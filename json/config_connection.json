@@ -1,0 +1,17 @@
+{
+	"DBMOBILE_HOST" : "127.0.0.1",
+	"DBMOBILE_USERNAME" : "root",
+	"DBMOBILE_PASSWORD" : "WebServer",
+	"DBMOBILE_DATABASENAME" : "mhs_splus",
+	"DBMOBILE_DATABASENAME_TEST" : "mhs_splus_test",
+	"DBORACLE_HOST" : "172.24.7.94",
+	"DBORACLE_SERVICE" : "gcoop",
+	"DBORACLE_USERNAME" : "iscomhs",
+	"DBORACLE_PASSWORD" : "iscomhs",
+	"DBORACLE_DATABASENAME" : "iscomhs",
+	"DBORACLE_HOST_TEST" : "172.24.7.94",
+	"DBORACLE_SERVICE_TEST" : "gcoop",
+	"DBORACLE_USERNAME_TEST" : "iscomhs_test",
+	"DBORACLE_PASSWORD_TEST" : "iscomhs_test",
+	"DBORACLE_DATABASENAME_TEST" : "iscomhs_test"
+}
