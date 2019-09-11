@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Headers: Origin, Content-Type, Authorization, X-Requested-With, Accept");
+header("Access-Control-Allow-Headers: Origin, Content-Type, basetest, X-Requested-With, Accept");
 header("Access-Control-Allow-Methods: GET, POST");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");

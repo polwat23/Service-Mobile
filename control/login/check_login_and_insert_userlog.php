@@ -32,7 +32,7 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 				$access_token = $lib->generate_token();
 				$dateAfter1day = date('Y-m-d H:i:s',strtotime("+1 day"));
 				$dateAfter1hours = date('Y-m-d H:i:s',strtotime("+1 hour"));
-				if($dataComing["channel"] == 'mobile'){
+				if($dataComing["channel"] == 'mobile_app'){
 					try{
 						$conmysql->beginTransaction();
 						$updateOldToken = $conmysql->prepare("UPDATE mdbtoken SET at_is_revoke = '-9',rt_is_revoke = '-9',
