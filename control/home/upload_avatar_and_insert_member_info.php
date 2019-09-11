@@ -23,10 +23,14 @@ if(isset($dataComing["member_no"]) && isset($dataComing["access_token"]) && isse
 		$member_no = $dataComing["member_no"];
 		$encode_avatar = $dataComing["encode_avatar"];
 		$destination = __DIR__.'/../../resource/avatar/'.$member_no;
-		$extension = $lib->base64_to_img($encode_avatar,$destination);
-		if($extension){
-			$path_avatar = '/resource/avatar/'.$member_no.'.'.$extension.'?v='.$lib->randomText('all',2);
-			$insertIntoInfo = $conmysql->prepare("UPDATE mdbmemberaccount SET path_avatar2 = :path_avatar,update_date = NOW() WHERE member_no = :member_no");
+		$file_name = $lib->randomText('all',6);
+		if(!file_exists($destination)){
+			mkdir($destination, 0777, true);
+		}
+		$createAvatar = $lib->base64_to_img($encode_avatar,$file_name,$destination);
+		if($createAvatar){
+			$path_avatar = '/resource/avatar/'.$member_no.'/'.$createAvatar;
+			$insertIntoInfo = $conmysql->prepare("UPDATE mdbmemberaccount SET path_avatar = :path_avatar,update_date = NOW() WHERE member_no = :member_no");
 			if($insertIntoInfo->execute([
 				':path_avatar' => $path_avatar,
 				':member_no' => $member_no

@@ -2,7 +2,7 @@
 
 require_once('../autoload.php');
 
-if(isset($dataComing['api_key']) && isset($dataComing['unique_id'])){
+if(isset($dataComing['api_key']) && isset($dataComing['unique_id']) && isset($dataComing['channel'])){
 	$conmysql_nottest = $con->connecttomysql();
 	$checkUNIQUE = $conmysql_nottest->prepare("SELECT id_api FROM mdbapikey WHERE unique_id = :unique_id and is_revoke = 0");
 	$checkUNIQUE->execute([':unique_id' => $dataComing['unique_id']]);
@@ -13,10 +13,11 @@ if(isset($dataComing['api_key']) && isset($dataComing['unique_id'])){
 		if($updateAPI->execute([
 			':id_api' => $rowUniq["id_api"]
 		])){
-			$insertNewAPI = $conmysql_nottest->prepare("INSERT INTO mdbapikey(api_key,unique_id,create_date) VALUES(:api_key,:unique_id,NOW())");
+			$insertNewAPI = $conmysql_nottest->prepare("INSERT INTO mdbapikey(api_key,unique_id,channel,create_date) VALUES(:api_key,:unique_id,:channel,NOW())");
 			if($insertNewAPI->execute([
 				':api_key' => $dataComing['api_key'],
-				':unique_id' => $dataComing['unique_id']
+				':unique_id' => $dataComing['unique_id'],
+				':channel' => $dataComing['channel']
 			])){
 				$id_api = $conmysql_nottest->lastInsertId();
 				$conmysql_nottest->commit();
@@ -41,11 +42,12 @@ if(isset($dataComing['api_key']) && isset($dataComing['unique_id'])){
 			echo json_encode($arrayError);
 		}
 	}else{
-		$insertAPI = $conmysql_nottest->prepare("INSERT INTO mdbapikey(api_key,unique_id,create_date) VALUES(:api_key,:unique_id,NOW())");
+		$insertAPI = $conmysql_nottest->prepare("INSERT INTO mdbapikey(api_key,unique_id,channel,create_date) VALUES(:api_key,:unique_id,:channel,NOW())");
 		$conmysql_nottest->beginTransaction();
 		if($insertAPI->execute([
 				':api_key' => $dataComing['api_key'],
-				':unique_id' => $dataComing['unique_id']
+				':unique_id' => $dataComing['unique_id'],
+				':channel' => $dataComing['channel']
 		])){
 			$id_api = $conmysql_nottest->lastInsertId();
 			$conmysql_nottest->commit();

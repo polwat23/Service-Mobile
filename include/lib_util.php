@@ -194,7 +194,7 @@ class library {
 			return true;
 		}
 	}
-	public function base64_to_img($encode_string, $output_file) {
+	public function base64_to_img($encode_string,$file_name,$output_file) {
 		$data_Img = explode(',',$encode_string);
 		$dataImg = base64_decode($data_Img[1]);
 		$info_img = explode('/',$data_Img[0]);
@@ -203,13 +203,14 @@ class library {
 		if (!$im_string) {
 			return false;
 		}else{
-			$destination = $output_file.'.'.$ext_img;
+			$filename = $file_name.'.'.$ext_img;
+			$destination = $output_file.'/'.$filename;
 			if($ext_img == 'png'){
 				imagepng($im_string, $destination, 2);
-				return $ext_img;
+				return $filename;
 			}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
 				imagejpeg($im_string, $destination, 70);
-				return $ext_img;
+				return $filename;
 			}else{
 				return false;
 			}
