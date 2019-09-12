@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isset($dataComing["id_memo"])
+if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isset($dataComing["account_no"]) && isset($dataComing["seq_no"])
 && isset($dataComing["menu_component"]) && isset($dataComing["refresh_token"])){
 	$is_accessToken = $api->check_accesstoken($dataComing["access_token"],$conmysql);
 	$new_token = null;
@@ -19,9 +19,11 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isse
 		}
 	}
 	if($func->check_permission($dataComing["user_type"],$dataComing["menu_component"],$conmysql,'DepositStatement')){
-		$DeleteMemoDept = $conmysql->prepare("DELETE FROM mdbmemodept WHERE id_memo = :id_memo");
+		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
+		$DeleteMemoDept = $conmysql->prepare("DELETE FROM mdbmemodept WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 		if($DeleteMemoDept->execute([
-			':id_memo' => $dataComing["id_memo"]
+			':deptaccount_no' => $account_no,
+			':seq_no' => $dataComing["seq_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			if(isset($new_token)){
