@@ -39,7 +39,9 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isse
 		while($rowAccount = $getAccount->fetch()){
 			$arrAccount = array();
 			$arrGroupAccount = array();
-			$arrAccount["DEPTACCOUNT_NO"] = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
+			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
+			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
+			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep',$conmysql));
 			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
