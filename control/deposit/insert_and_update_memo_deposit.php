@@ -21,14 +21,14 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isse
 	}
 	if($func->check_permission($dataComing["user_type"],$dataComing["menu_component"],$conmysql,'DepositStatement')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$updateMemoDept = $conmysql->prepare("UPDATE mdbmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
+		$updateMemoDept = $conmysql->prepare("UPDATE mdbmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path,update_date = NOW()
 												WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 		if($updateMemoDept->execute([
 			':memo_text' => $dataComing["memo_text"],
 			':memo_icon_path' => $dataComing["memo_icon_path"],
 			':deptaccount_no' => $account_no,
 			':seq_no' => $dataComing["seq_no"]
-		])){
+		]) && $updateMemoDept->rowCount() > 0){
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
