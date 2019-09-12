@@ -25,7 +25,7 @@
     cd to destination folder
     git clone -b <branch> https://gitlab.com/dev_gensoft/service-mobile.git .
 
-##### 3. Git add staged นำไฟล์เข้าสู่สถานะรอบันทึก
+##### 3. Git add staged นำไฟล์เข้าสู่สถานะรอบันทึก (ต้อง cd เข้า Folder destination ก่อน)
     git add *
 
 ##### 4. Git commit บันทึกการเปลี่ยนแปลงของไฟล์
