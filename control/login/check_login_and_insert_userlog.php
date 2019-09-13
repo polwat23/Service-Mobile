@@ -17,7 +17,7 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 				if($dataComing["password"] == $rowPassword['temppass']){
 					$valid_pass = true;
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "SQL400";
+					$arrayResult['RESPONSE_CODE'] = "SQL403";
 					$arrayResult['RESPONSE'] = "Temp password is invalid";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(203);
@@ -190,7 +190,7 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 					exit();
 				}
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "SQL400";
+				$arrayResult['RESPONSE_CODE'] = "SQL403";
 				$arrayResult['RESPONSE'] = "Invalid password";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
