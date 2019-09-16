@@ -126,7 +126,7 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 							':unique_id' => $dataComing["unique_id"],
 							':id_api' => $dataComing["id_api"]
 						]);
-						$insertToken = $conmysql->prepare("INSERT INTO mdbtoken(refresh_token,access_token,rt_expire_date,at_expite_date,unique_id,id_api) 
+						$insertToken = $conmysql->prepare("INSERT INTO mdbtoken(refresh_token,access_token,rt_expire_date,at_expire_date,unique_id,id_api) 
 													VALUES(:refresh_token,:access_token,:expire_refresh_token,:expire_access_token,:unique_id,:id_api)");
 						if($insertToken->execute([
 							':refresh_token' => $refresh_token,

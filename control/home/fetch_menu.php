@@ -32,10 +32,10 @@ if(isset($dataComing["user_type"])){
 	if(isset($dataComing["menu_parent"])){
 		if($user_type == '5' || $user_type == '9'){
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM mdbmenu 
-											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent");
+											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent ORDER BY menu_order ASC");
 		}else{
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM mdbmenu 
-											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1'");
+											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' ORDER BY menu_order ASC");
 		}
 		$fetch_menu->execute([
 			':menu_parent' => $dataComing["menu_parent"]
@@ -56,10 +56,10 @@ if(isset($dataComing["user_type"])){
 	}else{
 		if($user_type == '5' || $user_type == '9'){
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM mdbmenu 
-											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24')");
+											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24') ORDER BY menu_order ASC");
 		}else{
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM mdbmenu 
-											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24') and menu_status = '1'");
+											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24') and menu_status = '1' ORDER BY menu_order ASC");
 		}
 		$fetch_menu->execute();
 		while($rowMenu = $fetch_menu->fetch()){
