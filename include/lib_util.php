@@ -231,6 +231,12 @@ class library {
 			}
 		} 
 	}
+	public function text_limit($text, $limit = 50, $end = '...'){
+		if (mb_strwidth($text, 'UTF-8') <= $limit) {
+			return $text;
+		}
+		return rtrim(mb_strimwidth($text, 0, $limit, '', 'UTF-8')).$end;
+	}
 	public function randomText($type='number',$length=4){
 		if($type == 'number'){
 			$characters = '0123456789';

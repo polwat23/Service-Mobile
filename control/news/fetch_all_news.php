@@ -9,8 +9,8 @@ if(isset($dataComing["unique_id"]) && isset($dataComing["user_type"]) && isset($
 		$fetchNews->execute();
 		while($rowNews = $fetchNews->fetch()){
 			$arrayNews = array();
-			$arrayNews["TITLE"] = $rowNews["news_title"];
-			$arrayNews["DETAIL"] = $rowNews["news_detail"];
+			$arrayNews["TITLE"] = $lib->text_limit($rowNews["news_title"]);
+			$arrayNews["DETAIL"] = $lib->text_limit($rowNews["news_detail"],100);
 			$arrayNews["IMAGE_HEADER"] = $rowNews["path_img_header"];
 			$arrayNews["UPDATE_DATE"] = $lib->convertdate($rowNews["update_date"],'D m Y',true);
 			$arrayNews["ID_NEWS"] = $rowNews["id_news"];
