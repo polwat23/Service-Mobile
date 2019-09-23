@@ -147,8 +147,9 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 								':unique_id' => $dataComing["unique_id"],
 								':id_token' => $id_token
 							])){
-								$conmysql->commit();
 								$arrayResult['ID_USERLOGIN'] = $conmysql->lastInsertId();
+								$conmysql->commit();
+								$arrayResult['USER_TYPE'] = $rowPassword['user_type'];
 								$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 								$arrayResult['ACCESS_TOKEN'] = $access_token;
 								$arrayResult['MEMBER_NO'] = $member_no;
