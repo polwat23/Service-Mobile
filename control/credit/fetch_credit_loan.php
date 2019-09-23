@@ -20,9 +20,9 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isse
 	}
 	if($func->check_permission($dataComing["user_type"],$dataComing["menu_component"],$conmysql,'LoanCredit')){
 		if($dataComing["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
+			$member_no = $config["MEMBER_NO_DEV_CREDIT"];
 		}else if($dataComing["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
+			$member_no = $config["MEMBER_NO_SALE_CREDIT"];
 		}else{
 			$member_no = $dataComing["member_no"];
 		}
