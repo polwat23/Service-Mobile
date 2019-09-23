@@ -32,7 +32,8 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isse
 		$rowSumloanbalance = $getSumAllContract->fetch();
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
-											ln.loanapprove_amt as APPROVE_AMT,
+											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,period_payamt as PERIOD,
+											LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(entry_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 											WHERE ln.member_no = :member_no and ln.contract_status = 1");
@@ -45,6 +46,9 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"]) && isse
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
 			$arrContract["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'D m Y');
+			$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
+			$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
+			$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
 			$arrGroupContract['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;

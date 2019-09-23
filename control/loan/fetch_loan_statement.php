@@ -30,13 +30,6 @@ if(isset($dataComing["access_token"]) && isset($dataComing["unique_id"])
 		}
 		$date_now = date('Y-m-d');
 		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
-		$getLoanMaster = $conoracle->prepare("SELECT startcont_date,period_payment,period_payamt as PERIOD,
-											LAST_PERIODPAY as LAST_PERIOD FROM lncontmaster WHERE loancontract_no = :contract_no");
-		$getLoanMaster->execute([':contract_no' => $contract_no]);
-		$rowLoanMaster = $getLoanMaster->fetch();
-		$arrayResult["STARTCONT_DATE"] = $lib->convertdate($rowLoanMaster["STARTCONT_DATE"],'D m Y');
-		$arrayResult["PERIOD_PAYMENT"] = number_format($rowLoanMaster["PERIOD_PAYMENT"],2);
-		$arrayResult["PERIOD"] = $rowLoanMaster["LAST_PERIOD"].' / '.$rowLoanMaster["PERIOD"];
 		$getStatement = $conoracle->prepare("SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
 											lsm.interest_payment as INT_PAYMENT,sl.payinslip_no
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
