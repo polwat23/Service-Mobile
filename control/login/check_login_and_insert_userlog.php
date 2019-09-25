@@ -29,7 +29,6 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 			}
 			if ($valid_pass) {
 				$refresh_token = $lib->generate_token();
-				$access_token = $lib->generate_token();
 				$dateAfter1day = date('Y-m-d H:i:s',strtotime("+1 day"));
 				$dateAfter1hours = date('Y-m-d H:i:s',strtotime("+1 hour"));
 				if($dataComing["channel"] == 'mobile_app'){
@@ -41,12 +40,10 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 							':unique_id' => $dataComing["unique_id"],
 							':id_api' => $dataComing["id_api"]
 						]);
-						$insertToken = $conmysql->prepare("INSERT INTO mdbtoken(refresh_token,access_token,at_expire_date,unique_id,id_api) 
-													VALUES(:refresh_token,:access_token,:expire_access_token,:unique_id,:id_api)");
+						$insertToken = $conmysql->prepare("INSERT INTO mdbtoken(refresh_token,unique_id,id_api) 
+													VALUES(:refresh_token,:unique_id,:id_api)");
 						if($insertToken->execute([
 							':refresh_token' => $refresh_token,
-							':access_token' => $access_token,
-							':expire_access_token' => $dateAfter1day,
 							':unique_id' => $dataComing["unique_id"],
 							':id_api' => $dataComing["id_api"]
 						])){
@@ -72,15 +69,34 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 									':fcm_token' => $dataComing["fcm_token"],
 									':id_api' => $dataComing["id_api"]
 								])){
-									$arrayResult['ID_USERLOGIN'] = $conmysql->lastInsertId();
-									$conmysql->commit();
-									$arrayResult['USER_TYPE'] = $rowPassword['user_type'];
-									$arrayResult['REFRESH_TOKEN'] = $refresh_token;
-									$arrayResult['MEMBER_NO'] = $member_no;
-									$arrayResult['ACCESS_TOKEN'] = $access_token;
-									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? TRUE : FALSE);
-									$arrayResult['RESULT'] = TRUE;
-									echo json_encode($arrayResult);
+									$arrPayload = array();
+									$arrPayload['id_userlogin'] = $conmysql->lastInsertId();
+									$arrPayload['user_type'] = $rowPassword['user_type'];
+									$arrPayload['exp'] = (time() + 86400);
+									$arrPayload['member_no'] = $member_no;
+									$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_JWT"]);
+									$updateAccessToken = $conmysql->prepare("UPDATE mdbtoken SET access_token = :access_token,
+																			at_expire_date = :at_expire_date WHERE id_token = :id_token");
+									if($updateAccessToken->execute([
+										':access_token' => $access_token,
+										':at_expire_date' => $dateAfter1day,
+										':id_token' => $id_token
+									])){
+										$conmysql->commit();
+										$arrayResult['REFRESH_TOKEN'] = $refresh_token;
+										$arrayResult['ACCESS_TOKEN'] = $access_token;
+										$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? TRUE : FALSE);
+										$arrayResult['RESULT'] = TRUE;
+										echo json_encode($arrayResult);
+									}else{
+										$conmysql->rollback();
+										$arrayResult['RESPONSE_CODE'] = "SQL500";
+										$arrayResult['RESPONSE'] = "Cannot update Access Token";
+										$arrayResult['RESULT'] = FALSE;
+										http_response_code(203);
+										echo json_encode($arrayResult);
+										exit();
+									}
 								}else{
 									$conmysql->rollback();
 									$arrayResult['RESPONSE_CODE'] = "SQL500";
@@ -126,13 +142,11 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 							':unique_id' => $dataComing["unique_id"],
 							':id_api' => $dataComing["id_api"]
 						]);
-						$insertToken = $conmysql->prepare("INSERT INTO mdbtoken(refresh_token,access_token,rt_expire_date,at_expire_date,unique_id,id_api) 
-													VALUES(:refresh_token,:access_token,:expire_refresh_token,:expire_access_token,:unique_id,:id_api)");
+						$insertToken = $conmysql->prepare("INSERT INTO mdbtoken(refresh_token,rt_expire_date,unique_id,id_api) 
+													VALUES(:refresh_token,:expire_refresh_token,:unique_id,:id_api)");
 						if($insertToken->execute([
 							':refresh_token' => $refresh_token,
-							':access_token' => $access_token,
 							':expire_refresh_token' => $dateAfter1day,
-							':expire_access_token' => $dateAfter1hours,
 							':unique_id' => $dataComing["unique_id"],
 							':id_api' => $dataComing["id_api"]
 						])){
@@ -147,14 +161,34 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 								':unique_id' => $dataComing["unique_id"],
 								':id_token' => $id_token
 							])){
-								$arrayResult['ID_USERLOGIN'] = $conmysql->lastInsertId();
-								$conmysql->commit();
-								$arrayResult['USER_TYPE'] = $rowPassword['user_type'];
-								$arrayResult['REFRESH_TOKEN'] = $refresh_token;
-								$arrayResult['ACCESS_TOKEN'] = $access_token;
-								$arrayResult['MEMBER_NO'] = $member_no;
-								$arrayResult['RESULT'] = TRUE;
-								echo json_encode($arrayResult);
+								$arrPayload = array();
+								$arrPayload['id_userlogin'] = $conmysql->lastInsertId();
+								$arrPayload['user_type'] = $rowPassword['user_type'];
+								$arrPayload['exp'] = (time() + 3600);
+								$arrPayload['member_no'] = $member_no;
+								$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_JWT"]);
+								$updateAccessToken = $conmysql->prepare("UPDATE mdbtoken SET access_token = :access_token,
+																		at_expire_date = :at_expire_date WHERE id_token = :id_token");
+								if($updateAccessToken->execute([
+									':access_token' => $access_token,
+									':at_expire_date' => $dateAfter1hours,
+									':id_token' => $id_token
+								])){
+									$conmysql->commit();
+									$arrayResult['REFRESH_TOKEN'] = $refresh_token;
+									$arrayResult['ACCESS_TOKEN'] = $access_token;
+									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? TRUE : FALSE);
+									$arrayResult['RESULT'] = TRUE;
+									echo json_encode($arrayResult);
+								}else{
+									$conmysql->rollback();
+									$arrayResult['RESPONSE_CODE'] = "SQL500";
+									$arrayResult['RESPONSE'] = "Cannot update Access Token";
+									$arrayResult['RESULT'] = FALSE;
+									http_response_code(203);
+									echo json_encode($arrayResult);
+									exit();
+								}
 							}else{
 								$conmysql->rollback();
 								$arrayResult['RESPONSE_CODE'] = "SQL500";

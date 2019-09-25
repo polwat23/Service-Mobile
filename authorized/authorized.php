@@ -31,7 +31,7 @@ class API {
 		}
 	}
 	
-	public function refresh_accesstoken($refresh_token,$unique_id,$con,$lib=null,$channel){
+	public function refresh_accesstoken($refresh_token,$unique_id,$con,$lib=null,$channel,$payload,$jwt_token,$secret_key){
 		$checkRT = $con->prepare("SELECT id_token FROM mdbtoken
 								WHERE refresh_token = :refresh_token and rt_is_revoke = 0 and (rt_expire_date IS NULL || rt_expire_date > NOW())
 								and unique_id = :unique_id");
@@ -42,12 +42,12 @@ class API {
 		if($checkRT->rowCount() > 0){
 			$Token = $checkRT->fetch();
 			$date_expire;
-			if($channel == 'mobile'){
+			if($channel == 'mobile_app'){
 				$date_expire = date('Y-m-d H:i:s',strtotime("+1 day"));
 			}else{
 				$date_expire = date('Y-m-d H:i:s',strtotime("+1 hour"));
 			}
-			$new_access_token = $lib->generate_token();
+			$new_access_token = $jwt_token->customPayload($payload, $secret_key);
 			$updateNewAT = $con->prepare("UPDATE mdbtoken SET access_token = :new_access_token,at_expire_date = :date_expire
 											WHERE id_token = :id_token");
 			if($updateNewAT->execute([
@@ -59,6 +59,17 @@ class API {
 				$arrReturn["ACCESS_TOKEN"] = $new_access_token;
 				$arrReturn["ID_TOKEN"] = $Token["id_token"];
 				return $arrReturn;
+			}else{
+				return false;
+			}
+		}else{
+			return false;
+		}
+	}
+	public function validate_jwttoken($token,$jwt_function,$secret_key) {
+		if(substr($token,0,6) === 'Bearer'){
+			if($jwt_function->validate(substr($token,7), $secret_key)){
+				return true;
 			}else{
 				return false;
 			}

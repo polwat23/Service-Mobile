@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Headers: Origin, Content-Type, basetest, X-Requested-With, Accept");
+header("Access-Control-Allow-Headers: Origin, Content-Type, basetest, X-Requested-With, Accept, Authorization");
 header("Access-Control-Allow-Methods: GET, POST");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -21,6 +21,7 @@ require_once(__DIR__.'/authorized/authorized.php');
 require_once(__DIR__.'/extension/PHPMailer-master/src/PHPMailer.php');
 require_once(__DIR__.'/extension/PHPMailer-master/src/SMTP.php');
 require_once(__DIR__.'/extension/PHPMailer-master/src/Exception.php');
+require_once(__DIR__.'/extension/jwt/autoload.php');
 
 use Connection\connection;
 use Utility\library;
@@ -28,11 +29,13 @@ use Authorized\API;
 use Component\functions;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use ReallySimpleJWT\Token;
 
 $mailFunction = new PHPMailer(false);
 $con = new connection();
 $lib = new library();
 $api = new API();
+$jwt_token = new Token();
 $func = new functions();
 $header = apache_request_headers();
 $basetest = json_decode(isset($header["basetest"]) ? $header["basetest"] : false);
@@ -40,4 +43,9 @@ $conmysql = $con->connecttomysql($basetest);
 $conoracle = $con->connecttooracle($basetest);
 $jsonConfig = file_get_contents(__DIR__.'/json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
+if(isset($header["Authorization"]) && substr($header["Authorization"],7) != null){
+	$author_token = $header["Authorization"];
+	$payload = $lib->fetch_payloadJWT($author_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+	$access_token = substr($author_token,7);
+}
 ?>

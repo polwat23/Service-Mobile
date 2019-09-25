@@ -312,5 +312,8 @@ class library {
 			return false;
 		}
 	}
+	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
+		return $jwt_function->getPayload(substr($token,7), $secret_key);
+	}
 }
 ?>
