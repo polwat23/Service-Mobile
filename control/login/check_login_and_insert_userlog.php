@@ -85,7 +85,12 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 										$conmysql->commit();
 										$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 										$arrayResult['ACCESS_TOKEN'] = $access_token;
-										$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? TRUE : FALSE);
+										// Pin Status : 9 => DEV, 1 => TRUE, 0 => FALSE
+										if($rowPassword['user_type'] == '9'){
+											$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 9 : 0);
+										}else{
+											$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 1 : 0);
+										}
 										$arrayResult['RESULT'] = TRUE;
 										echo json_encode($arrayResult);
 									}else{

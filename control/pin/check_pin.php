@@ -19,12 +19,18 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 				$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
 			}
 		}
-		$checkPin = $conmysql->prepare("SELECT id_account FROM mdbmemberaccount WHERE pin = :pin and member_no = :member_no");
+		$checkPin = $conmysql->prepare("SELECT id_account,account_status FROM mdbmemberaccount WHERE pin = :pin and member_no = :member_no");
 		$checkPin->execute([
 			':pin' => $dataComing["pin"],
 			':member_no' => $payload["member_no"]
 		]);
 		if($checkPin->rowCount() > 0){
+			$rowaccount = $checkPin->fetch();
+			if($rowaccount["account_status"] == '-9'){
+				$arrayResult['TEMP_PASSWORD'] = TRUE;
+			}else{
+				$arrayResult['TEMP_PASSWORD'] = FALSE;
+			}
 			$arrayResult['RESULT'] = TRUE;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
