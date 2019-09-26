@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if(isset($author_token) && $api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($payload["user_type"])){
+	if(isset($payload["user_type"]) && isset($dataComing["channel"])){
 		$user_type = $payload["user_type"];
 		$permission = array();
 		$arrayResult = array();
@@ -36,20 +36,34 @@ if(isset($author_token) && $api->validate_jwttoken($author_token,$jwt_token,$con
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent ORDER BY menu_order ASC");
 			}else{
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM mdbmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' ORDER BY menu_order ASC");
+												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' 
+												ORDER BY menu_order ASC");
 			}
 			$fetch_menu->execute([
 				':menu_parent' => $dataComing["menu_parent"]
 			]);
 			while($rowMenu = $fetch_menu->fetch()){
-				$arrMenu = array();
-				$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
-				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-				$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
-				$arrayAllMenu[] = $arrMenu;
+				if($dataComing["channel"] == 'mobile_app'){
+					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
+						$arrMenu = array();
+						$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+						$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+						$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
+						$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
+						$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
+						$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+						$arrayAllMenu[] = $arrMenu;
+					}
+				}else{
+					$arrMenu = array();
+					$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
+					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
+					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
+					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+					$arrayAllMenu[] = $arrMenu;
+				}
 			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
@@ -64,17 +78,34 @@ if(isset($author_token) && $api->validate_jwttoken($author_token,$jwt_token,$con
 			}
 			$fetch_menu->execute();
 			while($rowMenu = $fetch_menu->fetch()){
-				$arrMenu = array();
-				$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
-				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-				$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
-				if($rowMenu["menu_parent"] == '0'){
-					$arrayAllMenu[] = $arrMenu;
-				}else if($rowMenu["menu_parent"] == '24'){
-					$arrayMenuSetting[] = $arrMenu;
+				if($dataComing["channel"] == 'mobile_app'){
+					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
+						$arrMenu = array();
+						$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+						$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+						$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
+						$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
+						$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
+						$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+						if($rowMenu["menu_parent"] == '0'){
+							$arrayAllMenu[] = $arrMenu;
+						}else if($rowMenu["menu_parent"] == '24'){
+							$arrayMenuSetting[] = $arrMenu;
+						}
+					}
+				}else{
+					$arrMenu = array();
+					$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
+					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
+					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
+					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+					if($rowMenu["menu_parent"] == '0'){
+						$arrayAllMenu[] = $arrMenu;
+					}else if($rowMenu["menu_parent"] == '24'){
+						$arrayMenuSetting[] = $arrMenu;
+					}
 				}
 			}
 			$arrayResult['MENU_HOME'] = $arrayAllMenu;
@@ -96,14 +127,27 @@ if(isset($author_token) && $api->validate_jwttoken($author_token,$jwt_token,$con
 										WHERE menu_parent IN ('-1','-2')");
 	$fetch_menu->execute();
 	while($rowMenu = $fetch_menu->fetch()){
-		$arrMenu = array();
-		$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
-		$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-		$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-		$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-		$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-		$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
-		$arrayAllMenu[] = $arrMenu;
+		if($dataComing["channel"] == 'mobile_app'){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
+				$arrMenu = array();
+				$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
+				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
+				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
+				$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+				$arrayAllMenu[] = $arrMenu;
+			}
+		}else{
+			$arrMenu = array();
+			$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+			$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+			$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
+			$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
+			$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
+			$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+			$arrayAllMenu[] = $arrMenu;
+		}
 	}
 	$arrayResult['MENU'] = $arrayAllMenu;
 	$arrayResult['RESULT'] = TRUE;

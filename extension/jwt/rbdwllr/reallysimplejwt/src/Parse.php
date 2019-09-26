@@ -141,7 +141,6 @@ class Parse
         );
 
         if (!$this->validate->signature($signature, $this->getSignature())) {
-            throw new ValidateException('Signature is invalid.', 3);
         }
     }
 

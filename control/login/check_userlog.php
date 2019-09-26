@@ -28,15 +28,21 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 		$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 		$rowPinNull = $checkPinNull->fetch();
 		if(isset($rowPinNull["pin"])){
-			$checkPin = $conmysql->prepare("SELECT id_account FROM mdbmemberaccount WHERE member_no = :member_no and pin = :pin");
+			$checkPin = $conmysql->prepare("SELECT id_account,account_status FROM mdbmemberaccount WHERE member_no = :member_no and pin = :pin");
 			$checkPin->execute([
 				':member_no' => $payload["member_no"],
 				':pin' => $dataComing["pin"]
 			]);
 			if($checkPin->rowCount() > 0){
+				$rowaccount = $checkPin->fetch();
 				$insertToLogAccess = $conmysql->prepare("INSERT INTO mdbuseraccessafterlogin(access_date,id_userlogin) 
 														VALUES(NOW(),:id_userlogin)");
 				if($insertToLogAccess->execute([':id_userlogin' => $payload["id_userlogin"]])){
+					if($rowaccount["account_status"] == '-9'){
+						$arrayResult['TEMP_PASSWORD'] = TRUE;
+					}else{
+						$arrayResult['TEMP_PASSWORD'] = FALSE;
+					}
 					$arrayResult['RESULT'] = TRUE;
 					if(isset($new_token)){
 						$arrayResult['NEW_TOKEN'] = $new_token;
@@ -70,6 +76,16 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 														VALUES(NOW(),:id_userlogin)");
 				if($insertToLogAccess->execute([':id_userlogin' => $payload["id_userlogin"]])){
 					$conmysql->commit();
+					$fetchAcc = $conmysql->prepare("SELECT account_status FROM mdbmemberaccount WHERE member_no = :member_no");
+					$fetchAcc->execute([
+						':member_no' => $payload["member_no"]
+					]);
+					$rowaccount = $fetchAcc->fetch();
+					if($rowaccount["account_status"] == '-9'){
+						$arrayResult['TEMP_PASSWORD'] = TRUE;
+					}else{
+						$arrayResult['TEMP_PASSWORD'] = FALSE;
+					}
 					$arrayResult['RESULT'] = TRUE;
 					if(isset($new_token)){
 						$arrayResult['NEW_TOKEN'] = $new_token;
