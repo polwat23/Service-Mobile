@@ -15,18 +15,14 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			$arrayDetailNews["DETAIL"] = $rowDetailNews["news_detail"];
 			$arrayDetailNews["NAME_GALLERY"] = $rowDetailNews["name_gallery"];
 			$arrayDetailNews["UPDATE_DATE"] = $lib->convertdate($rowDetailNews["update_date"],'D m Y',true);
-			$path_img = [];
-			for($i=1; $i<=5; $i++){
-				if(isset($rowDetailNews["path_img_{$i}"])){
-					array_push($path_img,$rowDetailNews["path_img_{$i}"]);
-				}
-			}
-			$arrayDetailNews["IMG"] = $path_img;
-			//$arrayDetailNews["IMG_1"] = $rowDetailNews["path_img_1"];
-			//$arrayDetailNews["IMG_2"] = $rowDetailNews["path_img_2"];
-			//$arrayDetailNews["IMG_3"] = $rowDetailNews["path_img_3"];
-			//$arrayDetailNews["IMG_4"] = $rowDetailNews["path_img_4"];
-			//$arrayDetailNews["IMG_5"] = $rowDetailNews["path_img_5"];
+			$path_img = array(
+				$rowDetailNews["path_img_1"],
+				$rowDetailNews["path_img_2"],
+				$rowDetailNews["path_img_3"],
+				$rowDetailNews["path_img_4"],
+				$rowDetailNews["path_img_5"]
+			);
+			$arrayDetailNews["IMG"] = array_filter($path_img);
 			$arrayResult['DETAIL_NEWS'] = $arrayDetailNews;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
