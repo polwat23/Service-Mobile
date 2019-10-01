@@ -18,7 +18,7 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			$path_img = array();
 			for($i = 1; $i <=5; $i++){
 				if(!is_null($rowDetailNews["path_img_$i"]) && $rowDetailNews["path_img_$i"] !== ''){
-					$path_img.push($rowDetailNews["path_img_$i"]);
+					array_push($path_img, $rowDetailNews["path_img_$i"]);
 				}
 			}
 			$arrayDetailNews["IMG"] = $path_img;
