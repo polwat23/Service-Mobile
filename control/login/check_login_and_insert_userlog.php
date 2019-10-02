@@ -72,8 +72,8 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 									$arrPayload = array();
 									$arrPayload['id_userlogin'] = $conmysql->lastInsertId();
 									$arrPayload['user_type'] = $rowPassword['user_type'];
-									$arrPayload['exp'] = (time() + 86400);
 									$arrPayload['member_no'] = $member_no;
+									$arrPayload['refresh_amount'] = 0;
 									$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_JWT"]);
 									$updateAccessToken = $conmysql->prepare("UPDATE mdbtoken SET access_token = :access_token,
 																			at_expire_date = :at_expire_date WHERE id_token = :id_token");
@@ -169,8 +169,8 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 								$arrPayload = array();
 								$arrPayload['id_userlogin'] = $conmysql->lastInsertId();
 								$arrPayload['user_type'] = $rowPassword['user_type'];
-								$arrPayload['exp'] = (time() + 3600);
 								$arrPayload['member_no'] = $member_no;
+								$arrPayload['refresh_amount'] = 0;
 								$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_JWT"]);
 								$updateAccessToken = $conmysql->prepare("UPDATE mdbtoken SET access_token = :access_token,
 																		at_expire_date = :at_expire_date WHERE id_token = :id_token");

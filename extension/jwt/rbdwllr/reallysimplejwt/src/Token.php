@@ -41,7 +41,7 @@ class Token
 
         return $builder->setPayloadClaim('user_id', $userId)
             ->setSecret($secret)
-            ->setExpiration($expiration)
+            //->setExpiration($expiration)
             ->setIssuer($issuer)
             ->setIssuedAt(time())
             ->build()

@@ -47,8 +47,10 @@ class API {
 			}else{
 				$date_expire = date('Y-m-d H:i:s',strtotime("+1 hour"));
 			}
+			$payload["refresh_amount"] = $payload["refresh_amount"] + 1;
 			$new_access_token = $jwt_token->customPayload($payload, $secret_key);
-			$updateNewAT = $con->prepare("UPDATE mdbtoken SET access_token = :new_access_token,at_expire_date = :date_expire
+			$updateNewAT = $con->prepare("UPDATE mdbtoken SET access_token = :new_access_token,at_expire_date = :date_expire,
+											at_is_revoke = '0'
 											WHERE id_token = :id_token");
 			if($updateNewAT->execute([
 				':new_access_token' => $new_access_token,
