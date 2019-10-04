@@ -72,7 +72,7 @@ class Parse
     public function validate(): self
     {
         if (!$this->validate->structure($this->jwt->getToken())) {
-            throw new ValidateException('Token is invalid.', 1);
+            //throw new ValidateException('Token is invalid.', 1);
         }
 
         $this->validateSignature();
