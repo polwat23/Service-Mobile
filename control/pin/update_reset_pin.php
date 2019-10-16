@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset(isset($dataComing["unique_id"]) && isset($payload["member_no"]) && isset($dataComing["refresh_token"])){
+	if(isset($dataComing["unique_id"]) && isset($payload["member_no"]) && isset($dataComing["refresh_token"])){
 		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
 		$id_token = null;
 		$new_token = null;
