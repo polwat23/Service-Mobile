@@ -22,13 +22,12 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 		}
 		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'Notification')){
 			$arrGroupHis = array();
-			$data_limit = isset($dataComing["limit"]) ? (is_numeric($dataComing["limit"]) ? $dataComing["limit"] : 10) : 10;
 			$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status FROM mdbhistory 
-												WHERE member_no = :member_no and his_type = :his_type and id_history > :id_history ORDER BY id_history DESC LIMIT {$data_limit}");
+												WHERE member_no = :member_no and his_type = :his_type and id_history < :id_history ORDER BY id_history DESC LIMIT 10");
 			$getHistory->execute([
 				':member_no' => $payload["member_no"],
 				':his_type' => $dataComing["type_history"],
-				':id_history' => isset($dataComing["id_history"]) ? $dataComing["id_history"] : 0
+				':id_history' => isset($dataComing["id_history"]) ? $dataComing["id_history"] : 999999999999 // max number int(12) of id_history
 			]);
 			while($rowHistory = $getHistory->fetch()){
 				$arrHistory = array();
