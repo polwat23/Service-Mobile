@@ -1,5 +1,5 @@
 {
-	"DBMOBILE_HOST" : "127.0.0.1",
+	"DBMOBILE_HOST" : "mobilecloud.coopsiam.com:3306",
 	"DBMOBILE_USERNAME" : "root",
 	"DBMOBILE_PASSWORD" : "WebServer",
 	"DBMOBILE_DATABASENAME" : "demogcoop_connect",

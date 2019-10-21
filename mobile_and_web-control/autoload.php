@@ -11,8 +11,6 @@ header("X-XSS-Protection: 1; mode=block");
 header("X-Content-Type-Options: nosniff");
 header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 
-date_default_timezone_set("Asia/Bangkok");
-
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');

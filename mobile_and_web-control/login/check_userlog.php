@@ -1,62 +1,48 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
+$status_token = $api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+if($status_token){
 	if(isset($dataComing["unique_id"]) && isset($dataComing["channel"]) && 
-	isset($dataComing["pin"]) && isset($payload["member_no"]) && isset($payload["id_userlogin"]) && isset($dataComing["refresh_token"])){
-		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
-		$id_token = null;
+	isset($dataComing["pin"]) && isset($payload["member_no"]) && 
+	isset($payload["id_userlogin"]) && isset($dataComing["refresh_token"]) && isset($payload["id_token"])){
 		$new_token = null;
-		if(!$is_accessToken){
+		$id_token = $payload["id_token"];
+		if($status_token == 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-			$lib,$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "SQL409";
-				$arrayResult['RESPONSE'] = "Invalid Access Maybe AccessToken and RefreshToken is not correct";
+				$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
 				echo json_encode($arrayResult);
 				exit();
 			}else{
-				$id_token = $is_refreshToken_arr["ID_TOKEN"];
 				$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
 			}
-		}else{
-			$id_token = $is_accessToken;
 		}
-		$checkPinNull = $conmysql->prepare("SELECT pin FROM mdbmemberaccount WHERE member_no = :member_no");
+		$checkPinNull = $conmysql->prepare("SELECT pin FROM gcmemberaccount WHERE member_no = :member_no and account_status NOT IN('-6','-7','-8')");
 		$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 		$rowPinNull = $checkPinNull->fetch();
 		if(isset($rowPinNull["pin"])){
-			$checkPin = $conmysql->prepare("SELECT id_account,account_status FROM mdbmemberaccount WHERE member_no = :member_no and pin = :pin");
+			$checkPin = $conmysql->prepare("SELECT id_account,account_status FROM gcmemberaccount WHERE member_no = :member_no and pin = :pin");
 			$checkPin->execute([
 				':member_no' => $payload["member_no"],
 				':pin' => $dataComing["pin"]
 			]);
 			if($checkPin->rowCount() > 0){
 				$rowaccount = $checkPin->fetch();
-				$insertToLogAccess = $conmysql->prepare("INSERT INTO mdbuseraccessafterlogin(access_date,id_userlogin) 
-														VALUES(NOW(),:id_userlogin)");
-				if($insertToLogAccess->execute([':id_userlogin' => $payload["id_userlogin"]])){
-					if($rowaccount["account_status"] == '-9'){
-						$arrayResult['TEMP_PASSWORD'] = TRUE;
-					}else{
-						$arrayResult['TEMP_PASSWORD'] = FALSE;
-					}
-					$arrayResult['RESULT'] = TRUE;
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
-					echo json_encode($arrayResult);
+				if($rowaccount["account_status"] == '-9'){
+					$arrayResult['TEMP_PASSWORD'] = TRUE;
 				}else{
-					$func->logout($id_token,'-9',$conmysql);
-					$arrayResult['RESPONSE_CODE'] = "SQL500";
-					$arrayResult['RESPONSE'] = "Cannot Insert User Access";
-					$arrayResult['RESULT'] = FALSE;
-					http_response_code(203);
-					echo json_encode($arrayResult);
-					exit();
+					$arrayResult['TEMP_PASSWORD'] = FALSE;
 				}
+				$arrayResult['RESULT'] = TRUE;
+				if(isset($new_token)){
+					$arrayResult['NEW_TOKEN'] = $new_token;
+				}
+				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "SQL403";
 				$arrayResult['RESPONSE'] = "Invalid Pin";
@@ -66,43 +52,27 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 				exit();
 			}
 		}else{
-			$conmysql->beginTransaction();
-			$updatePin = $conmysql->prepare("UPDATE mdbmemberaccount SET pin = :pin WHERE member_no = :member_no");
+			$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 			if($updatePin->execute([
 				':pin' => $dataComing["pin"],
 				':member_no' => $payload["member_no"]
 			])){
-				$insertToLogAccess = $conmysql->prepare("INSERT INTO mdbuseraccessafterlogin(access_date,id_userlogin) 
-														VALUES(NOW(),:id_userlogin)");
-				if($insertToLogAccess->execute([':id_userlogin' => $payload["id_userlogin"]])){
-					$conmysql->commit();
-					$fetchAcc = $conmysql->prepare("SELECT account_status FROM mdbmemberaccount WHERE member_no = :member_no");
-					$fetchAcc->execute([
-						':member_no' => $payload["member_no"]
-					]);
-					$rowaccount = $fetchAcc->fetch();
-					if($rowaccount["account_status"] == '-9'){
-						$arrayResult['TEMP_PASSWORD'] = TRUE;
-					}else{
-						$arrayResult['TEMP_PASSWORD'] = FALSE;
-					}
-					$arrayResult['RESULT'] = TRUE;
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
-					echo json_encode($arrayResult);
+				$fetchAcc = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no");
+				$fetchAcc->execute([
+					':member_no' => $payload["member_no"]
+				]);
+				$rowaccount = $fetchAcc->fetch();
+				if($rowaccount["account_status"] == '-9'){
+					$arrayResult['TEMP_PASSWORD'] = TRUE;
 				}else{
-					$conmysql->rollback();
-					$func->logout($id_token,'-9',$conmysql);
-					$arrayResult['RESPONSE_CODE'] = "SQL500";
-					$arrayResult['RESPONSE'] = "Cannot Insert User Access";
-					$arrayResult['RESULT'] = FALSE;
-					http_response_code(203);
-					echo json_encode($arrayResult);
-					exit();
+					$arrayResult['TEMP_PASSWORD'] = FALSE;
 				}
+				$arrayResult['RESULT'] = TRUE;
+				if(isset($new_token)){
+					$arrayResult['NEW_TOKEN'] = $new_token;
+				}
+				echo json_encode($arrayResult);
 			}else{
-				$conmysql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "SQL500";
 				$arrayResult['RESPONSE'] = "Update Pin Failed";
 				$arrayResult['RESULT'] = FALSE;

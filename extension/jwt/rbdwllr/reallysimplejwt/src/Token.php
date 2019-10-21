@@ -41,7 +41,7 @@ class Token
 
         return $builder->setPayloadClaim('user_id', $userId)
             ->setSecret($secret)
-            //->setExpiration($expiration)
+            ->setExpiration($expiration)
             ->setIssuer($issuer)
             ->setIssuedAt(time())
             ->build()
@@ -87,7 +87,7 @@ class Token
         $parse = self::parser($token, $secret);
 
         if (!self::validateWithExpiration($parse)) {
-            return false;
+            return 'expired';
         }
 
         if (!self::validateNotBefore($parse)) {
