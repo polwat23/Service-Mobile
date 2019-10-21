@@ -18,8 +18,8 @@
 > #### Git command
 
 ##### 1. Git config ทำครั้งเดียวตอนลง Git
-    git config --global user.name "zcrimxelz"
-    git config --global user.email "zcrimxelz@gmail.com"
+    git config --global user.name "dev_gensoft"
+    git config --global user.email "developer@gensoft.co.th"
 
 ##### 2. Git clone ดึงไฟล์ทั้งหมดลงมาจาก Gitlab แยกตาม Branch สหกรณ์
     cd to destination folder
