@@ -13,7 +13,7 @@ if(isset($dataComing['api_key']) && isset($dataComing['unique_id']) && isset($da
 		if($updateAPI->execute([
 			':id_api' => $rowUniq["id_api"]
 		])){
-			$insertNewAPI = $conmysql_nottest->prepare("INSERT INTO mdbapikey(api_key,unique_id,channel,create_date) VALUES(:api_key,:unique_id,:channel,NOW())");
+			$insertNewAPI = $conmysql_nottest->prepare("INSERT INTO gcapikey(api_key,unique_id,channel,create_date) VALUES(:api_key,:unique_id,:channel,NOW())");
 			if($insertNewAPI->execute([
 				':api_key' => $dataComing['api_key'],
 				':unique_id' => $dataComing['unique_id'],
