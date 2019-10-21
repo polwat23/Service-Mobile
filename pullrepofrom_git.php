@@ -1,3 +1,3 @@
 <?php
-shell_exec('cd C:\xampp\htdocs\Service_Mobile_TEST && "C:\Program Files\Git\bin\git" pull origin mhscoop-test');
+shell_exec('cd C:\File Mobile\Demo\Service-Demo && "C:\Program Files\Git\bin\git" pull origin demo');
 ?>
