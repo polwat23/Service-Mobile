@@ -42,7 +42,7 @@ if(isset($dataComing['api_key']) && isset($dataComing['unique_id']) && isset($da
 			echo json_encode($arrayError);
 		}
 	}else{
-		$insertAPI = $conmysql_nottest->prepare("INSERT INTO mdbapikey(api_key,unique_id,channel,create_date) VALUES(:api_key,:unique_id,:channel,NOW())");
+		$insertAPI = $conmysql_nottest->prepare("INSERT INTO gcapikey(api_key,unique_id,channel,create_date) VALUES(:api_key,:unique_id,:channel,NOW())");
 		$conmysql_nottest->beginTransaction();
 		if($insertAPI->execute([
 				':api_key' => $dataComing['api_key'],
