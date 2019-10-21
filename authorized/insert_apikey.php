@@ -1,10 +1,10 @@
 <?php
 
-require_once('../autoload.php');
+require_once('../autoloadConnection.php');
 
 if(isset($dataComing['api_key']) && isset($dataComing['unique_id']) && isset($dataComing['channel'])){
 	$conmysql_nottest = $con->connecttomysql();
-	$checkUNIQUE = $conmysql_nottest->prepare("SELECT id_api FROM gcapikey4 WHERE unique_id = :unique_id and is_revoke = 0");
+	$checkUNIQUE = $conmysql_nottest->prepare("SELECT id_api FROM gcapikey WHERE unique_id = :unique_id and is_revoke = 0");
 	$checkUNIQUE->execute([':unique_id' => $dataComing['unique_id']]);
 	if($checkUNIQUE->rowCount() > 0){
 		$rowUniq = $checkUNIQUE->fetch();
