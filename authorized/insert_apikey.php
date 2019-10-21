@@ -8,7 +8,7 @@ if(isset($dataComing['api_key']) && isset($dataComing['unique_id']) && isset($da
 	$checkUNIQUE->execute([':unique_id' => $dataComing['unique_id']]);
 	if($checkUNIQUE->rowCount() > 0){
 		$rowUniq = $checkUNIQUE->fetch();
-		$updateAPI = $conmysql_nottest->prepare("UPDATE mdbapikey SET is_revoke = '-9',expire_date = NOW() WHERE id_api = :id_api");
+		$updateAPI = $conmysql_nottest->prepare("UPDATE gcapikey SET is_revoke = '-9',expire_date = NOW() WHERE id_api = :id_api");
 		$conmysql_nottest->beginTransaction();
 		if($updateAPI->execute([
 			':id_api' => $rowUniq["id_api"]
