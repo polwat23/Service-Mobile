@@ -12,7 +12,6 @@ header("X-Content-Type-Options: nosniff");
 header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 
 require_once(__DIR__.'/../autoloadConnection.php');
-require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../authorized/authorized.php');
@@ -37,7 +36,7 @@ $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 if(isset($header["Authorization"]) && substr($header["Authorization"],7) != null){
 	$author_token = $header["Authorization"];
-	$payload = $lib->fetch_payloadJWT($author_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 	$access_token = substr($author_token,7);
+	$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 }
 ?>

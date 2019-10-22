@@ -313,7 +313,7 @@ class library {
 		}
 	}
 	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
-		return $jwt_function->getPayload(substr($token,7), $secret_key);
+		return $jwt_function->getPayload($token, $secret_key);
 	}
 }
 ?>

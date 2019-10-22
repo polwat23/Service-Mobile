@@ -87,7 +87,7 @@ class Token
         $parse = self::parser($token, $secret);
 
         if (!self::validateWithExpiration($parse)) {
-            return 'expired';
+            return false;
         }
 
         if (!self::validateNotBefore($parse)) {

@@ -1,3 +1,4 @@
+@echo off
 
 cd C:\File Mobile\Demo\Service-Demo
 
