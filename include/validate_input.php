@@ -6,9 +6,11 @@ $dataComing = array();
 
 foreach($jsonData as $key => $data) {
 	if(!is_array($data)){
-		$dataComing[$key] = preg_replace('/[^ก-ฮA-Za-z0-9 \/\-@_${}(),:+!?.]/u','', strip_tags($data));
+		$dataComing[$key] = preg_replace('/[^ก-ฮA-Za-z0-9 \/\-@_${}(),#<>:+!?.]/u','', strip_tags($data));
 	}else{
-		$dataComing[$key] = $data;
+		$dataComing[$key] = array_map(function($text){
+			return preg_replace('/[^\p{Thai}A-Za-z0-9 \/\-@_${}(),#<>:+!?.]/u','', $text);
+		},$data);
 	}
 }
 ?>
