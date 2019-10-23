@@ -39,8 +39,7 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 							':unique_id' => $dataComing["unique_id"],
 							':id_api' => $dataComing["id_api"]
 						]);
-						$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,id_api) 
-														VALUES(:refresh_token,:unique_id,:channel,:id_api)");
+						$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,id_api) VALUES(:refresh_token,:unique_id,:channel,:id_api)");
 						if($insertToken->execute([
 							':refresh_token' => $refresh_token,
 							':unique_id' => $dataComing["unique_id"],

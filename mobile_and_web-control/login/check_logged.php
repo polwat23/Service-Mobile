@@ -1,13 +1,13 @@
 <?php
 require_once('../autoload.php');
 
-$status_token = $api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 if($status_token){
 	if(isset($dataComing["unique_id"]) && isset($dataComing["channel"]) && 
 	isset($payload["member_no"]) && isset($dataComing["refresh_token"]) && isset($payload["id_token"])){
 		$new_token = null;
 		$id_token = $payload["id_token"];
-		if($status_token == 'expired'){
+		if($status_token === 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
 			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){

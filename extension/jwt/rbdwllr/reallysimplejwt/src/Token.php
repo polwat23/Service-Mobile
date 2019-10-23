@@ -82,12 +82,12 @@ class Token
      *
      * @return bool
      */
-    public static function validate(string $token, string $secret): bool
+    public static function validate(string $token, string $secret)
     {
         $parse = self::parser($token, $secret);
 
         if (!self::validateWithExpiration($parse)) {
-            return false;
+            return 'expired';
         }
 
         if (!self::validateNotBefore($parse)) {
