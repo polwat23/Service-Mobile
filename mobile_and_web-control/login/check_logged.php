@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-$status_token = $api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 if($status_token){
 	if(isset($dataComing["unique_id"]) && isset($dataComing["channel"]) && 
 	isset($payload["member_no"]) && isset($dataComing["refresh_token"]) && isset($payload["id_token"])){

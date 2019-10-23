@@ -34,8 +34,8 @@ $jwt_token = new Token();
 $func = new functions();
 $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
-if(isset($header["Authorization"]) && substr($header["Authorization"],7) != null){
-	$author_token = $header["Authorization"];
+if(isset($_SERVER["HTTP_AUTHORIZATION"]) && substr($_SERVER["HTTP_AUTHORIZATION"],7) != null){
+	$author_token = $_SERVER["HTTP_AUTHORIZATION"];
 	$access_token = substr($author_token,7);
 	$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 }

@@ -7,8 +7,7 @@ require_once(__DIR__.'/include/validate_input.php');
 use Connection\connection;
 
 $con = new connection();
-$header = apache_request_headers();
-$basetest = json_decode(isset($header["basetest"]) ? $header["basetest"] : false);
+$basetest = json_decode(isset($_SERVER["HTTP_BASETEST"]) ? $_SERVER["HTTP_BASETEST"] : false);
 $conmysql = $con->connecttomysql($basetest);
 $conoracle = $con->connecttooracle($basetest);
 ?>
