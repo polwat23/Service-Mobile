@@ -22,6 +22,7 @@ foreach ($_SERVER as $header_key => $header_value){
 	}
 }
 
+// Require files
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
@@ -31,6 +32,7 @@ require_once(__DIR__.'/../extension/PHPMailer-master/src/SMTP.php');
 require_once(__DIR__.'/../extension/PHPMailer-master/src/Exception.php');
 require_once(__DIR__.'/../extension/jwt/autoload.php');
 
+// Call functions
 use Utility\library;
 use Authorized\API;
 use Component\functions;
@@ -46,14 +48,14 @@ $func = new functions();
 $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
-if(isset($headers["Authorization"]) && substr($headers["Authorization"],7) != null){
+// Complete Argument
+if(isset($headers["Authorization"])){
 	$author_token = $headers["Authorization"];
 	$access_token = substr($author_token,7);
 	$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-	if(empty($payload) && empty($payload["user_type"]) && empty($payload["member_no"]) && empty($payload["exp"]) 
-	&& empty($payload["id_token"]) && empty($payload["id_userlogin"]) && empty($payload["id_api"]) && empty($payload["refresh_amount"])
-	&& empty($dataComing["refresh_token"]) && empty($dataComing["channel"]) && empty($dataComing["unique_id"]) && empty($author_token)
-	&& empty($dataComing["menu_component"])){
+	if(empty($payload["user_type"]) || empty($payload["member_no"]) || empty($payload["exp"])
+	|| empty($payload["id_token"]) || empty($payload["id_userlogin"]) || empty($payload["id_api"])
+	|| empty($dataComing["refresh_token"]) || empty($dataComing["channel"]) || empty($dataComing["unique_id"])){
 		$arrayResult['RESPONSE_CODE'] = "PARAM400";
 		$arrayResult['RESPONSE'] = "Not complete argument";
 		$arrayResult['RESULT'] = FALSE;

@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if(isset($author_token) && isset($payload)){
+if(isset($author_token) && isset($payload) && isset($dataComing)){
 	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 	if($status_token){
 		if(isset($dataComing["unique_id"]) && isset($dataComing["channel"]) && 
@@ -61,12 +61,5 @@ if(isset($author_token) && isset($payload)){
 		echo json_encode($arrayResult);
 		exit();
 	}
-}else{
-	$arrayResult['RESPONSE_CODE'] = "PARAM400";
-	$arrayResult['RESPONSE'] = "Not complete parameter";
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
 }
 ?>

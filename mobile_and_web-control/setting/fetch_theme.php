@@ -1,11 +1,10 @@
 <?php
 require_once('../autoload.php');
 
-if(isset($author_token) && isset($payload)){
+if(isset($author_token) && isset($payload) && isset($dataComing)){
 	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 	if($status_token){
-		if(isset($dataComing["unique_id"]) && isset($payload["user_type"]) && isset($dataComing["menu_component"]) 
-		&& isset($dataComing["refresh_token"]) && isset($dataComing['resolution']) && isset($payload["id_token"])){
+		if(isset($dataComing['resolution'])){
 			$new_token = null;
 			$id_token = $payload["id_token"];
 			if($status_token === 'expired'){
@@ -37,10 +36,10 @@ if(isset($author_token) && isset($payload)){
 				$responseData['default'] = $jsonTheme['default'];
 				$theme = [];
 				foreach($jsonTheme['theme'] as $value){
-				$getImageBySize = [];
-				$getImageBySize['name'] = $value['name'];
-				$getImageBySize['url'] = $value[$deviceResolution];
-				array_push($theme, $getImageBySize);
+					$getImageBySize = [];
+					$getImageBySize['name'] = $value['name'];
+					$getImageBySize['url'] = $value[$deviceResolution];
+					array_push($theme, $getImageBySize);
 				}
 				$responseData['theme'] = $theme;
 				echo json_encode($responseData);
@@ -68,12 +67,5 @@ if(isset($author_token) && isset($payload)){
 		echo json_encode($arrayResult);
 		exit();
 	}
-}else{
-	$arrayResult['RESPONSE_CODE'] = "PARAM400";
-	$arrayResult['RESPONSE'] = "Not complete parameter";
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
 }
 ?>

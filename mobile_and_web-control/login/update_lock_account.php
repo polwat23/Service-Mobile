@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if(isset($dataComing["member_no"]) && isset($dataComing["api_key"]) && isset($dataComing["unique_id"])){
 	$conmysql_nottest = $con->connecttomysql();
-	if($api->check_apikey($dataComing["api_key"],$conmysql_nottest)){
+	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8' WHERE member_no = :member_no");
 		if($updateAccountStatus->execute([':member_no' => $dataComing["member_no"]])){
 			$arrayResult['RESULT'] = TRUE;
