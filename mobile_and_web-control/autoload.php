@@ -1,6 +1,6 @@
 <?php
-ini_set('display_errors', false);
-ini_set('error_log', __DIR__.'/../log/error.log');
+/*ini_set('display_errors', false);
+ini_set('error_log', __DIR__.'/../log/error.log');*/
 
 header("Access-Control-Allow-Headers: Origin, Content-Type, X-Requested-With, Accept, Authorization ,basetest");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
