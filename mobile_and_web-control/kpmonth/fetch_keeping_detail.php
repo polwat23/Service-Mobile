@@ -1,17 +1,17 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($dataComing["unique_id"]) && isset($payload["member_no"]) && isset($dataComing["recv_period"]) 
-	&& isset($payload["user_type"]) && isset($dataComing["menu_component"]) && isset($dataComing["refresh_token"])){
-		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
+$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
+if($status_token){
+	if(isset($dataComing["recv_period"])){
 		$new_token = null;
-		if(!$is_accessToken){
+		$id_token = $payload["id_token"];
+		if($status_token === 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-			$lib,$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "SQL409";
-				$arrayResult['RESPONSE'] = "Invalid Access Maybe AccessToken and RefreshToken is not correct";
+				$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
 				echo json_encode($arrayResult);
@@ -31,39 +31,38 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			$arrGroupDetail = array();
 			$getDetailKP = $conoracle->prepare("SELECT * FROM (
 													SELECT 
-													kut.keepitemtype_desc as TYPE_DESC,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													case kut.keepitemtype_grp WHEN 'DEP' THEN 
+														kut.keepitemtype_desc as TYPE_DESC,
+														kut.keepitemtype_grp as TYPE_GROUP,
+														case kut.keepitemtype_grp WHEN 'DEP' THEN 
 														kpd.description
 													WHEN 'LON' THEN 
 														kpd.loancontract_no
-													ELSE null END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)
-												UNION 
-												(	SELECT 
-													kut.keepitemtype_desc as TYPE_DESC,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													case kut.keepitemtype_grp WHEN 'DEP' THEN 
-														kpd.description
-													WHEN 'LON' THEN 
-														kpd.loancontract_no
-													ELSE null END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-												)");
+														ELSE null END as PAY_ACCOUNT,
+														kpd.period,
+														NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+														NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+														NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+														NVL(kpd.interest_payment,0) AS INT_BALANCE
+														FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+														kpd.keepitemtype_code = kut.keepitemtype_code
+														WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)
+													UNION 
+													(	SELECT 
+														kut.keepitemtype_desc as TYPE_DESC,
+														kut.keepitemtype_grp as TYPE_GROUP,
+														case kut.keepitemtype_grp WHEN 'DEP' THEN 
+															kpd.description
+														WHEN 'LON' THEN 
+															kpd.loancontract_no
+														ELSE null END as PAY_ACCOUNT,
+														kpd.period,
+														NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+														NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+														NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+														NVL(kpd.interest_payment,0) AS INT_BALANCE
+														FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+														kpd.keepitemtype_code = kut.keepitemtype_code
+														WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)");
 			$getDetailKP->execute([
 				':member_no' => $member_no,
 				':recv_period' => $dataComing["recv_period"]

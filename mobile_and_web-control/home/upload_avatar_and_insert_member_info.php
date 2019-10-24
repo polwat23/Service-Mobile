@@ -1,17 +1,17 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($payload["member_no"]) && isset($dataComing["unique_id"]) && isset($dataComing["refresh_token"])
-	&& isset($payload["user_type"]) && isset($dataComing["menu_component"]) && isset($dataComing["encode_avatar"])){
-		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
+$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
+if($status_token){
+	if(isset($dataComing["encode_avatar"])){
 		$new_token = null;
-		if(!$is_accessToken){
+		$id_token = $payload["id_token"];
+		if($status_token === 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-			$lib,$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "SQL409";
-				$arrayResult['RESPONSE'] = "Invalid Access Maybe AccessToken and RefreshToken is not correct";
+				$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
 				echo json_encode($arrayResult);
@@ -32,7 +32,7 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			$createAvatar = $lib->base64_to_img($encode_avatar,$file_name,$destination);
 			if($createAvatar){
 				$path_avatar = '/resource/avatar/'.$member_no.'/'.$createAvatar;
-				$insertIntoInfo = $conmysql->prepare("UPDATE mdbmemberaccount SET path_avatar = :path_avatar,update_date = NOW() WHERE member_no = :member_no");
+				$insertIntoInfo = $conmysql->prepare("UPDATE gcmemberaccount SET path_avatar = :path_avatar WHERE member_no = :member_no");
 				if($insertIntoInfo->execute([
 					':path_avatar' => $path_avatar,
 					':member_no' => $member_no

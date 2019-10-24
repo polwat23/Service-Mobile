@@ -1,17 +1,17 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($dataComing["unique_id"]) && isset($dataComing["account_no"]) && isset($dataComing["seq_no"]) && isset($payload["user_type"])
-	&& isset($dataComing["menu_component"]) && isset($dataComing["refresh_token"])){
-		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
+$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
+if($status_token){
+	if(isset($dataComing["account_no"]) && isset($dataComing["seq_no"])){
 		$new_token = null;
-		if(!$is_accessToken){
+		$id_token = $payload["id_token"];
+		if($status_token === 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-			$lib,$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "SQL409";
-				$arrayResult['RESPONSE'] = "Invalid Access Maybe AccessToken and RefreshToken is not correct";
+				$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
 				echo json_encode($arrayResult);
@@ -22,7 +22,7 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 		}
 		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'DepositStatement')){
 			$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-			$DeleteMemoDept = $conmysql->prepare("DELETE FROM mdbmemodept WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+			$DeleteMemoDept = $conmysql->prepare("DELETE FROM gcmemodept WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 			if($DeleteMemoDept->execute([
 				':deptaccount_no' => $account_no,
 				':seq_no' => $dataComing["seq_no"]
