@@ -43,7 +43,6 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 												LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
 												WHERE
 												LCM.CONTRACT_STATUS = '1'
-												AND LCC.COLL_STATUS = '1'
 												AND LCC.LOANCOLLTYPE_CODE = '01'
 												AND LCC.REF_COLLNO = :member_no");
 			$getUcollwho->execute([':member_no' => $member_no]);

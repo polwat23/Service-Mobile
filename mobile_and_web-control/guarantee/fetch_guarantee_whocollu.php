@@ -34,7 +34,8 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 				$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 				$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 													FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
-													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no");
+													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
+													and lnm.contract_status = '1'");
 				$getWhocollu->execute([':contract_no' => $contract_no]);
 				$rowWhocollu = $getWhocollu->fetch();
 				if($rowWhocollu){
@@ -76,7 +77,9 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 				$arrayGroupLoan = array();
 				$getWhocollu = $conoracle->prepare("SELECT lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 													FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
-													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no");
+													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
+													and lnm.contract_status = '1'
+                          							GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 				$getWhocollu->execute([':member_no' => $member_no]);
 				while($rowWhocollu = $getWhocollu->fetch()){
 					$arrGroupAll = array();
@@ -91,8 +94,7 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 															LNCONTCOLL LCC LEFT JOIN MBMEMBMASTER MMB ON LCC.REF_COLLNO = MMB.MEMBER_NO
 															LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 														WHERE
-															LCC.LOANCOLLTYPE_CODE = '01' 
-															AND LCC.COLL_STATUS = '1' 
+															LCC.LOANCOLLTYPE_CODE = '01'
 															AND LCC.LOANCONTRACT_NO = :contract_no ");
 					$whocolluMember->execute([':contract_no' => $arrGroupAll['CONTRACT_NO']]);
 					while($rowCollMember = $whocolluMember->fetch()){
