@@ -5,8 +5,9 @@ namespace Authorized;
 class API {
 	
 	public function check_apikey($api_key,$unique_id,$con){
-		$updateAllUniqueID = $con->prepare("UPDATE gcapikey SET is_revoke = '-9' WHERE unique_id = :unique_id");
-		$updateAllUniqueID->execute([':unique_id' => $unique_id]);
+		$updateAllUniqueID = $con->prepare("UPDATE gcapikey SET is_revoke = '-9',expire_date = NOW() WHERE unique_id = :unique_id
+											api_key <> :api_key and is_revoke = '0'");
+		$updateAllUniqueID->execute([':unique_id' => $unique_id,':api_key' => $api_key]);
 		$checkAPIKey = $con->prepare("SELECT id_api,is_revoke FROM gcapikey WHERE api_key = :api_key");
 		$checkAPIKey->execute([
 			':api_key' => $api_key

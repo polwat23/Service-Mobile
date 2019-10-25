@@ -1,6 +1,6 @@
 <?php
-/*ini_set('display_errors', false);
-ini_set('error_log', __DIR__.'/../log/error.log');*/
+ini_set('display_errors', false);
+ini_set('error_log', __DIR__.'/../log/error.log');
 
 header("Access-Control-Allow-Headers: Origin, Content-Type, X-Requested-With, Accept, Authorization ,basetest");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -49,7 +49,7 @@ $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 // Complete Argument
-if(isset($headers["Authorization"])){
+if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 6){
 	$author_token = $headers["Authorization"];
 	$access_token = substr($author_token,7);
 	$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
@@ -63,6 +63,9 @@ if(isset($headers["Authorization"])){
 		echo json_encode($arrayResult);
 		exit();
 	}
+}else{
+	$author_token = null;
+	$payload["exp"] = null;
 }
 
 ?>

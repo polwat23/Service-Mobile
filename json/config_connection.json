@@ -13,5 +13,10 @@
 	"DBORACLE_SERVICE_TEST" : "gcoop",
 	"DBORACLE_USERNAME_TEST" : "iscorfscmas",
 	"DBORACLE_PASSWORD_TEST" : "iscorfscmas",
-	"DBORACLE_DATABASENAME_TEST" : "iscorfscmas"
+	"DBORACLE_DATABASENAME_TEST" : "iscorfscmas",
+	"DBLOG_HOST" : "localhost:27017",
+	"DBLOG_USERNAME" : "developer",
+	"DBLOG_PASSWORD" : "Gensoft2018",
+	"DBLOG_DATABASENAME" : "demogcoop_connect",
+	"DBLOG_DATABASENAME_TEST" : "demogcoop_connect_test"
 }

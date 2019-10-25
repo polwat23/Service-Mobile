@@ -1,5 +1,4 @@
 <?php
-
 require_once('../autoloadConnection.php');
 
 if(isset($dataComing['api_key']) && isset($dataComing['channel']) && isset($dataComing['unique_id']) && isset($dataComing['id_api_source'])){
