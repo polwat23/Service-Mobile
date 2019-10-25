@@ -1,5 +1,5 @@
 {
-    "default": "theme02",
+    "default": "theme04",
     "theme": [
         {
             "name": "theme01",
@@ -21,6 +21,13 @@
             "hd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/03/720p.jpg",
             "fhd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/03/1080p.jpg",
             "qhd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/03/1440p.jpg"
+        },
+        {
+            "name": "theme04",
+            "sd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/04/576p.jpg",
+            "hd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/04/720p.jpg",
+            "fhd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/04/1080p.jpg",
+            "qhd": "https://mobilecore.gensoft.co.th/DEFAULTTHEME/v3/04/1440p.jpg"
         }
     ]
 }

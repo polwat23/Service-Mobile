@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if(isset($author_token) && isset($payload) && isset($dataComing)){
-	$status_token = $api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 	if($status_token){
 		if(isset($dataComing["pin"])){
 			$new_token = null;
@@ -25,7 +25,7 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 			$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 			$rowPinNull = $checkPinNull->fetch();
 			if(isset($rowPinNull["pin"])){
-				$checkPin = $conmysql->prepare("SELECT id_account,account_status FROM gcmemberaccount WHERE member_no = :member_no and pin = :pin");
+				$checkPin = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no and pin = :pin");
 				$checkPin->execute([
 					':member_no' => $payload["member_no"],
 					':pin' => $dataComing["pin"]

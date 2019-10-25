@@ -62,5 +62,24 @@ class connection {
 			exit();
 		}
 	}
+	public function connecttomongo($is_test=false) {
+		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
+		$json_data = json_decode($json,true);
+		$dbhost = $json_data["DBLOG_HOST"];
+		$dbuser = $json_data["DBLOG_USERNAME"];
+		$dbpass = $json_data["DBLOG_PASSWORD"];
+		if($is_test){
+			$dbname = $json_data["DBLOG_DATABASENAME_TEST"];
+		}else{
+			$dbname = $json_data["DBLOG_DATABASENAME"];
+		}
+		
+		$this->conmongo = new \MongoDB\Driver\Manager("mongodb://".$dbhost,[
+			'username' => $dbuser,
+			'password' => $dbpass,
+			'db' => $dbname
+		]);
+		return $this->conmongo;
+	}
 }
 ?>

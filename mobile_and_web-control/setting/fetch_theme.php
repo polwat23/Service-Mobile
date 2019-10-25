@@ -39,7 +39,7 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 					$getImageBySize = [];
 					$getImageBySize['name'] = $value['name'];
 					$getImageBySize['url'] = $value[$deviceResolution];
-					array_push($theme, $getImageBySize);
+					$theme[] = $getImageBySize;
 				}
 				$responseData['theme'] = $theme;
 				echo json_encode($responseData);

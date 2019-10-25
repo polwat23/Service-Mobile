@@ -10,4 +10,6 @@ $con = new connection();
 $basetest = json_decode(isset($headers["basetest"]) ? $headers["basetest"] : false);
 $conmysql = $con->connecttomysql($basetest);
 $conoracle = $con->connecttooracle($basetest);
+$conmongo = $con->connecttomongo($basetest);
+$bulkMongo = new MongoDB\Driver\BulkWrite;
 ?>

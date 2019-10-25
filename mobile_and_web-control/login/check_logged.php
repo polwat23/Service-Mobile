@@ -32,6 +32,17 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 			if($checkUserlogin->rowCount() > 0){
 				$rowLog = $checkUserlogin->fetch();
 				if($rowLog["is_login"] == '1'){
+					$logAccess = [
+						"access_date" => date('Y-m-d'), 
+						"member_no" => $payload["member_no"], 
+						"access_token" => $access_token,
+						"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+						"id_userlogin" => $rowLog["id_userlogin"]
+					];
+					/*$bulkMongo->insert($logAccess);
+					$conmongo->executeBulkWrite('GCLOGUSERACCESSAFTERLOGIN', $bulkMongo);
+					$query = new MongoDB\Driver\Query($filter, $options);
+					$cursor = $manager->executeQuery('GCLOGUSERACCESSAFTERLOGIN', $query);*/
 					$arrayResult['RESULT'] = TRUE;
 					if(isset($new_token)){
 						$arrayResult['NEW_TOKEN'] = $new_token;
