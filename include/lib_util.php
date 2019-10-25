@@ -103,15 +103,30 @@ class library {
 	public function formataccount($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$formatArray = explode('-',$format);
-			$account;
+			$account_text = '';
 			for($i = 0;$i < sizeof($formatArray);$i++){
 				if($i == 0){
-					$account = substr($account_no,$i,strlen($formatArray[$i]));
+					$account_text = substr($account_no,$i,strlen($formatArray[$i]));
 				}else{
-					$account .= '-'.substr($account_no,strlen(preg_replace('/-/','',$account)),strlen($formatArray[$i]));
+					$account_text .= '-'.substr($account_no,strlen(preg_replace('/-/','',$account_text)),strlen($formatArray[$i]));
 				}
 			}
-			return $account;
+			return $account_text;
+		}else{
+			return '-';
+		}
+	}
+	public function formataccount_hidden($account_no,$format) {
+		if(isset($account_no) && isset($format)){
+			$account_text = '';
+			for($i = 0; $i < strlen($account_no);$i++){
+				if($format[$i] == 'h'){
+					$account_text .= 'x';
+				}else{
+					$account_text .= $account_no[$i];
+				}
+			}
+			return $account_text;
 		}else{
 			return '-';
 		}
@@ -119,15 +134,15 @@ class library {
 	public function formatcontract($contract_no,$format) {
 		if(isset($contract_no) && isset($format)){
 			$formatArray = explode('/',$format);
-			$contract;
+			$contract_text = '';
 			for($i = 0;$i < sizeof($formatArray);$i++){
 				if($i == 0){
-					$contract = mb_substr($contract_no,$i,strlen($formatArray[$i]));
+					$contract_text = mb_substr($contract_no,$i,strlen($formatArray[$i]));
 				}else{
-					$contract .= '/'.mb_substr($contract_no,strlen(preg_replace('/-/','',$contract)),strlen($formatArray[$i]));
+					$contract_text .= '/'.mb_substr($contract_no,strlen(preg_replace('/-/','',$contract_text)),strlen($formatArray[$i]));
 				}
 			}
-			return $contract;
+			return $contract_text;
 		}else{
 			return '-';
 		}
@@ -194,7 +209,7 @@ class library {
 			return true;
 		}
 	}
-	public function base64_to_img($encode_string, $output_file) {
+	public function base64_to_img($encode_string,$file_name,$output_file) {
 		$data_Img = explode(',',$encode_string);
 		$dataImg = base64_decode($data_Img[1]);
 		$info_img = explode('/',$data_Img[0]);
@@ -203,17 +218,24 @@ class library {
 		if (!$im_string) {
 			return false;
 		}else{
-			$destination = $output_file.'.'.$ext_img;
+			$filename = $file_name.'.'.$ext_img;
+			$destination = $output_file.'/'.$filename;
 			if($ext_img == 'png'){
 				imagepng($im_string, $destination, 2);
-				return $ext_img;
+				return $filename;
 			}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
 				imagejpeg($im_string, $destination, 70);
-				return $ext_img;
+				return $filename;
 			}else{
 				return false;
 			}
 		} 
+	}
+	public function text_limit($text, $limit = 50, $end = '...'){
+		if (mb_strwidth($text, 'UTF-8') <= $limit) {
+			return $text;
+		}
+		return rtrim(mb_strimwidth($text, 0, $limit, '', 'UTF-8')).$end;
 	}
 	public function randomText($type='number',$length=4){
 		if($type == 'number'){
@@ -289,6 +311,9 @@ class library {
 			curl_close ($ch);
 			return false;
 		}
+	}
+	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
+		return $jwt_function->getPayload($token, $secret_key);
 	}
 }
 ?>
