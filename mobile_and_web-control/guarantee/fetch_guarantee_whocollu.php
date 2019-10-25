@@ -1,17 +1,17 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($dataComing["unique_id"]) && isset($payload["member_no"]) 
-	&& isset($payload["user_type"]) && isset($dataComing["menu_component"]) && isset($dataComing["refresh_token"])){
-		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
+if(isset($author_token) && isset($payload) && isset($dataComing)){
+	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
+	if($status_token){
 		$new_token = null;
-		if(!$is_accessToken){
+		$id_token = $payload["id_token"];
+		if($status_token === 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-			$lib,$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "SQL409";
-				$arrayResult['RESPONSE'] = "Invalid Access Maybe AccessToken and RefreshToken is not correct";
+				$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
 				echo json_encode($arrayResult);
@@ -34,7 +34,8 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 				$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 				$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 													FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
-													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no");
+													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
+													and lnm.contract_status = '1'");
 				$getWhocollu->execute([':contract_no' => $contract_no]);
 				$rowWhocollu = $getWhocollu->fetch();
 				if($rowWhocollu){
@@ -47,7 +48,7 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 															LNCONTCOLL LCC LEFT JOIN MBMEMBMASTER MMB ON LCC.REF_COLLNO = MMB.MEMBER_NO
 															LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 														WHERE
-															 LCC.LOANCOLLTYPE_CODE = '01' 
+															LCC.LOANCOLLTYPE_CODE = '01' 
 															AND LCC.COLL_STATUS = '1' 
 															AND LCC.LOANCONTRACT_NO = :contract_no ");
 					$whocolluMember->execute([':contract_no' => $contract_no]);
@@ -76,7 +77,9 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 				$arrayGroupLoan = array();
 				$getWhocollu = $conoracle->prepare("SELECT lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 													FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
-													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no");
+													LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
+													and lnm.contract_status = '1'
+                          							GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 				$getWhocollu->execute([':member_no' => $member_no]);
 				while($rowWhocollu = $getWhocollu->fetch()){
 					$arrGroupAll = array();
@@ -91,8 +94,7 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 															LNCONTCOLL LCC LEFT JOIN MBMEMBMASTER MMB ON LCC.REF_COLLNO = MMB.MEMBER_NO
 															LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 														WHERE
-															 LCC.LOANCOLLTYPE_CODE = '01' 
-															AND LCC.COLL_STATUS = '1' 
+															LCC.LOANCOLLTYPE_CODE = '01'
 															AND LCC.LOANCONTRACT_NO = :contract_no ");
 					$whocolluMember->execute([':contract_no' => $arrGroupAll['CONTRACT_NO']]);
 					while($rowCollMember = $whocolluMember->fetch()){
@@ -118,19 +120,12 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "PARAM400";
-		$arrayResult['RESPONSE'] = "Not complete parameter";
+		$arrayResult['RESPONSE_CODE'] = "HEADER500";
+		$arrayResult['RESPONSE'] = "Authorization token invalid";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(203);
 		echo json_encode($arrayResult);
 		exit();
 	}
-}else{
-	$arrayResult['RESPONSE_CODE'] = "HEADER500";
-	$arrayResult['RESPONSE'] = "Authorization token invalid";
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
 }
 ?>

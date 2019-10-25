@@ -20,30 +20,26 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 				$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
 			}
 		}
-		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageDevice')){
-			$arrGroupDevice = array();
-			$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
-														FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
-														ORDER BY id_userlogin DESC GROUP BY unique_id");
-			$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
-			while($rowSetting = $fetchSettingDevice->fetch()){
-				$arrDevice = array();
-				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
-				$arrDevice["CHANNEL"] = $rowSetting["channel"];
-				if($rowSetting["unique_id"] == $dataComing["unique_id"]){
-					$arrDevice["THIS_DEVICE"] = true;
+		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'Notification')){
+			$getBadge = $conmysql->prepare("SELECT COUNT(id_history) as badge,his_type FROM gchistory 
+											WHERE member_no = :member_no AND his_read_status = 0
+											GROUP BY his_type");
+			$getBadge->execute([
+				':member_no' => $payload["member_no"]
+			]);
+			if($getBadge->rowCount() > 0){
+				while($badgeData = $getBadge->fetch()){
+					$arrayResult['BADGE_'.$badgeData["his_type"]] = $badgeData["badge"];
 				}
-				$arrDevice["LOGIN_DATE"] = isset($rowSetting["login_date"]) ? $lib->convertdate($rowSetting["login_date"],'D m Y',true) : null;
-				$arrDevice["ACCESS_DATE"] = isset($rowSetting["access_date"]) ? $lib->convertdate($rowSetting["access_date"],'D m Y',true) : null;
-				$arrDevice["ID_TOKEN"] = $rowSetting["id_token"];
-				$arrGroupDevice[] = $arrDevice;
+				if(isset($new_token)){
+					$arrayResult['NEW_TOKEN'] = $new_token;
+				}
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
 			}
-			$arrayResult["DEVICE"] = $arrGroupDevice;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "PARAM500";
 			$arrayResult['RESPONSE'] = "Not permission this menu";

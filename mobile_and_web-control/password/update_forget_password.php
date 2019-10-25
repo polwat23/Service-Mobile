@@ -1,5 +1,5 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
 if(isset($dataComing["api_key"]) && isset($dataComing["unique_id"]) && isset($dataComing["member_no"]) && isset($dataComing["email"])
 && isset($dataComing["device_name"])){
@@ -24,7 +24,7 @@ if(isset($dataComing["api_key"]) && isset($dataComing["unique_id"]) && isset($da
 			$arrayDataTemplate["DEVICE_NAME"] = $dataComing["device_name"];
 			$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
 			$conmysql->beginTransaction();
-			$updateTemppass = $conmysql->prepare("UPDATE mdbmemberaccount SET temppass = :temp_pass,account_status = '-9',update_date = NOW() 
+			$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :temp_pass,account_status = '-9' 
 												WHERE member_no = :member_no");
 			if($updateTemppass->execute([
 				':temp_pass' => $temp_pass,

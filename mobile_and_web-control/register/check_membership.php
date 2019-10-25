@@ -1,11 +1,11 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
 if(isset($dataComing["member_no"]) && isset($dataComing["id_card"]) && isset($dataComing["api_key"]) && isset($dataComing["unique_id"])){
 	$conmysql_nottest = $con->connecttomysql();
 	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
-		$checkMember = $conmysql->prepare("SELECT id_account FROM mdbmemberaccount WHERE member_no = :member_no");
+		$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);
 		if($checkMember->rowCount() > 0){
 			$arrayResult = array();

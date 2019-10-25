@@ -1,5 +1,5 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
 if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isset($dataComing["name_template"]) && isset($dataComing["payload"])){
 	$conmysql_nottest = $con->connecttomysql();
@@ -37,13 +37,13 @@ if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isse
 				}
 			}
 			$getAPI = $conmysql->prepare("SELECT mdt.id_api
-											FROM mdbuserlogin mul LEFT JOIN mdbtoken mdt ON mul.id_token = mdt.id_token
+											FROM mdbuserlogin mul LEFT JOIN gctoken mdt ON mul.id_token = mdt.id_token
 											WHERE mul.member_no IN(".$member_no_text.") and mul.receive_notify_news = '1' and mul.channel = 'mobile' 
 											and mdt.rt_is_revoke = 0");
 			$getAPI->execute();
 			if($getAPI->rowCount() > 0){
 				while($rowAPI = $getAPI->fetch()){
-					$getToken = $conmysql_nottest->prepare("SELECT fcm_token FROM mdbapikey WHERE id_api = :id_api and is_revoke = 0");
+					$getToken = $conmysql_nottest->prepare("SELECT fcm_token FROM gcapikey WHERE id_api = :id_api and is_revoke = 0");
 					$getToken->execute([':id_api' => $rowAPI["id_api"]]);
 					$rowToken = $getToken->fetch();
 					$arrayToken[] = $rowToken["fcm_token"];

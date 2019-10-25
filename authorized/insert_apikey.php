@@ -2,7 +2,7 @@
 
 require_once('../autoloadConnection.php');
 
-if(isset($dataComing['api_key']) && isset($dataComing['channel']) && isset($dataComing['id_api_source'])){
+if(isset($dataComing['api_key']) && isset($dataComing['channel']) && isset($dataComing['unique_id']) && isset($dataComing['id_api_source'])){
 	$conmysql_nottest = $con->connecttomysql();
 	$conmysql_nottest->beginTransaction();
 	if($dataComing['channel'] == 'mobile_app'){
@@ -10,12 +10,13 @@ if(isset($dataComing['api_key']) && isset($dataComing['channel']) && isset($data
 	}else{
 		$expire_date = date('Y-m-d H:i:s',strtotime("+1 day"));
 	}
-	$insertAPI = $conmysql_nottest->prepare("INSERT INTO gcapikey(api_key,expire_date,id_api_source) 
-											VALUES(:api_key,:expire_date,:id_api_source)");
+	$insertAPI = $conmysql_nottest->prepare("INSERT INTO gcapikey(api_key,expire_date,id_api_source,unique_id) 
+											VALUES(:api_key,:expire_date,:id_api_source,:unique_id)");
 	if($insertAPI->execute([
 			':api_key' => $dataComing['api_key'],
 			':expire_date' => $expire_date,
-			':id_api_source' => $dataComing['id_api_source']
+			':id_api_source' => $dataComing['id_api_source'],
+			':unique_id' => $dataComing['unique_id']
 	])){
 		$id_api = $conmysql_nottest->lastInsertId();
 		$conmysql_nottest->commit();

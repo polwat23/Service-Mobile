@@ -1,12 +1,12 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
 if(isset($dataComing["member_no"]) && isset($dataComing["password"])){
 	$email = $dataComing["email"];
 	$phone = $dataComing["phone"];
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-	$insertAccount = $conmysql->prepare("INSERT INTO mdbmemberaccount(member_no,password,phone_number,email,register_date,update_date) 
-										VALUES(:member_no,:password,:phone,:email,NOW(),NOW())");
+	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email) 
+										VALUES(:member_no,:password,:phone,:email)");
 	if($insertAccount->execute([
 		':member_no' => $dataComing["member_no"],
 		':password' => $password,

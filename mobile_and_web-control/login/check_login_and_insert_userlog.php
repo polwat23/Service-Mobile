@@ -5,7 +5,7 @@ require_once('../autoload.php');
 if(isset($dataComing["member_no"]) && isset($dataComing["api_key"]) && isset($dataComing["password"]) && isset($dataComing["unique_id"]) && 
 isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComing["device_name"])){
 	$conmysql_nottest = $con->connecttomysql();
-	if($api->check_apikey($dataComing["api_key"],$conmysql_nottest)){
+	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$arrayResult = array();
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
 		$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 

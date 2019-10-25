@@ -1,12 +1,13 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($dataComing["unique_id"]) && isset($payload["user_type"]) && isset($dataComing["menu_component"])){
+if(isset($author_token) && isset($payload) && isset($dataComing)){
+	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
+	if($status_token){
 		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'News')){
 			$arrayGroupNews = array();
-			$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,update_date,id_news,link_news_more
-												FROM mdbnews LIMIT 5");
+			$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,username,update_date,id_news,link_news_more
+											FROM gcnews LIMIT 5");
 			$fetchNews->execute();
 			while($rowNews = $fetchNews->fetch()){
 				$arrayNews = array();
@@ -15,6 +16,7 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 				$arrayNews["IMAGE_HEADER"] = $rowNews["path_img_header"];
 				$arrayNews["UPDATE_DATE"] = $lib->convertdate($rowNews["update_date"],'D m Y',true);
 				$arrayNews["ID_NEWS"] = $rowNews["id_news"];
+				$arrayNews["CREATE_BY"] = $rowNews["username"];
 				$arrayNews["LINK_NEWS_MORE"] = $rowNews["link_news_more"];
 				$arrayGroupNews[] = $arrayNews;
 			}
@@ -30,19 +32,12 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "PARAM400";
-		$arrayResult['RESPONSE'] = "Not complete parameter";
+		$arrayResult['RESPONSE_CODE'] = "HEADER500";
+		$arrayResult['RESPONSE'] = "Authorization token invalid";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(203);
 		echo json_encode($arrayResult);
 		exit();
 	}
-}else{
-	$arrayResult['RESPONSE_CODE'] = "HEADER500";
-	$arrayResult['RESPONSE'] = "Authorization token invalid";
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
 }
 ?>

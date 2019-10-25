@@ -1,32 +1,28 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
-if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
-	if(isset($dataComing["unique_id"]) && isset($payload["user_type"]) && isset($dataComing["menu_component"]) 
-	&& isset($dataComing["refresh_token"])){
-		$is_accessToken = $api->check_accesstoken($access_token,$conmysql);
-		$id_token = null;
+if(isset($author_token) && isset($payload) && isset($dataComing)){
+	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
+	if($status_token){
 		$new_token = null;
-		if(!$is_accessToken){
+		$id_token = $payload["id_token"];
+		if($status_token === 'expired'){
 			$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-			$lib,$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+			$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "SQL409";
-				$arrayResult['RESPONSE'] = "Invalid Access Maybe AccessToken and RefreshToken is not correct";
+				$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
 				echo json_encode($arrayResult);
 				exit();
 			}else{
-				$id_token = $is_refreshToken_arr["ID_TOKEN"];
 				$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
 			}
-		}else{
-			$id_token = $is_accessToken;
 		}
 		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageNotification')){
 			$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email,is_sound_notify
-														FROM mdbuserlogin WHERE id_token = :id_token and is_login = '1'");
+														FROM gcuserlogin WHERE id_token = :id_token and is_login = '1'");
 			$fetchSettingNotify->execute([':id_token' => $id_token]);
 			if($fetchSettingNotify->rowCount() > 0){
 				$rowSetting = $fetchSettingNotify->fetch();
@@ -56,19 +52,12 @@ if($api->validate_jwttoken($author_token,$jwt_token,$config["SECRET_KEY_JWT"])){
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "PARAM400";
-		$arrayResult['RESPONSE'] = "Not complete parameter";
+		$arrayResult['RESPONSE_CODE'] = "HEADER500";
+		$arrayResult['RESPONSE'] = "Authorization token invalid";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(203);
 		echo json_encode($arrayResult);
 		exit();
 	}
-}else{
-	$arrayResult['RESPONSE_CODE'] = "HEADER500";
-	$arrayResult['RESPONSE'] = "Authorization token invalid";
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
 }
 ?>

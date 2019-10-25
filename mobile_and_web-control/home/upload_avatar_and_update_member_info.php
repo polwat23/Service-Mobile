@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if(isset($author_token) && isset($payload) && isset($dataComing)){
 	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 	if($status_token){
-		if(isset($dataComing["id_history"])){
+		if(isset($dataComing["encode_avatar"])){
 			$new_token = null;
 			$id_token = $payload["id_token"];
 			if($status_token === 'expired'){
@@ -21,20 +21,37 @@ if(isset($author_token) && isset($payload) && isset($dataComing)){
 					$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
 				}
 			}
-			if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'Notification')){
-				$readHistory = $conmysql->prepare("UPDATE gchistory SET his_read_status = '1' WHERE member_no = :member_no and id_history = :id_history");
-				if($readHistory->execute([
-					':member_no' => $payload["member_no"],
-					':id_history' => $dataComing["id_history"]
-				])){
-					$arrayResult['RESULT'] = TRUE;
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
+			if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'MemberInfo')){
+				$arrayResult = array();
+				$member_no = $payload["member_no"];
+				$encode_avatar = $dataComing["encode_avatar"];
+				$destination = __DIR__.'/../../resource/avatar/'.$member_no;
+				$file_name = $lib->randomText('all',6);
+				if(!file_exists($destination)){
+					mkdir($destination, 0777, true);
+				}
+				$createAvatar = $lib->base64_to_img($encode_avatar,$file_name,$destination);
+				if($createAvatar){
+					$path_avatar = '/resource/avatar/'.$member_no.'/'.$createAvatar;
+					$insertIntoInfo = $conmysql->prepare("UPDATE gcmemberaccount SET path_avatar = :path_avatar WHERE member_no = :member_no");
+					if($insertIntoInfo->execute([
+						':path_avatar' => $path_avatar,
+						':member_no' => $member_no
+					])){
+						$arrayResult['PATH_AVATAR'] = $path_avatar;
+						$arrayResult['RESULT'] = TRUE;
+						echo json_encode($arrayResult);
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "SQL500";
+						$arrayResult['RESPONSE'] = "Cannot update avatar path";
+						$arrayResult['RESULT'] = FALSE;
+						http_response_code(203);
+						echo json_encode($arrayResult);
+						exit();
 					}
-					echo json_encode($arrayResult);
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "SQL500";
-					$arrayResult['RESPONSE'] = "Cannot change status this history";
+					$arrayResult['RESPONSE_CODE'] = "UPLOAD500";
+					$arrayResult['RESPONSE'] = "Extension is invalid";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(203);
 					echo json_encode($arrayResult);
