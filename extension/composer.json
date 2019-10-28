@@ -1,0 +1,7 @@
+{
+    "require": {
+        "mongodb/mongodb": "^1.5",
+		"rbdwllr/reallysimplejwt": "^2.0",
+		"phpmailer/phpmailer": "~6.1"
+    }
+}

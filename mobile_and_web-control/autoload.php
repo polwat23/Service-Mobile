@@ -27,10 +27,7 @@ require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../authorized/authorized.php');
-require_once(__DIR__.'/../extension/PHPMailer-master/src/PHPMailer.php');
-require_once(__DIR__.'/../extension/PHPMailer-master/src/SMTP.php');
-require_once(__DIR__.'/../extension/PHPMailer-master/src/Exception.php');
-require_once(__DIR__.'/../extension/jwt/autoload.php');
+require_once(__DIR__.'/../extension/vendor/autoload.php');
 
 // Call functions
 use Utility\library;
