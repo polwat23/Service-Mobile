@@ -5,6 +5,7 @@ namespace Connection;
 class connection {
 	public $conmysql;
 	public $conoracle;
+	public $conmongo;
 	
 	public function connecttomysql($is_test=false) {
 		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
@@ -73,13 +74,8 @@ class connection {
 		}else{
 			$dbname = $json_data["DBLOG_DATABASENAME"];
 		}
-		
-		$this->conmongo = new \MongoDB\Driver\Manager("mongodb://".$dbhost,[
-			'username' => $dbuser,
-			'password' => $dbpass,
-			'db' => $dbname
-		]);
-		return $this->conmongo;
+		$this->conmongo = new \MongoDB\Client("mongodb://{$dbhost}");
+		return $this->conmongo->$dbname;
 	}
 }
 ?>

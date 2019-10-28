@@ -67,17 +67,6 @@ class API {
 			return false;
 		}
 	}
-	public function validate_jwttoken($token,$exp,$jwt_function,$secret_key) {
-		if(substr($token,0,6) === 'Bearer'){
-			if($jwt_function->validate(substr($token,7), $secret_key)){
-				return $jwt_function->validate(substr($token,7), $secret_key);
-			}else{
-				return false;
-			}
-		}else{
-			return false;
-		}
-	}
 }
 
 ?>

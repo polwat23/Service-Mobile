@@ -23,11 +23,12 @@ foreach ($_SERVER as $header_key => $header_value){
 }
 
 // Require files
+require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../authorized/authorized.php');
-require_once(__DIR__.'/../extension/vendor/autoload.php');
+
 
 // Call functions
 use Utility\library;
@@ -36,6 +37,11 @@ use Component\functions;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use ReallySimpleJWT\Token;
+use ReallySimpleJWT\Parse;
+use ReallySimpleJWT\Jwt;
+use ReallySimpleJWT\Validate;
+use ReallySimpleJWT\Encode;
+use ReallySimpleJWT\Exception\ValidateException;
 
 $mailFunction = new PHPMailer(false);
 $lib = new library();
@@ -46,23 +52,69 @@ $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 // Complete Argument
-if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 6){
-	$author_token = $headers["Authorization"];
-	$access_token = substr($author_token,7);
-	$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-	if(empty($payload["user_type"]) || empty($payload["member_no"]) || empty($payload["exp"])
-	|| empty($payload["id_token"]) || empty($payload["id_userlogin"]) || empty($payload["id_api"])
-	|| empty($dataComing["refresh_token"]) || empty($dataComing["channel"]) || empty($dataComing["unique_id"])){
-		$arrayResult['RESPONSE_CODE'] = "PARAM400";
-		$arrayResult['RESPONSE'] = "Not complete argument";
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(203);
-		echo json_encode($arrayResult);
-		exit();
+if(isset($dataComing["channel"]) && isset($dataComing["refresh_token"]) && isset($dataComing["unique_id"])){
+	if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 6){
+		$author_token = $headers["Authorization"];
+		if(substr($author_token,0,6) === 'Bearer'){
+			$access_token = substr($author_token,7);
+			
+			$jwt = new Jwt($access_token, $config["SECRET_KEY_JWT"]);
+
+			$parse_token = new Parse($jwt, new Validate(), new Encode());
+			try{
+				$parsed_token = $parse_token->validate()
+					->validateExpiration()
+					->parse();
+				$payload = $parsed_token->getPayload();
+			}catch (ValidateException $e) {
+				$errorCode = $e->getCode();
+				if($errorCode === 3){
+					$arrayResult['RESPONSE_CODE'] = "HEADER500";
+					$arrayResult['RESPONSE'] = "Signature is invalid";
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(403);
+					echo json_encode($arrayResult);
+					exit();
+				}else if($errorCode === 4){
+					$new_token = null;
+					$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
+					$dataComing["channel"],$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
+					if(!$is_refreshToken_arr){
+						$arrayResult['RESPONSE_CODE'] = "SQL409";
+						$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
+						$arrayResult['RESULT'] = FALSE;
+						http_response_code(403);
+						echo json_encode($arrayResult);
+						exit();
+					}else{
+						$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
+						$payload = $lib->fetch_payloadJWT($new_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+					}
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "HEADER500";
+					$arrayResult['RESPONSE'] = "JWT Token is invalid";
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(403);
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "HEADER500";
+			$arrayResult['RESPONSE'] = "Authorization Header is not correct";
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			echo json_encode($arrayResult);
+			exit();
+		}
 	}
 }else{
-	$author_token = null;
-	$payload["exp"] = null;
+	$arrayResult['RESPONSE_CODE'] = "ARG400";
+	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(403);
+	echo json_encode($arrayResult);
+	exit();
 }
 
 ?>
