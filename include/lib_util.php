@@ -315,5 +315,15 @@ class library {
 	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
 		return $jwt_function->getPayload($token, $secret_key);
 	}
+	public function checkCompleteArgument($dataincome,$dataComing) {
+		foreach($dataincome as $data){
+			if(isset($dataComing[$data]) && !empty($dataComing[$data])){
+				continue;
+			}else{
+				return false;
+			}
+		}
+		return true;
+	}
 }
 ?>

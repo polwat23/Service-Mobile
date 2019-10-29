@@ -1,38 +1,48 @@
 <?php
 require_once('../autoload.php');
 
-$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0' 
-									and member_no = :member_no and unique_id = :unique_id");
-$checkUserlogin->execute([
-	':id_token' => $payload["id_token"],
-	':member_no' => $payload["member_no"],
-	':unique_id' => $dataComing["unique_id"]
-]);
-if($checkUserlogin->rowCount() > 0){
-	$rowLog = $checkUserlogin->fetch();
-	if($rowLog["is_login"] == '1'){
-		$logAccess = [
-			"access_date" => date('Y-m-d H:i:s'), 
-			"member_no" => $payload["member_no"], 
-			"access_token" => $access_token,
-			"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
-			"id_userlogin" => $rowLog["id_userlogin"]
-		];
-		$conmongo->GCLOGUSERACCESSAFTERLOGIN->insertOne($logAccess);
-					
-		$arrayResult['RESULT'] = TRUE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
-	}else{
-		$arrayResult['RESULT'] = TRUE;
-		$arrayResult["MESSAGE_LOGOUT"] = $config['LOGOUT'.$rowLog["is_login"]];
-	}
-	echo json_encode($arrayResult);
-}else{
-	$arrayResult['RESULT'] = $payload;
-	echo json_encode($arrayResult);
-}
+if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+	$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0'
+											and member_no = :member_no and unique_id = :unique_id");
+	$checkUserlogin->execute([
+		':id_token' => $payload["id_token"],
+		':member_no' => $payload["member_no"],
+		':unique_id' => $dataComing["unique_id"]
+	]);
+	if($checkUserlogin->rowCount() > 0){
+		$rowLog = $checkUserlogin->fetch();
+		if($rowLog["is_login"] == '1'){
+			$logAccess = [
+				"access_date" => date('Y-m-d H:i:s'), 
+				"member_no" => $payload["member_no"], 
+				"access_token" => $access_token,
+				"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+				"id_userlogin" => $rowLog["id_userlogin"]
+			];
+			$conmongo->GCLOGUSERACCESSAFTERLOGIN->insertOne($logAccess);
 
-	
+			$arrayResult['RESULT'] = TRUE;
+			if(isset($new_token)){
+				$arrayResult['NEW_TOKEN'] = $new_token;
+			}
+		}else{
+			$arrayResult['RESULT'] = TRUE;
+			$arrayResult["MESSAGE_LOGOUT"] = $config['LOGOUT'.$rowLog["is_login"]];
+		}
+		echo json_encode($arrayResult);
+	}else{
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		echo json_encode($arrayResult);
+		exit();
+	}
+}else{
+	$arrayResult['RESPONSE_CODE'] = "4004";
+	$arrayResult['RESPONSE_AWARE'] = "argument";
+	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	echo json_encode($arrayResult);
+	exit();
+}
 ?>
