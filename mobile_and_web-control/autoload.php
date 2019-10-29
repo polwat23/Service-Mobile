@@ -49,7 +49,7 @@ $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 // Complete Argument
-if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 6){
+if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 7){
 	$author_token = $headers["Authorization"];
 	$access_token = substr($author_token,7);
 	$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);

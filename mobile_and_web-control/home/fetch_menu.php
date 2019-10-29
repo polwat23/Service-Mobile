@@ -1,6 +1,8 @@
 <?php
 require_once('../autoload.php');
 
+file_put_contents(__DIR__.'/../../log/log_error.txt', json_encode($payload) . PHP_EOL, FILE_APPEND);
+
 if(isset($dataComing["channel"])){
 	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
 	if($status_token){
