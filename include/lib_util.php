@@ -325,5 +325,8 @@ class library {
 		}
 		return true;
 	}
+	public function addLogtoTxt($dataLog,$pathfile){
+		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
+	}
 }
 ?>

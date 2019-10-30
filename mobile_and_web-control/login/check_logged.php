@@ -12,15 +12,24 @@ if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->check
 	if($checkUserlogin->rowCount() > 0){
 		$rowLog = $checkUserlogin->fetch();
 		if($rowLog["is_login"] == '1'){
-			$logAccess = [
-				"access_date" => date('Y-m-d H:i:s'), 
-				"member_no" => $payload["member_no"], 
-				"access_token" => $access_token,
-				"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
-				"id_userlogin" => $rowLog["id_userlogin"]
-			];
-			$conmongo->GCLOGUSERACCESSAFTERLOGIN->insertOne($logAccess);
-
+			try{
+				$logAccess = [
+					"access_date" => date('Y-m-d H:i:s'), 
+					"member_no" => $payload["member_no"], 
+					"access_token" => $access_token,
+					"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+					"id_userlogin" => $rowLog["id_userlogin"]
+				];
+				$conmongo->GCLOGUSERACCESSAFTERLOGIN->insertOne($logAccess);
+			}catch(Exception $e) {
+				$lib->addLogtoTxt([
+					"access_date" => date('Y-m-d H:i:s'), 
+					"member_no" => $payload["member_no"], 
+					"access_token" => $access_token,
+					"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+					"id_userlogin" => $rowLog["id_userlogin"]
+				],'GCLOGUSERACCESSAFTERLOGIN');
+			}
 			$arrayResult['RESULT'] = TRUE;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;

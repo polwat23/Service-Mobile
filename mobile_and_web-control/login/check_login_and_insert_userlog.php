@@ -1,9 +1,7 @@
 <?php
-
 require_once('../autoload.php');
 
-if(isset($dataComing["member_no"]) && isset($dataComing["api_key"]) && isset($dataComing["password"]) && isset($dataComing["unique_id"]) && 
-isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComing["device_name"])){
+if($lib->checkCompleteArgument(['member_no','api_key','password','channel','id_api','device_name','unique_id'],$dataComing)){
 	$conmysql_nottest = $con->connecttomysql();
 	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$arrayResult = array();
@@ -17,12 +15,7 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 				if($dataComing["password"] == $rowPassword['temppass']){
 					$valid_pass = true;
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "SQL403";
-					$arrayResult['RESPONSE'] = "Temp password is invalid";
-					$arrayResult['RESULT'] = FALSE;
-					http_response_code(203);
-					echo json_encode($arrayResult);
-					exit();
+					$valid_pass = false;
 				}
 			}else{
 				$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
@@ -96,46 +89,46 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 										echo json_encode($arrayResult);
 									}else{
 										$conmysql->rollback();
-										$arrayResult['RESPONSE_CODE'] = "SQL500";
+										$arrayResult['RESPONSE_CODE'] = "5005";
+										$arrayResult['RESPONSE_AWARE'] = "update";
 										$arrayResult['RESPONSE'] = "Cannot update Access Token";
 										$arrayResult['RESULT'] = FALSE;
-										http_response_code(203);
 										echo json_encode($arrayResult);
 										exit();
 									}
 								}else{
 									$conmysql->rollback();
-									$arrayResult['RESPONSE_CODE'] = "SQL500";
+									$arrayResult['RESPONSE_CODE'] = "5005";
+									$arrayResult['RESPONSE_AWARE'] = "update";
 									$arrayResult['RESPONSE'] = "Update FCM Token Failed";
 									$arrayResult['RESULT'] = FALSE;
-									http_response_code(203);
 									echo json_encode($arrayResult);
 									exit();
 								}
 							}else{
 								$conmysql->rollback();
-								$arrayResult['RESPONSE_CODE'] = "SQL500";
+								$arrayResult['RESPONSE_CODE'] = "5005";
+								$arrayResult['RESPONSE_AWARE'] = "insert";
 								$arrayResult['RESPONSE'] = "Error! Cannot Insert User Log";
 								$arrayResult['RESULT'] = FALSE;
-								http_response_code(203);
 								echo json_encode($arrayResult);
 								exit();
 							}
 						}else{
 							$conmysql->rollback();
-							$arrayResult['RESPONSE_CODE'] = "SQL500";
+							$arrayResult['RESPONSE_CODE'] = "5005";
+							$arrayResult['RESPONSE_AWARE'] = "insert";
 							$arrayResult['RESPONSE'] = "Error! Cannot Insert Token";
 							$arrayResult['RESULT'] = FALSE;
-							http_response_code(203);
 							echo json_encode($arrayResult);
 							exit();
 						}
 					}catch (PDOExecption $e) {
 						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = "SQL500";
+						$arrayResult['RESPONSE_CODE'] = "5005";
+						$arrayResult['RESPONSE_AWARE'] = "anything";
 						$arrayResult['RESPONSE'] = $e->getMessage();
 						$arrayResult['RESULT'] = FALSE;
-						http_response_code(203);
 						echo json_encode($arrayResult);
 						exit();
 					}
@@ -195,88 +188,86 @@ isset($dataComing["channel"]) && isset($dataComing["id_api"]) && isset($dataComi
 										echo json_encode($arrayResult);
 									}else{
 										$conmysql->rollback();
-										$arrayResult['RESPONSE_CODE'] = "SQL500";
+										$arrayResult['RESPONSE_CODE'] = "5005";
+										$arrayResult['RESPONSE_AWARE'] = "update";
 										$arrayResult['RESPONSE'] = "Cannot update Access Token";
 										$arrayResult['RESULT'] = FALSE;
-										http_response_code(203);
 										echo json_encode($arrayResult);
 										exit();
 									}
 								}else{
 									$conmysql->rollback();
-									$arrayResult['RESPONSE_CODE'] = "SQL500";
+									$arrayResult['RESPONSE_CODE'] = "5005";
+									$arrayResult['RESPONSE_AWARE'] = "update";
 									$arrayResult['RESPONSE'] = "Update Member no Failed";
 									$arrayResult['RESULT'] = FALSE;
-									http_response_code(203);
 									echo json_encode($arrayResult);
 									exit();
 								}
 							}else{
 								$conmysql->rollback();
-								$arrayResult['RESPONSE_CODE'] = "SQL500";
+								$arrayResult['RESPONSE_CODE'] = "5005";
+								$arrayResult['RESPONSE_AWARE'] = "insert";
 								$arrayResult['RESPONSE'] = "Error! Cannot Insert User Log";
 								$arrayResult['RESULT'] = FALSE;
-								http_response_code(203);
 								echo json_encode($arrayResult);
 								exit();
 							}
 						}else{
 							$conmysql->rollback();
-							$arrayResult['RESPONSE_CODE'] = "SQL500";
+							$arrayResult['RESPONSE_CODE'] = "5005";
+							$arrayResult['RESPONSE_AWARE'] = "insert";
 							$arrayResult['RESPONSE'] = "Error! Cannot Insert Token";
 							$arrayResult['RESULT'] = FALSE;
-							http_response_code(203);
 							echo json_encode($arrayResult);
 							exit();
 						}
 					}catch (PDOExecption $e) {
 						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = "SQL500";
+						$arrayResult['RESPONSE_CODE'] = "5005";
+						$arrayResult['RESPONSE_AWARE'] = "anything";
 						$arrayResult['RESPONSE'] = $e->getMessage();
 						$arrayResult['RESULT'] = FALSE;
-						http_response_code(203);
 						echo json_encode($arrayResult);
 						exit();
 					}
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "PARAM500";
+					$arrayResult['RESPONSE_CODE'] = "4005";
+					$arrayResult['RESPONSE_AWARE'] = "channel";
 					$arrayResult['RESPONSE'] = "Not available this channel";
 					$arrayResult['RESULT'] = FALSE;
-					http_response_code(203);
+					http_response_code(403);
 					echo json_encode($arrayResult);
 					exit();
 				}
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "SQL403";
+				$arrayResult['RESPONSE_CODE'] = "4003";
+				$arrayResult['RESPONSE_AWARE'] = "password";
 				$arrayResult['RESPONSE'] = "Invalid password";
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(203);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "SQL400";
-			$arrayResult['RESPONSE'] = "Don't have a member";
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(203);
-			echo json_encode($arrayResult);
+			http_response_code(404);
 			exit();
 		}
 	}else{
 		$arrayResult = array();
-		$arrayResult['RESPONSE_CODE'] = "PARAM500";
+		$arrayResult['RESPONSE_CODE'] = "4007";
+		$arrayResult['RESPONSE_AWARE'] = "api";
 		$arrayResult['RESPONSE'] = "Invalid API KEY";
 		$arrayResult['RESULT'] = FALSE;
-		http_response_code(203);
+		http_response_code(407);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult = array();
-	$arrayResult['RESPONSE_CODE'] = "PARAM400";
-	$arrayResult['RESPONSE'] = "Not complete parameter";
+	$arrayResult['RESPONSE_CODE'] = "4004";
+	$arrayResult['RESPONSE_AWARE'] = "argument";
+	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
+	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }

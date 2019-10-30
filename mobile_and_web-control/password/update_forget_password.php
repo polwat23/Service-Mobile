@@ -1,8 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if(isset($dataComing["api_key"]) && isset($dataComing["unique_id"]) && isset($dataComing["member_no"]) && isset($dataComing["email"])
-&& isset($dataComing["device_name"])){
+if($lib->checkCompleteArgument(['api_key','unique_id','member_no','email','device_name'],$dataComing)){
 	$conmysql_nottest = $con->connecttomysql();
 	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
@@ -37,54 +36,52 @@ if(isset($dataComing["api_key"]) && isset($dataComing["unique_id"]) && isset($da
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{
-						$arrayResult['RESPONSE_CODE'] = "SQL500";
+						$arrayResult['RESPONSE_CODE'] = "5005";
+						$arrayResult['RESPONSE_AWARE'] = "update";
 						$arrayResult['RESPONSE'] = "Cannot update Temppass";
 						$arrayResult['RESULT'] = FALSE;
-						http_response_code(203);
 						echo json_encode($arrayResult);
 						exit();
 					}
 				}else{
 					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "MAIL500";
+					$arrayResult['RESPONSE_CODE'] = "5002";
+					$arrayResult['RESPONSE_AWARE'] = "mail";
 					$arrayResult['RESPONSE'] = "Cannot send mail";
 					$arrayResult['RESULT'] = FALSE;
-					http_response_code(203);
+					http_response_code(502);
 					echo json_encode($arrayResult);
 					exit();
 				}
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "SQL500";
+				$arrayResult['RESPONSE_CODE'] = "5005";
+				$arrayResult['RESPONSE_AWARE'] = "update";
 				$arrayResult['RESPONSE'] = "Cannot update Temppass";
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(203);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			$arrayResult = array();
-			$arrayResult['RESPONSE_CODE'] = "SQL400";
-			$arrayResult['RESPONSE'] = "Not found a membership";
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(203);
-			echo json_encode($arrayResult);
+			http_response_code(404);
 			exit();
 		}
 	}else{
 		$arrayResult = array();
-		$arrayResult['RESPONSE_CODE'] = "PARAM500";
+		$arrayResult['RESPONSE_CODE'] = "4007";
+		$arrayResult['RESPONSE_AWARE'] = "api";
 		$arrayResult['RESPONSE'] = "Invalid API KEY";
 		$arrayResult['RESULT'] = FALSE;
-		http_response_code(203);
+		http_response_code(407);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "PARAM400";
-	$arrayResult['RESPONSE'] = "Not complete parameter";
+	$arrayResult['RESPONSE_CODE'] = "4004";
+	$arrayResult['RESPONSE_AWARE'] = "argument";
+	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
+	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }

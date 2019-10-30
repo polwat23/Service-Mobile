@@ -122,6 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			echo json_encode($arrayResult);
 			exit();
 		}
+	}else{
+		$anonymous = true;
 	}
 }else{
 	$arrayResult['RESULT'] = TRUE;
