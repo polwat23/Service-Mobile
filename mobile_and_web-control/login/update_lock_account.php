@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if(isset($dataComing["member_no"]) && isset($dataComing["api_key"]) && isset($dataComing["unique_id"])){
+if($lib->checkCompleteArgument(['member_no','api_key','unique_id'],$dataComing)){
 	$conmysql_nottest = $con->connecttomysql();
 	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8' WHERE member_no = :member_no");
@@ -10,28 +10,29 @@ if(isset($dataComing["member_no"]) && isset($dataComing["api_key"]) && isset($da
 			echo json_encode($arrayResult);
 		}else{
 			$arrayResult = array();
-			$arrayResult['RESPONSE_CODE'] = "SQL500";
+			$arrayResult['RESPONSE_CODE'] = "5005";
+			$arrayResult['RESPONSE_AWARE'] = "update";
 			$arrayResult['RESPONSE'] = "Cannot lock account";
 			$arrayResult['RESULT'] = FALSE;
-			http_response_code(203);
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult = array();
-		$arrayResult['RESPONSE_CODE'] = "PARAM500";
+		$arrayResult['RESPONSE_CODE'] = "4007";
+		$arrayResult['RESPONSE_AWARE'] = "api";
 		$arrayResult['RESPONSE'] = "Invalid API KEY";
 		$arrayResult['RESULT'] = FALSE;
-		http_response_code(203);
+		http_response_code(407);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult = array();
-	$arrayResult['RESPONSE_CODE'] = "PARAM400";
-	$arrayResult['RESPONSE'] = "Not complete parameter";
+	$arrayResult['RESPONSE_CODE'] = "4004";
+	$arrayResult['RESPONSE_AWARE'] = "argument";
+	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(203);
+	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }

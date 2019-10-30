@@ -5,6 +5,7 @@ namespace Connection;
 class connection {
 	public $conmysql;
 	public $conoracle;
+	public $conmongo;
 	
 	public function connecttomysql($is_test=false) {
 		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
@@ -66,20 +67,21 @@ class connection {
 		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
 		$json_data = json_decode($json,true);
 		$dbhost = $json_data["DBLOG_HOST"];
-		$dbuser = $json_data["DBLOG_USERNAME"];
-		$dbpass = $json_data["DBLOG_PASSWORD"];
 		if($is_test){
+			$dbuser = $json_data["DBLOG_USERNAME_TEST"];
+			$dbpass = $json_data["DBLOG_PASSWORD_TEST"];
 			$dbname = $json_data["DBLOG_DATABASENAME_TEST"];
 		}else{
+			$dbuser = $json_data["DBLOG_USERNAME"];
+			$dbpass = $json_data["DBLOG_PASSWORD"];
 			$dbname = $json_data["DBLOG_DATABASENAME"];
 		}
-		
-		$this->conmongo = new \MongoDB\Driver\Manager("mongodb://".$dbhost,[
+		$this->conmongo = new \MongoDB\Client("mongodb://{$dbhost}",[
 			'username' => $dbuser,
 			'password' => $dbpass,
-			'db' => $dbname
+			'authSource' => 'admin',
 		]);
-		return $this->conmongo;
+		return $this->conmongo->$dbname;
 	}
 }
 ?>

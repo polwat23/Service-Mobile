@@ -1,77 +1,57 @@
 <?php
 require_once('../autoload.php');
 
-
-if(isset($author_token) && isset($payload) && isset($dataComing)){
-	$status_token = $api->validate_jwttoken($author_token,$payload["exp"],$jwt_token,$config["SECRET_KEY_JWT"]);
-	if($status_token){
-		if(isset($dataComing["unique_id"]) && isset($dataComing["channel"]) && 
-		isset($payload["member_no"]) && isset($dataComing["refresh_token"]) && isset($payload["id_token"])){
-			$new_token = null;
-			$id_token = $payload["id_token"];
-			if($status_token === 'expired'){
-				$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-				$dataComing["channel"],$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
-				if(!$is_refreshToken_arr){
-					$arrayResult['RESPONSE_CODE'] = "SQL409";
-					$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
-					$arrayResult['RESULT'] = FALSE;
-					http_response_code(203);
-					echo json_encode($arrayResult);
-					exit();
-				}else{
-					$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
-				}
+if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+	$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0'
+											and member_no = :member_no and unique_id = :unique_id");
+	$checkUserlogin->execute([
+		':id_token' => $payload["id_token"],
+		':member_no' => $payload["member_no"],
+		':unique_id' => $dataComing["unique_id"]
+	]);
+	if($checkUserlogin->rowCount() > 0){
+		$rowLog = $checkUserlogin->fetch();
+		if($rowLog["is_login"] == '1'){
+			try{
+				$logAccess = [
+					"access_date" => date('Y-m-d H:i:s'), 
+					"member_no" => $payload["member_no"], 
+					"access_token" => $access_token,
+					"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+					"id_userlogin" => $rowLog["id_userlogin"]
+				];
+				$conmongo->GCLOGUSERACCESSAFTERLOGIN->insertOne($logAccess);
+			}catch(Exception $e) {
+				$lib->addLogtoTxt([
+					"access_date" => date('Y-m-d H:i:s'), 
+					"member_no" => $payload["member_no"], 
+					"access_token" => $access_token,
+					"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+					"id_userlogin" => $rowLog["id_userlogin"]
+				],'GCLOGUSERACCESSAFTERLOGIN');
 			}
-			$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0' 
-												and member_no = :member_no and unique_id = :unique_id");
-			$checkUserlogin->execute([
-				':id_token' => $id_token,
-				':member_no' => $payload["member_no"],
-				':unique_id' => $dataComing["unique_id"]
-			]);
-			if($checkUserlogin->rowCount() > 0){
-				$rowLog = $checkUserlogin->fetch();
-				if($rowLog["is_login"] == '1'){
-					$logAccess = [
-						"access_date" => date('Y-m-d'), 
-						"member_no" => $payload["member_no"], 
-						"access_token" => $access_token,
-						"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
-						"id_userlogin" => $rowLog["id_userlogin"]
-					];
-					/*$bulkMongo->insert($logAccess);
-					$conmongo->executeBulkWrite('GCLOGUSERACCESSAFTERLOGIN', $bulkMongo);
-					$query = new MongoDB\Driver\Query($filter, $options);
-					$cursor = $manager->executeQuery('GCLOGUSERACCESSAFTERLOGIN', $query);*/
-					$arrayResult['RESULT'] = TRUE;
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
-				}else{
-					$arrayResult['RESULT'] = TRUE;
-					$arrayResult["MESSAGE_LOGOUT"] = $config['LOGOUT'.$rowLog["is_login"]];
-				}
-				echo json_encode($arrayResult);
-			}else{
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+			$arrayResult['RESULT'] = TRUE;
+			if(isset($new_token)){
+				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "PARAM400";
-			$arrayResult['RESPONSE'] = "Not complete parameter";
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(203);
-			echo json_encode($arrayResult);
-			exit();
+			$arrayResult['RESULT'] = TRUE;
+			$arrayResult["MESSAGE_LOGOUT"] = $config['LOGOUT'.$rowLog["is_login"]];
 		}
+		echo json_encode($arrayResult);
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "HEADER500";
-		$arrayResult['RESPONSE'] = "Authorization token invalid";
 		$arrayResult['RESULT'] = FALSE;
-		http_response_code(203);
+		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
+}else{
+	$arrayResult['RESPONSE_CODE'] = "4004";
+	$arrayResult['RESPONSE_AWARE'] = "argument";
+	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	echo json_encode($arrayResult);
+	exit();
 }
 ?>
