@@ -1,3 +1,4 @@
 log/*
 resource/*
 web.config
+pull_repo.bat
