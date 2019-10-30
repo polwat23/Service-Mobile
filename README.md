@@ -16,6 +16,10 @@ Link : [Package Installer](https://mobilecloud.coopsiam.com/installer/)
 
     * Nginx version 1.16.1 Stable or Newer versions
 
+* ##### Language
+
+    * PHP version 7.3.11 or Lastest versions (recommend)
+
 * ##### Version control
 
     * Git lastest versions
