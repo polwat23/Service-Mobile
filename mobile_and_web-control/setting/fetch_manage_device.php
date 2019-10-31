@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 													FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
 													ORDER BY id_userlogin DESC GROUP BY unique_id");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
-		if($rowSetting->rowCount() > 0){
+		if($fetchSettingDevice->rowCount() > 0){
 			while($rowSetting = $fetchSettingDevice->fetch()){
 				$arrDevice = array();
 				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
