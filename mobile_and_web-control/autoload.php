@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				$arrayResult['RESPONSE_AWARE'] = "authorization_type";
 				$arrayResult['RESPONSE'] = "Authorization Header is not correct";
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(401);
+				http_response_code(400);
 				echo json_encode($arrayResult);
 				exit();
 			}
