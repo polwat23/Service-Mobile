@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','api_key','password','channel','id_api','device_name','unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','api_key','password','channel','id_api','device_name','unique_id'],$dataComing) && $anonymous){
 	$conmysql_nottest = $con->connecttomysql();
 	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$arrayResult = array();

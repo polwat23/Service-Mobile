@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['user_type','id_token'],$payload) && $lib->check
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageNotification')){
 		$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email,is_sound_notify
 													FROM gcuserlogin WHERE id_token = :id_token and is_login = '1'");
-		$fetchSettingNotify->execute([':id_token' => $id_token]);
+		$fetchSettingNotify->execute([':id_token' => $payload["id_token"]]);
 		if($fetchSettingNotify->rowCount() > 0){
 			$rowSetting = $fetchSettingNotify->fetch();
 			$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["receive_notify_news"];
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['user_type','id_token'],$payload) && $lib->check
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			http_response_code(404);
+			http_response_code(204);
 			exit();
 		}
 	}else{

@@ -1,12 +1,12 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','id_token'],$payload) && $lib->checkCompleteArgument(['menu_component','setting_status'],$dataComing)){
+if($lib->checkCompleteArgument(['user_type','id_token'],$payload) && $lib->checkCompleteArgument(['menu_component','setting_status','setting_name'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageNotification')){
-		$updateSetting = $conmysql->prepare("UPDATE gcuserlogin SET ".strtoupper($dataComing["setting_name"])." = :status
+		$updateSetting = $conmysql->prepare("UPDATE gcuserlogin SET ".strtolower($dataComing["setting_name"])." = :status
 												WHERE id_token = :id_token and is_login = '1'");
 		if($updateSetting->execute([
-			':status' => $dataComing["setting_status"],
+			':status' => ($dataComing["setting_status"] == '-1' ? '0' : $dataComing["setting_status"]),
 			':id_token' => $payload["id_token"]
 		])){
 			$arrayResult['RESULT'] = TRUE;

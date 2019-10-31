@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['member_no','id_card','api_key','unique_id','menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['member_no','id_card','api_key','unique_id','menu_component'],$dataComing) && $anonymous){
 	$conmysql_nottest = $con->connecttomysql();
 	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'AppRegister')){

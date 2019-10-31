@@ -29,11 +29,11 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				http_response_code(404);
+				http_response_code(204);
 				exit();
 			}
 		}else{
-			http_response_code(404);
+			http_response_code(204);
 			exit();
 		}
 	}else{
