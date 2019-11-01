@@ -1,5 +1,5 @@
 <?php
-require_once('../../autoload.php');
+require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['id_news'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'News')){
