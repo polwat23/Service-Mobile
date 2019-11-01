@@ -317,7 +317,7 @@ class library {
 	}
 	public function checkCompleteArgument($dataincome,$dataComing) {
 		foreach($dataincome as $data){
-			if(isset($dataComing[$data]) && !empty($dataComing[$data])){
+			if(isset($dataComing[$data]) && ($dataComing == '0' || !empty($dataComing[$data]))){
 				continue;
 			}else{
 				return false;
@@ -328,5 +328,60 @@ class library {
 	public function addLogtoTxt($dataLog,$pathfile){
 		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
 	}
+	public function getClientIP() {
+        $ipaddress = '';
+        if (isset($_SERVER['HTTP_CLIENT_IP']))
+            $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+        else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+            $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        else if(isset($_SERVER['HTTP_X_FORWARDED']))
+            $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+        else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
+            $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+        else if(isset($_SERVER['HTTP_FORWARDED']))
+            $ipaddress = $_SERVER['HTTP_FORWARDED'];
+        else if(isset($_SERVER['REMOTE_ADDR']))
+            $ipaddress = $_SERVER['REMOTE_ADDR'];
+        else
+            $ipaddress = '';
+        return $ipaddress;
+    }
+	
+	public function getDeviceName() { 
+        $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']); 
+        if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE){
+			$name = 'Internet explorer';
+		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== FALSE){
+			$name =  'Internet explorer';
+		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Firefox') !== FALSE){
+			$name =  'Mozilla Firefox';
+		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== FALSE){
+			$name =  'Google Chrome';
+		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera Mini') !== FALSE){
+			$name =  "Opera Mini";
+		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') !== FALSE){
+			$name =  "Opera";
+		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== FALSE){
+		   $name =  "Safari";
+		}else{
+		   $name =  'Something else';
+		}
+        if (preg_match('/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/', $userAgent, $matches)) { 
+            $version = $matches[1]; 
+        }else { 
+            $version = 'unknown'; 
+        }
+        if (preg_match('/linux/', $userAgent)) { 
+            $os_platform = 'linux'; 
+        }elseif (preg_match('/macintosh|mac os x/', $userAgent)) { 
+            $os_platform = 'mac'; 
+        }elseif (preg_match('/windows|win32/', $userAgent)) { 
+            $os_platform = 'windows'; 
+        }else { 
+            $os_platform = 'unrecognized'; 
+        }
+		$device_name = $name.' V.'.$version.' ('.$os_platform.')';
+        return $device_name;
+    }
 }
 ?>

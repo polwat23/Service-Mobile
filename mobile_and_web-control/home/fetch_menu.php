@@ -1,7 +1,8 @@
 <?php
+$anonymous = '';
 require_once('../autoload.php');
 
-if(empty($anonymous)){
+if(!$anonymous){
 	if($lib->checkCompleteArgument(['user_type'],$payload)){
 		$user_type = $payload["user_type"];
 		$permission = array();

@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'News')){
 		$arrayGroupNews = array();
-		fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,username,update_date,id_news,link_news_more
+		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,username,update_date,id_news,link_news_more
 										FROM gcnews LIMIT 5");
 		$fetchNews->execute();
 		while($rowNews = $fetchNews->fetch()){
