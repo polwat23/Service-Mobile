@@ -317,7 +317,7 @@ class library {
 	}
 	public function checkCompleteArgument($dataincome,$dataComing) {
 		foreach($dataincome as $data){
-			if(isset($dataComing[$data]) && !empty($dataComing[$data])){
+			if(isset($dataComing[$data]) && ($dataComing == '0' || !empty($dataComing[$data]))){
 				continue;
 			}else{
 				return false;

@@ -1,4 +1,5 @@
 <?php
+$anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
