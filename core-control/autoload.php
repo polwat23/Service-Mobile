@@ -48,6 +48,7 @@ $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
+	$payload = array();
 	$dataComing["device_name"] = $lib->getDeviceName();
 	$dataComing["ip_address"] = $lib->getClientIP();
 	// Complete Argument

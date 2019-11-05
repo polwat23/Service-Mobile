@@ -9,9 +9,9 @@ $lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataC
 		if(isset($dataComing["query_template"]) && isset($dataComing["column_selected"])){
 			$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_in_query,username)
 													VALUES(:sms_query,:column_selected,:username)");
-			if$insertSmsQuery->execute([
+			if($insertSmsQuery->execute([
 				':sms_query' => $dataComing["query_template"],
-				':column_selected' => $dataComing["query_template"],
+				':column_selected' => $dataComing["column_selected"],
 				':username' => $payload["username"]
 			])){
 				$id_smsquery = $conmysql->lastInsertId();
@@ -33,7 +33,9 @@ $lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataC
 			':username' => $payload["username"],
 			':id_smsquery' => $id_smsquery
 		])){
-			
+			$conmysql->commit();
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			$conmysql->rollback();
 			$arrayResult['RESPONSE_CODE'] = "5005";
