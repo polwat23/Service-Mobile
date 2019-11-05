@@ -52,7 +52,7 @@ $config = json_decode($jsonConfig,true);
 
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
-	
+	$payload = array();
 	// Complete Argument
 	if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 15){
 		if($lib->checkCompleteArgument(['channel','refresh_token','unique_id'],$dataComing)){

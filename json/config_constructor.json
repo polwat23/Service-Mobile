@@ -31,5 +31,6 @@
 	"LOGOUT-8" : "ท่านถูกบังคับออกจากระบบ จากเจ้าหน้าที่สหกรณ์",
 	"LOGOUT-9" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเปลี่ยนรหัสผ่าน",
 	"LOGOUT-10" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการรีเซ็ตรหัส PIN",
-	"SECRET_KEY_JWT" : "DemoGcoop+Connect^999999*!&"
+	"SECRET_KEY_JWT" : "DemoGcoop+Connect^999999*!&",
+	"SECRET_KEY_CORE" : "DemoGcoop+Control^999999*!&"
 }

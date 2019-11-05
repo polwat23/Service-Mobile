@@ -153,5 +153,12 @@ class functions {
 				return false;
 			}
 		}
+		public function check_permission_core($section_system,$root_menu,$con){
+			if($section_system == "root" || $section_system == "root_test"){
+				return true;
+			}else{
+				return false;
+			}
+		}
 }
 ?>
