@@ -4,28 +4,25 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['section_system','username'],$payload) && 
 $lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
-		$fetchTopic = $conmysql->prepare("SELECT stp.smstemplate_name,sm.sms_menu_name,csy.system_assign FROM smstopicmatchtemplate stmt 
-											INNER JOIN smstemplate stp ON  stmt.id_smstemplate = stp.id_smstemplate
-											INNER JOIN smsmenu sm ON stmt.id_smsmenu = sm.id_smsmenu INNER JOIN corepermissionmenu cpm ON sm.id_coremenu = cpm.id_coremenu and cpm.is_use = '1'
-											INNER JOIN coresectionsystem csy ON cpm.id_section_system = csy.id_section_system and csy.is_use = '1'
-											WHERE stmt.is_use = '1' GROUP BY smstemplate_name,sms_menu_name,system_assign");
+		$fetchTopic = $conmysql->prepare("SELECT sm.sms_menu_name,sm.id_smsmenu,smt.id_smstemplate,cpm.username,stm.smstemplate_name
+											FROM smsmenu sm LEFT JOIN smstopicmatchtemplate smt ON sm.id_smsmenu = smt.id_smsmenu
+											LEFT JOIN smstemplate stm ON smt.id_smstemplate = stm.id_smstemplate
+                                            LEFT JOIN smsmatchpermission smp ON smt.id_matching = smp.id_matching
+											LEFT JOIN corepermissionmenu cpm ON smp.id_permission_menu = cpm.id_permission_menu
+											WHERE sm.sms_menu_status = '1' and sm.id_menuparent = 8 and smp.is_use = '1'");
 		$fetchTopic->execute();
 		$arrAllTopic = array();
 		while($rowTopic = $fetchTopic->fetch()){
 			$arrayTopic = array();
-			$arrayGroupTopic = array();
-			$arrayTopic["TEMPLATE_NAME"] = $rowTopic["smstemplate_name"];
 			$arrayTopic["TOPIC_NAME"] = $rowTopic["sms_menu_name"];
-			$arrayTopic["SYSTEM_CONTROL"] = $rowTopic["system_assign"];
-			$arrayGroupTopic["TOPIC_NAME"] = $rowTopic["sms_menu_name"];
-			$arrayGroupTopic["TEMPLATE_NAME"] = $rowTopic["smstemplate_name"];
-			if(array_search($rowTopic["sms_menu_name"],array_column($arrAllTopic,'TOPIC_NAME')) === False && 
-			array_search($rowTopic["smstemplate_name"],array_column($arrAllTopic,'TEMPLATE_NAME')) === False){
-				($arrayGroupTopic['SYSTEM_CONTROL'])[] = $arrayTopic["SYSTEM_CONTROL"];
-				$arrAllTopic[] = $arrayGroupTopic;
+			$arrayTopic["ID_SMSMENU"] = $rowTopic["id_smsmenu"];
+			$arrayTopic["SMSTEMPLATE_NAME"] = $rowTopic["smstemplate_name"];
+			$arrayTopic["ID_SMSTEMPLATE"] = $rowTopic["id_smstemplate"];
+			if(array_search($rowTopic["sms_menu_name"],array_column($arrAllTopic,"TOPIC_NAME")) === FALSE){
+				($arrayTopic["USER_CONTROL"])[] = $rowTopic["username"];
+				$arrAllTopic[] = $arrayTopic;
 			}else{
-				($arrAllTopic[array_search($rowTopic["sms_menu_name"],array_column($arrAllTopic,'TOPIC_NAME'))]["SYSTEM_CONTROL"])[] = $arrayTopic["SYSTEM_CONTROL"];
-				($arrAllTopic[array_search($rowTopic["smstemplate_name"],array_column($arrAllTopic,'TEMPLATE_NAME'))]["SYSTEM_CONTROL"])[] = $arrayTopic["SYSTEM_CONTROL"];
+				($arrAllTopic[array_search($rowTopic["sms_menu_name"],array_column($arrAllTopic,"TOPIC_NAME"))]["USER_CONTROL"])[] = $rowTopic["username"];
 			}
 		}
 		$arrayResult['TOPIC'] = $arrAllTopic;

@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 													WHERE member_no = :member_no");
 			if($insertIntoInfo->execute([
 				':path_avatar' => $path_avatar,
-				':channel' => $channel,
+				':channel' => $dataComing["channel"],
 				':member_no' => $member_no
 			])){
 				$arrayResult['PATH_AVATAR'] = $path_avatar;

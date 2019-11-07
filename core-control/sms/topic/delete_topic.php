@@ -1,19 +1,18 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id','id_smstemplate'],$dataComing)){
+if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id','id_smsmenu'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
-		$unuseTemplate = $conmysql->prepare("UPDATE smstemplate SET is_use = '-9' WHERE id_smstemplate = :id_smstemplate");
-		if($unuseTemplate->execute([
-			':id_smstemplate' => $dataComing["id_smstemplate"]
+		$unuseTopic = $conmysql->prepare("UPDATE smsmenu SET sms_menu_status = '-9' WHERE id_smsmenu = :id_smsmenu");
+		if($unuseTopic->execute([
+			':id_smsmenu' => $dataComing["id_smsmenu"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$conmysql->rollback();
 			$arrayResult['RESPONSE_CODE'] = "5005";
 			$arrayResult['RESPONSE_AWARE'] = "update";
-			$arrayResult['RESPONSE'] = "Cannot delete SMS template";
+			$arrayResult['RESPONSE'] = "Cannot delete SMS topic";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

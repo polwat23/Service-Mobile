@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->
 	$arrayGroup = array();
 	$fetchMenu = $conmysql->prepare("SELECT id_coremenu,coremenu_name,coremenu_iconpath,coremenu_status,
 									coremenu_desc,coremenu_colorbanner,root_path,coremenu_colortext
-									FROM coremenu WHERE coremenu_status NOT IN('0','-99') and coremenu_parent = '0'");
+									FROM coremenu WHERE coremenu_status NOT IN('0','-99') and coremenu_parent = '0' ORDER BY coremenu_order ASC");
 	$fetchMenu->execute();
 	while($rowMenu = $fetchMenu->fetch()){
 		$arrMenu = array();
