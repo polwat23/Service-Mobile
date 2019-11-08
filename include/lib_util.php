@@ -137,9 +137,9 @@ class library {
 			$contract_text = '';
 			for($i = 0;$i < sizeof($formatArray);$i++){
 				if($i == 0){
-					$contract_text = mb_substr($contract_no,$i,strlen($formatArray[$i]));
+					$contract_text = mb_substr($contract_no,$i,mb_strlen($formatArray[$i]));
 				}else{
-					$contract_text .= '/'.mb_substr($contract_no,strlen(preg_replace('/-/','',$contract_text)),strlen($formatArray[$i]));
+					$contract_text .= '/'.mb_substr($contract_no,mb_strlen(preg_replace('/-/','',$contract_text)),mb_strlen($formatArray[$i]));
 				}
 			}
 			return $contract_text;
