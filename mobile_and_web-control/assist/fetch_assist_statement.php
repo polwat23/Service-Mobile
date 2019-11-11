@@ -1,0 +1,79 @@
+<?php
+require_once('../autoload.php');
+
+if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'AssistStatement')){
+		$limit = $func->getConstant('limit_stmass',$conmysql);
+		$arrayResult['LIMIT_DURATION'] = $limit;
+		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
+			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
+		}else{
+			$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
+		}
+		if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+			$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+		}else{
+			$date_now = date('Y-m-d');
+		}
+		$fetchAccountReceive = $conoracle->prepare("SELECT cb.BANK_DESC,cbb.BRANCH_NAME,acm.EXPENSE_ACCID,cb.ACCOUNT_FORMAT FROM asscontmaster acm 
+													LEFT JOIN cmucfbank cb ON acm.EXPENSE_BANK = cb.BANK_CODE
+													LEFT JOIN cmucfbankbranch cbb ON acm.EXPENSE_BANK = cbb.BANK_CODE and acm.EXPENSE_BRANCH = cbb.BRANCH_ID
+													WHERE acm.asscontract_no = :asscontract_no and acm.asscont_status = 1");
+		$fetchAccountReceive->execute([
+			':asscontract_no' => $dataComing["asscontract_no"]
+		]);
+		$rowAccountRCV = $fetchAccountReceive->fetch();
+		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
+		$fetchAssStatement = $conoracle->prepare("select atc.SIGN_FLAG,cmt.MONEYTYPE_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
+													from asscontmaster asm LEFT JOIN asscontstatement astm 
+													ON asm.ASSCONTRACT_NO = astm.ASSCONTRACT_NO LEFT JOIN assucfassitemcode atc
+													ON astm.ITEM_CODE = atc.ITEM_CODE LEFT JOIN CMUCFMONEYTYPE cmt ON astm.MONEYTYPE_CODE = cmt.MONEYTYPE_CODE 
+													where asm.asscontract_no = :asscontract_no and asm.asscont_status = 1 and astm.SLIP_DATE
+													BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY astm.SEQ_NO DESC");
+		$fetchAssStatement->execute([
+			':asscontract_no' => $dataComing["asscontract_no"],
+			':datebefore' => $date_before,
+			':datenow' => $date_now
+		]);
+		$arrGroupAssStm = array();
+		$arrGroupAssStm["ACCOUNT_RECEIVE"] = $accAssRcv;
+		$arrGroupAssStm["BANK_NAME"] = $rowAccountRCV["BANK_DESC"];
+		$arrGroupAssStm["BANK_BRANCH_NAME"] = $rowAccountRCV["BRANCH_NAME"];
+		while($rowAssStm = $fetchAssStatement->fetch()){
+			$arrAssStm = array();
+			$arrAssStm["MONEYTYPE_DESC"] = $rowAssStm["MONEYTYPE_DESC"];
+			$arrAssStm["OPERATE_DATE"] = $lib->convertdate($rowAssStm["SLIP_DATE"],'D m Y');
+			$arrAssStm["RECEIVE_BALANCE"] = number_format($rowAssStm["PAY_BALANCE"],2);
+			$arrAssStm["SIGN_FLAG"] = $rowAssStm["SIGN_FLAG"];
+			($arrGroupAssStm["STATEMENT"])[] = $arrAssStm;
+		}
+		if(sizeof($arrGroupAssStm) > 0 || isset($new_token)){
+			$arrayResult["ASSIST_STM"] = $arrGroupAssStm;
+			if(isset($new_token)){
+				$arrayResult['NEW_TOKEN'] = $new_token;
+			}
+			$arrayResult["RESULT"] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			http_response_code(204);
+			exit();
+		}
+	}else{
+		$arrayResult['RESPONSE_CODE'] = "4003";
+		$arrayResult['RESPONSE_AWARE'] = "permission";
+		$arrayResult['RESPONSE'] = "Not permission this menu";
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		echo json_encode($arrayResult);
+		exit();
+	}
+}else{
+	$arrayResult['RESPONSE_CODE'] = "4004";
+	$arrayResult['RESPONSE_AWARE'] = "argument";
+	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	echo json_encode($arrayResult);
+	exit();
+}
+?>

@@ -7,12 +7,16 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmloan',$conmysql);
 		$arrayResult['LIMIT_DURATION'] = $limit;
-		if(isset($dataComing["date_start"])){
+		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
 		}else{
 			$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		}
-		$date_now = date('Y-m-d');
+		if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+			$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+		}else{
+			$date_now = date('Y-m-d');
+		}
 		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 		$getStatement = $conoracle->prepare("SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
 											lsm.interest_payment as INT_PAYMENT,sl.payinslip_no

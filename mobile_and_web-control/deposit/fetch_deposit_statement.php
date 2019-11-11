@@ -7,18 +7,22 @@ if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArg
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit',$conmysql);
 		$arrayResult['LIMIT_DURATION'] = $limit;
-		if(isset($dataComing["date_start"])){
+		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
 		}else{
 			$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		}
-		$date_now = date('Y-m-d');
+		if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+			$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+		}else{
+			$date_now = date('Y-m-d');
+		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-											WHERE dsm.deptaccount_no = :account_no and dsm.ENTRY_DATE
+											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY dsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':account_no' => $account_no,

@@ -34,14 +34,17 @@ if(!$anonymous){
 		if(isset($dataComing["menu_parent"])){
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent ORDER BY menu_order ASC");
+												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and (menu_channel = :channel OR menu_channel = 'both')
+												ORDER BY menu_order ASC");
 			}else{
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' 
+												and (menu_channel = :channel OR menu_channel = 'both')
 												ORDER BY menu_order ASC");
 			}
 			$fetch_menu->execute([
-				':menu_parent' => $dataComing["menu_parent"]
+				':menu_parent' => $dataComing["menu_parent"],
+				':channel' => $dataComing["channel"]
 			]);
 			while($rowMenu = $fetch_menu->fetch()){
 				if($dataComing["channel"] == 'mobile_app'){

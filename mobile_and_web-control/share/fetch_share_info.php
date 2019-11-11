@@ -21,12 +21,16 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
 			$limit = $func->getConstant('limit_stmshare',$conmysql);
 			$arrayResult['LIMIT_DURATION'] = $limit;
-			if(isset($dataComing["date_start"])){
+			if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 				$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
 			}else{
 				$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 			}
-			$date_now = date('Y-m-d');
+			if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+				$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+			}else{
+				$date_now = date('Y-m-d');
+			}
 			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
 														stm.sharestk_amt as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
