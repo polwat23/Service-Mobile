@@ -209,27 +209,51 @@ class library {
 			return true;
 		}
 	}
-	public function base64_to_img($encode_string,$file_name,$output_file) {
-		$data_Img = explode(',',$encode_string);
-		$dataImg = base64_decode($data_Img[1]);
-		$info_img = explode('/',$data_Img[0]);
-		$ext_img = str_replace('base64','',$info_img[1]);
-		$im_string = imageCreateFromString($dataImg);
-		if (!$im_string) {
-			return false;
-		}else{
-			$filename = $file_name.'.'.$ext_img;
-			$destination = $output_file.'/'.$filename;
-			if($ext_img == 'png'){
-				imagepng($im_string, $destination, 2);
-				return $filename;
-			}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-				imagejpeg($im_string, $destination, 70);
-				return $filename;
-			}else{
+	public function base64_to_img($encode_string,$file_name,$output_file,$webP) {
+		if(self::getBase64ImageSize($encode_string) < 1500){
+			$data_Img = explode(',',$encode_string);
+			$dataImg = base64_decode($data_Img[1]);
+			$info_img = explode('/',$data_Img[0]);
+			$ext_img = str_replace('base64','',$info_img[1]);
+			$im_string = imageCreateFromString($dataImg);
+			if (!$im_string) {
 				return false;
+			}else{
+				$filename = $file_name.'.'.$ext_img;
+				$destination = $output_file.'/'.$filename;
+				$webP_destination = $output_file.'/'.$file_name.'.webp';
+				if($ext_img == 'png'){
+					imagepng($im_string, $destination, 2);
+					$webP->convert($destination,$webP_destination,[]);
+					$arrPath = array();
+					$arrPath["normal_path"] = $filename;
+					$arrPath["webP_path"] = $file_name.'.webp';
+					return $arrPath;
+				}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+					imagejpeg($im_string, $destination, 70);
+					$webP->convert($destination,$webP_destination,[]);
+					$arrPath = array();
+					$arrPath["normal_path"] = $filename;
+					$arrPath["webP_path"] = $file_name.'.webp';
+					return $arrPath;
+				}else{
+					return false;
+				}
 			}
-		} 
+		}else{
+			return 'oversize';
+		}
+	}
+	private function getBase64ImageSize($base64Image){
+		try{
+			$size_in_bytes = (int) (strlen(rtrim($base64Image, '=')) * 3 / 4);
+			$size_in_kb    = $size_in_bytes / 1024;
+			
+			return $size_in_kb;
+		}
+		catch(Exception $e){
+			return $e;
+		}
 	}
 	public function text_limit($text, $limit = 50, $end = '...'){
 		if (mb_strwidth($text, 'UTF-8') <= $limit) {

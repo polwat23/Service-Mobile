@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											LEFT JOIN slslippayindet sl ON lsm.loancontract_no = sl.loancontract_no and lsm.period = sl.period
-											WHERE lsm.loancontract_no = :contract_no and lsm.ENTRY_DATE
+											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY lsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':contract_no' => $contract_no,

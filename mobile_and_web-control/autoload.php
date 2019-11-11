@@ -41,8 +41,10 @@ use ReallySimpleJWT\Jwt;
 use ReallySimpleJWT\Validate;
 use ReallySimpleJWT\Encode;
 use ReallySimpleJWT\Exception\ValidateException;
+use WebPConvert\WebPConvert;
 
 $mailFunction = new PHPMailer(false);
+$webP = new WebPConvert();
 $lib = new library();
 $api = new API();
 $jwt_token = new Token();

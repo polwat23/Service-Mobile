@@ -12,6 +12,8 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			$arrayResult["AVATAR_PATH"] = $rowInfoMobile["path_avatar"];
+			$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+			$arrayResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
 			if($member_no == "dev@mode"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
