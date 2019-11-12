@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		]);
 		$rowAccountRCV = $fetchAccountReceive->fetch();
 		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
-		$fetchAssStatement = $conoracle->prepare("select atc.SIGN_FLAG,cmt.MONEYTYPE_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
+		$fetchAssStatement = $conoracle->prepare("select atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
 													from asscontmaster asm LEFT JOIN asscontstatement astm 
 													ON asm.ASSCONTRACT_NO = astm.ASSCONTRACT_NO LEFT JOIN assucfassitemcode atc
 													ON astm.ITEM_CODE = atc.ITEM_CODE LEFT JOIN CMUCFMONEYTYPE cmt ON astm.MONEYTYPE_CODE = cmt.MONEYTYPE_CODE 
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		$arrGroupAssStm["BANK_BRANCH_NAME"] = $rowAccountRCV["BRANCH_NAME"];
 		while($rowAssStm = $fetchAssStatement->fetch()){
 			$arrAssStm = array();
-			$arrAssStm["MONEYTYPE_DESC"] = $rowAssStm["MONEYTYPE_DESC"];
+			$arrAssStm["ITEM_DESC"] = $rowAssStm["ITEM_DESC"];
 			$arrAssStm["OPERATE_DATE"] = $lib->convertdate($rowAssStm["SLIP_DATE"],'D m Y');
 			$arrAssStm["RECEIVE_BALANCE"] = number_format($rowAssStm["PAY_BALANCE"],2);
 			$arrAssStm["SIGN_FLAG"] = $rowAssStm["SIGN_FLAG"];

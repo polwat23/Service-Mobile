@@ -407,5 +407,12 @@ class library {
 		$device_name = $name.' V.'.$version.' ('.$os_platform.')';
         return $device_name;
     }
+	public function getnumberofYear($year){
+		$days=0; 
+		for($month=1;$month<=12;$month++){ 
+			$days = $days + cal_days_in_month(CAL_GREGORIAN,$month,$year);
+		}
+		return $days;
+	}
 }
 ?>

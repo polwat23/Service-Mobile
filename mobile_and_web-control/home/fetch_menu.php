@@ -50,7 +50,7 @@ if(!$anonymous){
 				if($dataComing["channel"] == 'mobile_app'){
 					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
-						$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+						$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 						$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
 						$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 						$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
@@ -60,7 +60,7 @@ if(!$anonymous){
 					}
 				}else{
 					$arrMenu = array();
-					$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
 					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
@@ -85,7 +85,7 @@ if(!$anonymous){
 				if($dataComing["channel"] == 'mobile_app'){
 					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
-						$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+						$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 						$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
 						$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 						$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
@@ -99,7 +99,7 @@ if(!$anonymous){
 					}
 				}else{
 					$arrMenu = array();
-					$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
 					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
@@ -140,7 +140,7 @@ if(!$anonymous){
 		if($dataComing["channel"] == 'mobile_app'){
 			if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
 				$arrMenu = array();
-				$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+				$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
 				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
@@ -150,7 +150,7 @@ if(!$anonymous){
 			}
 		}else{
 			$arrMenu = array();
-			$arrMenu["ID_MENU"] = $rowMenu["id_menu"];
+			$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 			$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
 			$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 			$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
