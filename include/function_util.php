@@ -112,9 +112,9 @@ class functions {
 				return false;
 			}
 		}
-		public function getConstant($component,$con) {
-			$getLimit = $con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = :component and is_use = '1'");
-			$getLimit->execute([':component' => $component]);
+		public function getConstant($constant,$con) {
+			$getLimit = $con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = :constant and is_use = '1'");
+			$getLimit->execute([':constant' => $constant]);
 			if($getLimit->rowCount() > 0){
 				$rowLimit = $getLimit->fetch();
 				return $rowLimit["constant_value"];

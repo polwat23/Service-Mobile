@@ -414,5 +414,20 @@ class library {
 		}
 		return $days;
 	}
+	public function posting_data($url,$payload) {
+		$ch = curl_init( $url );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+		$result = curl_exec($ch);
+		curl_close($ch);
+		if($result){
+			return $result;
+		}else{
+			return json_encode(['RESPONSE' => curl_error($ch)]);
+		}
+	}
 }
 ?>
