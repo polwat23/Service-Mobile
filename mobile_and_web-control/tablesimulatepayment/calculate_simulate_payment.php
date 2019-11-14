@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload)
 		$calint_type = $dataComing["calint_type"];
 		$arrPayment = array();
 		$lastDateofMonth = strtotime(date('M Y',strtotime($pay_date)));
+		$payment_per_period = 0;
 		for($i = 1;$i <= $period;$i++){
 			$arrPaymentPerPeriod = array();
 			if($calint_type === "2"){ // คงยอด ต้น + ดอก เท่ากันทุกเดือน
@@ -45,7 +46,6 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload)
 				$payment_sumbalance -= $prn_amount;
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
 				$arrPaymentPerPeriod["PERIOD"] = $i;
-				$arrPaymentPerPeriod["DAY_ON_MONTH"] = (int) $dayOfMonth;
 				$arrPaymentPerPeriod["INTEREST"] = number_format($interest,2);
 				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($payment_per_period,2);
 				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
