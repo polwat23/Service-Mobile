@@ -2,7 +2,7 @@
 
 namespace Authorized;
 
-class API {
+class Authorization {
 	
 	public function check_apikey($api_key,$unique_id,$con){
 		$updateAllUniqueID = $con->prepare("UPDATE gcapikey SET is_revoke = '-9',expire_date = NOW() WHERE unique_id = :unique_id

@@ -31,7 +31,7 @@ require_once(__DIR__.'/../authorized/authorized.php');
 
 // Call functions
 use Utility\library;
-use Authorized\API;
+use Authorized\Authorization;
 use Component\functions;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -46,7 +46,7 @@ use WebPConvert\WebPConvert;
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
-$api = new API();
+$auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
 $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						exit();
 					}else if($errorCode === 4){
 						$new_token = null;
-						$is_refreshToken_arr = $api->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
+						$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
 						$dataComing["channel"],$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 						if(!$is_refreshToken_arr){
 							$arrayResult['RESPONSE_CODE'] = "4009";

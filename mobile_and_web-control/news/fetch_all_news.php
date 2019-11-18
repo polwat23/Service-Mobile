@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'News')){
 		$arrayGroupNews = array();
-		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,username,update_date,id_news,link_news_more
+		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,create_by,update_date,id_news,link_news_more
 										FROM gcnews LIMIT 5");
 		$fetchNews->execute();
 		while($rowNews = $fetchNews->fetch()){
@@ -14,12 +14,15 @@ if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArg
 			$arrayNews["IMAGE_HEADER"] = $rowNews["path_img_header"];
 			$arrayNews["UPDATE_DATE"] = $lib->convertdate($rowNews["update_date"],'D m Y',true);
 			$arrayNews["ID_NEWS"] = $rowNews["id_news"];
-			$arrayNews["CREATE_BY"] = $rowNews["username"];
+			$arrayNews["CREATE_BY"] = $rowNews["create_by"];
 			$arrayNews["LINK_NEWS_MORE"] = $rowNews["link_news_more"];
 			$arrayGroupNews[] = $arrayNews;
 		}
-		if(sizeof($arrayGroupNews) > 0){
+		if(sizeof($arrayGroupNews) > 0 || isset($new_token)){
 			$arrayResult['NEWS'] = $arrayGroupNews;
+			if(isset($new_token)){
+				$arrayResult['NEW_TOKEN'] = $new_token;
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

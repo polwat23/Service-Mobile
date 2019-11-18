@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['member_no','api_key','password','channel','id_api','device_name','unique_id'],$dataComing)){
 	$conmysql_nottest = $con->connecttomysql();
-	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
+	if($auth->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		$arrayResult = array();
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
 		$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 

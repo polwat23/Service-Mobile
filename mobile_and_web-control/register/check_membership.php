@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['member_no','id_card','api_key','unique_id','menu_component'],$dataComing)){
 	$conmysql_nottest = $con->connecttomysql();
-	if($api->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
+	if($auth->check_apikey($dataComing["api_key"],$dataComing["unique_id"],$conmysql_nottest)){
 		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'AppRegister')){
 			$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
 			$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
