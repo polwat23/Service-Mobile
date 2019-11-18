@@ -422,11 +422,14 @@ class library {
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
 		$result = curl_exec($ch);
-		curl_close($ch);
 		if($result){
+			curl_close($ch);
 			return $result;
 		}else{
-			return json_encode(['RESPONSE' => curl_error($ch)]);
+			$text = '#PostData Error : '.date("Y-m-d H:i:s").' > '.$url.' | '.curl_error($ch);
+			file_put_contents(__DIR__.'/../log/log_api_error.txt', $text . PHP_EOL, FILE_APPEND);
+			curl_close ($ch);
+			return false;
 		}
 	}
 }
