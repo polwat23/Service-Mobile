@@ -40,7 +40,8 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayGroupAccount[] = $arrayAccount;
 		}
 		$arrayResult['ACCOUNT'] = $arrayGroupAccount;
-		$arrayResult['CITIZEN_ID'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+		$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+		$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 		if(isset($new_token)){
 			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
