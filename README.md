@@ -12,9 +12,6 @@ Link : [Package Installer](https://mobilecloud.coopsiam.com/installer/)
     
     * MariaDB version 10.4.8 or Newer versions
 
-* ##### Nginx
-
-    * Nginx version 1.16.1 Stable or Newer versions
 
 * ##### Language
 
@@ -60,22 +57,14 @@ Link : [Package Installer](https://mobilecloud.coopsiam.com/installer/)
     Open another CMD and typing without quote "mongo"
 
 ##### 4. Create Authen user
-    1. use admin
+    1. use <name_database>
     2. db.createUser({
-        user: "root",
-        pwd: "Gensoft2018",
-        roles: [{
-            role: "userAdminAnyDatabase",   db: "admin"
-        }]
-    })
-    3. use <name_database>
-    4. db.createUser({
         user: "developer",
-        pwd: "Gensoft2018",
+        pwd: "@Gensoft2018",
         roles: [{
             role: "readWrite",   db: "<name_database>"
         }]
     })
-    5. Exit mongod and typing without quote "mongod --auth --dbpath=C:/Gcoop/dataMongo"
-    6. Open MongoDB compass and Select Authenication to Username/Password
-    7. Fill username : "developer" , password : "Gensoft2018", Authen Database : "demogcoop_connect" Click Conenct
+    3. Exit mongod and typing without quote "mongod --auth --dbpath=C:/Gcoop/dataMongo"
+    4. Open MongoDB compass and Select Authenication to Username/Password
+    5. Fill username : "developer" , password : "@Gensoft2018", Authen Database : "<name_database>" Click Conenct
