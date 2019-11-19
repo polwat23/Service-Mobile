@@ -30,7 +30,7 @@ require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../authorized/authorized.php');
 
 // Call functions
-use Utility\library;
+use Utility\Library;
 use Authorized\Authorization;
 use Component\functions;
 use PHPMailer\PHPMailer\PHPMailer;
