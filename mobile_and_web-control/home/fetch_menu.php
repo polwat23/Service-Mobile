@@ -11,22 +11,22 @@ if(!$anonymous){
 		$arrayMenuSetting = array();
 		switch($user_type){
 			case '0' : 
-				$permission[] = '0';
+				$permission[] = "'0'";
 				break;
 			case '1' : 
-				$permission[] = '0';
-				$permission[] = '1';
+				$permission[] = "'0'";
+				$permission[] = "'1'";
 				break;
 			case '5' : 
-				$permission[] = '0';
-				$permission[] = '1';
-				$permission[] = '2';
+				$permission[] = "'0'";
+				$permission[] = "'1'";
+				$permission[] = "'2'";
 				break;
 			case '9' : 
-				$permission[] = '0';
-				$permission[] = '1';
-				$permission[] = '2';
-				$permission[] = '3';
+				$permission[] = "'0'";
+				$permission[] = "'1'";
+				$permission[] = "'2'";
+				$permission[] = "'3'";
 				break;
 			default : $permission[] = '0';
 				break;
