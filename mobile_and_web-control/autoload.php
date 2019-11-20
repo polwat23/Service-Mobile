@@ -56,9 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			$author_token = $headers["Authorization"];
 			if(substr($author_token,0,6) === 'Bearer'){
 				$access_token = substr($author_token,7);
-				
 				$jwt = new Jwt($access_token, $config["SECRET_KEY_JWT"]);
-
 				$parse_token = new Parse($jwt, new Validate(), new Encode());
 				try{
 					$parsed_token = $parse_token->validate()
