@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->check
 					"access_date" => date('Y-m-d H:i:s'), 
 					"member_no" => $payload["member_no"], 
 					"access_token" => $access_token,
-					"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+					"ip_address" => $dataComing["ip_address"] ?? 'unknown',
 					"id_userlogin" => $rowLog["id_userlogin"]
 				];
 				$conmongo->GCLOGUSERACCESSAFTERLOGIN->insertOne($logAccess);
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->check
 					"access_date" => date('Y-m-d H:i:s'), 
 					"member_no" => $payload["member_no"], 
 					"access_token" => $access_token,
-					"ip_address" => isset($dataComing["ip_address"]) ? $dataComing["ip_address"] : 'unknown',
+					"ip_address" => $dataComing["ip_address"] ?? 'unknown',
 					"id_userlogin" => $rowLog["id_userlogin"]
 				],'GCLOGUSERACCESSAFTERLOGIN');
 			}
