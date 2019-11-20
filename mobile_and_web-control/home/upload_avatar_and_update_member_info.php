@@ -13,9 +13,8 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		}
 		$createAvatar = $lib->base64_to_img($encode_avatar,$file_name,$destination,$webP);
 		if($createAvatar == 'oversize'){
-			$arrayResult['RESPONSE_CODE'] = "4012";
-			$arrayResult['RESPONSE_AWARE'] = "oversize";
-			$arrayResult['RESPONSE'] = "Image oversize please reduce filesize";
+			$arrayResult['RESPONSE_CODE'] = "WS0008";
+			$arrayResult['RESPONSE_MESSAGE'] = "Image oversize please reduce filesize";
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(413);
 			echo json_encode($arrayResult);
@@ -35,17 +34,15 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "5005";
-					$arrayResult['RESPONSE_AWARE'] = "update";
-					$arrayResult['RESPONSE'] = "Cannot update avatar path";
+					$arrayResult['RESPONSE_CODE'] = "WS1008";
+					$arrayResult['RESPONSE_MESSAGE'] = "Cannot update avatar path";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "4005";
-				$arrayResult['RESPONSE_AWARE'] = "extension";
-				$arrayResult['RESPONSE'] = "Extension is invalid";
+				$arrayResult['RESPONSE_CODE'] = "WS0007";
+				$arrayResult['RESPONSE_MESSAGE'] = "Extension is invalid";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(415);
 				echo json_encode($arrayResult);
@@ -53,18 +50,16 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			}
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

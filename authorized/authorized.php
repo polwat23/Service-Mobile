@@ -1,38 +1,48 @@
 <?php
+declare(strict_types=1);
 
 namespace Authorized;
 
+use ReallySimpleJWT\Parse;
+use ReallySimpleJWT\Jwt;
+use ReallySimpleJWT\Validate;
+use ReallySimpleJWT\Encode;
+use ReallySimpleJWT\Exception\ValidateException;
+
 class Authorization {
 	
-	public function check_apikey($api_key,$unique_id,$con){
-		$updateAllUniqueID = $con->prepare("UPDATE gcapikey SET is_revoke = '-9',expire_date = NOW() WHERE unique_id = :unique_id
-											api_key <> :api_key and is_revoke = '0'");
-		$updateAllUniqueID->execute([':unique_id' => $unique_id,':api_key' => $api_key]);
-		$checkAPIKey = $con->prepare("SELECT id_api,is_revoke FROM gcapikey WHERE api_key = :api_key");
-		$checkAPIKey->execute([
-			':api_key' => $api_key
-		]);
-		if($checkAPIKey->rowCount() > 0){
-			$rowAPI = $checkAPIKey->fetch();
-			if($rowAPI["is_revoke"] == '0'){
-				return true;
-			}else{
-				$revokeAPI = $con->prepare("UPDATE gcapikey SET is_revoke = '-99',expire_date = NOW() WHERE id_api = :id_api");
-				$revokeAPI->execute([':id_api' => $rowAPI["id_api"]]);
-				return false;
+	public function check_apitoken($api_token, string $secret_key) : array {
+		if(isset($api_token)){
+			$jwt = new Jwt($api_token, $secret_key);
+
+			$parse_token = new Parse($jwt, new Validate(), new Encode());
+			$arrayReturn = array();
+			try{
+				$parsed_token = $parse_token->validate()
+					->validateExpiration()
+					->parse();
+				$payload = $parsed_token->getPayload();
+				$arrayReturn["PAYLOAD"] = $payload;
+				$arrayReturn["VALIDATE"] = true;
+				return $arrayReturn;
+			}catch (ValidateException $e) {
+				$arrayReturn["ERROR_MESSAGE"] = $e->getMessage();
+				$arrayReturn["VALIDATE"] = false;
+				return $arrayReturn;
 			}
 		}else{
-			return false;
+			$arrayReturn["ERROR_MESSAGE"] = "Cannot access";
+			$arrayReturn["VALIDATE"] = false;
+			return $arrayReturn;
 		}
 	}
 	
 	public function refresh_accesstoken($refresh_token,$unique_id,$con,$channel,$payload,$jwt_token,$secret_key){
 		$checkRT = $con->prepare("SELECT id_token,DATE_FORMAT(rt_expire_date,'%Y-%m-%d') as rt_expire_date,rt_is_revoke FROM gctoken
-								WHERE refresh_token = :refresh_token and unique_id = :unique_id and id_api = :id_api");
+								WHERE refresh_token = :refresh_token and unique_id = :unique_id and at_is_revoke = '0' OR rt_is_revoke = '0'");
 		$checkRT->execute([
 			':refresh_token' => $refresh_token,
-			':unique_id' => $unique_id,
-			':id_api' => $payload["id_api"]
+			':unique_id' => $unique_id
 		]);
 		if($checkRT->rowCount() > 0){
 			$Token = $checkRT->fetch();

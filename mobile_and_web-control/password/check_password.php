@@ -23,21 +23,19 @@ if($lib->checkCompleteArgument(['member_no'],$payload) && $lib->checkCompleteArg
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "4003";
-			$arrayResult['RESPONSE_AWARE'] = "password";
-			$arrayResult['RESPONSE'] = "Password was wrong";
+			$arrayResult['RESPONSE_CODE'] = "WS0004";
+			$arrayResult['RESPONSE_MESSAGE'] = "Password was wrong";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		http_response_code(404);
+		http_response_code(204);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

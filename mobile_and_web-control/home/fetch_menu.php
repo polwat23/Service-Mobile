@@ -122,26 +122,34 @@ if(!$anonymous){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				http_response_code(404);
+				http_response_code(204);
 				exit();
 			}
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4004";
-		$arrayResult['RESPONSE_AWARE'] = "argument";
-		$arrayResult['RESPONSE'] = "Not complete argument";
+		$arrayResult['RESPONSE_CODE'] = "WS4004";
+		$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(400);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
+	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
+	if(!$arrPayload["VALIDATE"]){
+		$arrayResult['RESPONSE_CODE'] = "WS0001";
+		$arrayResult['RESPONSE_MESSAGE'] = $arrPayload["ERROR_MESSAGE"];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(401);
+		echo json_encode($arrayResult);
+		exit();
+	}
 	$arrayAllMenu = array();
 	$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 										WHERE menu_parent IN ('-1','-2')");
 	$fetch_menu->execute();
 	while($rowMenu = $fetch_menu->fetch()){
-		if($dataComing["channel"] == 'mobile_app'){
+		if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 			if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
 				$arrMenu = array();
 				$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
@@ -168,7 +176,7 @@ if(!$anonymous){
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		http_response_code(404);
+		http_response_code(204);
 		exit();
 	}
 }

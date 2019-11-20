@@ -73,9 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				}catch (ValidateException $e) {
 					$errorCode = $e->getCode();
 					if($errorCode === 3){
-						$arrayResult['RESPONSE_CODE'] = "4005";
-						$arrayResult['RESPONSE_AWARE'] = "signature";
-						$arrayResult['RESPONSE'] = "Signature is invalid";
+						$arrayResult['RESPONSE_CODE'] = "WS0015";
+						$arrayResult['RESPONSE_MESSAGE'] = "Signature is invalid";
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
 						echo json_encode($arrayResult);
@@ -85,9 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
 						$dataComing["channel"],$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 						if(!$is_refreshToken_arr){
-							$arrayResult['RESPONSE_CODE'] = "4009";
-							$arrayResult['RESPONSE_AWARE'] = "refresh_token_&_access_token";
-							$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
+							$arrayResult['RESPONSE_CODE'] = "WS0014";
+							$arrayResult['RESPONSE_MESSAGE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							echo json_encode($arrayResult);
@@ -97,9 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							$payload = $lib->fetch_payloadJWT($new_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 						}
 					}else{
-						$arrayResult['RESPONSE_CODE'] = "4005";
-						$arrayResult['RESPONSE_AWARE'] = "access_token";
-						$arrayResult['RESPONSE'] = "Access Token is invalid";
+						$arrayResult['RESPONSE_CODE'] = "WS0013";
+						$arrayResult['RESPONSE_MESSAGE'] = "Access Token is invalid";
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
 						echo json_encode($arrayResult);
@@ -107,18 +104,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					}
 				}
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "4005";
-				$arrayResult['RESPONSE_AWARE'] = "authorization_type";
-				$arrayResult['RESPONSE'] = "Authorization Header is not correct";
+				$arrayResult['RESPONSE_CODE'] = "WS0012";
+				$arrayResult['RESPONSE_MESSAGE'] = "Authorization Header is not correct";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "4004";
-			$arrayResult['RESPONSE_AWARE'] = "argument";
-			$arrayResult['RESPONSE'] = "Not complete argument";
+			$arrayResult['RESPONSE_CODE'] = "WS4004";
+			$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

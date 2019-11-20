@@ -15,25 +15,22 @@ if($lib->checkCompleteArgument(['member_no'],$payload)){
 			}
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "update";
-			$arrayResult['RESPONSE'] = "Cannot reset pin because cannot logout";
+			$arrayResult['RESPONSE_CODE'] = "WS1016";
+			$arrayResult['RESPONSE_MESSAGE'] = "Cannot reset pin because cannot logout";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "5005";
-		$arrayResult['RESPONSE_AWARE'] = "update";
-		$arrayResult['RESPONSE'] = "Cannot reset pin";
+		$arrayResult['RESPONSE_CODE'] = "WS1015";
+		$arrayResult['RESPONSE_MESSAGE'] = "Cannot reset pin";
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
