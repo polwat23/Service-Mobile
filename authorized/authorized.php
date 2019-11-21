@@ -5,6 +5,7 @@ namespace Authorized;
 
 use ReallySimpleJWT\{Parse,Encode,Validate,Jwt};
 use ReallySimpleJWT\Exception\ValidateException;
+use Component\functions;
 
 class Authorization {
 	
@@ -66,10 +67,9 @@ class Authorization {
 					return false;
 				}
 			}else{
-				$revokeRefreshToken = $con->prepare("UPDATE gctoken SET rt_is_revoke = '-99',rt_expire_date = NOW()
-													,at_is_revoke = '-99',at_expire_date = NOW()
-													WHERE id_token = :id_token");
-				$revokeRefreshToken->execute([':id_token' => $payload["id_token"]]);
+				$func = new functions();
+				$func->revoke_accesstoken($payload["id_token"],'-99',$con);
+				$func->revoke_refreshtoken($payload["id_token"],'-99',$con);
 				return false;
 			}
 		}else{

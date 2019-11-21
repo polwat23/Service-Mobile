@@ -30,13 +30,23 @@ if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->check
 					"id_userlogin" => $rowLog["id_userlogin"]
 				],'GCLOGUSERACCESSAFTERLOGIN');
 			}
-			$arrayResult['RESULT'] = TRUE;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
-		}else{
 			$arrayResult['RESULT'] = TRUE;
-			$arrayResult["MESSAGE_LOGOUT"] = $config['LOGOUT'.$rowLog["is_login"]];
+		}else{
+			if($rowLog["is_login"] == '-9' || $rowLog["is_login"] == '-10') {
+				$func->revoke_accesstoken($payload["id_token"],'-9',$con);
+				$func->revoke_refreshtoken($payload["id_token"],'-9',$con);
+			}else if($rowLog["is_login"] == '-8' || $rowLog["is_login"] == '-99'){
+				$func->revoke_accesstoken($payload["id_token"],'-8',$con);
+				$func->revoke_refreshtoken($payload["id_token"],'-8',$con);
+			}else if($rowLog["is_login"] == '-7'){
+				$func->revoke_accesstoken($payload["id_token"],'-7',$con);
+				$func->revoke_refreshtoken($payload["id_token"],'-7',$con);
+			}
+			$arrayResult["RESPONSE_MESSAGE"] = $config['LOGOUT'.$rowLog["is_login"]];
+			$arrayResult['RESULT'] = FALSE;
 		}
 		echo json_encode($arrayResult);
 	}else{

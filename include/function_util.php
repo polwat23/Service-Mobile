@@ -126,7 +126,10 @@ class functions {
 			$getAvatar = $con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no");
 			$getAvatar->execute([':member_no' => $member_no]);
 			$rowPathpic = $getAvatar->fetch();
-			return $rowPathpic["path_avatar"];
+			$returnResult["AVATAR_PATH"] = $rowPathpic["path_avatar"];
+			$explodePathAvatar = explode('.',$rowPathpic["path_avatar"]);
+			$returnResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
+			return $returnResult;
 		}
 		public function getTemplate($template_name,$con){
 			$getTemplatedata = $con->prepare("SELECT template_subject,template_body 
