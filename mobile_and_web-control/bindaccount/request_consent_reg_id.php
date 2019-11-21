@@ -30,35 +30,43 @@ if($lib->checkCompleteArgument(['user_type','member_no','id_token'],$payload) &&
 		$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 		$arrPayloadverify["reference"] = $member_no.$kb_account_no;
 		$arrPayloadverify['exp'] = time() + 60;
+		$sigma_key = $lib->generate_token();
+		$arrPayloadverify['sigma_key'] = $sigma_key;
 		$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
-		$sigma_id = $lib->generate_token();
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
-		$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_id,member_no,deptaccount_no_coop,deptaccount_no_bank,bank_code,id_token) 
-														VALUES(:sigma_id,:member_no,:coop_account_no,:kb_account_no,'004',:id_token)");
-		if($insertPendingBindAccount->execute([
-			':sigma_id' => $sigma_id,
-			':member_no' => $member_no,
-			':coop_account_no' => $coop_account_no,
-			':kb_account_no' => $kb_account_no,
-			':id_token' => $payload["id_token"]
-		])){
-			$arrSendData = array();
-			$arrSendData["verify_token"] = $verify_token;
-			$arrSendData["app_id"] = $config["APP_ID"];
-			$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/bindaccount/pending_bind_account',$arrSendData);
-			if(!$responseAPI){
-				$arrayResult['RESPONSE_CODE'] = "WS0017";
-				$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";
+		$arrSendData = array();
+		$arrSendData["verify_token"] = $verify_token;
+		$arrSendData["app_id"] = $config["APP_ID"];
+		$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/bindaccount/pending_bind_account',$arrSendData);
+		if(!$responseAPI){
+			$arrayResult['RESPONSE_CODE'] = "WS0017";
+			$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(400);
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$arrResponse = json_decode($responseAPI);
+		if($arrResponse->RESULT){
+			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,bank_code,id_token) 
+															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,'004',:id_token)");
+			if($insertPendingBindAccount->execute([
+				':sigma_key' => $sigma_key,
+				':member_no' => $member_no,
+				':coop_account_no' => $coop_account_no,
+				':kb_account_no' => $kb_account_no,
+				':id_token' => $payload["id_token"]
+			])){
+				$arrayResult["URL_CONSENT"] = "https://www.google.com";
+				$arrayResult['RESULT'] = TRUE;
+			}else{
+				$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
+				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
 				echo json_encode($arrayResult);
 				exit();
 			}
-			$arrResponse = json_decode($responseAPI);
-			if($arrResponse->RESULT){
-				$arrayResult["URL_CONSENT"] = "https://www.google.com";
-				$arrayResult['RESULT'] = TRUE;
-				
 				//$responsePosting = $lib->posting_data('https://ws04.uatebpp.kasikornbank.com/ws/v1/registerinit',$arrPayload);
 				/*if($responsePosting["return_status"] == '0' && $responsePosting["return_code"] == 'K0000'){
 					$arrayResult["URL_CONSENT"] = "https://ws06.uatebpp.kasikornbank.com/PGSRegistration.do?reg_id=".$responsePosting["reg_id"]."&langLocale=th_TH";
@@ -68,21 +76,14 @@ if($lib->checkCompleteArgument(['user_type','member_no','id_token'],$payload) &&
 					$arrayResult['RETURN_MESSAGE'] = $responsePosting["return_message"];
 					$arrayResult['RESULT'] = FALSE;
 				}*/
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				echo json_encode($arrayResult);
-			}else{
-				$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
-				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
-				$arrayResult['RESULT'] = FALSE;
-				http_response_code(400);
-				echo json_encode($arrayResult);
-				exit();
+			if(isset($new_token)){
+				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
+			echo json_encode($arrayResult);
+			
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS1020";
-			$arrayResult['RESPONSE_MESSAGE'] = $insertPendingBindAccount;
+			$arrayResult['RESPONSE_MESSAGE'] = "Cannot insert bind account";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
