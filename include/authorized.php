@@ -72,8 +72,8 @@ class Authorization {
 					return false;
 				}
 			}else{
-				$func->revoke_alltoken($payload["id_token"],$rowToken["rt_is_revoke"],$con);
 				$func = new functions();
+				$func->revoke_alltoken($payload["id_token"],$rowToken["rt_is_revoke"],$con);
 				return false;
 			}
 		}else{

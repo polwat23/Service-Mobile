@@ -10,7 +10,7 @@ class functions {
 				':type_login' => $type_login,
 				':id_token' => $id_token
 			])){
-				$this->revoke_alltoken($token_value,'-9',$con,true);
+				$this->revoke_alltoken($id_token,'-9',$con,true);
 				return true;
 			}else{
 				return false;
