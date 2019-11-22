@@ -1,21 +1,21 @@
 <?php
-require_once('../../autoload.php');
+require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'mobileadmin',$conmysql)){
 		$arrayGroup = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT member_no, device_name, login_date, channel 
+		$fetchUserlogin = $conmysql->prepare("SELECT member_no, device_name, login_date, id_token 
 												FROM  gcuserlogin WHERE is_login = '1' ");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch()){
-			$arrGroupRootUseronline = array();
-			$arrGroupRootUseronline["MEMBER_NO"] = $rowUserlogin["member_no"];
-			$arrGroupRootUseronline["DEVICE"] = $rowUserlogin["device_name"];
-			$arrGroupRootUseronline["LOGIN_DATE"] = $lib->convertdate($rowUserlogin["login_date"],'d m Y',true);
-			$arrGroupRootUseronline["CHANNEL"] = $rowUserlogin["channel"];
-			$arrayGroup[] = $arrGroupRootUseronline;
+			$arrGroupRootUserlogin = array();
+			$arrGroupRootUserlogin["MEMBER_NO"] = $rowUserlogin["member_no"];
+			$arrGroupRootUserlogin["DEVICE"] = $rowUserlogin["device_name"];
+			$arrGroupRootUserlogin["LOGIN_DATE"] = $lib->convertdate($rowUserlogin["login_date"],'d m Y',true);
+			$arrGroupRootUserlogin["ID_TOKEN"] = $rowUserlogin["id_token"];
+			$arrayGroup[] = $arrGroupRootUserlogin;
 		}
-		$arrayResult["USER_ONLINE"] = $arrayGroup;
+		$arrayResult["USER_LOGIN"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
