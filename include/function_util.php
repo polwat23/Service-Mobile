@@ -10,8 +10,7 @@ class functions {
 				':type_login' => $type_login,
 				':id_token' => $id_token
 			])){
-				$this->revoke_accesstoken($id_token,'-9',$con);
-				$this->revoke_refreshtoken($id_token,'-9',$con);
+				$this->revoke_alltoken($token_value,'-9',$con,true);
 				return true;
 			}else{
 				return false;
@@ -42,21 +41,62 @@ class functions {
 				':id_token' => $id_token
 			])){
 				foreach($arrMember as $token_value){
-					$this->revoke_accesstoken($token_value,'-9',$con);
-					$this->revoke_refreshtoken($token_value,'-9',$con);
+					$this->revoke_alltoken($token_value,'-9',$con,true);
 				}
 				return true;
 			}else{
 				return false;
 			}
 		}
+		public function revoke_alltoken($id_token,$type_revoke,$con,$is_logout=false){
+			if($is_logout){
+				$revokeAllToken = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
+											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+											WHERE id_token = :id_token");
+				if($revokeAllToken->execute([
+					':type_revoke' => $type_revoke,
+					':id_token' => $id_token
+				])){
+					return true;
+				}else{
+					return false;
+				}
+			}else{
+				$type_login = null;
+				switch($type_revoke) {
+					case '-9' : $type_login = '0';
+						break;
+					case '-8' : $type_login = '-99';
+						break;
+					case '-7' : $type_login = '-7';
+						break;
+					case '-99' : $type_login = '-6';
+						break;
+				}
+				$revokeAllToken = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
+											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+											WHERE id_token = :id_token");
+				$forceLogout = $con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW()
+											WHERE id_token = :id_token");
+				if($revokeAllToken->execute([
+					':type_revoke' => $type_revoke,
+					':id_token' => $id_token
+				]) && $forceLogout->execute([
+					':type_login' => $type_login,
+					':id_token' => $id_token
+				])){
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}
 		public function revoke_accesstoken($id_token,$type_revoke,$con){
 			$revokeAT = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW() WHERE id_token = :id_token");
-			$revokeAT->execute([
+			if($revokeAT->execute([
 				':type_revoke' => $type_revoke,
 				':id_token' => $id_token
-			]);
-			if($revokeAT->rowCount() > 0){
+			])){
 				return true;
 			}else{
 				return false;
@@ -64,11 +104,10 @@ class functions {
 		}
 		public function revoke_refreshtoken($id_token,$type_revoke,$con){
 			$revokeRT = $con->prepare("UPDATE gctoken SET rt_is_revoke = :type_revoke,rt_expire_date = NOW() WHERE id_token = :id_token");
-			$revokeRT->execute([
+			if($revokeRT->execute([
 				':type_revoke' => $type_revoke,
 				':id_token' => $id_token
-			]);
-			if($revokeRT->rowCount() > 0){
+			])){
 				return true;
 			}else{
 				return false;
@@ -125,10 +164,15 @@ class functions {
 		public function getPathpic($member_no,$con){
 			$getAvatar = $con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no");
 			$getAvatar->execute([':member_no' => $member_no]);
-			$rowPathpic = $getAvatar->fetch();
-			$returnResult["AVATAR_PATH"] = $rowPathpic["path_avatar"];
-			$explodePathAvatar = explode('.',$rowPathpic["path_avatar"]);
-			$returnResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
+			if($getAvatar->rowCount() > 0){
+				$rowPathpic = $getAvatar->fetch();
+				$returnResult["AVATAR_PATH"] = $rowPathpic["path_avatar"];
+				$explodePathAvatar = explode('.',$rowPathpic["path_avatar"]);
+				$returnResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
+			}else{
+				$returnResult["AVATAR_PATH"] = null;
+				$returnResult["AVATAR_PATH_WEBP"] = null;
+			}
 			return $returnResult;
 		}
 		public function getTemplate($template_name,$con){

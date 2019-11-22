@@ -36,14 +36,11 @@ if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->check
 			$arrayResult['RESULT'] = TRUE;
 		}else{
 			if($rowLog["is_login"] == '-9' || $rowLog["is_login"] == '-10') {
-				$func->revoke_accesstoken($payload["id_token"],'-9',$con);
-				$func->revoke_refreshtoken($payload["id_token"],'-9',$con);
+				$func->revoke_alltoken($payload["id_token"],'-9',$con,true);
 			}else if($rowLog["is_login"] == '-8' || $rowLog["is_login"] == '-99'){
-				$func->revoke_accesstoken($payload["id_token"],'-8',$con);
-				$func->revoke_refreshtoken($payload["id_token"],'-8',$con);
+				$func->revoke_alltoken($payload["id_token"],'-8',$con,true);
 			}else if($rowLog["is_login"] == '-7'){
-				$func->revoke_accesstoken($payload["id_token"],'-7',$con);
-				$func->revoke_refreshtoken($payload["id_token"],'-7',$con);
+				$func->revoke_alltoken($payload["id_token"],'-7',$con,true);
 			}
 			$arrayResult["RESPONSE_MESSAGE"] = $config['LOGOUT'.$rowLog["is_login"]];
 			$arrayResult['RESULT'] = FALSE;

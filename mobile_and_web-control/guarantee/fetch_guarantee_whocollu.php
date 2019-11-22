@@ -35,7 +35,9 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$whocolluMember->execute([':contract_no' => $contract_no]);
 			while($rowCollMember = $whocolluMember->fetch()){
 				$arrMember = array();
-				$arrMember["PATH_AVATAR"] = $func->getPathpic($rowCollMember["MEMBER_NO"],$conmysql);
+				$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"],$conmysql);
+				$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
+				$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 				$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 				$arrMember["MEMBER_NO"] = $rowCollMember["MEMBER_NO"];
 				$arrGroupAll[] = $arrMember;
@@ -77,7 +79,9 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 				$whocolluMember->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 				while($rowCollMember = $whocolluMember->fetch()){
 					$arrMember = array();
-					$arrMember["PATH_AVATAR"] = $func->getPathpic($rowCollMember["MEMBER_NO"],$conmysql);
+					$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"],$conmysql);
+					$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
+					$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 					$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrMember["MEMBER_NO"] = $rowCollMember["MEMBER_NO"];
 					$arrGroupAllMember[] = $arrMember;

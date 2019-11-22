@@ -27,7 +27,7 @@ require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
-require_once(__DIR__.'/../authorized/authorized.php');
+require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
 use Utility\Library;

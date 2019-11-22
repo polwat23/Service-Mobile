@@ -33,7 +33,9 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayColl["CONTRACT_NO"] = $lib->formatcontract($rowUcollwho["LOANCONTRACT_NO"],$func->getConstant('loan_format',$conmysql));
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
 			$arrayColl["COLL_MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
-			$arrayColl["PATH_AVATAR"] = $func->getPathpic($rowUcollwho["MEMBER_NO"],$conmysql);
+			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"],$conmysql);
+			$arrayColl["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
+			$arrayColl["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
