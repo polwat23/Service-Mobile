@@ -63,6 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						->validateExpiration()
 						->parse();
 					$payload = $parsed_token->getPayload();
+					if(!$func->checkLogin($payload["id_token"],$conmysql)){
+						$arrayResult['RESPONSE_CODE'] = "WS0009";
+						$arrayResult['RESPONSE_MESSAGE'] = "You cannot access please login";
+						$arrayResult['RESULT'] = FALSE;
+						http_response_code(403);
+						echo json_encode($arrayResult);
+						exit();
+					}
 				}catch (ValidateException $e) {
 					$errorCode = $e->getCode();
 					if($errorCode === 3){

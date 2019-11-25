@@ -3,7 +3,19 @@
 namespace Component;
 
 class functions {
-		
+	
+		public function checkLogin($id_token,$con) {
+			$checkLogin = $con->prepare("SELECT id_userlogin FROM gcuserlogin 
+										WHERE id_token = :id_token and is_login = '1'");
+			$checkLogin->execute([
+				':id_token' => $id_token
+			]);
+			if($checkLogin->rowCount() > 0){
+				return true;
+			}else{
+				return false;
+			}
+		}
 		public function logout($id_token,$type_login,$con) {
 			$logout = $con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() WHERE id_token = :id_token");
 			if($logout->execute([
