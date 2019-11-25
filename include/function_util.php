@@ -127,7 +127,7 @@ class functions {
 		}
 		public function check_permission($user_type,$menu_component,$con,$service_component=null){
 			$permission = array();
-			switch($user_type){ 
+			switch($user_type){
 				case '0' : 
 					$permission[] = "'0'";
 					break;
@@ -146,7 +146,7 @@ class functions {
 					$permission[] = "'2'";
 					$permission[] = "'3'";
 					break;
-				default : $permission[] = '0';
+				default : $permission[] = "'0'";
 					break;
 			}
 			if($user_type == '5' || $user_type == '9'){
@@ -154,7 +154,7 @@ class functions {
 										 and menu_permission IN (".implode(',',$permission).")");
 			}else{
 				$checkPermission = $con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										and menu_status = 1 and menu_permission IN (".implode(',',$permission).")");
+										and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
 			}
 			$checkPermission->execute([':menu_component' => $menu_component]);
 			if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
