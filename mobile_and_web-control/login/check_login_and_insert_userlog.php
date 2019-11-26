@@ -28,12 +28,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		}
 		if ($valid_pass) {
 			$refresh_token = $lib->generate_token();
-			$dateAfter1day = date('Y-m-d H:i:s',strtotime("+1 day"));
 			try{
 				$conmysql->beginTransaction();
 				$updateOldToken = $conmysql->prepare("UPDATE gctoken SET at_is_revoke = '-9',rt_is_revoke = '-9',
 														rt_expire_date = NOW(),at_expire_date = NOW() 
-														WHERE unique_id = :unique_id and at_is_revoke = '0' OR rt_is_revoke = '0'");
+														WHERE unique_id = :unique_id and (at_is_revoke = '0' OR rt_is_revoke = '0')");
 				$updateOldToken->execute([
 					':unique_id' => $dataComing["unique_id"]
 				]);
@@ -67,7 +66,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['user_type'] = $rowPassword['user_type'];
 						$arrPayloadNew['id_token'] = $id_token;
 						$arrPayloadNew['member_no'] = $member_no;
-						if($arrPayload["PAYLOAD"]["channel"] === 'mobile_app'){
+						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 							$arrPayloadNew['exp'] = time() + 86400;
 						}else {
 							$arrPayloadNew['exp'] = time() + 900;

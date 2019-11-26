@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['user_type','member_no','id_token'],$payload) &&
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);
 				if($rowAccountBind["type_palette"] == '2'){
-					$arrAccount["BANNER_COLOR"] = "(".$rowAccountBind["color_deg"]."deg,".$rowAccountBind["color_main"].",".$rowAccountBind["color_secon"].")";
+					$arrAccount["BANNER_COLOR"] = $rowAccountBind["color_deg"]."|".$rowAccountBind["color_main"].",".$rowAccountBind["color_secon"];
 				}else{
 					$arrAccount["BANNER_COLOR"] = $rowAccountBind["color_main"];
 				}

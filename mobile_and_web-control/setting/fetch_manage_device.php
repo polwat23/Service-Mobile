@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		$arrGroupDevice = array();
 		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
 													FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
-													ORDER BY id_userlogin DESC GROUP BY unique_id");
+													GROUP BY unique_id ORDER BY id_userlogin DESC");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
 		if($fetchSettingDevice->rowCount() > 0){
 			while($rowSetting = $fetchSettingDevice->fetch()){

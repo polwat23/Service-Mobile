@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'BindAccountConsent')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
@@ -42,6 +42,10 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			}
 			if(sizeof($arrayGroupAccount) > 0 || isset($new_token)){
 				$arrayResult['ACCOUNT'] = $arrayGroupAccount;
+				$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
+				$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
+				$rowFormatBank = $getFormatBank->fetch();
+				$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? "xxx-x-xxxxx-x";
 				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 				if(isset($new_token)){

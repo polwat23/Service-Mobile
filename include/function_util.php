@@ -86,10 +86,10 @@ class functions {
 						break;
 				}
 				$revokeAllToken = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
-											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
-											WHERE id_token = :id_token");
+												rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+												WHERE id_token = :id_token");
 				$forceLogout = $con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW()
-											WHERE id_token = :id_token");
+												WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
 					':type_revoke' => $type_revoke,
 					':id_token' => $id_token
