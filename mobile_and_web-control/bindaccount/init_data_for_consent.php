@@ -16,7 +16,10 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		]);
 		$rowDataMember = $fetchDataMember->fetch();
 		if(isset($rowDataMember["CARD_PERSON"])){
-			$fetchConstantAllowDept = $conmysql->prepare("SELECT dept_type_code FROM gcconstantallowtransaction WHERE is_use = '1' and member_cate_code = :membcat_code");
+			$fetchConstantAllowDept = $conmysql->prepare("SELECT gca.dept_type_code 
+															FROM gcconstantallowtransaction gat LEFT JOIN gcconstantaccount gca ON gat.id_accountconstant = gca.id_accountconstant
+															and gca.is_use = '1'
+															WHERE gat.is_use = '1' and gca.member_cate_code = :membcat_code");
 			$fetchConstantAllowDept->execute([
 				':membcat_code' => $rowDataMember["MEMBCAT_CODE"]
 			]);

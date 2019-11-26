@@ -24,6 +24,9 @@ if($lib->checkCompleteArgument(['user_type','id_token','member_no','id_userlogin
 						':fav_refno' => $fav_refno
 					])){
 						$conmysql->commit();
+						if(isset($new_token)){
+							$arrayResult['NEW_TOKEN'] = $new_token;
+						}
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{
@@ -44,6 +47,9 @@ if($lib->checkCompleteArgument(['user_type','id_token','member_no','id_userlogin
 				}
 			}else{
 				$conmysql->commit();
+				if(isset($new_token)){
+					$arrayResult['NEW_TOKEN'] = $new_token;
+				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}

@@ -21,6 +21,9 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrGroupFavmenu[] = $arrayFavMenu;
 		}
 		$arrayResult['FAV_MENU'] = $arrGroupFavmenu;
+		if(isset($new_token)){
+			$arrayResult['NEW_TOKEN'] = $new_token;
+		}
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
