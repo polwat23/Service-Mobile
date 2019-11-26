@@ -25,13 +25,18 @@ if($lib->checkCompleteArgument(['user_type','member_no','id_token'],$payload) &&
 				$arrAccount = array();
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);
-				if($rowAccountBind["type_palette"] == '2'){
-					$arrAccount["BANNER_COLOR"] = $rowAccountBind["color_deg"]."|".$rowAccountBind["color_main"].",".$rowAccountBind["color_secon"];
+				if(isset($rowAccountBind["type_palette"])){
+					if($rowAccountBind["type_palette"] == '2'){
+						$arrAccount["BANNER_COLOR"] = $rowAccountBind["color_deg"]."|".$rowAccountBind["color_main"].",".$rowAccountBind["color_secon"];
+					}else{
+						$arrAccount["BANNER_COLOR"] = "90|".$rowAccountBind["color_main"].",".$rowAccountBind["color_main"];
+					}
+					$arrAccount["BANNER_TEXT_COLOR"] = $rowAccountBind["color_text"];
 				}else{
-					$arrAccount["BANNER_COLOR"] = "90|".$rowAccountBind["color_main"].",".$rowAccountBind["color_main"];
+					$arrAccount["BANNER_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
+					$arrAccount["BANNER_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 				}
 				$arrAccount["ICON_BANK"] = $rowAccountBind["bank_logo_path"];
-				$arrAccount["BANNER_TEXT_COLOR"] = $rowAccountBind["color_text"];
 				$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
 				$arrAccount["ICON_BANK_WEBP"] = $explodePathBankLOGO[0].'.webp';
 				$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
@@ -52,12 +57,17 @@ if($lib->checkCompleteArgument(['user_type','member_no','id_token'],$payload) &&
 					':membcat_code' => $rowAccountCoop["MEMBCAT_CODE"]
 				]);
 				$rowBanner = $getBannerColorCoop->fetch();
-				if($rowBanner["type_palette"] == '2'){
-					$arrAccount["ACCOUNT_COOP_COLOR"] = $rowBanner["color_deg"]."|".$rowBanner["color_main"].",".$rowBanner["color_secon"];
+				if(isset($rowBanner["type_palette"])){
+					if($rowBanner["type_palette"] == '2'){
+						$arrAccount["ACCOUNT_COOP_COLOR"] = $rowBanner["color_deg"]."|".$rowBanner["color_main"].",".$rowBanner["color_secon"];
+					}else{
+						$arrAccount["ACCOUNT_COOP_COLOR"] = "90|".$rowBanner["color_main"].",".$rowBanner["color_main"];
+					}
+					$arrAccount["ACCOUNT_COOP_TEXT_COLOR"] = $rowBanner["color_text"];
 				}else{
-					$arrAccount["ACCOUNT_COOP_COLOR"] = "90|".$rowBanner["color_main"].",".$rowBanner["color_main"];
+					$arrAccount["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
+					$arrAccount["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 				}
-				$arrAccount["ACCOUNT_COOP_TEXT_COLOR"] = $rowBanner["color_text"];
 				$arrAccount["ACCOUNT_COOP_NAME"] = preg_replace('/\"/','',$rowAccountCoop["DEPTACCOUNT_NAME"]);
 				$arrBindAccount[] = $arrAccount;
 			}
