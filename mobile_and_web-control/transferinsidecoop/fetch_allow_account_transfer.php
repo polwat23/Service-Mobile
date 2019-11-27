@@ -11,6 +11,7 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$member_no = $payload["member_no"];
 		}
 		$arrGroupAccAllow = array();
+		$arrGroupAccFav = array();
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
 		$fetchAccAllowTrans->execute([':member_no' => $member_no]);
@@ -34,8 +35,22 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token)){
+			$getAccFav = $conmysql->prepare("SELECT gts.destination,gfl.name_fav
+												FROM gcfavoritelist gfl LEFT JOIN gctransaction gts ON gfl.ref_no = gts.ref_no
+												and gfl.member_no = gts.member_no
+												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gts.destination_type = '1'");
+			$getAccFav->execute([':member_no' => $member_no]);
+			while($rowAccFav = $getAccFav->fetch()){
+				$arrAccFav = array();
+				$arrAccFav["DEPTACCOUNT_NO"] = $rowAccFav["destination"];
+				$arrAccFav["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format',$conmysql));
+				$arrAccFav["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
+				$arrGroupAccFav[] = $arrAccFav;
+			}
+			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
+				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
