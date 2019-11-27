@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'FavoriteAccount')){
 		$arrGroupFavmenu = array();
-		$fetchFavMenu = $conmysql->prepare("SELECT gfl.fav_name,gpc.type_palette,gpc.color_deg,gpc.color_main,gpc.color_secon
+		$fetchFavMenu = $conmysql->prepare("SELECT gfl.fav_name,gpc.type_palette,gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.color_text
 											FROM gcfavoritemenu gfm LEFT JOIN gcpalettecolor gpc ON gfm.id_palette = gpc.id_palette and gpc.is_use = '1'
 											LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno and gfl.is_use = '1'
 											WHERE gfl.member_no = :member_no ORDER BY gfm.seq_no ASC");
@@ -13,10 +13,16 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayFavMenu = array();
 			$arrayFavMenu["FAV_NAME_MENU"] = $rowFavMenu["fav_name"];
 			$arrayFavMenu["FAV_ICON_MENU"] = mb_substr($rowFavMenu["fav_name"],0,1);
-			if($rowFavMenu["type_palette"] == '2'){
-				$arrayFavMenu["FAV_COLOR_MENU"] = $rowFavMenu["color_deg"]."|".$rowFavMenu["color_main"].",".$rowFavMenu["color_secon"];
+			if(isset($rowFavMenu["type_palette"])){
+				if($rowFavMenu["type_palette"] == '2'){
+					$arrayFavMenu["ACCOUNT_COOP_COLOR"] = $rowFavMenu["color_deg"]."|".$rowFavMenu["color_main"].",".$rowFavMenu["color_secon"];
+				}else{
+					$arrayFavMenu["ACCOUNT_COOP_COLOR"] = "90|".$rowFavMenu["color_main"].",".$rowFavMenu["color_main"];
+				}
+				$arrayFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $rowFavMenu["color_text"];
 			}else{
-				$arrayFavMenu["FAV_COLOR_MENU"] = $rowFavMenu["color_main"];
+				$arrayFavMenu["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
+				$arrayFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 			}
 			$arrGroupFavmenu[] = $arrayFavMenu;
 		}

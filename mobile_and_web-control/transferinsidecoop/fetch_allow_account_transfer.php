@@ -3,7 +3,52 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'TransferDepInsideCoop')){
-		//$fetch
+		if($payload["member_no"] == 'dev@mode'){
+			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
+		}else if($payload["member_no"] == 'salemode'){
+			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
+		}else{
+			$member_no = $payload["member_no"];
+		}
+		$arrGroupAccAllow = array();
+		$arrayAcc = array();
+		$fetchAccAllowTrans = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
+		$fetchAccAllowTrans->execute([':member_no' => $member_no]);
+		if($fetchAccAllowTrans->rowCount() > 0){
+			while($rowAccAllow = $fetchAccAllowTrans->fetch()){
+				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
+			}
+			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
+													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+													and dpm.membcat_code = dpt.membcat_code
+													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
+			$getDataBalAcc->execute();
+			while($rowDataAccAllow = $getDataBalAcc->fetch()){
+				$arrAccAllow = array();
+				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
+				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
+				$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
+				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
+				$arrGroupAccAllow[] = $arrAccAllow;
+			}
+			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token)){
+				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
+				if(isset($new_token)){
+					$arrayResult['NEW_TOKEN'] = $new_token;
+				}
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				http_response_code(204);
+				exit();
+			}
+		}else{
+			http_response_code(204);
+			exit();
+		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
