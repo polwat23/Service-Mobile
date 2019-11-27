@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['id_token','member_no'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0'
 											and member_no = :member_no and unique_id = :unique_id");
 	$checkUserlogin->execute([

@@ -1,8 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no'],$payload) 
-&& $lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'PaymentSimulateTable')){
 		$request_date = $dataComing['request_date'];
 		$cal_start_pay_date = $func->getConstant('cal_start_pay_date',$conmysql);

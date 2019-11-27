@@ -63,6 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						->validateExpiration()
 						->parse();
 					$payload = $parsed_token->getPayload();
+					if(!$lib->checkCompleteArgument(['id_userlogin','member_no','exp','id_token','user_type'],$payload)){
+						$arrayResult['RESPONSE_CODE'] = "WS4004";
+						$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+						$arrayResult['RESULT'] = FALSE;
+						http_response_code(400);
+						echo json_encode($arrayResult);
+						exit();
+					}
 					if(!$func->checkLogin($payload["id_token"],$conmysql)){
 						$arrayResult['RESPONSE_CODE'] = "WS0009";
 						$arrayResult['RESPONSE_MESSAGE'] = "You cannot access please login";

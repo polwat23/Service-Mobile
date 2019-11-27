@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no','id_token'],$payload) && $lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ManagementAccount')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];

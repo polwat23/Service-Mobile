@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'Notification')){
 		$arrGroupHis = array();
 		$executeData = [

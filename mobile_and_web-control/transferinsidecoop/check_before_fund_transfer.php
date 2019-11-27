@@ -1,15 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'TransactionWithdrawDeposit')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amount_transfer'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'TransferDepInsideCoop')){
 		
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

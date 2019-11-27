@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','menu_component'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";

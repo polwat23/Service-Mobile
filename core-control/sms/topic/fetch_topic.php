@@ -1,8 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && 
-$lib->checkCompleteArgument(['unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
 		$fetchTopic = $conmysql->prepare("SELECT sm.sms_menu_name,sm.id_smsmenu,smt.id_smstemplate,cpm.username,stm.smstemplate_name
 											FROM smsmenu sm LEFT JOIN smstopicmatchtemplate smt ON sm.id_smsmenu = smt.id_smsmenu

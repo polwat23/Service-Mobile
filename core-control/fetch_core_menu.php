@@ -1,7 +1,7 @@
 <?php
 require_once('autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	$arrayGroup = array();
 	$fetchMenu = $conmysql->prepare("SELECT id_coremenu,coremenu_name,coremenu_iconpath,coremenu_status,
 									coremenu_desc,coremenu_colorbanner,root_path,coremenu_colortext

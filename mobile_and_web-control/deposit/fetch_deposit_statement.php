@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'DepositStatement')){
 		$arrayResult = array();
 		$arrayGroupSTM = array();

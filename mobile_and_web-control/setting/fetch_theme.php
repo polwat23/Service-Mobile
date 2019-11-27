@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingTheme')){
 		$jsonTheme = json_decode(file_get_contents(__DIR__.'/../../json/theme.json'), true);
 		if($dataComing['resolution'] >= 1440){

@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type'],$payload) && $lib->checkCompleteArgument(['menu_component','id_token'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','id_token'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageDevice')){
 		if($func->logout($dataComing["id_token"],'-7',$conmysql)){
 			$arrayResult['RESULT'] = TRUE;

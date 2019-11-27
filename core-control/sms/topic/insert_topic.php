@@ -1,8 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && 
-$lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_control'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_control'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'sms',$conmysql) && is_numeric($dataComing["id_template"])){
 		$conmysql->beginTransaction();
 		$page_name = $lib->randomText('all',6);

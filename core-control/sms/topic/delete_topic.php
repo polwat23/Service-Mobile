@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id','id_smsmenu'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','id_smsmenu'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
 		$unuseTopic = $conmysql->prepare("UPDATE smsmenu SET sms_menu_status = '-9' WHERE id_smsmenu = :id_smsmenu");
 		if($unuseTopic->execute([

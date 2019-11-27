@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'mobileadmin',$conmysql)){
 		$arrayGroup = array();
 		$fetchMenuMobile = $conmysql->prepare("SELECT id_menu, menu_name, menu_status FROM gcmenu 

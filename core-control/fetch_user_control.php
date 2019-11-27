@@ -1,7 +1,7 @@
 <?php
 require_once('autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	$fetchUserControl = $conmysql->prepare("SELECT cu.username,cs.section_system,cs.system_assign,cs.id_section_system
 											FROM coreuser cu INNER JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
 											WHERE cu.user_status = '1'");

@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && $lib->checkCompleteArgument(['unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'mobileadmin',$conmysql)){
 		$arrayGroup = array();
 		$fetchUserlogin = $conmysql->prepare("SELECT member_no, device_name, login_date, id_token 

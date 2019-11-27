@@ -1,8 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['section_system','username'],$payload) && 
-$lib->checkCompleteArgument(['unique_id','page_name'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','page_name'],$dataComing)){
 	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
 		$getTemplate = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery,smu.sms_menu_name
 											FROM smsmenu smu INNER JOIN smstopicmatchtemplate smt ON smu.id_smsmenu = smt.id_smsmenu
