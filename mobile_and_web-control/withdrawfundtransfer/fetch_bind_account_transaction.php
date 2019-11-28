@@ -11,8 +11,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$member_no = $payload["member_no"];
 		}
 		$arrGroupAccBind = array();
-		$fetchBindAccount = $conmysql->prepare("SELECT sigma_key,deptaccount_no_coop FROM gcbindaccount 
-												WHERE member_no = :member_no and bindaccount_status = '1'");
+		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
+												csb.bank_format_account,csb.bank_format_account_hide
+												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
 		$fetchBindAccount->execute([':member_no' => $member_no]);
 		if($fetchBindAccount->rowCount() > 0){
 			while($rowAccBind = $fetchBindAccount->fetch()){
@@ -21,6 +23,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
 				$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format',$conmysql));
 				$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccBind["BANK_LOGO"] = $rowAccBind["bank_logo_path"];
+				$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
+				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
+				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
 				$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 													and dpm.membcat_code = dpt.membcat_code

@@ -38,8 +38,8 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
 		$conmysql->beginTransaction();
-		$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,id_bankpalette,id_token) 
-														VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,2,:id_token)");
+		$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,bank_code,id_bankpalette,id_token) 
+														VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,'004',2,:id_token)");
 		if($insertPendingBindAccount->execute([
 			':sigma_key' => $sigma_key,
 			':member_no' => $member_no,
