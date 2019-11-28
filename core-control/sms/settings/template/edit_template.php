@@ -1,8 +1,8 @@
 <?php
-require_once('../../autoload.php');
+require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataComing)){
-	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
+if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_template'],$dataComing)){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conmysql)){
 		$id_smsquery = null;
 		$conmysql->beginTransaction();
 		if(isset($dataComing["query_template"]) && isset($dataComing["column_selected"])){
@@ -24,13 +24,12 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 				exit();
 			}
 		}
-		$insertTemplate = $conmysql->prepare("INSERT INTO smstemplate(smstemplate_name,smstemplate_body,username,id_smsquery) 
-												VALUES(:smstemplate_name,:smstemplate_body,:username,:id_smsquery)");
-		if($insertTemplate->execute([
+		$editTemplate = $conmysql->prepare("UPDATE smstemplate SET smstemplate_name = :smstemplate_name,smstemplate_body = :smstemplate_body
+												WHERE id_smstemplate = :id_smstemplate");
+		if($editTemplate->execute([
 			':smstemplate_name' => $dataComing["template_name"],
 			':smstemplate_body' => $dataComing["template_body"],
-			':username' => $payload["username"],
-			':id_smsquery' => $id_smsquery
+			':id_smstemplate' => $dataComing["id_template"]
 		])){
 			$conmysql->commit();
 			$arrayResult['RESULT'] = TRUE;
@@ -38,8 +37,8 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 		}else{
 			$conmysql->rollback();
 			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "insert";
-			$arrayResult['RESPONSE'] = "Cannot insert SMS template";
+			$arrayResult['RESPONSE_AWARE'] = "update";
+			$arrayResult['RESPONSE'] = "Cannot edit SMS template";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

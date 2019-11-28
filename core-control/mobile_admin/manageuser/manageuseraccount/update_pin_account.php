@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_token','member_no','pin'],$dataComing)){
-	if($func->check_permission_core($payload["section_system"],'mobileadmin',$conmysql)){
+	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount',$conmysql)){
 		$repassword = $con->prepare("UPDATE gcmemberaccount SET pin = :pin
 									 WHERE member_no = :member_no")
 		if($repassword->execute([

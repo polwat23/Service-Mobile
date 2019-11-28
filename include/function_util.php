@@ -212,11 +212,42 @@ class functions {
 				return false;
 			}
 		}
-		public function check_permission_core($section_system,$root_menu,$con){
-			if($section_system == "root" || $section_system == "root_test"){
+		public function check_permission_core($payload,$root_menu,$page_name,$con){
+			if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 				return true;
 			}else{
-				return false;
+				if(isset($page_name)){
+					$getConstructorMenu = $con->prepare("SELECT id_coremenu,submenu_in_database FROM coremenu WHERE root_path = :root_menu and coremenu_status = '1'");
+					$getConstructorMenu->execute([':root_menu' => $root_menu]);
+					if($getConstructorMenu->rowCount() > 0){
+						$rowrootMenu = $getConstructorMenu->fetch();
+						$checkMenuinRoot = $con->prepare("SELECT page_name FROM ".$rowrootMenu["submenu_in_database"]." 
+															WHERE id_coremenu = :id_coremenu and menu_status = '1' and page_name = :page_name");
+						$checkMenuinRoot->execute([
+							':id_coremenu' => $rowrootMenu["id_coremenu"],
+							':page_name' => $page_name
+						]);
+						if($checkMenuinRoot->rowCount() > 0){
+							return true;
+						}else{
+							return false;
+						}
+					}else{
+						return false;
+					}
+				}else{
+					$checkPermit = $con->prepare("SELECT FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+													WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
+					$checkPermit->execute([
+						':username' => $payload["username"],
+						':root_menu' => $root_menu
+					]);
+					if($checkPermit->rowCount() > 0){
+						return true;
+					}else{
+						return false;
+					}
+				}
 			}
 		}
 }

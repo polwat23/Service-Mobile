@@ -2,17 +2,17 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload["section_system"],'mobileadmin',$conmysql)){
+	if($func->check_permission_core($payload,'mobileadmin',null,$conmysql)){
 		$arrayGroup = array();
 		$fetchMenu = $conmysql->prepare("SELECT admin_menu_name,page_name,id_adminmenu
-										 FROM mobileadminmenu WHERE id_menuparent = 0 and id_coremenu = 2 and admin_menu_status = '1' ORDER BY adminmenu_order ASC");
+										 FROM mobileadminmenu WHERE id_menuparent = 0 and id_coremenu = 2 and menu_status = '1' ORDER BY adminmenu_order ASC");
 		$fetchMenu->execute();
 		while($rowMenu = $fetchMenu->fetch()){
 			$arrGroupRootMenu = array();
 			$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["admin_menu_name"];
 			$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
 			$fetchMenuAdmin = $conmysql->prepare("SELECT admin_menu_name,page_name
-												FROM mobileadminmenu WHERE admin_menu_status = '1' and id_menuparent = :id_coremenu ORDER BY adminmenu_order ASC");
+												FROM mobileadminmenu WHERE menu_status = '1' and id_menuparent = :id_coremenu ORDER BY adminmenu_order ASC");
 			$fetchMenuAdmin->execute([':id_coremenu' => $rowMenu["id_adminmenu"]]);
 			while($rowMobileAdminMenu = $fetchMenuAdmin->fetch()){
 				$arrayGroupMobileAdmin = array();

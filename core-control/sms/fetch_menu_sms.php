@@ -2,17 +2,17 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
+	if($func->check_permission_core($payload,'sms',null,$conmysql)){
 		$arrayGroup = array();
 		$fetchMenu = $conmysql->prepare("SELECT sms_menu_name,page_name,id_smsmenu
-										FROM smsmenu WHERE id_menuparent = 0 and id_coremenu = 1 and sms_menu_status = '1' ORDER BY smsmenu_order ASC");
+										FROM smsmenu WHERE id_menuparent = 0 and id_coremenu = 1 and menu_status = '1' ORDER BY smsmenu_order ASC");
 		$fetchMenu->execute();
 		while($rowMenu = $fetchMenu->fetch()){
 			$arrGroupRootMenu = array();
 			$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["sms_menu_name"];
 			$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
 			$fetchMenuSMS = $conmysql->prepare("SELECT sms_menu_name,page_name
-												FROM smsmenu WHERE sms_menu_status = '1' and id_menuparent = :id_coremenu ORDER BY smsmenu_order ASC");
+												FROM smsmenu WHERE menu_status = '1' and id_menuparent = :id_coremenu ORDER BY smsmenu_order ASC");
 			$fetchMenuSMS->execute([':id_coremenu' => $rowMenu["id_smsmenu"]]);
 			while($rowSmsMenu = $fetchMenuSMS->fetch()){
 				$arrayGroupSMS = array();

@@ -1,14 +1,14 @@
 <?php
-require_once('../../autoload.php');
+require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload["section_system"],'sms',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managetopic',$conmysql)){
 		$fetchTopic = $conmysql->prepare("SELECT sm.sms_menu_name,sm.id_smsmenu,smt.id_smstemplate,cpm.username,stm.smstemplate_name
 											FROM smsmenu sm LEFT JOIN smstopicmatchtemplate smt ON sm.id_smsmenu = smt.id_smsmenu
 											LEFT JOIN smstemplate stm ON smt.id_smstemplate = stm.id_smstemplate
                                             LEFT JOIN smsmatchpermission smp ON smt.id_matching = smp.id_matching
 											LEFT JOIN corepermissionmenu cpm ON smp.id_permission_menu = cpm.id_permission_menu
-											WHERE sm.sms_menu_status = '1' and sm.id_menuparent = 8 and smp.is_use = '1'");
+											WHERE sm.menu_status = '1' and sm.id_menuparent = 8 and smp.is_use = '1'");
 		$fetchTopic->execute();
 		$arrAllTopic = array();
 		while($rowTopic = $fetchTopic->fetch()){
