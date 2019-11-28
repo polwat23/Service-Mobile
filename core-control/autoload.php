@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					->validateExpiration()
 					->parse();
 				$payload = $parsed_token->getPayload();
-				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload){
+				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
 					$arrayResult['RESPONSE_CODE'] = "4004";
 					$arrayResult['RESPONSE_AWARE'] = "argument";
 					$arrayResult['RESPONSE'] = "Not complete argument";

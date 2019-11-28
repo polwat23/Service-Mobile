@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/bindaccount/pending_bind_account',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0017";
-				$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";
+				$arrayResult['RESPONSE_MESSAGE'] = "Request to API Bank failed";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
 				echo json_encode($arrayResult);
