@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 				exit();
 			}
 		}
-		$insertTemplate = $conmysql->prepare("INSERT INTO smstemplate(smstemplate_name,smstemplate_body,username,id_smsquery) 
+		$insertTemplate = $conmysql->prepare("INSERT INTO smstemplate(smstemplate_name,smstemplate_body,create_by,id_smsquery) 
 												VALUES(:smstemplate_name,:smstemplate_body,:username,:id_smsquery)");
 		if($insertTemplate->execute([
 			':smstemplate_name' => $dataComing["template_name"],

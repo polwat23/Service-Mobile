@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_control'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic',$conmysql)) && is_numeric($dataComing["id_template"])){
+	if($func->check_permission_core($payload,'sms','managetopic',$conmysql) && is_numeric($dataComing["id_template"])){
 		$conmysql->beginTransaction();
 		$page_name = $lib->randomText('all',6);
-		$insertSmsMenu = $conmysql->prepare("INSERT INTO smsmenu(sms_menu_name,page_name,smsmenu_order,username,id_menuparent)
+		$insertSmsMenu = $conmysql->prepare("INSERT INTO smsmenu(sms_menu_name,page_name,smsmenu_order,create_by,id_menuparent)
 												VALUES(:topic_name,:page_name,1,:username,8)");
 		if($insertSmsMenu->execute([
 			':topic_name' => $dataComing["topic_name"],
