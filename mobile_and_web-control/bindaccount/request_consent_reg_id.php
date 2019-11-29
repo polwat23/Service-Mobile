@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
 				$conmysql->commit();
-				$arrayResult["URL_CONSENT"] = "https://www.google.com";
+				$arrayResult["URL_CONSENT"] = "https://ws06.uatebpp.kasikornbank.com/PGSRegistration.do";
 				$arrayResult['RESULT'] = TRUE;
 				//$responsePosting = $lib->posting_data('https://ws04.uatebpp.kasikornbank.com/ws/v1/registerinit',$arrPayload);
 				/*if($responsePosting["return_status"] == '0' && $responsePosting["return_code"] == 'K0000'){

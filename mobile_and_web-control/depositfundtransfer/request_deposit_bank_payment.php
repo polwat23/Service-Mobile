@@ -10,8 +10,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
+		$cert = __DIR__."/../api.gensoft.co.th-crt.cer";
+		$key = __DIR__."/../_.gensoft.co.th-key.pem";
 		$arrSendData = array();
-		$responseAPI = $lib->posting_data('https://apitest.kasikornbank.com:12002/gw/bka/inquiry-account',$arrSendData);
+		$responseAPI = $lib->posting_data('https://58.137.161.157:5443/OnlineDirectWebService/services/FundTransferService?wsdl',$arrSendData,$cert,$key);
 		if(!$responseAPI){
 			$arrayResult['RESPONSE_CODE'] = "WS0017";
 			$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";
