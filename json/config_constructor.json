@@ -40,6 +40,7 @@
 	"SECRET_KEY_JWT" : "DemoGcoop+Connect^999999*!&",
 	"SECRET_KEY_CORE" : "DemoGcoop+Control^999999*!&",
 	"SIGNATURE_KEY_VERIFY_API" : "DemoGcoop+-API_LB-WITH-!KBank!-^999999*!&",
+	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-999999",
 	"DEFAULT_BANNER_COLOR_DEG" : "90",
 	"DEFAULT_BANNER_COLOR_MAIN" : "#56ab2f",
 	"DEFAULT_BANNER_COLOR_SECON" : "#a8e063",

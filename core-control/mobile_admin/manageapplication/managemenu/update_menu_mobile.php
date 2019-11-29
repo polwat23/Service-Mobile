@@ -2,18 +2,18 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managemenu',$conmysql)){
-		$arrayGroup = array();
-		$fetchMenuMobile = $conmysql->prepare("SELECT id_menu, menu_name, menu_status FROM gcmenu 
-											  WHERE menu_status <>'9' AND menu_parent NOT IN ('-1','-2','-8','-9')  
-											  ORDER BY menu_order ASC ");
-		$fetchMenuMobile->execute();
-		while($rowMenuMobile = $fetchMenuMobile->fetch()){
-			$arrGroupMenuMobile = array();
-			$arrGroupMenuMobile["ID_MENU"] = $rowMenuMobile["id_menu"];
-			$arrGroupMenuMobile["MENU_NAME"] = $rowMenuMobile["menu_name"];
-			$arrGroupMenuMobile["MENU_STATUS"] = $rowMenuMobile["menu_status"];
-			$arrayGroup[] = $arrGroupMenuMobile;
+	if($func->check_permission_core($payload,'idmenu','statusmenu',$conmysql)){
+		$updatemenu = $con->prepare("UPDATE gcmenu SET menu_status = :statusmenu
+									 WHERE id_menu = :idmenu");
+		if($updatemenu->execute([
+				':menu_status' => $menu_status,
+				':id_menu' => $id_menu
+			])){
+				$arrayResult["RESULT"] = TRUE;
+			}else{
+				$arrayResult["RESULT"] = FALSE;
+			}
+		echo json_encode($arrayResult);	
 		}
 		$arrayResult["MENU_MOBILE"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
