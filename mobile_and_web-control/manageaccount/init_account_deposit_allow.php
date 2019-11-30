@@ -44,9 +44,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$getAccountAllinCoop->execute([':member_no' => $member_no]);
 			while($rowAccIncoop = $getAccountAllinCoop->fetch()){
-				$arrAccInCoop["ACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
-				$arrAccInCoop["ACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
-				$arrAccInCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccIncoop["DEPTACCOUNT_NAME"]);
+				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
+				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
+				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccIncoop["DEPTACCOUNT_NAME"]);
 				$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
 				$arrAllowAccGroup[] = $arrAccInCoop;
 			}
