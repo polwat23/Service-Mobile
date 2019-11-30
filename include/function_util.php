@@ -217,12 +217,16 @@ class functions {
 				return true;
 			}else{
 				if(isset($page_name)){
-					$getConstructorMenu = $con->prepare("SELECT id_coremenu,submenu_in_database FROM coremenu WHERE root_path = :root_menu and coremenu_status = '1'");
-					$getConstructorMenu->execute([':root_menu' => $root_menu]);
+					$getConstructorMenu = $con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+														WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
+					$getConstructorMenu->execute([
+						':username' => $payload["username"],
+						':root_menu' => $root_menu
+					]);
 					if($getConstructorMenu->rowCount() > 0){
 						$rowrootMenu = $getConstructorMenu->fetch();
-						$checkMenuinRoot = $con->prepare("SELECT page_name FROM ".$rowrootMenu["submenu_in_database"]." 
-															WHERE id_coremenu = :id_coremenu and menu_status = '1' and page_name = :page_name");
+						$checkMenuinRoot = $con->prepare("SELECT csm.id_submenu FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm ON csm.id_submenu = cpsm.id_submenu
+															WHERE cpsm.is_use = '1' and csm.id_coremenu = :id_coremenu and csm.menu_status = '1' and csm.page_name = :page_name");
 						$checkMenuinRoot->execute([
 							':id_coremenu' => $rowrootMenu["id_coremenu"],
 							':page_name' => $page_name
@@ -236,7 +240,7 @@ class functions {
 						return false;
 					}
 				}else{
-					$checkPermit = $con->prepare("SELECT FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+					$checkPermit = $con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
 													WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
 					$checkPermit->execute([
 						':username' => $payload["username"],
