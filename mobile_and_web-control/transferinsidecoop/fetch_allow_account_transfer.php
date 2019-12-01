@@ -13,7 +13,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayAcc = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
+		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $member_no]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch()){

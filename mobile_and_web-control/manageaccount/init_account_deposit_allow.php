@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
 		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
-												WHERE is_use = '1' and allow_transaction = '1'");
+												WHERE is_use = '1'");
 		$getDeptTypeAllow->execute();
 		if($getDeptTypeAllow->rowCount() > 0 ){
 			while($rowDeptAllow = $getDeptTypeAllow->fetch()){
