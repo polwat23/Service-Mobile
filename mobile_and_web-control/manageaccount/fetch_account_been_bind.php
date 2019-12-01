@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				]);
 				$rowAccountCoop = $fetchAccountCoop->fetch();
 				$getBannerColorCoop = $conmysql->prepare("SELECT gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.type_palette,gpc.color_text
-															FROM gcconstantaccount gca LEFT JOIN gcpalettecolor gpc ON gca.id_palette = gpc.id_palette and gpc.is_use = '1'
+															FROM gcconstantaccountdept gca LEFT JOIN gcpalettecolor gpc ON gca.id_palette = gpc.id_palette and gpc.is_use = '1'
 															WHERE gca.dept_type_code = :depttype_code and gca.member_cate_code = :membcat_code and gca.is_use = '1'");
 				$getBannerColorCoop->execute([
 					':depttype_code' => $rowAccountCoop["DEPTTYPE_CODE"],

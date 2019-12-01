@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountconstant'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ManagementAccount')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
@@ -10,13 +10,13 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing))
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		$arrBulkAllow = array();
-		foreach($dataComing["deptaccount_no"] as $deptaccount_no){
-			$arrBulkAllow[] = "('".$deptaccount_no."','".$member_no."')";
-		}
-		$insertDeptAllow = $conmysql->prepare("INSERT INTO gcuserallowacctransaction(deptaccount_no,member_no) 
-												VALUES".implode(',',$arrBulkAllow));
-		if($insertDeptAllow->execute()){
+		$insertDeptAllow = $conmysql->prepare("INSERT INTO gcuserallowacctransaction(deptaccount_no,member_no,id_accountconstant) 
+												VALUES(:deptaccount_no,:member_no,:id_accountconstant)");
+		if($insertDeptAllow->execute([
+			':deptaccount_no' => $dataComing["deptaccount_no"],
+			':member_no' => $member_no,
+			':id_accountconstant' => $dataComing["id_accountconstant"]
+		])){
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
 			}

@@ -13,10 +13,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDeptAllowed = array();
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
-		$getDeptTypeAllow = $conmysql->prepare("SELECT gca.dept_type_code
-												FROM gcconstantallowtransaction gat LEFT JOIN gcconstantaccount gca 
-												ON gat.id_accountconstant = gca.id_accountconstant and gca.is_use = '1'
-												WHERE gat.is_use = '1'");
+		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
+												WHERE is_use = '1' and allow_transaction = '1'");
 		$getDeptTypeAllow->execute();
 		if($getDeptTypeAllow->rowCount() > 0 ){
 			while($rowDeptAllow = $getDeptTypeAllow->fetch()){
@@ -52,6 +50,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':membcat_code' => $rowAccIncoop["MEMBCAT_CODE"]
 				]);
 				$rowBanner = $getBannerColorCoop->fetch();
+				$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
+														WHERE dept_type_code = :depttype_code and member_cate_code = :membcat_code");
+				$getIDDeptTypeAllow->execute([
+					':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"],
+					':membcat_code' => $rowAccIncoop["MEMBCAT_CODE"]
+				]);
+				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch();
 				if(isset($rowBanner["type_palette"])){
 					if($rowBanner["type_palette"] == '2'){
 						$arrAccInCoop["ACCOUNT_COOP_COLOR"] = $rowBanner["color_deg"]."|".$rowBanner["color_main"].",".$rowBanner["color_secon"];
@@ -63,6 +68,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccInCoop["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
 					$arrAccInCoop["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 				}
+				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
 				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conmysql));

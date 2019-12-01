@@ -16,21 +16,20 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		]);
 		$rowDataMember = $fetchDataMember->fetch();
 		if(isset($rowDataMember["CARD_PERSON"])){
-			$fetchConstantAllowDept = $conmysql->prepare("SELECT gca.dept_type_code 
-															FROM gcconstantallowtransaction gat LEFT JOIN gcconstantaccount gca ON gat.id_accountconstant = gca.id_accountconstant
-															and gca.is_use = '1'
-															WHERE gat.is_use = '1' and gca.member_cate_code = :membcat_code");
+			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant and gad.is_use = '1'
+															WHERE gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchConstantAllowDept->execute([
-				':membcat_code' => $rowDataMember["MEMBCAT_CODE"]
+				':member_no' => $member_no
 			]);
 			$arrayDeptAllow = array();
 			while($rowAllowDept = $fetchConstantAllowDept->fetch()){
-				$arrayDeptAllow[] = $rowAllowDept["dept_type_code"];
+				$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 			}
 			$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 														ON dpm.depttype_code = dpt.depttype_code 
 														WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
-														dpm.depttype_code IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = '0'");
+														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = '0'");
 			$fetchDataAccount->execute([
 				':member_no' => $member_no,
 				':membcat_code' => $rowDataMember["MEMBCAT_CODE"]
