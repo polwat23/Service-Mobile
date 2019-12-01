@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['username','password','device_name','ip_address'
 			$arrPayload = array();
 			$arrPayload['section_system'] = $rowPassword['section_system'];
 			$arrPayload['username'] = $dataComing["username"];
-			$arrPayload['exp'] = time() + 3600;
+			$arrPayload['exp'] = time() + 21600;
 			$refresh_token = $lib->generate_token();
 			$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
 			$arrayResult["SECTION_ASSIGN"] = $rowPassword["system_assign"];

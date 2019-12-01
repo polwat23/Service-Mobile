@@ -47,7 +47,9 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 				$fetchSubMenu = $conmysql->prepare("SELECT csm.menu_name,csm.page_name FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm 
 													ON csm.id_submenu = cpsm.id_submenu and cpsm.is_use = '1'
 													LEFT JOIN corepermissionmenu cpm ON cpsm.id_permission_menu = cpm.id_permission_menu and cpm.is_use = '1'
+													LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
 													WHERE csm.menu_status = '1' and csm.id_menuparent = :id_submenu and cpm.username = :username 
+													and csm.id_coremenu = cm.id_coremenu
 													ORDER BY csm.menu_order ASC");
 				$fetchSubMenu->execute([
 					':id_submenu' => $rowMenu["id_submenu"],
@@ -61,7 +63,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 						($arrGroupRootMenu["SUB_MENU"])[] = $arrayGroupSubMenu;
 					}
 				}
-				if(sizeof($arrGroupRootMenu["SUB_MENU"]) > 0){
+				if(isset($arrGroupRootMenu["SUB_MENU"])){
 					$arrayGroup[] = $arrGroupRootMenu;
 				}
 			}
