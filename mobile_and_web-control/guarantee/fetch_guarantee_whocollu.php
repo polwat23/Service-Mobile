@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAll[] = $arrMember;
 			}
 			if(sizeof($arrGroupAll) > 0 || isset($new_token)){
-				$arrayResult['MEMBER_NO'] = $arrGroupAll;
+				$arrayResult['CONTRACT_COLL'] = $arrGroupAll;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}

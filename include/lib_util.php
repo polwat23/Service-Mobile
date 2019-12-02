@@ -142,7 +142,7 @@ class library {
 				if($i == 0){
 					$contract_text = mb_substr($contract_no,$i,mb_strlen($formatArray[$i]));
 				}else{
-					$contract_text .= '/'.mb_substr($contract_no,mb_strlen(preg_replace('/-/','',$contract_text)),mb_strlen($formatArray[$i]));
+					$contract_text .= '/'.mb_substr($contract_no,mb_strlen(preg_replace('/-/','',$contract_text)));
 				}
 			}
 			return $contract_text;

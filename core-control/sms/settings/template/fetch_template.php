@@ -10,13 +10,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												WHERE is_use = '1' and id_smstemplate = :id_smstemplate ORDER BY id_smstemplate DESC");
 			$fetchTemplate->execute([':id_smstemplate' => $dataComing["id_smstemplate"]]);
 			$rowTemplate = $fetchTemplate->fetch();
-			$arrTemplate = array();
-			$arrTemplate["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
-			$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
-			$arrTemplate["TEMPLATE_BODY"] = $rowTemplate["smstemplate_body"];
-			$arrayResult['TEMPLATE'] = $arrTemplate;
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			$arrTemplateGroup["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
+			$arrTemplateGroup["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
+			$arrTemplateGroup["TEMPLATE_BODY"] = $rowTemplate["smstemplate_body"];
 		}else{
 			$fetchTemplate = $conmysql->prepare("SELECT id_smstemplate,smstemplate_name,smstemplate_body
 												FROM smstemplate
@@ -29,10 +25,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrTemplate["TEMPLATE_BODY"] = $rowTemplate["smstemplate_body"];
 				$arrTemplateGroup[] = $arrTemplate;
 			}
-			$arrayResult['TEMPLATE'] = $arrTemplateGroup;
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
 		}
+		$arrayResult['TEMPLATE'] = $arrTemplate;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "4003";
 		$arrayResult['RESPONSE_AWARE'] = "permission";

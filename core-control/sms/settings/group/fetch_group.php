@@ -8,11 +8,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1' and id_groupmember = :id_group");
 			$fetchGroup->execute([':id_group' => $dataComing["id_group"]]);
-			while($rowGroup = $fetchGroup->fetch()){
-				$arrGroupAll["ID_GROUP"] = $rowGroup["id_groupmember"];
-				$arrGroupAll["GROUP_NAME"] = $rowGroup["group_name"];
-				$arrGroupAll["GROUP_MEMBER"] = explode(',',$rowGroup["group_member"]);
-			}
+			$rowGroup = $fetchGroup->fetch();
+			$arrGroupAll["ID_GROUP"] = $rowGroup["id_groupmember"];
+			$arrGroupAll["GROUP_NAME"] = $rowGroup["group_name"];
+			$arrGroupAll["GROUP_MEMBER"] = explode(',',$rowGroup["group_member"]);
 		}else{
 			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1'");
