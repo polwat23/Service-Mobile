@@ -17,9 +17,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch();
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant,gcbindaccount gba 
-															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1'
-															and (gat.deptaccount_no <> gba.deptaccount_no_coop OR gba.bindaccount_status = '-9')");
+															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
+															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $member_no
 			]);
@@ -27,10 +26,24 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 			while($rowAllowDept = $fetchConstantAllowDept->fetch()){
 				$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 			}
-			$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
+			$arrAccBeenBind = array();
+			$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM bindaccount WHERE member_no = :member_no and bindaccount_status <> '-9'");
+			$InitDeptAccountBeenBind->execute([':member_no' => $member_no]);
+			while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch()){
+				$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
+			}
+			if(sizeof($arrAccBeenBind) > 0){
+				$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
+														ON dpm.depttype_code = dpt.depttype_code 
+														WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
+														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = '0'
+														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccBeenBind).")");
+			}else{
+				$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 														ON dpm.depttype_code = dpt.depttype_code 
 														WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
 														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = '0'");
+			}
 			$fetchDataAccount->execute([
 				':member_no' => $member_no,
 				':membcat_code' => $rowDataMember["MEMBCAT_CODE"]

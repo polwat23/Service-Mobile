@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_message,destination,repeat_send,send_date,amount_repeat
 													FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
 			$fetchGroup->execute([':id_sendahead' => $dataComing["id_sendahead"]]);
-			while($rowGroup = $fetchGroup->fetch()){
+			while($rowSendAhead = $fetchGroup->fetch()){
 				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
 				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
 				$arrGroupSendAhead["REPEAT_STATUS"] = $rowSendAhead["repeat_send"];
