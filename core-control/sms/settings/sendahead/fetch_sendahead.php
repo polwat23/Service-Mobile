@@ -9,12 +9,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
 			$fetchGroup->execute([':id_sendahead' => $dataComing["id_sendahead"]]);
 			while($rowGroup = $fetchGroup->fetch()){
-				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
-				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
-				$arrGroupSendAhead["REPEAT_STATUS"] = $rowSendAhead["repeat_send"];
-				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y');
-				$arrGroupSendAhead["AMOUNT_REPEAT"] = number_format($rowSendAhead["amount_repeat"],0);
-				$arrGroupSendAhead["DESTINATION"] = explode(',',$rowSendAhead["destination"]);
+				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowGroup["id_sendahead"];
+				$arrGroupSendAhead["SEND_MESSAGE"] = $rowGroup["send_message"];
+				$arrGroupSendAhead["REPEAT_STATUS"] = $rowGroup["repeat_send"];
+				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowGroup["send_date"],'D m Y');
+				$arrGroupSendAhead["AMOUNT_REPEAT"] = number_format($rowGroup["amount_repeat"],0);
+				$arrGroupSendAhead["DESTINATION"] = explode(',',$rowGroup["destination"]);
 			}
 		}else{
 			$fetchSendAhead = $conmysql->prepare("SELECT id_sendahead,send_message,destination,repeat_send,send_date,amount_repeat
