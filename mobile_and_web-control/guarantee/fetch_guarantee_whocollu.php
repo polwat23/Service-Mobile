@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
 												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
 												and lnm.contract_status = '1'
-                         							GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
+                         						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':member_no' => $member_no]);
 			while($rowWhocollu = $getWhocollu->fetch()){
 				$arrGroupAll = array();

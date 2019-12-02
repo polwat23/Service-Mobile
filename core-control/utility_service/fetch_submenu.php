@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 						($arrGroupRootMenu["SUB_MENU"])[] = $arrayGroupSubMenu;
 					}
 				}
-				if(sizeof($arrGroupRootMenu["SUB_MENU"]) > 0){
+				if(isset($arrGroupRootMenu["SUB_MENU"])){
 					$arrayGroup[] = $arrGroupRootMenu;
 				}
 			}

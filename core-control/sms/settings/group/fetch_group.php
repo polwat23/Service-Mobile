@@ -11,8 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			while($rowGroup = $fetchGroup->fetch()){
 				$arrGroupAll["ID_GROUP"] = $rowGroup["id_groupmember"];
 				$arrGroupAll["GROUP_NAME"] = $rowGroup["group_name"];
-				$arrMember = 
-				$arrGroupAll["GROUP_MEMBER"] =explode(',',$rowGroup["group_member"]);
+				$arrGroupAll["GROUP_MEMBER"] = explode(',',$rowGroup["group_member"]);
 			}
 		}else{
 			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
