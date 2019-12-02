@@ -3,8 +3,8 @@ require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','page_name'],$dataComing)){
 	if($func->check_permission_core($payload,'sms',$dataComing["page_name"],$conmysql)){
-		$getTemplate = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery,smu.sms_menu_name
-											FROM smsmenu smu INNER JOIN smstopicmatchtemplate smt ON smu.id_smsmenu = smt.id_smsmenu
+		$getTemplate = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery,smu.menu_name
+											FROM coresubmenu smu INNER JOIN smstopicmatchtemplate smt ON smu.id_submenu = smt.id_submenu
 											INNER JOIN smstemplate stp ON smt.id_smstemplate = stp.id_smstemplate 
 											LEFT JOIN smsquery sq ON stp.id_smsquery = sq.id_smsquery WHERE smu.page_name = :page_name and smu.menu_status = '1'
 											and stp.is_use = '1' and smt.is_use = '1'");
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['unique_id','page_name'],$dataComing)){
 			$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
 			$arrTemplate["TEMPLATE_MESSAGE"] = $rowTemplate["smstemplate_body"];
 			$arrTemplate["ID_SMSQUERY"] = $rowTemplate["id_smsquery"];
-			$arrTemplate["MENU_NAME"] = $rowTemplate["sms_menu_name"];
+			$arrTemplate["MENU_NAME"] = $rowTemplate["menu_name"];
 			$arrayResult["DATA"] = $arrTemplate;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);

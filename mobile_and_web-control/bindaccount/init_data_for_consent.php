@@ -17,8 +17,9 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch();
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant 
-															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1'");
+															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant,gcbindaccount gba 
+															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1'
+															and (gat.deptaccount_no <> gba.deptaccount_no_coop OR gba.bindaccount_status = '-9')");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $member_no
 			]);
