@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id','send_message','destination','send_d
 		if($insertSendAhead->execute([
 			':send_message' => $dataComing["send_message"],
 			':destination' => $dataComing["destination"],
-			':send_date' => $lib->convertdate($dataComing["send_message"],'y-n-d'),
+			':send_date' => $dataComing["send_date"],
 			':username' => $payload["username"]
 		])){
 			$arrayResult['RESULT'] = TRUE;

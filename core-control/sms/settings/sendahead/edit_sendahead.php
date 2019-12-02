@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id','send_message','destination','send_d
 		if($updateSendAhead->execute([
 			':send_message' => $dataComing["send_message"],
 			':destination' => $dataComing["destination"],
-			':send_date' => $lib->convertdate($dataComing["send_message"],'y-n-d'),
+			':send_date' => $lib->convertdate($dataComing["send_date"],'y-n-d'),
 			':id_sendahead' => $dataComing["id_sendahead"]
 		])){
 			$arrayResult['RESULT'] = TRUE;

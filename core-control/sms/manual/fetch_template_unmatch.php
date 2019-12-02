@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupTemplate = array();
 		$getTemplateUnMatch = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery
 											FROM smstemplate stp LEFT JOIN smsquery sq ON stp.id_smsquery = sq.id_smsquery 
-                                            WHERE stp.is_use = '1' and stp.id_smstemplate NOT IN(SELECT id_smstemplate FROM smstopicmatchtemplate WHERE is_use <> '-9')");
+                                            WHERE stp.is_use = '1' and stp.id_smstemplate NOT IN(SELECT id_smstemplate FROM smstopicmatchtemplate WHERE is_use <> '-9')
+											and ISNULL(stp.id_smsquery)");
 		$getTemplateUnMatch->execute();
 		if($getTemplateUnMatch->rowCount() > 0){
 			while($rowTemplate = $getTemplateUnMatch->fetch()){
