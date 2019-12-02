@@ -1,22 +1,18 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','send_message','destination','send_date'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','id_sendahead'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageahead',$conmysql)){
-		$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_message,destination,send_date,create_by)
-												VALUES(:send_message,:destination,:send_date,:username)");
-		if($insertSendAhead->execute([
-			':send_message' => $dataComing["send_message"],
-			':destination' => $dataComing["destination"],
-			':send_date' => $lib->convertdate($dataComing["send_message"],'y-n-d'),
-			':username' => $payload["username"]
+		$deleteSendAhead = $conmysql->prepare("DELETE FROM smssendahead WHERE id_sendahead = :id_sendahead");
+		if($deleteSendAhead->execute([
+			':id_sendahead' => $dataComing["id_sendahead"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "insert";
-			$arrayResult['RESPONSE'] = "Cannot insert send ahead";
+			$arrayResult['RESPONSE_AWARE'] = "delete";
+			$arrayResult['RESPONSE'] = "Cannot delete send ahead";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
