@@ -12,7 +12,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult = array();
 		if(isset($dataComing["contract_no"])){
+			$arrayGroupLoan = array();
 			$arrGroupAll = array();
+			$arrGroupAllMember = array();
 			$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 			$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
@@ -21,8 +23,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch();
-			$arrayResult['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
-			$arrayResult['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
+			$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+			$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 			$whocolluMember = $conoracle->prepare("SELECT
 													MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 													LCC.REF_COLLNO AS MEMBER_NO			
@@ -40,10 +42,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 				$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 				$arrMember["MEMBER_NO"] = $rowCollMember["MEMBER_NO"];
-				$arrGroupAll[] = $arrMember;
+				$arrGroupAllMember[] = $arrMember;
 			}
-			if(sizeof($arrGroupAll) > 0 || isset($new_token)){
-				$arrayResult['CONTRACT_COLL'] = $arrGroupAll;
+			$arrGroupAll['MEMBER'] = $arrGroupAllMember;
+			$arrayGroupLoan[] = $arrGroupAll;
+			if(sizeof($arrayGroupLoan) > 0 || isset($new_token)){
+				$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
