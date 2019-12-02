@@ -13,6 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
 				$arrGroupSendAhead["REPEAT_STATUS"] = $rowSendAhead["repeat_send"];
 				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y');
+				$arrGroupSendAhead["SEND_DATE_NOT_FORMAT"] = $rowGroup["send_date"];
 				$arrGroupSendAhead["AMOUNT_REPEAT"] = number_format($rowSendAhead["amount_repeat"],0);
 				$arrGroupSendAhead["DESTINATION"] = explode(',',$rowSendAhead["destination"]);
 			}
