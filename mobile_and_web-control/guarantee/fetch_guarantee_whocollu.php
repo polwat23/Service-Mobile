@@ -17,7 +17,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
 												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
-												and lnm.contract_status = '1'");
+												and lnm.contract_status = '1'
+												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch();
 			$arrayResult['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
@@ -29,8 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LNCONTCOLL LCC LEFT JOIN MBMEMBMASTER MMB ON LCC.REF_COLLNO = MMB.MEMBER_NO
 													LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 												WHERE
-													LCC.LOANCOLLTYPE_CODE = '01' 
-													AND LCC.COLL_STATUS = '1' 
+													LCC.LOANCOLLTYPE_CODE = '01'
 													AND LCC.LOANCONTRACT_NO = :contract_no ");
 			$whocolluMember->execute([':contract_no' => $contract_no]);
 			while($rowCollMember = $whocolluMember->fetch()){
