@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrTemplateGroup[] = $arrTemplate;
 			}
 		}
-		$arrayResult['TEMPLATE'] = $arrTemplate;
+		$arrayResult['TEMPLATE'] = $arrTemplateGroup;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

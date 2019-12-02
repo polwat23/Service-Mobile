@@ -5,21 +5,20 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 	if($func->check_permission_core($payload,'sms','managetopic',$conmysql) && is_numeric($dataComing["id_template"])){
 		$conmysql->beginTransaction();
 		$page_name = $lib->randomText('all',6);
-		$insertSmsMenu = $conmysql->prepare("INSERT INTO smsmenu(sms_menu_name,page_name,smsmenu_order,create_by,id_menuparent)
-												VALUES(:topic_name,:page_name,1,:username,8)");
+		$insertSmsMenu = $conmysql->prepare("INSERT INTO coresubmenu(menu_name,page_name,menu_order,create_by,id_menuparent,id_coremenu)
+												VALUES(:topic_name,:page_name,1,:username,8,1)");
 		if($insertSmsMenu->execute([
 			':topic_name' => $dataComing["topic_name"],
 			':page_name'=> $page_name,
 			':username' => $payload["username"]
 		])){
-			$id_smsmenu = $conmysql->lastInsertId();
-			$insertTopicMatch = $conmysql->prepare("INSERT INTO smstopicmatchtemplate(id_smsmenu,id_smstemplate) 
-													VALUES(:id_smsmenu,:id_smstemplate)");
+			$id_submenu = $conmysql->lastInsertId();
+			$insertTopicMatch = $conmysql->prepare("INSERT INTO smstopicmatchtemplate(id_submenu,id_smstemplate) 
+													VALUES(:id_submenu,:id_smstemplate)");
 			if($insertTopicMatch->execute([
-				':id_smsmenu' => $id_smsmenu,
+				':id_submenu' => $id_submenu,
 				':id_smstemplate' => $dataComing["id_template"]
 			])){
-				$id_matching = $conmysql->lastInsertId();
 				$arrayInsert = array();
 				foreach($dataComing["user_control"] as $username) {
 					if(strpos($username,"_system_") === FALSE){
@@ -27,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						$getIdPermission->execute([':username' => $username]);
 						if($getIdPermission->rowCount() > 0){
 							$rowIdPermission = $getIdPermission->fetch();
-							$arrayInsert[] = "(".$id_matching.",".$rowIdPermission["id_permission_menu"].")";
+							$arrayInsert[] = "(".$id_submenu.",".$rowIdPermission["id_permission_menu"].")";
 						}
 					}else{
 						$id_section_system = str_replace("_system_","",$username);
@@ -38,12 +37,12 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						$selectUserinSystem->execute([':id_section_system' => $id_section_system]);
 						if($selectUserinSystem->rowCount() > 0){
 							while($rowUser = $selectUserinSystem->fetch()){
-								$arrayInsert[] = "(".$id_matching.",".$rowUser["id_permission_menu"].")";
+								$arrayInsert[] = "(".$id_submenu.",".$rowUser["id_permission_menu"].")";
 							}
 						}
 					}
 				}
-				$insertMatchPermit = $conmysql->prepare("INSERT INTO smsmatchpermission(id_matching,id_permission_menu) 
+				$insertMatchPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu) 
 														VALUES".implode(',',$arrayInsert));
 				if($insertMatchPermit->execute()){
 					$conmysql->commit();
