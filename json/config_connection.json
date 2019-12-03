@@ -11,5 +11,5 @@
 	"DBLOG_HOST" : "localhost:27017",
 	"DBLOG_USERNAME" : "developer_test",
 	"DBLOG_PASSWORD" : "@Gensoft2018",
-	"DBLOG_DATABASENAME" : "demogcoop_connect_test",
+	"DBLOG_DATABASENAME" : "demogcoop_connect_test"
 }
