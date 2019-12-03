@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'TransactionWithdrawDeposit')){
-		$clientWS = new SoapClient("http://web.coopsiam.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
+		//$clientWS = new SoapClient("http://web.coopsiam.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		$operate_date = date('c');
 		/*try {
 			$argumentWS = [

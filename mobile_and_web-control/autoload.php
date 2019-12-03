@@ -2,7 +2,7 @@
 ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ,basetest");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -17,8 +17,6 @@ header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsaf
 foreach ($_SERVER as $header_key => $header_value){
 	if($header_key == "HTTP_AUTHORIZATION" ){
 		$headers["Authorization"] = $header_value;
-	}else if($header_key == "HTTP_BASETEST" ){
-		$headers["basetest"] = $header_value;
 	}
 }
 
