@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','ref_no','allow_create_menu','name_fav'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'FavoriteAccount')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		$conmysql->beginTransaction();
 		$fav_refno = substr($dataComing["ref_no"],0,3).(date("Y") + 543).substr($payload["member_no"],4).date("i").date("s").$lib->randomText("all",2)."FAV";
 		$insertFavAccount = $conmysql->prepare("INSERT INTO gcfavoritelist(fav_refno,ref_no,name_fav,member_no)

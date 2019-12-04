@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'GuaranteeInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_WHOCOLLU"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$whocolluMember->execute([':contract_no' => $contract_no]);
 			while($rowCollMember = $whocolluMember->fetch()){
 				$arrMember = array();
-				$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"],$conmysql);
+				$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
 				$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
 				$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 				$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$arrGroupAll['CONTRACT_NO'] =  $lib->formatcontract($rowWhocollu["LOANCONTRACT_NO"],$func->getConstant('loan_format',$conmysql));
+				$arrGroupAll['CONTRACT_NO'] =  $lib->formatcontract($rowWhocollu["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
 				$whocolluMember = $conoracle->prepare("SELECT
 														MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 														LCC.REF_COLLNO AS MEMBER_NO			
@@ -84,7 +84,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$whocolluMember->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 				while($rowCollMember = $whocolluMember->fetch()){
 					$arrMember = array();
-					$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"],$conmysql);
+					$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
 					$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
 					$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 					$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];

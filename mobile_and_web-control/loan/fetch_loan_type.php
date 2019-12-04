@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'LoanInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_LOAN"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowContract = $getContract->fetch()){
 			$arrGroupContract = array();
 			$arrContract = array();
-			$arrContract["CONTRACT_NO"] = $lib->formatcontract($rowContract["LOANCONTRACT_NO"],$func->getConstant('loan_format',$conmysql));
+			$arrContract["CONTRACT_NO"] = $lib->formatcontract($rowContract["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');

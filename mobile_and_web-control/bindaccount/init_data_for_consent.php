@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'BindAccountConsent')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 			while($rowDataAccount = $fetchDataAccount->fetch()){
 				$arrayAccount = array();
 				$arrayAccount["DEPTTYPE_DESC"] = $rowDataAccount["DEPTTYPE_DESC"];
-				$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
+				$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrayAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccount["DEPTACCOUNT_NAME"]);
 				$arrayGroupAccount[] = $arrayAccount;
 			}

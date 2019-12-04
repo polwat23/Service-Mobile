@@ -2,10 +2,10 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'LoanStatement')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
 		$arrayResult = array();
 		$arrayGroupSTM = array();
-		$limit = $func->getConstant('limit_stmloan',$conmysql);
+		$limit = $func->getConstant('limit_stmloan');
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');

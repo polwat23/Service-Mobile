@@ -36,11 +36,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 		}else{
 			if($rowLog["is_login"] == '-9' || $rowLog["is_login"] == '-10') {
-				$func->revoke_alltoken($payload["id_token"],'-9',$con,true);
+				$func->revoke_alltoken($payload["id_token"],'-9',true);
 			}else if($rowLog["is_login"] == '-8' || $rowLog["is_login"] == '-99'){
-				$func->revoke_alltoken($payload["id_token"],'-8',$con,true);
+				$func->revoke_alltoken($payload["id_token"],'-8',true);
 			}else if($rowLog["is_login"] == '-7'){
-				$func->revoke_alltoken($payload["id_token"],'-7',$con,true);
+				$func->revoke_alltoken($payload["id_token"],'-7',true);
 			}
 			$arrayResult["RESPONSE_MESSAGE"] = $config['LOGOUT'.$rowLog["is_login"]];
 			$arrayResult['RESULT'] = FALSE;

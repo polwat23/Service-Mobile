@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','id_history'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'Notification')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$deleteHistory = $conmysql->prepare("DELETE FROM gchistory WHERE member_no = :member_no and id_history = :id_history");
 		if($deleteHistory->execute([
 			':member_no' => $payload["member_no"],

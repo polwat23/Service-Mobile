@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'PaymentMonthlyInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_KEEPINGMONTH"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -10,8 +10,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		$limit_period = $func->getConstant('limit_kpmonth',$conmysql);
-		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth',$conmysql);
+		$limit_period = $func->getConstant('limit_kpmonth');
+		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth');
 		$dateNow = date('d');
 		$arrayGroupPeriod = array();
 		if($dateNow >= $dateshow_kpmonth){

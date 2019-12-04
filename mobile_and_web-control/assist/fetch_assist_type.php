@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'AssistInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_ASSIST"];
 		}else if($payload["member_no"] == 'salemode'){

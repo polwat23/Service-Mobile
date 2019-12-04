@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'TransactionWithdrawDeposit')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -21,8 +21,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBind = array();
 				$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
 				$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
-				$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format',$conmysql));
-				$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
+				$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
 				$arrAccBind["BANK_LOGO"] = $rowAccBind["bank_logo_path"];
 				$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
 				$arrAccBind["BANK_LOGO_WEBP"] = $explodePathLogo[0].'.webp';

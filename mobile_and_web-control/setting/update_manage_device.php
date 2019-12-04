@@ -2,8 +2,8 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','id_token'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageDevice')){
-		if($func->logout($dataComing["id_token"],'-7',$conmysql)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
+		if($func->logout($dataComing["id_token"],'-7')){
 			$arrayResult['RESULT'] = TRUE;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;

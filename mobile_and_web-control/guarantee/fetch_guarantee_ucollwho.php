@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'GuaranteeInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_UCOLLWHO"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -30,10 +30,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getUcollwho->execute([':member_no' => $member_no]);
 		while($rowUcollwho = $getUcollwho->fetch()){
 			$arrayColl = array();
-			$arrayColl["CONTRACT_NO"] = $lib->formatcontract($rowUcollwho["LOANCONTRACT_NO"],$func->getConstant('loan_format',$conmysql));
+			$arrayColl["CONTRACT_NO"] = $lib->formatcontract($rowUcollwho["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
 			$arrayColl["COLL_MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
-			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"],$conmysql);
+			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
 			$arrayColl["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
 			$arrayColl["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);

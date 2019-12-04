@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ShareInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_SHARE"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"],2);
 			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
 			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
-			$limit = $func->getConstant('limit_stmshare',$conmysql);
+			$limit = $func->getConstant('limit_stmshare');
 			$arrayResult['LIMIT_DURATION'] = $limit;
 			if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 				$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');

@@ -36,14 +36,15 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$updateOldToken->execute([
 					':unique_id' => $dataComing["unique_id"]
 				]);
-				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
-													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
+				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address,fcm_token) 
+													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address,:fcm_token)");
 				if($insertToken->execute([
 					':refresh_token' => $refresh_token,
 					':unique_id' => $dataComing["unique_id"],
 					':channel' => $arrPayload["PAYLOAD"]["channel"],
 					':device_name' => $arrPayload["PAYLOAD"]["device_name"],
-					':ip_address' => $arrPayload["PAYLOAD"]["ip_address"]
+					':ip_address' => $arrPayload["PAYLOAD"]["ip_address"],
+					':fcm_token' => $dataComing["fcm_token"] ?? null
 				])){
 					$id_token = $conmysql->lastInsertId();
 					if(isset($dataComing["firsttime"])){

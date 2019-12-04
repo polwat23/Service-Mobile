@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
 		$getNameMember->execute([':member_no' => $member_no]);
 		$rowName = $getNameMember->fetch();
-		$template = $func->getTemplate('send_mail_forget_password',$conmysql);
+		$template = $func->getTemplate('send_mail_forget_password');
 		$arrayDataTemplate = array();
 		$temp_pass = $lib->randomText('number',6);
 		$arrayDataTemplate["FULL_NAME"] = (isset($rowName["MEMB_NAME"]) ? $rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"] : $member_no);
@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
 			if($lib->sendMail($dataComing["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction)){
 				$conmysql->commit();
-				if($func->logoutAll(null,$member_no,'-9',$conmysql)){
+				if($func->logoutAll(null,$member_no,'-9')){
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

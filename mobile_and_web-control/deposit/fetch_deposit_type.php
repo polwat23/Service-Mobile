@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'DepositInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -23,9 +23,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowAccount = $getAccount->fetch()){
 			$arrAccount = array();
 			$arrGroupAccount = array();
-			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
+			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
-			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep',$conmysql));
+			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');

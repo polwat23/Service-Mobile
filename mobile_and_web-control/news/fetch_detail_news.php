@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['id_news'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'News')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
 		$fetchDetailNews = $conmysql->prepare("SELECT ga.name_gallery,ga.update_date,ga.path_img_1,ga.path_img_2,ga.path_img_3,
 											ga.path_img_4,ga.path_img_5,gn.news_title,gn.news_detail,gn.create_by
 											FROM gcnews gn LEFT JOIN gcgallery ga ON gn.id_gallery = ga.id_gallery 

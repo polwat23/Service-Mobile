@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ManagementAccount')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -44,8 +44,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
 				$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
-				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format',$conmysql));
-				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
+				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
 				$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
 				$arrGroupAccAllow[] = $arrAccBeenAllow;
 			}

@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'PaymentMonthlyDetail')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_KEEPINGMONTH"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -53,13 +53,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formatcontract($rowDetail["PAY_ACCOUNT"],$func->getConstant('loan_format',$conmysql));
+				$arrDetail["PAY_ACCOUNT"] = $lib->formatcontract($rowDetail["PAY_ACCOUNT"],$func->getConstant('loan_format'));
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format',$conmysql));
+				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;

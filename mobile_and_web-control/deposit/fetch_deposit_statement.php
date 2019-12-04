@@ -2,10 +2,10 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'DepositStatement')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$arrayResult = array();
 		$arrayGroupSTM = array();
-		$limit = $func->getConstant('limit_stmdeposit',$conmysql);
+		$limit = $func->getConstant('limit_stmdeposit');
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');

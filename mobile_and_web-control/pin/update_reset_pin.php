@@ -5,7 +5,7 @@ $updateResetPin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = null WHER
 if($updateResetPin->execute([
 	':member_no' => $payload["member_no"]
 ])){
-	if($func->logoutAll(null,$payload["member_no"],'-10',$conmysql)){
+	if($func->logoutAll(null,$payload["member_no"],'-10')){
 		$arrayResult['RESULT'] = TRUE;
 		if(isset($new_token)){
 			$arrayResult['NEW_TOKEN'] = $new_token;

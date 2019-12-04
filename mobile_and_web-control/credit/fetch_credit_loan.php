@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'LoanCredit')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_CREDIT"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$member_no = $payload["member_no"];
 		}
 		$arrGroupCredit = array();
-		$loantype_notshow = $func->getConstant('loantype_notshow',$conmysql);
+		$loantype_notshow = $func->getConstant('loantype_notshow');
 		$fetchCredit = $conoracle->prepare("SELECT lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,
 											(sm.sharestk_amt*sh.unitshare_value*lc.multiple_share ) + (NVL(mb.salary_amount,15000)*lc.multiple_salary ) AS CREDIT_AMT
 											FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,

@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'TransferDepInsideCoop')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -29,8 +29,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowDataAccAllow = $getDataBalAcc->fetch()){
 				$arrAccAllow = array();
 				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
-				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conmysql));
-				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
 				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
 				$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
@@ -45,8 +45,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccFav = $getAccFav->fetch()){
 				$arrAccFav = array();
 				$arrAccFav["DEPTACCOUNT_NO"] = $rowAccFav["destination"];
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format',$conmysql));
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccFav["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
+				$arrAccFav["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}

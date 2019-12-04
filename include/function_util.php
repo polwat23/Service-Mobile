@@ -2,10 +2,18 @@
 
 namespace Component;
 
+use Connection\connection;
+
 class functions {
-	
-		public function checkLogin($id_token,$con) {
-			$checkLogin = $con->prepare("SELECT id_userlogin FROM gcuserlogin 
+		private $con;
+		
+		function __construct() {
+			$connection = new connection();
+			$this->con = $connection->connecttomysql();
+		}
+		
+		public function checkLogin($id_token) {
+			$checkLogin = $this->con->prepare("SELECT id_userlogin FROM gcuserlogin 
 										WHERE id_token = :id_token and is_login = '1'");
 			$checkLogin->execute([
 				':id_token' => $id_token
@@ -16,28 +24,28 @@ class functions {
 				return false;
 			}
 		}
-		public function logout($id_token,$type_login,$con) {
-			$logout = $con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() WHERE id_token = :id_token");
+		public function logout($id_token,$type_login) {
+			$logout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() WHERE id_token = :id_token");
 			if($logout->execute([
 				':type_login' => $type_login,
 				':id_token' => $id_token
 			])){
-				$this->revoke_alltoken($id_token,'-9',$con,true);
+				$this->revoke_alltoken($id_token,'-9',true);
 				return true;
 			}else{
 				return false;
 			}
 		}
-		public function logoutAll($id_token,$member_no,$type_login,$con) {
+		public function logoutAll($id_token,$member_no,$type_login) {
 			$arrMember = array();
 			if(isset($id_token)){
-				$getMemberlogin = $con->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and id_token <> :id_token and is_login = '1'");
+				$getMemberlogin = $this->con->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and id_token <> :id_token and is_login = '1'");
 				$getMemberlogin->execute([
 					':member_no' => $member_no,
 					':id_token' => $id_token
 				]);
 			}else{
-				$getMemberlogin = $con->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and is_login = '1'");
+				$getMemberlogin = $this->con->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and is_login = '1'");
 				$getMemberlogin->execute([
 					':member_no' => $member_no
 				]);
@@ -45,7 +53,7 @@ class functions {
 			while($rowMember = $getMemberlogin->fetch()){
 				$arrMember[] = $rowMember["id_token"];
 			}
-			$logout = $con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() 
+			$logout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() 
 									WHERE member_no = :member_no and id_token <> :id_token and is_login = '1'");
 			if($logout->execute([
 				':type_login' => $type_login,
@@ -53,16 +61,16 @@ class functions {
 				':id_token' => $id_token
 			])){
 				foreach($arrMember as $token_value){
-					$this->revoke_alltoken($token_value,'-9',$con,true);
+					$this->revoke_alltoken($token_value,'-9',$this->con,true);
 				}
 				return true;
 			}else{
 				return false;
 			}
 		}
-		public function revoke_alltoken($id_token,$type_revoke,$con,$is_logout=false){
+		public function revoke_alltoken($id_token,$type_revoke,$is_logout=false){
 			if($is_logout){
-				$revokeAllToken = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
+				$revokeAllToken = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
 											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
 											WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
@@ -85,10 +93,10 @@ class functions {
 					case '-99' : $type_login = '-6';
 						break;
 				}
-				$revokeAllToken = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
+				$revokeAllToken = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
 												rt_is_revoke = :type_revoke,rt_expire_date = NOW()
 												WHERE id_token = :id_token");
-				$forceLogout = $con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW()
+				$forceLogout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW()
 												WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
 					':type_revoke' => $type_revoke,
@@ -103,8 +111,8 @@ class functions {
 				}
 			}
 		}
-		public function revoke_accesstoken($id_token,$type_revoke,$con){
-			$revokeAT = $con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW() WHERE id_token = :id_token");
+		public function revoke_accesstoken($id_token,$type_revoke){
+			$revokeAT = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW() WHERE id_token = :id_token");
 			if($revokeAT->execute([
 				':type_revoke' => $type_revoke,
 				':id_token' => $id_token
@@ -114,8 +122,8 @@ class functions {
 				return false;
 			}
 		}
-		public function revoke_refreshtoken($id_token,$type_revoke,$con){
-			$revokeRT = $con->prepare("UPDATE gctoken SET rt_is_revoke = :type_revoke,rt_expire_date = NOW() WHERE id_token = :id_token");
+		public function revoke_refreshtoken($id_token,$type_revoke){
+			$revokeRT = $this->con->prepare("UPDATE gctoken SET rt_is_revoke = :type_revoke,rt_expire_date = NOW() WHERE id_token = :id_token");
 			if($revokeRT->execute([
 				':type_revoke' => $type_revoke,
 				':id_token' => $id_token
@@ -125,7 +133,7 @@ class functions {
 				return false;
 			}
 		}
-		public function check_permission($user_type,$menu_component,$con,$service_component=null){
+		public function check_permission($user_type,$menu_component,$service_component=null){
 			$permission = array();
 			switch($user_type){
 				case '0' : 
@@ -150,10 +158,10 @@ class functions {
 					break;
 			}
 			if($user_type == '5' || $user_type == '9'){
-				$checkPermission = $con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
 										 and menu_permission IN (".implode(',',$permission).")");
 			}else{
-				$checkPermission = $con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
 										and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
 			}
 			$checkPermission->execute([':menu_component' => $menu_component]);
@@ -163,8 +171,8 @@ class functions {
 				return false;
 			}
 		}
-		public function getConstant($constant,$con) {
-			$getLimit = $con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = :constant and is_use = '1'");
+		public function getConstant($constant) {
+			$getLimit = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = :constant and is_use = '1'");
 			$getLimit->execute([':constant' => $constant]);
 			if($getLimit->rowCount() > 0){
 				$rowLimit = $getLimit->fetch();
@@ -173,8 +181,8 @@ class functions {
 				return false;
 			}
 		}
-		public function getPathpic($member_no,$con){
-			$getAvatar = $con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no");
+		public function getPathpic($member_no){
+			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no");
 			$getAvatar->execute([':member_no' => $member_no]);
 			if($getAvatar->rowCount() > 0){
 				$rowPathpic = $getAvatar->fetch();
@@ -187,8 +195,8 @@ class functions {
 			}
 			return $returnResult;
 		}
-		public function getTemplate($template_name,$con){
-			$getTemplatedata = $con->prepare("SELECT template_subject,template_body 
+		public function getTemplate($template_name){
+			$getTemplatedata = $this->con->prepare("SELECT template_subject,template_body 
 										FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
 			$getTemplatedata->execute([':template_name' => $template_name]);
 			$rowTemplate = $getTemplatedata->fetch();
@@ -197,8 +205,8 @@ class functions {
 			$arrayResult["BODY"] = $rowTemplate["template_body"];
 			return $arrayResult;
 		}
-		public function insertHistory($payload,$type_history,$con) {
-			$insertHis = $con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
+		public function insertHistory($payload,$type_history) {
+			$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
 										VALUES(:his_type,:title,:detail,:path_image,:member_no)");
 			if($insertHis->execute([
 				':his_type' => $type_history,
@@ -212,12 +220,12 @@ class functions {
 				return false;
 			}
 		}
-		public function check_permission_core($payload,$root_menu,$page_name,$con){
+		public function check_permission_core($payload,$root_menu,$page_name){
 			if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 				return true;
 			}else{
 				if(isset($page_name)){
-					$getConstructorMenu = $con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+					$getConstructorMenu = $this->con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
 														WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
 					$getConstructorMenu->execute([
 						':username' => $payload["username"],
@@ -225,7 +233,7 @@ class functions {
 					]);
 					if($getConstructorMenu->rowCount() > 0){
 						$rowrootMenu = $getConstructorMenu->fetch();
-						$checkMenuinRoot = $con->prepare("SELECT csm.id_submenu FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm ON csm.id_submenu = cpsm.id_submenu
+						$checkMenuinRoot = $this->con->prepare("SELECT csm.id_submenu FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm ON csm.id_submenu = cpsm.id_submenu
 															WHERE cpsm.is_use = '1' and csm.id_coremenu = :id_coremenu and csm.menu_status = '1' and csm.page_name = :page_name");
 						$checkMenuinRoot->execute([
 							':id_coremenu' => $rowrootMenu["id_coremenu"],
@@ -240,7 +248,7 @@ class functions {
 						return false;
 					}
 				}else{
-					$checkPermit = $con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+					$checkPermit = $this->con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
 													WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
 					$checkPermit->execute([
 						':username' => $payload["username"],

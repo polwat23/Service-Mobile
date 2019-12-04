@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 		echo json_encode($arrayResult);
 		exit();
 	}
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'AppRegister')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AppRegister')){
 		$email = $dataComing["email"];
 		$phone = $dataComing["phone"];
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);

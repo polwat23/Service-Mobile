@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','setting_status','setting_name'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingManageNotification')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageNotification')){
 		$updateSetting = $conmysql->prepare("UPDATE gcuserlogin SET ".strtolower($dataComing["setting_name"])." = :status
 												WHERE id_token = :id_token and is_login = '1'");
 		if($updateSetting->execute([

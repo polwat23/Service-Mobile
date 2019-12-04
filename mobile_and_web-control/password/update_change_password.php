@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'SettingChangePassword')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingChangePassword')){
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		$conmysql->beginTransaction();
 		$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1'
@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 			':password' => $password,
 			':member_no' => $payload["member_no"]
 		])){
-			if($func->logoutAll($payload["id_token"],$payload["member_no"],'-9',$conmysql)){
+			if($func->logoutAll($payload["id_token"],$payload["member_no"],'-9')){
 				$conmysql->commit();
 				$arrayResult['RESULT'] = TRUE;
 				if(isset($new_token)){

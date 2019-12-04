@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ManagementAccount')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -41,8 +41,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ICON_BANK_WEBP"] = $explodePathBankLOGO[0].'.webp';
 				$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
 				$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
-				$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format',$conmysql));
-				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep',$conmysql));
+				$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
+				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
 				$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
 				$fetchAccountCoop = $conoracle->prepare("SELECT deptaccount_name,depttype_code,membcat_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 				$fetchAccountCoop->execute([

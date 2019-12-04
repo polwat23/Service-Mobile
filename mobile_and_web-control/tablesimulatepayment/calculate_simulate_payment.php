@@ -2,9 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'PaymentSimulateTable')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
 		$request_date = $dataComing['request_date'];
-		$cal_start_pay_date = $func->getConstant('cal_start_pay_date',$conmysql);
+		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
 		$pay_date = date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime($lib->convertdate($request_date,'y-N-d'))));
 		$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
 		$payment_sumbalance = (float) preg_replace('/,/','',$dataComing['payment_sumbalance']);
