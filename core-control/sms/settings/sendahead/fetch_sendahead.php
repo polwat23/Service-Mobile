@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead',$conmysql)){
+	if($func->check_permission_core($payload,'sms','manageahead')){
 		$arrGroupSendAhead = array();
 		if(isset($dataComing["id_sendahead"])){
 			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_message,destination,repeat_send,send_date,amount_repeat

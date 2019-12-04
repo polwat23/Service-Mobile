@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','userlogin',$conmysql)){
+	if($func->check_permission_core($payload,'mobileadmin','userlogin')){
 		$arrayGroup = array();
 		$fetchUserlogin = $conmysql->prepare("SELECT member_no, device_name, login_date, id_token 
 												FROM  gcuserlogin WHERE is_login = '1' ");

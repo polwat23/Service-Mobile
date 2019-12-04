@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','group_name','group_member','id_group'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managegroup',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managegroup')){
 		$EditSmsGroup = $conmysql->prepare("UPDATE smsgroupmember SET group_name = :group_name,group_member = :group_member
 												WHERE id_groupmember = :id_group");
 		if($EditSmsGroup->execute([

@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_submenu'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managetopic')){
 		$unuseTopic = $conmysql->prepare("UPDATE coresubmenu SET menu_status = '-9' WHERE id_submenu = :id_submenu");
 		if($unuseTopic->execute([
 			':id_submenu' => $dataComing["id_submenu"]

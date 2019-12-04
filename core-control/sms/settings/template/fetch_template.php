@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managetemplate')){
 		$arrTemplateGroup = array();
 		if(isset($dataComing["id_smstemplate"])){
 			$fetchTemplate = $conmysql->prepare("SELECT id_smstemplate,smstemplate_name,smstemplate_body

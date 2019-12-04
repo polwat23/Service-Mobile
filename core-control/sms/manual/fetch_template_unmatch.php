@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','sendmessage',$conmysql)){
+	if($func->check_permission_core($payload,'sms','sendmessage')){
 		$arrGroupTemplate = array();
 		$getTemplateUnMatch = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery
 											FROM smstemplate stp LEFT JOIN smsquery sq ON stp.id_smsquery = sq.id_smsquery 

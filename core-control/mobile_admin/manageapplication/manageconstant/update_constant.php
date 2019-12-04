@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_constant','value_constant'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageconstant',$conmysql)){
+	if($func->check_permission_core($payload,'mobileadmin','manageconstant')){
 		$updateConstants = $conmysql->prepare("UPDATE gcconstant SET constant_value = :constant_value
 												WHERE id_constant = :id_constant");
 		if($updateConstants->execute([

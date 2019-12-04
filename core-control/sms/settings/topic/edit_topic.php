@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_control','id_submenu'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic',$conmysql) && is_numeric($dataComing["id_template"])){
+	if($func->check_permission_core($payload,'sms','managetopic') && is_numeric($dataComing["id_template"])){
 		$conmysql->beginTransaction();
 		$UpdateMenuSMS = $conmysql->prepare("UPDATE coresubmenu SET menu_name = :topic_name WHERE id_submenu = :id_submenu");
 		if($UpdateMenuSMS->execute([

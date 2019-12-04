@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managegroup',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managegroup')){
 		$arrGroupAll = array();
 		if(isset($dataComing["id_group"])){
 			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember

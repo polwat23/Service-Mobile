@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_template'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managetemplate')){
 		$id_smsquery = null;
 		$conmysql->beginTransaction();
 		if(isset($dataComing["query_template"]) && isset($dataComing["column_selected"])){

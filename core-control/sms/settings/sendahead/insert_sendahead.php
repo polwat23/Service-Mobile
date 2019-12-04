@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','send_message','destination','send_date'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead',$conmysql)){
+	if($func->check_permission_core($payload,'sms','manageahead')){
 		$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_message,destination,send_date,create_by)
 												VALUES(:send_message,:destination,:send_date,:username)");
 		if($insertSendAhead->execute([

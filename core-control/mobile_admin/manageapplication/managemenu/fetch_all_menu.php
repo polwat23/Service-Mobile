@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managemenu',$conmysql)){
+	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
 		$arrayGroup = array();
 		$fetchMenuMobile = $conmysql->prepare("SELECT id_menu, menu_name, menu_status FROM gcmenu 
 											  WHERE menu_status <>'9' AND menu_parent NOT IN ('-1','-2','-8','-9')  

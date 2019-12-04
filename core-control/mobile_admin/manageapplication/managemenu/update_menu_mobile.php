@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_status','id_menu'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managemenu',$conmysql)){
-		$updatemenu = $con->prepare("UPDATE gcmenu SET menu_status = :menu_status
+	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
+		$updatemenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = :menu_status
 									 WHERE id_menu = :id_menu");
 		if($updatemenu->execute([
 			':menu_status' => $dataComing["menu_status"],
