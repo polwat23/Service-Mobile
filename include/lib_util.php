@@ -282,27 +282,29 @@ class library {
 	public function sendNotify($payload,$type_send){
 		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
 		$json_data = json_decode($json,true);
-		define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
+		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
 		if($type_send == 'someone'){
 			$data = [
 				"registration_ids" => $payload["TO"],
-				"priority" => $payload["PRIORITY"],
+				"priority" => "high",
 				"notification" => [
-					"title" => $payload["PAYLOAD"]["TITLE"],
+					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"sound" => $payload["PAYLOAD"]["SOUND"],
-					"icon" => $json_data["ICON"]
+					"icon" => $json_data["ICON"],
+					"sound" => "default",
+					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
 			];
 		}else if($type_send == 'all'){
 			$data = [
 				"to" => $payload["TO"],
-				"priority" => $payload["PRIORITY"],
+				"priority" => "high",
 				"notification" => [
-					"title" => $payload["PAYLOAD"]["TITLE"],
+					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"sound" => $payload["PAYLOAD"]["SOUND"],
-					"icon" => $json_data["ICON"]
+					"icon" => $json_data["ICON"],
+					"sound" => "default",
+					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
 			];
 		}
@@ -322,14 +324,18 @@ class library {
 																												 
 		$result = curl_exec($ch);
 		
-		if($result){
+		if(isset($result)){
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
-			if($resultNoti->success){
-				return true;
+			if(isset($resultNoti)){
+				if($resultNoti->success){
+					return true;
+				}else{
+					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
+					file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+					return false;
+				}
 			}else{
-				$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti->results);
-				file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}else{

@@ -9,10 +9,15 @@ if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
 			$arrColumn = array();
 			$queryDataForm = $conoracle->prepare($dataComing["query_message_spc_"]);
 			$queryDataForm->execute();
-			$dataForm = $queryDataForm->fetch(PDO::FETCH_ASSOC);
-			if(isset($dataForm) && $dataForm){
-				$arrColumn = array_keys($dataForm);
+			while($rowData = $queryDataForm->fetch(PDO::FETCH_ASSOC)){
+				$arrDataForm = array();
+				$arrColumn = array_keys($rowData);
+				foreach($arrColumn as $column_name){
+					$arrDataForm[$column_name] = $rowData[$column_name];
+				}
+				$arrayData[] = $arrDataForm;
 			}
+			$arrayResult['DATA'] = $arrayData;
 			$arrayResult['COLUMN'] = $arrColumn;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);

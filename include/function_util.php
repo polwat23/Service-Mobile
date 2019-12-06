@@ -206,60 +206,102 @@ class functions {
 			return $arrayResult;
 		}
 		public function insertHistory($payload,$type_history) {
-			$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
-										VALUES(:his_type,:title,:detail,:path_image,:member_no)");
-			if($insertHis->execute([
-				':his_type' => $type_history,
-				':title' => $payload["title"],
-				':detail' => $payload["detail"],
-				':path_image' => $payload["path_image"],
-				':member_no' => $payload["member_no"]
-			])){
-				return true;
+			$this->con->beginTransaction();
+			if($payload["TYPE_SEND_HISTORY"] == "onemessage"){
+				$bulkInsert = array();
+				foreach($payload["MEMBER_NO"] as $member_no){
+					$bulkInsert[] = "('".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."')";
+					if(sizeof($bulkInsert) == "1000"){
+						$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
+												VALUES".implode(',',$bulkInsert));
+						if($insertHis->execute()){
+							unset($bulkInsert);
+							$bulkInsert = array();
+							continue;
+						}else{
+							$this->con->rollback();
+							return false;
+						}
+					}
+				}
+				if(sizeof($bulkInsert) > 0){
+					$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
+												VALUES".implode(',',$bulkInsert));
+					if($insertHis->execute()){
+						$this->con->commit();
+						return true;
+					}else{
+						$this->con->rollback();
+						return false;
+					}
+				}else{
+					$this->con->commit();
+					return true;
+				}
+			}else if($payload["TYPE_SEND_HISTORY"] == "manymessage"){
+				$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no)
+													VALUES(:his_type,:hit_title,:his_detail,:his_path_image,:member_no)");
+				if($insertHis->execute([
+					':his_type' => $type_history,
+					':hit_title' => $payload["PAYLOAD"]["SUBJECT"],
+					':his_detail' => $payload["PAYLOAD"]["BODY"],
+					':his_path_image' => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null,
+					':member_no' => $payload["MEMBER_NO"]
+				])){
+					$this->con->commit();
+					return true;
+				}else{
+					$this->con->rollback();
+					return false;
+				}
 			}else{
-				return false;
+				return true;
 			}
 		}
 		public function check_permission_core($payload,$root_menu,$page_name){
-			if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
-				return true;
-			}else{
-				if(isset($page_name)){
-					$getConstructorMenu = $this->con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
-														WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
-					$getConstructorMenu->execute([
-						':username' => $payload["username"],
-						':root_menu' => $root_menu
-					]);
-					if($getConstructorMenu->rowCount() > 0){
-						$rowrootMenu = $getConstructorMenu->fetch();
-						$checkMenuinRoot = $this->con->prepare("SELECT csm.id_submenu FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm ON csm.id_submenu = cpsm.id_submenu
-															WHERE cpsm.is_use = '1' and csm.id_coremenu = :id_coremenu and csm.menu_status = '1' and csm.page_name = :page_name");
-						$checkMenuinRoot->execute([
-							':id_coremenu' => $rowrootMenu["id_coremenu"],
-							':page_name' => $page_name
+			if(isset($payload["section_system"]) && isset($payload["username"])){
+				if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
+					return true;
+				}else{
+					if(isset($page_name)){
+						$getConstructorMenu = $this->con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+															WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
+						$getConstructorMenu->execute([
+							':username' => $payload["username"],
+							':root_menu' => $root_menu
 						]);
-						if($checkMenuinRoot->rowCount() > 0){
-							return true;
+						if($getConstructorMenu->rowCount() > 0){
+							$rowrootMenu = $getConstructorMenu->fetch();
+							$checkMenuinRoot = $this->con->prepare("SELECT csm.id_submenu FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm ON csm.id_submenu = cpsm.id_submenu
+																WHERE cpsm.is_use = '1' and csm.id_coremenu = :id_coremenu and csm.menu_status = '1' and csm.page_name = :page_name");
+							$checkMenuinRoot->execute([
+								':id_coremenu' => $rowrootMenu["id_coremenu"],
+								':page_name' => $page_name
+							]);
+							if($checkMenuinRoot->rowCount() > 0){
+								return true;
+							}else{
+								return false;
+							}
 						}else{
 							return false;
 						}
 					}else{
-						return false;
-					}
-				}else{
-					$checkPermit = $this->con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
-													WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
-					$checkPermit->execute([
-						':username' => $payload["username"],
-						':root_menu' => $root_menu
-					]);
-					if($checkPermit->rowCount() > 0){
-						return true;
-					}else{
-						return false;
+						$checkPermit = $this->con->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
+														WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
+						$checkPermit->execute([
+							':username' => $payload["username"],
+							':root_menu' => $root_menu
+						]);
+						if($checkPermit->rowCount() > 0){
+							return true;
+						}else{
+							return false;
+						}
 					}
 				}
+			}else{
+				return false;
 			}
 		}
 }

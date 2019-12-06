@@ -29,13 +29,8 @@ require_once(__DIR__.'/../include/function_util.php');
 // Call functions
 use Utility\library;
 use Component\functions;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use ReallySimpleJWT\Token;
-use ReallySimpleJWT\Parse;
-use ReallySimpleJWT\Jwt;
-use ReallySimpleJWT\Validate;
-use ReallySimpleJWT\Encode;
+use PHPMailer\PHPMailer\{PHPMailer,Exception};
+use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
 
 $mailFunction = new PHPMailer(false);

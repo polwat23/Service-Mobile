@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageNotification')){
-		$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email,is_sound_notify
+		$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email
 													FROM gcuserlogin WHERE id_token = :id_token and is_login = '1'");
 		$fetchSettingNotify->execute([':id_token' => $payload["id_token"]]);
 		if($fetchSettingNotify->rowCount() > 0){
@@ -11,7 +11,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["receive_notify_news"];
 			$arrayResult["RECEIVE_NOTIFY_TRANSACTION"] = $rowSetting["receive_notify_transaction"];
 			$arrayResult["RECEIVE_LOGIN_EMAIL"] = $rowSetting["receive_login_email"];
-			$arrayResult["IS_SOUND_NOTIFY"] = $rowSetting["is_sound_notify"];
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
