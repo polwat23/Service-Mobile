@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 														VALUES(:sms_query,:column_selected,:target_field,:username)");
 				if($insertSmsQuery->execute([
 					':sms_query' => $dataComing["query_template_spc_"],
-					':column_selected' => $dataComing["column_selected"],
+					':column_selected' => implode(',',$dataComing["column_selected"]),
 					':target_field' => $dataComing["target_field"],
 					':username' => $payload["username"]
 				])){
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 					exit();
 				}
 			}else{
-				$query = $dataComing["query_template_spc_"];
+				/*$query = $dataComing["query_template_spc_"];
 				if(stripos($query,'WHERE') === FALSE){
 					if(stripos($query,'GROUP BY') !== FALSE){
 						$arrQuery = explode('GROUP BY',$query);
@@ -41,13 +41,14 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 					}else{
 						$query .= " and ".$dataComing["condition_target"];
 					}
-				}
-				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,is_bind_param,create_by)
-														VALUES(:sms_query,:column_selected,:target_field,'1',:username)");
+				}*/
+				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
+														VALUES(:sms_query,:column_selected,:target_field,:condition_target,'1',:username)");
 				if($insertSmsQuery->execute([
-					':sms_query' => $query,
-					':column_selected' => $dataComing["column_selected"],
+					':sms_query' => $dataComing["query_template_spc_"],
+					':column_selected' => implode(',',$dataComing["column_selected"]),
 					':target_field' => $dataComing["target_field"],
+					':condition_target' => $dataComing["condition_target"],
 					':username' => $payload["username"]
 				])){
 					$id_smsquery = $conmysql->lastInsertId();
