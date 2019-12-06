@@ -1,16 +1,16 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','template_name','template_body','is_bind_param'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managetemplate')){
 		$id_smsquery = null;
 		$conmysql->beginTransaction();
-		if(isset($dataComing["query_template"]) && isset($dataComing["column_selected"])){
-			if($dataComing["is_bind_param"] == '0'){
-				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,username)
+		if(isset($dataComing["query_template_spc_"]) && isset($dataComing["column_selected"])){
+			if(empty($dataComing["condition_target"])){
+				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,create_by)
 														VALUES(:sms_query,:column_selected,:target_field,:username)");
 				if($insertSmsQuery->execute([
-					':sms_query' => $dataComing["query_template"],
+					':sms_query' => $dataComing["query_template_spc_"],
 					':column_selected' => $dataComing["column_selected"],
 					':target_field' => $dataComing["target_field"],
 					':username' => $payload["username"]
@@ -26,10 +26,26 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','is_
 					exit();
 				}
 			}else{
-				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,is_bind_param,username)
+				$query = $dataComing["query_template_spc_"];
+				if(stripos($query,'WHERE') === FALSE){
+					if(stripos($query,'GROUP BY') !== FALSE){
+						$arrQuery = explode('GROUP BY',$query);
+						$query = $arrQuery[0]." WHERE ".$dataComing["condition_target"]." GROUP BY ".$arrQuery[1];
+					}else{
+						$query .= " WHERE ".$dataComing["condition_target"];
+					}
+				}else{
+					if(stripos($query,'GROUP BY') !== FALSE){
+						$arrQuery = explode('GROUP BY',$query);
+						$query = $arrQuery[0]." and ".$dataComing["condition_target"]." GROUP BY ".$arrQuery[1];
+					}else{
+						$query .= " and ".$dataComing["condition_target"];
+					}
+				}
+				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,is_bind_param,create_by)
 														VALUES(:sms_query,:column_selected,:target_field,'1',:username)");
 				if($insertSmsQuery->execute([
-					':sms_query' => $dataComing["query_template"],
+					':sms_query' => $query,
 					':column_selected' => $dataComing["column_selected"],
 					':target_field' => $dataComing["target_field"],
 					':username' => $payload["username"]
