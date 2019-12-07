@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrTemplateGroup["COLUMN_SELECTED"] = explode(',',$rowTemplate["column_selected"]);
 			$arrTemplateGroup["TARGET_FIELD"] = $rowTemplate["target_field"];
 			$arrTemplateGroup["CONDITION_TARGET"] = (explode('.',$rowTemplate["condition_target"]))[0];
-			$arrTemplateGroup["IS_BIND_PARAM"] = $rowTemplate["is_bind_param"];
+			$arrTemplateGroup["BIND_PARAM"] = $rowTemplate["is_bind_param"];
 		}else{
 			$fetchTemplate = $conmysql->prepare("SELECT id_smstemplate,smstemplate_name,smstemplate_body
 												FROM smstemplate

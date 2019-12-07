@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','destination','send_date'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_date'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageahead')){
 		$platform = null;
 		$pathImg = null;
@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','destina
 			if($insertSendAhead->execute([
 				':send_topic' => $dataComing["send_topic"],
 				':send_message' => $dataComing["send_message"],
-				':destination' => implode(',',$dataComing["destination"]),
+				':destination' => isset($dataComing["destination"]) ? implode(',',$dataComing["destination"]) : 'all',
 				':send_date' => $dataComing["send_date"],
 				':username' => $payload["username"],
 				':id_smsquery' => $id_smsquery,
