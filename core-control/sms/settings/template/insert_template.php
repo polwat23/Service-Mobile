@@ -26,22 +26,6 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 					exit();
 				}
 			}else{
-				/*$query = $dataComing["query_template_spc_"];
-				if(stripos($query,'WHERE') === FALSE){
-					if(stripos($query,'GROUP BY') !== FALSE){
-						$arrQuery = explode('GROUP BY',$query);
-						$query = $arrQuery[0]." WHERE ".$dataComing["condition_target"]." GROUP BY ".$arrQuery[1];
-					}else{
-						$query .= " WHERE ".$dataComing["condition_target"];
-					}
-				}else{
-					if(stripos($query,'GROUP BY') !== FALSE){
-						$arrQuery = explode('GROUP BY',$query);
-						$query = $arrQuery[0]." and ".$dataComing["condition_target"]." GROUP BY ".$arrQuery[1];
-					}else{
-						$query .= " and ".$dataComing["condition_target"];
-					}
-				}*/
 				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
 														VALUES(:sms_query,:column_selected,:target_field,:condition_target,'1',:username)");
 				if($insertSmsQuery->execute([

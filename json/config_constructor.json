@@ -30,6 +30,7 @@
 	"NAME_APP" : "DEMO-GCoop Connect",
 	"COOP_KEY" : "demo-test",
 	"APP_ID" : "com.gcoop.mobile",
+	"URL_SERVICE" : "https://demo.gensoft.co.th/Service-Demo-Test/",
 	"FIREBASE_API_KEY" : "AIzaSyCTywPPFCTeLq_mMFGqU4-aLQ1BvHhRmDw",
 	"FIREBASE_SECRET_KEY" : "AAAA0QxZDiU:APA91bEVS8jdkSWxYQKLUQ0TbGD6U6HKPu12y8iAGEIHXCyN2M6sztd6wHXHSDfsbnhocScXyPbkszaIbQCM8QlcbcnYJH_UF1rQ3gupXLUuzRxnEOcfaxqLGVswoekDlkxb8KrZyXuM",
 	"ICON" : "ic_stat_ic_notification",

@@ -212,7 +212,7 @@ class library {
 			return true;
 		}
 	}
-	public function base64_to_img($encode_string,$file_name,$output_file,$webP) {
+	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
 		if(self::getBase64ImageSize($encode_string) < 1500){
 			$data_Img = explode(',',$encode_string);
 			$dataImg = base64_decode($data_Img[1]);
@@ -222,25 +222,43 @@ class library {
 			if (!$im_string) {
 				return false;
 			}else{
-				$filename = $file_name.'.'.$ext_img;
-				$destination = $output_file.'/'.$filename;
-				$webP_destination = $output_file.'/'.$file_name.'.webp';
-				if($ext_img == 'png'){
-					imagepng($im_string, $destination, 2);
-					$webP->convert($destination,$webP_destination,[]);
-					$arrPath = array();
-					$arrPath["normal_path"] = $filename;
-					$arrPath["webP_path"] = $file_name.'.webp';
-					return $arrPath;
-				}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-					imagejpeg($im_string, $destination, 70);
-					$webP->convert($destination,$webP_destination,[]);
-					$arrPath = array();
-					$arrPath["normal_path"] = $filename;
-					$arrPath["webP_path"] = $file_name.'.webp';
-					return $arrPath;
+				if(isset($webP)){
+					$filename = $file_name.'.'.$ext_img;
+					$destination = $output_file.'/'.$filename;
+					$webP_destination = $output_file.'/'.$file_name.'.webp';
+					if($ext_img == 'png'){
+						imagepng($im_string, $destination, 2);
+						$webP->convert($destination,$webP_destination,[]);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						$arrPath["webP_path"] = $file_name.'.webp';
+						return $arrPath;
+					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+						imagejpeg($im_string, $destination, 70);
+						$webP->convert($destination,$webP_destination,[]);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						$arrPath["webP_path"] = $file_name.'.webp';
+						return $arrPath;
+					}else{
+						return false;
+					}
 				}else{
-					return false;
+					$filename = $file_name.'.'.$ext_img;
+					$destination = $output_file.'/'.$filename;
+					if($ext_img == 'png'){
+						imagepng($im_string, $destination, 2);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						return $arrPath;
+					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+						imagejpeg($im_string, $destination, 70);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						return $arrPath;
+					}else{
+						return false;
+					}
 				}
 			}
 		}else{
@@ -283,7 +301,7 @@ class library {
 		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
 		$json_data = json_decode($json,true);
 		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
-		if($type_send == 'someone'){
+		if($type_send == 'person'){
 			$data = [
 				"registration_ids" => $payload["TO"],
 				"priority" => "high",
