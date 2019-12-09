@@ -34,14 +34,16 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 						}
 					}
 				}
-				$arrSendSuccess = array();
-				$arrSendFailed = array();
+				$arrSendSuccessMember = array();
+				$arrGroupAllSuccess = array();
+				$arrGroupAllFailed = array();
 				$rowQuery = $getQuery->fetch();
 				$arrColumn = explode(',',$rowQuery["column_selected"]);
 				if($rowQuery["is_bind_param"] == '0'){
 					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch()){
+						$arrSendSuccess = array();
 						$arrGroupMessage = array();
 						$arrDestination = array();
 						$arrMemberNoDestination = array();
@@ -57,26 +59,22 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 						while($rowToken = $getFcmToken->fetch()){
 							$arrDestination[] = $rowToken["fcm_token"];
 							$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
+							$arrSendSuccessMember[] = $arrGroupMessage["MEMBER_NO"];
+							$arrSendSuccess["DESTINATION"] = $rowToken["member_no"];
 						}
 						$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
-						$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-						$arrGroupMessage["PAYLOAD"] = $arrMessage;
-						$arrGroupMessage["TO"] = $arrDestination;
-						$arrGroupMessage["TYPE_SEND_HISTORY"] = "manymessage";
-						if(sizeof($arrGroupMessage["TO"]) > 0){
-							if($func->insertHistory($arrGroupMessage,'2')){
-								if($lib->sendNotify($arrGroupMessage,$dataComing["type_send"])){
-									$arrSendSuccess[] = $arrGroupMessage["MEMBER_NO"];
-								}else{
-									$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
-								}
+						$arrSendSuccess["MESSAGE"] = $arrMessage["BODY"];
+						if(isset($rowTarget[$rowQuery["target_field"]])){
+							if(isset($arrSendSuccess["DESTINATION"])){
+								$arrGroupAllSuccess[] = $arrSendSuccess;
 							}else{
-								$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
+								$arrSendSuccess["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+								$arrGroupAllFailed[] = $arrSendSuccess;
 							}
 						}
 					}
-					$arrayResult['SUCCESS'] = $arrSendSuccess;
-					$arrayResult['FAILED'] = $arrSendFailed;
+					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
@@ -99,35 +97,36 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 					foreach($dataComing["destination"] as $target){
 						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$rowQuery["target_field"] => $target]);
-						$rowTarget = $queryTarget->fetch();
-						$arrGroupMessage = array();
-						$arrDestination = array();
-						$arrMemberNoDestination = array();
-						$arrTarget = array();
-						foreach($arrColumn as $column){
-							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
-						}
-						$getFcmToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-															WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no and gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
-						$getFcmToken->execute([':member_no' => $rowTarget[$rowQuery["target_field"]]]);
-						while($rowToken = $getFcmToken->fetch()){
-							$arrDestination[] = $rowToken["fcm_token"];
-							$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
-						}
-						$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
-						$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-						$arrGroupMessage["PAYLOAD"] = $arrMessage;
-						$arrGroupMessage["TO"] = $arrDestination;
-						$arrGroupMessage["TYPE_SEND_HISTORY"] = "manymessage";
-						if(sizeof($arrGroupMessage["TO"]) > 0){
-							if($func->insertHistory($arrGroupMessage,'2')){
-								if($lib->sendNotify($arrGroupMessage,$dataComing["type_send"])){
-									$arrSendSuccess[] = $arrGroupMessage["MEMBER_NO"];
+						while($rowTarget = $queryTarget->fetch()){
+							$arrGroupMessage = array();
+							$arrDestination = array();
+							$arrMemberNoDestination = array();
+							$arrTarget = array();
+							foreach($arrColumn as $column){
+								$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
+							}
+							$getFcmToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+																WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no and gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
+							$getFcmToken->execute([':member_no' => $rowTarget[$rowQuery["target_field"]]]);
+							while($rowToken = $getFcmToken->fetch()){
+								$arrDestination[] = $rowToken["fcm_token"];
+								$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
+							}
+							$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
+							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+							$arrGroupMessage["PAYLOAD"] = $arrMessage;
+							$arrGroupMessage["TO"] = $arrDestination;
+							$arrGroupMessage["TYPE_SEND_HISTORY"] = "manymessage";
+							if(sizeof($arrGroupMessage["TO"]) > 0){
+								if($func->insertHistory($arrGroupMessage,'2')){
+									if($lib->sendNotify($arrGroupMessage,'someone')){
+										$arrSendSuccess[] = $arrGroupMessage["MEMBER_NO"];
+									}else{
+										$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
+									}
 								}else{
 									$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
 								}
-							}else{
-								$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
 							}
 						}
 					}
