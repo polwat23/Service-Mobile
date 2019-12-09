@@ -47,6 +47,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 		])){
 			if($lib->sendNotify($arrPayloadNotify,'person')){
 				$conmysql->commit();
+				$arrayResult['REFERENCE_OTP'] = $reference;
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
