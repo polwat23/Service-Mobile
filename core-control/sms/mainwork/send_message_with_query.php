@@ -50,7 +50,9 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 						}
 						$getFcmToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-															WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no and gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
+															WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no 
+															and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app' and
+															gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
 						$getFcmToken->execute([':member_no' => $rowTarget[$rowQuery["target_field"]]]);
 						while($rowToken = $getFcmToken->fetch()){
 							$arrDestination[] = $rowToken["fcm_token"];

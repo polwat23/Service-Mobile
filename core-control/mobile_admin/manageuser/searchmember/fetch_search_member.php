@@ -123,7 +123,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 												WHERE mb.province_code = :province_code");
 			$fetchMember->execute([
-				':province_code' => $dataComing["province_code"]
+				':province_code' => $dataComing["province_code"] ?? null
 			]);
 			while($rowMember = $fetchMember->fetch()){
 				$arrayGroupMember = array();

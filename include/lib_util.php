@@ -349,15 +349,17 @@ class library {
 				if($resultNoti->success){
 					return true;
 				}else{
-					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
+					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.json_encode($resultNoti->results);
 					file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
+				$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.$result;
+				file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
+			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.curl_error($ch);
 			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;

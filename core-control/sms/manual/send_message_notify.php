@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				$arrMember = array();
 				$getFCMToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
 													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$dataComing["destination"])."')
-													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
+													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
 				$getFCMToken->execute();
 				if($getFCMToken->rowCount() > 0){
 					$arrDestination = array();
