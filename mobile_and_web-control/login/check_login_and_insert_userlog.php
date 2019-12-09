@@ -52,6 +52,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				}
 				if ($valid_pass) {
 					$refresh_token = $lib->generate_token();
+					$fcm_token = (isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != '' ? $dataComing["fcm_token"] : null);
 					try{
 						$conmysql->beginTransaction();
 						$updateOldToken = $conmysql->prepare("UPDATE gctoken SET at_is_revoke = '-9',rt_is_revoke = '-9',
@@ -68,7 +69,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							':channel' => $arrPayload["PAYLOAD"]["channel"],
 							':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 							':ip_address' => $arrPayload["PAYLOAD"]["ip_address"],
-							':fcm_token' => $dataComing["fcm_token"] ?? null
+							':fcm_token' => $fcm_token ?? null
 						])){
 							$id_token = $conmysql->lastInsertId();
 							if(isset($dataComing["firsttime"])){
