@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
@@ -19,6 +19,8 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 	$getFCMToken->execute([':member_no' => 'dev@mode']);
 	if($getFCMToken->rowCount() > 0){
 		$rowFCMToken = $getFCMToken->fetch();
+		$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp");
+		$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 		$getOTPTemplate = $conmysql->prepare("SELECT subject,body FROM smssystemtemplate 
 											WHERE component_system = :menu_component and is_use = '1'");
 		$getOTPTemplate->execute([':menu_component' => $dataComing["menu_component"]]);
@@ -45,9 +47,7 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 		])){
 			if($lib->sendNotify($arrPayloadNotify,'person')){
 				$conmysql->commit();
-				$arrayResult['TEL'] = $dataComing["tel"];
-				$arrayResult['TEL_FORMAT'] = $lib->formatphone($dataComing["tel"]);
-				$arrayResult['VERIFY'] = TRUE;
+				$arrayResult['RESULT'] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

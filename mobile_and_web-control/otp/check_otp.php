@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		$rowOTP = $checkOTP->fetch();
 		$expire = strtotime($rowOTP["expire_date"]);
 		if($expire >= $callfile_now){
-			if($rowOTP["otp_status"] == '-99'){
+			if($rowOTP["otp_status"] == '-9'){
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
 				$arrayResult['RESPONSE_MESSAGE'] = "OTP นี้ได้ถูกยกเลิกไปแล้วเนื่องจากท่านขอ OTP ใหม่";
 				$arrayResult['RESULT'] = FALSE;
