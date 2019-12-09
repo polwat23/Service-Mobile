@@ -25,10 +25,11 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 		$rowOTPTemplate = $getOTPTemplate->fetch();
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);
-		$expire_date = date('H:i:s',strtotime('+15 minutes'));
+		$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '15';
+		$expire_date = date('Y-m-d H:i:s',strtotime('+'.$duration_expire.' minutes'));
 		$arrTarget["RANDOM_NUMBER"] = $otp_password;
 		$arrTarget["RANDOM_ALL"] = $reference;
-		$arrTarget["DATE_EXPIRE"] = $expire_date;
+		$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 		$arrMessage = $lib->mergeTemplate($rowOTPTemplate["subject"],$rowOTPTemplate["body"],$arrTarget);
 		$arrPayloadNotify["TO"][] = $rowFCMToken["fcm_token"];
 		$arrPayloadNotify["MEMBER_NO"] = $rowFCMToken["member_no"];
@@ -39,15 +40,16 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 			':ref_otp' => $reference,
 			':otp_pass' => $otp_password,
 			':destination' => $dataComing["tel"],
-			':expire_date' => date('Y-m-d ').$expire_date,
+			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
 			if($lib->sendNotify($arrPayloadNotify,'person')){
 				$conmysql->commit();
 				$arrayResult['RESULT'] = TRUE;
+				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$conmysql->commit();
+				$conmysql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0025";
 				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถส่ง OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์";
 				$arrayResult['RESULT'] = FALSE;
