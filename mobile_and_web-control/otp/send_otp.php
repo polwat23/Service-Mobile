@@ -45,9 +45,6 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 		])){
 			if($lib->sendNotify($arrPayloadNotify,'person')){
 				$conmysql->commit();
-				$arrayResult['TEL'] = $dataComing["tel"];
-				$arrayResult['TEL_FORMAT'] = $lib->formatphone($dataComing["tel"]);
-				$arrayResult['VERIFY'] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
