@@ -34,7 +34,6 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 						}
 					}
 				}
-				$arrSendSuccessMember = array();
 				$arrGroupAllSuccess = array();
 				$arrGroupAllFailed = array();
 				$rowQuery = $getQuery->fetch();
@@ -43,10 +42,8 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch()){
-						$arrSendSuccess = array();
+						$arrGroupCheckSend = array();
 						$arrGroupMessage = array();
-						$arrDestination = array();
-						$arrMemberNoDestination = array();
 						$arrTarget = array();
 						foreach($arrColumn as $column){
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
@@ -57,19 +54,17 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 															gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
 						$getFcmToken->execute([':member_no' => $rowTarget[$rowQuery["target_field"]]]);
 						while($rowToken = $getFcmToken->fetch()){
-							$arrDestination[] = $rowToken["fcm_token"];
 							$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
-							$arrSendSuccessMember[] = $arrGroupMessage["MEMBER_NO"];
-							$arrSendSuccess["DESTINATION"] = $rowToken["member_no"];
+							$arrGroupCheckSend["DESTINATION"] = $rowToken["member_no"];
 						}
 						$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
-						$arrSendSuccess["MESSAGE"] = $arrMessage["BODY"];
+						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"];
 						if(isset($rowTarget[$rowQuery["target_field"]])){
-							if(isset($arrSendSuccess["DESTINATION"])){
-								$arrGroupAllSuccess[] = $arrSendSuccess;
+							if(isset($arrGroupCheckSend["DESTINATION"])){
+								$arrGroupAllSuccess[] = $arrGroupCheckSend;
 							}else{
-								$arrSendSuccess["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
-								$arrGroupAllFailed[] = $arrSendSuccess;
+								$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+								$arrGroupAllFailed[] = $arrGroupCheckSend;
 							}
 						}
 					}
@@ -95,12 +90,12 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 						}
 					}
 					foreach($dataComing["destination"] as $target){
+						$target = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
 						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$rowQuery["target_field"] => $target]);
 						while($rowTarget = $queryTarget->fetch()){
+							$arrGroupCheckSend = array();
 							$arrGroupMessage = array();
-							$arrDestination = array();
-							$arrMemberNoDestination = array();
 							$arrTarget = array();
 							foreach($arrColumn as $column){
 								$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
@@ -109,29 +104,28 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 																WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no and gul.is_login = '1' and gtk.fcm_token IS NOT NULL");
 							$getFcmToken->execute([':member_no' => $rowTarget[$rowQuery["target_field"]]]);
 							while($rowToken = $getFcmToken->fetch()){
-								$arrDestination[] = $rowToken["fcm_token"];
 								$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
+								$arrGroupCheckSend["DESTINATION"] = $rowToken["member_no"];
 							}
 							$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
-							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-							$arrGroupMessage["PAYLOAD"] = $arrMessage;
-							$arrGroupMessage["TO"] = $arrDestination;
-							$arrGroupMessage["TYPE_SEND_HISTORY"] = "manymessage";
-							if(sizeof($arrGroupMessage["TO"]) > 0){
-								if($func->insertHistory($arrGroupMessage,'2')){
-									if($lib->sendNotify($arrGroupMessage,'someone')){
-										$arrSendSuccess[] = $arrGroupMessage["MEMBER_NO"];
-									}else{
-										$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
-									}
+							$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"];
+							if(isset($rowTarget[$rowQuery["target_field"]])){
+								if(isset($arrGroupCheckSend["DESTINATION"])){
+									$arrGroupAllSuccess[] = $arrGroupCheckSend;
 								}else{
-									$arrSendFailed[] = $arrGroupMessage["MEMBER_NO"];
+									$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+									$arrGroupAllFailed[] = $arrGroupCheckSend;
 								}
 							}
 						}
+						if(array_search($target, array_column($arrGroupAllSuccess, 'DESTINATION')) === false && array_search($target, array_column($arrGroupAllFailed, 'DESTINATION')) === false){
+							$arrGroupCheckSend["DESTINATION"] = $target;
+							$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขอ้างอิงได้";
+							$arrGroupAllFailed[] = $arrGroupCheckSend;
+						}
 					}
-					$arrayResult['SUCCESS'] = $arrSendSuccess;
-					$arrayResult['FAILED'] = $arrSendFailed;
+					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}

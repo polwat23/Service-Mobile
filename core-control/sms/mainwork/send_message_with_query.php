@@ -97,6 +97,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 						}
 					}
 					foreach($dataComing["destination"] as $target){
+						$target = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
 						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$rowQuery["target_field"] => $target]);
 						$rowTarget = $queryTarget->fetch();
