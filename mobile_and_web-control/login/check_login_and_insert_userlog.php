@@ -132,33 +132,33 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					exit();
 				}
 			}else{
-				$checkMember = $conoracle->prepare("SELECT card_person,mem_telmobile FROM mbmembmaster WHERE member_no = :member_no and card_person = :password");
-				$checkMember->execute([
-					':member_no' => $member_no,
-					':password' => $dataComing["password"]
-				]);
-				$rowMemberChecked = $checkMember->fetch();
-				if(isset($rowMemberChecked["CARD_PERSON"])){
-					$arrayResult['TEL'] = $rowMemberChecked["MEM_TELMOBILE"];
-					$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowMemberChecked["MEM_TELMOBILE"],' ');
-					$arrayResult['VERIFY'] = TRUE;
-					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
-					exit();
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS0004";
-					$arrayResult['RESPONSE_MESSAGE'] = "Invalid password";
-					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
-				}
+				$arrayResult['RESPONSE_CODE'] = "WS0004";
+				$arrayResult['RESPONSE_MESSAGE'] = "รหัสผ่านผิด";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0005";
-			$arrayResult['RESPONSE_MESSAGE'] = "Not found membership";
-			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			$checkMember = $conoracle->prepare("SELECT card_person,mem_telmobile FROM mbmembmaster WHERE member_no = :member_no and card_person = :password");
+			$checkMember->execute([
+				':member_no' => $member_no,
+				':password' => $dataComing["password"]
+			]);
+			$rowMemberChecked = $checkMember->fetch();
+			if(isset($rowMemberChecked["CARD_PERSON"])){
+				$arrayResult['TEL'] = $rowMemberChecked["MEM_TELMOBILE"];
+				$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowMemberChecked["MEM_TELMOBILE"],' ');
+				$arrayResult['VERIFY'] = TRUE;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+				exit();
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0030";
+				$arrayResult['RESPONSE_MESSAGE'] = "รหัสบัตรประชาชนไม่ตรงกับฐานข้อมูล";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0021";
