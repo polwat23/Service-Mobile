@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		echo json_encode($arrayResult);
 		exit();
 	}
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AppRegister')){
+	if($func->check_permission(null,$dataComing["menu_component"],'AppRegister')){
 		$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
 		$email = isset($dataComing["email"]) && $dataComing["email"] != '' ? $dataComing["email"] : null;
 		$phone = $dataComing["phone"];
