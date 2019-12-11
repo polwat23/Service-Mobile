@@ -2,7 +2,7 @@
 	"DBMOBILE_HOST" : "mobilecloud.coopsiam.com:3306",
 	"DBMOBILE_USERNAME" : "demo",
 	"DBMOBILE_PASSWORD" : "demo501888",
-	"DBMOBILE_DATABASENAME" : "demogcoop_connect_test",
+	"DBMOBILE_DATABASENAME" : "rfsc",
 	"DBORACLE_HOST" : "183.88.230.183",
 	"DBORACLE_SERVICE" : "gcoop",
 	"DBORACLE_USERNAME" : "iscorfscmas",

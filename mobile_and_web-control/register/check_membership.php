@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','m
 		echo json_encode($arrayResult);
 		exit();
 	}
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AppRegister')){
+	if($func->check_permission(null,$dataComing["menu_component"],'AppRegister')){
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
 		$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);

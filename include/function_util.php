@@ -134,41 +134,52 @@ class functions {
 			}
 		}
 		public function check_permission($user_type,$menu_component,$service_component=null){
-			$permission = array();
-			switch($user_type){
-				case '0' : 
-					$permission[] = "'0'";
-					break;
-				case '1' : 
-					$permission[] = "'0'";
-					$permission[] = "'1'";
-					break;
-				case '5' : 
-					$permission[] = "'0'";
-					$permission[] = "'1'";
-					$permission[] = "'2'";
-					break;
-				case '9' : 
-					$permission[] = "'0'";
-					$permission[] = "'1'";
-					$permission[] = "'2'";
-					$permission[] = "'3'";
-					break;
-				default : $permission[] = "'0'";
-					break;
-			}
-			if($user_type == '5' || $user_type == '9'){
-				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										 and menu_permission IN (".implode(',',$permission).")");
+			if(isset($user_type)){
+				$permission = array();
+				switch($user_type){
+					case '0' : 
+						$permission[] = "'0'";
+						break;
+					case '1' : 
+						$permission[] = "'0'";
+						$permission[] = "'1'";
+						break;
+					case '5' : 
+						$permission[] = "'0'";
+						$permission[] = "'1'";
+						$permission[] = "'2'";
+						break;
+					case '9' : 
+						$permission[] = "'0'";
+						$permission[] = "'1'";
+						$permission[] = "'2'";
+						$permission[] = "'3'";
+						break;
+					default : $permission[] = "'0'";
+						break;
+				}
+				if($user_type == '5' || $user_type == '9'){
+					$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+											 and menu_permission IN (".implode(',',$permission).")");
+				}else{
+					$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+											and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
+				}
+				$checkPermission->execute([':menu_component' => $menu_component]);
+				if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
+					return true;
+				}else{
+					return false;
+				}
 			}else{
 				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
-			}
-			$checkPermission->execute([':menu_component' => $menu_component]);
-			if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
-				return true;
-			}else{
-				return false;
+											and menu_status = '1' and menu_parent = '-2'");
+				$checkPermission->execute([':menu_component' => $menu_component]);
+				if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
+					return true;
+				}else{
+					return false;
+				}
 			}
 		}
 		public function getConstant($constant) {
