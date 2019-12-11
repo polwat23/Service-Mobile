@@ -20,6 +20,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["province"]) && $dataComing["province"] != ''){
 			$arrayExecute[':province_code'] = $dataComing["province"];
 		}
+		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
+			http_response_code(204);
+			exit();
+		}
 		$fetchMember = $conoracle->prepare("SELECT mp.prename_desc,mb.memb_name,mb.memb_surname,mb.mem_telmobile,mb.email,mb.member_no,
 											mb.member_date,
 											mb.ADDRESS_NO AS ADDR_NO, 
@@ -43,13 +47,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		while($rowMember = $fetchMember->fetch()){
 			$arrayGroup = array();
 			$address = $rowMember["ADDR_NO"];
-			$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
-			$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
-			$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
-			$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
-			$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
-			$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
-			$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+			$address .= (isset($rowMember["ADDR_MOO"]) ? '  ม.'.$rowMember["ADDR_MOO"] : null);
+			$address .= (isset($rowMember["ADDR_SOI"]) ? '  ซอย'.$rowMember["ADDR_SOI"] : null);
+			$address .= (isset($rowMember["ADDR_VILLAGE"]) ? '  หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+			$address .= (isset($rowMember["ADDR_ROAD"]) ? '  ถนน'.$rowMember["ADDR_ROAD"] : null);
+			$address .= (isset($rowMember["TAMBOL_DESC"]) ? '  ต.'.$rowMember["TAMBOL_DESC"] : null);
+			$address .= (isset($rowMember["DISTRICT_DESC"]) ? '  อ.'.$rowMember["DISTRICT_DESC"] : null);
+			$address .= (isset($rowMember["PROVINCE_DESC"]) ? '  จ.'.$rowMember["PROVINCE_DESC"] : null);
 			$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			$arrayGroup["ADDRESS"] = $address;
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
