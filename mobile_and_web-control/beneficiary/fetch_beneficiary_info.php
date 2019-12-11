@@ -12,10 +12,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$getBeneficiary = $conoracle->prepare("select base64_img from fomimagemaster 
 												where system_code = 'mbshr' and column_name = 'member_no' 
-												and column_data = :member_no and img_type_code = '003' and seq_no = 3");
+												and column_data = :member_no and img_type_code = '003' and seq_no = 1");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		$rowBenefit = $getBeneficiary->fetch();
-		$rowBase64PDF = "data:application/pdf;base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"]));
+		$rowBase64PDF = isset($rowBenefit["BASE64_IMG"]) ? "data:application/pdf;base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"])) : null;
 		if((isset($rowBase64PDF) && $rowBase64PDF != '') || isset($new_token)){
 			$arrayResult['BENEFICIARY'] = $rowBase64PDF;
 			if(isset($new_token)){
