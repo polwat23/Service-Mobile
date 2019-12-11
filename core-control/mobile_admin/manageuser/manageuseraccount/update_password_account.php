@@ -6,8 +6,8 @@ if($lib->checkCompleteArgument(['unique_id','id_token','member_no','newpassword'
 		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :newpassword
 									 WHERE member_no = :member_no")
 		if($repassword->execute([
-				':newpassword' => $newpassword,
-				':member_no' => $member_no
+				':newpassword' => $dataComing['newpassword'],
+				':member_no' => $dataComing['member_no']
 			])){
 				$arrayResult["RESULT"] = TRUE;
 			}else{
