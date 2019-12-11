@@ -14,13 +14,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												where system_code = 'mbshr' and column_name = 'member_no' 
 												and column_data = :member_no and img_type_code = '003' and seq_no = 3");
 		$getBeneficiary->execute([':member_no' => $member_no]);
-		while($rowBenefit = $getBeneficiary->fetch()){
-			$arrBenefit = array();
-			$arrBenefit["FILE_BENEFICIARY"] = "data:application/pdf;base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"]));
-			$arrGroupBNF[] = $arrBenefit;
-		}
-		if(sizeof($arrGroupBNF) > 0 || isset($new_token)){
-			$arrayResult['BENEFICIARY'] = $arrGroupBNF;
+		$rowBenefit = $getBeneficiary->fetch();
+		$rowBase64PDF = "data:application/pdf;base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"]));
+		if((isset($rowBase64PDF) && $rowBase64PDF != '') || isset($new_token)){
+			$arrayResult['BENEFICIARY'] = $rowBase64PDF;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
 			}

@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id','menu_component','channel','os_channel'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id','menu_component','os_channel'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 			':password' => $password,
 			':phone' => $phone,
 			':email' => $email,
-			':channel' => $arrPayload["VALIDATE"]["channel"],
+			':channel' => $arrPayload["PAYLOAD"]["channel"],
 			':os_channel' => $dataComing["os_channel"]
 		])){
 			$arrayResult = array();

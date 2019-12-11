@@ -5,15 +5,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageconstant')){
 		$arrayGroup = array();
 		$fetchConstant = $conmysql->prepare("SELECT id_smscssystem as id_constant,smscs_name as constant_name,smscs_desc as constant_desc,
-											smscs_type as constant_type,smscs_value as constant_value
-											 FROM smsconstantsystem WHERE is_use = '1'");
+												smscs_value as constant_value
+												FROM smsconstantsystem WHERE is_use = '1'");
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch()){
 			$arrConstans = array();
 			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["id_constant"];
 			$arrConstans["CONSTANT_NAME"] = $rowMenuMobile["constant_name"];
 			$arrConstans["CONSTANT_DESC"] = $rowMenuMobile["constant_desc"];
-			$arrConstans["CONSTANT_TYPE"] = $rowMenuMobile["constant_type"];
 			$arrConstans["CONSTANT_VALUE"] = $rowMenuMobile["constant_value"];
 			$arrayGroup[] = $arrConstans;
 		}
