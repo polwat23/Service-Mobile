@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id','menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id','menu_component','channel','os_channel'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
@@ -16,13 +16,15 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$email = isset($dataComing["email"]) && $dataComing["email"] != '' ? $dataComing["email"] : null;
 		$phone = $dataComing["phone"];
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-		$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email) 
-											VALUES(:member_no,:password,:phone,:email)");
+		$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel,os_channel) 
+											VALUES(:member_no,:password,:phone,:email,:channel,:os_channel)");
 		if($insertAccount->execute([
 			':member_no' => $member_no,
 			':password' => $password,
 			':phone' => $phone,
-			':email' => $email
+			':email' => $email,
+			':channel' => $arrPayload["VALIDATE"]["channel"],
+			':os_channel' => $dataComing["os_channel"]
 		])){
 			$arrayResult = array();
 			$arrayResult['MEMBER_NO'] = $member_no;

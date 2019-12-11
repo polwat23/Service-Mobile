@@ -10,16 +10,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mp.prename_short,mg.gain_name,mg.gain_surname,mg.gain_addr,mg.gain_relation
-												FROM mbgainmaster mg LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
-												WHERE member_no = :member_no");
+		$getBeneficiary = $conoracle->prepare("select base64_img from fomimagemaster 
+												where system_code = 'mbshr' and column_name = 'member_no' 
+												and column_data = :member_no and img_type_code = '003' and seq_no = 3");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch()){
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			$arrBenefit["RELATION"] = $rowBenefit["GAIN_RELATION"];
+			$arrBenefit["FILE_BENEFICIARY"] = "data:application/pdf;base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"]));
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		if(sizeof($arrGroupBNF) > 0 || isset($new_token)){

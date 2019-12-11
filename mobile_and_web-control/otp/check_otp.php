@@ -34,6 +34,8 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 				echo json_encode($arrayResult);
 				exit();
 			}else if($rowOTP["otp_status"] == '0'){
+				$updateUseOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '1' WHERE refno_otp = :ref_no");
+				$updateUseOTP->execute([':ref_no' => $dataComing["ref_no"]]);
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
