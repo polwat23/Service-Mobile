@@ -33,6 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no']
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
 				$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
+				$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
 				$arrayResult['RESULT'] = TRUE;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
