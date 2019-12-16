@@ -1,19 +1,19 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','send_date','id_sendahead'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead')){
-		$updateSendAhead = $conmysql->prepare("UPDATE smssendahead SET send_date = :send_date WHERE id_sendahead = :id_sendahead");
-		if($updateSendAhead->execute([
-			':send_date' => $lib->convertdate($dataComing["send_date"],'y-n-d'),
-			':id_sendahead' => $dataComing["id_sendahead"]
+if($lib->checkCompleteArgument(['unique_id','field','value','id_systemplate'],$dataComing)){
+	if($func->check_permission_core($payload,'sms','managesystemtemplate')){
+		$updateSysTemplate = $conmysql->prepare("UPDATE smssystemtemplate SET ".$dataComing["field"]." = :value WHERE id_systemplate = :id_systemplate");
+		if($updateSysTemplate->execute([
+			':value' => $dataComing["value"],
+			':id_systemplate' => $dataComing["id_systemplate"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "5005";
+			$arrayResult['RESPONSE_CODE'] = "4004";
 			$arrayResult['RESPONSE_AWARE'] = "update";
-			$arrayResult['RESPONSE'] = "Cannot edit send ahead";
+			$arrayResult['RESPONSE'] = "Cannot update system template";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

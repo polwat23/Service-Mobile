@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrGroupAllIns[array_search($rowInsure["INSURETYPE_DESC"],array_column($arrGroupAllIns,'INS_TYPE'))]["STATEMENT"])[] = $arrayInsure;
 			}
 		}
-		if(sizeof($arrGroupIns) > 0 || isset($new_token)){
+		if(sizeof($arrGroupAllIns) > 0 || isset($new_token)){
 			$arrayResult['INSURE'] = $arrGroupAllIns;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;

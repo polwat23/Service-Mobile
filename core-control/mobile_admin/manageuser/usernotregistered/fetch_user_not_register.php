@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserNotRegister["NAME"] = $rowUserNotRegis["PRENAME_DESC"].$rowUserNotRegis["MEMB_NAME"]." ".$rowUserNotRegis["MEMB_SURNAME"];
 			$arrayUserNotRegister["MEMBER_DATE"] = $lib->convertdate($rowUserNotRegis["MEMBER_DATE"],'D m Y');
 			$arrayUserNotRegister["TEL"] = $lib->formatphone($rowUserNotRegis["MEM_TELMOBILE"],'-');
-			$arrayUserNotRegister["EMAIL"] = $rowUserNotRegis["EMAIL"];
+			$arrayUserNotRegister["EMAIL"] = $rowUserNotRegis["EMAIL"] ?? "-";
 			$arrayGroup[] = $arrayUserNotRegister;
 		}
 		$arrayResult["USER_NOT_REGISTER"] = $arrayGroup;

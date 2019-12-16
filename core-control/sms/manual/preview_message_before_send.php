@@ -36,55 +36,47 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				foreach($dataComing["destination"] as $target){
 					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
 				}
-				$arrPayloadNotify = array();
 				$arrMessage = array();
 				$arrMember = array();
+				$arrGroupAllSuccess = array();
+				$arrGroupAllFailed = array();
 				$getFCMToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
 													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$destination)."')
 													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
 				$getFCMToken->execute();
 				if($getFCMToken->rowCount() > 0){
-					$arrDestination = array();
 					while($rowFcmToken = $getFCMToken->fetch()){
 						if(isset($rowFcmToken["fcm_token"])){
-							$arrDestination[] = $rowFcmToken["fcm_token"];
-							$arrMember[] = $rowFcmToken["member_no"];
+							if(!in_array($rowFcmToken["member_no"],$arrMember)){
+								$arrMember[] = $rowFcmToken["member_no"];
+							}
 						}
 					}
-					$arrPayloadNotify["TO"] = $arrDestination;
-					$arrPayloadNotify["MEMBER_NO"] = $arrMember;
-					$arrMessage["SUBJECT"] = $dataComing["topic"];
-					$arrMessage["BODY"] = $dataComing["message"];
-					$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-					if($func->insertHistory($arrPayloadNotify,'1')){
-						if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
-						}else{
-							$arrayResult['RESPONSE_CODE'] = "1001";
-							$arrayResult['RESPONSE_AWARE'] = "notify";
-							$arrayResult['RESPONSE'] = "Notify Failed see log error";
-							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
-						}
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "1002";
-						$arrayResult['RESPONSE_AWARE'] = "insert";
-						$arrayResult['RESPONSE'] = "Cannot insert history";
-						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+					foreach($arrMember as $member){
+						$arrGroupSuccess["DESTINATION"] = $member;
+						$arrGroupSuccess["MESSAGE"] = $dataComing["message"];
+						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "4003";
-					$arrayResult['RESPONSE_AWARE'] = "notfound";
-					$arrayResult['RESPONSE'] = "Cannot found fcm token";
-					$arrayResult['RESULT'] = FALSE;
+					$arrDiff = array_diff($destination,array_column($arrGroupAllSuccess, 'DESTINATION'));
+					foreach($arrDiff as $member){
+						$arrGroupSuccess["DESTINATION"] = $member;
+						$arrGroupSuccess["MESSAGE"] = $dataComing["message"];
+						$arrGroupAllFailed[] = $arrGroupSuccess;
+					}
+					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+					$arrayResult['FAILED'] = $arrGroupAllFailed;
+					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
-					exit();
+				}else{
+					foreach($destination as $member){
+						$arrGroupSuccess["DESTINATION"] = $member;
+						$arrGroupSuccess["MESSAGE"] = $dataComing["message"];
+						$arrGroupAllFailed[] = $arrGroupSuccess;
+					}
+					$arrayResult['SUCCESS'] = [];
+					$arrayResult['FAILED'] = $arrGroupAllFailed;
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
 				}
 			}
 		}

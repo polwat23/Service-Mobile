@@ -10,10 +10,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		$cert = __DIR__."/../api.gensoft.co.th-crt.cer";
-		$key = __DIR__."/../_.gensoft.co.th-key.pem";
+		$jsonConfigLB = file_get_contents(__DIR__.'/../../json/config_lb_bank.json');
+		$configLB = json_decode($jsonConfigLB,true);
 		$arrSendData = array();
-		$responseAPI = $lib->posting_data('https://58.137.161.157:5443/OnlineDirectWebService/services/FundTransferService?wsdl',$arrSendData,$cert,$key);
+		$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/deposit/request_deposit_payment',$arrSendData);
 		if(!$responseAPI){
 			$arrayResult['RESPONSE_CODE'] = "WS0017";
 			$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";
