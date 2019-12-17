@@ -15,7 +15,6 @@ if(!$anonymous){
 	$arrayResult = array();
 	$arrayAllMenu = array();
 	$arrayMenuSetting = array();
-	$arrayMenuTransaction = array();
 	switch($user_type){
 		case '0' : 
 			$permission[] = "'0'";
@@ -85,6 +84,8 @@ if(!$anonymous){
 	}else{
 		$arrMenuDep = array();
 		$arrMenuLoan = array();
+		$arrayGroupMenu = array();
+		$arrayMenuTransaction = array();
 		if($user_type == '5' || $user_type == '9'){
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and (menu_channel = :channel OR menu_channel = 'both')
@@ -108,11 +109,13 @@ if(!$anonymous){
 					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
 					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
 					if($rowMenu["menu_parent"] == '0'){
-						$arrayAllMenu[] = $arrMenu;
+						$arrayGroupMenu["ID_PARENT"] = $rowMenu["menu_parent"];
+						$arrayGroupMenu["MENU"][] = $arrMenu;
 					}else if($rowMenu["menu_parent"] == '24'){
 						$arrayMenuSetting[] = $arrMenu;
 					}else if($rowMenu["menu_parent"] == '18'){
-						$arrayMenuTransaction[] = $arrMenu;
+						$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
+						$arrayMenuTransaction["MENU"][] = $arrMenu;
 					}
 					if($rowMenu["id_menu"] == 1){
 						$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
@@ -145,6 +148,13 @@ if(!$anonymous){
 				}
 			}
 		}
+		if($dataComing["channel"] == 'mobile_app'){
+			$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
+			$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
+			$arrayGroupAllMenu[] = $arrayGroupMenu;
+			$arrayGroupAllMenu[] = $arrayMenuTransaction;
+			$arrayAllMenu = $arrayGroupAllMenu;
+		}
 		$arrFavMenuGroup = array();
 		$fetchMenuFav = $conmysql->prepare("SELECT gfm.id_fav_menu,gfl.name_fav,gpc.color_text,gpc.color_main,gpc.color_secon,gpc.color_deg,gpc.type_palette
 											FROM gcfavoritemenu gfm LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno
@@ -172,12 +182,21 @@ if(!$anonymous){
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
-			$arrayResult['MENU_HOME'] = $arrayAllMenu;
-			$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
-			$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
-			$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
-			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
-			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
+			if($dataComing["channel"] == 'mobile_app'){
+				$arrayResult['MENU_HOME'] = $arrayAllMenu;
+				$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
+				$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
+				$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
+				$arrayResult['MENU_LOAN'] = $arrMenuLoan;
+			}else{
+				$arrayResult['MENU_HOME'] = $arrayAllMenu;
+				$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
+				$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
+				$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
+				$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
+				$arrayResult['MENU_LOAN'] = $arrMenuLoan;
+
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

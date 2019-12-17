@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -34,6 +34,9 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no']
 			if($arrResponse->RESULT){
 				$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 				$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
+				$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
+				$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
+				$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
 				$arrayResult['RESULT'] = TRUE;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;

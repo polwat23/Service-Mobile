@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayResult['SLIP_NO'] = $resultWS->of_withdraw_deposit_transResult;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
-		}catch(Throwable $e){
+		}catch(SoapFault $e){
 			$arrayResult['RESPONSE_CODE'] = "WS2001";
 			$arrayResult['RESPONSE_MESSAGE'] = $e->getMessage();
 			$arrayResult['RESULT'] = FALSE;

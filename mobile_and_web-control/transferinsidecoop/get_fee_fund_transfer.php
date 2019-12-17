@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['FEE_AMT_FORMAT'] = number_format($amt_transfer,2);
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
-		}catch(Throwable $e){
+		}catch(SoapFault $e){
 			$arrayResult['RESPONSE_CODE'] = "WS2001";
 			$arrayResult['RESPONSE_MESSAGE'] = $e->getMessage();
 			$arrayResult['RESULT'] = FALSE;
