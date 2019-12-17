@@ -39,11 +39,11 @@ if(!$anonymous){
 	}
 	if(isset($dataComing["menu_parent"])){
 		if($user_type == '5' || $user_type == '9'){
-			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
 		}else{
-			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' 
 											and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
@@ -58,6 +58,7 @@ if(!$anonymous){
 					$arrMenu = array();
 					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
 					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
@@ -68,6 +69,7 @@ if(!$anonymous){
 				$arrMenu = array();
 				$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+				$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
 				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
@@ -87,11 +89,11 @@ if(!$anonymous){
 		$arrayGroupMenu = array();
 		$arrayMenuTransaction = array();
 		if($user_type == '5' || $user_type == '9'){
-			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
 		}else{
-			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status = '1'
 											and (menu_channel = :channel OR menu_channel = 'both') ORDER BY menu_order ASC");
 		}
@@ -104,6 +106,7 @@ if(!$anonymous){
 					$arrMenu = array();
 					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
 					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
@@ -135,6 +138,7 @@ if(!$anonymous){
 				$arrMenu = array();
 				$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+				$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
 				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
@@ -216,7 +220,7 @@ if(!$anonymous){
 			exit();
 		}
 		$arrayAllMenu = array();
-		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_parent IN ('-1','-2')");
 		$fetch_menu->execute();
 		while($rowMenu = $fetch_menu->fetch()){
@@ -225,6 +229,7 @@ if(!$anonymous){
 					$arrMenu = array();
 					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
 					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
@@ -235,6 +240,7 @@ if(!$anonymous){
 				$arrMenu = array();
 				$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
 				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
+				$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
 				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
