@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','fee_transfer'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop')){
 		$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
 		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){
 			$arrayResult['RESPONSE_CODE'] = "WS2001";
-			$arrayResult['RESPONSE_MESSAGE'] = $e->getMessage();
+			$arrayResult['RESPONSE_MESSAGE'] = $e;
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

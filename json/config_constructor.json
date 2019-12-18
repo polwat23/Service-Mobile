@@ -29,6 +29,7 @@
 	"MEMBER_NO_SALE_SLIP" : "00004130",
 	"NAME_APP" : "DEMO-GCoop Connect",
 	"COOP_KEY" : "demo-test",
+	"URL_API_GENSOFT" : "http://localhost/api-uat",
 	"APP_ID" : "com.gcoop.mobile",
 	"URL_SERVICE" : "https://demo.gensoft.co.th/Service-Demo-Test/",
 	"FIREBASE_API_KEY" : "AIzaSyCTywPPFCTeLq_mMFGqU4-aLQ1BvHhRmDw",

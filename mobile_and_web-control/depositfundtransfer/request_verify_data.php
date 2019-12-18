@@ -13,8 +13,6 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no']
 		try {
 			$arrSendData = array();
 			if(isset($dataComing["sigma_key"])){
-				$jsonConfigLB = file_get_contents(__DIR__.'/../../json/config_lb_bank.json');
-				$configLB = json_decode($jsonConfigLB,true);
 				$arrVerifyToken['exp'] = time() + 60;
 				$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 				$arrVerifyToken['citizen_id'] = $dataComing["citizen_id"];
@@ -22,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no']
 				$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 				$arrSendData["verify_token"] = $verify_token;
 				$arrSendData["app_id"] = $config["APP_ID"];
-				$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/verifydata/request_verify_data',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/request_verify_data',$arrSendData);
 				if(!$responseAPI){
 					$arrayResult['RESPONSE_CODE'] = "WS0017";
 					$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";

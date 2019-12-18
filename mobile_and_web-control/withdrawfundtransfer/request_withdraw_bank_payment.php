@@ -13,8 +13,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key'],$da
 		try{
 			$arrSendData = array();
 			if(isset($dataComing["sigma_key"])){
-				$jsonConfigLB = file_get_contents(__DIR__.'/../../json/config_lb_bank.json');
-				$configLB = json_decode($jsonConfigLB,true);
 				$arrSendData["remark"] = $dataComing["remark"] ?? null;
 				$arrVerifyToken['exp'] = time() + 60;
 				$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -23,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key'],$da
 				$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 				$arrSendData["verify_token"] = $verify_token;
 				$arrSendData["app_id"] = $config["APP_ID"];
-				$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/withdraw/request_withdraw_payment',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/withdraw/request_withdraw_payment',$arrSendData);
 				if(!$responseAPI){
 					$arrayResult['RESPONSE_CODE'] = "WS0017";
 					$arrayResult['RESPONSE_MESSAGE'] = "Request to API Server failed";
