@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrVerifyToken['exp'] = time() + 60;
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 			$fetchCitizenId = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-			$fetchCitizenId->execute([':member_no' => $member_no])
+			$fetchCitizenId->execute([':member_no' => $member_no]);
 			$rowCitizen = $fetchCitizenId->fetch();
 			$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"];
 			$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);

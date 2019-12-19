@@ -12,11 +12,12 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$member_no = $payload["member_no"];
 		}
 		$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
+		$mobile_no = "0867075797";//preg_replace('/-/','',$dataComing["k_mobile_no"]);
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $member_no;
-		$arrPayloadverify['user_mobile_no'] = preg_replace('/-/','',$dataComing["k_mobile_no"]);
-		$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
-		$arrPayloadverify['kb_account_no'] = $kb_account_no;
+		$arrPayloadverify['user_mobile_no'] = $mobile_no;
+		$arrPayloadverify['citizen_id'] = "1341407730121";//$dataComing["citizen_id"];
+		$arrPayloadverify['kb_account_no'] = "0011391958";//$kb_account_no;
 		$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 		$arrPayloadverify['exp'] = time() + 60;
 		$sigma_key = $lib->generate_token();
@@ -26,13 +27,14 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 		$arrSendData = array();
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,bank_code,id_bankpalette,id_token) 
-														VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,'004',2,:id_token)");
+		$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,mobile_no,bank_code,id_bankpalette,id_token) 
+														VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:mobile_no,'004',2,:id_token)");
 		if($insertPendingBindAccount->execute([
 			':sigma_key' => $sigma_key,
 			':member_no' => $member_no,
 			':coop_account_no' => $coop_account_no,
 			':kb_account_no' => $kb_account_no,
+			':mobile_no' => $mobile_no,
 			':id_token' => $payload["id_token"]
 		])){
 			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/pending_bind_account',$arrSendData);

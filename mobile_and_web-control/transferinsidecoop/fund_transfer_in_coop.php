@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){
 			$arrayResult['RESPONSE_CODE'] = "WS2001";
-			$arrayResult['RESPONSE_MESSAGE'] = $e;
+			$arrayResult['RESPONSE_MESSAGE'] = $e->getMessage();
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

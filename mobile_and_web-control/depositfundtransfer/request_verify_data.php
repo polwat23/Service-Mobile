@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','bank_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
@@ -15,7 +15,10 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','bank_account_no']
 			if(isset($dataComing["sigma_key"])){
 				$arrVerifyToken['exp'] = time() + 60;
 				$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-				$arrVerifyToken['citizen_id'] = $dataComing["citizen_id"];
+				$fetchCitizenId = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
+				$fetchCitizenId->execute([':member_no' => $member_no]);
+				$rowCitizen = $fetchCitizenId->fetch();
+				$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"];
 				$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
 				$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 				$arrSendData["verify_token"] = $verify_token;

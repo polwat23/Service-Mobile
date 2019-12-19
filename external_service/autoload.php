@@ -16,7 +16,7 @@ use Connection\connection;
 $con = new connection();
 $jwt_token = new Token();
 $lib = new library();
-$conmysql = $con->connecttomysql(true);
+$conmysql = $con->connecttomysql();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$origin = $_SERVER["REMOTE_ADDR"];

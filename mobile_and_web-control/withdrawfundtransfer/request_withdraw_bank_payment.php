@@ -33,6 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key'],$da
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$arrayResult['EXTERNAL_REF'] = $arrResponse->EXTERNAL_REF;
+					$arrayResult['TRANSACTION_NO'] = $arrResponse->TRANSACTION_NO;
 					$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 					$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 					$arrayResult['RESULT'] = TRUE;
