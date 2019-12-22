@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM gcbindaccount gba LEFT JOIN gcconstantbankpalette gcpl ON gba.id_bankpalette = gcpl.id_bankpalette and gcpl.is_use = '1'
 													LEFT JOIN gcpalettecolor gpl ON gcpl.id_palette = gpl.id_palette and gpl.is_use = '1'
 													LEFT JOIN csbankdisplay csb ON gcpl.bank_code = csb.bank_code
-													WHERE gba.member_no = :member_no and gba.bindaccount_status <> '-9'");
+													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9')");
 		$fetchAccountBeenBind->execute([
 			':member_no' => $member_no
 		]);

@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 			}
 			$arrAccBeenBind = array();
-			$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM bindaccount WHERE member_no = :member_no and bindaccount_status <> '-9'");
+			$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
 			$InitDeptAccountBeenBind->execute([':member_no' => $member_no]);
 			while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch()){
 				$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];

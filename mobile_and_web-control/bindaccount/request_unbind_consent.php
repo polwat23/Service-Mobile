@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
 			':id_bindaccount' => $dataComing["id_bindaccount"],
-			':member_no' => $payload["member_no"]
+			':member_no' => $member_no
 		]);
 		if($check_account->rowCount() > 0){
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
@@ -29,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
 			$conmysql->beginTransaction();
-			$updateUnBindAccount = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9' and unbind_date = NOW() WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
+			$updateUnBindAccount = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW() WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
 			if($updateUnBindAccount->execute([
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"],

@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		header("X-Content-Type-Options: nosniff");
 		header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 		
-		$jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($jsonConfig,true);
 		if(isset($dataComing)){
 			if(isset($dataComing["verify_token"])){

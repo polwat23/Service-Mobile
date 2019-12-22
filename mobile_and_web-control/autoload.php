@@ -42,7 +42,7 @@ $lib = new library();
 $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
-$jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
+$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 

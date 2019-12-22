@@ -4,11 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status WHERE deptaccount_no = :deptaccount_no");
-		$updateAccountBeenbind = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = :allow_status WHERE deptaccount_no_coop = :deptaccount_no");
 		if($updateAccountBeenAllow->execute([
-			':allow_status' => $dataComing["allow_status"],
-			':deptaccount_no' => $dataComing["deptaccount_no"],
-		]) && $updateAccountBeenbind->execute([
 			':allow_status' => $dataComing["allow_status"],
 			':deptaccount_no' => $dataComing["deptaccount_no"],
 		])){

@@ -8,7 +8,7 @@ class connection {
 	public $conmongo;
 	
 	public function connecttomysql() {
-		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);
 		$dbhost = $json_data["DBMOBILE_HOST"];
 		$dbuser = $json_data["DBMOBILE_USERNAME"];
@@ -24,7 +24,7 @@ class connection {
 		}
 	}
 	public function connecttooracle() {
-		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);
 		$dbuser = $json_data["DBORACLE_USERNAME"];
 		$dbpass = $json_data["DBORACLE_PASSWORD"];
@@ -47,7 +47,7 @@ class connection {
 		}
 	}
 	public function connecttomongo() {
-		$json = file_get_contents(__DIR__.'/../json/config_connection.json');
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);
 		$dbhost = $json_data["DBLOG_HOST"];
 		$dbuser = $json_data["DBLOG_USERNAME"];

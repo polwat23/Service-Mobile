@@ -181,7 +181,7 @@ class library {
 		return $arrayText;
 	}
 	public function sendMail($email,$subject,$body,$mailFunction) {
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
 		$mailFunction->isSMTP();
@@ -298,7 +298,7 @@ class library {
 		return $randomString;
 	}
 	public function sendNotify($payload,$type_send){
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
 		if($type_send == 'person'){
