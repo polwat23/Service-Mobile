@@ -1,8 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'GuaranteeInfo')){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_UCOLLWHO"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -30,10 +30,12 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 		$getUcollwho->execute([':member_no' => $member_no]);
 		while($rowUcollwho = $getUcollwho->fetch()){
 			$arrayColl = array();
-			$arrayColl["CONTRACT_NO"] = $lib->formatcontract($rowUcollwho["LOANCONTRACT_NO"],$func->getConstant('loan_format',$conmysql));
+			$arrayColl["CONTRACT_NO"] = $lib->formatcontract($rowUcollwho["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
 			$arrayColl["COLL_MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
-			$arrayColl["PATH_AVATAR"] = $func->getPathpic($rowUcollwho["MEMBER_NO"],$conmysql);
+			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
+			$arrayColl["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
+			$arrayColl["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
@@ -50,18 +52,24 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

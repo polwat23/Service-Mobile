@@ -1,8 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ShareInfo')){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_SHARE"];
 		}else if($payload["member_no"] == 'salemode'){
@@ -19,14 +19,18 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"],2);
 			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
 			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
-			$limit = $func->getConstant('limit_stmshare',$conmysql);
+			$limit = $func->getConstant('limit_stmshare');
 			$arrayResult['LIMIT_DURATION'] = $limit;
-			if(isset($dataComing["date_start"])){
+			if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 				$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
 			}else{
 				$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 			}
-			$date_now = date('Y-m-d');
+			if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+				$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+			}else{
+				$date_now = date('Y-m-d');
+			}
 			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
 														stm.sharestk_amt as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
@@ -53,22 +57,28 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			http_response_code(404);
+			http_response_code(204);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

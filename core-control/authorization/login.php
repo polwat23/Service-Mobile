@@ -1,8 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['username','password','channel','device_name','ip_address'],$dataComing) && $anonymous){
-	$checkPassword = $conmysql->prepare("SELECT cs.section_system,cu.password
+if($lib->checkCompleteArgument(['username','password','device_name','ip_address','unique_id'],$dataComing)){
+	$checkPassword = $conmysql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
 										FROM coreuser cu LEFT JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
 										WHERE cu.username = :username");
 	$checkPassword->execute([
@@ -11,7 +11,15 @@ if($lib->checkCompleteArgument(['username','password','channel','device_name','i
 	if($checkPassword->rowCount() > 0){
 		$rowPassword = $checkPassword->fetch();
 		if(password_verify($dataComing["password"], $rowPassword['password'])){
-			$arrayResult["SECTION_SYSTEM"] = $rowPassword["section_system"];
+			$arrPayload = array();
+			$arrPayload['section_system'] = $rowPassword['section_system'];
+			$arrPayload['username'] = $dataComing["username"];
+			$arrPayload['exp'] = time() + 21600;
+			$refresh_token = $lib->generate_token();
+			$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
+			$arrayResult["SECTION_ASSIGN"] = $rowPassword["system_assign"];
+			$arrayResult["USERNAME"] = $dataComing["username"];
+			$arrayResult["ACCESS_TOKEN"] = $access_token;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

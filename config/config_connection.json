@@ -3,22 +3,13 @@
 	"DBMOBILE_USERNAME" : "demo",
 	"DBMOBILE_PASSWORD" : "demo501888",
 	"DBMOBILE_DATABASENAME" : "demogcoop_connect",
-	"DBMOBILE_DATABASENAME_TEST" : "demogcoop_connect_test",
 	"DBORACLE_HOST" : "183.88.230.183",
 	"DBORACLE_SERVICE" : "gcoop",
 	"DBORACLE_USERNAME" : "iscorfscmas",
 	"DBORACLE_PASSWORD" : "iscorfscmas",
 	"DBORACLE_DATABASENAME" : "iscorfscmas",
-	"DBORACLE_HOST_TEST" : "183.88.230.183",
-	"DBORACLE_SERVICE_TEST" : "gcoop",
-	"DBORACLE_USERNAME_TEST" : "iscorfscmas",
-	"DBORACLE_PASSWORD_TEST" : "iscorfscmas",
-	"DBORACLE_DATABASENAME_TEST" : "iscorfscmas",
 	"DBLOG_HOST" : "localhost:27017",
 	"DBLOG_USERNAME" : "developer",
 	"DBLOG_PASSWORD" : "@Gensoft2018",
-	"DBLOG_DATABASENAME" : "demogcoop_connect",
-	"DBLOG_USERNAME_TEST" : "developer_test",
-	"DBLOG_PASSWORD_TEST" : "@Gensoft2018",
-	"DBLOG_DATABASENAME_TEST" : "demogcoop_connect_test"
+	"DBLOG_DATABASENAME" : "demogcoop_connect"
 }

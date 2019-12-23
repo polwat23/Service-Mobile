@@ -1,8 +1,8 @@
 <?php
 ini_set('display_errors', false);
-ini_set('error_log', __DIR__.'/../log/error.log');
+ini_set('error_log', __DIR__.'/../log/core_error.log');
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ,basetest");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -17,8 +17,6 @@ header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsaf
 foreach ($_SERVER as $header_key => $header_value){
 	if($header_key == "HTTP_AUTHORIZATION" ){
 		$headers["Authorization"] = $header_value;
-	}else if($header_key == "HTTP_BASETEST" ){
-		$headers["basetest"] = $header_value;
 	}
 }
 
@@ -27,11 +25,9 @@ require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
-require_once(__DIR__.'/../authorized/authorized.php');
 
 // Call functions
 use Utility\library;
-use Authorized\API;
 use Component\functions;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -44,67 +40,65 @@ use ReallySimpleJWT\Exception\ValidateException;
 
 $mailFunction = new PHPMailer(false);
 $lib = new library();
-$api = new API();
 $jwt_token = new Token();
 $func = new functions();
 $jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
+	$payload = array();
 	$dataComing["device_name"] = $lib->getDeviceName();
 	$dataComing["ip_address"] = $lib->getClientIP();
 	// Complete Argument
 	if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 15){
-		$anonymous = false;
-		if($lib->checkCompleteArgument(['channel','refresh_token','unique_id'],$dataComing)){
-			$author_token = $headers["Authorization"];
-			if(substr($author_token,0,6) === 'Bearer'){
-				$access_token = substr($author_token,7);
+		$author_token = $headers["Authorization"];
+		if(substr($author_token,0,6) === 'Bearer'){
+			$access_token = substr($author_token,7);
 				
-				$jwt = new Jwt($access_token, $config["SECRET_KEY_JWT"]);
+			$jwt = new Jwt($access_token, $config["SECRET_KEY_CORE"]);
 
-				$parse_token = new Parse($jwt, new Validate(), new Encode());
-				try{
-					$parsed_token = $parse_token->validate()
-						->validateExpiration()
-						->parse();
-					$payload = $parsed_token->getPayload();
-				}catch (ValidateException $e) {
-					$errorCode = $e->getCode();
-					if($errorCode === 3){
-						$arrayResult['RESPONSE_CODE'] = "4005";
-						$arrayResult['RESPONSE_AWARE'] = "signature";
-						$arrayResult['RESPONSE'] = "Signature is invalid";
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
-					}else if($errorCode === 4){
-						$arrayResult['RESPONSE_CODE'] = "4009";
-						$arrayResult['RESPONSE_AWARE'] = "refresh_token_&_access_token";
-						$arrayResult['RESPONSE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "4005";
-						$arrayResult['RESPONSE_AWARE'] = "access_token";
-						$arrayResult['RESPONSE'] = "Access Token is invalid";
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
-					}
+			$parse_token = new Parse($jwt, new Validate(), new Encode());
+			try{
+				$parsed_token = $parse_token->validate()
+					->validateExpiration()
+					->parse();
+				$payload = $parsed_token->getPayload();
+				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
+					$arrayResult['RESPONSE_CODE'] = "4004";
+					$arrayResult['RESPONSE_AWARE'] = "argument";
+					$arrayResult['RESPONSE'] = "Not complete argument";
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(400);
+					echo json_encode($arrayResult);
+					exit();
 				}
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "4005";
-				$arrayResult['RESPONSE_AWARE'] = "authorization_type";
-				$arrayResult['RESPONSE'] = "Authorization Header is not correct";
-				$arrayResult['RESULT'] = FALSE;
-				http_response_code(400);
-				echo json_encode($arrayResult);
-				exit();
+			}catch (ValidateException $e) {
+				$errorCode = $e->getCode();
+				if($errorCode === 3){
+					$arrayResult['RESPONSE_CODE'] = "4005";
+					$arrayResult['RESPONSE_AWARE'] = "signature";
+					$arrayResult['RESPONSE'] = "Signature is invalid";
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(401);
+					echo json_encode($arrayResult);
+					exit();
+				}else if($errorCode === 4){
+					$arrayResult['RESPONSE_CODE'] = "4009";
+					$arrayResult['RESPONSE_AWARE'] = "access_token";
+					$arrayResult['RESPONSE'] = "Access Token was expired";
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(401);
+					echo json_encode($arrayResult);
+					exit();
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "4005";
+					$arrayResult['RESPONSE_AWARE'] = "access_token";
+					$arrayResult['RESPONSE'] = "Access Token is invalid";
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(401);
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "4004";
@@ -115,8 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			echo json_encode($arrayResult);
 			exit();
 		}
-	}else{
-		$anonymous = true;
 	}
 }else{
 	$arrayResult['RESULT'] = TRUE;

@@ -1,8 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','user_type'],$payload) && $lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'ChangePin')){
+if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ChangePin')){
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
 			':pin' => $dataComing["pin"],
@@ -14,26 +14,44 @@ if($lib->checkCompleteArgument(['member_no','user_type'],$payload) && $lib->chec
 			}
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "update";
-			$arrayResult['RESPONSE'] = "Cannot update PIN !!";
+			$arrExecute = [
+				':pin' => $dataComing["pin"],
+				':member_no' => $payload["member_no"]
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $updatePin;
+			$arrError["ERROR_CODE"] = 'WS1015';
+			$lib->addLogtoTxt($arrError,'pin_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1015";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเปลี่ยน Pin ได้กรุณาติดต่อสหกรณ์ #WS1015";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Cannot change Pin please contact cooperative #WS1015";
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

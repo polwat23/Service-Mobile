@@ -1,24 +1,21 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['id_token'],$payload)){
-	if($func->logout($payload["id_token"],'0',$conmysql)){
-		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
-	}else{
-		$arrayResult['RESPONSE_CODE'] = "5005";
-		$arrayResult['RESPONSE_AWARE'] = "update";
-		$arrayResult['RESPONSE'] = "Cannot logout !!";
-		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
-	}
+if($func->logout($payload["id_token"],'0')){
+	$arrayResult['RESULT'] = TRUE;
+	echo json_encode($arrayResult);
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrError = array();
+	$arrError["PAYLOAD"] = $payload;
+	$arrError["ERROR_CODE"] = 'WS1007';
+	$lib->addLogtoTxt($arrError,'logout_error');
+	$arrayResult['RESPONSE_CODE'] = "WS1007";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถออกจากระบบได้ในขณะนี้ #WS1007";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Cannot logout this moment #WS1007";
+	}
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }

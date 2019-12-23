@@ -119,6 +119,9 @@ class library {
 	public function formataccount_hidden($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$account_text = '';
+			if(strlen($account_no) === 10){
+				$account_no = $this->formataccount($account_no,$format);
+			}
 			for($i = 0; $i < strlen($account_no);$i++){
 				if($format[$i] == 'h'){
 					$account_text .= 'x';
@@ -137,9 +140,9 @@ class library {
 			$contract_text = '';
 			for($i = 0;$i < sizeof($formatArray);$i++){
 				if($i == 0){
-					$contract_text = mb_substr($contract_no,$i,strlen($formatArray[$i]));
+					$contract_text = mb_substr($contract_no,$i,mb_strlen($formatArray[$i]));
 				}else{
-					$contract_text .= '/'.mb_substr($contract_no,strlen(preg_replace('/-/','',$contract_text)),strlen($formatArray[$i]));
+					$contract_text .= '/'.mb_substr($contract_no,mb_strlen(preg_replace('/-/','',$contract_text)));
 				}
 			}
 			return $contract_text;
@@ -178,7 +181,7 @@ class library {
 		return $arrayText;
 	}
 	public function sendMail($email,$subject,$body,$mailFunction) {
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
 		$mailFunction->isSMTP();
@@ -203,33 +206,75 @@ class library {
 		$mailFunction->Body = $body;
 		if(!$mailFunction->send()){
 			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
 			return false;
 		}else{
 			return true;
 		}
 	}
-	public function base64_to_img($encode_string,$file_name,$output_file) {
-		$data_Img = explode(',',$encode_string);
-		$dataImg = base64_decode($data_Img[1]);
-		$info_img = explode('/',$data_Img[0]);
-		$ext_img = str_replace('base64','',$info_img[1]);
-		$im_string = imageCreateFromString($dataImg);
-		if (!$im_string) {
-			return false;
-		}else{
-			$filename = $file_name.'.'.$ext_img;
-			$destination = $output_file.'/'.$filename;
-			if($ext_img == 'png'){
-				imagepng($im_string, $destination, 2);
-				return $filename;
-			}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-				imagejpeg($im_string, $destination, 70);
-				return $filename;
-			}else{
+	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
+		if(self::getBase64ImageSize($encode_string) < 1500){
+			$data_Img = explode(',',$encode_string);
+			$dataImg = base64_decode($data_Img[1]);
+			$info_img = explode('/',$data_Img[0]);
+			$ext_img = str_replace('base64','',$info_img[1]);
+			$im_string = imageCreateFromString($dataImg);
+			if (!$im_string) {
 				return false;
+			}else{
+				if(isset($webP)){
+					$filename = $file_name.'.'.$ext_img;
+					$destination = $output_file.'/'.$filename;
+					$webP_destination = $output_file.'/'.$file_name.'.webp';
+					if($ext_img == 'png'){
+						imagepng($im_string, $destination, 2);
+						$webP->convert($destination,$webP_destination,[]);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						$arrPath["webP_path"] = $file_name.'.webp';
+						return $arrPath;
+					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+						imagejpeg($im_string, $destination, 70);
+						$webP->convert($destination,$webP_destination,[]);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						$arrPath["webP_path"] = $file_name.'.webp';
+						return $arrPath;
+					}else{
+						return false;
+					}
+				}else{
+					$filename = $file_name.'.'.$ext_img;
+					$destination = $output_file.'/'.$filename;
+					if($ext_img == 'png'){
+						imagepng($im_string, $destination, 2);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						return $arrPath;
+					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+						imagejpeg($im_string, $destination, 70);
+						$arrPath = array();
+						$arrPath["normal_path"] = $filename;
+						return $arrPath;
+					}else{
+						return false;
+					}
+				}
 			}
-		} 
+		}else{
+			return 'oversize';
+		}
+	}
+	private function getBase64ImageSize($base64Image){
+		try{
+			$size_in_bytes = (int) (strlen(rtrim($base64Image, '=')) * 3 / 4);
+			$size_in_kb    = $size_in_bytes / 1024;
+			
+			return $size_in_kb;
+		}
+		catch(Exception $e){
+			return $e;
+		}
 	}
 	public function text_limit($text, $limit = 50, $end = '...'){
 		if (mb_strwidth($text, 'UTF-8') <= $limit) {
@@ -253,29 +298,31 @@ class library {
 		return $randomString;
 	}
 	public function sendNotify($payload,$type_send){
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
-		if($type_send == 'someone'){
+		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
+		if($type_send == 'person'){
 			$data = [
 				"registration_ids" => $payload["TO"],
-				"priority" => $payload["PRIORITY"],
+				"priority" => "high",
 				"notification" => [
-					"title" => $payload["PAYLOAD"]["TITLE"],
+					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"sound" => $payload["PAYLOAD"]["SOUND"],
-					"icon" => $json_data["ICON"]
+					"icon" => $json_data["ICON"],
+					"sound" => "default",
+					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
 			];
 		}else if($type_send == 'all'){
 			$data = [
 				"to" => $payload["TO"],
-				"priority" => $payload["PRIORITY"],
+				"priority" => "high",
 				"notification" => [
-					"title" => $payload["PAYLOAD"]["TITLE"],
+					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"sound" => $payload["PAYLOAD"]["SOUND"],
-					"icon" => $json_data["ICON"]
+					"icon" => $json_data["ICON"],
+					"sound" => "default",
+					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
 			];
 		}
@@ -295,19 +342,23 @@ class library {
 																												 
 		$result = curl_exec($ch);
 		
-		if($result){
+		if(isset($result)){
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
-			if($resultNoti->success){
-				return true;
+			if(isset($resultNoti)){
+				if($resultNoti->success){
+					return true;
+				}else{
+					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
+					file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
+					return false;
+				}
 			}else{
-				$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti->results);
-				file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}else{
 			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}
@@ -383,5 +434,31 @@ class library {
 		$device_name = $name.' V.'.$version.' ('.$os_platform.')';
         return $device_name;
     }
+	public function getnumberofYear($year){
+		$days=0; 
+		for($month=1;$month<=12;$month++){ 
+			$days = $days + cal_days_in_month(CAL_GREGORIAN,$month,$year);
+		}
+		return $days;
+	}
+	public function posting_data($url,$payload) {
+		$ch = curl_init( $url );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'));
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 180);
+		$result = curl_exec($ch);
+		if($result){
+			curl_close($ch);
+			return $result;
+		}else{
+			$text = '#PostData Error : '.date("Y-m-d H:i:s").' > '.$url.' | '.curl_error($ch);
+			file_put_contents(__DIR__.'/../log/log_api_error.txt', $text . PHP_EOL, FILE_APPEND);
+			curl_close ($ch);
+			return false;
+		}
+	}
 }
 ?>

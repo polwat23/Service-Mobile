@@ -1,8 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],$conmysql,'MemberInfo')){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
 		$arrayResult = array();
 		$member_no = $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
@@ -12,6 +12,8 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			$arrayResult["AVATAR_PATH"] = $rowInfoMobile["path_avatar"];
+			$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+			$arrayResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
 			if($member_no == "dev@mode"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
@@ -41,11 +43,11 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			}else{
 				$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
-													mb.ADDR_NO AS ADDR_NO, 
-													mb.ADDR_MOO AS ADDR_MOO,
-													mb.ADDR_SOI AS ADDR_SOI,
-													mb.ADDR_VILLAGE AS ADDR_VILLAGE,
-													mb.ADDR_ROAD AS ADDR_ROAD,
+													mb.ADDRESS_NO AS ADDR_NO, 
+													mb.ADDRESS_MOO AS ADDR_MOO,
+													mb.ADDRESS_SOI AS ADDR_SOI,
+													mb.ADDRESS_VILLAGE AS ADDR_VILLAGE,
+													mb.ADDRESS_ROAD AS ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
@@ -97,18 +99,24 @@ if($lib->checkCompleteArgument(['user_type','member_no'],$payload) && $lib->chec
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -1,8 +1,8 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no'],$payload) && $lib->checkCompleteArgument(['pin'],$dataComing)){
-	$checkPin = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE pin = :pin and member_no = :member_no");
+if($lib->checkCompleteArgument(['pin'],$dataComing)){
+	$checkPin = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE pin = :pin and member_no = :member_no");
 	$checkPin->execute([
 		':pin' => $dataComing["pin"],
 		':member_no' => $payload["member_no"]
@@ -22,9 +22,12 @@ if($lib->checkCompleteArgument(['member_no'],$payload) && $lib->checkCompleteArg
 		echo json_encode($arrayResult);
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

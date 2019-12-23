@@ -1,0 +1,7 @@
+{
+	"external_system" : "ISOCAREETN",
+	"payee_short_name" : "MAHIDOLPAYEE",
+	"payer_short_name" : "MAHIDOLPAYER",
+	"pass_phrase" : "GensoftCoopDirect",
+	"url_api_gensoft" : "http://localhost/api-uat"
+}
