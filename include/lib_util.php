@@ -206,7 +206,7 @@ class library {
 		$mailFunction->Body = $body;
 		if(!$mailFunction->send()){
 			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
 			return false;
 		}else{
 			return true;
@@ -350,7 +350,7 @@ class library {
 					return true;
 				}else{
 					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
-					file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+					file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
@@ -358,7 +358,7 @@ class library {
 			}
 		}else{
 			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}

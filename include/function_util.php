@@ -33,6 +33,15 @@ class functions {
 				$this->revoke_alltoken($id_token,'-9',true);
 				return true;
 			}else{
+				$arrExecute = [
+					':type_login' => $type_login,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $logout;
+				$arrError["COMPONENT"] = "Logout";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -65,6 +74,16 @@ class functions {
 				}
 				return true;
 			}else{
+				$arrExecute = [
+					':type_login' => $type_login,
+					':member_no' => $member_no,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $logout;
+				$arrError["COMPONENT"] = "LogoutAll";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -79,6 +98,15 @@ class functions {
 				])){
 					return true;
 				}else{
+					$arrExecute = [
+						':type_revoke' => $type_revoke,
+						':id_token' => $id_token
+					];
+					$arrError = array();
+					$arrError["EXECUTE"] = $arrExecute;
+					$arrError["QUERY"] = $revokeAllToken;
+					$arrError["COMPONENT"] = "Revoke all token";
+					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
@@ -107,6 +135,17 @@ class functions {
 				])){
 					return true;
 				}else{
+					$arrExecute = [
+						':type_revoke' => $type_revoke,
+						':id_token' => $id_token,
+						':type_login' => $type_login
+					];
+					$arrError = array();
+					$arrError["EXECUTE"] = $arrExecute;
+					$arrError["QUERY"] = $revokeAllToken;
+					$arrError["QUERY_LOGOUT"] = $forceLogout;
+					$arrError["COMPONENT"] = "Revoke all token";
+					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}
@@ -119,6 +158,15 @@ class functions {
 			])){
 				return true;
 			}else{
+				$arrExecute = [
+					':type_revoke' => $type_revoke,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $revokeAT;
+				$arrError["COMPONENT"] = "Revoke access token";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -130,6 +178,15 @@ class functions {
 			])){
 				return true;
 			}else{
+				$arrExecute = [
+					':type_revoke' => $type_revoke,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $revokeRT;
+				$arrError["COMPONENT"] = "Revoke refresh token";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -160,6 +217,9 @@ class functions {
 			if($user_type == '5' || $user_type == '9'){
 				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
 										 and menu_permission IN (".implode(',',$permission).")");
+			}else if($user_type == '1'){
+				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+										 and menu_status IN('0','1') and menu_permission IN (".implode(',',$permission).")");
 			}else{
 				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
 										and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");

@@ -22,16 +22,26 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){
-			$arrayResult['RESPONSE_CODE'] = "WS2001";
-			$arrayResult['RESPONSE_MESSAGE'] = $e->getMessage();
+			$arrError = array();
+			$arrError["MESSAGE"] = $e->getMessage();
+			$arrError["ERROR_CODE"] = 'WS8001';
+			$lib->addLogtoTxt($arrError,'soap_error');
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Cannot fund transfer in cooperative please contact cooperative #WS8001";
+			}
 			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -39,7 +49,11 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

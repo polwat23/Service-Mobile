@@ -84,19 +84,34 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				http_response_code(204);
+				$arrayResult['RESPONSE_CODE'] = "WS0023";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบบัญชีที่สามารถทำรายการได้ ท่านต้องอนุญาตบัญชีที่สามารถทำรายการได้ก่อนจะทำธุรกรรม";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "You must allow account before transaction";
+				}
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0018";
-			$arrayResult['RESPONSE_MESSAGE'] = "Coop is not allow any dept type";
+			$arrayResult['RESPONSE_CODE'] = "WS0024";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "สหกรณ์ไม่อนุญาตให้เงินฝากประเภทนี้ทำรายการได้";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Cooperative not allow for transaction in this deposits type";
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -104,7 +119,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

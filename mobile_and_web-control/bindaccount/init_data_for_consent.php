@@ -70,20 +70,34 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0016";
-				$arrayResult['RESPONSE_MESSAGE'] = "Dont have coop account for bind account";
+				$arrayResult['RESPONSE_CODE'] = "WS0005";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบบัญชีที่สามารถผูกได้";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "Not found account for bind";
+				}
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(403);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			http_response_code(204);
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบข้อมูลผู้ใช้";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Not found membership";
+			}
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -91,7 +105,11 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

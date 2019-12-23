@@ -37,10 +37,13 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/unbind_account',$arrSendData);
 				if(!$responseAPI){
 					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "WS0017";
-					$arrayResult['RESPONSE_MESSAGE'] = "Request to API Bank failed";
+					$arrayResult['RESPONSE_CODE'] = "WS0029";
+					if($lang_locale == 'th'){
+						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถยกเลิกผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0029";
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = "Cannot unbind account please contact cooperative #WS0029";
+					}
 					$arrayResult['RESULT'] = FALSE;
-					http_response_code(400);
 					echo json_encode($arrayResult);
 					exit();
 				}
@@ -54,6 +57,8 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 					echo json_encode($arrayResult);
 				}else{
 					$conmysql->rollback();
+					$text = '#Unbind : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
+					file_put_contents(__DIR__.'/../../log/unbind_error.txt', $text . PHP_EOL, FILE_APPEND);
 					$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
 					$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
 					$arrayResult['RESULT'] = FALSE;
@@ -62,23 +67,43 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				}			
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS1026";
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot unbind account";
+				$arrExecute = [
+					':sigma_key' => $dataComing["sigma_key"],
+					':id_bindaccount' => $dataComing["id_bindaccount"],
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $updateUnBindAccount;
+				$arrError["ERROR_CODE"] = 'WS1021';
+				$lib->addLogtoTxt($arrError,'bind_error');
+				$arrayResult['RESPONSE_CODE'] = "WS1021";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถยกเลิกการผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1021";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "Cannot unbind account please contact cooperative #WS1021";
+				}
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0031";
-			$arrayResult['RESPONSE_MESSAGE'] = "Not found account";
+			$arrayResult['RESPONSE_CODE'] = "WS0021";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบการผูกบัญชีของท่าน";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Not found bind account";
+			}
 			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -86,7 +111,11 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

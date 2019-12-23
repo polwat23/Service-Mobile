@@ -15,15 +15,32 @@ if($lib->checkCompleteArgument(['menu_component','setting_status','setting_name'
 			}
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS1019";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot change this setting";
+			$arrExecute = [
+				':status' => $dataComing["setting_status"],
+				':id_token' => $payload["id_token"]
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $updateSetting;
+			$arrError["ERROR_CODE"] = 'WS1020';
+			$lib->addLogtoTxt($arrError,'notify_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1020";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถแก้ไขสถานะแจ้งเตือนได้ กรุณาติดต่อสหกรณ์ #WS1020";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Cannot change status notification please contact cooperative #WS1020";
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -31,7 +48,11 @@ if($lib->checkCompleteArgument(['menu_component','setting_status','setting_name'
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

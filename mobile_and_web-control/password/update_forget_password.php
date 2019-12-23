@@ -5,7 +5,11 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
-		$arrayResult['RESPONSE_MESSAGE'] = $arrPayload["ERROR_MESSAGE"];
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
@@ -43,36 +47,67 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS1014";
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot update Temppass because cannot logout";
+					$arrayResult['RESPONSE_CODE'] = "WS1013";
+					if($lang_locale == 'th'){
+						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเปลี่ยนรหัสผ่านได้กรุณาติดต่อสหกรณ์ #WS1013";
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = "Cannot change password please contact cooperative #WS1013";
+					}
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0010";
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot send mail";
+				$arrayResult['RESPONSE_CODE'] = "WS0019";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถส่งอีเมลได้ กรุณาติดต่อสหกรณ์";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "Cannot send email please contact cooperative";
+				}
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(502);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "WS1013";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot update Temppass";
+			$arrExecute = [
+				':temp_pass' => $temp_pass,
+				':member_no' => $member_no
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $updateTemppass;
+			$arrError["ERROR_CODE"] = 'WS1014';
+			$lib->addLogtoTxt($arrError,'forget_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1014";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถขอรหัสผ่านชั่วคราวได้กรุณาติดต่อสหกรณ์ #WS1014";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Cannot request temp password please contact cooperative #WS1014";
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		http_response_code(204);
+		$arrayResult['RESPONSE_CODE'] = "WS0003";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบข้อมูลผู้ใช้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "Not found membership";
+		}
+		$arrayResult['RESULT'] = FALSE;
+		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

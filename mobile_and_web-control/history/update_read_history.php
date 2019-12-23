@@ -4,26 +4,22 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','id_history'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$readHistory = $conmysql->prepare("UPDATE gchistory SET his_read_status = '1' WHERE member_no = :member_no and id_history = :id_history");
-		if($readHistory->execute([
+		$readHistory->execute([
 			':member_no' => $payload["member_no"],
 			':id_history' => $dataComing["id_history"]
-		])){
-			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			echo json_encode($arrayResult);
-		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS1006";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot change status this history";
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(203);
-			echo json_encode($arrayResult);
-			exit();
+		]);
+		$arrayResult['RESULT'] = TRUE;
+		if(isset($new_token)){
+			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -31,7 +27,11 @@ if($lib->checkCompleteArgument(['menu_component','id_history'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

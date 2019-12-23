@@ -42,6 +42,11 @@ if(!$anonymous){
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
+		}else if($user_type == '1'){
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status IN('0','1')
+											and (menu_channel = :channel OR menu_channel = 'both')
+											ORDER BY menu_order ASC");
 		}else{
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' 
@@ -91,6 +96,11 @@ if(!$anonymous){
 		if($user_type == '5' || $user_type == '9'){
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and (menu_channel = :channel OR menu_channel = 'both')
+											ORDER BY menu_order ASC");
+		}else if($user_type == '1'){
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status IN('0','1')
+											and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
 		}else{
 			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu
@@ -213,7 +223,11 @@ if(!$anonymous){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
-			$arrayResult['RESPONSE_MESSAGE'] = $arrPayload["ERROR_MESSAGE"];
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
+			}
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
 			echo json_encode($arrayResult);
@@ -258,7 +272,11 @@ if(!$anonymous){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS4004";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(400);
 		echo json_encode($arrayResult);

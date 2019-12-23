@@ -5,7 +5,11 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
-		$arrayResult['RESPONSE_MESSAGE'] = $arrPayload["ERROR_MESSAGE"];
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
@@ -52,30 +56,58 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 				echo json_encode($arrayResult);
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0025";
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถส่ง OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์";
+				$arrayResult['RESPONSE_CODE'] = "WS0018";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถส่ง OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์ #WS0018";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "Cannot send OTP please contact cooperative #WS0018";
+				}
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "WS0024";
-			$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเก็บ OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์";
+			$arrExecute = [
+				':ref_otp' => $reference,
+				':otp_pass' => $otp_password,
+				':destination' => $dataComing["tel"],
+				':expire_date' => $expire_date,
+				':otp_text' => $arrMessage["BODY"]
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $insertOTP;
+			$arrError["ERROR_CODE"] = 'WS1011';
+			$lib->addLogtoTxt($arrError,'otp_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1001";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเก็บ OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์ #WS1011";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Cannot keep OTP please contact cooperative #WS1011";
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0023";
-		$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบเบอร์โทรศัพท์ของคุณอยู่ในฐานข้อมูล";
+		$arrayResult['RESPONSE_CODE'] = "WS0017";
+		if($lang_locale == 'th'){
+			$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบเบอร์โทรศัพท์มือถือของท่านในฐานข้อมูล";
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "Not found your mobile number in database";
+		}
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	if($lang_locale == 'th'){
+		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
+	}else{
+		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
+	}
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
