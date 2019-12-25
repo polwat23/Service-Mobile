@@ -98,7 +98,7 @@ if(!$anonymous){
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
 		}else if($user_type == '1'){
-			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+			$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 											WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status IN('0','1')
 											and (menu_channel = :channel OR menu_channel = 'both')
 											ORDER BY menu_order ASC");
