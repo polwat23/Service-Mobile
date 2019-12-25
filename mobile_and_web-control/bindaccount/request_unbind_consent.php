@@ -57,10 +57,14 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 					echo json_encode($arrayResult);
 				}else{
 					$conmysql->rollback();
-					$text = '#Unbind : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
+					$text = '#Unbind #WS0040: '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
 					file_put_contents(__DIR__.'/../../log/unbind_error.txt', $text . PHP_EOL, FILE_APPEND);
-					$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
-					$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
+					$arrayResult['RESPONSE_CODE'] = "WS0040";
+					if($lang_locale == 'th'){
+						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถยกเลิกผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0040";
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = "Cannot unbind account please contact cooperative #WS0040";
+					}
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();

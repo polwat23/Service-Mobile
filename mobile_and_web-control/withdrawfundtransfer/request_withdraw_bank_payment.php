@@ -46,10 +46,14 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				}
 				echo json_encode($arrayResult);
 			}else{
-				$text = '#Withdraw Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
-				file_put_contents(__DIR__.'/../../log/withdrawfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
-				$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
-				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
+				$text = '#Withdraw #WS0037 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
+				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
+				$arrayResult['RESPONSE_CODE'] = "WS0037";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถถอนเงินได้ กรุณาติดต่อสหกรณ์ #WS0037";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "Cannot withdraw deposit please contact cooperative #WS0037";
+				}
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();

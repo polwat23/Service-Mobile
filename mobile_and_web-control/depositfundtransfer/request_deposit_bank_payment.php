@@ -45,10 +45,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				}
 				echo json_encode($arrayResult);
 			}else{
-				$text = '#Deposit Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
-				file_put_contents(__DIR__.'/../../log/depositfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
-				$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
-				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
+				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
+				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
+				$arrayResult['RESPONSE_CODE'] = "WS0038";
+				if($lang_locale == 'th'){
+					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถฝากเงินได้ กรุณาติดต่อสหกรณ์ #WS0038";
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "Cannot deposit please contact cooperative #WS0038";
+				}
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
