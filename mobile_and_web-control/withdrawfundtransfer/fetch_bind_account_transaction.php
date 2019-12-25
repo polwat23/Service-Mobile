@@ -10,6 +10,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
+		$time = date("Hi");
+		if($time >= 0000 && $time <= 0200){
+			$arrayResult['RESPONSE_CODE'] = "WS0035";
+			if($lang_locale == 'th'){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถทำธุรกรรมได้ในช่วงเวลา 00.00 - 02.00";
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = "Transaction is not available at 00.00 - 02.00 AM";
+			}
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
 												csb.bank_format_account,csb.bank_format_account_hide

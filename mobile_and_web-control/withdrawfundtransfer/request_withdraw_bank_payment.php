@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc','dept_account_enc','tran_id','sigma_key','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
@@ -17,6 +17,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key'],$da
 			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 			$arrVerifyToken['amt_transfer'] = $dataComing["amt_transfer"];
+			$arrVerifyToken['coop_account_no'] = preg_replace('/-/','',$dataComing["coop_account_no"]);
+			$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
+			$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
+			$arrVerifyToken['citizen_id_enc'] = $dataComing["citizen_id_enc"];
+			$arrVerifyToken['dept_account_enc'] = $dataComing["dept_account_enc"];
 			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
@@ -34,10 +39,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key'],$da
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
-				$arrayResult['EXTERNAL_REF'] = $arrResponse->EXTERNAL_REF;
-				$arrayResult['TRANSACTION_NO'] = $arrResponse->TRANSACTION_NO;
-				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
+				$arrayResult['TRANSACTION_NO'] = $dataComing["kbank_ref_no"];
 				$arrayResult['RESULT'] = TRUE;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;

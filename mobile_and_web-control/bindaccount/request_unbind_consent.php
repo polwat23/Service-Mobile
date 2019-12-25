@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$updateUnBindAccount = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW() WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
 			if($updateUnBindAccount->execute([
 				':sigma_key' => $dataComing["sigma_key"],
-				':id_bindaccount' => $dataComing["id_bindaccount"],
+				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
 				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/unbind_account',$arrSendData);
 				if(!$responseAPI){
@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				$conmysql->rollback();
 				$arrExecute = [
 					':sigma_key' => $dataComing["sigma_key"],
-					':id_bindaccount' => $dataComing["id_bindaccount"],
+					':id_bindaccount' => $dataComing["id_bindaccount"]
 				];
 				$arrError = array();
 				$arrError["EXECUTE"] = $arrExecute;
