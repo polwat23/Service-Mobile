@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
 				$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
 				$rowFormatBank = $getFormatBank->fetch();
-				$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? "xxx-x-xxxxx-x";
+				$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? $config["ACCOUNT_BANK_FORMAT"];
 				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 				if(isset($new_token)){

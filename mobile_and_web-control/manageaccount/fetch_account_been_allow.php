@@ -57,25 +57,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0023";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบบัญชีที่สามารถทำรายการได้ ท่านต้องอนุญาตบัญชีที่สามารถทำรายการได้ก่อนจะทำธุรกรรม";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "You must allow account before transaction";
-				}
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				http_response_code(204);
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบบัญชีที่สามารถทำรายการได้ ท่านต้องอนุญาตบัญชีที่สามารถทำรายการได้ก่อนจะทำธุรกรรม";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "You must allow account before transaction";
-			}
-			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			http_response_code(204);
 			exit();
 		}
 	}else{

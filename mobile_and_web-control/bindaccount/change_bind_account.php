@@ -88,14 +88,10 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 					echo json_encode($arrayResult);
 				}else{
 					$conmysql->rollback();
-					$text = '#Bind #WS0039 : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
+					$text = '#Bind : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
 					file_put_contents(__DIR__.'/../../log/consentbind_error.txt', $text . PHP_EOL, FILE_APPEND);
-					$arrayResult['RESPONSE_CODE'] = "WS0039";
-					if($lang_locale == 'th'){
-						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0039";
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = "Cannot bind account please contact cooperative #WS0039";
-					}
+					$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
+					$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
