@@ -36,6 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no'],$dataComing)
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
+				$arrayResult['FEE_AMT'] = 0;
 				$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 				$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
 				$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;

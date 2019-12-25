@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							"adtm_date" => date('c')
 			];
 			$resultWS = $clientWS->__call("of_chk_withdrawcount_amt", array($argumentWS));
-			$arrayResult['FEE_AMT'] = $resultWS->of_chk_withdrawcount_amtResult;
+			$arrayResult['PENALTY_AMT'] = $resultWS->of_chk_withdrawcount_amtResult;
 		}catch(SoapFault $e){
 			$arrError = array();
 			$arrError["MESSAGE"] = $e->getMessage();
@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			if($lang_locale == 'th'){
 				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002";
 			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot calculate fine please contact cooperative #WS8002";
+				$arrayResult['RESPONSE_MESSAGE'] = "Cannot calculate penalty please contact cooperative #WS8002";
 			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -61,6 +61,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
+			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 			$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
 			$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
