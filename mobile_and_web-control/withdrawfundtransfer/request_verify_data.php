@@ -10,6 +10,31 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}else{
 			$member_no = $payload["member_no"];
 		}
+		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
+													and transaction_type_code = 'WTX' and from_account = :from_account and destination_type = '1'");
+		$checkLimitBalance->execute([
+			':member_no' => $member_no,
+			':from_account' => $dataComing["deptaccount_no"]
+		]);
+		$rowBalLimit = $checkLimitBalance->fetch();
+		$limit_amt = 0;
+		$limit_withdraw = $func->getConstant("limit_withdraw");
+		$getLimitUser = $conmysql->prepare("SELECT limit_amt FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no and bindaccount_status = '1'");
+		$getLimitUser->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
+		$rowLimitUser = $getLimitUser->fetch();
+		if($limit_withdraw >= $rowLimitUser["limit_amt"]){
+			$limit_amt = (int)$rowLimitUser["limit_amt"];
+		}else{
+			$limit_amt = (int)$limit_withdraw;
+		}
+		$balance_request = $rowBalLimit["sum_amt"] + $dataComing["amt_transfer"];
+		if($balance_request > $limit_amt){
+			$arrayResult['RESPONSE_CODE'] = "WS0043";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$arrSendData = array();
 		$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		try {

@@ -51,6 +51,7 @@
 	"WS0040" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0040","en" : "Cannot unbind account please contact cooperative #WS0040"}],
 	"WS0041" : [{"th" : "ไม่สามารถทำรายการได้ในขณะนี้ กรุณาติดต่อสหกรณ์ #WS0041","en" : "Cannot transaction this moment please contact cooperative #WS0041"}],
 	"WS0042" : [{"th" : "ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ กรุณาติดต่อสหกรณ์ #WS0042","en" : "Cannot check destination account please contact cooperative #WS0042"}],
+	"WS0043" : [{"th" : "วงเงินการทำธุรกรรมวันนี้ของท่านเต็มจำนวนแล้ว","en" : "Your money limit of transaction today is full"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],
