@@ -46,6 +46,8 @@ $jwt_token = new Token();
 $func = new functions();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
+$jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
+$configError = json_decode($jsonConfigError,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
@@ -65,11 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					$payload = $parsed_token->getPayload();
 					if(!$lib->checkCompleteArgument(['id_userlogin','member_no','exp','id_token','user_type'],$payload)){
 						$arrayResult['RESPONSE_CODE'] = "WS4004";
-						if($lang_locale == 'th'){
-							$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-						}else{
-							$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-						}
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(400);
 						echo json_encode($arrayResult);
@@ -77,11 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					}
 					if(!$func->checkLogin($payload["id_token"],$conmysql)){
 						$arrayResult['RESPONSE_CODE'] = "WS0009";
-						if($lang_locale == 'th'){
-							$arrayResult['RESPONSE_MESSAGE'] = "กรุณาเข้าสู่ระบบ";
-						}else{
-							$arrayResult['RESPONSE_MESSAGE'] = "Please login";
-						}
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
@@ -90,11 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					$errorCode = $e->getCode();
 					if($errorCode === 3){
 						$arrayResult['RESPONSE_CODE'] = "WS0034";
-						if($lang_locale == 'th'){
-							$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถใช้งานได้ ลองเข้าสู่ระบบใหม่อีกครั้ง #WS0034";
-						}else{
-							$arrayResult['RESPONSE_MESSAGE'] = "Cannot use please relogin #WS0034";
-						}
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
 						echo json_encode($arrayResult);
@@ -105,11 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$dataComing["channel"],$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 						if(!$is_refreshToken_arr){
 							$arrayResult['RESPONSE_CODE'] = "WS0014";
-							if($lang_locale == 'th'){
-								$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถใช้งานได้ ลองเข้าสู่ระบบใหม่อีกครั้ง #WS0014";
-							}else{
-								$arrayResult['RESPONSE_MESSAGE'] = "Cannot use please relogin #WS0014";
-							}
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							echo json_encode($arrayResult);
@@ -120,11 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						}
 					}else{
 						$arrayResult['RESPONSE_CODE'] = "WS0032";
-						if($lang_locale == 'th'){
-							$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถใช้งานได้ ลองเข้าสู่ระบบใหม่อีกครั้ง #WS0032";
-						}else{
-							$arrayResult['RESPONSE_MESSAGE'] = "Cannot use please relogin #WS0032";
-						}
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
 						echo json_encode($arrayResult);
@@ -133,11 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0031";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถใช้งานได้ ลองเข้าสู่ระบบใหม่อีกครั้ง #WS0031";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot use please relogin #WS0031";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
 				echo json_encode($arrayResult);
@@ -145,11 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

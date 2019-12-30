@@ -44,11 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','memo_text','memo_icon_path','s
 				$arrError["ERROR_CODE"] = 'WS1005';
 				$lib->addLogtoTxt($arrError,'memo_error');
 				$arrayResult['RESPONSE_CODE'] = "WS1005";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเพิ่มบันทึกช่วยจำได้กรุณาติดต่อสหกรณ์ #WS1005";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot add memo please contact cooperative #WS1005";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -56,11 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','memo_text','memo_icon_path','s
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -68,11 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','memo_text','memo_icon_path','s
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

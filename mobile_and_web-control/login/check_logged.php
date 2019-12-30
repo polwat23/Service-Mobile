@@ -32,29 +32,21 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}else if($rowLog["is_login"] == '-7'){
 				$func->revoke_alltoken($payload["id_token"],'-7',true);
 			}
-			$arrayResult["RESPONSE_MESSAGE"] = $config['LOGOUT'.$rowLog["is_login"].'_'.$lang_locale];
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLog["is_login"]][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 		}
 		echo json_encode($arrayResult);
 		exit();
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0009";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "กรุณาเข้าสู่ระบบ";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "Please login";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

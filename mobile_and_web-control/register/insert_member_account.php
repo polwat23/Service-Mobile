@@ -5,11 +5,7 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
@@ -45,22 +41,14 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 			$arrError["ERROR_CODE"] = 'WS1018';
 			$lib->addLogtoTxt($arrError,'register_error');
 			$arrayResult['RESPONSE_CODE'] = "WS1018";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถสมัครได้ในขณะนี้ กรุณาติดต่อสหกรณ์ #WS1018";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot register this moment please contact cooperative #WS1018";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -68,11 +56,7 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

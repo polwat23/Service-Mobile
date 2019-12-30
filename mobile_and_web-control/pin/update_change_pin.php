@@ -24,22 +24,14 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrError["ERROR_CODE"] = 'WS1015';
 			$lib->addLogtoTxt($arrError,'pin_error');
 			$arrayResult['RESPONSE_CODE'] = "WS1015";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเปลี่ยน Pin ได้กรุณาติดต่อสหกรณ์ #WS1015";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot change Pin please contact cooperative #WS1015";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -47,11 +39,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

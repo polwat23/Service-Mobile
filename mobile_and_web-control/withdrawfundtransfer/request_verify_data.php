@@ -27,11 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrError["MESSAGE"] = $e->getMessage();
 			$arrError["ERROR_CODE"] = 'WS8002';
 			$lib->addLogtoTxt($arrError,'soap_error');
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot calculate penalty please contact cooperative #WS8002";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -50,11 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/request_verify_data',$arrSendData);
 		if(!$responseAPI){
 			$arrayResult['RESPONSE_CODE'] = "WS0028";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ กรุณาติดต่อสหกรณ์ #WS0028";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot check destination account please contact cooperative #WS0028";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -74,20 +66,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			echo json_encode($arrayResult);
 		}else{
 			$text = '#Verify Data withdraw Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
-			file_put_contents(__DIR__.'/../../log/withdrawfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
-			$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
-			$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
+			file_put_contents(__DIR__.'/../../log/verifydata_error.txt', $text . PHP_EOL, FILE_APPEND);
+			$arrayResult['RESPONSE_CODE'] = "WS0042";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -95,11 +83,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

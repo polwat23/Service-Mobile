@@ -33,11 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$checkAccBankBeenbind->execute([':kb_account_no' => $kb_account_no]);
 			if($checkAccBankBeenbind->rowCount() > 0){
 				$arrayResult['RESPONSE_CODE'] = "WS0036";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "บัญชีปลายทางของท่านได้มีการผูกบัญชีไว้อยู่แล้ว หากท่านต้องการผูกบัญชีใหม่ กรุณายกเลิกผูกบัญชีกับบัญชีเดิมก่อน หรือสามารถเปลี่ยนบัญชีที่ผูกได้";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Destination account has been bind if you want to rebind account please unbind from old account or change to bind account";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -69,11 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/pending_bind_account',$arrSendData);
 				if(!$responseAPI){
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
-					if($lang_locale == 'th'){
-						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0022";
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = "Cannot bind account please contact cooperative #WS0022";
-					}
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -92,11 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 					$text = '#Bind #WS0039 : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
 					file_put_contents(__DIR__.'/../../log/consentbind_error.txt', $text . PHP_EOL, FILE_APPEND);
 					$arrayResult['RESPONSE_CODE'] = "WS0039";
-					if($lang_locale == 'th'){
-						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0039";
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = "Cannot bind account please contact cooperative #WS0039";
-					}
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -117,11 +105,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 				$arrError["ERROR_CODE"] = 'WS1022';
 				$lib->addLogtoTxt($arrError,'bind_error');
 				$arrayResult['RESPONSE_CODE'] = "WS1022";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1022";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot bind account please contact cooperative #WS1022";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -132,22 +116,14 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$arrError["ERROR_CODE"] = 'WS9999';
 			$lib->addLogtoTxt($arrError,'exception_error');
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS9999";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -155,11 +131,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
