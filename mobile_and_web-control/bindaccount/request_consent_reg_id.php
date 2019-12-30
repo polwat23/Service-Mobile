@@ -55,14 +55,15 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 				$deleteAccForPending->execute();
 			}
 			$conmysql->beginTransaction();
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,mobile_no,bank_code,id_bankpalette,id_token) 
-															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:mobile_no,'004',2,:id_token)");
+			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,mobile_no,bank_code,id_bankpalette,limit_amt,id_token) 
+															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:mobile_no,'004',2,:limit_amt,:id_token)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
 				':member_no' => $member_no,
 				':coop_account_no' => $coop_account_no,
 				':kb_account_no' => $kb_account_no,
 				':mobile_no' => $mobile_no,
+				':limit_amt' => $func->getConstant('limit_withdraw'),
 				':id_token' => $payload["id_token"]
 			])){
 				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/pending_bind_account',$arrSendData);

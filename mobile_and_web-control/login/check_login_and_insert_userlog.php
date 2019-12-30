@@ -40,6 +40,20 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$updateOldToken->execute([
 					':unique_id' => $dataComing["unique_id"]
 				]);
+				if($member_no != 'dev@mode' && $member_no != 'salemode' && $arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
+					$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = 'mobile_app' and is_login = '1'");
+					$getMemberLogged->execute([':member_no' => $member_no]);
+					if($getMemberLogged->rowCount() > 0){
+						$arrayIdToken = array();
+						$rowIdToken = $getMemberLogged->fetch();
+						$arrayIdToken[] = $rowIdToken["id_token"];
+						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-7',
+																	gt.at_is_revoke = '-7',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
+																	gu.is_login = '-7',gu.logout_date = NOW()
+																	WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
+						$updateLoggedOneDevice->execute();
+					}
+				}
 				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address,fcm_token) 
 													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address,:fcm_token)");
 				if($insertToken->execute([

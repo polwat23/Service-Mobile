@@ -111,10 +111,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
 				$transaction_no = $arrResponse->TRANSACTION_NO;
+				$etn_ref = $arrResponse->EXTERNAL_REF;
 				$ref_no = date('YmdHis').substr($coop_account_no,7);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,amount,result_transaction,member_no,
-															ref_no_1,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+															ref_no_1,etn_ref,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
@@ -122,10 +123,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':member_no' => $member_no,
 					':ref_no1' => $coop_account_no,
+					':etn_ref' => $etn_ref,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $transaction_no
 				]);
-				$arrayResult['EXTERNAL_REF'] = $arrResponse->EXTERNAL_REF;
+				$arrayResult['EXTERNAL_REF'] = $etn_ref;
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
@@ -143,7 +145,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
 				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
 				$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
-				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel_error.txt', $text . PHP_EOL, FILE_APPEND);
+				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
 				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0038";
