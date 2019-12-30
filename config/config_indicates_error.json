@@ -1,0 +1,10 @@
+{
+	"LOGOUT-7_th" : "ท่านถูกบังคับออกจากระบบ จากอุปกรณ์อื่น",
+	"LOGOUT-8_th" : "ท่านถูกบังคับออกจากระบบ จากเจ้าหน้าที่สหกรณ์",
+	"LOGOUT-9_th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเปลี่ยนรหัสผ่าน",
+	"LOGOUT-10_th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการรีเซ็ตรหัส PIN",
+	"LOGOUT-7_en" : "You was forced logout from other device",
+	"LOGOUT-8_en" : "You was forced logout from cooperative",
+	"LOGOUT-9_en" : "You was forced logout because password has been change",
+	"LOGOUT-10_en" : "You was forced logout because pin has been change"
+}
