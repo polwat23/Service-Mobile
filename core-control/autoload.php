@@ -59,9 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					->parse();
 				$payload = $parsed_token->getPayload();
 				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
-					$arrayResult['RESPONSE_CODE'] = "4004";
-					$arrayResult['RESPONSE_AWARE'] = "argument";
-					$arrayResult['RESPONSE'] = "Not complete argument";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(400);
 					echo json_encode($arrayResult);
@@ -70,25 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			}catch (ValidateException $e) {
 				$errorCode = $e->getCode();
 				if($errorCode === 3){
-					$arrayResult['RESPONSE_CODE'] = "4005";
-					$arrayResult['RESPONSE_AWARE'] = "signature";
-					$arrayResult['RESPONSE'] = "Signature is invalid";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
 					echo json_encode($arrayResult);
 					exit();
 				}else if($errorCode === 4){
-					$arrayResult['RESPONSE_CODE'] = "4009";
-					$arrayResult['RESPONSE_AWARE'] = "access_token";
-					$arrayResult['RESPONSE'] = "Access Token was expired";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
 					echo json_encode($arrayResult);
 					exit();
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "4005";
-					$arrayResult['RESPONSE_AWARE'] = "access_token";
-					$arrayResult['RESPONSE'] = "Access Token is invalid";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
 					echo json_encode($arrayResult);
@@ -96,9 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				}
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "4004";
-			$arrayResult['RESPONSE_AWARE'] = "argument";
-			$arrayResult['RESPONSE'] = "Not complete argument";
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

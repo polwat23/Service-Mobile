@@ -22,21 +22,18 @@ if($lib->checkCompleteArgument(['username','password','device_name','ip_address'
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "4003";
-			$arrayResult['RESPONSE_AWARE'] = "password";
-			$arrayResult['RESPONSE'] = "Invalid password";
+			$arrayResult['RESPONSE'] = "รหัสผ่านไม่ถูกต้อง";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		http_response_code(204);
+		$arrayResult['RESPONSE'] = "ไม่พบข้อมูลผู้ใช้งานกรุณาตรวจสอบ ชื่อผู้ใช้ / รหัสผ่าน หรือฐานข้อมูล อีกครั้ง";
+		$arrayResult['RESULT'] = FALSE;
+		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

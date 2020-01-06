@@ -1,18 +1,18 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','id_token','member_no','newpassword'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
-		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :newpassword
+		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = :account_status
 									 WHERE member_no = :member_no");
-		if($repassword->execute([
-				':newpassword' => $newpassword,
-				':member_no' => $member_no
+		if($updateStatus->execute([
+			':account_status' => $dataComing["account_status"],
+			':member_no' => $dataComing["member_no"]
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถรีเซ็ตรหัสผ่านได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถล็อคหรือปลดล็อคบัญชีได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

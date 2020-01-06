@@ -27,20 +27,16 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 			}
 			$createImage = $lib->base64_to_img($dataComing["send_image"],$file_name,$destination,null);
 			if($createImage == 'oversize'){
-				$arrayResult['RESPONSE_CODE'] = "WS0008";
-				$arrayResult['RESPONSE_MESSAGE'] = "Image oversize please reduce filesize";
+				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(413);
 				echo json_encode($arrayResult);
 				exit();
 			}else{
 				if($createImage){
-					$pathImg = "resource/image_wait_to_be_sent/".$createImage["normal_path"];
+					$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS0007";
-					$arrayResult['RESPONSE_MESSAGE'] = "Extension is invalid";
+					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					$arrayResult['RESULT'] = FALSE;
-					http_response_code(415);
 					echo json_encode($arrayResult);
 					exit();
 				}
@@ -61,9 +57,7 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "5005";
-				$arrayResult['RESPONSE_AWARE'] = "insert";
-				$arrayResult['RESPONSE'] = "Cannot insert send ahead";
+				$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -84,27 +78,19 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "5005";
-				$arrayResult['RESPONSE_AWARE'] = 'insert';
-				$arrayResult['RESPONSE'] = "Cannot insert send ahead";
+				$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

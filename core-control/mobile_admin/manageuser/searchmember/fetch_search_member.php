@@ -21,7 +21,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute[':province_code'] = $dataComing["province"];
 		}
 		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
-			http_response_code(204);
+			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 		$fetchMember = $conoracle->prepare("SELECT mp.prename_desc,mb.memb_name,mb.memb_surname,mb.mem_telmobile,mb.email,mb.member_no,
@@ -67,18 +69,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

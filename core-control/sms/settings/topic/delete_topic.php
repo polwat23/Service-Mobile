@@ -17,35 +17,25 @@ if($lib->checkCompleteArgument(['unique_id','id_submenu'],$dataComing)){
 				echo json_encode($arrayResult);
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "5005";
-				$arrayResult['RESPONSE_AWARE'] = "update";
-				$arrayResult['RESPONSE'] = "Cannot delete SMS topic";
+				$arrayResult['RESPONSE'] = "ไม่สามารถลบหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "update";
-			$arrayResult['RESPONSE'] = "Cannot delete SMS topic";
+			$arrayResult['RESPONSE'] = "ไม่สามารถลบหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
