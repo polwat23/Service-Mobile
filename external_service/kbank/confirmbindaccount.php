@@ -1,5 +1,5 @@
 <?php
-require_once('autoload.php');
+require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['sigma_key'],$payload)){
 	$updateBindAcc = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '1',bind_date = NOW() WHERE sigma_key = :sigma_key");

@@ -95,7 +95,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$etn_ref = $arrResponse->EXTERNAL_REF;
 				$ref_no = date('YmdHis').substr($coop_account_no,7);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,amount,result_transaction,member_no,
-															ref_no_1,etn_ref,id_userlogin,ref_no_source)
+															ref_no_1,etn_refno,id_userlogin,ref_no_source)
 															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
