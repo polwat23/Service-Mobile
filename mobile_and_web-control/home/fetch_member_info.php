@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["MEMBER_TYPE"] = "สมาชิกพิเศษ";
 				$arrayResult["MEMBERGROUP_DESC"] = "บริษัท เจนซอฟท์ จำกัด";
 				$arrayResult["FULL_ADDRESS"] = "219/14 ม.8 ถ.วงแหวนรอบกลาง ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ 50300";
-			}else if($member_no == "salemode"){
+			}else if($member_no == "salemode" || $member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
 				$arrayResult["SURNAME"] = "ซิสเต็มส์";
@@ -100,11 +100,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -112,11 +108,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -25,11 +25,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0011";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "Pin ไม่ถูกต้อง";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Pin is invalid";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -66,11 +62,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrError["ERROR_CODE"] = 'WS1009';
 			$lib->addLogtoTxt($arrError,'pin_error');
 			$arrayResult['RESPONSE_CODE'] = "WS1009";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถตั้ง Pin ได้กรุณาติดต่อสหกรณ์ #WS1009";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot set Pin please contact cooperative #WS1009";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -78,11 +70,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

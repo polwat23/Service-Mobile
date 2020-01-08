@@ -1,23 +1,44 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
+		if($payload["member_no"] == 'dev@mode'){
+			$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
+		}else if($payload["member_no"] == 'salemode'){
+			$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
+		}else{
+			$member_no = $payload["member_no"];
+		}
 		$arrayResult = array();
+		$arrGroupAccount = array();
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit');
 		$arrayResult['LIMIT_DURATION'] = $limit;
-		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
-			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
-		}else{
-			$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
-		}
-		if($lib->checkCompleteArgument(["date_end"],$dataComing)){
-			$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
-		}else{
-			$date_now = date('Y-m-d');
-		}
-		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
+		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
+		$date_now = date('Y-m-d');
+		$fetchLastStmAcc = $conoracle->prepare("SELECT deptaccount_no from dpdeptmaster where member_no = :member_no and 
+												lastmovement_date = (SELECT MAX(dpm.lastmovement_date) FROM dpdeptmaster dpm WHERE dpm.member_no = :member_no) and deptclose_status <> 1");
+		$fetchLastStmAcc->execute([':member_no' => $member_no]);
+		$rowAccountLastSTM = $fetchLastStmAcc->fetch();
+		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
+		$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name,dp.prncbal as BALANCE,
+											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = :account_no) as LAST_OPERATE_DATE
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
+											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 and dp.deptaccount_no = :account_no");
+		$getAccount->execute([
+			':member_no' => $member_no,
+			':account_no' => $account_no
+		]);
+		$rowAccount = $getAccount->fetch();
+		$arrAccount = array();
+		$account_no_format = $lib->formataccount($account_no,$func->getConstant('dep_format'));
+		$arrAccount["DEPTACCOUNT_NO"] = $account_no_format;
+		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
+		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
+		$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
+		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
+		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
@@ -48,6 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		if(sizeof($arrayGroupSTM) > 0 || isset($new_token)){
+			$arrayResult["HEADER"] = $arrAccount;
 			$arrayResult["STATEMENT"] = $arrayGroupSTM;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;

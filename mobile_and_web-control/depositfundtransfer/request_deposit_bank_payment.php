@@ -3,13 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		try {
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$time = time();
@@ -47,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["fee_amt"] = "0";
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
-			$arrayGroup["member_no"] = $member_no;
+			$arrayGroup["member_no"] = $payload["member_no"];
 			$arrayGroup["moneytype_code"] = "CBT";
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
@@ -73,11 +66,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoap->msg_output).' | '.json_encode($responseSoap);
 					file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 					$arrayResult['RESPONSE_CODE'] = "WS0041";
-					if($lang_locale == 'th'){
-						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถทำรายการได้ในขณะนี้ กรุณาติดต่อสหกรณ์ #WS0041";
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = "Cannot transaction this moment please contact cooperative #WS0041";
-					}
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -86,24 +75,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($e).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถทำรายการได้ในขณะนี้ กรุณาติดต่อสหกรณ์ #WS0041";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot transaction this moment please contact cooperative #WS0041";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 			// -----------------------------------------------
-			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/deposit/request_deposit_payment',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/deposit/kbank/request_deposit_payment',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถฝากเงินเข้าบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0027";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot deposit to account please contact cooperative #WS0027";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -111,21 +92,23 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
 				$transaction_no = $arrResponse->TRANSACTION_NO;
+				$etn_ref = $arrResponse->EXTERNAL_REF;
 				$ref_no = date('YmdHis').substr($coop_account_no,7);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,amount,result_transaction,member_no,
-															ref_no_1,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+															ref_no_1,etn_ref,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
 					':amount' => $dataComing["amt_transfer"],
-					':member_no' => $member_no,
+					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
+					':etn_ref' => $etn_ref,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $transaction_no
 				]);
-				$arrayResult['EXTERNAL_REF'] = $arrResponse->EXTERNAL_REF;
+				$arrayResult['EXTERNAL_REF'] = $etn_ref;
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
@@ -143,15 +126,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
 				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
 				$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
-				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel_error.txt', $text . PHP_EOL, FILE_APPEND);
+				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
 				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0038";
-				if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถฝากเงินได้ กรุณาติดต่อสหกรณ์ #WS0038";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot deposit please contact cooperative #WS0038";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -161,22 +140,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrError["ERROR_CODE"] = 'WS9999';
 			$lib->addLogtoTxt($arrError,'exception_error');
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			if($lang_locale == 'th'){
-					$arrayResult['RESPONSE_MESSAGE'] = "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS9999";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -184,11 +155,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

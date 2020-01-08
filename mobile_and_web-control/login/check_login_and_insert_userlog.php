@@ -5,11 +5,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
@@ -40,6 +36,20 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$updateOldToken->execute([
 					':unique_id' => $dataComing["unique_id"]
 				]);
+				if($member_no != 'dev@mode' && $member_no != 'salemode' && $arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
+					$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = 'mobile_app' and is_login = '1'");
+					$getMemberLogged->execute([':member_no' => $member_no]);
+					if($getMemberLogged->rowCount() > 0){
+						$arrayIdToken = array();
+						$rowIdToken = $getMemberLogged->fetch();
+						$arrayIdToken[] = $rowIdToken["id_token"];
+						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-7',
+																	gt.at_is_revoke = '-7',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
+																	gu.is_login = '-7',gu.logout_date = NOW()
+																	WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
+						$updateLoggedOneDevice->execute();
+					}
+				}
 				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address,fcm_token) 
 													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address,:fcm_token)");
 				if($insertToken->execute([
@@ -108,11 +118,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							$arrError["ERROR_CODE"] = 'WS1001';
 							$lib->addLogtoTxt($arrError,'login_error');
 							$arrayResult['RESPONSE_CODE'] = "WS1001";
-							if($lang_locale == 'th'){
-								$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001";
-							}else{
-								$arrayResult['RESPONSE_MESSAGE'] = "Cannot login this moment #WS1001";
-							}
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							echo json_encode($arrayResult);
 							exit();
@@ -133,11 +139,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrError["ERROR_CODE"] = 'WS1002';
 						$lib->addLogtoTxt($arrError,'login_error');
 						$arrayResult['RESPONSE_CODE'] = "WS1002";
-						if($lang_locale == 'th'){
-							$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002";
-						}else{
-							$arrayResult['RESPONSE_MESSAGE'] = "Cannot login this moment #WS1002";
-						}
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
@@ -158,11 +160,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$arrError["ERROR_CODE"] = 'WS1003';
 					$lib->addLogtoTxt($arrError,'login_error');
 					$arrayResult['RESPONSE_CODE'] = "WS1003";
-					if($lang_locale == 'th'){
-						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003";
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = "Cannot login this moment #WS1003";
-					}
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -174,44 +172,28 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrError["ERROR_CODE"] = 'WS9999';
 				$lib->addLogtoTxt($arrError,'exception_error');
 				$arrayResult['RESPONSE_CODE'] = "WS9999";
-				if($lang_locale == 'th'){
-						$arrayResult['RESPONSE_MESSAGE'] = "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999";
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS9999";
-				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0002";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "รหัสผ่านไม่ถูกต้อง";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Invalid password";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบข้อมูลผู้ใช้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "Not found membership";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode'){
+		if($payload["member_no"] == 'dev@mode' || $member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3"){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
 			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDeptAllowed[] = $rowDeptAllow["dept_type_code"];
 			}
 			$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
-			$InitDeptAccountAllowed->execute([':member_no' => $member_no]);
+			$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccountAllowed = $InitDeptAccountAllowed->fetch()){
 				$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 			}
@@ -89,22 +89,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0024";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "สหกรณ์ไม่อนุญาตให้เงินฝากประเภทนี้ทำรายการได้";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Cooperative not allow for transaction in this deposits type";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -112,11 +104,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -3,27 +3,20 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		$arrGroupAccAllow = array();
 		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use FROM gcuserallowacctransaction WHERE member_no = :member_no");
-		$fetchAccountBeenAllow->execute([':member_no' => $member_no]);
+		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch()){
 				$arrAccBeenAllow = array();
 				$getDetailAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.membcat_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														and dpm.membcat_code = dpt.membcat_code
-														WHERE dpm.deptaccount_no = :deptaccount_no");
+														WHERE dpm.deptaccount_no = :deptaccount_no and deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch();
 				$getBannerColorCoop = $conmysql->prepare("SELECT gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.type_palette,gpc.color_text
-															FROM gcconstantaccount gca LEFT JOIN gcpalettecolor gpc ON gca.id_palette = gpc.id_palette and gpc.is_use = '1'
+															FROM gcconstantaccountdept gca LEFT JOIN gcpalettecolor gpc ON gca.id_palette = gpc.id_palette and gpc.is_use = '1'
 															WHERE gca.dept_type_code = :depttype_code and gca.member_cate_code = :membcat_code and gca.is_use = '1'");
 				$getBannerColorCoop->execute([
 					':depttype_code' => $rowDetailAcc["DEPTTYPE_CODE"],
@@ -66,11 +59,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -78,11 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
