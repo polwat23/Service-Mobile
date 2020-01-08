@@ -3,7 +3,7 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	if($payload["member_no"] == 'dev@mode'){
+	if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 		$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
 	}else if($payload["member_no"] == 'salemode'){
 		$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];

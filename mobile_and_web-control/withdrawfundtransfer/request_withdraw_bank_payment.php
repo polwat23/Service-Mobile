@@ -3,13 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc','dept_account_enc','tran_id','sigma_key','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		try{
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$time = time();
@@ -51,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrayGroup["fee_amt"] = "0";
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
-			$arrayGroup["member_no"] = $member_no;
+			$arrayGroup["member_no"] = $payload["member_no"];
 			$arrayGroup["moneytype_code"] = "CBT";
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
@@ -92,7 +85,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				exit();
 			}
 			// -----------------------------------------------
-			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/withdraw/request_withdraw_payment',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/withdraw/kbank/request_withdraw_payment',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0030";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -110,7 +103,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
 					':amount' => $dataComing["amt_transfer"],
-					':member_no' => $member_no,
+					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"]

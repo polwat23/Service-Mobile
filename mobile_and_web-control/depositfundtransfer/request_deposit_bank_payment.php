@@ -3,13 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		try {
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$time = time();
@@ -47,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["fee_amt"] = "0";
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
-			$arrayGroup["member_no"] = $member_no;
+			$arrayGroup["member_no"] = $payload["member_no"];
 			$arrayGroup["moneytype_code"] = "CBT";
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
@@ -88,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				exit();
 			}
 			// -----------------------------------------------
-			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/deposit/request_deposit_payment',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/deposit/kbank/request_deposit_payment',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -109,7 +102,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
 					':amount' => $dataComing["amt_transfer"],
-					':member_no' => $member_no,
+					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':etn_ref' => $etn_ref,
 					':id_userlogin' => $payload["id_userlogin"],

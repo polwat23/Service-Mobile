@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode'){
+		if($payload["member_no"] == 'dev@mode' || $member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3"){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
 			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDeptAllowed[] = $rowDeptAllow["dept_type_code"];
 			}
 			$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
-			$InitDeptAccountAllowed->execute([':member_no' => $member_no]);
+			$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccountAllowed = $InitDeptAccountAllowed->fetch()){
 				$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 			}

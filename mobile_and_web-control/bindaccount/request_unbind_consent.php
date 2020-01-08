@@ -4,21 +4,14 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		$arrPayloadverify = array();
-		$arrPayloadverify['member_no'] = $member_no;
+		$arrPayloadverify['member_no'] = $payload["member_no"];
 		$check_account = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
 											and bindaccount_status IN('0','1')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
 			':id_bindaccount' => $dataComing["id_bindaccount"],
-			':member_no' => $member_no
+			':member_no' => $payload["member_no"]
 		]);
 		if($check_account->rowCount() > 0){
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
@@ -34,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/unbind_account',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/kbank/unbind_account',$arrSendData);
 				if(!$responseAPI){
 					$conmysql->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS0029";

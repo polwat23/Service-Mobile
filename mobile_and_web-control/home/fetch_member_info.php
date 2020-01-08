@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["MEMBER_TYPE"] = "สมาชิกพิเศษ";
 				$arrayResult["MEMBERGROUP_DESC"] = "บริษัท เจนซอฟท์ จำกัด";
 				$arrayResult["FULL_ADDRESS"] = "219/14 ม.8 ถ.วงแหวนรอบกลาง ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ 50300";
-			}else if($member_no == "salemode"){
+			}else if($member_no == "salemode" || $member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
 				$arrayResult["SURNAME"] = "ซิสเต็มส์";

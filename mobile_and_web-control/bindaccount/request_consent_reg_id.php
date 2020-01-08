@@ -4,19 +4,12 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_account_no','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		try {
 			$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
 			$arrPayloadverify = array();
-			$arrPayloadverify['member_no'] = $member_no;
+			$arrPayloadverify['member_no'] = $payload["member_no"];
 			$arrPayloadverify['coop_account_no'] = $coop_account_no;
 			$arrPayloadverify['user_mobile_no'] = $mobile_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
@@ -40,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			}
 			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '8'");
 			$checkBeenBindForPending->execute([
-				':member_no' => $member_no
+				':member_no' => $payload["member_no"]
 			]);
 			if($checkBeenBindForPending->rowCount() > 0){
 				$arrayAccPending = array();
@@ -55,14 +48,14 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:mobile_no,'004',2,:limit_amt,:id_token)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
-				':member_no' => $member_no,
+				':member_no' => $payload["member_no"],
 				':coop_account_no' => $coop_account_no,
 				':kb_account_no' => $kb_account_no,
 				':mobile_no' => $mobile_no,
 				':limit_amt' => $func->getConstant('limit_withdraw'),
 				':id_token' => $payload["id_token"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/pending_bind_account',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/kbank/pending_bind_account',$arrSendData);
 				if(!$responseAPI){
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -93,7 +86,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 				$conmysql->rollback();
 				$arrExecute = [
 					':sigma_key' => $sigma_key,
-					':member_no' => $member_no,
+					':member_no' => $payload["member_no"],
 					':coop_account_no' => $coop_account_no,
 					':kb_account_no' => $kb_account_no,
 					':mobile_no' => $mobile_no,

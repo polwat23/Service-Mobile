@@ -3,26 +3,19 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		try {
 			$arrSendData = array();
 			$arrVerifyToken['exp'] = time() + 60;
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 			$fetchCitizenId = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-			$fetchCitizenId->execute([':member_no' => $member_no]);
+			$fetchCitizenId->execute([':member_no' => $payload["member_no"]]);
 			$rowCitizen = $fetchCitizenId->fetch();
-			$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"];
+			$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"] ?? "1500900999999";
 			$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
 			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/request_verify_data',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/kbank/request_verify_data',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0028";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

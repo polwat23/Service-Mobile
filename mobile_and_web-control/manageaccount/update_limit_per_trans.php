@@ -3,13 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','sigma_key','limit_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		$updateLimitTrans = $conmysql->prepare("UPDATE gcbindaccount SET limit_amt = :limit_amt WHERE sigma_key = :sigma_key");
 		if($updateLimitTrans->execute([
 			':limit_amt' => $dataComing["limit_amt"],

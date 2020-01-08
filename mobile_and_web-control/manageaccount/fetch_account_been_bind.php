@@ -3,13 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
 													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.limit_amt
 													FROM gcbindaccount gba LEFT JOIN gcconstantbankpalette gcpl ON gba.id_bankpalette = gcpl.id_bankpalette and gcpl.is_use = '1'
@@ -17,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LEFT JOIN csbankdisplay csb ON gcpl.bank_code = csb.bank_code
 													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9')");
 		$fetchAccountBeenBind->execute([
-			':member_no' => $member_no
+			':member_no' => $payload["member_no"]
 		]);
 		$limit_withdraw = $func->getConstant("limit_withdraw");
 		if($fetchAccountBeenBind->rowCount() > 0){
