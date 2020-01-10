@@ -31,6 +31,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$func->revoke_alltoken($payload["id_token"],'-8',true);
 			}else if($rowLog["is_login"] == '-7'){
 				$func->revoke_alltoken($payload["id_token"],'-7',true);
+			}else if($rowLog["is_login"] == '-5'){
+				$func->revoke_alltoken($payload["id_token"],'-6',true);
 			}
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLog["is_login"]][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

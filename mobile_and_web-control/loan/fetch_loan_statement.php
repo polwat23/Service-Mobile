@@ -17,6 +17,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
+		$CountRowNext = $dataComing["amt_row_next"] ?? 20;
+		$oldRowOffer = $dataComing["amt_old_row_offer"] ?? 0;
 		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 		$getStatement = $conoracle->prepare("SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
 											lsm.interest_payment as INT_PAYMENT,sl.payinslip_no
@@ -24,7 +26,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											LEFT JOIN slslippayindet sl ON lsm.loancontract_no = sl.loancontract_no and lsm.period = sl.period
 											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY lsm.SEQ_NO DESC");
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY lsm.SEQ_NO DESC
+											OFFSET ".$oldRowOffer." ROWS FETCH NEXT ".$CountRowNext." ROWS ONLY");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,

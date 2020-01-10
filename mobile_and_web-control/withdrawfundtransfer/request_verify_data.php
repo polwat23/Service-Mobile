@@ -13,11 +13,15 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$rowBalLimit = $checkLimitBalance->fetch();
 		$limit_amt = 0;
 		$limit_withdraw = $func->getConstant("limit_withdraw");
-		$getLimitUser = $conmysql->prepare("SELECT limit_amt FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no and bindaccount_status = '1'");
-		$getLimitUser->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
-		$rowLimitUser = $getLimitUser->fetch();
-		if($limit_withdraw >= $rowLimitUser["limit_amt"]){
-			$limit_amt = (int)$rowLimitUser["limit_amt"];
+		$getDataUser = $conmysql->prepare("SELECT limit_amt,citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
+											and member_no = :member_no and bindaccount_status = '1'");
+		$getDataUser->execute([
+			':deptaccount_no' => $dataComing["deptaccount_no"],
+			':member_no' => $payload["member_no"]
+		]);
+		$rowDataUser = $getDataUser->fetch();
+		if($limit_withdraw >= $rowDataUser["limit_amt"]){
+			$limit_amt = (int)$rowDataUser["limit_amt"];
 		}else{
 			$limit_amt = (int)$limit_withdraw;
 		}
@@ -53,10 +57,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-		$fetchCitizenId = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-		$fetchCitizenId->execute([':member_no' => $payload["member_no"]]);
-		$rowCitizen = $fetchCitizenId->fetch();
-		$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"] ?? "1500900999999";
+		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
 		$arrVerifyToken['deptaccount_no'] = $dataComing["deptaccount_no"];
 		$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
@@ -74,6 +75,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		if($arrResponse->RESULT){
 			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
+			$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
 			$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
 			$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
 			$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;

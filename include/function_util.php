@@ -13,15 +13,20 @@ class functions {
 		}
 		
 		public function checkLogin($id_token) {
-			$checkLogin = $this->con->prepare("SELECT id_userlogin FROM gcuserlogin 
-										WHERE id_token = :id_token and is_login = '1'");
+			$checkLogin = $this->con->prepare("SELECT id_userlogin,is_login FROM gcuserlogin 
+												WHERE id_token = :id_token");
 			$checkLogin->execute([
 				':id_token' => $id_token
 			]);
-			if($checkLogin->rowCount() > 0){
-				return true;
+			$rowLogin = $checkLogin->fetch();
+			$arrayLogin = array();
+			if($rowLogin["is_login"] == '1'){
+				$arrayLogin["RETURN"] = TRUE;
+				return $arrayLogin;
 			}else{
-				return false;
+				$arrayLogin["IS_LOGIN"] = $rowLogin["is_login"] ?? '-99';
+				$arrayLogin["RETURN"] = FALSE;
+				return $arrayLogin;
 			}
 		}
 		public function logout($id_token,$type_login) {
@@ -119,6 +124,8 @@ class functions {
 					case '-7' : $type_login = '-7';
 						break;
 					case '-99' : $type_login = '-6';
+						break;
+					case '-6' : $type_login = '-5';
 						break;
 				}
 				$revokeAllToken = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),

@@ -50,13 +50,13 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 					}
 					foreach($arrMember as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = $dataComing["message"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}
 					$arrDiff = array_diff($destination,array_column($arrGroupAllSuccess, 'DESTINATION'));
 					foreach($arrDiff as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = $dataComing["message"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message"];
 						$arrGroupAllFailed[] = $arrGroupSuccess;
 					}
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				}else{
 					foreach($destination as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = $dataComing["message"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message"];
 						$arrGroupAllFailed[] = $arrGroupSuccess;
 					}
 					$arrayResult['SUCCESS'] = [];

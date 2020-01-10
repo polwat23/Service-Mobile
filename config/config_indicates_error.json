@@ -10,6 +10,8 @@
 	"WS0009" : [{"th" : "กรุณาเข้าสู่ระบบ","en" : "Please login"}],
 	"WS0010" : 
 		[{
+		"LOGOUT-5" : 
+			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเข้าสู่ระบบจากอุปกรณ์อื่น","en" : "You was forced logout because login duplicate other device"}],
 		"LOGOUT-7" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบ จากอุปกรณ์อื่น","en" : "You was forced logout from other device"}],
 		"LOGOUT-8" : 
@@ -17,7 +19,9 @@
 		"LOGOUT-9" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเปลี่ยนรหัสผ่าน","en" : "You was forced logout because password has been change"}],
 		"LOGOUT-10" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการรีเซ็ตรหัส PIN","en" : "You was forced logout because pin has been change"}]			
+			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการรีเซ็ตรหัส PIN","en" : "You was forced logout because pin has been change"}],
+		"LOGOUT-99" : 
+			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากโทเคนถูกยกเลิก","en" : "You was forced logout because token was cancel"}]
 		}],
 	"WS0011" : [{"th" : "Pin ไม่ถูกต้อง","en" : "Pin is invalid"}],
 	"WS0012" : [{"th" : "OTP ไม่ถูกต้อง","en" : "OTP is invalid"}],
@@ -52,6 +56,7 @@
 	"WS0041" : [{"th" : "ไม่สามารถทำรายการได้ในขณะนี้ กรุณาติดต่อสหกรณ์ #WS0041","en" : "Cannot transaction this moment please contact cooperative #WS0041"}],
 	"WS0042" : [{"th" : "ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ กรุณาติดต่อสหกรณ์ #WS0042","en" : "Cannot check destination account please contact cooperative #WS0042"}],
 	"WS0043" : [{"th" : "วงเงินการทำธุรกรรมวันนี้ของท่านเต็มจำนวนแล้ว","en" : "Your money limit of transaction today is full"}],
+	"WS0044" : [{"th" : "ไม่สามารถสร้างไฟล์เรียกเก็บแบบ PDF ได้กรุณาลองใหม่อีกครั้ง","en" : "Cannot create report for charge monthly in type PDF"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],

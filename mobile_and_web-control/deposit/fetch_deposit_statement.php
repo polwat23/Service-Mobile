@@ -17,13 +17,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
+		$CountRowNext = $dataComing["amt_row_next"] ?? 20;
+		$oldRowOffer = $dataComing["amt_old_row_offer"] ?? 0;
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY dsm.SEQ_NO DESC");
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY dsm.SEQ_NO DESC
+											OFFSET ".$oldRowOffer." ROWS FETCH NEXT ".$CountRowNext." ROWS ONLY");
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,

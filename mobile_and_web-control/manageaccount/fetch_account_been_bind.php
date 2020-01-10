@@ -4,7 +4,8 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
-													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.limit_amt
+													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.limit_amt,
+													gba.bank_account_name,gba.bank_account_name_en
 													FROM gcbindaccount gba LEFT JOIN gcconstantbankpalette gcpl ON gba.id_bankpalette = gcpl.id_bankpalette and gcpl.is_use = '1'
 													LEFT JOIN gcpalettecolor gpl ON gcpl.id_palette = gpl.id_palette and gpl.is_use = '1'
 													LEFT JOIN csbankdisplay csb ON gcpl.bank_code = csb.bank_code
@@ -45,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
 				$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
 				$arrAccount["LIMIT_COOP_WITHDRAW"] = (int)$limit_withdraw;
-				$fetchAccountCoop = $conoracle->prepare("SELECT deptaccount_name,depttype_code,membcat_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$fetchAccountCoop = $conoracle->prepare("SELECT depttype_code,membcat_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 				$fetchAccountCoop->execute([
 					':deptaccount_no' => $rowAccountBind["deptaccount_no_coop"]
 				]);
@@ -69,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccount["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
 					$arrAccount["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 				}
-				$arrAccount["ACCOUNT_COOP_NAME"] = preg_replace('/\"/','',$rowAccountCoop["DEPTACCOUNT_NAME"]);
+				$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];
 				$arrBindAccount[] = $arrAccount;
 			}
 			if(sizeof($arrBindAccount) > 0 || isset($new_token)){

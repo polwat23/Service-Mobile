@@ -43,9 +43,9 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrayIdToken = array();
 						$rowIdToken = $getMemberLogged->fetch();
 						$arrayIdToken[] = $rowIdToken["id_token"];
-						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-7',
-																	gt.at_is_revoke = '-7',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
-																	gu.is_login = '-7',gu.logout_date = NOW()
+						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
+																	gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
+																	gu.is_login = '-5',gu.logout_date = NOW()
 																	WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
 						$updateLoggedOneDevice->execute();
 					}

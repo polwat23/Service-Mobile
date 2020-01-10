@@ -7,11 +7,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no'],$dataComing)
 			$arrSendData = array();
 			$arrVerifyToken['exp'] = time() + 60;
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-			$fetchCitizenId = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-			$fetchCitizenId->execute([':member_no' => $payload["member_no"]]);
+			$bank_account_no = preg_replace('/-/','',$dataComing["bank_account_no"]);
+			$fetchCitizenId = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_bank = :deptaccount_no 
+													and member_no = :member_no and bindaccount_status = '1'");
+			$fetchCitizenId->execute([
+				':deptaccount_no' => $bank_account_no,
+				':member_no' => $payload["member_no"]
+			]);
 			$rowCitizen = $fetchCitizenId->fetch();
-			$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"] ?? "1500900999999";
-			$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
+			$arrVerifyToken['citizen_id'] = $rowCitizen["citizen_id"];
+			$arrVerifyToken['bank_account_no'] = $bank_account_no;
 			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];

@@ -3,6 +3,7 @@
         "mongodb/mongodb": "^1.5",
 		"rbdwllr/reallysimplejwt": "^2.0",
 		"phpmailer/phpmailer": "~6.1",
-        "rosell-dk/webp-convert": "^2.3"
+        "rosell-dk/webp-convert": "^2.3",
+        "dompdf/dompdf": "^0.8.3"
     }
 }

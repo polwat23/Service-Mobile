@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','calendarcoop')){
 		$arrayGroup = array();
 		
-		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date
+		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before
 												FROM gctaskevent");
 		$fetchCalendar->execute();
 		while($rowCalendar = $fetchCalendar->fetch()){
@@ -15,6 +15,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["TASK_DETAIL"] = $rowCalendar["task_detail"];
 			$arrConstans["START_DATE"] = $rowCalendar["start_date"];
 			$arrConstans["END_DATE"] = $rowCalendar["end_date"];
+			$arrConstans["START_TIME"] = $rowCalendar["event_start_time"];
+			$arrConstans["END_TIME"] = $rowCalendar["event_end_time"];
+			$arrConstans["IS_SETTIME"] = $rowCalendar["is_settime"] == 1 ? true : false;
+			$arrConstans["IS_NOTIFY"] = $rowCalendar["is_notify"] == 1 ? true : false;
+			$arrConstans["IS_NOTIFY_BEFORE"] = $rowCalendar["is_notify_before"] == 1 ? true : false;
 			$arrayGroup[] = $arrConstans;
 		}
 		
