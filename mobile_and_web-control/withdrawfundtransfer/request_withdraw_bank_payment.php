@@ -1,17 +1,24 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc','dept_account_enc','tran_id','sigma_key','coop_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc',
+'dept_account_enc','tran_id','sigma_key','coop_account_no','penelty_amt','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		try{
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$time = time();
 			$arrSendData = array();
+			$penalty_include = $func->getConstant("include_penalty");
+			if($penalty_include == '0'){
+				$amt_transfer = $dataComing["amt_transfer"] - $dataComing["penelty_amt"] - $dataComing["fee_amt"];
+			}else{
+				$amt_transfer = $dataComing["amt_transfer"];
+			}
 			$arrSendData["remark"] = $dataComing["remark"] ?? null;
 			$arrVerifyToken['exp'] = time() + 60;
 			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-			$arrVerifyToken['amt_transfer'] = $dataComing["amt_transfer"];
+			$arrVerifyToken['amt_transfer'] = $amt_transfer;
 			$arrVerifyToken['coop_account_no'] = $coop_account_no;
 			$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
 			$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
@@ -41,9 +48,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = "admin";
-			$arrayGroup["fee_amt"] = "0";
-			$arrayGroup["feeinclude_status"] = "1";
-			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
+			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
+			$arrayGroup["feeinclude_status"] = $penalty_include;
+			$arrayGroup["item_amt"] = $amt_transfer;
 			$arrayGroup["member_no"] = $payload["member_no"];
 			$arrayGroup["moneytype_code"] = "CBT";
 			$arrayGroup["msg_output"] = null;
@@ -102,7 +109,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
-					':amount' => $dataComing["amt_transfer"],
+					':amount' => $amt_transfer,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':id_userlogin' => $payload["id_userlogin"],

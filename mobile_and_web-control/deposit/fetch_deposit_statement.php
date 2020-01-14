@@ -17,16 +17,28 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$CountRowNext = $dataComing["amt_row_next"] ?? 20;
-		$oldRowOffer = $dataComing["amt_old_row_offer"] ?? 0;
+		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
+			$arrayResult['RESPONSE_CODE'] = "WS4004";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(400);
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$old_seq_no = $dataComing["old_seq_no"] ?? 999999;
+		if($dataComing["channel"] == 'mobile_app'){
+			$rownum = $func->getConstant('limit_fetch_stm_dept');
+		}else{
+			$rownum = 999999;
+		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY dsm.SEQ_NO DESC
-											OFFSET ".$oldRowOffer." ROWS FETCH NEXT ".$CountRowNext." ROWS ONLY");
+											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and dsm.SEQ_NO < ".$old_seq_no." 
+											and rownum <= ".$rownum." ORDER BY dsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,

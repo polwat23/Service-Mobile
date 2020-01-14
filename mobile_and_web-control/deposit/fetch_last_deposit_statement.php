@@ -21,8 +21,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												lastmovement_date = (SELECT MAX(dpm.lastmovement_date) FROM dpdeptmaster dpm WHERE dpm.member_no = :member_no) and deptclose_status <> 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch();
-		$CountRowNext = $dataComing["amt_row_next"] ?? 20;
-		$oldRowOffer = $dataComing["amt_old_row_offer"] ?? 0;
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
 		$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = :account_no) as LAST_OPERATE_DATE
@@ -41,13 +39,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
+		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
+			$arrayResult['RESPONSE_CODE'] = "WS4004";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(400);
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$old_seq_no = $dataComing["old_seq_no"] ?? 999999;
+		if($dataComing["channel"] == 'mobile_app'){
+			$rownum = $func->getConstant('limit_fetch_stm_dept');
+		}else{
+			$rownum = 999999;
+		}
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY dsm.SEQ_NO DESC
-											OFFSET ".$oldRowOffer." ROWS FETCH NEXT ".$CountRowNext." ROWS ONLY");
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and dsm.SEQ_NO < ".$old_seq_no." 
+											and rownum <= ".$rownum." ORDER BY dsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,

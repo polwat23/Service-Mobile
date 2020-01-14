@@ -17,8 +17,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$CountRowNext = $dataComing["amt_row_next"] ?? 20;
-		$oldRowOffer = $dataComing["amt_old_row_offer"] ?? 0;
+		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
+			$arrayResult['RESPONSE_CODE'] = "WS4004";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(400);
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$old_seq_no = $dataComing["old_seq_no"] ?? 999999;
+		if($dataComing["channel"] == 'mobile_app'){
+			$rownum = $func->getConstant('limit_fetch_stm_loan');
+		}else{
+			$rownum = 999999;
+		}
 		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 		$getStatement = $conoracle->prepare("SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
 											lsm.interest_payment as INT_PAYMENT,sl.payinslip_no
@@ -26,8 +38,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											LEFT JOIN slslippayindet sl ON lsm.loancontract_no = sl.loancontract_no and lsm.period = sl.period
 											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY lsm.SEQ_NO DESC
-											OFFSET ".$oldRowOffer." ROWS FETCH NEXT ".$CountRowNext." ROWS ONLY");
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and lsm.SEQ_NO < ".$old_seq_no." 
+											and rownum <= ".$rownum." ORDER BY lsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,

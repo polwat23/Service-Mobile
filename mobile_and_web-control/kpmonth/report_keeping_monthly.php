@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		if(sizeof($arrGroupDetail) > 0 || isset($new_token)){
-			$arrayPDF = GenerateReport($arrGroupDetail,$payload["member_no"],$dompdf);
+			$arrayPDF = GenerateReport($arrGroupDetail,$$lib->convertperiodkp($dataComing["recv_period"]),$payload["member_no"],$dompdf);
 			if($arrayPDF["RESULT"]){
 				$arrayResult['REPORT_URL'] = $arrayPDF["PATH"];
 				if(isset($new_token)){
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	exit();
 }
 
-function GenerateReport($dataReport,$member_no,$dompdf){
+function GenerateReport($dataReport,$recv_period,$member_no,$dompdf){
 	$html = '<style>
 				@font-face {
 				  font-family: THSarabun;
@@ -130,7 +130,7 @@ function GenerateReport($dataReport,$member_no,$dompdf){
 					<div style="text-align:center;position: absolute;width:100%">
 						<p style="margin-top: 10px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด</p>
 						<p style="margin-top: -15px;font-size: 18px;font-weight: bold">รายการเรียกเก็บประจำเดือน</p>
-						<p style="margin-top: -28px;font-size: 18px;font-weight: bold">มีนาคม 2562</p>
+						<p style="margin-top: -28px;font-size: 18px;font-weight: bold">'.$recv_period.'</p>
 					</div>
 				</div>
 				<div style="margin: 30px 0 20px 0;">
