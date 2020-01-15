@@ -25,19 +25,33 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$old_seq_no = $dataComing["old_seq_no"] ?? 999999;
+		
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_dept');
+			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO > 0";
+			}else{
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
+			}
 		}else{
 			$rownum = 999999;
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
+		$getAccount = $conoracle->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
+											WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+		$getAccount->execute([
+			':account_no' => $account_no
+		]);
+		$rowAccount = $getAccount->fetch();
+		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
+		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and dsm.SEQ_NO < ".$old_seq_no." 
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 											and rownum <= ".$rownum." ORDER BY dsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':account_no' => $account_no,
@@ -63,6 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		if(sizeof($arrayGroupSTM) > 0 || isset($new_token)){
+			$arrayResult["HEADER"] = $arrayHeaderAcc;
 			$arrayResult["STATEMENT"] = $arrayGroupSTM;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;

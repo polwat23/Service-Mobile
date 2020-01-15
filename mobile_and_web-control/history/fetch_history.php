@@ -12,11 +12,11 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		if(isset($dataComing["fetch_type"])){
 			switch($dataComing["fetch_type"]){
 				case "refresh":
-					$executeData[':id_history'] = isset($dataComing["id_history"]) ? $dataComing["id_history"] : 16777215; // max number mediumint(8) of id_history
+					$executeData[':id_history'] = $dataComing["id_history"] ?? 0; 
 					$extraQuery = "and id_history > :id_history";
 					break;
 				case "more":
-					$executeData[':id_history'] = isset($dataComing["id_history"]) ? $dataComing["id_history"] : 0;
+					$executeData[':id_history'] = $dataComing["id_history"] ?? 16777215; // max number mediumint(8) of id_history
 					$extraQuery = "and id_history < :id_history";
 					break;
 			}

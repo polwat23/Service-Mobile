@@ -39,6 +39,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
+		$arrAccount["DATA_TIME"] = date('H:i');
 		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -47,18 +48,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$old_seq_no = $dataComing["old_seq_no"] ?? 999999;
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_dept');
+			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO > 0";
+			}else{
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
+			}
 		}else{
 			$rownum = 999999;
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
+		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and dsm.SEQ_NO < ".$old_seq_no." 
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 											and rownum <= ".$rownum." ORDER BY dsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':account_no' => $account_no,

@@ -38,15 +38,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
 			$getKPDetail = $conoracle->prepare("select * from (
-													(select RECEIPT_NO,RECEIVE_AMT from kpmastreceive 
-													where member_no = :member_no and recv_period = :period)
+													(select kpr.RECEIPT_NO,NVL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,(SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kpmastreceivedet kpd
+													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
+													where kpr.member_no = :member_no and kpr.recv_period = :recv_period )
 												UNION
-													(select RECEIPT_NO,RECEIVE_AMT from kptempreceive 
-													where member_no = :member_no and recv_period = :period)
+													(select kpr.RECEIPT_NO,NVL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kptempreceive kpr,(SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kptempreceivedet kpd
+													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
+													where kpr.member_no = :member_no and kpr.recv_period = :recv_period )
 												)");
 			$getKPDetail->execute([
 				':member_no' => $member_no,
-				':period' => $rowPeriod["RECV_PERIOD"]
+				':recv_period' => $rowPeriod["RECV_PERIOD"]
 			]);
 			$rowKPDetali = $getKPDetail->fetch();
 			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];

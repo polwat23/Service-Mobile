@@ -4,13 +4,22 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageconstantperson')){
 		$arrayGroup = array();
-		//fetch smsConstant
-		$smsConstantMin = 0;
-		$fetchSMSConstant = $conmysql->prepare("SELECT smscs_value as constant_value
+		//fetch smsConstantDept
+		$smsConstantMinDept = 0;
+		$fetchSMSConstantDept = $conmysql->prepare("SELECT smscs_value as constant_value
 												FROM smsconstantsystem WHERE is_use = '1' AND smscs_name = 'limit_dept_send_free'");
-		$fetchSMSConstant->execute();
-		while($rowSMSConstant = $fetchSMSConstant->fetch()){
-			$smsConstantMin = $rowSMSConstant["constant_value"];
+		$fetchSMSConstantDept->execute();
+		while($rowSMSConstantDept = $fetchSMSConstantDept->fetch()){
+			$smsConstantMinDept = $rowSMSConstantDept["constant_value"];
+		}
+		
+		//fetch smsConstantWithdraw
+		$smsConstantMinWithdraw = 0;
+		$fetchSMSConstantWithdraw = $conmysql->prepare("SELECT smscs_value as constant_value
+												FROM smsconstantsystem WHERE is_use = '1' AND smscs_name = 'limit_withdraw_send_free'");
+		$fetchSMSConstantWithdraw->execute();
+		while($rowSMSConstantWithdraw = $fetchSMSConstantWithdraw->fetch()){
+			$smsConstantMinWithdraw = $rowSMSConstantWithdraw["constant_value"];
 		}
 		
 		$fetchConstant = $conmysql->prepare("SELECT id_smscsperson as id_constantperson,smscsp_member as member_no,smscsp_mindeposit as mindeposit,
@@ -26,7 +35,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["IS_USE"] = $rowMenuMobile["is_use"];
 			$arrayGroup[] = $arrConstans;
 		}
-		$arrayResult["CONSTANT_MIN"] = $smsConstantMin;
+		$arrayResult["CONSTANT_MIN_DEPT"] = $smsConstantMinDept;
+		$arrayResult["CONSTANT_MIN_WITHDRAW"] = $smsConstantMinWithdraw;
 		$arrayResult["CONSTANT_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);

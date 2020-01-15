@@ -25,20 +25,33 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$old_seq_no = $dataComing["old_seq_no"] ?? 999999;
+		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
+			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO > 0";
+			}else{
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+			}
 		}else{
 			$rownum = 999999;
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
 		}
-		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
+		$getAccount = $conoracle->prepare("SELECT principal_balance as LOAN_BALANCE FROM lncontmaster
+											WHERE contract_status = 1 and loancontract_no = :contract_no");
+		$getAccount->execute([
+			':contract_no' => $contract_no
+		]);
+		$rowContract = $getAccount->fetch();
+		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
 											lsm.interest_payment as INT_PAYMENT,sl.payinslip_no
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											LEFT JOIN slslippayindet sl ON lsm.loancontract_no = sl.loancontract_no and lsm.period = sl.period
 											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and lsm.SEQ_NO < ".$old_seq_no." 
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 											and rownum <= ".$rownum." ORDER BY lsm.SEQ_NO DESC");
 		$getStatement->execute([
 			':contract_no' => $contract_no,

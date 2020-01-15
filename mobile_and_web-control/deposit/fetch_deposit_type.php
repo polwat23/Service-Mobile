@@ -24,6 +24,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			$arrayHeaderAcc = array();
+			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
+			$fetchAlias->execute([
+				':account_no' => $account_no
+			]);
+			$rowAlias = $fetchAlias->fetch();
+			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"];
+			$arrAccount["ALIAS_PATH_IMG"] = $rowAlias["path_alias_img"];
+			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
