@@ -42,14 +42,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 		$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 		$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
-		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
-			$arrayResult['RESPONSE_CODE'] = "WS4004";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
-			echo json_encode($arrayResult);
-			exit();
-		}
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
@@ -84,18 +76,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["SUM_PAYMENT"] = number_format($rowStm["INT_PAYMENT"] + $rowStm["PRN_PAYMENT"],2);
 			$arrayGroupSTM[] = $arrSTM;
 		}
-		if(sizeof($arrayGroupSTM) > 0 || isset($new_token)){
-			$arrayResult["HEADER"] = $arrContract;
-			$arrayResult["STATEMENT"] = $arrayGroupSTM;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
+		$arrayResult["HEADER"] = $arrContract;
+		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		if(isset($new_token)){
+			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
+		$arrayResult["RESULT"] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

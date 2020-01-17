@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','settingpalette',$conmysql)){
+	if($func->check_permission_core($payload,'mobileadmin','managepalette')){
 		$arrayGroup = array();
 		$fetchPalette = $conmysql->prepare("SELECT id_palette,type_palette,color_main,color_secon,color_deg,color_text,
 										type_palette_prev,color_main_prev,color_secon_prev,color_text_prev,color_deg_prev,update_date
@@ -29,18 +29,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

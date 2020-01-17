@@ -1,13 +1,12 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','id_token','member_no','pin'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
-		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin
+		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET pin = null
 										WHERE member_no = :member_no");
 		if($repassword->execute([
-				':pin' => $newpin,
-				':member_no' => $member_no
+				':member_no' => $dataComing["member_no"]
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);

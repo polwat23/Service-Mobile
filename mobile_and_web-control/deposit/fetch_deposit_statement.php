@@ -17,14 +17,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
-			$arrayResult['RESPONSE_CODE'] = "WS4004";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
-			echo json_encode($arrayResult);
-			exit();
-		}
 		
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_dept');
@@ -76,18 +68,13 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"];
 			$arrayGroupSTM[] = $arrSTM;
 		}
-		if(sizeof($arrayGroupSTM) > 0 || isset($new_token)){
-			$arrayResult["HEADER"] = $arrayHeaderAcc;
-			$arrayResult["STATEMENT"] = $arrayGroupSTM;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
+		$arrayResult["HEADER"] = $arrayHeaderAcc;
+		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		if(isset($new_token)){
+			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
+		$arrayResult["RESULT"] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

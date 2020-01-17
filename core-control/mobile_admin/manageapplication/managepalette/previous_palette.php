@@ -14,13 +14,11 @@ if($lib->checkCompleteArgument(['unique_id','color_main','color_text','type_pale
 				':id_palette' => $dataComing["id_palette"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถเเก้ไขถาดสีได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
 			}
+			echo json_encode($arrayResult);
 		}else{
 			if(isset($dataComing["color_secon"]) && isset($dataComing["color_deg"])){
 				$updatePalette = $conmysql->prepare("UPDATE gcpalettecolor SET color_main_prev = color_main,color_secon_prev = color_secon,type_palette_prev = type_palette,color_text_prev = color_text,
@@ -35,13 +33,11 @@ if($lib->checkCompleteArgument(['unique_id','color_main','color_text','type_pale
 					':id_palette' => $dataComing["id_palette"]
 				])){
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
 				}else{
 					$arrayResult['RESPONSE'] = "ไม่สามารถเเก้ไขถาดสีได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
 				}
+				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);

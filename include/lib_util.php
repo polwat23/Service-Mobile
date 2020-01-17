@@ -157,7 +157,7 @@ class library {
 			$monthOne = str_replace('0','',substr($period,4,1));
 			$monthTwo= substr($period,5);
 			$month = $monthOne.$monthTwo;
-			return $thaimonth[$month].' '.$year;
+			return $thaimonth[$month].' '.($year + 543);
 		}else{ 
 			return ""; 
 		}
@@ -276,6 +276,14 @@ class library {
 			return $e;
 		}
 	}
+	
+	public function imgtobase($path){
+		$path = __DIR__.'/..'.$path;
+		$img_type = pathinfo($path, PATHINFO_EXTENSION);
+		$data_img = file_get_contents($path);
+		return 'data:image/' . $img_type . ';base64,' . base64_encode($data_img);
+	}
+	
 	public function text_limit($text, $limit = 50, $end = '...'){
 		if (mb_strwidth($text, 'UTF-8') <= $limit) {
 			return $text;

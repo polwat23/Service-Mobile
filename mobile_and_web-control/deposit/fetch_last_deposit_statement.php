@@ -22,6 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch();
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
+		
 		$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = :account_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
@@ -32,6 +33,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		$rowAccount = $getAccount->fetch();
 		$arrAccount = array();
+		$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
+			$fetchAlias->execute([
+				':account_no' => $account_no
+			]);
+		$rowAlias = $fetchAlias->fetch();
+		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"];
+		if(isset($rowAlias["path_alias_img"])){
+			$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
+			$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
+		}else{
+			$arrAccount["ALIAS_PATH_IMG"] = null;
+		}
 		$account_no_format = $lib->formataccount($account_no,$func->getConstant('dep_format'));
 		$arrAccount["DEPTACCOUNT_NO"] = $account_no_format;
 		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
@@ -40,14 +53,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
 		$arrAccount["DATA_TIME"] = date('H:i');
-		if(isset($dataComing["old_seq_no"]) && !is_int($dataComing["old_seq_no"])){
-			$arrayResult['RESPONSE_CODE'] = "WS4004";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
-			echo json_encode($arrayResult);
-			exit();
-		}
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_dept');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
@@ -59,7 +64,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
-		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
@@ -90,18 +94,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"];
 			$arrayGroupSTM[] = $arrSTM;
 		}
-		if(sizeof($arrayGroupSTM) > 0 || isset($new_token)){
-			$arrayResult["HEADER"] = $arrAccount;
-			$arrayResult["STATEMENT"] = $arrayGroupSTM;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
+		$arrayResult["HEADER"] = $arrAccount;
+		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		if(isset($new_token)){
+			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
+		$arrayResult["RESULT"] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
