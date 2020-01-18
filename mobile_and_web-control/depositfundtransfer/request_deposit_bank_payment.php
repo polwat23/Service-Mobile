@@ -7,7 +7,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$time = time();
 			$arrSendData = array();
-			$arrSendData["remark"] = $dataComing["remark"] ?? null;
 			$arrVerifyToken['exp'] = time() + 60;
 			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
@@ -81,7 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				exit();
 			}
 			// -----------------------------------------------
-			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/deposit/kbank/request_deposit_payment',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/depositfundtransfer_kbank',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

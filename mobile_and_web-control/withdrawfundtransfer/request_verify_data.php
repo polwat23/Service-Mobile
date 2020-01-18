@@ -63,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/kbank/request_verify_data',$arrSendData);
+		$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/verifydata_kbank',$arrSendData);
 		if(!$responseAPI){
 			$arrayResult['RESPONSE_CODE'] = "WS0028";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

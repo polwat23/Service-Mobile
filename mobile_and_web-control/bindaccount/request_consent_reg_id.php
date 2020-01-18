@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$verify_token_bind =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendDataVerify["verify_token"] = $verify_token_bind;
 			$arrSendDataVerify["app_id"] = $config["APP_ID"];
-			$responseAPIVerify = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/kbank/request_verify_data',$arrSendDataVerify);
+			$responseAPIVerify = $lib->posting_data($config["URL_API_COOPDIRECT"].'/verifydata_kbank',$arrSendDataVerify);
 			if(!$responseAPIVerify){
 				$arrayResult['RESPONSE_CODE'] = "WS0028";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 					':limit_amt' => $func->getConstant('limit_withdraw'),
 					':id_token' => $payload["id_token"]
 				])){
-					$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/kbank/pending_bind_account',$arrSendData);
+					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_reg_id_for_consent',$arrSendData);
 					if(!$responseAPI){
 						$arrayResult['RESPONSE_CODE'] = "WS0022";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/kbank/unbind_account',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_unbind_espa_id',$arrSendData);
 				if(!$responseAPI){
 					$conmysql->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS0029";
