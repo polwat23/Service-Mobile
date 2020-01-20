@@ -64,13 +64,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
-		$getStatement = $conoracle->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
+		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											and rownum <= ".$rownum." ORDER BY dsm.SEQ_NO DESC");
+											ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,

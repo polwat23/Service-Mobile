@@ -84,6 +84,7 @@
 	"WS1025" : [{"th" : "ไม่สามารถเปลี่ยนสถานะบัญชีที่ผูกสำหรับการทำธุรกรรมได้ กรุณาติดต่อสหกรณ์ #WS1025","en" : "Cannot change account status bind for transaction please contact cooperative #WS1025"}],
 	"WS1026" : [{"th" : "ไม่สามารถเปลี่ยนแปลงวงเงินได้ กรุณาติดต่อสหกรณ์ #WS1026","en" : "Cannot change limit please contact cooperative #WS1026"}],
 	"WS1027" : [{"th" : "ไม่สามารถตั้งค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1027","en" : "Cannot set alias name account please contact cooperative #WS1027"}],
+	"WS1028" : [{"th" : "ไม่สามารถล้างค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1028","en" : "Cannot reset alias name account please contact cooperative #WS1028"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],

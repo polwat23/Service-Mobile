@@ -53,14 +53,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
 		}
-		$getStatement = $conoracle->prepare("SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
+		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,
 											lsm.interest_payment as INT_PAYMENT,sl.payinslip_no
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											LEFT JOIN slslippayindet sl ON lsm.loancontract_no = sl.loancontract_no and lsm.period = sl.period
 											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											and rownum <= ".$rownum." ORDER BY lsm.SEQ_NO DESC");
+											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,

@@ -11,9 +11,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowInfoMobile = $memberInfoMobile->fetch();
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
-			$arrayResult["AVATAR_PATH"] = $rowInfoMobile["path_avatar"];
+			$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
 			$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-			$arrayResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
+			$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			if($member_no == "dev@mode"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";

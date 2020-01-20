@@ -82,11 +82,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				echo json_encode($arrayResult);
 				exit();
 			}
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $updateMemoDept;
-			$arrError["ERROR_CODE"] = 'WS1005-2';
-			$lib->addLogtoTxt($arrError,'alias_error');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

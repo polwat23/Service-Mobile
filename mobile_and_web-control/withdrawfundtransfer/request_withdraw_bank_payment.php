@@ -101,14 +101,17 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,amount,result_transaction,member_no,
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,fee_amt,penalty_amt,result_transaction,member_no,
 															ref_no_1,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
 					':amount' => $amt_transfer,
+					':fee_amt' => $dataComing["fee_amt"],
+					':penalty_amt' => $dataComing["penelty_amt"],
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':id_userlogin' => $payload["id_userlogin"],
@@ -121,6 +124,23 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				}
 				echo json_encode($arrayResult);
 			}else{
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,fee_amt,penalty_amt,result_transaction,cancel_date,member_no,
+															ref_no_1,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'-9',NOW(),:member_no
+															,:ref_no1,:id_userlogin,:ref_no_source)");
+				$insertTransactionLog->execute([
+					':ref_no' => $dataComing["tran_id"],
+					':from_account' => $coop_account_no,
+					':destination' => $rowDataDeposit["deptaccount_no_bank"],
+					':amount' => $amt_transfer,
+					':fee_amt' => $dataComing["fee_amt"],
+					':penalty_amt' => $dataComing["penelty_amt"],
+					':member_no' => $payload["member_no"],
+					':ref_no1' => $coop_account_no,
+					':id_userlogin' => $payload["id_userlogin"],
+					':ref_no_source' => $dataComing["kbank_ref_no"]
+				]);
 				$arrayGroup["post_status"] = "-1";
 				$argumentWS = [
 						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",

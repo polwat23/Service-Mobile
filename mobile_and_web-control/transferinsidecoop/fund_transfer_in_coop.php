@@ -18,10 +18,40 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							"adc_fee" => $dataComing["fee_transfer"],
 			];
 			$resultWS = $clientWS->__call("of_withdraw_deposit_trans", array($argumentWS));
-			$arrayResult['SLIP_NO'] = $resultWS->of_withdraw_deposit_transResult;
+			$slip_no = $resultWS->of_withdraw_deposit_transResult;
+			$arrayResult['SLIP_NO'] = $slip_no;
+			$ref_no = date('YmdHis').substr($from_account_no,-3);
+			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,penalty_amt,result_transaction,member_no,
+															ref_no_1,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+			$insertTransactionLog->execute([
+				':ref_no' => $ref_no,
+				':from_account' => $from_account_no,
+				':destination' => $to_account_no,
+				':amount' => $dataComing["amt_transfer"],
+				':penalty_amt' => $dataComing["fee_transfer"],
+				':member_no' => $payload["member_no"],
+				':ref_no1' => $from_account_no,
+				':id_userlogin' => $payload["id_userlogin"],
+				':ref_no_source' => $slip_no
+			]);
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){
+			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,penalty_amt,result_transaction,cancel_date,member_no,ref_no_1,id_userlogin)
+															VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,'-9',NOW(),:member_no,:ref_no1,:id_userlogin)");
+			$insertTransactionLog->execute([
+				':ref_no' => $ref_no,
+				':from_account' => $from_account_no,
+				':destination' => $to_account_no,
+				':amount' => $dataComing["amt_transfer"],
+				':penalty_amt' => $dataComing["fee_transfer"],
+				':member_no' => $payload["member_no"],
+				':ref_no1' => $from_account_no,
+				':id_userlogin' => $payload["id_userlogin"]
+			]);
 			$arrError = array();
 			$arrError["MESSAGE"] = $e->getMessage();
 			$arrError["ERROR_CODE"] = 'WS8001';

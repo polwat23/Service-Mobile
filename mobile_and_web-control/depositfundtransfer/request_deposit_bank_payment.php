@@ -93,9 +93,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
 				$ref_no = date('YmdHis').substr($coop_account_no,7);
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,amount,result_transaction,member_no,
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
+															,amount,result_transaction,member_no,
 															ref_no_1,etn_refno,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:etn_ref,:id_userlogin,:ref_no_source)");
+															VALUES(:ref_no,'DTX',:from_account,'1',:destination,'9',:amount,'1',:member_no,:ref_no1,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
@@ -117,6 +118,19 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				}
 				echo json_encode($arrayResult);
 			}else{
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,result_transaction,cancel_date,member_no,ref_no_1,etn_refno,id_userlogin)
+															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,'-9',NOW(),:member_no,:ref_no1,:etn_ref,:id_userlogin)");
+				$insertTransactionLog->execute([
+					':ref_no' => $ref_no,
+					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
+					':destination' => $coop_account_no,
+					':amount' => $dataComing["amt_transfer"],
+					':member_no' => $payload["member_no"],
+					':ref_no1' => $coop_account_no,
+					':etn_ref' => $etn_ref,
+					':id_userlogin' => $payload["id_userlogin"]
+				]);
 				$arrayGroup["post_status"] = "-1";
 				$argumentWS = [
 						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
