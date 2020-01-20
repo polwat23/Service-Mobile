@@ -262,14 +262,27 @@ class functions {
 			}
 			return $returnResult;
 		}
-		public function getTemplate($template_name){
+		public function getTemplate($template_name,$seq_no){
 			$getTemplatedata = $this->con->prepare("SELECT template_subject,template_body 
-										FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
+													FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
 			$getTemplatedata->execute([':template_name' => $template_name]);
 			$rowTemplate = $getTemplatedata->fetch();
 			$arrayResult = array();
 			$arrayResult["SUBJECT"] = $rowTemplate["template_subject"];
 			$arrayResult["BODY"] = $rowTemplate["template_body"];
+			return $arrayResult;
+		}
+		public function getTemplatSystem($component_system,$seq_no){
+			$getTemplatedata = $this->con->prepare("SELECT subject,body 
+													FROM smssystemtemplate WHERE component_system = :component_system and is_use = '1' and seq_no = :seq_no");
+			$getTemplatedata->execute([
+				':component_system' => $component_system,
+				':seq_no' => $seq_no
+			]);
+			$rowTemplate = $getTemplatedata->fetch();
+			$arrayResult = array();
+			$arrayResult["SUBJECT"] = $rowTemplate["subject"];
+			$arrayResult["BODY"] = $rowTemplate["body"];
 			return $arrayResult;
 		}
 		public function insertHistory($payload,$type_history) {
@@ -370,6 +383,34 @@ class functions {
 			}else{
 				return false;
 			}
+		}
+		
+		public function getFCMToken($type_target,$member_no){
+			$arrayGrpToken = array();
+			$arrayToken = array();
+			$arrayMember = array();
+			if($type_target == 'person'){
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1' and gul.member_no = :member_no
+													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
+				$fetchFCMToken->execute([':member_no' => $member_no]);
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					$arrayMember[] = $rowFCMToken["member_no"];
+				}
+			}else if($type_target == 'many'){
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$member_no)."')
+													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
+				$fetchFCMToken->execute();
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					$arrayMember[] = $rowFCMToken["member_no"];
+				}
+			}
+			$arrayGrpToken["TOKEN"] = $arrayToken;
+			$arrayGrpToken["MEMBER_NO"] = $arrayMember;
+			return $arrayGrpToken;
 		}
 }
 ?>

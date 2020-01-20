@@ -35,43 +35,26 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				$arrPayloadNotify = array();
 				$arrMessage = array();
 				$arrMember = array();
-				$getFCMToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$destination)."')
-													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
-				$getFCMToken->execute();
-				if($getFCMToken->rowCount() > 0){
-					$arrDestination = array();
-					while($rowFcmToken = $getFCMToken->fetch()){
-						if(isset($rowFcmToken["fcm_token"])){
-							$arrDestination[] = $rowFcmToken["fcm_token"];
-							$arrMember[] = $rowFcmToken["member_no"];
-						}
-					}
-					$arrPayloadNotify["TO"] = $arrDestination;
-					$arrPayloadNotify["MEMBER_NO"] = $arrMember;
-					$arrMessage["SUBJECT"] = $dataComing["topic"];
-					$arrMessage["BODY"] = $dataComing["message"];
-					$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-					if($func->insertHistory($arrPayloadNotify,'1')){
-						if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
-						}else{
-							$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
-							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
-						}
+				$arrToken = $func->getFCMToken('many',$destination);
+				$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
+				$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+				$arrMessage["SUBJECT"] = $dataComing["topic"];
+				$arrMessage["BODY"] = $dataComing["message"];
+				$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+				if($func->insertHistory($arrPayloadNotify,'1')){
+					if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+						$arrayResult['RESULT'] = TRUE;
+						echo json_encode($arrayResult);
 					}else{
-						$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
+						$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
 					}
 				}else{
-					$arrayResult['RESPONSE'] = "ไม่พบปลายทางที่ต้องการส่งข้อความ";
+					$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();

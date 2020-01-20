@@ -36,6 +36,23 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':id_userlogin' => $payload["id_userlogin"],
 				':ref_no_source' => $slip_no
 			]);
+			$arrToken = $func->getFCMToken('person',$payload["member_no"]);
+			$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
+			$dataMerge = array();
+			$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
+			$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+			$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
+			$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			if($func->insertHistory($arrPayloadNotify,'1')){
+				$lib->sendNotify($arrPayloadNotify,"person");
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){
