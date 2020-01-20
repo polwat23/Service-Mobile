@@ -41,13 +41,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAccFav = $conmysql->prepare("SELECT gts.destination,gfl.name_fav
 												FROM gcfavoritelist gfl LEFT JOIN gctransaction gts ON gfl.ref_no = gts.ref_no
 												and gfl.member_no = gts.member_no
-												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gts.destination_type = '1'");
+												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gts.destination_type = '3'");
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch()){
 				$arrAccFav = array();
-				$arrAccFav["DEPTACCOUNT_NO"] = $rowAccFav["destination"];
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
+				$arrAccFav["LOANCONTRACT_NO"] = $rowAccFav["destination"];
+				$arrAccFav["LOANCONTRACT_NO_FORMAT"] = $lib->formatcontract($rowAccFav["destination"],$func->getConstant('loan_format'));
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}
@@ -68,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
-				$arrayResult['ACCOUNT_FAV'] = $arrLoanGrp;
+				$arrayResult['LOAN'] = $arrLoanGrp;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
