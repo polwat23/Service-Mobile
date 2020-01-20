@@ -3,6 +3,13 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
+		if($payload["member_no"] == 'dev@mode'){
+			$member_no = $config["MEMBER_NO_DEV_SHARE"];
+		}else if($payload["member_no"] == 'salemode'){
+			$member_no = $config["MEMBER_NO_SALE_SHARE"];
+		}else{
+			$member_no = $payload["member_no"];
+		}
 		$arrGroupAccAllow = array();
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
@@ -29,8 +36,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
+			$fetchShare = $conoracle->prepare("SELECT sharestk_amt FROM shsharemaster WHERE member_no = :member_no");
+			$fetchShare->execute([':member_no' => $member_no]);
+			$rowShare = $fetchShare->fetch();
+			$arrayShare = array();
+			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*10,2);
+			$arrayShare["MEMBER_NO"] = $payload["member_no"];
 			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token)){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
+				$arrayResult['SHARE'] = $arrayShare;
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
