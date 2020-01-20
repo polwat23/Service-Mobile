@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrExecute["alias_name"] = $dataComing["alias_name_emoji_"];
 		}
 		$arrExecute["deptaccount_no"] = $account_no;
-		$updateMemoDept = $conmysql->prepare("UPDATE gcdeptalias SET update_date = NOW(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."is_use = '1'
+		$updateMemoDept = $conmysql->prepare("UPDATE gcdeptalias SET update_date = NOW(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
 												".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
 												WHERE deptaccount_no = :deptaccount_no");
 		if($updateMemoDept->execute($arrExecute) && $updateMemoDept->rowCount() > 0){
@@ -66,13 +66,13 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrExecute = [
+				$arrExecute2 = [
 					':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],
 					':path_alias_img' => $path_alias_img ?? null,
 					':deptaccount_no' => $account_no
 				];
 				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["EXECUTE"] = $arrExecute2;
 				$arrError["QUERY"] = $insertMemoDept;
 				$arrError["ERROR_CODE"] = 'WS1005';
 				$lib->addLogtoTxt($arrError,'alias_error');
@@ -82,6 +82,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				echo json_encode($arrayResult);
 				exit();
 			}
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $updateMemoDept;
+			$arrError["ERROR_CODE"] = 'WS1005-2';
+			$lib->addLogtoTxt($arrError,'alias_error');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
