@@ -128,7 +128,6 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 			$arrPayment[] = $arrPaymentPerPeriod;
 		}
 		include(__DIR__.'/show_table_payment.php');
-		//echo json_encode($arrPayment);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

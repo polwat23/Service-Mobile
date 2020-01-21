@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 			if($checkPermissionCoremenu->rowCount() > 0){
 				$rowid_permission = $checkPermissionCoremenu->fetch();
 				$checkSubmenuPermit = $conmysql->prepare("SELECT id_permission_submenu FROM corepermissionsubmenu
-															WHERE id_permission_menu = :id_permission_menu and id_submenu = :id_submenu");
+															WHERE id_permission_menu = :id_permission_menu and id_submenu = :id_submenu and is_use <> '-9'");
 				$checkSubmenuPermit->execute([
 					':id_permission_menu' => $rowid_permission["id_permission_menu"],
 					':id_submenu' => $dataComing["id_submenu"]

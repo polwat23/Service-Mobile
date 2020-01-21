@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','message','topic','destination','type_send','channel_send'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','type_send','channel_send'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessage')){
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -38,8 +38,8 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				$arrToken = $func->getFCMToken('many',$destination);
 				$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
 				$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
-				$arrMessage["SUBJECT"] = $dataComing["topic"];
-				$arrMessage["BODY"] = $dataComing["message"];
+				$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+				$arrMessage["BODY"] = $dataComing["message_emoji_"];
 				$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
@@ -59,7 +59,53 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 					echo json_encode($arrayResult);
 					exit();
 				}
+			}else{
+				$arrToken = $func->getFCMToken('all');
+				$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
+				$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+				$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+				$arrMessage["BODY"] = $dataComing["message_emoji_"];
+				$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+				if($func->insertHistory($arrPayloadNotify,'1')){
+					if($lib->sendNotify($arrPayloadNotify,'person')){
+					//if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){ //รอแก้ไขส่งทุกคน
+						$arrayResult['RESULT'] = TRUE;
+						echo json_encode($arrayResult);
+					}else{
+						$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
+				}else{
+					$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}
+		}else if($dataComing["channel_send"] == "sms"){
+			if($dataComing["type_send"] == "person"){
+				$destination = array();
+				foreach($dataComing["destination"] as $target){
+					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+				}
+				$arrayResult['RESPONSE'] = $destination;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				$arrayTel = $func->getSMSPerson('all');
+				$arrayResult['RESPONSE'] = $arrayTel;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}
+		}else{
+			$arrayResult['RESPONSE'] = "ยังไม่รองรับรูปแบบการส่งนี้";
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;

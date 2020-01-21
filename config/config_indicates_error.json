@@ -57,6 +57,7 @@
 	"WS0042" : [{"th" : "ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ กรุณาติดต่อสหกรณ์ #WS0042","en" : "Cannot check destination account please contact cooperative #WS0042"}],
 	"WS0043" : [{"th" : "วงเงินการทำธุรกรรมวันนี้ของท่านเต็มจำนวนแล้ว","en" : "Your money limit of transaction today is full"}],
 	"WS0044" : [{"th" : "ไม่สามารถสร้างไฟล์เรียกเก็บแบบ PDF ได้กรุณาลองใหม่อีกครั้ง","en" : "Cannot create report for charge monthly in type PDF"}],
+	"WS0045" : [{"th" : "ไม่สามารถโอนเข้าบัญชีเดียวกันได้ กรุณาเปลี่ยนบัญชีปลายทาง","en" : "Cannot fund transfer same account please change account"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],

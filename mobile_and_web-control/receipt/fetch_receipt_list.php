@@ -10,6 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
+		$arraySlipGrp = array();
 		$fetchSlipCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'YYYY')) as COUNT_SLIP_YEAR,to_char(slip_date,'YYYY') as YEAR_SLIP
 												FROM slslippayin WHERE member_no = :member_no GROUP BY to_char(slip_date,'YYYY')");
 		$fetchSlipCount->execute([':member_no' => $member_no]);

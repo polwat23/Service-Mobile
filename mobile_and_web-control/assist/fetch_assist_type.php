@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		$fetchAssType = $conoracle->prepare("select ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO from asscontmaster asm LEFT JOIN 
+		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO FROM asscontmaster asm LEFT JOIN 
 												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE WHERE member_no = :member_no and asscont_status = 1");
 		$fetchAssType->execute([
 			':member_no' => $member_no

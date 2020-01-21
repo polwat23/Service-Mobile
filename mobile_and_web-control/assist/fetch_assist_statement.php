@@ -24,8 +24,8 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		]);
 		$rowAccountRCV = $fetchAccountReceive->fetch();
 		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
-		$fetchAssStatement = $conoracle->prepare("select atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
-													from asscontmaster asm LEFT JOIN asscontstatement astm 
+		$fetchAssStatement = $conoracle->prepare("SELECT atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
+													FROM asscontmaster asm LEFT JOIN asscontstatement astm 
 													ON asm.ASSCONTRACT_NO = astm.ASSCONTRACT_NO LEFT JOIN assucfassitemcode atc
 													ON astm.ITEM_CODE = atc.ITEM_CODE LEFT JOIN CMUCFMONEYTYPE cmt ON astm.MONEYTYPE_CODE = cmt.MONEYTYPE_CODE 
 													where asm.asscontract_no = :asscontract_no and asm.asscont_status = 1 and astm.SLIP_DATE

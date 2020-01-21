@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','message','topic','destination','type_send','channel_send'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessage')){
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -27,6 +27,8 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 					}
 				}
 			}
+			$arrGroupAllSuccess = array();
+			$arrGroupAllFailed = array();
 			if($dataComing["type_send"] == "person"){
 				$destination = array();
 				foreach($dataComing["destination"] as $target){
@@ -34,29 +36,17 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				}
 				$arrMessage = array();
 				$arrMember = array();
-				$arrGroupAllSuccess = array();
-				$arrGroupAllFailed = array();
-				$getFCMToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$destination)."')
-													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
-				$getFCMToken->execute();
-				if($getFCMToken->rowCount() > 0){
-					while($rowFcmToken = $getFCMToken->fetch()){
-						if(isset($rowFcmToken["fcm_token"])){
-							if(!in_array($rowFcmToken["member_no"],$arrMember)){
-								$arrMember[] = $rowFcmToken["member_no"];
-							}
-						}
-					}
-					foreach($arrMember as $member){
+				$arrToken = $func->getFCMToken('many',$destination);
+				if(sizeof($arrToken["MEMBER_NO"]) > 0){
+					foreach($arrToken["MEMBER_NO"] as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}
 					$arrDiff = array_diff($destination,array_column($arrGroupAllSuccess, 'DESTINATION'));
 					foreach($arrDiff as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
 						$arrGroupAllFailed[] = $arrGroupSuccess;
 					}
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -66,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 				}else{
 					foreach($destination as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
 						$arrGroupAllFailed[] = $arrGroupSuccess;
 					}
 					$arrayResult['SUCCESS'] = [];
@@ -74,7 +64,48 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','destination','typ
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}
+			}else{
+				$arrToken = $func->getFCMToken('all');
+				foreach($arrToken["MEMBER_NO"] as $member){
+					$arrGroupSuccess["DESTINATION"] = $member;
+					$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
+					$arrGroupAllSuccess[] = $arrGroupSuccess;
+				}
+				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+				$arrayResult['FAILED'] = $arrGroupAllFailed;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
 			}
+		}else if($dataComing["channel_send"] == "sms"){
+			$arrGroupAllSuccess = array();
+			$arrGroupAllFailed = array();
+			if($dataComing["type_send"] == "person"){
+				$destination = array();
+				foreach($dataComing["destination"] as $target){
+					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+				}
+				$arrayResult['RESPONSE'] = $destination;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				$arrayTel = $func->getSMSPerson('all');
+				foreach($arrayTel as $key => $dataTel){
+					$arrGroupSuccess["DESTINATION"] = $dataTel["MEMBER_NO"][$key];
+					$arrGroupSuccess["TEL"] = $lib->formatphone($dataTel["TEL"][$key],'-');
+					$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? 
+					$dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
+					$arrGroupAllSuccess[] = $arrGroupSuccess;
+				}
+				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+				$arrayResult['FAILED'] = $arrGroupAllFailed;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}
+		}else{
+			$arrayResult['RESPONSE'] = "ยังไม่รองรับรูปแบบการส่งนี้";
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;

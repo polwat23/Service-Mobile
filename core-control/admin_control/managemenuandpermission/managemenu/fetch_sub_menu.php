@@ -4,19 +4,17 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
 		$arrayGroup = array();
-		$fetchMenuMobile = $conmysql->prepare("SELECT coresubmenu.id_submenu, coresubmenu.menu_name, coresubmenu.menu_status, coremenu.coremenu_name
-											   FROM coresubmenu
-											   INNER JOIN coremenu
-											   ON coresubmenu.id_coremenu = coresubmenu.id_coremenu
-											   WHERE menu_status <>'-9' AND id_menuparent !=0
-ORDER BY menu_order ASC");
+		$fetchMenuMobile = $conmysql->prepare("SELECT id_submenu, menu_name, menu_status,id_coremenu
+												FROM coresubmenu
+												WHERE menu_status <>'-9' AND id_menuparent !=0
+												ORDER BY menu_order ASC");
 		$fetchMenuMobile->execute();
 		while($rowMenuMobile = $fetchMenuMobile->fetch()){
 			$arrGroupMenu = array();
 			$arrGroupMenu["ID_SUbMENU"] = $rowMenuMobile["id_submenu"];
 			$arrGroupMenu["MENU_NAME"] = $rowMenuMobile["menu_name"];
 			$arrGroupMenu["MENU_STATUS"] = $rowMenuMobile["menu_status"];
-			$arrGroupMenu["COREMENU_NAME"] = $rowMenuMobile["coremenu_name"];
+			$arrGroupMenu["ID_COREMENU"] = $rowMenuMobile["id_coremenu"];
 			$arrayGroup[] = $arrGroupMenu;
 		}
 		$arrayResult["MENU_ALL"] = $arrayGroup;

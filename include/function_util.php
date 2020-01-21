@@ -6,10 +6,12 @@ use Connection\connection;
 
 class functions {
 		private $con;
+		private $conora;
 		
 		function __construct() {
 			$connection = new connection();
 			$this->con = $connection->connecttomysql();
+			$this->conora = $connection->connecttooracle();
 		}
 		
 		public function checkLogin($id_token) {
@@ -385,7 +387,7 @@ class functions {
 			}
 		}
 		
-		public function getFCMToken($type_target,$member_no){
+		public function getFCMToken($type_target,$member_no=null){
 			$arrayGrpToken = array();
 			$arrayToken = array();
 			$arrayMember = array();
@@ -407,10 +409,49 @@ class functions {
 					$arrayToken[] = $rowFCMToken["fcm_token"];
 					$arrayMember[] = $rowFCMToken["member_no"];
 				}
+			}else{
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1'
+													and gtk.fcm_token IS NOT NULL and gul.channel = 'mobile_app'
+													GROUP BY gtk.fcm_token,gul.member_no");
+				$fetchFCMToken->execute();
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					$arrayMember[] = $rowFCMToken["member_no"];
+				}
 			}
 			$arrayGrpToken["TOKEN"] = $arrayToken;
 			$arrayGrpToken["MEMBER_NO"] = $arrayMember;
 			return $arrayGrpToken;
+		}
+		
+		public function getSMSPerson($type_target,$member_no=null){
+			$arrayGrpAll = array();
+			$arrayGrp = array();
+			$arrayTel = array();
+			$arrayMember = array();
+			if($type_target == 'person'){
+				
+			}else if($type_target == 'many'){
+				
+			}else{
+				$arrayMemberTemp = array();
+				$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1'");
+				$fetchMemberAllow->execute();
+				while($rowMember = $fetchMemberAllow->fetch()){
+					$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
+				}
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
+				$fetchDataOra->execute();
+				while($rowDataOra = $fetchDataOra->fetch()){
+					$arrayMember[] = $rowDataOra["MEMBER_NO"];
+					$arrayTel[] = $rowDataOra["MEM_TELMOBILE"];
+				}
+			}
+			$arrayGrp["TEL"] = $arrayTel;
+			$arrayGrp["MEMBER_NO"] = $arrayMember;
+			$arrayGrpAll[] = $arrayGrp;
+			return $arrayGrpAll;
 		}
 }
 ?>

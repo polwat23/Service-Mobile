@@ -12,9 +12,18 @@ if($lib->checkCompleteArgument(['unique_id','id_submenu'],$dataComing)){
 			if($unuseTopic->execute([
 				':id_submenu' => $dataComing["id_submenu"]
 			])){
-				$conmysql->commit();
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				$unGrantPermission = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '-9' WHERE id_submenu = :id_submenu");
+				if($unGrantPermission->execute([':id_submenu' => $dataComing["id_submenu"]])){
+					$conmysql->commit();
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{
+					$conmysql->rollback();
+					$arrayResult['RESPONSE'] = "ไม่สามารถลบหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}else{
 				$conmysql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถลบหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";

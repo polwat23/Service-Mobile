@@ -209,16 +209,16 @@ function GenerateReport($dataReport,$header,$dompdf){
 						<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
 						</div>
 						<div style="width: 70px;text-align: center;font-size: 18px;border-right : 0.5px solid black;margin-left: 290px;">
-						<div>'.$dataReport[$i]["PERIOD"].'</div>
+						<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 					</div>
 					<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 370px;">
-						<div>'.$dataReport[$i]["PRN_BALANCE"].'</div>
+						<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 					</div>
 					<div style="width: 100px;text-align: right;font-size: 18px;margin-left: 490px;">
-						<div>'.$dataReport[$i]["INT_BALANCE"].'</div>
+						<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
 					</div>
 					<div style="width: 100px;text-align: right;font-size: 18px;margin-left: 595px;">
-						<div>'.$dataReport[$i]["ITEM_PAYMENT"].'</div>
+						<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
 					</div>
 				</div>';
 		}else{
@@ -227,16 +227,16 @@ function GenerateReport($dataReport,$header,$dompdf){
 						<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
 					</div>
 					<div style="width: 70px;text-align: center;font-size: 18px;margin-left: 290px;">
-						<div>'.$dataReport[$i]["PERIOD"].'</div>
+						<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 					</div>
 					<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 370px;">
-						<div>'.$dataReport[$i]["PRN_BALANCE"].'</div>
+						<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 					</div>
 					<div style="width: 100px;text-align: right;font-size: 18px;margin-left: 490px;">
-						<div>'.$dataReport[$i]["INT_BALANCE"].'</div>
+						<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
 					</div>
 					<div style="width: 100px;text-align: right;font-size: 18px;margin-left: 595px;">
-						<div>'.$dataReport[$i]["ITEM_PAYMENT"].'</div>
+						<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
 					</div>
 				</div>';
 		}

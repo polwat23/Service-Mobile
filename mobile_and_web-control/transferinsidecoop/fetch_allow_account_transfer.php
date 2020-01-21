@@ -46,6 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
+				$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}

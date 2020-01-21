@@ -157,7 +157,7 @@ class library {
 			$monthOne = str_replace('0','',substr($period,4,1));
 			$monthTwo= substr($period,5);
 			$month = $monthOne.$monthTwo;
-			return $thaimonth[$month].' '.($year + 543);
+			return $thaimonth[$month].' '.($year);
 		}else{ 
 			return ""; 
 		}
