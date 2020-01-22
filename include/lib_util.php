@@ -308,7 +308,7 @@ class library {
 	public function sendNotify($payload,$type_send){
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
+		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SERVER_KEY"] );
 		if($type_send == 'person'){
 			$data = [
 				"registration_ids" => $payload["TO"],
