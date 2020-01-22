@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
-		$arrayResult['RESPONSE_MESSAGE'] = $arrPayload["ERROR_MESSAGE"];
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
@@ -21,10 +21,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 		$rowFCMToken = $getFCMToken->fetch();
 		$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp");
 		$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
-		$getOTPTemplate = $conmysql->prepare("SELECT subject,body FROM smssystemtemplate 
-											WHERE component_system = :menu_component and is_use = '1'");
-		$getOTPTemplate->execute([':menu_component' => $dataComing["menu_component"]]);
-		$rowOTPTemplate = $getOTPTemplate->fetch();
+		$templateMessage = $func->getTemplatSystem("OTPChecker",1);
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);
 		$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '15';
@@ -32,7 +29,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 		$arrTarget["RANDOM_NUMBER"] = $otp_password;
 		$arrTarget["RANDOM_ALL"] = $reference;
 		$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
-		$arrMessage = $lib->mergeTemplate($rowOTPTemplate["subject"],$rowOTPTemplate["body"],$arrTarget);
+		$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
 		$arrPayloadNotify["TO"][] = $rowFCMToken["fcm_token"];
 		$arrPayloadNotify["MEMBER_NO"] = $rowFCMToken["member_no"];
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
@@ -52,30 +49,42 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 				echo json_encode($arrayResult);
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0025";
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถส่ง OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์";
+				$arrayResult['RESPONSE_CODE'] = "WS0018";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "WS0024";
-			$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถเก็บ OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์";
+			$arrExecute = [
+				':ref_otp' => $reference,
+				':otp_pass' => $otp_password,
+				':destination' => $dataComing["tel"],
+				':expire_date' => $expire_date,
+				':otp_text' => $arrMessage["BODY"]
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $insertOTP;
+			$arrError["ERROR_CODE"] = 'WS1011';
+			$lib->addLogtoTxt($arrError,'otp_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1001";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0023";
-		$arrayResult['RESPONSE_MESSAGE'] = "ไม่พบเบอร์โทรศัพท์ของคุณอยู่ในฐานข้อมูล";
+		$arrayResult['RESPONSE_CODE'] = "WS0017";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

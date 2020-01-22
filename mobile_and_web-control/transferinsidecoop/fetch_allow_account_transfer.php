@@ -3,20 +3,13 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
-		$fetchAccAllowTrans->execute([':member_no' => $member_no]);
+		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch()){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
@@ -41,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM gcfavoritelist gfl LEFT JOIN gctransaction gts ON gfl.ref_no = gts.ref_no
 												and gfl.member_no = gts.member_no
 												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gts.destination_type = '1'");
-			$getAccFav->execute([':member_no' => $member_no]);
+			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch()){
 				$arrAccFav = array();
 				$arrAccFav["DEPTACCOUNT_NO"] = $rowAccFav["destination"];
@@ -53,22 +46,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
+				$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				http_response_code(204);
+				$arrayResult['RESPONSE_CODE'] = "WS0023";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			http_response_code(204);
+			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -76,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -157,7 +157,7 @@ class library {
 			$monthOne = str_replace('0','',substr($period,4,1));
 			$monthTwo= substr($period,5);
 			$month = $monthOne.$monthTwo;
-			return $thaimonth[$month].' '.$year;
+			return $thaimonth[$month].' '.($year);
 		}else{ 
 			return ""; 
 		}
@@ -181,7 +181,7 @@ class library {
 		return $arrayText;
 	}
 	public function sendMail($email,$subject,$body,$mailFunction) {
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
 		$mailFunction->isSMTP();
@@ -206,7 +206,7 @@ class library {
 		$mailFunction->Body = $body;
 		if(!$mailFunction->send()){
 			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
 			return false;
 		}else{
 			return true;
@@ -276,6 +276,14 @@ class library {
 			return $e;
 		}
 	}
+	
+	public function imgtobase($path){
+		$path = __DIR__.'/..'.$path;
+		$img_type = pathinfo($path, PATHINFO_EXTENSION);
+		$data_img = file_get_contents($path);
+		return 'data:image/' . $img_type . ';base64,' . base64_encode($data_img);
+	}
+	
 	public function text_limit($text, $limit = 50, $end = '...'){
 		if (mb_strwidth($text, 'UTF-8') <= $limit) {
 			return $text;
@@ -298,9 +306,9 @@ class library {
 		return $randomString;
 	}
 	public function sendNotify($payload,$type_send){
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
+		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SERVER_KEY"] );
 		if($type_send == 'person'){
 			$data = [
 				"registration_ids" => $payload["TO"],
@@ -349,18 +357,16 @@ class library {
 				if($resultNoti->success){
 					return true;
 				}else{
-					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.json_encode($resultNoti->results);
-					file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
+					file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
-				$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.$result;
-				file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
+			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}
@@ -379,6 +385,7 @@ class library {
 		return true;
 	}
 	public function addLogtoTxt($dataLog,$pathfile){
+		$dataLog["TIME"] = date("Y-m-d H:i:s");
 		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
 	}
 	public function getClientIP() {

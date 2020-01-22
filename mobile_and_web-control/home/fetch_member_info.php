@@ -11,9 +11,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowInfoMobile = $memberInfoMobile->fetch();
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
-			$arrayResult["AVATAR_PATH"] = $rowInfoMobile["path_avatar"];
+			$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
 			$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-			$arrayResult["AVATAR_PATH_WEBP"] = $explodePathAvatar[0].'.webp';
+			$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			if($member_no == "dev@mode"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["MEMBER_TYPE"] = "สมาชิกพิเศษ";
 				$arrayResult["MEMBERGROUP_DESC"] = "บริษัท เจนซอฟท์ จำกัด";
 				$arrayResult["FULL_ADDRESS"] = "219/14 ม.8 ถ.วงแหวนรอบกลาง ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ 50300";
-			}else if($member_no == "salemode"){
+			}else if($member_no == "salemode" || $member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
 				$arrayResult["SURNAME"] = "ซิสเต็มส์";
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["FULL_ADDRESS"] = "219/14 ม.8 ถ.วงแหวนรอบกลาง ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ 50300";
 			}else{
 				$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													mb.ADDRESS_NO AS ADDR_NO, 
 													mb.ADDRESS_MOO AS ADDR_MOO,
 													mb.ADDRESS_SOI AS ADDR_SOI,
@@ -54,10 +54,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBD.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
-													LEFT JOIN MBUCFPOSITION mpos ON mb.position_code = mpos.position_code
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.AMPHUR_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 				$memberInfo->execute([':member_no' => $member_no]);
@@ -101,7 +100,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -109,7 +108,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -18,9 +18,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 					$id_smsquery = $conmysql->lastInsertId();
 				}else{
 					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "5005";
-					$arrayResult['RESPONSE_AWARE'] = "insert";
-					$arrayResult['RESPONSE'] = "Cannot insert SMS query";
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -38,9 +36,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 					$id_smsquery = $conmysql->lastInsertId();
 				}else{
 					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "5005";
-					$arrayResult['RESPONSE_AWARE'] = "insert";
-					$arrayResult['RESPONSE'] = "Cannot insert SMS query";
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -60,26 +56,18 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 			echo json_encode($arrayResult);
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "insert";
-			$arrayResult['RESPONSE'] = "Cannot insert SMS template";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

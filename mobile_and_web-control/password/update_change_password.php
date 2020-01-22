@@ -19,22 +19,33 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 				}
 				echo json_encode($arrayResult);
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS1012";
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot change password because cannot logout";
+				$conmysql->rollback();
+				$arrayResult['RESPONSE_CODE'] = "WS1013";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS1011";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot change password";
+			$conmysql->rollback();
+			$arrExecute = [
+				':password' => $password,
+				':member_no' => $payload["member_no"]
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $changePassword;
+			$arrError["ERROR_CODE"] = 'WS1012';
+			$lib->addLogtoTxt($arrError,'password_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1012";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -42,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

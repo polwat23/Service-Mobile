@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
-		$arrayResult['RESPONSE_MESSAGE'] = $arrPayload["ERROR_MESSAGE"];
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
@@ -43,36 +43,47 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS1014";
-					$arrayResult['RESPONSE_MESSAGE'] = "Cannot update Temppass because cannot logout";
+					$arrayResult['RESPONSE_CODE'] = "WS1013";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0010";
-				$arrayResult['RESPONSE_MESSAGE'] = "Cannot send mail";
+				$arrayResult['RESPONSE_CODE'] = "WS0019";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(502);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "WS1013";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot update Temppass";
+			$arrExecute = [
+				':temp_pass' => $temp_pass,
+				':member_no' => $member_no
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $updateTemppass;
+			$arrError["ERROR_CODE"] = 'WS1014';
+			$lib->addLogtoTxt($arrError,'forget_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1014";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		http_response_code(204);
+		$arrayResult['RESPONSE_CODE'] = "WS0003";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
