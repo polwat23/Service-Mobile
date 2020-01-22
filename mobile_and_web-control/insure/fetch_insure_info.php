@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrGroupAllIns[array_search($rowInsure["INSURETYPE_DESC"],array_column($arrGroupAllIns,'INS_TYPE'))]["STATEMENT"])[] = $arrayInsure;
 			}
 		}
-		if(sizeof($arrGroupIns) > 0 || isset($new_token)){
+		if(sizeof($arrGroupAllIns) > 0 || isset($new_token)){
 			$arrayResult['INSURE'] = $arrGroupAllIns;
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

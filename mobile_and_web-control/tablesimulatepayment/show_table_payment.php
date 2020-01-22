@@ -27,6 +27,7 @@ table thead {
 }
 table thead th {
 	padding: 15px 20px;
+	text-align: center;
 }
 
 .body-card-table tr {
@@ -43,29 +44,34 @@ table thead th {
 <table>
 <thead>
 <tr>
-<th>วันที่ชำระ</th>
 <th>งวด</th>
-<th>ดอกเบี้ย</th>
+<th>วันที่ชำระ</th>
+<th>จำนวนวัน</th>
 <th>เงินต้น</th>
+<th>ดอกเบี้ย</th>
 <th>ยอดชำระ</th>
 <th>หนี้คงเหลือ</th>
 </tr>
 </thead>
 <tbody class="body-card-table">
 <?php
+if(isset($arrPayment)){
 for($i = 0;$i < sizeof($arrPayment);$i++){ ?>
 <tr>
-	<td>
-	<?php echo $arrPayment[$i]["MUST_PAY_DATE"];?>
-	</td>
 	<td>
 	<?php echo $arrPayment[$i]["PERIOD"];?>
 	</td>
 	<td>
-	<?php echo $arrPayment[$i]["INTEREST"];?>
+	<?php echo $arrPayment[$i]["MUST_PAY_DATE"];?>
+	</td>
+	<td>
+	<?php echo $arrPayment[$i]["DAYS"];?>
 	</td>
 	<td>
 	<?php echo $arrPayment[$i]["PRN_AMOUNT"];?>
+	</td>
+	<td>
+	<?php echo $arrPayment[$i]["INTEREST"];?>
 	</td>
 	<td>
 	<?php echo $arrPayment[$i]["PAYMENT_PER_PERIOD"];?>
@@ -74,7 +80,10 @@ for($i = 0;$i < sizeof($arrPayment);$i++){ ?>
 	<?php echo $arrPayment[$i]["PRINCIPAL_BALANCE"];?>
 	</td>
 </tr>
-<?php } ?>
+<?php 
+}
+}
+?>
 
 </tbody>
 </table>

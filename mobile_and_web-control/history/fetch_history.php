@@ -12,11 +12,11 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		if(isset($dataComing["fetch_type"])){
 			switch($dataComing["fetch_type"]){
 				case "refresh":
-					$executeData[':id_history'] = isset($dataComing["id_history"]) ? $dataComing["id_history"] : 16777215; // max number mediumint(8) of id_history
+					$executeData[':id_history'] = $dataComing["id_history"] ?? 0; 
 					$extraQuery = "and id_history > :id_history";
 					break;
 				case "more":
-					$executeData[':id_history'] = isset($dataComing["id_history"]) ? $dataComing["id_history"] : 0;
+					$executeData[':id_history'] = $dataComing["id_history"] ?? 16777215; // max number mediumint(8) of id_history
 					$extraQuery = "and id_history < :id_history";
 					break;
 			}
@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch();
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
-		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
+		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_refno,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,period_payamt as PERIOD,
 											LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
@@ -25,7 +25,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowContract = $getContract->fetch()){
 			$arrGroupContract = array();
 			$arrContract = array();
-			$arrContract["CONTRACT_NO"] = $lib->formatcontract($rowContract["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
+			$arrContract["CONTRACT_REFNO"] = $rowContract["LOANCONTRACT_REFNO"];
+			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
@@ -54,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -62,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

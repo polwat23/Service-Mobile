@@ -2,6 +2,15 @@
 
 namespace Utility;
 
+const BAHT_TEXT_NUMBERS = array('ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า');
+const BAHT_TEXT_UNITS = array('', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน');
+const BAHT_TEXT_ONE_IN_TENTH = 'เอ็ด';
+const BAHT_TEXT_TWENTY = 'ยี่';
+const BAHT_TEXT_INTEGER = 'ถ้วน';
+const BAHT_TEXT_BAHT = 'บาท';
+const BAHT_TEXT_SATANG = 'สตางค์';
+const BAHT_TEXT_POINT = 'จุด';
+
 class library {
 	
 	public function generate_token(){
@@ -150,14 +159,18 @@ class library {
 			return '-';
 		}
 	}
-	public function convertperiodkp($period){
+	public function convertperiodkp($period,$diff_year=false){
 		if(isset($period)){
 			$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 			$year = substr($period,0,4);
 			$monthOne = str_replace('0','',substr($period,4,1));
 			$monthTwo= substr($period,5);
 			$month = $monthOne.$monthTwo;
-			return $thaimonth[$month].' '.$year;
+			if($diff_year){
+				return $thaimonth[$month].' '.($year + 543);
+			}else{
+				return $thaimonth[$month].' '.($year);
+			}
 		}else{ 
 			return ""; 
 		}
@@ -181,7 +194,7 @@ class library {
 		return $arrayText;
 	}
 	public function sendMail($email,$subject,$body,$mailFunction) {
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
 		$mailFunction->isSMTP();
@@ -206,7 +219,7 @@ class library {
 		$mailFunction->Body = $body;
 		if(!$mailFunction->send()){
 			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
 			return false;
 		}else{
 			return true;
@@ -276,6 +289,14 @@ class library {
 			return $e;
 		}
 	}
+	
+	public function imgtobase($path){
+		$path = __DIR__.'/..'.$path;
+		$img_type = pathinfo($path, PATHINFO_EXTENSION);
+		$data_img = file_get_contents($path);
+		return 'data:image/' . $img_type . ';base64,' . base64_encode($data_img);
+	}
+	
 	public function text_limit($text, $limit = 50, $end = '...'){
 		if (mb_strwidth($text, 'UTF-8') <= $limit) {
 			return $text;
@@ -298,9 +319,9 @@ class library {
 		return $randomString;
 	}
 	public function sendNotify($payload,$type_send){
-		$json = file_get_contents(__DIR__.'/../json/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SECRET_KEY"] );
+		if (!defined('API_ACCESS_KEY')) define( 'API_ACCESS_KEY', $json_data["FIREBASE_SERVER_KEY"] );
 		if($type_send == 'person'){
 			$data = [
 				"registration_ids" => $payload["TO"],
@@ -349,18 +370,16 @@ class library {
 				if($resultNoti->success){
 					return true;
 				}else{
-					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.json_encode($resultNoti->results);
-					file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
+					file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
-				$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.$result;
-				file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["MEMBER_NO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/log_error.txt', $text . PHP_EOL, FILE_APPEND);
+			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
+			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}
@@ -379,6 +398,7 @@ class library {
 		return true;
 	}
 	public function addLogtoTxt($dataLog,$pathfile){
+		$dataLog["TIME"] = date("Y-m-d H:i:s");
 		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
 	}
 	public function getClientIP() {
@@ -461,6 +481,75 @@ class library {
 			curl_close ($ch);
 			return false;
 		}
+	}
+	public function baht_text($number, $include_unit = true, $display_zero = true){
+		if (!is_numeric($number)) {
+			return null;
+		}
+
+		$log = floor(log($number, 10));
+		if ($log > 5) {
+			$millions = floor($log / 6);
+			$million_value = pow(1000000, $millions);
+			$normalised_million = floor($number / $million_value);
+			$rest = $number - ($normalised_million * $million_value);
+			$millions_text = '';
+			for ($i = 0; $i < $millions; $i++) {
+				$millions_text .= BAHT_TEXT_UNITS[6];
+			}
+			return baht_text($normalised_million, false) . $millions_text . baht_text($rest, true, false);
+		}
+
+		$number_str = (string)floor($number);
+		$text = '';
+		$unit = 0;
+
+		if ($display_zero && $number_str == '0') {
+			$text = BAHT_TEXT_NUMBERS[0];
+		} else for ($i = strlen($number_str) - 1; $i > -1; $i--) {
+			$current_number = (int)$number_str[$i];
+
+			$unit_text = '';
+			if ($unit == 0 && $i > 0) {
+				$previous_number = isset($number_str[$i - 1]) ? (int)$number_str[$i - 1] : 0;
+				if ($current_number == 1 && $previous_number > 0) {
+					$unit_text .= BAHT_TEXT_ONE_IN_TENTH;
+				} else if ($current_number > 0) {
+					$unit_text .= BAHT_TEXT_NUMBERS[$current_number];
+				}
+			} else if ($unit == 1 && $current_number == 2) {
+				$unit_text .= BAHT_TEXT_TWENTY;
+			} else if ($current_number > 0 && ($unit != 1 || $current_number != 1)) {
+				$unit_text .= BAHT_TEXT_NUMBERS[$current_number];
+			}
+
+			if ($current_number > 0) {
+				$unit_text .= BAHT_TEXT_UNITS[$unit];
+			}
+
+			$text = $unit_text . $text;
+			$unit++;
+		}
+
+		if ($include_unit) {
+			$text .= BAHT_TEXT_BAHT;
+
+			$satang = explode('.', number_format($number, 2, '.', ''))[1];
+			$text .= $satang == 0
+				? BAHT_TEXT_INTEGER
+				: baht_text($satang, false) . BAHT_TEXT_SATANG;
+		} else {
+			$exploded = explode('.', $number);
+			if (isset($exploded[1])) {
+				$text .= BAHT_TEXT_POINT;
+				$decimal = (string)$exploded[1];
+				for ($i = 0; $i < strlen($decimal); $i++) {
+					$text .= BAHT_TEXT_NUMBERS[$decimal[$i]];
+				}
+			}
+		}
+
+		return $text;
 	}
 }
 ?>

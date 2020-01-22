@@ -6,22 +6,29 @@ use Connection\connection;
 
 class functions {
 		private $con;
+		private $conora;
 		
 		function __construct() {
 			$connection = new connection();
 			$this->con = $connection->connecttomysql();
+			$this->conora = $connection->connecttooracle();
 		}
 		
 		public function checkLogin($id_token) {
-			$checkLogin = $this->con->prepare("SELECT id_userlogin FROM gcuserlogin 
-										WHERE id_token = :id_token and is_login = '1'");
+			$checkLogin = $this->con->prepare("SELECT id_userlogin,is_login FROM gcuserlogin 
+												WHERE id_token = :id_token");
 			$checkLogin->execute([
 				':id_token' => $id_token
 			]);
-			if($checkLogin->rowCount() > 0){
-				return true;
+			$rowLogin = $checkLogin->fetch();
+			$arrayLogin = array();
+			if($rowLogin["is_login"] == '1'){
+				$arrayLogin["RETURN"] = TRUE;
+				return $arrayLogin;
 			}else{
-				return false;
+				$arrayLogin["IS_LOGIN"] = $rowLogin["is_login"] ?? '-99';
+				$arrayLogin["RETURN"] = FALSE;
+				return $arrayLogin;
 			}
 		}
 		public function logout($id_token,$type_login) {
@@ -33,6 +40,15 @@ class functions {
 				$this->revoke_alltoken($id_token,'-9',true);
 				return true;
 			}else{
+				$arrExecute = [
+					':type_login' => $type_login,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $logout;
+				$arrError["COMPONENT"] = "Logout";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -65,6 +81,16 @@ class functions {
 				}
 				return true;
 			}else{
+				$arrExecute = [
+					':type_login' => $type_login,
+					':member_no' => $member_no,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $logout;
+				$arrError["COMPONENT"] = "LogoutAll";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -79,6 +105,15 @@ class functions {
 				])){
 					return true;
 				}else{
+					$arrExecute = [
+						':type_revoke' => $type_revoke,
+						':id_token' => $id_token
+					];
+					$arrError = array();
+					$arrError["EXECUTE"] = $arrExecute;
+					$arrError["QUERY"] = $revokeAllToken;
+					$arrError["COMPONENT"] = "Revoke all token";
+					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
@@ -91,6 +126,8 @@ class functions {
 					case '-7' : $type_login = '-7';
 						break;
 					case '-99' : $type_login = '-6';
+						break;
+					case '-6' : $type_login = '-5';
 						break;
 				}
 				$revokeAllToken = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
@@ -107,6 +144,17 @@ class functions {
 				])){
 					return true;
 				}else{
+					$arrExecute = [
+						':type_revoke' => $type_revoke,
+						':id_token' => $id_token,
+						':type_login' => $type_login
+					];
+					$arrError = array();
+					$arrError["EXECUTE"] = $arrExecute;
+					$arrError["QUERY"] = $revokeAllToken;
+					$arrError["QUERY_LOGOUT"] = $forceLogout;
+					$arrError["COMPONENT"] = "Revoke all token";
+					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}
@@ -119,6 +167,15 @@ class functions {
 			])){
 				return true;
 			}else{
+				$arrExecute = [
+					':type_revoke' => $type_revoke,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $revokeAT;
+				$arrError["COMPONENT"] = "Revoke access token";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -130,56 +187,57 @@ class functions {
 			])){
 				return true;
 			}else{
+				$arrExecute = [
+					':type_revoke' => $type_revoke,
+					':id_token' => $id_token
+				];
+				$arrError = array();
+				$arrError["EXECUTE"] = $arrExecute;
+				$arrError["QUERY"] = $revokeRT;
+				$arrError["COMPONENT"] = "Revoke refresh token";
+				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
 		public function check_permission($user_type,$menu_component,$service_component=null){
-			if(isset($user_type)){
-				$permission = array();
-				switch($user_type){
-					case '0' : 
-						$permission[] = "'0'";
-						break;
-					case '1' : 
-						$permission[] = "'0'";
-						$permission[] = "'1'";
-						break;
-					case '5' : 
-						$permission[] = "'0'";
-						$permission[] = "'1'";
-						$permission[] = "'2'";
-						break;
-					case '9' : 
-						$permission[] = "'0'";
-						$permission[] = "'1'";
-						$permission[] = "'2'";
-						$permission[] = "'3'";
-						break;
-					default : $permission[] = "'0'";
-						break;
-				}
-				if($user_type == '5' || $user_type == '9'){
-					$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-											 and menu_permission IN (".implode(',',$permission).")");
-				}else{
-					$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-											and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
-				}
-				$checkPermission->execute([':menu_component' => $menu_component]);
-				if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
-					return true;
-				}else{
-					return false;
-				}
+			$permission = array();
+			switch($user_type){
+				case '0' : 
+					$permission[] = "'0'";
+					break;
+				case '1' : 
+					$permission[] = "'0'";
+					$permission[] = "'1'";
+					break;
+				case '5' : 
+					$permission[] = "'0'";
+					$permission[] = "'1'";
+					$permission[] = "'2'";
+					break;
+				case '9' : 
+					$permission[] = "'0'";
+					$permission[] = "'1'";
+					$permission[] = "'2'";
+					$permission[] = "'3'";
+					break;
+				default : $permission[] = "'0'";
+					break;
+			}
+			if($user_type == '5' || $user_type == '9'){
+				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+										 and menu_permission IN (".implode(',',$permission).")");
+			}else if($user_type == '1'){
+				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
+										 and menu_status IN('0','1') and menu_permission IN (".implode(',',$permission).")");
 			}else{
 				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-											and menu_status = '1' and menu_parent = '-2'");
-				$checkPermission->execute([':menu_component' => $menu_component]);
-				if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
-					return true;
-				}else{
-					return false;
-				}
+										and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
+			}
+			$checkPermission->execute([':menu_component' => $menu_component]);
+			if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
+				return true;
+			}else{
+				return false;
 			}
 		}
 		public function getConstant($constant) {
@@ -206,14 +264,27 @@ class functions {
 			}
 			return $returnResult;
 		}
-		public function getTemplate($template_name){
+		public function getTemplate($template_name,$seq_no){
 			$getTemplatedata = $this->con->prepare("SELECT template_subject,template_body 
-										FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
+													FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
 			$getTemplatedata->execute([':template_name' => $template_name]);
 			$rowTemplate = $getTemplatedata->fetch();
 			$arrayResult = array();
 			$arrayResult["SUBJECT"] = $rowTemplate["template_subject"];
 			$arrayResult["BODY"] = $rowTemplate["template_body"];
+			return $arrayResult;
+		}
+		public function getTemplatSystem($component_system,$seq_no){
+			$getTemplatedata = $this->con->prepare("SELECT subject,body 
+													FROM smssystemtemplate WHERE component_system = :component_system and is_use = '1' and seq_no = :seq_no");
+			$getTemplatedata->execute([
+				':component_system' => $component_system,
+				':seq_no' => $seq_no
+			]);
+			$rowTemplate = $getTemplatedata->fetch();
+			$arrayResult = array();
+			$arrayResult["SUBJECT"] = $rowTemplate["subject"];
+			$arrayResult["BODY"] = $rowTemplate["body"];
 			return $arrayResult;
 		}
 		public function insertHistory($payload,$type_history) {
@@ -314,6 +385,73 @@ class functions {
 			}else{
 				return false;
 			}
+		}
+		
+		public function getFCMToken($type_target,$member_no=null){
+			$arrayGrpToken = array();
+			$arrayToken = array();
+			$arrayMember = array();
+			if($type_target == 'person'){
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1' and gul.member_no = :member_no
+													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
+				$fetchFCMToken->execute([':member_no' => $member_no]);
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					$arrayMember[] = $rowFCMToken["member_no"];
+				}
+			}else if($type_target == 'many'){
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$member_no)."')
+													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
+				$fetchFCMToken->execute();
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					$arrayMember[] = $rowFCMToken["member_no"];
+				}
+			}else{
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1'
+													and gtk.fcm_token IS NOT NULL and gul.channel = 'mobile_app'
+													GROUP BY gtk.fcm_token,gul.member_no");
+				$fetchFCMToken->execute();
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					$arrayMember[] = $rowFCMToken["member_no"];
+				}
+			}
+			$arrayGrpToken["TOKEN"] = $arrayToken;
+			$arrayGrpToken["MEMBER_NO"] = $arrayMember;
+			return $arrayGrpToken;
+		}
+		
+		public function getSMSPerson($type_target,$member_no=null){
+			$arrayGrpAll = array();
+			$arrayGrp = array();
+			$arrayTel = array();
+			$arrayMember = array();
+			if($type_target == 'person'){
+				
+			}else if($type_target == 'many'){
+				
+			}else{
+				$arrayMemberTemp = array();
+				$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1'");
+				$fetchMemberAllow->execute();
+				while($rowMember = $fetchMemberAllow->fetch()){
+					$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
+				}
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
+				$fetchDataOra->execute();
+				while($rowDataOra = $fetchDataOra->fetch()){
+					$arrayMember[] = $rowDataOra["MEMBER_NO"];
+					$arrayTel[] = $rowDataOra["MEM_TELMOBILE"];
+				}
+			}
+			$arrayGrp["TEL"] = $arrayTel;
+			$arrayGrp["MEMBER_NO"] = $arrayMember;
+			$arrayGrpAll[] = $arrayGrp;
+			return $arrayGrpAll;
 		}
 }
 ?>

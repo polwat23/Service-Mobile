@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingTheme')){
-		$jsonTheme = json_decode(file_get_contents(__DIR__.'/../../json/theme.json'), true);
+		$jsonTheme = json_decode(file_get_contents(__DIR__.'/../../config/theme.json'), true);
 		if($dataComing['resolution'] >= 1440){
 			$deviceResolution = 'qhd';
 		}else if($dataComing['resolution'] >= 1080){

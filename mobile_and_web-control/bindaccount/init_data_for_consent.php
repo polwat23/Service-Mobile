@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		if($payload["member_no"] == 'dev@mode'){
+		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
 			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
@@ -20,15 +20,15 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1'");
 			$fetchConstantAllowDept->execute([
-				':member_no' => $member_no
+				':member_no' => $payload["member_no"]
 			]);
 			$arrayDeptAllow = array();
 			while($rowAllowDept = $fetchConstantAllowDept->fetch()){
 				$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 			}
 			$arrAccBeenBind = array();
-			$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM bindaccount WHERE member_no = :member_no and bindaccount_status <> '-9'");
-			$InitDeptAccountBeenBind->execute([':member_no' => $member_no]);
+			$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
+			$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch()){
 				$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
 			}
@@ -36,13 +36,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 														ON dpm.depttype_code = dpt.depttype_code 
 														WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
-														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = '0'
+														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0
 														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccBeenBind).")");
 			}else{
 				$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 														ON dpm.depttype_code = dpt.depttype_code 
 														WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
-														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = '0'");
+														dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0");
 			}
 			$fetchDataAccount->execute([
 				':member_no' => $member_no,
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
 				$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
 				$rowFormatBank = $getFormatBank->fetch();
-				$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? "xxx-x-xxxxx-x";
+				$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? $config["ACCOUNT_BANK_FORMAT"];
 				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 				if(isset($new_token)){
@@ -70,20 +70,22 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0016";
-				$arrayResult['RESPONSE_MESSAGE'] = "Dont have coop account for bind account";
+				$arrayResult['RESPONSE_CODE'] = "WS0005";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(403);
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
-			http_response_code(204);
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -91,7 +93,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

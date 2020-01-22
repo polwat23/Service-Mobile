@@ -2,7 +2,7 @@
 ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -15,8 +15,10 @@ header("X-Content-Type-Options: nosniff");
 header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 
 foreach ($_SERVER as $header_key => $header_value){
-	if($header_key == "HTTP_AUTHORIZATION" ){
+	if($header_key == "HTTP_AUTHORIZATION"){
 		$headers["Authorization"] = $header_value;
+	}else if($header_key == "HTTP_LANG_LOCALE") {
+		$headers["Lang_locale"] = $header_value;
 	}
 }
 
@@ -42,9 +44,11 @@ $lib = new library();
 $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
-$jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
+$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
-
+$jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
+$configError = json_decode($jsonConfigError,true);
+$lang_locale = $headers["Lang_locale"] ?? "th";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
@@ -63,25 +67,34 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					$payload = $parsed_token->getPayload();
 					if(!$lib->checkCompleteArgument(['id_userlogin','member_no','exp','id_token','user_type'],$payload)){
 						$arrayResult['RESPONSE_CODE'] = "WS4004";
-						$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(400);
 						echo json_encode($arrayResult);
 						exit();
 					}
-					if(!$func->checkLogin($payload["id_token"],$conmysql)){
-						$arrayResult['RESPONSE_CODE'] = "WS0009";
-						$arrayResult['RESPONSE_MESSAGE'] = "You cannot access please login";
+					$rowLogin = $func->checkLogin($payload["id_token"],$conmysql);
+					if(!$rowLogin["RETURN"]){
+						if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
+							$func->revoke_alltoken($payload["id_token"],'-9',true);
+						}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
+							$func->revoke_alltoken($payload["id_token"],'-8',true);
+						}else if($rowLogin["IS_LOGIN"] == '-7'){
+							$func->revoke_alltoken($payload["id_token"],'-7',true);
+						}else if($rowLogin["IS_LOGIN"] == '-5'){
+							$func->revoke_alltoken($payload["id_token"],'-6',true);
+						}
+						$arrayResult['RESPONSE_CODE'] = "WS0010";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						http_response_code(403);
 						echo json_encode($arrayResult);
 						exit();
 					}
 				}catch (ValidateException $e) {
 					$errorCode = $e->getCode();
 					if($errorCode === 3){
-						$arrayResult['RESPONSE_CODE'] = "WS0015";
-						$arrayResult['RESPONSE_MESSAGE'] = "Signature is invalid";
+						$arrayResult['RESPONSE_CODE'] = "WS0034";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
 						echo json_encode($arrayResult);
@@ -92,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$dataComing["channel"],$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 						if(!$is_refreshToken_arr){
 							$arrayResult['RESPONSE_CODE'] = "WS0014";
-							$arrayResult['RESPONSE_MESSAGE'] = "Invalid RefreshToken is not correct or RefreshToken was expired";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							echo json_encode($arrayResult);
@@ -102,8 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							$payload = $lib->fetch_payloadJWT($new_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 						}
 					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0013";
-						$arrayResult['RESPONSE_MESSAGE'] = "Access Token is invalid";
+						$arrayResult['RESPONSE_CODE'] = "WS0032";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
 						echo json_encode($arrayResult);
@@ -111,8 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					}
 				}
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0012";
-				$arrayResult['RESPONSE_MESSAGE'] = "Authorization Header is not correct";
+				$arrayResult['RESPONSE_CODE'] = "WS0031";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
 				echo json_encode($arrayResult);
@@ -120,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
-			$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

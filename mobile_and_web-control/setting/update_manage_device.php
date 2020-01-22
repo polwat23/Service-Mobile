@@ -10,15 +10,15 @@ if($lib->checkCompleteArgument(['menu_component','id_token'],$dataComing)){
 			}
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS1018";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot revoke in that device";
+			$arrayResult['RESPONSE_CODE'] = "WS1019";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','id_token'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

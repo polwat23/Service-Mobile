@@ -4,96 +4,151 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_account_no','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
-		$jsonConfigLB = file_get_contents(__DIR__.'/../../json/config_lb_bank.json');
-		$configLB = json_decode($jsonConfigLB,true);
-		$arrPayload = array();
-		$arrPayload["transaction_type"] = "0620";
-		$arrPayload["encoding"] = "UTF8";
-		$arrPayload["external_system"] = $configLB["external_system"];
-		$arrPayload["payee_short_name"] = $configLB["payee_short_name"];
-		$arrPayload["payer_short_name"] = $configLB["payer_short_name"];
-		$arrPayload["user_mobile_no"] = preg_replace('/-/','',$dataComing["k_mobile_no"]);
-		$arrPayload["id"] = $dataComing["citizen_id"];
-		$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
-		$arrPayload["external_reference"] = $member_no.$kb_account_no;
-		$arrPayload["auth_parameter"] = $configLB["pass_phrase"];
-		$arrPayloadverify = array();
-		$arrPayloadverify['member_no'] = $member_no;
-		$arrPayloadverify['kb_account_no'] = $kb_account_no;
-		$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
-		$arrPayloadverify["reference"] = $member_no.$kb_account_no;
-		$arrPayloadverify['exp'] = time() + 60;
-		$sigma_key = $lib->generate_token();
-		$arrPayloadverify['sigma_key'] = $sigma_key;
-		$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
-		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
-		$arrSendData = array();
-		$arrSendData["verify_token"] = $verify_token;
-		$arrSendData["app_id"] = $config["APP_ID"];
-		$conmysql->beginTransaction();
-		$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,bank_code,id_bankpalette,id_token) 
-														VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,'004',2,:id_token)");
-		if($insertPendingBindAccount->execute([
-			':sigma_key' => $sigma_key,
-			':member_no' => $member_no,
-			':coop_account_no' => $coop_account_no,
-			':kb_account_no' => $kb_account_no,
-			':id_token' => $payload["id_token"]
-		])){
-			$responseAPI = $lib->posting_data($configLB["url_api_gensoft"].'/bindaccount/pending_bind_account',$arrSendData);
-			if(!$responseAPI){
-				$arrayResult['RESPONSE_CODE'] = "WS0017";
-				$arrayResult['RESPONSE_MESSAGE'] = "Request to API Bank failed";
+		try {
+			$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
+			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
+			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
+			$arrPayloadverify = array();
+			$arrPayloadverify['member_no'] = $payload["member_no"];
+			$arrPayloadverify['coop_account_no'] = $coop_account_no.$lib->randomText('all',4);
+			$arrPayloadverify['user_mobile_no'] = $mobile_no;
+			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
+			$arrPayloadverify['kb_account_no'] = $kb_account_no;
+			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
+			$arrPayloadverify['exp'] = time() + 60;
+			$sigma_key = $lib->generate_token();
+			$arrPayloadverify['sigma_key'] = $sigma_key;
+			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
+			$arrSendData = array();
+			$arrSendData["verify_token"] = $verify_token;
+			$arrSendData["app_id"] = $config["APP_ID"];
+			$checkAccBankBeenbind = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE deptaccount_no_bank = :kb_account_no and bindaccount_status IN('0','1')");
+			$checkAccBankBeenbind->execute([':kb_account_no' => $kb_account_no]);
+			if($checkAccBankBeenbind->rowCount() > 0){
+				$arrayResult['RESPONSE_CODE'] = "WS0036";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				http_response_code(400);
 				echo json_encode($arrayResult);
 				exit();
 			}
-			$arrResponse = json_decode($responseAPI);
-			if($arrResponse->RESULT){
-				$conmysql->commit();
-				$arrayResult["URL_CONSENT"] = "https://ws06.uatebpp.kasikornbank.com/PGSRegistration.do";
-				$arrayResult['RESULT'] = TRUE;
-				//$responsePosting = $lib->posting_data('https://ws04.uatebpp.kasikornbank.com/ws/v1/registerinit',$arrPayload);
-				/*if($responsePosting["return_status"] == '0' && $responsePosting["return_code"] == 'K0000'){
-					$arrayResult["URL_CONSENT"] = "https://ws06.uatebpp.kasikornbank.com/PGSRegistration.do?reg_id=".$responsePosting["reg_id"]."&langLocale=th_TH";
-					$arrayResult['RESULT'] = TRUE;
-				}else{
-					$arrayResult['RETURN_CODE'] = $responsePosting["return_code"];
-					$arrayResult['RETURN_MESSAGE'] = $responsePosting["return_message"];
-					$arrayResult['RESULT'] = FALSE;
-				}*/
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
+			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '8'");
+			$checkBeenBindForPending->execute([
+				':member_no' => $payload["member_no"]
+			]);
+			if($checkBeenBindForPending->rowCount() > 0){
+				$arrayAccPending = array();
+				while($rowAccPending = $checkBeenBindForPending->fetch()){
+					$arrayAccPending[] = $rowAccPending["id_bindaccount"];
 				}
-				echo json_encode($arrayResult);
-			}else{
-				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = $arrResponse->RESPONSE_CODE;
-				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;
+				$deleteAccForPending = $conmysql->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
+				$deleteAccForPending->execute();
+			}
+			$arrVerifyToken['exp'] = time() + 60;
+			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+			$arrVerifyToken['citizen_id'] = $dataComing["citizen_id"];
+			$arrVerifyToken['deptaccount_no'] = $coop_account_no;
+			$arrVerifyToken['bank_account_no'] = $kb_account_no;
+			$verify_token_bind =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
+			$arrSendDataVerify["verify_token"] = $verify_token_bind;
+			$arrSendDataVerify["app_id"] = $config["APP_ID"];
+			$responseAPIVerify = $lib->posting_data($config["URL_API_COOPDIRECT"].'/verifydata_kbank',$arrSendDataVerify);
+			if(!$responseAPIVerify){
+				$arrayResult['RESPONSE_CODE'] = "WS0028";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
-		}else{
-			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "WS1020";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot insert bindaccount to coop server";
+			$arrResponseVerify = json_decode($responseAPIVerify);
+			if($arrResponseVerify->RESULT){
+				$account_name_th = $arrResponseVerify->ACCOUNT_NAME;
+				$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
+				$conmysql->beginTransaction();
+				$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,citizen_id,mobile_no,bank_account_name,bank_account_name_en,bank_code,id_bankpalette,limit_amt,id_token) 
+																VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:citizen_id,:mobile_no,:bank_account_name,:bank_account_name_en,'004',2,:limit_amt,:id_token)");
+				if($insertPendingBindAccount->execute([
+					':sigma_key' => $sigma_key,
+					':member_no' => $payload["member_no"],
+					':coop_account_no' => $coop_account_no,
+					':kb_account_no' => $kb_account_no,
+					':citizen_id' => $dataComing["citizen_id"],
+					':mobile_no' => $mobile_no,
+					':bank_account_name' => $account_name_th,
+					':bank_account_name_en' => $account_name_en,
+					':limit_amt' => $func->getConstant('limit_withdraw'),
+					':id_token' => $payload["id_token"]
+				])){
+					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_reg_id_for_consent',$arrSendData);
+					if(!$responseAPI){
+						$arrayResult['RESPONSE_CODE'] = "WS0022";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
+					$arrResponse = json_decode($responseAPI);
+					if($arrResponse->RESULT){
+						$conmysql->commit();
+						$arrayResult["URL_CONSENT"] = $arrResponse->URL_CONSENT;
+						if(isset($new_token)){
+							$arrayResult['NEW_TOKEN'] = $new_token;
+						}
+						$arrayResult['RESULT'] = TRUE;
+						echo json_encode($arrayResult);
+					}else{
+						$conmysql->rollback();
+						$text = '#Bind #WS0039 : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
+						file_put_contents(__DIR__.'/../../log/consentbind_error.txt', $text . PHP_EOL, FILE_APPEND);
+						$arrayResult['RESPONSE_CODE'] = "WS0039";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
+				}else{
+					$conmysql->rollback();
+					$arrExecute = [
+						':sigma_key' => $sigma_key,
+						':member_no' => $payload["member_no"],
+						':coop_account_no' => $coop_account_no,
+						':kb_account_no' => $kb_account_no,
+						':mobile_no' => $mobile_no,
+						':id_token' => $payload["id_token"]
+					];
+					$arrError = array();
+					$arrError["EXECUTE"] = $arrExecute;
+					$arrError["QUERY"] = $insertPendingBindAccount;
+					$arrError["ERROR_CODE"] = 'WS1022';
+					$lib->addLogtoTxt($arrError,'bind_error');
+					$arrayResult['RESPONSE_CODE'] = "WS1022";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}else{
+				$text = '#Verify Data withdraw Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
+				file_put_contents(__DIR__.'/../../log/verifydata_error.txt', $text . PHP_EOL, FILE_APPEND);
+				$arrayResult['RESPONSE_CODE'] = "WS0042";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+		}catch(Throwable $e) {
+			$arrError = array();
+			$arrError["MESSAGE"] = $e->getMessage();
+			$arrError["ERROR_CODE"] = 'WS9999';
+			$lib->addLogtoTxt($arrError,'exception_error');
+			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -101,7 +156,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

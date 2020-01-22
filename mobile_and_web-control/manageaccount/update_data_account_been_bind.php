@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 		$updateAccountBeenbind = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = :bind_status WHERE id_bindaccount = :id_bindaccount");
 		if($updateAccountBeenbind->execute([
 			':bind_status' => $dataComing["bind_status"],
-			':id_bindaccount' => $dataComing["id_bindaccount"],
+			':id_bindaccount' => $dataComing["id_bindaccount"]
 		])){
 			if(isset($new_token)){
 				$arrayResult['NEW_TOKEN'] = $new_token;
@@ -14,16 +14,24 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult = array();
-			$arrayResult['RESPONSE_CODE'] = "WS1023";
-			$arrayResult['RESPONSE_MESSAGE'] = "Cannot update account status";
+			$arrExecute = [
+				':bind_status' => $dataComing["bind_status"],
+				':id_bindaccount' => $dataComing["id_bindaccount"]
+			];
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrExecute;
+			$arrError["QUERY"] = $updateAccountBeenbind;
+			$arrError["ERROR_CODE"] = 'WS1025';
+			$lib->addLogtoTxt($arrError,'manageaccount_error');
+			$arrayResult['RESPONSE_CODE'] = "WS1025";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = "Not permission this menu";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -31,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = "Not complete argument";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

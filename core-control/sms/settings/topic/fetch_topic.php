@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN smstemplate stm ON smt.id_smstemplate = stm.id_smstemplate
                                             LEFT JOIN corepermissionsubmenu smp ON sm.id_submenu = smp.id_submenu
 											LEFT JOIN corepermissionmenu cpm ON smp.id_permission_menu = cpm.id_permission_menu
-											WHERE sm.menu_status = '1' and sm.id_menuparent = 8 and smp.is_use = '1'");
+											WHERE sm.menu_status = '1' and sm.id_menuparent = 8");
 		$fetchTopic->execute();
 		$arrAllTopic = array();
 		while($rowTopic = $fetchTopic->fetch()){
@@ -28,18 +28,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
