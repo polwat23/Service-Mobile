@@ -8,6 +8,7 @@ if(!$anonymous){
 		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
 	}else if($payload["member_no"] == 'salemode'){
 		$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
+		$member_no_loan = $config["MEMBER_NO_SALE_LOAN"];
 	}else{
 		$member_no = $payload["member_no"];
 	}
