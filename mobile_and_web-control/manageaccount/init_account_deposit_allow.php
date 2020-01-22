@@ -47,6 +47,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccIncoop["DEPTACCOUNT_NAME"]);
 				$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
+				$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
+														WHERE dept_type_code = :depttype_code and member_cate_code = :membcat_code");
+				$getIDDeptTypeAllow->execute([
+					':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"],
+					':membcat_code' => $rowAccIncoop["MEMBCAT_CODE"]
+				]);
+				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch();
+				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
 				$arrAllowAccGroup[] = $arrAccInCoop;
 			}
 			if(sizeof($arrAllowAccGroup) > 0 || isset($new_token)){

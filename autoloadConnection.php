@@ -9,5 +9,4 @@ use Connection\connection;
 $con = new connection();
 $conmysql = $con->connecttomysql();
 $conoracle = $con->connecttooracle();
-//$conmongo = $con->connecttomongo();
 ?>

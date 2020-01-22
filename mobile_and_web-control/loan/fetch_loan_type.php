@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowContract = $getContract->fetch()){
 			$arrGroupContract = array();
 			$arrContract = array();
-			$arrContract["CONTRACT_NO"] = $lib->formatcontract($rowContract["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
+			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');

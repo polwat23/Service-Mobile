@@ -5,6 +5,7 @@ require_once('../autoload.php');
 if(!$anonymous){
 	if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 		$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
+		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
 	}else if($payload["member_no"] == 'salemode'){
 		$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
 	}else{
@@ -49,7 +50,7 @@ if(!$anonymous){
 		}else if($dataComing["id_menu"] == 2){
 			$arrMenuLoan = array();
 			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-			$fetchMenuLoan->execute([':member_no' => $member_no]);
+			$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
 			$rowMenuLoan = $fetchMenuLoan->fetch();
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
@@ -163,7 +164,7 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}else if($rowMenu["id_menu"] == 2){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-							$fetchMenuLoan->execute([':member_no' => $member_no]);
+							$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
 							$rowMenuLoan = $fetchMenuLoan->fetch();
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;

@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 			$arrayPDF = GenerateReport($arrGroupDetail,$header,$payload["member_no"],$dompdf);
 			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $arrayPDF["PATH"];
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
