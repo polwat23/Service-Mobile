@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arraySlipGrp = array();
 		$fetchSlipCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'YYYY')) as COUNT_SLIP_YEAR,to_char(slip_date,'YYYY') as YEAR_SLIP
-												FROM slslippayin WHERE member_no = :member_no GROUP BY to_char(slip_date,'YYYY')");
+												FROM slslippayin WHERE member_no = :member_no GROUP BY to_char(slip_date,'YYYY') ORDER BY YEAR_SLIP DESC");
 		$fetchSlipCount->execute([':member_no' => $member_no]);
 		while($rowslipcountyear = $fetchSlipCount->fetch()){
 			$arraySlipYear = array();
@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowslipcountmonth = $fetchSlipMonthCount->fetch()){
 				$arraySlipMonth = array();
 				$arraySlipMonth["COUNT_SLIP_MONTH"] = $rowslipcountmonth["COUNT_SLIP_MONTH"];
-				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp($rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"]);
+				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp($rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"],true);
 				$fetchSlipInMonth = $conoracle->prepare("SELECT slt.sliptype_desc,sl.payinslip_no
 														FROM slslippayin sl LEFT JOIN slucfsliptype slt ON sl.sliptype_code = slt.sliptype_code
 														WHERE member_no = :member_no and to_char(slip_date,'YYYYMM') = :slip_date");

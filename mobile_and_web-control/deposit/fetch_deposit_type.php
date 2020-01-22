@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch();
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dp.membcat_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
 											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1");
@@ -25,17 +25,25 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrayHeaderAcc = array();
-			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
-			$fetchAlias->execute([
-				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
-			]);
-			$rowAlias = $fetchAlias->fetch();
-			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"];
-			if(isset($rowAlias["path_alias_img"])){
-				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
-				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
+			if($dataComing["channel"] == 'mobile_app'){
+				$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
+				$fetchAlias->execute([
+					':account_no' => $rowAccount["DEPTACCOUNT_NO"]
+				]);
+				$rowAlias = $fetchAlias->fetch();
+				$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"];
+				if(isset($rowAlias["path_alias_img"])){
+					$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
+					$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
+				}else{
+					$arrAccount["ALIAS_PATH_IMG"] = null;
+				}
 			}else{
-				$arrAccount["ALIAS_PATH_IMG"] = null;
+				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg')){
+					$arrAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg';
+				}else{
+					$arrAccount["COVER_IMG"] = null;
+				}
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));

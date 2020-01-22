@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conoracle->prepare("SELECT loancontract_no from lncontmaster where member_no = :member_no and 
+		$fetchLastStmAcc = $conoracle->prepare("SELECT loancontract_no,loancontract_refno from lncontmaster where member_no = :member_no and 
 												lastpayment_date = (SELECT MAX(lnm.lastpayment_date) FROM lncontmaster lnm WHERE lnm.member_no = :member_no) and contract_status = 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch();
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		$rowContract = $getContract->fetch();
 		$arrContract = array();
-		$arrContract["CONTRACT_NO"] = $lib->formatcontract($contract_no,$func->getConstant('loan_format'));
+		$arrContract["CONTRACT_NO"] = $rowLoanLastSTM["LOANCONTRACT_REFNO"];
 		$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 		$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 		$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');

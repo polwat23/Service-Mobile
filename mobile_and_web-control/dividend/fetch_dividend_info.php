@@ -52,8 +52,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$rowMethpay["ACCOUNT_FORMAT"]);
 			$arrDividend["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
 			$arrDividend["BANK"] = $rowMethpay["BANK"];
-			$arrDividend["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
-			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
+			$arrDividend["RECEIVE_AMT"] = $arrDividend["SUM_AMT"];//number_format($rowMethpay["RECEIVE_AMT"],2);
+			/*$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
 											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.paytype_code <> 'ALL' ");
 			$getPaydiv->execute([
@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayPayGroup[] = $arrPay;
 			}
 			$arrDividend["PAY"] = $arrayPayGroup;
-			$arrDividend["SUMPAY"] = number_format($sumPay,2);
+			$arrDividend["SUMPAY"] = number_format($sumPay,2);*/
 			$arrDivmaster[] = $arrDividend;
 		}
 		if(sizeof($arrDivmaster) > 0 || isset($new_token)){

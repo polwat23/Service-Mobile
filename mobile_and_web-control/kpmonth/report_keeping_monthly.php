@@ -14,6 +14,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
+		$header = array();
 		if($payload["member_no"] != 'dev@mode'){
 			$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
@@ -22,9 +23,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				':member_no' => $member_no
 			]);
 			$rowName = $fetchName->fetch();
-			$fullname = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		}else{
-			$fullname = "นายไอโซแคร์ ซิสเต็มส์";
+			$header["fullname"] = "นายไอโซแคร์ ซิสเต็มส์";
 		}
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare("SELECT * FROM (
@@ -69,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formatcontract($rowDetail["PAY_ACCOUNT"],$func->getConstant('loan_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
@@ -99,14 +100,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				':recv_period' => $dataComing["recv_period"]
 			]);
 			$rowKPHeader = $getDetailKPHeader->fetch();
-			$header["fullname"] = $fullname;
 			$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
 			$header["member_no"] = $payload["member_no"];
 			$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
 			$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
-			$arrayPDF = GenerateReport($arrGroupDetail,$header,$payload["member_no"],$dompdf);
+			$arrayPDF = GenerateReport($arrGroupDetail,$header);
 			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $arrayPDF["PATH"];
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 				if(isset($new_token)){
 					$arrayResult['NEW_TOKEN'] = $new_token;
 				}
@@ -141,7 +141,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	exit();
 }
 
-function GenerateReport($dataReport,$header,$dompdf){
+function GenerateReport($dataReport,$header){
 	$sumBalance = 0;
 	$html = '<style>
 				@font-face {

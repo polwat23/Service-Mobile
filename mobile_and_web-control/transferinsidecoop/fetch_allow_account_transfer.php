@@ -37,9 +37,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch()){
 				$arrAccFav = array();
-				$arrAccFav["DEPTACCOUNT_NO"] = $rowAccFav["destination"];
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
+				$arrAccFav["DESTINATION"] = $rowAccFav["destination"];
+				$arrAccFav["DESTINATION_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
+				$arrAccFav["DESTINATION_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}

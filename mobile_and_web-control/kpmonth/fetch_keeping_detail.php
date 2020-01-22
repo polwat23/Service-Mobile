@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formatcontract($rowDetail["PAY_ACCOUNT"],$func->getConstant('loan_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);

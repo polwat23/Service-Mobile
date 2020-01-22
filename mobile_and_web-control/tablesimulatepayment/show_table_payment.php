@@ -55,6 +55,7 @@ table thead th {
 </thead>
 <tbody class="body-card-table">
 <?php
+if(isset($arrPayment)){
 for($i = 0;$i < sizeof($arrPayment);$i++){ ?>
 <tr>
 	<td>
@@ -79,7 +80,10 @@ for($i = 0;$i < sizeof($arrPayment);$i++){ ?>
 	<?php echo $arrPayment[$i]["PRINCIPAL_BALANCE"];?>
 	</td>
 </tr>
-<?php } ?>
+<?php 
+}
+}
+?>
 
 </tbody>
 </table>
