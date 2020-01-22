@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		$arrPayment = array();
 		$lastDateofMonth = strtotime(date('M Y',strtotime($pay_date)));
 		$payment_per_period = 0;
-		$period_payment = (float) preg_replace('/,/','',$dataComing['period_payment']);
+		$period_payment = isset($dataComing['period_payment']) ? (float) preg_replace('/,/','',$dataComing['period_payment']) : 0;
 		
 		if($lib->checkCompleteArgument(['period'],$dataComing)){
 			$period = $dataComing["period"];

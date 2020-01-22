@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$arrGroupAll['CONTRACT_NO'] =  $lib->formatcontract($rowWhocollu["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
+				$arrGroupAll['CONTRACT_NO'] =  $rowWhocollu["LOANCONTRACT_NO"];
 				$whocolluMember = $conoracle->prepare("SELECT
 														MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 														LCC.REF_COLLNO AS MEMBER_NO			

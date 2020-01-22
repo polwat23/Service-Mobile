@@ -45,8 +45,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch()){
 				$arrAccFav = array();
-				$arrAccFav["LOANCONTRACT_NO"] = $rowAccFav["destination"];
-				$arrAccFav["LOANCONTRACT_NO_FORMAT"] = $lib->formatcontract($rowAccFav["destination"],$func->getConstant('loan_format'));
+				$arrAccFav["DESTINATION"] = $rowAccFav["destination"];
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}
@@ -58,7 +57,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan = array();
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
-				$arrLoan["CONTRACT_NO_FORMAT"] = $lib->formatcontract($rowLoan["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
