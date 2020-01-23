@@ -2,7 +2,8 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
+	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayAcc = array();
