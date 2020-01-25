@@ -1,15 +1,20 @@
 <?php
-require_once('../../autoload.php');
+require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
 		$arrayGroup = array();
-		$fetchUser = $conmysql->prepare("SELECT username FROM coreuser WHERE user_status = '1' and username NOT IN('dev@mode','salemode')");
+		$fetchUser = $conmysql->prepare("SELECT coreuser.username,coresectionsystem.section_system, coreuser.user_status
+											FROM coreuser
+											INNER JOIN coresectionsystem
+											ON coresectionsystem.id_section_system = coreuser.id_section_system");
 		$fetchUser->execute();
 		while($rowCoreSubMenu = $fetchUser->fetch()){
-			$arrGroupCoreSubMenu = array();
-			$arrGroupCoreSubMenu["USERNAME"] = $rowCoreSubMenu["username"];
-			$arrayGroup[] = $arrGroupCoreSubMenu;
+			$arrGroupCoreUser = array();
+			$arrGroupCoreUser["USERNAME"] = $rowCoreSubMenu["username"];
+			$arrGroupCoreUser["SECTION_SYSTEM"] = $rowCoreSubMenu["section_system"];
+			$arrGroupCoreUser["USER_STATUS"] = $rowCoreSubMenu["user_status"];
+			$arrayGroup[] = $arrGroupCoreUser;
 		}
 		$arrayResult["CORE_USER"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;

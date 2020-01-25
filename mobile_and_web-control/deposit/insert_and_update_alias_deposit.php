@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		if(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != ""){
 			$encode_avatar = $dataComing["base64_img"];
 			$destination = __DIR__.'/../../resource/alias_account_dept';
-			$file_name = $account_no.$lib->randomText('all',6);
+			$file_name = $account_no;
 			if(!file_exists($destination)){
 				mkdir($destination, 0777, true);
 			}
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 					exit();
 				}
 			}
-			$path_alias_img = '/resource/alias_account_dept/'.$createAvatar["normal_path"];
+			$path_alias_img = '/resource/alias_account_dept/'.$createAvatar["normal_path"].'?v='.$lib->randomText('all',6);
 			$arrExecute["path_alias_img"] = $path_alias_img;
 		}
 		if(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != ""){
