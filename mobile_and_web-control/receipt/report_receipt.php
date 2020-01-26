@@ -6,6 +6,9 @@ use Dompdf\Dompdf;
 $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_SLIP"];
@@ -59,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $item_payment;
 			$arrGroupDetail[] = $arrDetail;
 		}
-		if(sizeof($arrGroupDetail) > 0 || isset($new_token)){
+		if(sizeof($arrGroupDetail) > 0){
 			$getDetailHeader = $conoracle->prepare("SELECT SLIP_DATE FROM slslippayin WHERE payinslip_no = :slip_no");
 			$getDetailHeader->execute([
 				':slip_no' => $dataComing["slip_no"]
@@ -71,9 +74,6 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 			if($arrayPDF["RESULT"]){
 				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

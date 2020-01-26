@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageNotification')){
 		$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email
 													FROM gcuserlogin WHERE id_token = :id_token and is_login = '1'");
@@ -11,9 +14,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["receive_notify_news"];
 			$arrayResult["RECEIVE_NOTIFY_TRANSACTION"] = $rowSetting["receive_notify_transaction"];
 			$arrayResult["RECEIVE_LOGIN_EMAIL"] = $rowSetting["receive_login_email"];
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

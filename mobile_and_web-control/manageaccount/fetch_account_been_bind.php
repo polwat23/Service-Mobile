@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
 													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.limit_amt,
@@ -48,17 +51,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];
 				$arrBindAccount[] = $arrAccount;
 			}
-			if(sizeof($arrBindAccount) > 0 || isset($new_token)){
-				$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				http_response_code(204);
-				exit();
-			}
+			$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			http_response_code(204);
 			exit();

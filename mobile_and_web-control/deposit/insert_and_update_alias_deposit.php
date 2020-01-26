@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		if(($dataComing["base64_img"] == "" || empty($dataComing["base64_img"])) && ($dataComing["alias_name_emoji_"] == "" || empty($dataComing["alias_name_emoji_"]))){
@@ -47,9 +50,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 												".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
 												WHERE deptaccount_no = :deptaccount_no");
 		if($updateMemoDept->execute($arrExecute) && $updateMemoDept->rowCount() > 0){
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
@@ -60,9 +60,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				':path_alias_img' => $path_alias_img ?? null,
 				':deptaccount_no' => $account_no
 			])){
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		try {
 			$arrSendData = array();
@@ -37,9 +40,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no'],$dataComing)
 				$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
 				$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
 				$arrayResult['RESULT'] = TRUE;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				echo json_encode($arrayResult);
 			}else{
 				$text = '#Verify Data Deposit Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);

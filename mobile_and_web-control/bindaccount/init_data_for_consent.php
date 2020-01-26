@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
@@ -57,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrayAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccount["DEPTACCOUNT_NAME"]);
 					$arrayGroupAccount[] = $arrayAccount;
 				}
-				if(sizeof($arrayGroupAccount) > 0 || isset($new_token)){
+				if(sizeof($arrayGroupAccount) > 0){
 					$arrayResult['ACCOUNT'] = $arrayGroupAccount;
 					$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
 					$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
@@ -65,9 +68,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? $config["ACCOUNT_BANK_FORMAT"];
 					$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 					$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

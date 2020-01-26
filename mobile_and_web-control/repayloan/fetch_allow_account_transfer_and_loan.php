@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_LOAN"];
@@ -62,13 +65,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;
 			}
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
+			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['LOAN'] = $arrLoanGrp;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

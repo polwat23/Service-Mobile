@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_CREDIT"];
@@ -35,17 +38,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrCredit["MAXLOAN_AMT"] = number_format($rowCredit["MAXLOAN_AMT"],2);
 			$arrGroupCredit[] = $arrCredit;
 		}
-		if(sizeof($arrGroupCredit) > 0 || isset($new_token)){
-			$arrayResult["CREDIT"] = $arrGroupCredit;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult["CREDIT"] = $arrGroupCredit;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

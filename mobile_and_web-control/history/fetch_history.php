@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$arrGroupHis = array();
 		$executeData = [
@@ -33,17 +36,9 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 			$arrHistory["RECEIVE_DATE"] = $lib->convertdate($rowHistory["receive_date"],'D m Y',true);
 			$arrGroupHis[] = $arrHistory;
 		}
-		if(sizeof($arrGroupHis) > 0 || isset($new_token)){
-			$arrayResult['HISTORY'] = $arrGroupHis;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['HISTORY'] = $arrGroupHis;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

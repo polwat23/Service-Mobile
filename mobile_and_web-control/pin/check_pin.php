@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	$checkPin = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE pin = :pin and member_no = :member_no");
 	$checkPin->execute([
 		':pin' => $dataComing["pin"],
@@ -10,15 +13,9 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	if($checkPin->rowCount() > 0){
 		$rowaccount = $checkPin->fetch();
 		$arrayResult['RESULT'] = TRUE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESULT'] = FALSE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		echo json_encode($arrayResult);
 	}
 }else{

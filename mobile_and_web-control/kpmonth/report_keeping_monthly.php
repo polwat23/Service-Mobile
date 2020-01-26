@@ -6,6 +6,9 @@ use Dompdf\Dompdf;
 $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_KEEPINGMONTH"];
@@ -82,7 +85,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
 		}
-		if(sizeof($arrGroupDetail) > 0 || isset($new_token)){
+		if(sizeof($arrGroupDetail) > 0){
 			$getDetailKPHeader = $conoracle->prepare("SELECT * FROM (
 													SELECT 
 														kpd.RECEIPT_NO,
@@ -107,9 +110,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrayPDF = GenerateReport($arrGroupDetail,$header);
 			if($arrayPDF["RESULT"]){
 				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

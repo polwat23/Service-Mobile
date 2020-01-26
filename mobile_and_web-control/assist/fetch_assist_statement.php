@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistStatement')){
 		$limit = $func->getConstant('limit_stmassist');
 		$arrayResult['LIMIT_DURATION'] = $limit;
@@ -47,17 +50,9 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 			$arrAssStm["SIGN_FLAG"] = $rowAssStm["SIGN_FLAG"];
 			($arrGroupAssStm["STATEMENT"])[] = $arrAssStm;
 		}
-		if(sizeof($arrGroupAssStm) > 0 || isset($new_token)){
-			$arrayResult["ASSIST_STM"] = $arrGroupAssStm;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult["ASSIST_STM"] = $arrGroupAssStm;
+		$arrayResult["RESULT"] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
