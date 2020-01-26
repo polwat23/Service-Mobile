@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
 		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use FROM gcuserallowacctransaction WHERE member_no = :member_no");
@@ -22,17 +25,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
 				$arrGroupAccAllow[] = $arrAccBeenAllow;
 			}
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token)){
-				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				http_response_code(204);
-				exit();
-			}
+			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			http_response_code(204);
 			exit();

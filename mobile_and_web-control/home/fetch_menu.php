@@ -3,6 +3,9 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 		$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
 		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
@@ -57,9 +60,6 @@ if(!$anonymous){
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 		exit();
@@ -108,9 +108,6 @@ if(!$anonymous){
 					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
 					$arrayAllMenu[] = $arrMenu;
 				}
-			}
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
@@ -192,8 +189,8 @@ if(!$anonymous){
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
-				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
+				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
@@ -220,9 +217,6 @@ if(!$anonymous){
 				$arrFavMenuGroup[] = $arrFavMenu;
 			}
 			if(sizeof($arrayAllMenu) > 0 || sizeof($arrayMenuSetting) > 0){
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;

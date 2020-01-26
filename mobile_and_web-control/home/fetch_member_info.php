@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
 		$arrayResult = array();
 		$member_no = $payload["member_no"];
@@ -87,9 +90,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					http_response_code(204);
 					exit();
 				}
-			}
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;

@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DividendInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_DIVIDEND"];
@@ -73,17 +76,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
 			$arrDivmaster[] = $arrDividend;
 		}
-		if(sizeof($arrDivmaster) > 0 || isset($new_token)){
-			$arrayResult["DIVIDEND"] = $arrDivmaster;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult["DIVIDEND"] = $arrDivmaster;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

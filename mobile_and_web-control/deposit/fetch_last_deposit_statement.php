@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 			$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
@@ -96,9 +99,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["HEADER"] = $arrAccount;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

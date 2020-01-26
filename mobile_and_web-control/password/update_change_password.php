@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingChangePassword')){
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		$conmysql->beginTransaction();
@@ -14,9 +17,6 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 			if($func->logoutAll($payload["id_token"],$payload["member_no"],'-9')){
 				$conmysql->commit();
 				$arrayResult['RESULT'] = TRUE;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				echo json_encode($arrayResult);
 			}else{
 				$conmysql->rollback();

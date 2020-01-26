@@ -3,6 +3,9 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc',
 'dept_account_enc','tran_id','sigma_key','coop_account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		try{
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
@@ -119,9 +122,6 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				]);
 				$arrayResult['TRANSACTION_NO'] = $dataComing["tran_id"];
 				$arrayResult['RESULT'] = TRUE;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				echo json_encode($arrayResult);
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode

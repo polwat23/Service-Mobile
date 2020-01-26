@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'InsureInfo')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_INSURANCE"];
@@ -14,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM insinsuremaster ism LEFT JOIN insinsuretype ist ON ism.insuretype_code = ist.insuretype_code
 												LEFT JOIN insinsurestatement issm ON ism.insurance_no = issm.insurance_no
 												LEFT JOIN insucfinsitemtype isit ON issm.insitemtype_code = isit.insitemtype_code
-												WHERE ism.insurance_status = '1' and ism.member_no = :member_no");
+												WHERE ism.insurance_status = '1' and ism.member_no = :member_no ORDER BY issm.SEQ_NO DESC");
 		$fetchinSureInfo->execute([
 			':member_no' => $member_no
 		]);
@@ -33,17 +36,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrGroupAllIns[array_search($rowInsure["INSURETYPE_DESC"],array_column($arrGroupAllIns,'INS_TYPE'))]["STATEMENT"])[] = $arrayInsure;
 			}
 		}
-		if(sizeof($arrGroupAllIns) > 0 || isset($new_token)){
-			$arrayResult['INSURE'] = $arrGroupAllIns;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['INSURE'] = $arrGroupAllIns;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

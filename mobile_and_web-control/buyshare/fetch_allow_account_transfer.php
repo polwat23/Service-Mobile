@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_SHARE"];
@@ -42,12 +45,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayShare = array();
 			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*10,2);
 			$arrayShare["MEMBER_NO"] = $payload["member_no"];
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token)){
+			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['SHARE'] = $arrayShare;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

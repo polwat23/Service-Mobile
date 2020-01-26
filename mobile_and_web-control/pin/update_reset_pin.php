@@ -1,15 +1,15 @@
 <?php
 require_once('../autoload.php');
 
+if(isset($new_token)){
+	$arrayResult['NEW_TOKEN'] = $new_token;
+}
 $updateResetPin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = null WHERE member_no = :member_no");
 if($updateResetPin->execute([
 	':member_no' => $payload["member_no"]
 ])){
 	if($func->logoutAll(null,$payload["member_no"],'-10')){
 		$arrayResult['RESULT'] = TRUE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS1017";

@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
 		$arrayResult = array();
 		$arrayGroupSTM = array();
@@ -61,9 +64,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

@@ -3,6 +3,9 @@ set_time_limit(150);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_account_no','coop_account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		try {
 			$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
@@ -90,9 +93,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 					if($arrResponse->RESULT){
 						$conmysql->commit();
 						$arrayResult["URL_CONSENT"] = $arrResponse->URL_CONSENT;
-						if(isset($new_token)){
-							$arrayResult['NEW_TOKEN'] = $new_token;
-						}
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{

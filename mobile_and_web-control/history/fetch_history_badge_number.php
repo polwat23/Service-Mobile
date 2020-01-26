@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$getBadge = $conmysql->prepare("SELECT IFNULL(COUNT(id_history),0) as badge,his_type FROM gchistory 
 										WHERE member_no = :member_no AND his_read_status = '0'
@@ -24,9 +27,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['BADGE_2'] = 0;
 			}
 			$arrayResult['BADGE_SUMMARY'] = $arrayResult['BADGE_1'] + $arrayResult['BADGE_2'];
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

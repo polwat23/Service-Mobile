@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$time = date("Hi");
 		if($time >= 0000 && $time <= 0200){
@@ -43,11 +46,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccBind[] = $arrAccBind;
 				}
 			}
-			if(sizeof($arrGroupAccBind) > 0 || isset($new_token)){
+			if(sizeof($arrGroupAccBind) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

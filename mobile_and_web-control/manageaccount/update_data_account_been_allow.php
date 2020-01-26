@@ -2,15 +2,15 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status WHERE deptaccount_no = :deptaccount_no");
 		if($updateAccountBeenAllow->execute([
 			':allow_status' => $dataComing["allow_status"],
 			':deptaccount_no' => $dataComing["deptaccount_no"]
 		])){
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

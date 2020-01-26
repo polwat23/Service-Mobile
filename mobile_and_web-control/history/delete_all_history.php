@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$deleteHistory = $conmysql->prepare("DELETE FROM gchistory WHERE member_no = :member_no and his_type = :his_type");
 		if($deleteHistory->execute([
@@ -9,9 +12,6 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 			':his_type' => $dataComing["type_history"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [

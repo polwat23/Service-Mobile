@@ -2,15 +2,15 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$updateAccountBeenbind = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = :bind_status WHERE id_bindaccount = :id_bindaccount");
 		if($updateAccountBeenbind->execute([
 			':bind_status' => $dataComing["bind_status"],
 			':id_bindaccount' => $dataComing["id_bindaccount"]
 		])){
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

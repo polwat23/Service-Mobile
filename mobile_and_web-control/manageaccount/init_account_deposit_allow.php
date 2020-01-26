@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
@@ -54,11 +57,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
 				$arrAllowAccGroup[] = $arrAccInCoop;
 			}
-			if(sizeof($arrAllowAccGroup) > 0 || isset($new_token)){
+			if(sizeof($arrAllowAccGroup) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
