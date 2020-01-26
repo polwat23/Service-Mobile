@@ -6,11 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$time = date("Hi");
 		if($time >= 0000 && $time <= 0200){
 			$arrayResult['RESPONSE_CODE'] = "WS0035";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถทำธุรกรรมได้ในช่วงเวลา 00.00 - 02.00";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Transaction is not available at 00.00 - 02.00 AM";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -36,7 +32,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
 				$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													and dpm.membcat_code = dpt.membcat_code
 													WHERE dpm.deptaccount_no = :deptaccount_no");
 				$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
 				$rowDataAcc = $getDataAcc->fetch();

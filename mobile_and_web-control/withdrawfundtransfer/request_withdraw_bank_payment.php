@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc',
-'dept_account_enc','tran_id','sigma_key','coop_account_no','penelty_amt','fee_amt'],$dataComing)){
+'dept_account_enc','tran_id','sigma_key','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		try{
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
@@ -64,14 +64,14 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			
-			$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
+			$clientWS = new SoapClient("http://localhost:81/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 			try {
 				$argumentWS = [
-						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
+						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
 						"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoap = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
+				$responseSoap = $resultWS->of_dept_inf_serv_cenResult;
 				if($responseSoap->msg_status != '0000'){
 					$text = '#Withdraw #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoap->msg_output).' | '.json_encode($responseSoap);
 					file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
@@ -110,8 +110,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
 					':amount' => $amt_transfer,
-					':fee_amt' => $dataComing["fee_amt"],
-					':penalty_amt' => $dataComing["penelty_amt"],
+					':fee_amt' => $dataComing["fee_amt"] ?? 0,
+					':penalty_amt' => $dataComing["penelty_amt"] ?? 0,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':id_userlogin' => $payload["id_userlogin"],
@@ -134,8 +134,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
 					':amount' => $amt_transfer,
-					':fee_amt' => $dataComing["fee_amt"],
-					':penalty_amt' => $dataComing["penelty_amt"],
+					':fee_amt' => $dataComing["fee_amt"] ?? 0,
+					':penalty_amt' => $dataComing["penelty_amt"] ?? 0,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':id_userlogin' => $payload["id_userlogin"],
@@ -143,11 +143,11 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				]);
 				$arrayGroup["post_status"] = "-1";
 				$argumentWS = [
-						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
+						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
 						"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
+				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
 				$text = '#Withdraw-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
 				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$text = '#Withdraw #WS0037 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);

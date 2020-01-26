@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$arrSendData = array();
+		/*$arrSendData = array();
 		$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		try {
 			$argumentWS = [
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
-		}
+		}*/
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
@@ -73,6 +73,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
+			$arrayResult['PENALTY_AMT'] = 0;
 			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 			$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;

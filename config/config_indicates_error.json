@@ -36,7 +36,7 @@
 	"WS0021" : [{"th" : "ไม่พบการผูกบัญชีของท่าน","en" : "Not found bind account"}],
 	"WS0022" : [{"th" : "ไม่สามารถผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0022","en" : "Cannot bind account please contact cooperative #WS0022"}],
 	"WS0023" : [{"th" : "ไม่พบบัญชีที่สามารถทำรายการได้ ท่านต้องอนุญาตบัญชีที่สามารถทำรายการได้ก่อนจะทำธุรกรรม","en" : "You must allow account before transaction"}],
-	"WS0024" : [{"th" : "สหกรณ์ไม่อนุญาตให้เงินฝากประเภทนี้ทำรายการได้","en" : "Cooperative not allow for transaction in this deposits type"}],
+	"WS0024" : [{"th" : "ไม่พบประเภทบัญชีเงินฝากที่สหกรณ์อนุญาตให้ทำธุรกรรมได้","en" : "Not found deposits type that cooperative allow to transaction"}],
 	"WS0025" : [{"th" : "ไม่พบบัญชีปลายทาง กรุณาตรวจสอบเลขบัญชีปลายทางอีกครั้ง","en" : "Not found destination deposit account please please recheck"}],
 	"WS0026" : [{"th" : "บัญชีปลายทางยังไม่ได้อนุญาตเพื่อทำธุรกรรม","en" : "Destination deposit account does not allow for transaction"}],
 	"WS0027" : [{"th" : "ไม่สามารถฝากเงินเข้าบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0027","en" : "Cannot deposit to account please contact cooperative #WS0027"}],

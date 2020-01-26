@@ -26,16 +26,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 			}
 			if(sizeof($arrAccAllowed) > 0){
-				$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.membcat_code
+				$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
 															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-															and dpm.membcat_code = dpt.membcat_code
 															WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 															and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
 															and dpm.member_no = :member_no and dpm.deptclose_status = 0");
 			}else{
-				$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.membcat_code
+				$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
 															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-															and dpm.membcat_code = dpt.membcat_code
 															WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 															and dpm.member_no = :member_no and dpm.deptclose_status = 0");
 
@@ -48,10 +46,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccIncoop["DEPTACCOUNT_NAME"]);
 				$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
 				$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
-														WHERE dept_type_code = :depttype_code and member_cate_code = :membcat_code");
+														WHERE dept_type_code = :depttype_code");
 				$getIDDeptTypeAllow->execute([
-					':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"],
-					':membcat_code' => $rowAccIncoop["MEMBCAT_CODE"]
+					':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
 				]);
 				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch();
 				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
@@ -65,7 +62,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				http_response_code(204);
+				$arrayResult['RESPONSE_CODE'] = "WS0024";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
