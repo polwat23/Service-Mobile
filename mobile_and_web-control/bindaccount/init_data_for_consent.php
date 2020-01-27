@@ -6,10 +6,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$arrayResult['NEW_TOKEN'] = $new_token;
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
+		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
 			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
+		}else if($payload["member_no"] == 'etnmode1'){
+			$member_no = $config["MEMBER_NO_ETN1"];
+		}else if($payload["member_no"] == 'etnmode2'){
+			$member_no = $config["MEMBER_NO_ETN2"];
+		}else if($payload["member_no"] == 'etnmode3'){
+			$member_no = $config["MEMBER_NO_ETN3"];
 		}else{
 			$member_no = $payload["member_no"];
 		}

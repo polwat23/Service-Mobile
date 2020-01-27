@@ -6,12 +6,21 @@ if(!$anonymous){
 	if(isset($new_token)){
 		$arrayResult['NEW_TOKEN'] = $new_token;
 	}
-	if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
-		$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
+	if($payload["member_no"] == 'dev@mode'){
+		$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
 		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
 	}else if($payload["member_no"] == 'salemode'){
-		$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
+		$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
 		$member_no_loan = $config["MEMBER_NO_SALE_LOAN"];
+	}else if($payload["member_no"] == 'etnmode1'){
+		$member_no = $config["MEMBER_NO_ETN1"];
+		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
+	}else if($payload["member_no"] == 'etnmode2'){
+		$member_no = $config["MEMBER_NO_ETN2"];
+		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
+	}else if($payload["member_no"] == 'etnmode3'){
+		$member_no = $config["MEMBER_NO_ETN3"];
+		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
 	}else{
 		$member_no = $payload["member_no"];
 	}
