@@ -28,8 +28,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup = array();
 			$arrayGroup["account_id"] = "11121700";
 			$arrayGroup["action_status"] = "1";
-			$arrayGroup["atm_no"] = $coop_account_no;
-			$arrayGroup["atm_seqno"] = $time;
+			$arrayGroup["atm_no"] = "mobile";
+			$arrayGroup["atm_seqno"] = null;
 			$arrayGroup["aviable_amt"] = null;
 			$arrayGroup["bank_accid"] = $rowDataDeposit["deptaccount_no_bank"];
 			$arrayGroup["bank_cd"] = $rowDataDeposit["bank_code"];
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["coop_id"] = $config["COOP_ID"];
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-			$arrayGroup["entry_id"] = "admin";
+			$arrayGroup["entry_id"] = "KBANK";
 			$arrayGroup["fee_amt"] = "0";
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
@@ -51,11 +51,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;
-			$arrayGroup["slipitemtype_code"] = "DTX";
-			$arrayGroup["stmtitemtype_code"] = "WTX";
+			$arrayGroup["slipitemtype_code"] = "DTB";
+			$arrayGroup["stmtitemtype_code"] = "WTB";
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
-	
+			$ref_slipno = null;
 			$clientWS = new SoapClient("http://localhost:81/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 			try {
 				$argumentWS = [
@@ -73,6 +73,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					echo json_encode($arrayResult);
 					exit();
 				}
+				$ref_slipno = $responseSoap->ref_slipno;
 			}catch(SoapFault $e){
 				$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($e).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
@@ -131,6 +132,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':id_userlogin' => $payload["id_userlogin"]
 				]);
 				$arrayGroup["post_status"] = "-1";
+				$arrayGroup["atm_no"] = $ref_slipno;
 				$argumentWS = [
 						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
 						"astr_dept_inf_serv" => $arrayGroup
@@ -142,7 +144,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0038";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;//$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
