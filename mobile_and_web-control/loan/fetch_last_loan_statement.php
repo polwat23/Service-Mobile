@@ -20,8 +20,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conoracle->prepare("SELECT loancontract_no from lncontmaster where member_no = :member_no and 
-												lastpayment_date = (SELECT MAX(lnm.lastpayment_date) FROM lncontmaster lnm WHERE lnm.member_no = :member_no) and contract_status = 1");
+		$fetchLastStmAcc = $conoracle->prepare("SELECT * FROM (SELECT lnm.loancontract_no from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
+												lnm.loancontract_no = lns.loancontract_no
+												WHERE lnm.member_no = :member_no and lnm.contract_status = 1 
+												and entry_date IS NOT NULL ORDER BY entry_date DESC) WHERE rownum <= 1;");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch();
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
