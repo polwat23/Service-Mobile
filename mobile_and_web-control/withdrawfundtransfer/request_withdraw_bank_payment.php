@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
 			$arrayGroup["operate_date"] = date('c');
-			$arrayGroup["oprate_cd"] = "002";
+			$arrayGroup["oprate_cd"] = "003";
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;
