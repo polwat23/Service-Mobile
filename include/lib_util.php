@@ -205,14 +205,15 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.isocare.co.th';
+		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
 		$mailFunction->SMTPAuth = true;
-		$mailFunction->Username = 'no-reply@isocare.co.th';
-		$mailFunction->Password = '@Iso1888';
-		$mailFunction->SMTPSecure = 'tls';
-		$mailFunction->Port = 587;
+		$mailFunction->Username = 'noreply@gensoft.co.th';
+		$mailFunction->Password = 'h>-^yM3cPd3&';
+		$mailFunction->SMTPSecure = 'ssl';
+		$mailFunction->Port = 465;
+		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
-		$mailFunction->setFrom('no-reply@isocare.co.th', $json_data["NAME_APP"]);
+		$mailFunction->setFrom('noreply@gensoft.co.th', $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;

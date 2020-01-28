@@ -417,7 +417,9 @@ class functions {
 				$fetchFCMToken->execute();
 				while($rowFCMToken = $fetchFCMToken->fetch()){
 					$arrayToken[] = $rowFCMToken["fcm_token"];
-					$arrayMember[] = $rowFCMToken["member_no"];
+					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
+						$arrayMember[] = $rowFCMToken["member_no"];
+					}
 				}
 			}
 			$arrayGrpToken["TOKEN"] = $arrayToken;
@@ -444,8 +446,10 @@ class functions {
 				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch()){
-					$arrayMember[] = $rowDataOra["MEMBER_NO"];
-					$arrayTel[] = $rowDataOra["MEM_TELMOBILE"];
+					if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
+						$arrayMember[] = $rowDataOra["MEMBER_NO"];
+						$arrayTel[] = $rowDataOra["MEM_TELMOBILE"];
+					}
 				}
 			}
 			$arrayGrp["TEL"] = $arrayTel;

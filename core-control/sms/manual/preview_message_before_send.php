@@ -68,7 +68,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$arrToken = $func->getFCMToken('all');
 				foreach($arrToken["MEMBER_NO"] as $member){
 					$arrGroupSuccess["DESTINATION"] = $member;
-					$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? $dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
+					$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
 					$arrGroupAllSuccess[] = $arrGroupSuccess;
 				}
 				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -92,8 +92,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayTel as $key => $dataTel){
 					$arrGroupSuccess["DESTINATION"] = $dataTel["MEMBER_NO"][$key];
 					$arrGroupSuccess["TEL"] = $lib->formatphone($dataTel["TEL"][$key],'-');
-					$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? 
-					$dataComing["message_importData"][$member] : $dataComing["message_emoji_"];
+					$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
 					$arrGroupAllSuccess[] = $arrGroupSuccess;
 				}
 				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -101,11 +100,6 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}
-		}else{
-			$arrayResult['RESPONSE'] = "ยังไม่รองรับรูปแบบการส่งนี้";
-			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
