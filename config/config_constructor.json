@@ -35,7 +35,7 @@
 	"COOP_ID" : "001001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.musaving.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/MHDCOOP_TEST/",
+	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/MHDCOOP-TEST/",
 	"FIREBASE_API_KEY" : "AIzaSyAA8lDn_1AnwHxlLyYfbOdnB_JVBNdswKw",
 	"FIREBASE_SERVER_KEY" : "AAAACCPrzj0:APA91bEaaflR2Rbi6JAgzbIMWg6Z8w4_iouJYDpVWiiGOG_WJcgbgFbQnY15E57szqklLBkhf6s537HU_fM7VRBcK6WQxrNa_kOk0tyNlcFzCsK9trst9Yg4VpqeLyXf7rbzlrXakZay",
 	"ICON" : "ic_stat_ic_notification",
