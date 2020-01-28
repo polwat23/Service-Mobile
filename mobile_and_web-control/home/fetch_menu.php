@@ -254,11 +254,7 @@ if(!$anonymous){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
 			echo json_encode($arrayResult);
