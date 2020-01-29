@@ -16,6 +16,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$member_no = $config["MEMBER_NO_ETN2"];
 		}else if($payload["member_no"] == 'etnmode3'){
 			$member_no = $config["MEMBER_NO_ETN3"];
+		}else if($payload["member_no"] == 'etnmode4'){
+			$member_no = $config["MEMBER_NO_ETN4"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -26,8 +28,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conoracle->prepare("SELECT deptaccount_no from dpdeptmaster where member_no = :member_no and 
-												lastmovement_date = (SELECT MAX(dpm.lastmovement_date) FROM dpdeptmaster dpm WHERE dpm.member_no = :member_no) and deptclose_status <> 1");
+		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no 
+							WHERE dpm.member_no = :member_no and deptgroup_code IS NOT NULL ORDER BY dps.deptslip_no DESC ) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch();
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);

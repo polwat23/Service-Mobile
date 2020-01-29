@@ -16,6 +16,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$member_no = $config["MEMBER_NO_ETN2"];
 		}else if($payload["member_no"] == 'etnmode3'){
 			$member_no = $config["MEMBER_NO_ETN3"];
+		}else if($payload["member_no"] == 'etnmode4'){
+			$member_no = $config["MEMBER_NO_ETN4"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -60,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
 			$arrayGroup["operate_date"] = date('c');
-			$arrayGroup["oprate_cd"] = "003";
+			$arrayGroup["oprate_cd"] = "002";
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;

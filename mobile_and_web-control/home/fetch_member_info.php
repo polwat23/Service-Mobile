@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["MEMBER_TYPE"] = "สมาชิกพิเศษ";
 				$arrayResult["MEMBERGROUP_DESC"] = "บริษัท เจนซอฟท์ จำกัด";
 				$arrayResult["FULL_ADDRESS"] = "219/14 ม.8 ถ.วงแหวนรอบกลาง ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ 50300";
-			}else if($member_no == "salemode" || $member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3"){
+			}else if($member_no == "salemode"){
 				$arrayResult["PRENAME"] = "นาย";
 				$arrayResult["NAME"] = "ไอโซแคร์";
 				$arrayResult["SURNAME"] = "ซิสเต็มส์";
@@ -44,13 +44,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["MEMBERGROUP_DESC"] = "บริษัท เจนซอฟท์ จำกัด";
 				$arrayResult["FULL_ADDRESS"] = "219/14 ม.8 ถ.วงแหวนรอบกลาง ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ 50300";
 			}else{
+				if($member_no == "etnmode1" || $member_no == "etnmode2" || $member_no == "etnmode3" || $member_no == "etnmode4"){
+					$member_no = $config[$member_no];
+				}
 				$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
-													mb.ADDRESS_NO AS ADDR_NO, 
-													mb.ADDRESS_MOO AS ADDR_MOO,
-													mb.ADDRESS_SOI AS ADDR_SOI,
-													mb.ADDRESS_VILLAGE AS ADDR_VILLAGE,
-													mb.ADDRESS_ROAD AS ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
