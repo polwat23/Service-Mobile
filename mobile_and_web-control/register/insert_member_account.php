@@ -15,13 +15,14 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 		$email = $dataComing["email"];
 		$phone = $dataComing["phone"];
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-		$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email) 
-											VALUES(:member_no,:password,:phone,:email)");
+		$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,limit_transaction_amt) 
+											VALUES(:member_no,:password,:phone,:email,:limit_amt)");
 		if($insertAccount->execute([
 			':member_no' => $dataComing["member_no"],
 			':password' => $password,
 			':phone' => $phone,
-			':email' => $email
+			':email' => $email,
+			':limit_amt' => $func->getConstant('limit_withdraw')
 		])){
 			$arrayResult = array();
 			$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
@@ -33,7 +34,8 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 				':member_no' => $dataComing["member_no"],
 				':password' => $password,
 				':phone' => $phone,
-				':email' => $email
+				':email' => $email,
+			':limit_amt' => $func->getConstant('limit_withdraw')
 			];
 			$arrError = array();
 			$arrError["EXECUTE"] = $arrExecute;
