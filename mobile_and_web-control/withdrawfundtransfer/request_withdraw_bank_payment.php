@@ -8,15 +8,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
+			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else if($payload["member_no"] == 'etnmode1'){
-			$member_no = $config["MEMBER_NO_ETN1"];
-		}else if($payload["member_no"] == 'etnmode2'){
-			$member_no = $config["MEMBER_NO_ETN2"];
-		}else if($payload["member_no"] == 'etnmode3'){
-			$member_no = $config["MEMBER_NO_ETN3"];
+			$member_no = $configAS["MEMBER_NO_SALE_TRANSACTION"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -120,8 +114,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			if($arrResponse->RESULT){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,result_transaction,member_no,
-															ref_no_1,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'1',:member_no,:ref_no1,
+															:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
@@ -131,6 +126,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
+					':slip_no' => $ref_slipno,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"]
 				]);
@@ -140,9 +136,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,result_transaction,cancel_date,member_no,
-															ref_no_1,id_userlogin,ref_no_source)
+															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
 															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'-9',NOW(),:member_no
-															,:ref_no1,:id_userlogin,:ref_no_source)");
+															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
@@ -152,6 +148,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
+					':slip_no' => $ref_slipno,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"]
 				]);

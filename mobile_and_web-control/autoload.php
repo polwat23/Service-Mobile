@@ -48,6 +48,8 @@ $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
 $configError = json_decode($jsonConfigError,true);
+$jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
+$configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {

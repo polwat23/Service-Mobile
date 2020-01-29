@@ -7,9 +7,9 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
+			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
+			$member_no = $configAS["MEMBER_NO_SALE_TRANSACTION"];
 		}else{
 			$member_no = $payload["member_no"];
 		}

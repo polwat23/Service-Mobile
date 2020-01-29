@@ -6,10 +6,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['NEW_TOKEN'] = $new_token;
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
+		if($payload["member_no"] == 'dev@mode'){
+			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
+			$member_no = $configAS["MEMBER_NO_SALE_TRANSACTION"];
 		}else{
 			$member_no = $payload["member_no"];
 		}

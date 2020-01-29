@@ -7,9 +7,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_LOAN"];
+			$member_no = $configAS["MEMBER_NO_DEV_LOAN"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_DEV_LOAN"];
+			$member_no = $configAS["MEMBER_NO_DEV_LOAN"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLastStmAcc = $conoracle->prepare("SELECT * FROM (SELECT lnm.loancontract_no from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
 												lnm.loancontract_no = lns.loancontract_no
 												WHERE lnm.member_no = :member_no and lnm.contract_status = 1 
-												and entry_date IS NOT NULL ORDER BY entry_date DESC) WHERE rownum <= 1;");
+												and entry_date IS NOT NULL ORDER BY entry_date DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch();
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);

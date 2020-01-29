@@ -11,9 +11,9 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_SLIP"];
+			$member_no = $configAS["MEMBER_NO_DEV_SLIP"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_SLIP"];
+			$member_no = $configAS["MEMBER_NO_SALE_SLIP"];
 		}else{
 			$member_no = $payload["member_no"];
 		}

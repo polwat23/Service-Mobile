@@ -7,9 +7,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_UCOLLWHO"];
+			$member_no = $configAS["MEMBER_NO_DEV_UCOLLWHO"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_UCOLLWHO"];
+			$member_no = $configAS["MEMBER_NO_SALE_UCOLLWHO"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
