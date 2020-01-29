@@ -17,6 +17,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$member_no = $config["MEMBER_NO_ETN2"];
 		}else if($payload["member_no"] == 'etnmode3'){
 			$member_no = $config["MEMBER_NO_ETN3"];
+		}else if($payload["member_no"] == 'etnmode4'){
+			$member_no = $config["MEMBER_NO_ETN4"];
 		}else{
 			$member_no = $payload["member_no"];
 		}

@@ -16,6 +16,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$member_no = $config["MEMBER_NO_ETN2"];
 		}else if($payload["member_no"] == 'etnmode3'){
 			$member_no = $config["MEMBER_NO_ETN3"];
+		}else if($payload["member_no"] == 'etnmode4'){
+			$member_no = $config["MEMBER_NO_ETN4"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
