@@ -427,16 +427,18 @@ class functions {
 				while($rowMember = $fetchMemberAllow->fetch()){
 					$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 				}
-				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
-				$fetchDataOra->execute();
-				while($rowDataOra = $fetchDataOra->fetch()){
-					if(isset($rowDataOra["MEM_TELMOBILE"])){
-						if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
-							$arrayMT = array();
-							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-							$arrayMember[] = $rowDataOra["MEMBER_NO"];
-							$arrayMemberGRP[] = $arrayMT;
+				if(sizeof($arrayMemberTemp) > 0){
+					$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
+					$fetchDataOra->execute();
+					while($rowDataOra = $fetchDataOra->fetch()){
+						if(isset($rowDataOra["MEM_TELMOBILE"])){
+							if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
+								$arrayMT = array();
+								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMember[] = $rowDataOra["MEMBER_NO"];
+								$arrayMemberGRP[] = $arrayMT;
+							}
 						}
 					}
 				}
