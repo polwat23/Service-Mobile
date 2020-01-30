@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','channel_send','id_query'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','type_send','channel_send','id_query'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessage')){
 		if($dataComing["channel_send"] == "mobile_app"){
 			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 							$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
 							$arrGroupCheckSend["DESTINATION"] = $rowToken["member_no"];
 						}
-						$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
+						$arrMessage = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"];
 						if(isset($rowTarget[$rowQuery["target_field"]])){
 							if(isset($arrGroupCheckSend["DESTINATION"])){
@@ -103,7 +103,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 								$arrGroupMessage["MEMBER_NO"] = $rowToken["member_no"];
 								$arrGroupCheckSend["DESTINATION"] = $rowToken["member_no"];
 							}
-							$arrMessage = $lib->mergeTemplate($dataComing["topic"],$dataComing["message"],$arrTarget);
+							$arrMessage = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 							$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"];
 							if(isset($rowTarget[$rowQuery["target_field"]])){
 								if(isset($arrGroupCheckSend["DESTINATION"])){
@@ -116,7 +116,7 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 						}
 						if(array_search($target, array_column($arrGroupAllSuccess, 'DESTINATION')) === false && array_search($target, array_column($arrGroupAllFailed, 'DESTINATION')) === false){
 							$arrGroupCheckSend["DESTINATION"] = $target;
-							$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขอ้างอิงได้";
+							$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขปลายทางได้";
 							$arrGroupAllFailed[] = $arrGroupCheckSend;
 						}
 					}
@@ -125,6 +125,65 @@ if($lib->checkCompleteArgument(['unique_id','message','topic','type_send','chann
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}
+			}else{
+				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+		}else{
+			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
+			if($getQuery->rowCount() > 0){
+				$arrGroupAllSuccess = array();
+				$arrGroupAllFailed = array();
+				$rowQuery = $getQuery->fetch();
+				$arrColumn = explode(',',$rowQuery["column_selected"]);
+				if($rowQuery["is_bind_param"] == '0'){
+					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+					$queryTarget->execute();
+					while($rowTarget = $queryTarget->fetch()){
+						$arrTarget = array();
+						foreach($arrColumn as $column){
+							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
+						}
+						$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
+						//$rowTarget[$rowQuery["target_field"]];
+						$arrayTel = $func->getSMSPerson('all');
+						foreach($arrayTel as $dest){
+							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+							$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
+							$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"];
+							$arrGroupAllSuccess[] = $arrGroupSuccess;
+						}
+					}
+					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+					$arrayResult['FAILED'] = $arrGroupAllFailed;
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{
+					
+				}
+				
+				/*	if($dataComing["type_send"] == "person"){
+						$destination = array();
+						foreach($dataComing["destination"] as $target){
+							$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						}
+						$arrayResult['RESPONSE'] = $destination;
+						$arrayResult['RESULT'] = TRUE;
+						echo json_encode($arrayResult);
+					}else{
+						$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
+						$arrayTel = $func->getSMSPerson('all');
+						foreach($arrayTel as $dest){
+							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+							$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
+							$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"];
+							$arrGroupAllSuccess[] = $arrGroupSuccess;
+						}
+						
+					}*/
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;

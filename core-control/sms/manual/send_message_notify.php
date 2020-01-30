@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','typ
 				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 				if($func->insertHistory($arrPayloadNotify,'1')){
 					if($lib->sendNotify($arrPayloadNotify,'person')){
-					//if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){ //รอแก้ไขส่งทุกคน
+					//if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{
@@ -89,16 +89,30 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','typ
 		}else if($dataComing["channel_send"] == "sms"){
 			if($dataComing["type_send"] == "person"){
 				$destination = array();
+				$arrDestGRP = array();
 				foreach($dataComing["destination"] as $target){
-					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+					$destination_temp = array();
+					if(mb_strlen($target) <= 8){
+						$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+					}else{
+						$destination_temp["MEMBER_NO"] = null;
+						$destination_temp["TEL"] = $target;
+						$arrDestGRP[] = $destination_temp
+					}
 				}
-				$arrayResult['RESPONSE'] = $destination;
+				$arrayTel = $func->getSMSPerson('person',$destination);
+				if(isset($arrDestGRP)){
+					$arrayMerge = array_merge($arrayTel,$arrDestGRP);
+				}else{
+					$arrayMerge = $arrayTel;
+				}
+				$arrayResult['RESPONSE'] = $arrayMerge;
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
 				$arrayTel = $func->getSMSPerson('all');
-				$arrayResult['RESPONSE'] = $arrayTel;
-				$arrayResult['RESULT'] = TRUE;
+				$arrayLogSMS = $func->logSMSWasSent($dataComing["message_emoji_"],$arrayTel,$payload["username"]);
+				$arrayResult['RESULT'] = $arrayLogSMS;
 				echo json_encode($arrayResult);
 			}
 		}else{

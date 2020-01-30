@@ -177,19 +177,23 @@ class library {
 	}
 	public function mergeTemplate($template_subject,$template_body,$data=[]) {
 		$arrayText = array();
-		preg_match_all('/\\${(.*?)\\}/',$template_subject,$arrayColSubject);
-		preg_match_all('/\\${(.*?)\\}/',$template_body,$arrayColBody);
-		foreach($arrayColSubject[1] as $key => $column){
-			if(isset($data[strtoupper($column)])){
-				$template_subject = preg_replace('/\\'.$arrayColSubject[0][$key].'/',$data[strtoupper($column)],$template_subject);
+		if(isset($template_subject)){
+			preg_match_all('/\\${(.*?)\\}/',$template_subject,$arrayColSubject);
+			foreach($arrayColSubject[1] as $key => $column){
+				if(isset($data[strtoupper($column)])){
+					$template_subject = preg_replace('/\\'.$arrayColSubject[0][$key].'/',$data[strtoupper($column)],$template_subject);
+				}
 			}
 		}
+		preg_match_all('/\\${(.*?)\\}/',$template_body,$arrayColBody);
 		foreach($arrayColBody[1] as $key => $column){
 			if(isset($data[strtoupper($column)])){
 				$template_body = preg_replace('/\\'.$arrayColBody[0][$key].'/',$data[strtoupper($column)],$template_body);
 			}
 		}
-		$arrayText["SUBJECT"] = $template_subject;
+		if(isset($template_subject)){
+			$arrayText["SUBJECT"] = $template_subject;
+		}
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}

@@ -393,15 +393,6 @@ class functions {
 			$arrayMember = array();
 			if($type_target == 'person'){
 				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-													WHERE gul.receive_notify_news = '1' and gul.member_no = :member_no
-													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
-				$fetchFCMToken->execute([':member_no' => $member_no]);
-				while($rowFCMToken = $fetchFCMToken->fetch()){
-					$arrayToken[] = $rowFCMToken["fcm_token"];
-					$arrayMember[] = $rowFCMToken["member_no"];
-				}
-			}else if($type_target == 'many'){
-				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
 													WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$member_no)."')
 													and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
 				$fetchFCMToken->execute();
@@ -428,14 +419,27 @@ class functions {
 		}
 		
 		public function getSMSPerson($type_target,$member_no=null){
-			$arrayGrpAll = array();
-			$arrayGrp = array();
-			$arrayTel = array();
 			$arrayMember = array();
+			$arrayMemberGRP = array();
 			if($type_target == 'person'){
-				
-			}else if($type_target == 'many'){
-				
+				$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1' and smscsp_member IN('".implode("','",$member_no)."') ");
+				$fetchMemberAllow->execute();
+				while($rowMember = $fetchMemberAllow->fetch()){
+					$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
+				}
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
+				$fetchDataOra->execute();
+				while($rowDataOra = $fetchDataOra->fetch()){
+					if(isset($rowDataOra["MEM_TELMOBILE"])){
+						if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
+							$arrayMT = array();
+							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMember[] = $rowDataOra["MEMBER_NO"];
+							$arrayMemberGRP[] = $arrayMT;
+						}
+					}
+				}
 			}else{
 				$arrayMemberTemp = array();
 				$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1'");
@@ -446,16 +450,51 @@ class functions {
 				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch()){
-					if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
-						$arrayMember[] = $rowDataOra["MEMBER_NO"];
-						$arrayTel[] = $rowDataOra["MEM_TELMOBILE"];
+					if(isset($rowDataOra["MEM_TELMOBILE"])){
+						if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
+							$arrayMT = array();
+							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMember[] = $rowDataOra["MEMBER_NO"];
+							$arrayMemberGRP[] = $arrayMT;
+						}
 					}
 				}
 			}
-			$arrayGrp["TEL"] = $arrayTel;
-			$arrayGrp["MEMBER_NO"] = $arrayMember;
-			$arrayGrpAll[] = $arrayGrp;
-			return $arrayGrpAll;
+			return $arrayMemberGRP;
+		}
+		public function logSMSWasSent($message,$destination,$send_by) {
+			$this->con->beginTransaction();
+			$textcombine = array();
+			foreach($destination as $dest){
+				$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."')";
+				if(sizeof($textcombine) == 1000){
+					$insertToLogSMS = $this->con->prepare("INSERT INTO smswassent(sms_message,member_no,tel_mobile,send_by)
+														VALUES".implode(',',$textcombine));
+					if($insertToLogSMS->execute()){
+						continue;
+					}else{
+						$this->con->rollback();
+						break;
+					}
+					unset($textcombine);
+					$textcombine = array();
+				}
+			}
+			if(isset($textcombine)){
+				$insertToLogSMS = $this->con->prepare("INSERT INTO smswassent(sms_message,member_no,tel_mobile,send_by)
+														VALUES".implode(',',$textcombine));
+				if($insertToLogSMS->execute()){
+					$this->con->commit();
+					return true;
+				}else{
+					$this->con->rollback();
+					return false;
+				}
+			}else{
+				$this->con->commit();
+				return true;
+			}
 		}
 }
 ?>

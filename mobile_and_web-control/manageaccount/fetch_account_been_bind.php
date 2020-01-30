@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
-													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.limit_amt,
+													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
 													gba.bank_account_name,gba.bank_account_name_en
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 													LEFT JOIN gcpalettecolor gpl ON csb.id_palette = gpl.id_palette and gpl.is_use = '1'
@@ -15,7 +15,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchAccountBeenBind->execute([
 			':member_no' => $payload["member_no"]
 		]);
-		$limit_withdraw = $func->getConstant("limit_withdraw");
 		if($fetchAccountBeenBind->rowCount() > 0){
 			$arrBindAccount = array();
 			while($rowAccountBind = $fetchAccountBeenBind->fetch()){
@@ -38,16 +37,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ICON_BANK_WEBP"] = $explodePathBankLOGO[0].'.webp';
 				$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
 				$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
-				if($limit_withdraw >= $rowAccountBind["limit_amt"]){
-					$arrAccount["LIMIT_USER_WITHDRAW"] = (int)$rowAccountBind["limit_amt"];
-				}else{
-					$arrAccount["LIMIT_USER_WITHDRAW"] = (int)$limit_withdraw;
-				}
 				$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 				$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
 				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
 				$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
-				$arrAccount["LIMIT_COOP_WITHDRAW"] = (int)$limit_withdraw;
 				$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];
 				$arrBindAccount[] = $arrAccount;
 			}
