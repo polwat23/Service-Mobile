@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','type_send','channel_send'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessage')){
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -28,36 +28,90 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','typ
 				}
 			}
 			if($dataComing["type_send"] == "person"){
-				$destination = array();
-				foreach($dataComing["destination"] as $target){
-					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
-				}
 				$arrPayloadNotify = array();
 				$arrMessage = array();
-				$arrMember = array();
-				$arrToken = $func->getFCMToken('many',$destination);
-				$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
-				$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
-				$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
-				$arrMessage["BODY"] = $dataComing["message_emoji_"];
-				$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-				if($func->insertHistory($arrPayloadNotify,'1')){
-					if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
+				if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != ""){
+					$blukInsert = array();
+					$blukInsertNot = array();
+					foreach($dataComing["destination"] as $target){
+						$destination = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						$arrToken = $func->getFCMToken('person',array($destination));
+						if(isset($arrToken["TOKEN"])){
+							$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
+							$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+							$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+							if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != ""){
+								$message = $dataComing["message_importData"][$destination];
+							}else{
+								$message = $dataComing["message_emoji_"];
+							}
+							$arrMessage["BODY"] = $message;
+							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+								$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$message."','".($pathImg ?? null)."','".$destination."')";
+								if(sizeof($blukInsert) == 1000){
+									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+									$arrPayloadHistory["bulkInsert"] = $blukInsert;
+									$func->insertHistory($arrPayloadHistory);
+									unset($blukInsert);
+									$blukInsert = array();
+								}
+							}else{
+								foreach($arrToken["TOKEN"] as $token){
+									$blukInsertNot[] = "('".$message."','".$destination."','".$token."','".$dataComing["channel_send"]."','".$payload["username"]."')";
+									if(sizeof($blukInsertNot) == 1000){
+										$func->logSMSWasNotSent($blukInsertNot);
+										unset($blukInsertNot);
+										$blukInsertNot = array();
+									}
+								}
+							}
+						}
+					}
+					if(sizeof($blukInsertNot) > 0){
+						$func->logSMSWasNotSent($blukInsertNot);
+						unset($blukInsertNot);
+						$blukInsertNot = array();
+					}
+					if(sizeof($blukInsert) > 0){
+						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+						$arrPayloadHistory["bulkInsert"] = $blukInsert;
+						$func->insertHistory($arrPayloadHistory);
+						unset($blukInsert);
+						$blukInsert = array();
+					}
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{
+					$destination = array();
+					foreach($dataComing["destination"] as $target){
+						$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+					}
+					$arrToken = $func->getFCMToken('person',$destination);
+					$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
+					$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+					$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+					$arrMessage["BODY"] = $dataComing["message_emoji_"];
+					$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+					if($func->insertHistory($arrPayloadNotify,'1')){
+						if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+							$arrayResult['RESULT'] = TRUE;
+							echo json_encode($arrayResult);
+						}else{
+							$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
+							$arrayResult['RESULT'] = FALSE;
+							echo json_encode($arrayResult);
+							exit();
+						}
 					}else{
-						$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
+						$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
 					}
-				}else{
-					$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
-					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
 				}
 			}else{
 				$arrToken = $func->getFCMToken('all');
@@ -94,10 +148,10 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','typ
 					$destination_temp = array();
 					if(mb_strlen($target) <= 8){
 						$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
-					}else{
+					}else if(mb_strlen($target) == 10){
 						$destination_temp["MEMBER_NO"] = null;
 						$destination_temp["TEL"] = $target;
-						$arrDestGRP[] = $destination_temp
+						$arrDestGRP[] = $destination_temp;
 					}
 				}
 				$arrayTel = $func->getSMSPerson('person',$destination);
@@ -106,8 +160,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','typ
 				}else{
 					$arrayMerge = $arrayTel;
 				}
-				$arrayResult['RESPONSE'] = $arrayMerge;
-				$arrayResult['RESULT'] = TRUE;
+				if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != ""){
+					$message = $dataComing["message_importData"];
+					$arrayLogSMS = $func->logSMSWasSent($message,$arrayMerge,$payload["username"],true);
+				}else{
+					$arrayLogSMS = $func->logSMSWasSent($dataComing["message_emoji_"],$arrayMerge,$payload["username"]);
+				}
+				$arrayResult['RESULT'] = $arrayLogSMS;
 				echo json_encode($arrayResult);
 			}else{
 				$arrayTel = $func->getSMSPerson('all');

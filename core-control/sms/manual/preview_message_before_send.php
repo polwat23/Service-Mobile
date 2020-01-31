@@ -36,19 +36,18 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				}
 				$arrMessage = array();
 				$arrMember = array();
-				$arrToken = $func->getFCMToken('many',$destination);
+				$arrToken = $func->getFCMToken('person',$destination);
 				if(sizeof($arrToken["MEMBER_NO"]) > 0){
 					foreach($arrToken["MEMBER_NO"] as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
 						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? 
-						$dataComing["message_importData"][$member] : $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
+						$dataComing["message_importData"][$member].'^'.$dataComing["topic_emoji_"] : $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}
 					$arrDiff = array_diff($destination,array_column($arrGroupAllSuccess, 'DESTINATION'));
 					foreach($arrDiff as $member){
 						$arrGroupSuccess["DESTINATION"] = $member;
-						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? 
-						$dataComing["message_importData"][$member] : $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
+						$arrGroupSuccess["MESSAGE"] = "ไม่สามารถระบุเลขปลายทางได้";
 						$arrGroupAllFailed[] = $arrGroupSuccess;
 					}
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -59,7 +58,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					foreach($destination as $member){
 						$arrGroupFailed["DESTINATION"] = $member;
 						$arrGroupFailed["MESSAGE"] = isset($dataComing["message_importData"][$member]) ? 
-						$dataComing["message_importData"][$member] : $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
+						$dataComing["message_importData"][$member].'^'.$dataComing["topic_emoji_"] : $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
 						$arrGroupAllFailed[] = $arrGroupFailed;
 					}
 					$arrayResult['SUCCESS'] = [];
@@ -104,7 +103,8 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayMerge as $dest){
 					$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 					$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
-					$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
+					$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
+					$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
 					$arrGroupAllSuccess[] = $arrGroupSuccess;
 				}
 				foreach($dataComing["destination"] as $target){

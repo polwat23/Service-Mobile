@@ -3,10 +3,10 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','newusername'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','manageuser')){
-		$updatemenu = $conmysql->prepare("UPDATE coreuser 
+		$updaeusername = $conmysql->prepare("UPDATE coreuser 
 										  SET username = :newusername
 								          WHERE  username = :username;");
-		if($updatemenu->execute([
+		if($updaeusername->execute([
 			':newusername' => $dataComing["newusername"],
 			':username' => $dataComing["username"]
 		])){

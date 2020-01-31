@@ -1,18 +1,19 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','username','id_section_system'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','username','newpassword'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','manageuser')){
-		$updateidsectionsystem = $conmysql->prepare("UPDATE coreuser 
-										  SET id_section_system = :id_section_system
+		$updatepassword = $conmysql->prepare("UPDATE coreuser 
+										  SET password = :newpassword
 								          WHERE  username = :username;");
-		if($updateidsectionsystem->execute([
-			':id_section_system' => $dataComing["id_section_system"],
+		$new_password = password_hash($dataComing["newpassword"], PASSWORD_DEFAULT);								  
+		if($updatepassword->execute([
+			':newpassword' => $new_password,
 			':username' => $dataComing["username"]
 		])){
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขชื่อเมนูได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

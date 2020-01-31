@@ -1,18 +1,15 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','username','password','id_section_system','create_date','update_date','user_status'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','username','password','id_section_system'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','manageuser')){
-		$updatemenu = $conmysql->prepare("INSERT INTO coreuser (username, password, id_section_system, create_date, update_date, user_status) 
-										 VALUES(:username,:password,:id_section_system,:create_date,:update_date,:user_status)");
+		$updatemenu = $conmysql->prepare("INSERT INTO coreuser (username, password, id_section_system) 
+										 VALUES(:username,:password,:id_section_system)");
+		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		if($updatemenu->execute([
 			':username' => $dataComing["username"],
-			':password' => $dataComing["password"],
-			':id_section_system' => $dataComing["id_section_system"],
-			':create_date' => $dataComing["create_date"],
-			':update_date' => $dataComing["update_date"],
-			':user_status' => $dataComing["user_status"]
-			
+			':password' => $password,
+			':id_section_system' => $dataComing["id_section_system"]
 		])){
 			$arrayResult["RESULT"] = TRUE;
 		}else{

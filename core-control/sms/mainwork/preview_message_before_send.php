@@ -1,6 +1,5 @@
 <?php
 require_once('../../autoload.php');
-
 if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','type_send','channel_send','id_query'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessage')){
 		if($dataComing["channel_send"] == "mobile_app"){
@@ -148,8 +147,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','topic_emoji_','typ
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 						}
 						$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
-						//$rowTarget[$rowQuery["target_field"]];
-						$arrayTel = $func->getSMSPerson('all');
+						$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["target_field"]]);
 						foreach($arrayTel as $dest){
 							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 							$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
