@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrayGroup["coop_id"] = $config["COOP_ID"];
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-			$arrayGroup["entry_id"] = "KBANK";
+			$arrayGroup["entry_id"] = "admin";
 			$arrayGroup["fee_amt"] = $dataComing["penalty_amt"];
 			$arrayGroup["feeinclude_status"] = $penalty_include;
 			$arrayGroup["item_amt"] = $amt_transfer;
@@ -69,8 +69,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;
-			$arrayGroup["slipitemtype_code"] = "WTB";
-			$arrayGroup["stmtitemtype_code"] = "DTB";
+			$arrayGroup["slipitemtype_code"] = "WTX";
+			$arrayGroup["stmtitemtype_code"] = "DTX";
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			$ref_slipno = null;
@@ -130,6 +130,23 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"]
 				]);
+				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+				$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
+				$dataMerge = array();
+				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+				$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+				$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+				$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
+				$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+				$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+				$arrMessage["BODY"] = $message_endpoint["BODY"];
+				$arrMessage["PATH_IMAGE"] = null;
+				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+				if($func->insertHistory($arrPayloadNotify,'1')){
+					$lib->sendNotify($arrPayloadNotify,"person");
+				}
 				$arrayResult['TRANSACTION_NO'] = $dataComing["tran_id"];
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);

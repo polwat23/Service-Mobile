@@ -51,12 +51,14 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			}else{
 				$member_no = $payload["member_no"];
 			}
-			$fetchMemberName = $conoracle->prepare("SELECT MEMB_NAME,MEMB_SURNAME FROM MBMEMBMASTER WHERE member_no = :member_no");
+			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+													WHERE MB.member_no = :member_no");
 			$fetchMemberName->execute([
 				':member_no' => $member_no
 			]);
 			$rowMember = $fetchMemberName->fetch();
-			$account_name_th = $rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();
 			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,citizen_id,mobile_no,bank_account_name,bank_account_name_en,bank_code,id_token) 

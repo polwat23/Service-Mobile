@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
 			$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-												mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,
 												mb.ADDRESS_NO AS ADDR_NO, 
 												mb.ADDRESS_MOO AS ADDR_MOO,
 												mb.ADDRESS_SOI AS ADDR_SOI,
@@ -29,10 +29,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												MBP.PROVINCE_DESC AS PROVINCE_DESC,
 												MBD.POSTCODE AS ADDR_POSTCODE
 												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												LEFT JOIN MBUCFPOSITION mpos ON mb.position_code = mpos.position_code
 												LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 												LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 												LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-												LEFT JOIN MBUCFDISTRICT MBD ON mb.AMPHUR_CODE = MBD.DISTRICT_CODE
+												LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 												LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 												WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);

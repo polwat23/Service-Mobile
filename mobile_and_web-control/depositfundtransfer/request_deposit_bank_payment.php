@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["coop_id"] = $config["COOP_ID"];
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-			$arrayGroup["entry_id"] = "KBANK";
+			$arrayGroup["entry_id"] = "admin";
 			$arrayGroup["fee_amt"] = "0";
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
@@ -58,8 +58,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;
-			$arrayGroup["slipitemtype_code"] = "DTB";
-			$arrayGroup["stmtitemtype_code"] = "WTB";
+			$arrayGroup["slipitemtype_code"] = "DTX";
+			$arrayGroup["stmtitemtype_code"] = "WTX";
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			$ref_slipno = null;

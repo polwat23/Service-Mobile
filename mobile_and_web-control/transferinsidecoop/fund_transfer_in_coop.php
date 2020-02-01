@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':id_userlogin' => $payload["id_userlogin"],
 				':ref_no_source' => $slip_no
 			]);
-			$arrToken = $func->getFCMToken('person',$payload["member_no"]);
+			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 			$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
 			$dataMerge = array();
 			$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));

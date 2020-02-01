@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','image'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managenews')){
 	
-				if(isset($dataComing["image"]) && $dataComing["image"] != null){
+			if(isset($dataComing["image"]) && $dataComing["image"] != null){
 			$destination = __DIR__.'/../../../resource/gallery';
 			$file_name = $lib->randomText('all',6);
 			if(!file_exists($destination)){
