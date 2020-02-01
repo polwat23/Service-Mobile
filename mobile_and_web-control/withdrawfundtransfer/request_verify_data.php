@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
 													and transaction_type_code = 'WTX' and from_account = :from_account and destination_type = '1'
@@ -13,11 +16,18 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$rowBalLimit = $checkLimitBalance->fetch();
 		$limit_amt = 0;
 		$limit_withdraw = $func->getConstant("limit_withdraw");
-		$getLimitUser = $conmysql->prepare("SELECT limit_amt FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no and bindaccount_status = '1'");
-		$getLimitUser->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
-		$rowLimitUser = $getLimitUser->fetch();
-		if($limit_withdraw >= $rowLimitUser["limit_amt"]){
-			$limit_amt = (int)$rowLimitUser["limit_amt"];
+		$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
+											and member_no = :member_no and bindaccount_status = '1'");
+		$getDataUser->execute([
+			':deptaccount_no' => $dataComing["deptaccount_no"],
+			':member_no' => $payload["member_no"]
+		]);
+		$rowDataUser = $getDataUser->fetch();
+		$getLimitRate = $conmysql->prepare("SELECT limit_transaction_amt FROM gcmemberaccount WHERE member_no = :member_no");
+		$getLimitRate->execute([':member_no' => $payload["member_no"]]);
+		$rowLimit = $getLimitRate->fetch();
+		if($limit_withdraw >= $rowLimit["limit_transaction_amt"]){
+			$limit_amt = (int)$rowLimit["limit_transaction_amt"];
 		}else{
 			$limit_amt = (int)$limit_withdraw;
 		}
@@ -53,16 +63,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-		$fetchCitizenId = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-		$fetchCitizenId->execute([':member_no' => $payload["member_no"]]);
-		$rowCitizen = $fetchCitizenId->fetch();
-		$arrVerifyToken['citizen_id'] = $rowCitizen["CARD_PERSON"] ?? "1500900999999";
+		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
 		$arrVerifyToken['deptaccount_no'] = $dataComing["deptaccount_no"];
 		$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/verifydata/kbank/request_verify_data',$arrSendData);
+		$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/verifydata_kbank',$arrSendData);
 		if(!$responseAPI){
 			$arrayResult['RESPONSE_CODE'] = "WS0028";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -74,14 +81,12 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		if($arrResponse->RESULT){
 			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
+			$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
 			$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
 			$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
 			$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
 			$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
 			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			echo json_encode($arrayResult);
 		}else{
 			$text = '#Verify Data withdraw Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);

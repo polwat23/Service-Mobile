@@ -2,7 +2,11 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop')){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
+	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayAcc = array();
@@ -37,18 +41,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch()){
 				$arrAccFav = array();
-				$arrAccFav["DEPTACCOUNT_NO"] = $rowAccFav["destination"];
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
-				$arrAccFav["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
+				$arrAccFav["DESTINATION"] = $rowAccFav["destination"];
+				$arrAccFav["DESTINATION_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
+				$arrAccFav["DESTINATION_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
+			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
+				$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

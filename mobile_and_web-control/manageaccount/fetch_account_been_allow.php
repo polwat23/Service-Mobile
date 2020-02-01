@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
 		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use FROM gcuserallowacctransaction WHERE member_no = :member_no");
@@ -14,26 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														and dpm.membcat_code = dpt.membcat_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
-				$rowDetailAcc = $getDetailAcc->fetch();
-				$getBannerColorCoop = $conmysql->prepare("SELECT gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.type_palette,gpc.color_text
-															FROM gcconstantaccountdept gca LEFT JOIN gcpalettecolor gpc ON gca.id_palette = gpc.id_palette and gpc.is_use = '1'
-															WHERE gca.dept_type_code = :depttype_code and gca.member_cate_code = :membcat_code and gca.is_use = '1'");
-				$getBannerColorCoop->execute([
-					':depttype_code' => $rowDetailAcc["DEPTTYPE_CODE"],
-					':membcat_code' => $rowDetailAcc["MEMBCAT_CODE"]
-				]);
-				$rowBanner = $getBannerColorCoop->fetch();
-				if(isset($rowBanner["type_palette"])){
-					if($rowBanner["type_palette"] == '2'){
-						$arrAccBeenAllow["ACCOUNT_COOP_COLOR"] = $rowBanner["color_deg"]."|".$rowBanner["color_main"].",".$rowBanner["color_secon"];
-					}else{
-						$arrAccBeenAllow["ACCOUNT_COOP_COLOR"] = "90|".$rowBanner["color_main"].",".$rowBanner["color_main"];
-					}
-					$arrAccBeenAllow["ACCOUNT_COOP_TEXT_COLOR"] = $rowBanner["color_text"];
-				}else{
-					$arrAccBeenAllow["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
-					$arrAccBeenAllow["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
-				}				
+				$rowDetailAcc = $getDetailAcc->fetch();	
 				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
 				$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
@@ -42,17 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
 				$arrGroupAccAllow[] = $arrAccBeenAllow;
 			}
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token)){
-				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				http_response_code(204);
-				exit();
-			}
+			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			http_response_code(204);
 			exit();

@@ -3,10 +3,15 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
-		$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
+	if($payload["member_no"] == 'dev@mode'){
+		$member_no = $configAS["MEMBER_NO_DEV_DEPOSIT"];
+		$member_no_loan = $configAS["MEMBER_NO_DEV_LOAN"];
 	}else if($payload["member_no"] == 'salemode'){
-		$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
+		$member_no = $configAS["MEMBER_NO_SALE_DEPOSIT"];
+		$member_no_loan = $configAS["MEMBER_NO_SALE_LOAN"];
 	}else{
 		$member_no = $payload["member_no"];
 	}
@@ -49,14 +54,11 @@ if(!$anonymous){
 		}else if($dataComing["id_menu"] == 2){
 			$arrMenuLoan = array();
 			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-			$fetchMenuLoan->execute([':member_no' => $member_no]);
+			$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
 			$rowMenuLoan = $fetchMenuLoan->fetch();
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
-		}
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
@@ -106,9 +108,6 @@ if(!$anonymous){
 					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
 					$arrayAllMenu[] = $arrMenu;
 				}
-			}
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
@@ -163,7 +162,7 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}else if($rowMenu["id_menu"] == 2){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-							$fetchMenuLoan->execute([':member_no' => $member_no]);
+							$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
 							$rowMenuLoan = $fetchMenuLoan->fetch();
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
@@ -190,8 +189,8 @@ if(!$anonymous){
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
-				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
+				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
@@ -218,9 +217,6 @@ if(!$anonymous){
 				$arrFavMenuGroup[] = $arrFavMenu;
 			}
 			if(sizeof($arrayAllMenu) > 0 || sizeof($arrayMenuSetting) > 0){
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
@@ -249,11 +245,7 @@ if(!$anonymous){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
 			echo json_encode($arrayResult);

@@ -3,6 +3,9 @@ set_time_limit(150);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
@@ -27,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/kbank/unbind_account',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_unbind_espa_id',$arrSendData);
 				if(!$responseAPI){
 					$conmysql->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS0029";
@@ -39,9 +42,6 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$conmysql->commit();
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

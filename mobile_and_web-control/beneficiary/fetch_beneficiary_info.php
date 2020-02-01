@@ -2,11 +2,14 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_BENEFICIARY"];
+			$member_no = $configAS["MEMBER_NO_DEV_BENEFICIARY"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_BENEFICIARY"];
+			$member_no = $configAS["MEMBER_NO_SALE_BENEFICIARY"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -22,17 +25,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_RELATION"];
 			$arrGroupBNF[] = $arrBenefit;
 		}
-		if(sizeof($arrGroupBNF) > 0 || isset($new_token)){
-			$arrayResult['BENEFICIARY'] = $arrGroupBNF;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

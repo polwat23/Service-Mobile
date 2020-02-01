@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$DeleteMemoDept = $conmysql->prepare("DELETE FROM gcmemodept WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
@@ -10,9 +13,6 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			':seq_no' => $dataComing["seq_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [

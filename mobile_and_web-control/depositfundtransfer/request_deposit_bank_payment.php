@@ -2,12 +2,21 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
+		if($payload["member_no"] == 'dev@mode'){
+			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];
+		}else if($payload["member_no"] == 'salemode'){
+			$member_no = $configAS["MEMBER_NO_SALE_TRANSACTION"];
+		}else{
+			$member_no = $payload["member_no"];
+		}
 		try {
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$time = time();
 			$arrSendData = array();
-			$arrSendData["remark"] = $dataComing["remark"] ?? null;
 			$arrVerifyToken['exp'] = time() + 60;
 			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
@@ -26,8 +35,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup = array();
 			$arrayGroup["account_id"] = "11121700";
 			$arrayGroup["action_status"] = "1";
-			$arrayGroup["atm_no"] = $coop_account_no;
-			$arrayGroup["atm_seqno"] = $time;
+			$arrayGroup["atm_no"] = "mobile";
+			$arrayGroup["atm_seqno"] = null;
 			$arrayGroup["aviable_amt"] = null;
 			$arrayGroup["bank_accid"] = $rowDataDeposit["deptaccount_no_bank"];
 			$arrayGroup["bank_cd"] = $rowDataDeposit["bank_code"];
@@ -40,12 +49,12 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["fee_amt"] = "0";
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
-			$arrayGroup["member_no"] = $payload["member_no"];
+			$arrayGroup["member_no"] = $member_no;
 			$arrayGroup["moneytype_code"] = "CBT";
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
 			$arrayGroup["operate_date"] = date('c');
-			$arrayGroup["oprate_cd"] = "003";
+			$arrayGroup["oprate_cd"] = "002";
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;
@@ -53,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["stmtitemtype_code"] = "WTX";
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
-	
+			$ref_slipno = null;
 			$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 			try {
 				$argumentWS = [
@@ -71,6 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					echo json_encode($arrayResult);
 					exit();
 				}
+				$ref_slipno = $responseSoap->ref_slipno;
 			}catch(SoapFault $e){
 				$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($e).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
@@ -81,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				exit();
 			}
 			// -----------------------------------------------
-			$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/deposit/kbank/request_deposit_payment',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/depositfundtransfer_kbank',$arrSendData);
 			if(!$responseAPI){
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -90,13 +100,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				exit();
 			}
 			$arrResponse = json_decode($responseAPI);
+			$ref_no = date('YmdHis').substr($coop_account_no,7);
 			if($arrResponse->RESULT){
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
-				$ref_no = date('YmdHis').substr($coop_account_no,7);
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,amount,result_transaction,member_no,
-															ref_no_1,etn_refno,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'DTX',:from_account,'1',:destination,:amount,1,:member_no,:ref_no1,:etn_ref,:id_userlogin,:ref_no_source)");
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
+															,amount,result_transaction,member_no,
+															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'DTX',:from_account,'1',:destination,'9',:amount,'1',:member_no,
+															:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
@@ -104,6 +116,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
+					':slip_no' => $ref_slipno,
 					':etn_ref' => $etn_ref,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $transaction_no
@@ -113,12 +126,23 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 				$arrayResult['RESULT'] = TRUE;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				echo json_encode($arrayResult);
 			}else{
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
+															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
+				$insertTransactionLog->execute([
+					':ref_no' => $ref_no,
+					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
+					':destination' => $coop_account_no,
+					':amount' => $dataComing["amt_transfer"],
+					':member_no' => $payload["member_no"],
+					':ref_no1' => $coop_account_no,
+					':slip_no' => $ref_slipno,
+					':id_userlogin' => $payload["id_userlogin"]
+				]);
 				$arrayGroup["post_status"] = "-1";
+				$arrayGroup["atm_no"] = $ref_slipno;
 				$argumentWS = [
 						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
 						"astr_dept_inf_serv" => $arrayGroup
@@ -130,7 +154,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0038";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;//$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();

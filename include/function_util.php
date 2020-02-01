@@ -6,22 +6,29 @@ use Connection\connection;
 
 class functions {
 		private $con;
+		private $conora;
 		
 		function __construct() {
 			$connection = new connection();
 			$this->con = $connection->connecttomysql();
+			$this->conora = $connection->connecttooracle();
 		}
 		
 		public function checkLogin($id_token) {
-			$checkLogin = $this->con->prepare("SELECT id_userlogin FROM gcuserlogin 
-										WHERE id_token = :id_token and is_login = '1'");
+			$checkLogin = $this->con->prepare("SELECT id_userlogin,is_login FROM gcuserlogin 
+												WHERE id_token = :id_token");
 			$checkLogin->execute([
 				':id_token' => $id_token
 			]);
-			if($checkLogin->rowCount() > 0){
-				return true;
+			$rowLogin = $checkLogin->fetch();
+			$arrayLogin = array();
+			if($rowLogin["is_login"] == '1'){
+				$arrayLogin["RETURN"] = TRUE;
+				return $arrayLogin;
 			}else{
-				return false;
+				$arrayLogin["IS_LOGIN"] = $rowLogin["is_login"] ?? '-99';
+				$arrayLogin["RETURN"] = FALSE;
+				return $arrayLogin;
 			}
 		}
 		public function logout($id_token,$type_login) {
@@ -119,6 +126,8 @@ class functions {
 					case '-7' : $type_login = '-7';
 						break;
 					case '-99' : $type_login = '-6';
+						break;
+					case '-6' : $type_login = '-5';
 						break;
 				}
 				$revokeAllToken = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
@@ -255,9 +264,9 @@ class functions {
 			}
 			return $returnResult;
 		}
-		public function getTemplate($template_name){
+		public function getTemplate($template_name,$seq_no){
 			$getTemplatedata = $this->con->prepare("SELECT template_subject,template_body 
-										FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
+													FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
 			$getTemplatedata->execute([':template_name' => $template_name]);
 			$rowTemplate = $getTemplatedata->fetch();
 			$arrayResult = array();
@@ -265,7 +274,20 @@ class functions {
 			$arrayResult["BODY"] = $rowTemplate["template_body"];
 			return $arrayResult;
 		}
-		public function insertHistory($payload,$type_history) {
+		public function getTemplatSystem($component_system,$seq_no){
+			$getTemplatedata = $this->con->prepare("SELECT subject,body 
+													FROM smssystemtemplate WHERE component_system = :component_system and is_use = '1' and seq_no = :seq_no");
+			$getTemplatedata->execute([
+				':component_system' => $component_system,
+				':seq_no' => $seq_no
+			]);
+			$rowTemplate = $getTemplatedata->fetch();
+			$arrayResult = array();
+			$arrayResult["SUBJECT"] = $rowTemplate["subject"];
+			$arrayResult["BODY"] = $rowTemplate["body"];
+			return $arrayResult;
+		}
+		public function insertHistory($payload,$type_history=1) {
 			$this->con->beginTransaction();
 			if($payload["TYPE_SEND_HISTORY"] == "onemessage"){
 				$bulkInsert = array();
@@ -299,15 +321,9 @@ class functions {
 					return true;
 				}
 			}else if($payload["TYPE_SEND_HISTORY"] == "manymessage"){
-				$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no)
-													VALUES(:his_type,:hit_title,:his_detail,:his_path_image,:member_no)");
-				if($insertHis->execute([
-					':his_type' => $type_history,
-					':hit_title' => $payload["PAYLOAD"]["SUBJECT"],
-					':his_detail' => $payload["PAYLOAD"]["BODY"],
-					':his_path_image' => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null,
-					':member_no' => $payload["MEMBER_NO"]
-				])){
+				$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
+												VALUES".implode(',',$payload["bulkInsert"]));
+				if($insertHis->execute()){
 					$this->con->commit();
 					return true;
 				}else{
@@ -362,6 +378,168 @@ class functions {
 				}
 			}else{
 				return false;
+			}
+		}
+		
+		public function getFCMToken($type_target,$member_no=null){
+			$arrayGrpToken = array();
+			$arrayToken = array();
+			$arrayMember = array();
+			if($type_target == 'person'){
+				if(isset($member_no) && $member_no != ""){
+					$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+														WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$member_no)."')
+														and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'");
+					$fetchFCMToken->execute();
+					while($rowFCMToken = $fetchFCMToken->fetch()){
+						$arrayToken[] = $rowFCMToken["fcm_token"];
+						$arrayMember[] = $rowFCMToken["member_no"];
+					}
+				}
+			}else{
+				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
+													WHERE gul.receive_notify_news = '1'
+													and gtk.fcm_token IS NOT NULL and gul.channel = 'mobile_app'
+													GROUP BY gtk.fcm_token,gul.member_no");
+				$fetchFCMToken->execute();
+				while($rowFCMToken = $fetchFCMToken->fetch()){
+					$arrayToken[] = $rowFCMToken["fcm_token"];
+					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
+						$arrayMember[] = $rowFCMToken["member_no"];
+					}
+				}
+			}
+			$arrayGrpToken["TOKEN"] = $arrayToken;
+			$arrayGrpToken["MEMBER_NO"] = $arrayMember;
+			return $arrayGrpToken;
+		}
+		
+		public function getSMSPerson($type_target,$member_no=null){
+			$arrayMember = array();
+			$arrayMemberGRP = array();
+			if($type_target == 'person'){
+				$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1' and smscsp_member IN('".implode("','",$member_no)."') ");
+				$fetchMemberAllow->execute();
+				while($rowMember = $fetchMemberAllow->fetch()){
+					$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
+				}
+				if(sizeof($arrayMemberTemp) > 0){
+					$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
+					$fetchDataOra->execute();
+					while($rowDataOra = $fetchDataOra->fetch()){
+						if(isset($rowDataOra["MEM_TELMOBILE"])){
+							if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
+								$arrayMT = array();
+								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMember[] = $rowDataOra["MEMBER_NO"];
+								$arrayMemberGRP[] = $arrayMT;
+							}
+						}
+					}
+				}
+			}else{
+				$arrayMemberTemp = array();
+				$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1'");
+				$fetchMemberAllow->execute();
+				while($rowMember = $fetchMemberAllow->fetch()){
+					$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
+				}
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).")");
+				$fetchDataOra->execute();
+				while($rowDataOra = $fetchDataOra->fetch()){
+					if(isset($rowDataOra["MEM_TELMOBILE"])){
+						if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
+							$arrayMT = array();
+							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMember[] = $rowDataOra["MEMBER_NO"];
+							$arrayMemberGRP[] = $arrayMT;
+						}
+					}
+				}
+			}
+			return $arrayMemberGRP;
+		}
+		public function logSMSWasSent($message,$destination,$send_by,$multi_message=false) {
+			$this->con->beginTransaction();
+			$textcombine = array();
+			if($multi_message){
+				foreach($destination as $dest){
+					$textcombine[] = "('".$message[$dest["MEMBER_NO"]]."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."')";
+					if(sizeof($textcombine) == 1000){
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smswassent(sms_message,member_no,tel_mobile,send_by)
+															VALUES".implode(',',$textcombine));
+						if($insertToLogSMS->execute()){
+							continue;
+						}else{
+							$this->con->rollback();
+							break;
+						}
+						unset($textcombine);
+						$textcombine = array();
+					}
+				}
+				if(sizeof($textcombine) > 0){
+					$insertToLogSMS = $this->con->prepare("INSERT INTO smswassent(sms_message,member_no,tel_mobile,send_by)
+															VALUES".implode(',',$textcombine));
+					if($insertToLogSMS->execute()){
+						$this->con->commit();
+						return true;
+					}else{
+						$this->con->rollback();
+						return false;
+					}
+				}else{
+					$this->con->commit();
+					return true;
+				}
+			}else{
+				foreach($destination as $dest){
+					$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."')";
+					if(sizeof($textcombine) == 1000){
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smswassent(sms_message,member_no,tel_mobile,send_by)
+															VALUES".implode(',',$textcombine));
+						if($insertToLogSMS->execute()){
+							continue;
+						}else{
+							$this->con->rollback();
+							break;
+						}
+						unset($textcombine);
+						$textcombine = array();
+					}
+				}
+				if(sizeof($textcombine) > 0){
+					$insertToLogSMS = $this->con->prepare("INSERT INTO smswassent(sms_message,member_no,tel_mobile,send_by)
+															VALUES".implode(',',$textcombine));
+					if($insertToLogSMS->execute()){
+						$this->con->commit();
+						return true;
+					}else{
+						$this->con->rollback();
+						return false;
+					}
+				}else{
+					$this->con->commit();
+					return true;
+				}
+			}
+		}
+		public function logSMSWasNotSent($bulkInsert,$multi_message=false) {
+			$this->con->beginTransaction();
+			if($multi_message){
+				
+			}else{
+				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by)
+														VALUES".implode(',',$bulkInsert));
+				if($insertToLogSMS->execute()){
+					$this->con->commit();
+					return true;
+				}else{
+					$this->con->rollback();
+					return false;
+				}
 			}
 		}
 }

@@ -2,14 +2,15 @@
 	"DBMOBILE_HOST" : "mobilecloud.coopsiam.com:3306",
 	"DBMOBILE_USERNAME" : "demo",
 	"DBMOBILE_PASSWORD" : "demo501888",
-	"DBMOBILE_DATABASENAME" : "demogcoop_connect",
+	"DBMOBILE_DATABASENAME" : "demogcoop_connect_test",
 	"DBORACLE_HOST" : "183.88.230.183",
 	"DBORACLE_SERVICE" : "gcoop",
 	"DBORACLE_USERNAME" : "iscorfscmas",
 	"DBORACLE_PASSWORD" : "iscorfscmas",
 	"DBORACLE_DATABASENAME" : "iscorfscmas",
-	"DBLOG_HOST" : "localhost:27017",
-	"DBLOG_USERNAME" : "developer",
-	"DBLOG_PASSWORD" : "@Gensoft2018",
-	"DBLOG_DATABASENAME" : "demogcoop_connect"
+	"DBORACLE_HOST_BACKUP" : "web.coopsiam.com",
+	"DBORACLE_SERVICE_BACKUP" : "gcoop",
+	"DBORACLE_USERNAME_BACKUP" : "iscorfsc",
+	"DBORACLE_PASSWORD_BACKUP" : "iscorfsc",
+	"DBORACLE_DATABASENAME_BACKUP" : "iscorfsc"
 }

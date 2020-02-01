@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_control'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic',$conmysql) && is_numeric($dataComing["id_template"])){
+	if($func->check_permission_core($payload,'sms','managetopic') && is_numeric($dataComing["id_template"])){
 		$conmysql->beginTransaction();
 		$page_name = $lib->randomText('all',6);
 		$insertSmsMenu = $conmysql->prepare("INSERT INTO coresubmenu(menu_name,page_name,menu_order,create_by,id_menuparent,id_coremenu)
@@ -50,44 +50,32 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					echo json_encode($arrayResult);
 				}else{
 					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "5005";
-					$arrayResult['RESPONSE_AWARE'] = "insert";
-					$arrayResult['RESPONSE'] = "Some user Cannot control topic";
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "5005";
-				$arrayResult['RESPONSE_AWARE'] = "insert";
-				$arrayResult['RESPONSE'] = "Cannot connect template to topic";
+				$arrayResult['RESPONSE'] = "ไม่สามารถเชื่อมเทมเพลตกับหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "insert";
-			$arrayResult['RESPONSE'] = "Cannot insert SMS Menu";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

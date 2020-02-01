@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
 		$arrayResult = array();
 		$member_no = $payload["member_no"];
@@ -28,8 +31,8 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 					':channel' => $dataComing["channel"],
 					':member_no' => $member_no
 				])){
-					$arrayResult['PATH_AVATAR'] = $path_avatar;
-					$arrayResult['PATH_AVATAR_WEBP'] = '/resource/avatar/'.$member_no.'/'.$createAvatar["webP_path"];
+					$arrayResult['PATH_AVATAR'] = $config["URL_SERVICE"].$path_avatar;
+					$arrayResult['PATH_AVATAR_WEBP'] = $config["URL_SERVICE"].'/resource/avatar/'.$member_no.'/'.$createAvatar["webP_path"];
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

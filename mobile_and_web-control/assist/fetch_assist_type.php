@@ -2,15 +2,18 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistInfo')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_ASSIST"];
+			$member_no = $configAS["MEMBER_NO_DEV_ASSIST"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_ASSIST"];
+			$member_no = $configAS["MEMBER_NO_SALE_ASSIST"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		$fetchAssType = $conoracle->prepare("select ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO from asscontmaster asm LEFT JOIN 
+		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO FROM asscontmaster asm LEFT JOIN 
 												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE WHERE member_no = :member_no and asscont_status = 1");
 		$fetchAssType->execute([
 			':member_no' => $member_no
@@ -23,17 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAss["ASSCONTRACT_NO"] = $rowAssType["ASSCONTRACT_NO"];
 			$arrGroupAss[] = $arrAss;
 		}
-		if(sizeof($arrGroupAss) > 0 || isset($new_token)){
-			$arrayResult["ASSIST"] = $arrGroupAss;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult["ASSIST"] = $arrGroupAss;
+		$arrayResult["RESULT"] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$arrGroupHis = array();
 		$executeData = [
@@ -12,11 +15,11 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		if(isset($dataComing["fetch_type"])){
 			switch($dataComing["fetch_type"]){
 				case "refresh":
-					$executeData[':id_history'] = isset($dataComing["id_history"]) ? $dataComing["id_history"] : 16777215; // max number mediumint(8) of id_history
+					$executeData[':id_history'] = $dataComing["id_history"] ?? 0; 
 					$extraQuery = "and id_history > :id_history";
 					break;
 				case "more":
-					$executeData[':id_history'] = isset($dataComing["id_history"]) ? $dataComing["id_history"] : 0;
+					$executeData[':id_history'] = $dataComing["id_history"] ?? 16777215; // max number mediumint(8) of id_history
 					$extraQuery = "and id_history < :id_history";
 					break;
 			}
@@ -33,17 +36,9 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 			$arrHistory["RECEIVE_DATE"] = $lib->convertdate($rowHistory["receive_date"],'D m Y',true);
 			$arrGroupHis[] = $arrHistory;
 		}
-		if(sizeof($arrGroupHis) > 0 || isset($new_token)){
-			$arrayResult['HISTORY'] = $arrGroupHis;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['HISTORY'] = $arrGroupHis;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

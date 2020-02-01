@@ -3,6 +3,9 @@ set_time_limit(150);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_account_no','coop_account_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		try {
 			$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
@@ -10,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
 			$arrPayloadverify = array();
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['coop_account_no'] = $coop_account_no;
+			$arrPayloadverify['coop_account_no'] = $coop_account_no.$lib->randomText('all',4);
 			$arrPayloadverify['user_mobile_no'] = $mobile_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
 			$arrPayloadverify['kb_account_no'] = $kb_account_no;
@@ -43,19 +46,35 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 				$deleteAccForPending = $conmysql->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
 				$deleteAccForPending->execute();
 			}
+			if($payload["member_no"] == "dev@mode" || $payload["member_no"] == "salemode"){
+				$member_no = $configAS[$payload["member_no"]];
+			}else{
+				$member_no = $payload["member_no"];
+			}
+			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+													WHERE MB.member_no = :member_no");
+			$fetchMemberName->execute([
+				':member_no' => $member_no
+			]);
+			$rowMember = $fetchMemberName->fetch();
+			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,mobile_no,bank_code,id_bankpalette,limit_amt,id_token) 
-															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:mobile_no,'004',2,:limit_amt,:id_token)");
+			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,citizen_id,mobile_no,bank_account_name,bank_account_name_en,bank_code,id_token) 
+															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:citizen_id,:mobile_no,:bank_account_name,:bank_account_name_en,'004',:id_token)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
 				':member_no' => $payload["member_no"],
 				':coop_account_no' => $coop_account_no,
 				':kb_account_no' => $kb_account_no,
+				':citizen_id' => $dataComing["citizen_id"],
 				':mobile_no' => $mobile_no,
-				':limit_amt' => $func->getConstant('limit_withdraw'),
+				':bank_account_name' => $account_name_th,
+				':bank_account_name_en' => $account_name_th,
 				':id_token' => $payload["id_token"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_GENSOFT"].'/bindaccount/kbank/pending_bind_account',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_reg_id_for_consent',$arrSendData);
 				if(!$responseAPI){
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -67,9 +86,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 				if($arrResponse->RESULT){
 					$conmysql->commit();
 					$arrayResult["URL_CONSENT"] = $arrResponse->URL_CONSENT;
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
@@ -89,7 +105,11 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 					':member_no' => $payload["member_no"],
 					':coop_account_no' => $coop_account_no,
 					':kb_account_no' => $kb_account_no,
+					':citizen_id' => $dataComing["citizen_id"],
 					':mobile_no' => $mobile_no,
+					':bank_account_name' => $account_name_th,
+					':bank_account_name_en' => $account_name_en,
+					':limit_amt' => $func->getConstant('limit_withdraw'),
 					':id_token' => $payload["id_token"]
 				];
 				$arrError = array();

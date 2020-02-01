@@ -2,17 +2,19 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
-													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.limit_amt
-													FROM gcbindaccount gba LEFT JOIN gcconstantbankpalette gcpl ON gba.id_bankpalette = gcpl.id_bankpalette and gcpl.is_use = '1'
-													LEFT JOIN gcpalettecolor gpl ON gcpl.id_palette = gpl.id_palette and gpl.is_use = '1'
-													LEFT JOIN csbankdisplay csb ON gcpl.bank_code = csb.bank_code
+													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
+													gba.bank_account_name,gba.bank_account_name_en
+													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+													LEFT JOIN gcpalettecolor gpl ON csb.id_palette = gpl.id_palette and gpl.is_use = '1'
 													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9')");
 		$fetchAccountBeenBind->execute([
 			':member_no' => $payload["member_no"]
 		]);
-		$limit_withdraw = $func->getConstant("limit_withdraw");
 		if($fetchAccountBeenBind->rowCount() > 0){
 			$arrBindAccount = array();
 			while($rowAccountBind = $fetchAccountBeenBind->fetch()){
@@ -35,54 +37,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ICON_BANK_WEBP"] = $explodePathBankLOGO[0].'.webp';
 				$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
 				$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
-				if($limit_withdraw >= $rowAccountBind["limit_amt"]){
-					$arrAccount["LIMIT_USER_WITHDRAW"] = (int)$rowAccountBind["limit_amt"];
-				}else{
-					$arrAccount["LIMIT_USER_WITHDRAW"] = (int)$limit_withdraw;
-				}
 				$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 				$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
 				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
 				$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
-				$arrAccount["LIMIT_COOP_WITHDRAW"] = (int)$limit_withdraw;
-				$fetchAccountCoop = $conoracle->prepare("SELECT deptaccount_name,depttype_code,membcat_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
-				$fetchAccountCoop->execute([
-					':deptaccount_no' => $rowAccountBind["deptaccount_no_coop"]
-				]);
-				$rowAccountCoop = $fetchAccountCoop->fetch();
-				$getBannerColorCoop = $conmysql->prepare("SELECT gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.type_palette,gpc.color_text
-															FROM gcconstantaccountdept gca LEFT JOIN gcpalettecolor gpc ON gca.id_palette = gpc.id_palette and gpc.is_use = '1'
-															WHERE gca.dept_type_code = :depttype_code and gca.member_cate_code = :membcat_code and gca.is_use = '1'");
-				$getBannerColorCoop->execute([
-					':depttype_code' => $rowAccountCoop["DEPTTYPE_CODE"],
-					':membcat_code' => $rowAccountCoop["MEMBCAT_CODE"]
-				]);
-				$rowBanner = $getBannerColorCoop->fetch();
-				if(isset($rowBanner["type_palette"])){
-					if($rowBanner["type_palette"] == '2'){
-						$arrAccount["ACCOUNT_COOP_COLOR"] = $rowBanner["color_deg"]."|".$rowBanner["color_main"].",".$rowBanner["color_secon"];
-					}else{
-						$arrAccount["ACCOUNT_COOP_COLOR"] = "90|".$rowBanner["color_main"].",".$rowBanner["color_main"];
-					}
-					$arrAccount["ACCOUNT_COOP_TEXT_COLOR"] = $rowBanner["color_text"];
-				}else{
-					$arrAccount["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
-					$arrAccount["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
-				}
-				$arrAccount["ACCOUNT_COOP_NAME"] = preg_replace('/\"/','',$rowAccountCoop["DEPTACCOUNT_NAME"]);
+				$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];
 				$arrBindAccount[] = $arrAccount;
 			}
-			if(sizeof($arrBindAccount) > 0 || isset($new_token)){
-				$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				http_response_code(204);
-				exit();
-			}
+			$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			http_response_code(204);
 			exit();

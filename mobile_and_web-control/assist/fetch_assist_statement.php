@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistStatement')){
 		$limit = $func->getConstant('limit_stmassist');
 		$arrayResult['LIMIT_DURATION'] = $limit;
@@ -24,8 +27,8 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		]);
 		$rowAccountRCV = $fetchAccountReceive->fetch();
 		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
-		$fetchAssStatement = $conoracle->prepare("select atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
-													from asscontmaster asm LEFT JOIN asscontstatement astm 
+		$fetchAssStatement = $conoracle->prepare("SELECT atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
+													FROM asscontmaster asm LEFT JOIN asscontstatement astm 
 													ON asm.ASSCONTRACT_NO = astm.ASSCONTRACT_NO LEFT JOIN assucfassitemcode atc
 													ON astm.ITEM_CODE = atc.ITEM_CODE LEFT JOIN CMUCFMONEYTYPE cmt ON astm.MONEYTYPE_CODE = cmt.MONEYTYPE_CODE 
 													where asm.asscontract_no = :asscontract_no and asm.asscont_status = 1 and astm.SLIP_DATE
@@ -47,17 +50,9 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 			$arrAssStm["SIGN_FLAG"] = $rowAssStm["SIGN_FLAG"];
 			($arrGroupAssStm["STATEMENT"])[] = $arrAssStm;
 		}
-		if(sizeof($arrGroupAssStm) > 0 || isset($new_token)){
-			$arrayResult["ASSIST_STM"] = $arrGroupAssStm;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult["ASSIST_STM"] = $arrGroupAssStm;
+		$arrayResult["RESULT"] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

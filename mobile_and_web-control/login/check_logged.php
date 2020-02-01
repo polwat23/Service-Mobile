@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0'
 											and member_no = :member_no and unique_id = :unique_id");
 	$checkUserlogin->execute([
@@ -19,9 +22,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				"ip_address" => $dataComing["ip_address"] ?? 'unknown',
 				"id_userlogin" => $rowLog["id_userlogin"]
 			],'user_access_after_login');
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0010";
@@ -31,6 +31,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$func->revoke_alltoken($payload["id_token"],'-8',true);
 			}else if($rowLog["is_login"] == '-7'){
 				$func->revoke_alltoken($payload["id_token"],'-7',true);
+			}else if($rowLog["is_login"] == '-5'){
+				$func->revoke_alltoken($payload["id_token"],'-6',true);
 			}
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLog["is_login"]][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

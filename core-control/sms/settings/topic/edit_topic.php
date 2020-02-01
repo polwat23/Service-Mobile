@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_control','id_submenu'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic',$conmysql) && is_numeric($dataComing["id_template"])){
+	if($func->check_permission_core($payload,'sms','managetopic') && is_numeric($dataComing["id_template"])){
 		$conmysql->beginTransaction();
 		$UpdateMenuSMS = $conmysql->prepare("UPDATE coresubmenu SET menu_name = :topic_name WHERE id_submenu = :id_submenu");
 		if($UpdateMenuSMS->execute([
@@ -41,11 +41,10 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 				$updateNotPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '-9' WHERE id_permission_menu 
 														NOT IN(".implode(',',$arrIdPermission).") and id_submenu = :id_submenu");
 				if($updateNotPermit->execute([':id_submenu' => $dataComing["id_submenu"]])){
+					continue;
 				}else{
 					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "5005";
-					$arrayResult['RESPONSE_AWARE'] = "update";
-					$arrayResult['RESPONSE'] = "Some user Cannot control topic";
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -70,11 +69,10 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					$updateTopicMatch = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '1' 
 															WHERE id_permission_menu IN(".implode(',',$arrWaitForUpdate).") and id_submenu = :id_submenu");
 					if($updateTopicMatch->execute([':id_submenu' => $dataComing["id_submenu"]])){
+						continue;
 					}else{
 						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = "5005";
-						$arrayResult['RESPONSE_AWARE'] = "update";
-						$arrayResult['RESPONSE'] = "Some user Cannot control topic";
+						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
@@ -84,11 +82,10 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					$insertMatchPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu) 
 													VALUES".implode(',',$arrWaitForInsert));
 					if($insertMatchPermit->execute()){
+						continue;
 					}else{
 						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = "5005";
-						$arrayResult['RESPONSE_AWARE'] = "insert";
-						$arrayResult['RESPONSE'] = "Some user Cannot control topic";
+						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
@@ -99,35 +96,25 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 				echo json_encode($arrayResult);
 			}else{
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "5005";
-				$arrayResult['RESPONSE_AWARE'] = "update";
-				$arrayResult['RESPONSE'] = "Cannot update SMS Template";
+				$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "update";
-			$arrayResult['RESPONSE'] = "Cannot update SMS Menu";
+			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขหัวข้องานได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

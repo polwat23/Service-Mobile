@@ -29,20 +29,15 @@ require_once(__DIR__.'/../include/function_util.php');
 // Call functions
 use Utility\library;
 use Component\functions;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use ReallySimpleJWT\Token;
-use ReallySimpleJWT\Parse;
-use ReallySimpleJWT\Jwt;
-use ReallySimpleJWT\Validate;
-use ReallySimpleJWT\Encode;
+use PHPMailer\PHPMailer\{PHPMailer,Exception};
+use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
 
 $mailFunction = new PHPMailer(false);
 $lib = new library();
 $jwt_token = new Token();
 $func = new functions();
-$jsonConfig = file_get_contents(__DIR__.'/../json/config_constructor.json');
+$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
@@ -64,9 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					->parse();
 				$payload = $parsed_token->getPayload();
 				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
-					$arrayResult['RESPONSE_CODE'] = "4004";
-					$arrayResult['RESPONSE_AWARE'] = "argument";
-					$arrayResult['RESPONSE'] = "Not complete argument";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(400);
 					echo json_encode($arrayResult);
@@ -75,25 +67,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 			}catch (ValidateException $e) {
 				$errorCode = $e->getCode();
 				if($errorCode === 3){
-					$arrayResult['RESPONSE_CODE'] = "4005";
-					$arrayResult['RESPONSE_AWARE'] = "signature";
-					$arrayResult['RESPONSE'] = "Signature is invalid";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
 					echo json_encode($arrayResult);
 					exit();
 				}else if($errorCode === 4){
-					$arrayResult['RESPONSE_CODE'] = "4009";
-					$arrayResult['RESPONSE_AWARE'] = "access_token";
-					$arrayResult['RESPONSE'] = "Access Token was expired";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
 					echo json_encode($arrayResult);
 					exit();
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "4005";
-					$arrayResult['RESPONSE_AWARE'] = "access_token";
-					$arrayResult['RESPONSE'] = "Access Token is invalid";
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
 					echo json_encode($arrayResult);
@@ -101,9 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				}
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "4004";
-			$arrayResult['RESPONSE_AWARE'] = "argument";
-			$arrayResult['RESPONSE'] = "Not complete argument";
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
 			echo json_encode($arrayResult);

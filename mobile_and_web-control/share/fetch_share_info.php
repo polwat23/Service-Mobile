@@ -2,11 +2,14 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_SHARE"];
+			$member_no = $configAS["MEMBER_NO_DEV_SHARE"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_SHARE"];
+			$member_no = $configAS["MEMBER_NO_SALE_SHARE"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -51,9 +54,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupStm[] = $arrayStm;
 			}
 			$arrayResult['STATEMENT'] = $arrGroupStm;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

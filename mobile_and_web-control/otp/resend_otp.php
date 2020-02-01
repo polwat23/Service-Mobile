@@ -21,10 +21,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 		$rowFCMToken = $getFCMToken->fetch();
 		$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp");
 		$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
-		$getOTPTemplate = $conmysql->prepare("SELECT subject,body FROM smssystemtemplate 
-											WHERE component_system = :menu_component and is_use = '1'");
-		$getOTPTemplate->execute([':menu_component' => $dataComing["menu_component"]]);
-		$rowOTPTemplate = $getOTPTemplate->fetch();
+		$templateMessage = $func->getTemplatSystem("OTPChecker",1);
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);
 		$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '15';
@@ -32,7 +29,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 		$arrTarget["RANDOM_NUMBER"] = $otp_password;
 		$arrTarget["RANDOM_ALL"] = $reference;
 		$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
-		$arrMessage = $lib->mergeTemplate($rowOTPTemplate["subject"],$rowOTPTemplate["body"],$arrTarget);
+		$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
 		$arrPayloadNotify["TO"][] = $rowFCMToken["fcm_token"];
 		$arrPayloadNotify["MEMBER_NO"] = $rowFCMToken["member_no"];
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;

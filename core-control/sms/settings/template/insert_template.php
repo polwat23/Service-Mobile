@@ -2,26 +2,45 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate',$conmysql)){
+	if($func->check_permission_core($payload,'sms','managetemplate')){
 		$id_smsquery = null;
 		$conmysql->beginTransaction();
-		if(isset($dataComing["query_template"]) && isset($dataComing["column_selected"])){
-			$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_in_query,username)
-													VALUES(:sms_query,:column_selected,:username)");
-			if($insertSmsQuery->execute([
-				':sms_query' => $dataComing["query_template"],
-				':column_selected' => $dataComing["column_selected"],
-				':username' => $payload["username"]
-			])){
-				$id_smsquery = $conmysql->lastInsertId();
+		if(isset($dataComing["query_template_spc_"]) && isset($dataComing["column_selected"])){
+			if(empty($dataComing["condition_target"])){
+				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,create_by)
+														VALUES(:sms_query,:column_selected,:target_field,:username)");
+				if($insertSmsQuery->execute([
+					':sms_query' => $dataComing["query_template_spc_"],
+					':column_selected' => implode(',',$dataComing["column_selected"]),
+					':target_field' => $dataComing["target_field"],
+					':username' => $payload["username"]
+				])){
+					$id_smsquery = $conmysql->lastInsertId();
+				}else{
+					$conmysql->rollback();
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}else{
-				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "5005";
-				$arrayResult['RESPONSE_AWARE'] = "insert";
-				$arrayResult['RESPONSE'] = "Cannot insert SMS query";
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
+														VALUES(:sms_query,:column_selected,:target_field,:condition_target,'1',:username)");
+				if($insertSmsQuery->execute([
+					':sms_query' => $dataComing["query_template_spc_"],
+					':column_selected' => implode(',',$dataComing["column_selected"]),
+					':target_field' => $dataComing["target_field"],
+					':condition_target' => $dataComing["condition_target"],
+					':username' => $payload["username"]
+				])){
+					$id_smsquery = $conmysql->lastInsertId();
+				}else{
+					$conmysql->rollback();
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}
 		}
 		$insertTemplate = $conmysql->prepare("INSERT INTO smstemplate(smstemplate_name,smstemplate_body,create_by,id_smsquery) 
@@ -37,26 +56,18 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 			echo json_encode($arrayResult);
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "5005";
-			$arrayResult['RESPONSE_AWARE'] = "insert";
-			$arrayResult['RESPONSE'] = "Cannot insert SMS template";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "4003";
-		$arrayResult['RESPONSE_AWARE'] = "permission";
-		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "4004";
-	$arrayResult['RESPONSE_AWARE'] = "argument";
-	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

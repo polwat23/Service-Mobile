@@ -2,11 +2,14 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if(isset($new_token)){
+		$arrayResult['NEW_TOKEN'] = $new_token;
+	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_LOAN"];
+			$member_no = $configAS["MEMBER_NO_DEV_LOAN"];
 		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_LOAN"];
+			$member_no = $configAS["MEMBER_NO_SALE_LOAN"];
 		}else{
 			$member_no = $payload["member_no"];
 		}
@@ -25,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowContract = $getContract->fetch()){
 			$arrGroupContract = array();
 			$arrContract = array();
-			$arrContract["CONTRACT_NO"] = $lib->formatcontract($rowContract["LOANCONTRACT_NO"],$func->getConstant('loan_format'));
+			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
@@ -41,17 +44,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrAllLoan[array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN'))]["CONTRACT"])[] = $arrContract;
 			}
 		}
-		if(sizeof($arrAllLoan) > 0 || isset($new_token)){
-			$arrayResult['DETAIL_LOAN'] = $arrAllLoan;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['DETAIL_LOAN'] = $arrAllLoan;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
