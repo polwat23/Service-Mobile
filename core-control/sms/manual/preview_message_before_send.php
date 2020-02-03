@@ -34,8 +34,6 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($dataComing["destination"] as $target){
 					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
 				}
-				$arrMessage = array();
-				$arrMember = array();
 				$arrToken = $func->getFCMToken('person',$destination);
 				if(sizeof($arrToken["MEMBER_NO"]) > 0){
 					foreach($arrToken["MEMBER_NO"] as $member){
@@ -68,10 +66,15 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				}
 			}else{
 				$arrToken = $func->getFCMToken('all');
-				foreach($arrToken["MEMBER_NO"] as $member){
+				foreach($arrToken["SUCCESS"]["MEMBER_NO"] as $member){
 					$arrGroupSuccess["DESTINATION"] = $member;
 					$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
 					$arrGroupAllSuccess[] = $arrGroupSuccess;
+				}
+				foreach($arrToken["FAIL"] as $member){
+					$arrGroupCheckSend["DESTINATION"] = $member;
+					$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+					$arrGroupAllFailed[] = $arrGroupCheckSend;
 				}
 				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 				$arrayResult['FAILED'] = $arrGroupAllFailed;
@@ -140,12 +143,10 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
-						$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
-						$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"];
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
 				}

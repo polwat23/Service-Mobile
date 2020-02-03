@@ -3,32 +3,6 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managenews')){
-		 $pathImg = null;
-		
-			if(isset($dataComing["img1"]) && $dataComing["img1"] != null){
-			$destination = __DIR__.'/../../../../resource/gallery';
-			$file_name = $lib->randomText('all',6);
-			if(!file_exists($destination)){
-				mkdir($destination, 0777, true);
-			}
-			$createImage = $lib->base64_to_img($dataComing["img1"],$file_name,$destination,null);
-			if($createImage == 'oversize'){
-				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}else{
-				if($createImage){
-					$pathImg = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
-					//$arrayResult['RESPONSE_MESSAGE'] = $pathImg;
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
-					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
-				}
-			}
-		}
 		$stmt = $conmysql->prepare("SELECT MAX(id_gallery)  AS max_id, path_img_1  FROM gcgallery ");
 		$stmt->execute();
 		$invNum = $stmt -> fetch(PDO::FETCH_ASSOC);
