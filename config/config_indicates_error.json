@@ -38,7 +38,7 @@
 	"WS0023" : [{"th" : "ไม่พบบัญชีที่สามารถทำรายการได้ ท่านต้องอนุญาตบัญชีที่สามารถทำรายการได้ก่อนจะทำธุรกรรม","en" : "You must allow account before transaction"}],
 	"WS0024" : [{"th" : "ไม่พบประเภทบัญชีเงินฝากที่สหกรณ์อนุญาตให้ทำธุรกรรมได้","en" : "Not found deposits type that cooperative allow to transaction"}],
 	"WS0025" : [{"th" : "ไม่พบบัญชีปลายทาง กรุณาตรวจสอบเลขบัญชีปลายทางอีกครั้ง","en" : "Not found destination deposit account please please recheck"}],
-	"WS0026" : [{"th" : "บัญชีปลายทางยังไม่ได้อนุญาตเพื่อทำธุรกรรม","en" : "Destination deposit account does not allow for transaction"}],
+	"WS0026" : [{"th" : "บัญชีปลายทางยังไม่ได้เปิดใช้งานแอพพลิเคชั่น","en" : "Destination deposit account do not use application"}],
 	"WS0027" : [{"th" : "ไม่สามารถฝากเงินเข้าบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0027","en" : "Cannot deposit to account please contact cooperative #WS0027"}],
 	"WS0028" : [{"th" : "ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ กรุณาติดต่อสหกรณ์ #WS0028","en" : "Cannot check destination account please contact cooperative #WS0028"}],
 	"WS0029" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0029","en" : "Cannot unbind account please contact cooperative #WS0029"}],

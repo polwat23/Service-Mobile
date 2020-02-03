@@ -101,19 +101,30 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayMerge = $arrayTel;
 				}
 				foreach($arrayMerge as $dest){
-					$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
-					$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
-					$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
-					$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
-					$arrGroupAllSuccess[] = $arrGroupSuccess;
+					$arrGroupCheckSend = array();
+					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
+						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$arrGroupAllSuccess[] = $arrGroupSuccess;
+					}else{
+						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+						$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
+						$arrGroupCheckSend["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
+						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$arrGroupAllFailed[] = $arrGroupCheckSend;
+					}
 				}
 				foreach($dataComing["destination"] as $target){
+					$arrGroupCheckSend = array();
 					if(mb_strlen($target) <= 8){
 						$target = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
 					}else if(mb_strlen($target) == 10){
 						$target = $lib->formatphone($target,'-');
 					}
-					if(array_search($target, array_column($arrGroupAllSuccess, 'DESTINATION')) === false && array_search($target, array_column($arrGroupAllSuccess, 'TEL')) === false){
+					if(array_search($target, array_column($arrGroupAllSuccess, 'DESTINATION')) === false && 
+					array_search($target, array_column($arrGroupAllSuccess, 'TEL')) === false && array_search($target, array_column($arrGroupAllFailed, 'DESTINATION')) === false){
 						$arrGroupCheckSend["DESTINATION"] = $target;
 						$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขปลายทางได้";
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
@@ -126,10 +137,17 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			}else{
 				$arrayTel = $func->getSMSPerson('all');
 				foreach($arrayTel as $dest){
-					$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
-					$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
-					$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
-					$arrGroupAllSuccess[] = $arrGroupSuccess;
+					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
+						$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
+						$arrGroupAllSuccess[] = $arrGroupSuccess;
+					}else{
+						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+						$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
+						$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"];
+						$arrGroupAllFailed[] = $arrGroupCheckSend;
+					}
 				}
 				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 				$arrayResult['FAILED'] = $arrGroupAllFailed;

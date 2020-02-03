@@ -154,15 +154,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrDestGRP[] = $destination_temp;
 					}
 				}
-				$arrayTel = $func->getSMSPerson('person',$destination);
+				$arrayTel = $func->getSMSPerson('person',$destination,false,true);
 				if(isset($arrDestGRP)){
 					$arrayMerge = array_merge($arrayTel,$arrDestGRP);
 				}else{
 					$arrayMerge = $arrayTel;
 				}
 				if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != ""){
-					$message = $dataComing["message_importData"];
-					$arrayLogSMS = $func->logSMSWasSent($message,$arrayMerge,$payload["username"],true);
+					$arrayLogSMS = $func->logSMSWasSent($dataComing["message_importData"],$arrayMerge,$payload["username"],true);
 				}else{
 					$arrayLogSMS = $func->logSMSWasSent($dataComing["message_emoji_"],$arrayMerge,$payload["username"]);
 				}

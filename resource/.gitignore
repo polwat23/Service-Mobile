@@ -1,8 +1,7 @@
-avatar/*
-logo/*
 alias_account_dept/*
+avatar/*
 cover-dept/*
-image_wait_to_be_sent/*
-cover-dept/*
-pdf/*
 gallery/*
+image_wait_to_be_sent/*
+pdf/*
+!.gitignore

@@ -22,10 +22,8 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
 		$rowDataAcc = $getDataAcc->fetch();
 		if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-			$checkAllowToTransaction = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-															WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
-			$checkAllowToTransaction->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
+			$checkAllowToTransaction = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
+			$checkAllowToTransaction->execute([':member_no' => $payload["member_no"]]);
 			if($checkAllowToTransaction->rowCount() > 0){
 				$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
 				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
