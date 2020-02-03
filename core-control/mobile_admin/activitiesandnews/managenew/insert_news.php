@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				':path_img_header' => $img1,
 				':link_news_more' =>  $dataComing["link_news_more"],
 				':id_gallery' =>  $last_id_gallary,
-				':create_by' => "dev@mode"
+				':create_by' => $dataComing["create_by"],
 			])){
 				$arrayResult["RESULT"] = TRUE;
 				echo json_encode($arrayResult);

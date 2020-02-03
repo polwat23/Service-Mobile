@@ -3,5 +3,4 @@ avatar/*
 cover-dept/*
 gallery/*
 image_wait_to_be_sent/*
-pdf/*
 !.gitignore
