@@ -1,11 +1,12 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','field','value','id_systemplate'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','subject','detail','id_systemplate'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managesystemtemplate')){
-		$updateSysTemplate = $conmysql->prepare("UPDATE smssystemtemplate SET ".$dataComing["field"]." = :value WHERE id_systemplate = :id_systemplate");
+		$updateSysTemplate = $conmysql->prepare("UPDATE smssystemtemplate SET subject = :subject,body = :body WHERE id_systemplate = :id_systemplate");
 		if($updateSysTemplate->execute([
-			':value' => $dataComing["value"],
+			':subject' => $dataComing["subject"],
+			':body' => $dataComing["detail"],
 			':id_systemplate' => $dataComing["id_systemplate"]
 		])){
 			$arrayResult['RESULT'] = TRUE;

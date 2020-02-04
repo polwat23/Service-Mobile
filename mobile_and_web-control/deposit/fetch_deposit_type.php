@@ -40,9 +40,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}else{
 				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg')){
-					$arrAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg';
+					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg';
 				}else{
-					$arrAccount["COVER_IMG"] = null;
+					$arrGroupAccount["COVER_IMG"] = null;
 				}
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;

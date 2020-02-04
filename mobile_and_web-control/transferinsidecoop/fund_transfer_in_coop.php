@@ -2,10 +2,12 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','fee_transfer'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
+	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
 		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
+		$ref_no = date('YmdHis').substr($from_account_no,-3);
 		try {
 			$argumentWS = [
 							"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
@@ -20,7 +22,6 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$resultWS = $clientWS->__call("of_withdraw_deposit_trans", array($argumentWS));
 			$slip_no = $resultWS->of_withdraw_deposit_transResult;
 			$arrayResult['SLIP_NO'] = $slip_no;
-			$ref_no = date('YmdHis').substr($from_account_no,-3);
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,penalty_amt,result_transaction,member_no,
 															ref_no_1,id_userlogin,ref_no_source)
