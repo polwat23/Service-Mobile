@@ -11,17 +11,13 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','m
 		echo json_encode($arrayResult);
 		exit();
 	}
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AppRegister')){
+	if($func->check_permission('0',$dataComing["menu_component"],'AppRegister')){
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
 		$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);
 		if($checkMember->rowCount() > 0){
 			$arrayResult['RESPONSE_CODE'] = "WS0020";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "คุณเป็นสมาชิกอยู่แล้ว";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "You has been registered";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'adminmobile','managenew')){
 		$arrayGroup = array();
-		$fetchUser = $conmysql->prepare("SELECT gcnews.id_news, gcnews.news_title, gcnews.news_detail, gcnews.path_img_header, gcnews.create_date, gcnews.update_date,gcnews.id_gallery ,gcgallery.path_img_1, gcgallery.path_img_2, gcgallery.path_img_3, gcgallery.path_img_4, gcgallery.path_img_5
+		$fetchUser = $conmysql->prepare("SELECT gcnews.id_news, gcnews.news_title, gcnews.news_detail, gcnews.path_img_header,gcnews.link_news_more, gcnews.create_date, gcnews.update_date,gcnews.id_gallery ,gcgallery.path_img_1, gcgallery.path_img_2, gcgallery.path_img_3, gcgallery.path_img_4, gcgallery.path_img_5
 										FROM gcnews
 										INNER JOIN gcgallery
 										ON gcgallery.id_gallery = gcnews.id_gallery");
@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupCoreUser["NEWS_TITLE"] = $rowCoreSubMenu["news_title"];
 			$arrGroupCoreUser["NEWS_DETAIL"] = $rowCoreSubMenu["news_detail"];
 			$arrGroupCoreUser["PATH_IMG_HEADER"] = $rowCoreSubMenu["path_img_header"];
+			$arrGroupCoreUser["LINK_News_MORE"] = $rowCoreSubMenu["link_news_more"];
 			$arrGroupCoreUser["CREATE_DATE"] = $lib->convertdate($rowCoreSubMenu["create_date"],'d m Y',true); 
 			$arrGroupCoreUser["UPDATE_DATE"] = $lib->convertdate($rowCoreSubMenu["update_date"],'d m Y',true);  
 			$arrGroupCoreUser["ID_GALLERY"] = $rowCoreSubMenu["id_gallery"];

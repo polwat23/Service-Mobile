@@ -7,8 +7,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageNotification')){
 		$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email
-													FROM gcuserlogin WHERE id_token = :id_token and is_login = '1'");
-		$fetchSettingNotify->execute([':id_token' => $payload["id_token"]]);
+													FROM gcmemberaccount WHERE member_no = :member_no");
+		$fetchSettingNotify->execute([':member_no' => $payload["member_no"]]);
 		if($fetchSettingNotify->rowCount() > 0){
 			$rowSetting = $fetchSettingNotify->fetch();
 			$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["receive_notify_news"];

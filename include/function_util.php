@@ -293,7 +293,7 @@ class functions {
 				$bulkInsert = array();
 				foreach($payload["MEMBER_NO"] as $member_no){
 					$bulkInsert[] = "('".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."')";
-					if(sizeof($bulkInsert) == "1000"){
+					if(sizeof($bulkInsert) == 1000){
 						$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no) 
 												VALUES".implode(',',$bulkInsert));
 						if($insertHis->execute()){
@@ -382,47 +382,41 @@ class functions {
 		}
 		
 		public function getFCMToken($type_target,$member_no=null){
-			$arrGrpAll = array();
-			$arrayGrpToken = array();
-			$arrayToken = array();
+			$arrayMemberGRP = array();
 			$arrayMember = array();
-			$arrayMemberNotToken = array();
+			$arrayAll = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
-					$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-														WHERE gul.receive_notify_news = '1' and gul.member_no IN('".implode("','",$member_no)."')
-														and gul.is_login = '1' and gtk.fcm_token IS NOT NULL and gtk.at_is_revoke = '0' and gtk.rt_is_revoke = '0' 
-														and gul.channel = 'mobile_app'");
+					$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
 					$fetchFCMToken->execute();
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
-						$arrayToken[] = $rowFCMToken["fcm_token"];
-						$arrayMember[] = $rowFCMToken["member_no"];
+						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
+							$arrayMT = array();
+							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMember[] = $rowFCMToken["member_no"];
+							$arrayMemberGRP[] = $arrayMT;
+						}
 					}
 				}
 			}else{
-				$fetchFCMToken = $this->con->prepare("SELECT gtk.fcm_token,gul.member_no,gul.receive_notify_news FROM gcuserlogin gul 
-													LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
-													WHERE gtk.fcm_token IS NOT NULL and gul.channel = 'mobile_app'
-													GROUP BY gtk.fcm_token,gul.member_no");
+				$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
 				$fetchFCMToken->execute();
 				while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
-					if($rowFCMToken["receive_notify_news"] == '1'){
-						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
-							$arrayMember[] = $rowFCMToken["member_no"];
-						}
-						$arrayToken[] = $rowFCMToken["fcm_token"];
-					}else{
-						if(!in_array($rowFCMToken["member_no"],$arrayMemberNotToken)){
-							$arrayMemberNotToken[] = $rowFCMToken["member_no"];
-						}
+					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
+						$arrayMT = array();
+						$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+						$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+						$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+						$arrayMember[] = $rowFCMToken["member_no"];
+						$arrayMemberGRP[] = $arrayMT;
 					}
 				}
 			}
-			$arrayGrpToken["TOKEN"] = $arrayToken;
-			$arrayGrpToken["MEMBER_NO"] = $arrayMember;
-			$arrGrpAll["SUCCESS"] = $arrayGrpToken;
-			$arrGrpAll["FAIL"] = $arrayMemberNotToken;
-			return $arrGrpAll;
+			$arrayAll["MEMBER_NO"] = $arrayMember;
+			$arrayAll["LIST_SEND"] = $arrayMemberGRP;
+			return $arrayAll;
 		}
 		
 		public function getSMSPerson($type_target,$member_no=null,$trans_flag=false,$check_tel=false){
@@ -491,18 +485,20 @@ class functions {
 			}
 			return $arrayMemberGRP;
 		}
-		public function logSMSWasSent($message,$destination,$send_by,$multi_message=false,$payment_keep=false) {
+		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false,$payment_keep=false) {
 			$this->con->beginTransaction();
 			$textcombine = array();
 			$textcombinenotsent = array();
-			if($payment_keep){
-				
+			if($trans_flag){
+				if($payment_keep){
+					
+				}
 			}else{
 				if($multi_message){
 					foreach($destination as $dest){
-						$textcombine[] = "('".$message[$dest["MEMBER_NO"]]."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."')";
+						$textcombine[] = "('".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						if(sizeof($textcombine) == 1000){
-							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by)
+							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
 																VALUES".implode(',',$textcombine));
 							if($insertToLogSMS->execute()){
 								unset($textcombine);
@@ -515,7 +511,7 @@ class functions {
 						}
 					}
 					if(sizeof($textcombine) > 0){
-						$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by)
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
 																VALUES".implode(',',$textcombine));
 						if($insertToLogSMS->execute()){
 							$this->con->commit();
@@ -531,12 +527,12 @@ class functions {
 				}else{
 					foreach($destination as $dest){
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-							$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."')";
+							$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						}else{
-							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','".$send_by."')";
+							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						}
 						if(sizeof($textcombine) == 1000){
-							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by)
+							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
 																VALUES".implode(',',$textcombine));
 							if($insertToLogSMS->execute()){
 								unset($textcombine);
@@ -548,7 +544,7 @@ class functions {
 							}
 						}
 						if(sizeof($textcombinenotsent) == 1000){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by)
+							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
 																	VALUES".implode(',',$textcombinenotsent));
 							if($insertToLogNotSentSMS->execute()){
 								unset($textcombinenotsent);
@@ -561,11 +557,11 @@ class functions {
 						}
 					}
 					if(sizeof($textcombine) > 0){
-						$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by)
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
 																VALUES".implode(',',$textcombine));
 						if($insertToLogSMS->execute()){
 							if(sizeof($textcombinenotsent) > 0){
-								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by)
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
 																		VALUES".implode(',',$textcombinenotsent));
 								if($insertToLogNotSentSMS->execute()){
 									$this->con->commit();
@@ -584,7 +580,7 @@ class functions {
 						}
 					}else{
 						if(sizeof($textcombinenotsent) > 0){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by)
+							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
 																		VALUES".implode(',',$textcombinenotsent));
 							if($insertToLogNotSentSMS->execute()){
 								$this->con->commit();
@@ -604,9 +600,9 @@ class functions {
 		public function logSMSWasNotSent($bulkInsert,$multi_message=false) {
 			$this->con->beginTransaction();
 			if($multi_message){
-				
+				return true;
 			}else{
-				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by)
+				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,send_by,id_smstemplate)
 														VALUES".implode(',',$bulkInsert));
 				if($insertToLogSMS->execute()){
 					$this->con->commit();
