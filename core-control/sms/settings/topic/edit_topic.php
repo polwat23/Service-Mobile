@@ -41,7 +41,6 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 				$updateNotPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '-9' WHERE id_permission_menu 
 														NOT IN(".implode(',',$arrIdPermission).") and id_submenu = :id_submenu");
 				if($updateNotPermit->execute([':id_submenu' => $dataComing["id_submenu"]])){
-					continue;
 				}else{
 					$conmysql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
@@ -69,7 +68,6 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					$updateTopicMatch = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '1' 
 															WHERE id_permission_menu IN(".implode(',',$arrWaitForUpdate).") and id_submenu = :id_submenu");
 					if($updateTopicMatch->execute([':id_submenu' => $dataComing["id_submenu"]])){
-						continue;
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
@@ -82,7 +80,6 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					$insertMatchPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu) 
 													VALUES".implode(',',$arrWaitForInsert));
 					if($insertMatchPermit->execute()){
-						continue;
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";

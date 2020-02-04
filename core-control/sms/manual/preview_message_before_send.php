@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 						if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
-							$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
+							$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
 							$arrGroupAllSuccess[] = $arrGroupSuccess;
 						}else{
 							$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
