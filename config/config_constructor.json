@@ -39,7 +39,7 @@
 	"SECRET_KEY_JWT" : "Rfsc!/-Gcoop+Connect^050001*!&",
 	"SECRET_KEY_CORE" : "Rfsc!/+Control-BackOffice^050001*!&",
 	"SIGNATURE_KEY_VERIFY_API" : "Rfsc!/-Connect+-API_LB-WITH-!KBank!-^050001*!&",
-	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-999999-RFSC-Test",
+	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-050001-RFSC-Test",
 	"DEFAULT_BANNER_COLOR_DEG" : "90",
 	"DEFAULT_BANNER_COLOR_MAIN" : "#8e9eab",
 	"DEFAULT_BANNER_COLOR_SECON" : "#eef2f3",
