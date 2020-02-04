@@ -94,30 +94,25 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							'mobile_app',null,'".$dest["TOKEN"]."','".$payload["username"]."','".$id_template."')";
 						}
 						if(sizeof($bulkInsert) == 1000){
-							if($func->logSMSWasNotSent($bulkInsert)){
-								unset($bulkInsert);
-								$bulkInsert = array();
-								continue;
-							}
+							$func->logSMSWasNotSent($bulkInsert);
+							unset($bulkInsert);
+							$bulkInsert = array();
 						}
 					}else{
 						$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
 						'mobile_app',null,null,'".$payload["username"]."','".$id_template."')";
 						if(sizeof($bulkInsert) == 1000){
-							if($func->logSMSWasNotSent($bulkInsert)){
-								unset($bulkInsert);
-								$bulkInsert = array();
-								continue;
-							}
+							$func->logSMSWasNotSent($bulkInsert);
+							unset($bulkInsert);
+							$bulkInsert = array();
 						}
 					}
 				}
 				if(sizeof($arrAllToken) > 0){
 					if(sizeof($bulkInsert) > 0){
-						if($func->logSMSWasNotSent($bulkInsert)){
-							unset($bulkInsert);
-							$bulkInsert = array();
-						}
+						$func->logSMSWasNotSent($bulkInsert);
+						unset($bulkInsert);
+						$bulkInsert = array();
 					}
 					$arrPayloadNotify["TO"] = $arrAllToken;
 					$arrPayloadNotify["MEMBER_NO"] = $arrAllMember_no;
@@ -145,10 +140,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 				}else{
 					if(sizeof($bulkInsert) > 0){
-						if($func->logSMSWasNotSent($bulkInsert)){
-							unset($bulkInsert);
-							$bulkInsert = array();
-						}
+						$func->logSMSWasNotSent($bulkInsert);
+						unset($bulkInsert);
+						$bulkInsert = array();
 					}
 					$arrayResult['RESPONSE'] = "ไม่พบบัญชีที่สามารถส่งได้กรุณาลองใหม่อีกครั้ง";
 					$arrayResult['RESULT'] = FALSE;
