@@ -3,9 +3,9 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','manageuser')){
-		$updatemenu = $conmysql->prepare("DELETE FROM coreuser 
+		$deletecoreuser = $conmysql->prepare("DELETE FROM coreuser 
 										  WHERE username=:username");
-		if($updatemenu->execute([
+		if($deletecoreuser->execute([
 			':username' => $dataComing["username"]
 		])){
 			$arrayResult["RESULT"] = TRUE;

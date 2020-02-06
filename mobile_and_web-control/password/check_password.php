@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['password'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	$getOldPassword = $conmysql->prepare("SELECT password,temppass,account_status FROM gcmemberaccount 
 											WHERE member_no = :member_no");
 	$getOldPassword->execute([':member_no' => $payload["member_no"]]);

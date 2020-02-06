@@ -3,9 +3,6 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($payload["member_no"] == 'dev@mode'){
 		$member_no = $configAS["MEMBER_NO_DEV_DEPOSIT"];
 		$member_no_loan = $configAS["MEMBER_NO_DEV_LOAN"];

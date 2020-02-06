@@ -1,9 +1,6 @@
 <?php
 require_once('../autoload.php');
 
-if(isset($new_token)){
-	$arrayResult['NEW_TOKEN'] = $new_token;
-}
 $checkPin = $conmysql->prepare("SELECT pin FROM gcmemberaccount WHERE member_no = :member_no");
 $checkPin->execute([
 	':member_no' => $payload["member_no"]

@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
 		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use FROM gcuserallowacctransaction WHERE member_no = :member_no");
