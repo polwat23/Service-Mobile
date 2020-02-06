@@ -15,25 +15,14 @@ $con = new connection();
 $lib = new library();
 $conmysql = $con->connecttomysql();
 
-$origin = $_SERVER["REMOTE_ADDR"];
-
-$allowed_domains = [
-	'203.151.66.161'
-];
-if (in_array($origin, $allowed_domains) || 1==1) {
-	header("Access-Control-Allow-Origin: ".$origin);
-	header("Access-Control-Allow-Credentials: true");
-	header("X-Frame-Options: sameorigin");
-	header("X-XSS-Protection: 1; mode=block");
-	header('Content-Type: application/json;charset=utf-8');
-	header("X-Content-Type-Options: nosniff");
-	header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
+header("Access-Control-Allow-Origin: ".$origin);
+header("Access-Control-Allow-Credentials: true");
+header("X-Frame-Options: sameorigin");
+header("X-XSS-Protection: 1; mode=block");
+header('Content-Type: application/json;charset=utf-8');
+header("X-Content-Type-Options: nosniff");
+header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 		
-	$jsonConfig = file_get_contents(__DIR__.'/../json/config_external.json');
-	$config = json_decode($jsonConfig,true);
-
-}else{
-	http_response_code(405);
-	exit();
-}
+$jsonConfig = file_get_contents(__DIR__.'/../json/config_external.json');
+$config = json_decode($jsonConfig,true);
 ?>
