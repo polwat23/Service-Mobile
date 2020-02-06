@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$arrayResult = array();
 		$arrayGroupSTM = array();

@@ -2,22 +2,19 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','setting_status','setting_name'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageNotification')){
-		$updateSetting = $conmysql->prepare("UPDATE gcuserlogin SET ".strtolower($dataComing["setting_name"])." = :status
-												WHERE id_token = :id_token and is_login = '1'");
+		$updateSetting = $conmysql->prepare("UPDATE gcmemberaccount SET ".strtolower($dataComing["setting_name"])." = :status
+												WHERE member_no = :member_no");
 		if($updateSetting->execute([
 			':status' => $dataComing["setting_status"],
-			':id_token' => $payload["id_token"]
+			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [
 				':status' => $dataComing["setting_status"],
-				':id_token' => $payload["id_token"]
+				':member_no' => $payload["member_no"]
 			];
 			$arrError = array();
 			$arrError["EXECUTE"] = $arrExecute;

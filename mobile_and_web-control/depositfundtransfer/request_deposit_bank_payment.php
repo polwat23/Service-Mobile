@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];
@@ -13,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}else{
 			$member_no = $payload["member_no"];
 		}
-		
+		$flag_transaction_coop = false;
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 		$time = time();
 		$arrSendData = array();
@@ -83,6 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					exit();
 				}
 				$ref_slipno = $responseSoap->ref_slipno;
+				$flag_transaction_coop = true;
 			}catch(SoapFault $e){
 				$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($e).' | '.json_encode($arrVerifyToken);
 				file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
@@ -186,31 +184,33 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				exit();
 			}
 		}catch(Throwable $e) {
-			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-														,amount,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
-														VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
-			$insertTransactionLog->execute([
-				':ref_no' => $ref_no,
-				':from_account' => $rowDataDeposit["deptaccount_no_bank"],
-				':destination' => $coop_account_no,
-				':amount' => $dataComing["amt_transfer"],
-				':member_no' => $payload["member_no"],
-				':ref_no1' => $coop_account_no,
-				':slip_no' => $ref_slipno,
-				':id_userlogin' => $payload["id_userlogin"]
-			]);
-			$arrayGroup["post_status"] = "-1";
-			$arrayGroup["atm_no"] = $ref_slipno;
-			$argumentWS = [
-					"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
-					"astr_dept_inf_serv" => $arrayGroup
-			];
-			$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-			$responseSoapCancel = $resultWS->of_dept_inf_servResult;
-			$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
-			file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
-			$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > Catch | '.json_encode($arrVerifyToken);
-			file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
+			if($flag_transaction_coop){
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
+															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
+				$insertTransactionLog->execute([
+					':ref_no' => $ref_no,
+					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
+					':destination' => $coop_account_no,
+					':amount' => $dataComing["amt_transfer"],
+					':member_no' => $payload["member_no"],
+					':ref_no1' => $coop_account_no,
+					':slip_no' => $ref_slipno,
+					':id_userlogin' => $payload["id_userlogin"]
+				]);
+				$arrayGroup["post_status"] = "-1";
+				$arrayGroup["atm_no"] = $ref_slipno;
+				$argumentWS = [
+						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
+						"astr_dept_inf_serv" => $arrayGroup
+				];
+				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
+				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
+				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
+				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > Catch | '.json_encode($arrVerifyToken);
+				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
+			}
 			$arrError["MESSAGE"] = $e->getMessage();
 			$arrError["ERROR_CODE"] = 'WS9999';
 			$lib->addLogtoTxt($arrError,'exception_error');

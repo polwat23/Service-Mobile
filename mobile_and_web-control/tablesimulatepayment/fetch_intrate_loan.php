@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
 		$fetchIntrate = $conoracle->prepare("select lir.interest_rate,lp.loantype_desc from lnloantype lp LEFT JOIN lncfloanintratedet lir
 												ON lp.inttabrate_code = lir.loanintrate_code where to_char(sysdate,'YYYY-MM-DD') BETWEEN 

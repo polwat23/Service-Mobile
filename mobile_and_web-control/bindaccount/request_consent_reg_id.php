@@ -2,21 +2,16 @@
 set_time_limit(150);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_account_no','coop_account_no'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
+if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coop_account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		try {
-			$kb_account_no = preg_replace('/-/','',$dataComing["kb_account_no"]);
 			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
 			$arrPayloadverify = array();
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['coop_account_no'] = $coop_account_no.$lib->randomText('all',4);
+			$arrPayloadverify['coop_account_no'] = $coop_account_no.$lib->randomText('all',2);
 			$arrPayloadverify['user_mobile_no'] = $mobile_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
-			$arrPayloadverify['kb_account_no'] = $kb_account_no;
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['exp'] = time() + 60;
 			$sigma_key = $lib->generate_token();
@@ -25,8 +20,8 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$checkAccBankBeenbind = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE deptaccount_no_bank = :kb_account_no and bindaccount_status IN('0','1')");
-			$checkAccBankBeenbind->execute([':kb_account_no' => $kb_account_no]);
+			$checkAccBankBeenbind = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
+			$checkAccBankBeenbind->execute([':member_no' => $payload["member_no"]]);
 			if($checkAccBankBeenbind->rowCount() > 0){
 				$arrayResult['RESPONSE_CODE'] = "WS0036";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -61,13 +56,12 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,citizen_id,mobile_no,bank_account_name,bank_account_name_en,bank_code,id_token) 
-															VALUES(:sigma_key,:member_no,:coop_account_no,:kb_account_no,:citizen_id,:mobile_no,:bank_account_name,:bank_account_name_en,'004',:id_token)");
+			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,mobile_no,bank_account_name,bank_account_name_en,bank_code,id_token) 
+															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:mobile_no,:bank_account_name,:bank_account_name_en,'004',:id_token)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
 				':member_no' => $payload["member_no"],
 				':coop_account_no' => $coop_account_no,
-				':kb_account_no' => $kb_account_no,
 				':citizen_id' => $dataComing["citizen_id"],
 				':mobile_no' => $mobile_no,
 				':bank_account_name' => $account_name_th,
@@ -104,7 +98,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','kb_
 					':sigma_key' => $sigma_key,
 					':member_no' => $payload["member_no"],
 					':coop_account_no' => $coop_account_no,
-					':kb_account_no' => $kb_account_no,
 					':citizen_id' => $dataComing["citizen_id"],
 					':mobile_no' => $mobile_no,
 					':bank_account_name' => $account_name_th,

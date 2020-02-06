@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
 		$arrGroupDevice = array();
 		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token

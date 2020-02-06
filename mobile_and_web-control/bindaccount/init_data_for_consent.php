@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
 			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];

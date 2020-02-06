@@ -50,15 +50,14 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$updateLoggedOneDevice->execute();
 					}
 				}
-				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address,fcm_token) 
-													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address,:fcm_token)");
+				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
+													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
 				if($insertToken->execute([
 					':refresh_token' => $refresh_token,
 					':unique_id' => $dataComing["unique_id"],
 					':channel' => $arrPayload["PAYLOAD"]["channel"],
 					':device_name' => $arrPayload["PAYLOAD"]["device_name"],
-					':ip_address' => $arrPayload["PAYLOAD"]["ip_address"],
-					':fcm_token' => $dataComing["fcm_token"] ?? null
+					':ip_address' => $arrPayload["PAYLOAD"]["ip_address"]
 				])){
 					$id_token = $conmysql->lastInsertId();
 					if(isset($dataComing["firsttime"])){
@@ -88,11 +87,15 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						}
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
+						$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([
 							':access_token' => $access_token,
 							':id_token' => $id_token
-						])){
+						]) && ($updateFCMToken->execute([
+							':fcm_token' => $dataComing["fcm_token"] ?? null,
+							':member_no' => $member_no
+						]))){
 							$conmysql->commit();
 							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 							$arrayResult['ACCESS_TOKEN'] = $access_token;

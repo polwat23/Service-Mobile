@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
 		$arrayGroupNews = array();
 		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,create_by,update_date,id_news,link_news_more

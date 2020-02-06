@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistStatement')){
 		$limit = $func->getConstant('limit_stmassist');
 		$arrayResult['LIMIT_DURATION'] = $limit;

@@ -6,9 +6,6 @@ use Dompdf\Dompdf;
 $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		if($payload["member_no"] == 'dev@mode'){
 			$member_no = $configAS["MEMBER_NO_DEV_KEEPINGMONTH"];
