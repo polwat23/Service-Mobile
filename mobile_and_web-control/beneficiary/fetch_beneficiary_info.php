@@ -24,6 +24,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
 		$arrayResult['RESULT'] = TRUE;
+		$arrayResult['RESPONSE_CODE'] = "WS0046";
+		$arrayResult['RESPONSE_MESSAGE'] = "";
+		http_response_code(401);
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

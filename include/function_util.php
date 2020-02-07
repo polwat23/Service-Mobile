@@ -544,7 +544,7 @@ class functions {
 							}
 						}
 						if(sizeof($textcombinenotsent) == 1000){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
+							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
 																	VALUES".implode(',',$textcombinenotsent));
 							if($insertToLogNotSentSMS->execute()){
 								unset($textcombinenotsent);
@@ -561,7 +561,7 @@ class functions {
 																VALUES".implode(',',$textcombine));
 						if($insertToLogSMS->execute()){
 							if(sizeof($textcombinenotsent) > 0){
-								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
 																		VALUES".implode(',',$textcombinenotsent));
 								if($insertToLogNotSentSMS->execute()){
 									$this->con->commit();
@@ -580,7 +580,7 @@ class functions {
 						}
 					}else{
 						if(sizeof($textcombinenotsent) > 0){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
+							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
 																		VALUES".implode(',',$textcombinenotsent));
 							if($insertToLogNotSentSMS->execute()){
 								$this->con->commit();
@@ -602,7 +602,7 @@ class functions {
 			if($multi_message){
 				return true;
 			}else{
-				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,send_by,id_smstemplate)
+				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
 														VALUES".implode(',',$bulkInsert));
 				if($insertToLogSMS->execute()){
 					$this->con->commit();

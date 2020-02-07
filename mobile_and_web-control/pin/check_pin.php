@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['pin','access_token'],$dataComing)){
+if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkPin = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE pin = :pin and member_no = :member_no");
 	$checkPin->execute([
 		':pin' => $dataComing["pin"],
@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['pin','access_token'],$dataComing)){
 	if($checkPin->rowCount() > 0){
 		$rowaccount = $checkPin->fetch();
 		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-		$lib->fetch_payloadJWT($dataComing["access_token"],$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
+		$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 		if(!$is_refreshToken_arr){
 			$arrayResult['RESPONSE_CODE'] = "WS0014";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

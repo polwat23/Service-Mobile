@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 				]);
 				$rowAlias = $fetchAlias->fetch();
-				$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"];
+				$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
 				if(isset($rowAlias["path_alias_img"])){
 					$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
 					$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';

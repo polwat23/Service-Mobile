@@ -4,10 +4,9 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'adminmobile','managenew')){
 		$arrayGroup = array();
-		$fetchUser = $conmysql->prepare("SELECT gcnews.id_news, gcnews.news_title, gcnews.news_detail, gcnews.path_img_header,gcnews.link_news_more, gcnews.create_date, gcnews.update_date,gcnews.id_gallery ,gcgallery.path_img_1, gcgallery.path_img_2, gcgallery.path_img_3, gcgallery.path_img_4, gcgallery.path_img_5
+		$fetchUser = $conmysql->prepare("SELECT id_news,news_title,news_detail,path_img_header,create_date,update_date,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5 
 										FROM gcnews
-										INNER JOIN gcgallery
-										ON gcgallery.id_gallery = gcnews.id_gallery");
+										WHERE is_use ='1'");
 		$fetchUser->execute();
 		while($rowCoreSubMenu = $fetchUser->fetch()){
 			$arrGroupCoreUser = array();
@@ -18,12 +17,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupCoreUser["LINK_News_MORE"] = $rowCoreSubMenu["link_news_more"];
 			$arrGroupCoreUser["CREATE_DATE"] = $lib->convertdate($rowCoreSubMenu["create_date"],'d m Y',true); 
 			$arrGroupCoreUser["UPDATE_DATE"] = $lib->convertdate($rowCoreSubMenu["update_date"],'d m Y',true);  
-			$arrGroupCoreUser["ID_GALLERY"] = $rowCoreSubMenu["id_gallery"];
-			$arrGroupCoreUser["PATH_IMG_1"] = $rowCoreSubMenu["path_img_1"];
-			$arrGroupCoreUser["PATH_IMG_2"] = $rowCoreSubMenu["path_img_2"];
-			$arrGroupCoreUser["PATH_IMG_3"] = $rowCoreSubMenu["path_img_3"];
-			$arrGroupCoreUser["PATH_IMG_4"] = $rowCoreSubMenu["path_img_4"];
-			$arrGroupCoreUser["PATH_IMG_5"] = $rowCoreSubMenu["path_img_5"];
+			$arrGroupCoreUser["PATH_IMG_1"] = $rowCoreSubMenu["img_gallery_1"];
+			$arrGroupCoreUser["PATH_IMG_2"] = $rowCoreSubMenu["img_gallery_2"];
+			$arrGroupCoreUser["PATH_IMG_3"] = $rowCoreSubMenu["img_gallery_3"];
+			$arrGroupCoreUser["PATH_IMG_4"] = $rowCoreSubMenu["img_gallery_4"];
+			$arrGroupCoreUser["PATH_IMG_5"] = $rowCoreSubMenu["img_gallery_5"];
 			
 			$arrayGroup[] = $arrGroupCoreUser;
 		}

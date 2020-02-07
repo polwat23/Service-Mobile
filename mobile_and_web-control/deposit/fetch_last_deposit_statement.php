@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':account_no' => $account_no
 			]);
 		$rowAlias = $fetchAlias->fetch();
-		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"];
+		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
 		if(isset($rowAlias["path_alias_img"])){
 			$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
 			$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
@@ -90,8 +90,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
-			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"];
-			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"];
+			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"] ?? null;
+			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"] ?? null;
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["HEADER"] = $arrAccount;

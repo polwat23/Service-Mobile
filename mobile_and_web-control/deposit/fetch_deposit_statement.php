@@ -64,8 +64,8 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
-			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"];
-			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"];
+			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"] ?? null;
+			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"] ?? null;
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;

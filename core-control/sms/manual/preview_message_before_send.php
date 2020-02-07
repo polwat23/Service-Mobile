@@ -112,8 +112,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				}else{
 					$arrayMerge = $arrayTel;
 				}
-				foreach($arrayMerge as $dest){
-					$arrGroupCheckSend = array();
+				foreach($arrayMerge as $dest){=
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
@@ -128,8 +127,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
 				}
-				foreach($dataComing["destination"] as $target){
-					$arrGroupCheckSend = array();
+				foreach($dataComing["destination"] as $target){=
 					if(mb_strlen($target) <= 8){
 						$target = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
 					}else if(mb_strlen($target) == 10){

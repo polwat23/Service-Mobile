@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								$blukInsert = array();
 							}
 						}else{
-							$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+							$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 							if(sizeof($blukInsertNot) == 1000){
 								$func->logSMSWasNotSent($blukInsertNot);
 								unset($blukInsertNot);
@@ -91,7 +91,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrAllToken[] = $dest["TOKEN"];
 						}else{
 							$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
-							'mobile_app',null,'".$dest["TOKEN"]."','".$payload["username"]."','".$id_template."')";
+							'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."','".$id_template."')";
 						}
 						if(sizeof($bulkInsert) == 1000){
 							$func->logSMSWasNotSent($bulkInsert);
@@ -100,7 +100,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						}
 					}else{
 						$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
-						'mobile_app',null,null,'".$payload["username"]."','".$id_template."')";
+						'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."','".$id_template."')";
 						if(sizeof($bulkInsert) == 1000){
 							$func->logSMSWasNotSent($bulkInsert);
 							unset($bulkInsert);

@@ -108,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 								$arrayResult['RESPONSE_CODE'] = "WS0046";
 								$arrayResult['RESPONSE_MESSAGE'] = "";
 								$arrayResult['RESULT'] = FALSE;
+								http_response_code(401);
 								echo json_encode($arrayResult);
 								exit();
 							}else{
