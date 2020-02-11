@@ -11,12 +11,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$member_no = $payload["member_no"];
 		}
 		$arrayGrpYear = array();
-		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year,sum(approve_amt) as ASS_BALANCE FROM asscontmaster WHERE member_no = :member_no GROUP BY assist_year");
+		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year,sum(approve_amt) as ASS_RECEIVED FROM asscontmaster 
+												WHERE member_no = :member_no GROUP BY assist_year ORDER BY assist_year DESC");
 		$fetchAssGrpYear->execute([':member_no' => $member_no]);
 		while($rowAssYear = $fetchAssGrpYear->fetch(PDO::FETCH_ASSOC)){
 			$arrayYear = array();
 			$arrayYear["ASSIST_YEAR"] = $rowAssYear["ASSIST_YEAR"] + 543;
-			$arrayYear["ASS_BALANCE"] = number_format($rowAssYear["ASS_BALANCE"],2);
+			$arrayYear["ASS_RECEIVED"] = number_format($rowAssYear["ASS_RECEIVED"],2);
 			$arrayGrpYear[] = $arrayYear;
 		}
 		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
