@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchMemberName->execute([
 			':member_no' => $member_no
 		]);
-		$rowMember = $fetchMemberName->fetch();
+		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 		$account_name_th = $rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 		$arrayResult['FEE_AMT'] = 0;
 		$arrayResult['ACCOUNT_NAME'] = $account_name_th;

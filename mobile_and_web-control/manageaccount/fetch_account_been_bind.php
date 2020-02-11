@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		if($fetchAccountBeenBind->rowCount() > 0){
 			$arrBindAccount = array();
-			while($rowAccountBind = $fetchAccountBeenBind->fetch()){
+			while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 				$arrAccount = array();
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);

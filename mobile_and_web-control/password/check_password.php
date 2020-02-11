@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 											WHERE member_no = :member_no");
 	$getOldPassword->execute([':member_no' => $payload["member_no"]]);
 	if($getOldPassword->rowCount() > 0){
-		$rowAccount = $getOldPassword->fetch();
+		$rowAccount = $getOldPassword->fetch(PDO::FETCH_ASSOC);
 		if($rowAccount['account_status'] == '-9'){
 			if($dataComing["password"] == $rowAccount["temppass"]){
 				$validpassword = true;

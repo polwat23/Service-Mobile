@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no 
 												WHERE dpm.member_no = :member_no and deptgroup_code IS NOT NULL ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
-		$rowAccountLastSTM = $fetchLastStmAcc->fetch();
+		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
 		
 		$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name,dp.prncbal as BALANCE,
@@ -31,13 +31,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no,
 			':account_no' => $account_no
 		]);
-		$rowAccount = $getAccount->fetch();
+		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrAccount = array();
 		$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
 			$fetchAlias->execute([
 				':account_no' => $account_no
 			]);
-		$rowAlias = $fetchAlias->fetch();
+		$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
 		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
 		if(isset($rowAlias["path_alias_img"])){
 			$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
+											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE
@@ -76,20 +76,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		while($rowStm = $getStatement->fetch()){
+		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path FROM gcmemodept 
 											WHERE deptaccount_no = :account_no and seq_no = :seq_no");
 			$getMemoDP->execute([
 				':account_no' => $account_no,
 				':seq_no' => $rowStm["SEQ_NO"]
 			]);
-			$rowMemo = $getMemoDP->fetch();
+			$rowMemo = $getMemoDP->fetch(PDO::FETCH_ASSOC);
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
 			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
+			$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
 			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"] ?? null;
 			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"] ?? null;
 			$arrayGroupSTM[] = $arrSTM;

@@ -9,6 +9,30 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$pathImg4 = null;
 		$pathImg5 = null;
 		
+			if(isset($dataComing["img_head_news"]) && $dataComing["img_head_news"] != null){
+			$destination = __DIR__.'/../../../../resource/gallery';
+			$file_name = $lib->randomText('all',6);
+			if(!file_exists($destination)){
+				mkdir($destination, 0777, true);
+			}
+			$createImage = $lib->base64_to_img($dataComing["img_head_news"],$file_name,$destination,null);
+			if($createImage == 'oversize'){
+				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}else{
+				if($createImage){
+					$pathImgHeadNews = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}
+		}
+		
 		if(isset($dataComing["img1"]) && $dataComing["img1"] != null){
 			$destination = __DIR__.'/../../../../resource/gallery';
 			$file_name = $lib->randomText('all',6);
@@ -132,7 +156,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			if($insert_news->execute([
 				':news_title' =>  $dataComing["news_title"],
 				':news_detail' =>  $dataComing["news_detail"],
-				':path_img_header' => $pathImg1,
+				':path_img_header' => $pathImgHeadNews ?? null,
 				':link_news_more' =>  $dataComing["link_news_more"],
 				':path_img_1' => $pathImg1 ?? null,
 				':path_img_2' => $pathImg2 ?? null,

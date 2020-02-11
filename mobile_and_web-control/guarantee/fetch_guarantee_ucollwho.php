@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											AND LCC.LOANCOLLTYPE_CODE = '01'
 											AND LCC.REF_COLLNO = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
-		while($rowUcollwho = $getUcollwho->fetch()){
+		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];

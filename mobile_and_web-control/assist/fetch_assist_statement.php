@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		$fetchAccountReceive->execute([
 			':asscontract_no' => $dataComing["asscontract_no"]
 		]);
-		$rowAccountRCV = $fetchAccountReceive->fetch();
+		$rowAccountRCV = $fetchAccountReceive->fetch(PDO::FETCH_ASSOC);
 		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
 		$fetchAssStatement = $conoracle->prepare("SELECT atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
 													FROM asscontmaster asm LEFT JOIN asscontstatement astm 
@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		$arrGroupAssStm["ACCOUNT_RECEIVE"] = $accAssRcv;
 		$arrGroupAssStm["BANK_NAME"] = $rowAccountRCV["BANK_DESC"];
 		$arrGroupAssStm["BANK_BRANCH_NAME"] = $rowAccountRCV["BRANCH_NAME"];
-		while($rowAssStm = $fetchAssStatement->fetch()){
+		while($rowAssStm = $fetchAssStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrAssStm = array();
 			$arrAssStm["ITEM_DESC"] = $rowAssStm["ITEM_DESC"];
 			$arrAssStm["OPERATE_DATE"] = $lib->convertdate($rowAssStm["SLIP_DATE"],'D m Y');

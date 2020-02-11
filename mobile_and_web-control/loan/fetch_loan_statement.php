@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getAccount->execute([
 			':contract_no' => $contract_no
 		]);
-		$rowContract = $getAccount->fetch();
+		$rowContract = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		while($rowStm = $getStatement->fetch()){
+		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SLIP_NO"] = $rowStm["PAYINSLIP_NO"];

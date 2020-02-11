@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
-			while($rowAccAllow = $fetchAccAllowTrans->fetch()){
+			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
 			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													and dpm.membcat_code = dpt.membcat_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
 			$getDataBalAcc->execute();
-			while($rowDataAccAllow = $getDataBalAcc->fetch()){
+			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllow = array();
 				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$fetchShare = $conoracle->prepare("SELECT sharestk_amt FROM shsharemaster WHERE member_no = :member_no");
 			$fetchShare->execute([':member_no' => $member_no]);
-			$rowShare = $fetchShare->fetch();
+			$rowShare = $fetchShare->fetch(PDO::FETCH_ASSOC);
 			$arrayShare = array();
 			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*10,2);
 			$arrayShare["MEMBER_NO"] = $payload["member_no"];

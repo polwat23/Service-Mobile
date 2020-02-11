@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			':member_no' => $payload["member_no"],
 			':from_account' => $dataComing["deptaccount_no"]
 		]);
-		$rowBalLimit = $checkLimitBalance->fetch();
+		$rowBalLimit = $checkLimitBalance->fetch(PDO::FETCH_ASSOC);
 		$limit_amt = 0;
 		$limit_withdraw = $func->getConstant("limit_withdraw");
 		$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
@@ -19,10 +19,10 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			':deptaccount_no' => $dataComing["deptaccount_no"],
 			':member_no' => $payload["member_no"]
 		]);
-		$rowDataUser = $getDataUser->fetch();
+		$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
 		$getLimitRate = $conmysql->prepare("SELECT limit_transaction_amt FROM gcmemberaccount WHERE member_no = :member_no");
 		$getLimitRate->execute([':member_no' => $payload["member_no"]]);
-		$rowLimit = $getLimitRate->fetch();
+		$rowLimit = $getLimitRate->fetch(PDO::FETCH_ASSOC);
 		if($limit_withdraw >= $rowLimit["limit_transaction_amt"]){
 			$limit_amt = (int)$rowLimit["limit_transaction_amt"];
 		}else{

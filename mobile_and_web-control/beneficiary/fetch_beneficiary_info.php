@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM mbgainmaster mg LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
 												WHERE member_no = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);
-		while($rowBenefit = $getBeneficiary->fetch()){
+		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
 			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
 			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);

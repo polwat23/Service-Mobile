@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayUserRegister = array();
 		$fetchUserAccount = $conmysql->prepare("SELECT member_no FROM gcmemberaccount");
 		$fetchUserAccount->execute();
-		while($rowUserRegis = $fetchUserAccount->fetch()){
+		while($rowUserRegis = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];
 		}
 		$arrayGroup = array();
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													WHERE mb.resign_status = '0'");
 		}
 		$fetchUserNotRegis->execute();
-		while($rowUserNotRegis = $fetchUserNotRegis->fetch()){
+		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
 			$arrayUserNotRegister = array();
 			$arrayUserNotRegister["MEMBER_NO"] = $rowUserNotRegis["MEMBER_NO"];
 			$arrayUserNotRegister["NAME"] = $rowUserNotRegis["PRENAME_DESC"].$rowUserNotRegis["MEMB_NAME"]." ".$rowUserNotRegis["MEMB_SURNAME"];

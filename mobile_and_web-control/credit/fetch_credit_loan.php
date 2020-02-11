@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											AND NVL(mb.salary_amount,15000) BETWEEN lc.startsalary_amt AND lc.endsalary_amt
 											GROUP BY lt.loantype_desc,lc.maxloan_amt,(sm.sharestk_amt*sh.unitshare_value*lc.multiple_share ) + (NVL(mb.salary_amount,15000)*lc.multiple_salary)");
 		$fetchCredit->execute([':member_no' => $member_no]);
-		while($rowCredit = $fetchCredit->fetch()){
+		while($rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC)){
 			$arrCredit = array();
 			if($rowCredit["CREDIT_AMT"] > $rowCredit["MAXLOAN_AMT"]){
 				$loan_amt = $rowCredit["MAXLOAN_AMT"];

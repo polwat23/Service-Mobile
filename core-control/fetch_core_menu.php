@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										ORDER BY cm.coremenu_order ASC");
 		$fetchMenu->execute([':username' => $payload["username"]]);
 	}
-	while($rowMenu = $fetchMenu->fetch()){
+	while($rowMenu = $fetchMenu->fetch(PDO::FETCH_ASSOC)){
 		if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 			$arrMenu = array();
 			$arrMenu["MENU_NAME"] = $rowMenu["coremenu_name"];

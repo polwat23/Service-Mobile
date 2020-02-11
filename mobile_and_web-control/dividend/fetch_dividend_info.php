@@ -19,14 +19,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no,
 			':limit_year' => $limit_year
 		]);
-		while($rowYear = $getYeardividend->fetch()){
+		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
 			$getDivMaster = $conoracle->prepare("SELECT div_amt,avg_amt FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
-			$rowDiv = $getDivMaster->fetch();
+			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
-			$rowMethpay = $getMethpay->fetch();
+			$rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$rowMethpay["ACCOUNT_FORMAT"]);
 			$arrDividend["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
 			$arrDividend["BANK"] = $rowMethpay["BANK"];
@@ -62,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$arrayPayGroup = array();
 			$sumPay = 0;
-			while($rowPay = $getPaydiv->fetch()){
+			while($rowPay = $getPaydiv->fetch(PDO::FETCH_ASSOC)){
 				$arrPay = array();
 				$arrPay["TYPE_DESC"] = $rowPay["TYPE_DESC"];
 				$arrPay["PAY_AMT"] = number_format($rowPay["PAY_AMT"],2);

@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_no' => $member_no,
 				':limit_period' => $limit_period
 		]);
-		while($rowPeriod = $getPeriodKP->fetch()){
+		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_no' => $member_no,
 				':recv_period' => $rowPeriod["RECV_PERIOD"]
 			]);
-			$rowKPDetali = $getKPDetail->fetch();
+			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
 			$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["RECEIVE_AMT"],2);
 			$arrayGroupPeriod[] = $arrKpmonth;

@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											WHERE sm.menu_status = '1' and sm.id_menuparent = 8 and smp.is_use = '1'");
 		$fetchTopic->execute();
 		$arrAllTopic = array();
-		while($rowTopic = $fetchTopic->fetch()){
+		while($rowTopic = $fetchTopic->fetch(PDO::FETCH_ASSOC)){
 			$arrayTopic = array();
 			$arrayTopic["TOPIC_NAME"] = $rowTopic["menu_name"];
 			$arrayTopic["ID_SUBMENU"] = $rowTopic["id_submenu"];

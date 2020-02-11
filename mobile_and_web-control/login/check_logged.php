@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		':unique_id' => $dataComing["unique_id"]
 	]);
 	if($checkUserlogin->rowCount() > 0){
-		$rowLog = $checkUserlogin->fetch();
+		$rowLog = $checkUserlogin->fetch(PDO::FETCH_ASSOC);
 		if($rowLog["is_login"] == '1'){
 			$lib->addLogtoTxt([
 				"access_date" => date('Y-m-d H:i:s'), 

@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchSlipCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'YYYY')) as COUNT_SLIP_YEAR,to_char(slip_date,'YYYY') as YEAR_SLIP
 												FROM slslippayin WHERE member_no = :member_no GROUP BY to_char(slip_date,'YYYY') ORDER BY YEAR_SLIP DESC");
 		$fetchSlipCount->execute([':member_no' => $member_no]);
-		while($rowslipcountyear = $fetchSlipCount->fetch()){
+		while($rowslipcountyear = $fetchSlipCount->fetch(PDO::FETCH_ASSOC)){
 			$arraySlipYear = array();
 			$arraySlipYear["COUNT_SLIP_YEAR"] = $rowslipcountyear["COUNT_SLIP_YEAR"];
 			$arraySlipYear["YEAR_SLIP"] = $rowslipcountyear["YEAR_SLIP"] + 543;
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_no' => $member_no,
 				':year_slip' => $rowslipcountyear["YEAR_SLIP"]
 			]);
-			while($rowslipcountmonth = $fetchSlipMonthCount->fetch()){
+			while($rowslipcountmonth = $fetchSlipMonthCount->fetch(PDO::FETCH_ASSOC)){
 				$arraySlipMonth = array();
 				$arraySlipMonth["COUNT_SLIP_MONTH"] = $rowslipcountmonth["COUNT_SLIP_MONTH"];
 				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp($rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"],true);
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':member_no' => $member_no,
 					':slip_date' => $rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"]
 				]);
-				while($rowslip = $fetchSlipInMonth->fetch()){
+				while($rowslip = $fetchSlipInMonth->fetch(PDO::FETCH_ASSOC)){
 					$arraySlip = array();
 					$arraySlip["SLIP_TYPE"] = $rowslip["SLIPTYPE_DESC"];
 					$arraySlip["SLIP_NO"] = $rowslip["PAYINSLIP_NO"];

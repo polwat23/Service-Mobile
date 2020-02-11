@@ -25,10 +25,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		// Deposit Inside --------------------------------------
 		$fetchDataDeposit = $conmysql->prepare("SELECT bank_code,deptaccount_no_bank FROM gcbindaccount WHERE sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
-		$rowDataDeposit = $fetchDataDeposit->fetch();
+		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$fetchDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$fetchDepttype->execute([':deptaccount_no' => $coop_account_no]);
-		$rowDataDepttype = $fetchDepttype->fetch();
+		$rowDataDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC);
 		$arrayGroup = array();
 		$arrayGroup["account_id"] = "11121700";
 		$arrayGroup["action_status"] = "1";

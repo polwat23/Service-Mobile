@@ -44,7 +44,7 @@ if(!$anonymous){
 			$arrMenuDep = array();
 			$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 			$fetchMenuDep->execute([':member_no' => $member_no]);
-			$rowMenuDep = $fetchMenuDep->fetch();
+			$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 			$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 			$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
@@ -52,7 +52,7 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 			$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
-			$rowMenuLoan = $fetchMenuLoan->fetch();
+			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
@@ -81,7 +81,7 @@ if(!$anonymous){
 				':menu_parent' => $dataComing["menu_parent"],
 				':channel' => $dataComing["channel"]
 			]);
-			while($rowMenu = $fetch_menu->fetch()){
+			while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["channel"] == 'mobile_app'){
 					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
@@ -131,7 +131,7 @@ if(!$anonymous){
 			$fetch_menu->execute([
 				':channel' => $dataComing["channel"]
 			]);
-			while($rowMenu = $fetch_menu->fetch()){
+			while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["channel"] == 'mobile_app'){
 					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
@@ -154,13 +154,13 @@ if(!$anonymous){
 						if($rowMenu["id_menu"] == 1){
 							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 							$fetchMenuDep->execute([':member_no' => $member_no]);
-							$rowMenuDep = $fetchMenuDep->fetch();
+							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}else if($rowMenu["id_menu"] == 2){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 							$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
-							$rowMenuLoan = $fetchMenuLoan->fetch();
+							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						}					
@@ -196,7 +196,7 @@ if(!$anonymous){
 												LEFT JOIN gcpalettecolor gpc ON gfm.id_palette = gpc.id_palette
 												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gfm.is_show = '1' ORDER BY gfm.seq_no ASC");
 			$fetchMenuFav->execute([':member_no' => $member_no]);
-			while($rowMenuFav = $fetchMenuFav->fetch()){
+			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
 				if(isset($rowMenuFav["type_palette"])){
 					if($rowMenuFav["type_palette"] == '2'){
@@ -252,7 +252,7 @@ if(!$anonymous){
 		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_parent IN ('-1','-2')");
 		$fetch_menu->execute();
-		while($rowMenu = $fetch_menu->fetch()){
+		while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 			if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
 					$arrMenu = array();

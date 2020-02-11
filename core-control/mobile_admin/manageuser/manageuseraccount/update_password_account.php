@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		$fetchCitizenID->execute([
 			':member_no' => $dataComing["member_no"]
 		]);
-		$rowcitizenid = $fetchCitizenID->fetch();
+		$rowcitizenid = $fetchCitizenID->fetch(PDO::FETCH_ASSOC);
 		$new_password = password_hash($rowcitizenid["CARD_PERSON"], PASSWORD_DEFAULT);
 		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :newpassword,account_status = '-9'
 										WHERE member_no = :member_no");

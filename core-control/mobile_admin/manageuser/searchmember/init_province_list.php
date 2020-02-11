@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$fetchProvince = $conoracle->prepare("SELECT province_code,province_desc FROM mbucfprovince");
 		$fetchProvince->execute();
-		while($rowProvince = $fetchProvince->fetch()){
+		while($rowProvince = $fetchProvince->fetch(PDO::FETCH_ASSOC)){
 			$arrayProvince = array();
 			$arrayProvince["PROVINCE_CODE"] = $rowProvince["PROVINCE_CODE"];
 			$arrayProvince["PROVINCE_DESC"] = $rowProvince["PROVINCE_DESC"];

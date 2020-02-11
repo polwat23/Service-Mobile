@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE lnm.member_no = :member_no and lnm.contract_status = 1 
 												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
-		$rowLoanLastSTM = $fetchLastStmAcc->fetch();
+		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,period_payamt as PERIOD,
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no,
 			':contract_no' => $contract_no
 		]);
-		$rowContract = $getContract->fetch();
+		$rowContract = $getContract->fetch(PDO::FETCH_ASSOC);
 		$arrContract = array();
 		$arrContract["CONTRACT_NO"] = $contract_no;
 		$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
@@ -68,7 +68,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		while($rowStm = $getStatement->fetch()){
+		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SLIP_NO"] = $rowStm["PAYINSLIP_NO"];

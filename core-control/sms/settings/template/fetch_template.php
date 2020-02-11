@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM smstemplate st LEFT JOIN smsquery sq ON st.id_smsquery = sq.id_smsquery
 												WHERE st.is_use = '1' and st.id_smstemplate = :id_smstemplate");
 			$fetchTemplate->execute([':id_smstemplate' => $dataComing["id_smstemplate"]]);
-			$rowTemplate = $fetchTemplate->fetch();
+			$rowTemplate = $fetchTemplate->fetch(PDO::FETCH_ASSOC);
 			$arrTemplateGroup["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
 			$arrTemplateGroup["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
 			$arrTemplateGroup["TEMPLATE_BODY"] = $rowTemplate["smstemplate_body"];
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM smstemplate
 												WHERE is_use = '1' ORDER BY id_smstemplate DESC");
 			$fetchTemplate->execute();
-			while($rowTemplate = $fetchTemplate->fetch()){
+			while($rowTemplate = $fetchTemplate->fetch(PDO::FETCH_ASSOC)){
 				$arrTemplate = array();
 				$arrTemplate["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
 				$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];

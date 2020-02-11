@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$arrGroupAllIns = array();
-		while($rowInsure = $fetchinSureInfo->fetch()){
+		while($rowInsure = $fetchinSureInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayInsure = array();
 			$arrGroupIns = array();
 			$arrayInsure["PAYMENT"] = number_format($rowInsure["PREMIUM_PAYMENT"],2);

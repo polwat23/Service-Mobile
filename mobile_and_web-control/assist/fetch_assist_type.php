@@ -10,19 +10,36 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$member_no = $payload["member_no"];
 		}
+		$arrayGrpYear = array();
+		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year,sum(approve_amt) as ASS_BALANCE FROM asscontmaster WHERE member_no = :member_no GROUP BY assist_year");
+		$fetchAssGrpYear->execute([':member_no' => $member_no]);
+		while($rowAssYear = $fetchAssGrpYear->fetch(PDO::FETCH_ASSOC)){
+			$arrayYear = array();
+			$arrayYear["ASSIST_YEAR"] = $rowAssYear["ASSIST_YEAR"] + 543;
+			$arrayYear["ASS_BALANCE"] = number_format($rowAssYear["ASS_BALANCE"],2);
+			$arrayGrpYear[] = $arrayYear;
+		}
+		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
+			$yearAss = $dataComing["ass_year"] - 543;
+		}else{
+			$yearAss = date('Y');
+		}
 		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO FROM asscontmaster asm LEFT JOIN 
-												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE WHERE member_no = :member_no and asscont_status = 1");
+												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE WHERE asm.member_no = :member_no 
+												and asm.asscont_status = 1 and asm.assist_year = :year");
 		$fetchAssType->execute([
-			':member_no' => $member_no
+			':member_no' => $member_no,
+			':year' => $yearAss
 		]);
 		$arrGroupAss = array();
-		while($rowAssType = $fetchAssType->fetch()){
+		while($rowAssType = $fetchAssType->fetch(PDO::FETCH_ASSOC)){
 			$arrAss = array();
 			$arrAss["ASSISTTYPE_CODE"] = $rowAssType["ASSISTTYPE_CODE"];
 			$arrAss["ASSISTTYPE_DESC"] = $rowAssType["ASSISTTYPE_DESC"];
 			$arrAss["ASSCONTRACT_NO"] = $rowAssType["ASSCONTRACT_NO"];
 			$arrGroupAss[] = $arrAss;
 		}
+		$arrayResult["YEAR"] = $arrayGrpYear;
 		$arrayResult["ASSIST"] = $arrGroupAss;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);

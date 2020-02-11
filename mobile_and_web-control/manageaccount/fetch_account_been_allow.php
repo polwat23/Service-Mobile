@@ -7,14 +7,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use FROM gcuserallowacctransaction WHERE member_no = :member_no");
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
-			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch()){
+			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrAccBeenAllow = array();
 				$getDetailAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.membcat_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														and dpm.membcat_code = dpt.membcat_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
-				$rowDetailAcc = $getDetailAcc->fetch();	
+				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);	
 				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
 				$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];

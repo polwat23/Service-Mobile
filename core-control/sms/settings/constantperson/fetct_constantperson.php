@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSMSConstantDept = $conmysql->prepare("SELECT smscs_value as constant_value
 												FROM smsconstantsystem WHERE is_use = '1' AND smscs_name = 'limit_dept_send_free'");
 		$fetchSMSConstantDept->execute();
-		while($rowSMSConstantDept = $fetchSMSConstantDept->fetch()){
+		while($rowSMSConstantDept = $fetchSMSConstantDept->fetch(PDO::FETCH_ASSOC)){
 			$smsConstantMinDept = $rowSMSConstantDept["constant_value"];
 		}
 		
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSMSConstantWithdraw = $conmysql->prepare("SELECT smscs_value as constant_value
 												FROM smsconstantsystem WHERE is_use = '1' AND smscs_name = 'limit_withdraw_send_free'");
 		$fetchSMSConstantWithdraw->execute();
-		while($rowSMSConstantWithdraw = $fetchSMSConstantWithdraw->fetch()){
+		while($rowSMSConstantWithdraw = $fetchSMSConstantWithdraw->fetch(PDO::FETCH_ASSOC)){
 			$smsConstantMinWithdraw = $rowSMSConstantWithdraw["constant_value"];
 		}
 		
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												smscsp_minwithdraw as minwithdraw,is_use
 												FROM smsconstantperson");
 		$fetchConstant->execute();
-		while($rowMenuMobile = $fetchConstant->fetch()){
+		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["id_constantperson"];
 			$arrConstans["CONSTANT_MEMBERNO"] = $rowMenuMobile["member_no"];

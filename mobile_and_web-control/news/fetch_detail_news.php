@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 											FROM gcnews gn
 											WHERE gn.id_news = :id_news");
 		$fetchDetailNews->execute([':id_news' => $dataComing["id_news"]]);
-		$rowDetailNews = $fetchDetailNews->fetch();
+		$rowDetailNews = $fetchDetailNews->fetch(PDO::FETCH_ASSOC);
 		$arrayDetailNews = array();
 		$arrayDetailNews["TITLE"] = $rowDetailNews["news_title"];
 		$arrayDetailNews["DETAIL"] = $rowDetailNews["news_detail"];

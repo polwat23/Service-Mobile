@@ -6,9 +6,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$fetchUser = $conmysql->prepare("SELECT id_news,news_title,news_detail,path_img_header,create_date,update_date,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5 
 										FROM gcnews
-										WHERE is_use ='1'");
+										WHERE is_use ='1'
+										ORDER BY update_date DESC");
 		$fetchUser->execute();
-		while($rowCoreSubMenu = $fetchUser->fetch()){
+		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreUser = array();
 			$arrGroupCoreUser["ID_NEW"] = $rowCoreSubMenu["id_news"];
 			$arrGroupCoreUser["NEWS_TITLE"] = $rowCoreSubMenu["news_title"];

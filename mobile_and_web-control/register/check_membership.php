@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			':member_no' => $member_no,
 			':card_person' => $dataComing["id_card"]
 		]);
-		$rowMember = $checkValid->fetch();
+		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
 		if($rowMember){
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];

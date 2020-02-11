@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 												and dpm.membcat_code = dpt.membcat_code
 												WHERE dpm.deptaccount_no = :deptaccount_no");
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
-		$rowDataAcc = $getDataAcc->fetch();
+		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataAcc["DEPTTYPE_DESC"])){
 			$checkAllowToTransaction = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 			$checkAllowToTransaction->execute([':member_no' => $payload["member_no"]]);

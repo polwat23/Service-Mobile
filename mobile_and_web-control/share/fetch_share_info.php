@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,sharebegin_amt
 													FROM shsharemaster WHERE member_no = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);
-		$rowMastershare = $getSharemasterinfo->fetch();
+		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
 			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"],2);
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':datebefore' => $date_before,
 				':datenow' => $date_now
 			]);
-			while($rowStm = $getShareStatement->fetch()){
+			while($rowStm = $getShareStatement->fetch(PDO::FETCH_ASSOC)){
 				$arrayStm = array();
 				$arrayStm["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 				$arrayStm["PERIOD_SHARE_AMOUNT"] = number_format($rowStm["PERIOD_SHARE_AMOUNT"],2);

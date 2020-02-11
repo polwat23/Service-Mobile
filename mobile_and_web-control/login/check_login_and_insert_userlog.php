@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 										WHERE member_no = :member_no and account_status NOT IN('-8','-7','-6')");
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
-		$rowPassword = $checkLogin->fetch();
+		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
 		if($rowPassword['account_status'] == '-9'){
 			if($dataComing["password"] == $rowPassword['temppass']){
 				$valid_pass = true;
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$getMemberLogged->execute([':member_no' => $member_no]);
 					if($getMemberLogged->rowCount() > 0){
 						$arrayIdToken = array();
-						$rowIdToken = $getMemberLogged->fetch();
+						$rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC);
 						$arrayIdToken[] = $rowIdToken["id_token"];
 						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
 																	gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),

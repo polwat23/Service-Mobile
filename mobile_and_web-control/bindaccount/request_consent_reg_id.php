@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 			]);
 			if($checkBeenBindForPending->rowCount() > 0){
 				$arrayAccPending = array();
-				while($rowAccPending = $checkBeenBindForPending->fetch()){
+				while($rowAccPending = $checkBeenBindForPending->fetch(PDO::FETCH_ASSOC)){
 					$arrayAccPending[] = $rowAccPending["id_bindaccount"];
 				}
 				$deleteAccForPending = $conmysql->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 			$fetchMemberName->execute([
 				':member_no' => $member_no
 			]);
-			$rowMember = $fetchMemberName->fetch();
+			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();

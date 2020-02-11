@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
 		]);
-		while($rowDetail = $getDetailKP->fetch()){
+		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];			
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){

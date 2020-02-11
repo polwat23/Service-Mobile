@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										 FROM  coresectionsystem
 										 WHERE is_use ='1'");
 		$fetchUser->execute();
-		while($rowCoreSubMenu = $fetchUser->fetch()){
+		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreSectionSystem = array();
 			$arrGroupCoreSectionSystem["ID_SECTION_SYSTEM"] = $rowCoreSubMenu["id_section_system"];
 			$arrGroupCoreSectionSystem["SECTION_SYSTEM"] = $rowCoreSubMenu["section_system"];

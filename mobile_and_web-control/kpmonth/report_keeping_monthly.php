@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$fetchName->execute([
 				':member_no' => $member_no
 			]);
-			$rowName = $fetchName->fetch();
+			$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		}else{
 			$header["fullname"] = "นายไอโซแคร์ ซิสเต็มส์";
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
 		]);
-		while($rowDetail = $getDetailKP->fetch()){
+		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];			
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
@@ -99,7 +99,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				':member_no' => $member_no,
 				':recv_period' => $dataComing["recv_period"]
 			]);
-			$rowKPHeader = $getDetailKPHeader->fetch();
+			$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 			$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
 			$header["member_no"] = $payload["member_no"];
 			$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];

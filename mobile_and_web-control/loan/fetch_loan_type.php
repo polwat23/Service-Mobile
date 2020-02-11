@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAllLoan = array();
 		$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE member_no = :member_no");
 		$getSumAllContract->execute([':member_no' => $member_no]);
-		$rowSumloanbalance = $getSumAllContract->fetch();
+		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,period_payamt as PERIOD,
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 											WHERE ln.member_no = :member_no and ln.contract_status = 1");
 		$getContract->execute([':member_no' => $member_no]);
-		while($rowContract = $getContract->fetch()){
+		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
 			$arrContract = array();
 			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];

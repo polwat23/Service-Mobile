@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_topic,send_message,destination,repeat_send,send_date,amount_repeat,send_platform,send_image
 													FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
 			$fetchGroup->execute([':id_sendahead' => $dataComing["id_sendahead"]]);
-			while($rowSendAhead = $fetchGroup->fetch()){
+			while($rowSendAhead = $fetchGroup->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
 				$arrGroupSendAhead["SEND_TOPIC"] = $rowSendAhead["send_topic"];
 				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchSendAhead = $conmysql->prepare("SELECT id_sendahead,send_message,destination,repeat_send,send_date,amount_repeat
 													FROM smssendahead WHERE is_use = '1'");
 			$fetchSendAhead->execute();
-			while($rowSendAhead = $fetchSendAhead->fetch()){
+			while($rowSendAhead = $fetchSendAhead->fetch(PDO::FETCH_ASSOC)){
 				$arrSendAhead = array();
 				$arrSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
 				$arrSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];

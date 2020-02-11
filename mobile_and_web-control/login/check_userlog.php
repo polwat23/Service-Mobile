@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkPinNull = $conmysql->prepare("SELECT pin FROM gcmemberaccount WHERE member_no = :member_no and account_status NOT IN('-6','-7','-8')");
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
-	$rowPinNull = $checkPinNull->fetch();
+	$rowPinNull = $checkPinNull->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowPinNull["pin"])){
 		$checkPin = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no and pin = :pin");
 		$checkPin->execute([
@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			':pin' => $dataComing["pin"]
 		]);
 		if($checkPin->rowCount() > 0){
-			$rowaccount = $checkPin->fetch();
+			$rowaccount = $checkPin->fetch(PDO::FETCH_ASSOC);
 			if($rowaccount["account_status"] == '-9'){
 				$arrayResult['TEMP_PASSWORD'] = TRUE;
 			}else{
@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$fetchAcc->execute([
 				':member_no' => $payload["member_no"]
 			]);
-			$rowaccount = $fetchAcc->fetch();
+			$rowaccount = $fetchAcc->fetch(PDO::FETCH_ASSOC);
 			if($rowaccount["account_status"] == '-9'){
 				$arrayResult['TEMP_PASSWORD'] = TRUE;
 			}else{
