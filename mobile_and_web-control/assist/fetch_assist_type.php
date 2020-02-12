@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$member_no = $payload["member_no"];
 		}
 		$arrayGrpYear = array();
-		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year,sum(approve_amt) as ASS_RECEIVED FROM asscontmaster 
+		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year,sum(pay_balance) as ASS_RECEIVED FROM asscontmaster 
 												WHERE member_no = :member_no GROUP BY assist_year ORDER BY assist_year DESC");
 		$fetchAssGrpYear->execute([':member_no' => $member_no]);
 		while($rowAssYear = $fetchAssGrpYear->fetch(PDO::FETCH_ASSOC)){

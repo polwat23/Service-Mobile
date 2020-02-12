@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$
 				exit();
 			}else{
 				if($createImage){
-					$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
+					$pathImg = "resource/image_wait_to_be_sent/".$createImage["normal_path"];
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					$arrayResult['RESULT'] = FALSE;

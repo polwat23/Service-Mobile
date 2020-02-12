@@ -5,18 +5,19 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageahead')){
 		$arrGroupSendAhead = array();
 		if(isset($dataComing["id_sendahead"])){
-			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_topic,send_message,destination,repeat_send,send_date,amount_repeat,send_platform,send_image
-													FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
+			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_topic,send_message,destination,repeat_send,
+												send_date,amount_repeat,send_platform,send_image
+												FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
 			$fetchGroup->execute([':id_sendahead' => $dataComing["id_sendahead"]]);
 			while($rowSendAhead = $fetchGroup->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
 				$arrGroupSendAhead["SEND_TOPIC"] = $rowSendAhead["send_topic"];
 				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
 				$arrGroupSendAhead["REPEAT_STATUS"] = $rowSendAhead["repeat_send"];
-				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y');
+				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y H i s',true);
 				$arrGroupSendAhead["SEND_DATE_NOT_FORMAT"] = $rowSendAhead["send_date"];
 				$arrGroupSendAhead["AMOUNT_REPEAT"] = number_format($rowSendAhead["amount_repeat"],0);
-				$arrGroupSendAhead["DESTINATION"] = $rowSendAhead["destination"];
+				$arrGroupSendAhead["DESTINATION"] = explode(',',$rowSendAhead["destination"]);
 				$arrGroupSendAhead["SEND_PLATFORM"] = $rowSendAhead["send_platform"];
 				$arrGroupSendAhead["SEND_IMAGE"] = isset($rowSendAhead["send_image"]) ? $config["URL_SERVICE"].$rowSendAhead["send_image"] : null;
 			}
@@ -29,7 +30,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
 				$arrSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
 				$arrSendAhead["REPEAT_STATUS"] = $rowSendAhead["repeat_send"];
-				$arrSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y');
+				$arrSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y H i s',true);
 				$arrSendAhead["AMOUNT_REPEAT"] = number_format($rowSendAhead["amount_repeat"],0);
 				$arrSendAhead["DESTINATION"] = explode(',',$rowSendAhead["destination"]);
 				$arrGroupSendAhead[] = $arrSendAhead;

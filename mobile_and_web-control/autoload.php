@@ -102,8 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						echo json_encode($arrayResult);
 						exit();
 					}else if($errorCode === 4){
-						if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Landing'){
-							if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
+						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
+							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Landing' && $payload["member_no"] != 'dev@mode'){
 								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
 								if($is_refreshToken_arr){
 									$arrayResult['RESPONSE_CODE'] = "WS0046";
@@ -120,14 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 									echo json_encode($arrayResult);
 									exit();
 								}
-							}else{
-								$arrayResult['RESPONSE_CODE'] = "WS0014";
-								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-								$arrayResult['RESULT'] = FALSE;
-								http_response_code(401);
-								echo json_encode($arrayResult);
-								exit();
+							
 							}
+						}else{
+							$arrayResult['RESPONSE_CODE'] = "WS0014";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							http_response_code(401);
+							echo json_encode($arrayResult);
+							exit();
 						}
 					}else{
 						$arrayResult['RESPONSE_CODE'] = "WS0032";

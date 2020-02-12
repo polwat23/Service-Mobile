@@ -49,9 +49,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC);
-			$arrDividend["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$rowMethpay["ACCOUNT_FORMAT"]);
-			$arrDividend["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
-			$arrDividend["BANK"] = $rowMethpay["BANK"];
+			$arrDividend["ACCOUNT_RECEIVE"] = !!$rowMethpay["BANK_ACCOUNT"] ? $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$rowMethpay["ACCOUNT_FORMAT"]) : null;
+			$arrDividend["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"] ?? null;
+			$arrDividend["BANK"] = $rowMethpay["BANK"]  ?? null;
 			$arrDividend["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
 			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
