@@ -3,11 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
-		if($payload["member_no"] == "dev@mode" || $payload["member_no"] == "salemode"){
-			$member_no = $configAS[$payload["member_no"]];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$fetchMemberName = $conoracle->prepare("SELECT MEMB_NAME,MEMB_SURNAME FROM MBMEMBMASTER WHERE member_no = :member_no");
 		$fetchMemberName->execute([
 			':member_no' => $member_no

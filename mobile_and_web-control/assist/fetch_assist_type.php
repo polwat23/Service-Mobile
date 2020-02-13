@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $configAS["MEMBER_NO_DEV_ASSIST"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $configAS["MEMBER_NO_SALE_ASSIST"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayGrpYear = array();
 		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year,sum(pay_balance) as ASS_RECEIVED FROM asscontmaster 
 												WHERE member_no = :member_no GROUP BY assist_year ORDER BY assist_year DESC");

@@ -41,11 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				$deleteAccForPending = $conmysql->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
 				$deleteAccForPending->execute();
 			}
-			if($payload["member_no"] == "dev@mode" || $payload["member_no"] == "salemode"){
-				$member_no = $configAS[$payload["member_no"]];
-			}else{
-				$member_no = $payload["member_no"];
-			}
+			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
 													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
 													WHERE MB.member_no = :member_no");

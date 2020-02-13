@@ -3,15 +3,7 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	if($payload["member_no"] == 'dev@mode'){
-		$member_no = $configAS["MEMBER_NO_DEV_DEPOSIT"];
-		$member_no_loan = $configAS["MEMBER_NO_DEV_LOAN"];
-	}else if($payload["member_no"] == 'salemode'){
-		$member_no = $configAS["MEMBER_NO_SALE_DEPOSIT"];
-		$member_no_loan = $configAS["MEMBER_NO_SALE_LOAN"];
-	}else{
-		$member_no = $payload["member_no"];
-	}
+	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 	$user_type = $payload["user_type"];
 	$permission = array();
 	$arrayResult = array();
@@ -51,7 +43,7 @@ if(!$anonymous){
 		}else if($dataComing["id_menu"] == 2){
 			$arrMenuLoan = array();
 			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-			$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
+			$fetchMenuLoan->execute([':member_no' => $member_no]);
 			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
@@ -159,7 +151,7 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}else if($rowMenu["id_menu"] == 2){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-							$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
+							$fetchMenuLoan->execute([':member_no' => $member_no]);
 							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
