@@ -183,26 +183,14 @@ if(!$anonymous){
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
-			$fetchMenuFav = $conmysql->prepare("SELECT gfm.id_fav_menu,gfl.name_fav,gpc.color_text,gpc.color_main,gpc.color_secon,gpc.color_deg,gpc.type_palette
-												FROM gcfavoritemenu gfm LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno
-												LEFT JOIN gcpalettecolor gpc ON gfm.id_palette = gpc.id_palette
-												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gfm.is_show = '1' ORDER BY gfm.seq_no ASC");
-			$fetchMenuFav->execute([':member_no' => $member_no]);
+			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
+			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
-				if(isset($rowMenuFav["type_palette"])){
-					if($rowMenuFav["type_palette"] == '2'){
-						$arrFavMenu["ACCOUNT_COOP_COLOR"] = $rowMenuFav["color_deg"]."|".$rowMenuFav["color_main"].",".$rowMenuFav["color_secon"];
-					}else{
-						$arrFavMenu["ACCOUNT_COOP_COLOR"] = "90|".$rowMenuFav["color_main"].",".$rowMenuFav["color_main"];
-					}
-					$arrFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $rowMenuFav["color_text"];
-				}else{
-					$arrFavMenu["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
-					$arrFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
-				}
 				$arrFavMenu["NAME_FAV"] = $rowMenuFav["name_fav"];
-				$arrFavMenu["ID_FAV_MENU"] = $rowMenuFav["id_fav_menu"];
+				$arrFavMenu["FAV_REFNO"] = $rowMenuFav["fav_refno"];
+				$arrFavMenu["FLAG_TRANS"] = $rowMenuFav["flag_trans"];
+				$arrFavMenu["DESTINATION"] = $rowMenuFav["destination"];
 				$arrFavMenuGroup[] = $arrFavMenu;
 			}
 			if(sizeof($arrayAllMenu) > 0 || sizeof($arrayMenuSetting) > 0){

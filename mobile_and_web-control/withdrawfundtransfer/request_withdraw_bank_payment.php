@@ -60,8 +60,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrayGroup["post_status"] = "1";
 		$arrayGroup["principal_amt"] = null;
 		$arrayGroup["ref_slipno"] = null;
-		$arrayGroup["slipitemtype_code"] = "WTX";
-		$arrayGroup["stmtitemtype_code"] = "DTX";
+		$arrayGroup["slipitemtype_code"] = "DTX";
+		$arrayGroup["stmtitemtype_code"] = "WTX";
 		$arrayGroup["system_cd"] = "02";
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
@@ -135,6 +135,16 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
+				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
+				$fetchSeqno->execute([':deptslip_no' => $ref_slipno]);
+				$rowSeqno = $fetchSeqno->fetch();
+				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
+													VALUES(:remark,:deptaccount_no,:seq_no)");
+				$insertRemark->execute([
+					':remark' => $dataComing["remark"],
+					':deptaccount_no' => $coop_account_no,
+					':seq_no' => $rowSeqno["SEQ_NO"]
+				]);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,result_transaction,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
@@ -155,20 +165,22 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				]);
 				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 				$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
-				$dataMerge = array();
-				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-				$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-				$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-				$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
-				$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
-				$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-				$arrMessage["BODY"] = $message_endpoint["BODY"];
-				$arrMessage["PATH_IMAGE"] = null;
-				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-				if($func->insertHistory($arrPayloadNotify,'1')){
-					$lib->sendNotify($arrPayloadNotify,"person");
+				foreach($arrToken["LIST_SEND"] as $dest){
+					$dataMerge = array();
+					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+					$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+					$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+					$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+					$arrMessage["BODY"] = $message_endpoint["BODY"];
+					$arrMessage["PATH_IMAGE"] = null;
+					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+					if($func->insertHistory($arrPayloadNotify,'2')){
+						$lib->sendNotify($arrPayloadNotify,"person");
+					}
 				}
 				$arrayResult['TRANSACTION_NO'] = $dataComing["tran_id"];
 				$arrayResult['RESULT'] = TRUE;

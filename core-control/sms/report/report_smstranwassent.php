@@ -11,6 +11,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){
 			$arrayExecute["member_no"] = $dataComing["member_no"];
 		}
+		if(isset($dataComing["send_by"]) && $dataComing["send_by"] != ''){
+			$arrayExecute["send_by"] = $dataComing["send_by"];
+		}
 		if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ''){
 			$arrayExecute["start_date"] = $dataComing["start_date"];
 		}
@@ -21,6 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											FROM smslogwassent WHERE 1=1
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."
+											".(isset($dataComing["send_by"]) && $dataComing["send_by"] != '' ? "and send_by = :send_by" : null)."
 											".(isset($dataComing["start_date"]) && $dataComing["start_date"] != '' ? "and date_format(send_date,'%Y-%m-%d') >= :start_date" : null)."
 											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and date_format(send_date,'%Y-%m-%d') <= :end_date" : null));
 		$fetchReport->execute($arrayExecute);
@@ -28,8 +32,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayReport = array();
 			$arrayReport["SMS_MESSAGE"] = $rowReport["sms_message"] ?? null;
 			$arrayReport["MEMBER_NO"] = $rowReport["member_no"] ?? null;
-			$arrayReport["TEL_MOBILE"] = $rowReport["tel_mobile"] ?? null;
-			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y') : null;
+			$arrayReport["TEL_MOBILE"] = $lib->formatphone($rowReport["tel_mobile"],'-');
+			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y',true) : null;
 			$arrayReport["SEND_BY"] = $rowReport["send_by"] ?? null;
 			$arrayAll[] = $arrayReport;
 		}

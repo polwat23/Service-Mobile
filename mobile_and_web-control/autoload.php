@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						echo json_encode($arrayResult);
 						exit();
 					}
-					$rowLogin = $func->checkLogin($payload["id_token"],$conmysql);
+					$rowLogin = $func->checkLogin($payload["id_token"]);
 					if(!$rowLogin["RETURN"]){
 						if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
 							$func->revoke_alltoken($payload["id_token"],'-9',true);
@@ -90,6 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_CODE'] = "WS0010";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
+						http_response_code(401);
+						echo json_encode($arrayResult);
+						exit();
+					}
+					$rowStatus = $func->checkAccStatus($payload["member_no"]);
+					if(!$rowStatus){
+						$func->revoke_alltoken($payload["id_token"],'-88');
+						$arrayResult['RESPONSE_CODE'] = "WS0010";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT-88'][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						http_response_code(401);
 						echo json_encode($arrayResult);
 						exit();
 					}
