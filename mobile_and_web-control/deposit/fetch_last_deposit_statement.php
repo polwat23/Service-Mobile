@@ -29,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
 		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no 
-							WHERE dpm.member_no = :member_no and deptgroup_code IS NOT NULL ORDER BY dps.deptslip_no DESC ) where rownum <= 1");
+							WHERE dpm.member_no = :member_no and deptgroup_code IS NOT NULL ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC ) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch();
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);

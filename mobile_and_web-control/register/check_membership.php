@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
@@ -11,17 +11,12 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','m
 		echo json_encode($arrayResult);
 		exit();
 	}
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AppRegister')){
 		$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
 		$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);
 		if($checkMember->rowCount() > 0){
 			$arrayResult['RESPONSE_CODE'] = "WS0020";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "คุณเป็นสมาชิกอยู่แล้ว";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "You has been registered";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -47,15 +42,9 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','m
 				exit();
 			}
 		}
-	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
-	}
 }else{
+	$text = '#CheckData Register : '.date("Y-m-d H:i:s").' > '.json_encode($dataComing);
+	file_put_contents(__DIR__.'/../../log/register.txt', $text . PHP_EOL, FILE_APPEND);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

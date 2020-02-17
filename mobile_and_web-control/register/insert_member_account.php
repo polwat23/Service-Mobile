@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','email','phone','password','api_token','unique_id','menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','email','phone','password','api_token','unique_id'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
@@ -11,7 +11,6 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 		echo json_encode($arrayResult);
 		exit();
 	}
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AppRegister')){
 		$email = $dataComing["email"];
 		$phone = $dataComing["phone"];
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
@@ -46,14 +45,6 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 			echo json_encode($arrayResult);
 			exit();
 		}
-	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
-	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
