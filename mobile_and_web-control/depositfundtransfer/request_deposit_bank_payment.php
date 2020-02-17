@@ -71,6 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			$ref_slipno = null;
+			$ref_no = date('YmdHis').substr($coop_account_no,7);
 			$clientWS = new SoapClient("http://localhost:81/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		try {
 			try {
@@ -133,7 +134,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				exit();
 			}
 			$arrResponse = json_decode($responseAPI);
-			$ref_no = date('YmdHis').substr($coop_account_no,7);
 			if($arrResponse->RESULT){
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
