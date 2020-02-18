@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		if($penalty_include == '0'){
 			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["penalty_amt"] - $dataComing["fee_amt"];
 		}else{
-			$amt_transfer = $dataComing["amt_transfer"];
+			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		}
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -98,17 +98,18 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/withdrawdeposit_kbank',$arrSendData);
 			if(!$responseAPI){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'-9',NOW(),:member_no
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1','-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
-					':amount' => $amt_transfer,
+					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
+					':amount_receive' => $amt_transfer,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -146,17 +147,18 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':seq_no' => $rowSeqno["SEQ_NO"]
 				]);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,result_transaction,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'1',:member_no,:ref_no1,
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1','1',:member_no,:ref_no1,
 															:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
-					':amount' => $amt_transfer,
+					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
+					':amount_receive' => $amt_transfer,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -187,17 +189,18 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				echo json_encode($arrayResult);
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'-9',NOW(),:member_no
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1','-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
-					':amount' => $amt_transfer,
+					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
+					':amount_receive' => $amt_transfer,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -225,17 +228,18 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		}catch(Throwable $e) {
 			if($flag_transaction_coop){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,'-9',NOW(),:member_no
+															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:,'-1','-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
 					':from_account' => $coop_account_no,
 					':destination' => $rowDataDeposit["deptaccount_no_bank"],
-					':amount' => $amt_transfer,
+					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
+					':amount_receive' => $amt_transfer,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,

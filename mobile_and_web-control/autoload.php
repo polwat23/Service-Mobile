@@ -115,9 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						exit();
 					}else if($errorCode === 4){
 						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
-							$payloadExp = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Landing' && $payloadExp["member_no"] != 'dev@mode'){
-								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payloadExp["id_token"],$conmysql);
+							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
+								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
 								if($is_refreshToken_arr){
 									$arrayResult['RESPONSE_CODE'] = "WS0046";
 									$arrayResult['RESPONSE_MESSAGE'] = "";

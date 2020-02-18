@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayReport["SMS_MESSAGE"] = $rowReport["message"] ?? null;
 			$arrayReport["MEMBER_NO"] = $rowReport["member_no"] ?? null;
 			$arrayReport["TEL_MOBILE"] = $lib->formatphone($rowReport["tel_mobile"],'-');
-			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y') : null;
+			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y',true) : null;
 			$arrayReport["SEND_BY"] = $rowReport["send_by"] ?? null;
 			$arrayReport["CAUSE_NOTSENT"] = $rowReport["cause_notsent"] ?? null;
 			$arrayAll[] = $arrayReport;
