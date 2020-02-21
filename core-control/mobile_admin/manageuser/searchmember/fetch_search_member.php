@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroupAll = array();
 		$arrayExecute = array();
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){
-			$arrayExecute[':member_no'] = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
+			$arrayExecute[':member_no'] = strtolower(mb_str_pad($dataComing["member_no"]));
 		}
 		if(isset($dataComing["member_name"]) && $dataComing["member_name"] != ''){
 			$arrName = explode(' ',$dataComing["member_name"]);

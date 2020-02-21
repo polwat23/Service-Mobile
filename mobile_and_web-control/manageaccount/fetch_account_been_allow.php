@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
 				$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
 				$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
+				$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $func->getConstant("limit_withdraw");
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
 				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));

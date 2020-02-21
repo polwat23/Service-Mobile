@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			if($dataComing["type_send"] == "person"){
 				$destination = array();
 				foreach($dataComing["destination"] as $target){
-					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+					$destination[] = strtolower(mb_str_pad($target));
 				}
 				$arrToken = $func->getFCMToken('person',$destination);
 				foreach($arrToken["LIST_SEND"] as $dest){
@@ -99,7 +99,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($dataComing["destination"] as $target){
 					$destination_temp = array();
 					if(mb_strlen($target) <= 8){
-						$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						$destination[] = strtolower(mb_str_pad($target));
 					}else if(mb_strlen($target) == 10){
 						$destination_temp["MEMBER_NO"] = null;
 						$destination_temp["TEL"] = $target;
@@ -129,7 +129,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				}
 				foreach($dataComing["destination"] as $target){
 					if(mb_strlen($target) <= 8){
-						$target = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						$target = strtolower(mb_str_pad($target));
 					}else if(mb_strlen($target) == 10){
 						$target = $lib->formatphone($target,'-');
 					}

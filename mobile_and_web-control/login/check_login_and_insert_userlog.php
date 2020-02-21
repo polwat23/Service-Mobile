@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
+	$member_no = strtolower(mb_str_pad($dataComing["member_no"]));
 	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);

@@ -128,7 +128,7 @@ class library {
 	public function formataccount_hidden($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$account_text = '';
-			if(strlen($account_no) === 10){
+			if(strpos($account_no,'-') !== FALSE){
 				$account_no = $this->formataccount($account_no,$format);
 			}
 			for($i = 0; $i < strlen($account_no);$i++){
@@ -555,6 +555,9 @@ class library {
 		}
 
 		return $text;
+	}
+	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
+		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 }
 ?>
