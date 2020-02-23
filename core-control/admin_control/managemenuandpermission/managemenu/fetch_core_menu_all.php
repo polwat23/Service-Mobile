@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												WHERE coremenu_status <>'-9'
 												ORDER BY coremenu_order ASC");
 		$fetchMenuMobile->execute();
-		while($rowMenuMobile = $fetchMenuMobile->fetch()){
+		while($rowMenuMobile = $fetchMenuMobile->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupMenu = array();
 			$arrGroupMenu["ID_COREMENU"] = $rowMenuMobile["id_coremenu"];
 			$arrGroupMenu["COREMENU_NAME"] = $rowMenuMobile["coremenu_name"];

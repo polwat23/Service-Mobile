@@ -15,9 +15,6 @@ if($lib->checkCompleteArgument(['menu_component','type_alias','account_no'],$dat
 			':deptaccount_no' => $account_no,
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [

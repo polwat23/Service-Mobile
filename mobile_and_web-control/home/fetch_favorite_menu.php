@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno and gfl.is_use = '1'
 											WHERE gfl.member_no = :member_no ORDER BY gfm.seq_no ASC");
 		$fetchFavMenu->execute([':member_no' => $payload["member_no"]]);
-		while($rowFavMenu = $fetchFavMenu->fetch()){
+		while($rowFavMenu = $fetchFavMenu->fetch(PDO::FETCH_ASSOC)){
 			$arrayFavMenu = array();
 			$arrayFavMenu["FAV_NAME_MENU"] = $rowFavMenu["fav_name"];
 			$arrayFavMenu["FAV_ICON_MENU"] = mb_substr($rowFavMenu["fav_name"],0,1);
@@ -27,9 +27,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupFavmenu[] = $arrayFavMenu;
 		}
 		$arrayResult['FAV_MENU'] = $arrGroupFavmenu;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

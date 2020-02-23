@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','sendmessage')){
+	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			if($dataComing["type_send"] == "person"){
 				$destination = array();
 				foreach($dataComing["destination"] as $target){
-					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+					$destination[] = strtolower(mb_str_pad($target));
 				}
 				$arrToken = $func->getFCMToken('person',$destination);
 				foreach($arrToken["LIST_SEND"] as $dest){
@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 						if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
-							$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"];
+							$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
 							$arrGroupAllSuccess[] = $arrGroupSuccess;
 						}else{
 							$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
@@ -99,7 +99,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($dataComing["destination"] as $target){
 					$destination_temp = array();
 					if(mb_strlen($target) <= 8){
-						$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						$destination[] = strtolower(mb_str_pad($target));
 					}else if(mb_strlen($target) == 10){
 						$destination_temp["MEMBER_NO"] = null;
 						$destination_temp["TEL"] = $target;
@@ -113,7 +113,6 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayMerge = $arrayTel;
 				}
 				foreach($arrayMerge as $dest){
-					$arrGroupCheckSend = array();
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
@@ -129,9 +128,8 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 				}
 				foreach($dataComing["destination"] as $target){
-					$arrGroupCheckSend = array();
 					if(mb_strlen($target) <= 8){
-						$target = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						$target = strtolower(mb_str_pad($target));
 					}else if(mb_strlen($target) == 10){
 						$target = $lib->formatphone($target,'-');
 					}

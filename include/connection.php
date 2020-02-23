@@ -46,19 +46,5 @@ class connection {
 			exit();
 		}
 	}
-	public function connecttomongo() {
-		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
-		$json_data = json_decode($json,true);
-		$dbhost = $json_data["DBLOG_HOST"];
-		$dbuser = $json_data["DBLOG_USERNAME"];
-		$dbpass = $json_data["DBLOG_PASSWORD"];
-		$dbname = $json_data["DBLOG_DATABASENAME"];
-		$this->conmongo = new \MongoDB\Client("mongodb://{$dbhost}",[
-			'username' => $dbuser,
-			'password' => $dbpass,
-			'authSource' => 'admin',
-		]);
-		return $this->conmongo->$dbname;
-	}
 }
 ?>

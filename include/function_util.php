@@ -31,6 +31,20 @@ class functions {
 				return $arrayLogin;
 			}
 		}
+		public function checkAccStatus($member_no) {
+			$checkStatus = $this->con->prepare("SELECT account_status FROM gcmemberaccount 
+												WHERE member_no = :member_no");
+			$checkStatus->execute([
+				':member_no' => $member_no
+			]);
+			$rowStatus = $checkStatus->fetch(\PDO::FETCH_ASSOC);
+			$arrayStatus = array();
+			if($rowStatus["account_status"] == '1' || $rowStatus["account_status"] == '-9'){
+				return TRUE;
+			}else{
+				return FALSE;
+			}
+		}
 		public function logout($id_token,$type_login) {
 			$logout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() WHERE id_token = :id_token");
 			if($logout->execute([
@@ -94,8 +108,8 @@ class functions {
 				return false;
 			}
 		}
-		public function revoke_alltoken($id_token,$type_revoke,$is_logout=false){
-			if($is_logout){
+		public function revoke_alltoken($id_token,$type_revoke,$is_notlogout=false){
+			if($is_notlogout){
 				$revokeAllToken = $this->con->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
 											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
 											WHERE id_token = :id_token");
@@ -124,6 +138,8 @@ class functions {
 					case '-8' : $type_login = '-99';
 						break;
 					case '-7' : $type_login = '-7';
+						break;
+					case '-88' : $type_login = '-88';
 						break;
 					case '-99' : $type_login = '-6';
 						break;
@@ -287,7 +303,7 @@ class functions {
 			$arrayResult["BODY"] = $rowTemplate["body"];
 			return $arrayResult;
 		}
-		public function insertHistory($payload,$type_history=1) {
+		public function insertHistory($payload,$type_history='1') {
 			$this->con->beginTransaction();
 			if($payload["TYPE_SEND_HISTORY"] == "onemessage"){
 				$bulkInsert = array();
@@ -387,7 +403,7 @@ class functions {
 			$arrayAll = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
-					$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+					$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
 					$fetchFCMToken->execute();
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
@@ -395,6 +411,7 @@ class functions {
 							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
 							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
 							$arrayMember[] = $rowFCMToken["member_no"];
 							$arrayMemberGRP[] = $arrayMT;
 						}
@@ -529,7 +546,7 @@ class functions {
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 							$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						}else{
-							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						}
 						if(sizeof($textcombine) == 1000){
 							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
@@ -544,7 +561,7 @@ class functions {
 							}
 						}
 						if(sizeof($textcombinenotsent) == 1000){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
+							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
 																	VALUES".implode(',',$textcombinenotsent));
 							if($insertToLogNotSentSMS->execute()){
 								unset($textcombinenotsent);
@@ -561,7 +578,7 @@ class functions {
 																VALUES".implode(',',$textcombine));
 						if($insertToLogSMS->execute()){
 							if(sizeof($textcombinenotsent) > 0){
-								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
 																		VALUES".implode(',',$textcombinenotsent));
 								if($insertToLogNotSentSMS->execute()){
 									$this->con->commit();
@@ -580,7 +597,7 @@ class functions {
 						}
 					}else{
 						if(sizeof($textcombinenotsent) > 0){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,send_by,id_smstemplate)
+							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
 																		VALUES".implode(',',$textcombinenotsent));
 							if($insertToLogNotSentSMS->execute()){
 								$this->con->commit();
@@ -602,7 +619,7 @@ class functions {
 			if($multi_message){
 				return true;
 			}else{
-				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,send_by,id_smstemplate)
+				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
 														VALUES".implode(',',$bulkInsert));
 				if($insertToLogSMS->execute()){
 					$this->con->commit();

@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
 		$fetchMenuMobile->execute([
 			':username' => $dataComing["username"]
 		]);
-		while($rowCoreSubMenu = $fetchMenuMobile->fetch()){
+		while($rowCoreSubMenu = $fetchMenuMobile->fetch(PDO::FETCH_ASSOC)){
 			$arrCoreSubMenu = array();
 			$arrCoreSubMenu["ID_SUBMENU"] = $rowCoreSubMenu["id_submenu"];
 			$arrCoreSubMenu["ID_COREMENU"] = $rowCoreSubMenu["id_coremenu"];

@@ -7,13 +7,7 @@ $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_SLIP"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_SLIP"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
 		if($payload["member_no"] != 'dev@mode' && $payload["member_no"] != 'salemode'){
 			$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
@@ -24,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$fetchName->execute([
 				':member_no' => $member_no
 			]);
-			$rowName = $fetchName->fetch();
+			$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 			$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		}else{
@@ -39,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		$getDetailSlip->execute([
 			':slip_no' => $dataComing["slip_no"]
 		]);
-		while($rowDetail = $getDetailSlip->fetch()){
+		while($rowDetail = $getDetailSlip->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["SLIPITEMTYPE_DESC"];			
 			if($rowDetail["SLIPITEMTYPE_CODE"] == 'SHR'){
@@ -59,21 +53,18 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $item_payment;
 			$arrGroupDetail[] = $arrDetail;
 		}
-		if(sizeof($arrGroupDetail) > 0 || isset($new_token)){
+		if(sizeof($arrGroupDetail) > 0){
 			$getDetailHeader = $conoracle->prepare("SELECT SLIP_DATE FROM slslippayin WHERE payinslip_no = :slip_no");
 			$getDetailHeader->execute([
 				':slip_no' => $dataComing["slip_no"]
 			]);
-			$rowHeader = $getDetailHeader->fetch();
+			$rowHeader = $getDetailHeader->fetch(PDO::FETCH_ASSOC);
 			$header["member_no"] = $payload["member_no"];
 			$header["slip_no"] = $dataComing["slip_no"];
 			$header["operate_date"] = $lib->convertdate($rowHeader["SLIP_DATE"],'D m Y');
 			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 			if($arrayPDF["RESULT"]){
 				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

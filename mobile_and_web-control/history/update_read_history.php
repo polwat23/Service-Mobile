@@ -9,9 +9,6 @@ if($lib->checkCompleteArgument(['menu_component','id_history'],$dataComing)){
 			':id_history' => $dataComing["id_history"]
 		]);
 		$arrayResult['RESULT'] = TRUE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

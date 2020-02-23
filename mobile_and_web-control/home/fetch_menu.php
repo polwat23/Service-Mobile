@@ -3,15 +3,7 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
-		$member_no = $config["MEMBER_NO_DEV_DEPOSIT"];
-		$member_no_loan = $config["MEMBER_NO_DEV_LOAN"];
-	}else if($payload["member_no"] == 'salemode'){
-		$member_no = $config["MEMBER_NO_SALE_DEPOSIT"];
-		$member_no_loan = $config["MEMBER_NO_SALE_LOAN"];
-	}else{
-		$member_no = $payload["member_no"];
-	}
+	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 	$user_type = $payload["user_type"];
 	$permission = array();
 	$arrayResult = array();
@@ -44,21 +36,18 @@ if(!$anonymous){
 			$arrMenuDep = array();
 			$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 			$fetchMenuDep->execute([':member_no' => $member_no]);
-			$rowMenuDep = $fetchMenuDep->fetch();
+			$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 			$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 			$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["id_menu"] == 2){
 			$arrMenuLoan = array();
 			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-			$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
-			$rowMenuLoan = $fetchMenuLoan->fetch();
+			$fetchMenuLoan->execute([':member_no' => $member_no]);
+			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
-		}
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
 		}
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
@@ -84,7 +73,7 @@ if(!$anonymous){
 				':menu_parent' => $dataComing["menu_parent"],
 				':channel' => $dataComing["channel"]
 			]);
-			while($rowMenu = $fetch_menu->fetch()){
+			while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["channel"] == 'mobile_app'){
 					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
@@ -108,9 +97,6 @@ if(!$anonymous){
 					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
 					$arrayAllMenu[] = $arrMenu;
 				}
-			}
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
 			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
@@ -137,7 +123,7 @@ if(!$anonymous){
 			$fetch_menu->execute([
 				':channel' => $dataComing["channel"]
 			]);
-			while($rowMenu = $fetch_menu->fetch()){
+			while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["channel"] == 'mobile_app'){
 					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
@@ -160,13 +146,13 @@ if(!$anonymous){
 						if($rowMenu["id_menu"] == 1){
 							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 							$fetchMenuDep->execute([':member_no' => $member_no]);
-							$rowMenuDep = $fetchMenuDep->fetch();
+							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}else if($rowMenu["id_menu"] == 2){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
-							$fetchMenuLoan->execute([':member_no' => $member_no_loan]);
-							$rowMenuLoan = $fetchMenuLoan->fetch();
+							$fetchMenuLoan->execute([':member_no' => $member_no]);
+							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						}					
@@ -192,37 +178,22 @@ if(!$anonymous){
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
-				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
+				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
-			$fetchMenuFav = $conmysql->prepare("SELECT gfm.id_fav_menu,gfl.name_fav,gpc.color_text,gpc.color_main,gpc.color_secon,gpc.color_deg,gpc.type_palette
-												FROM gcfavoritemenu gfm LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno
-												LEFT JOIN gcpalettecolor gpc ON gfm.id_palette = gpc.id_palette
-												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gfm.is_show = '1' ORDER BY gfm.seq_no ASC");
-			$fetchMenuFav->execute([':member_no' => $member_no]);
-			while($rowMenuFav = $fetchMenuFav->fetch()){
+			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
+			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
+			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
-				if(isset($rowMenuFav["type_palette"])){
-					if($rowMenuFav["type_palette"] == '2'){
-						$arrFavMenu["ACCOUNT_COOP_COLOR"] = $rowMenuFav["color_deg"]."|".$rowMenuFav["color_main"].",".$rowMenuFav["color_secon"];
-					}else{
-						$arrFavMenu["ACCOUNT_COOP_COLOR"] = "90|".$rowMenuFav["color_main"].",".$rowMenuFav["color_main"];
-					}
-					$arrFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $rowMenuFav["color_text"];
-				}else{
-					$arrFavMenu["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
-					$arrFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
-				}
 				$arrFavMenu["NAME_FAV"] = $rowMenuFav["name_fav"];
-				$arrFavMenu["ID_FAV_MENU"] = $rowMenuFav["id_fav_menu"];
+				$arrFavMenu["FAV_REFNO"] = $rowMenuFav["fav_refno"];
+				$arrFavMenu["FLAG_TRANS"] = $rowMenuFav["flag_trans"];
+				$arrFavMenu["DESTINATION"] = $rowMenuFav["destination"];
 				$arrFavMenuGroup[] = $arrFavMenu;
 			}
 			if(sizeof($arrayAllMenu) > 0 || sizeof($arrayMenuSetting) > 0){
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
@@ -251,11 +222,7 @@ if(!$anonymous){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS0001";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS0001";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
 			echo json_encode($arrayResult);
@@ -265,7 +232,7 @@ if(!$anonymous){
 		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_parent IN ('-1','-2')");
 		$fetch_menu->execute();
-		while($rowMenu = $fetch_menu->fetch()){
+		while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 			if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
 					$arrMenu = array();

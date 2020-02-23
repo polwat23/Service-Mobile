@@ -13,13 +13,12 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
-	$arrToken = $func->getFCMToken('person',$member_no);
 	$getFCMToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
 										WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'
 										and gul.is_login = '1' and gtk.fcm_token IS NOT NULL ORDER BY gul.id_userlogin DESC");
-	$getFCMToken->execute([':member_no' => $member_no]);
+	$getFCMToken->execute([':member_no' => 'dev@mode']);
 	if($getFCMToken->rowCount() > 0){
-		$rowFCMToken = $getFCMToken->fetch();
+		$rowFCMToken = $getFCMToken->fetch(PDO::FETCH_ASSOC);
 		$templateMessage = $func->getTemplatSystem("OTPChecker",1);
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);
@@ -29,8 +28,8 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 		$arrTarget["RANDOM_ALL"] = $reference;
 		$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 		$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
-		$arrPayloadNotify["TO"] = $arrToken["TOKEN"];
-		$arrPayloadNotify["MEMBER_NO"] = $arrToken["MEMBER_NO"];
+		$arrPayloadNotify["TO"][] = $rowFCMToken["fcm_token"];
+		$arrPayloadNotify["MEMBER_NO"] = $rowFCMToken["member_no"];
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$insertOTP = $conmysql->prepare("INSERT INTO gcotp(refno_otp,otp_password,destination_number,expire_date,otp_text)
 											VALUES(:ref_otp,:otp_pass,:destination,:expire_date,:otp_text)");

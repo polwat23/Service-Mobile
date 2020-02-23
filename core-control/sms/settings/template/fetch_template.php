@@ -2,7 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate')){
+	if($func->check_permission_core($payload,'sms','managetemplate') || $func->check_permission_core($payload,'sms','managetopic')
+		|| $func->check_permission_core($payload,'sms','reportsmssuccess')){
 		$arrTemplateGroup = array();
 		if(isset($dataComing["id_smstemplate"])){
 			$fetchTemplate = $conmysql->prepare("SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,
@@ -10,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM smstemplate st LEFT JOIN smsquery sq ON st.id_smsquery = sq.id_smsquery
 												WHERE st.is_use = '1' and st.id_smstemplate = :id_smstemplate");
 			$fetchTemplate->execute([':id_smstemplate' => $dataComing["id_smstemplate"]]);
-			$rowTemplate = $fetchTemplate->fetch();
+			$rowTemplate = $fetchTemplate->fetch(PDO::FETCH_ASSOC);
 			$arrTemplateGroup["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
 			$arrTemplateGroup["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
 			$arrTemplateGroup["TEMPLATE_BODY"] = $rowTemplate["smstemplate_body"];
@@ -25,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM smstemplate
 												WHERE is_use = '1' ORDER BY id_smstemplate DESC");
 			$fetchTemplate->execute();
-			while($rowTemplate = $fetchTemplate->fetch()){
+			while($rowTemplate = $fetchTemplate->fetch(PDO::FETCH_ASSOC)){
 				$arrTemplate = array();
 				$arrTemplate["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
 				$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];

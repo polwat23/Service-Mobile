@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status FROM gchistory 
 											WHERE member_no = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
 		$getHistory->execute($executeData);
-		while($rowHistory = $getHistory->fetch()){
+		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();
 			$arrHistory["TITLE"] = $rowHistory["his_title"];
 			$arrHistory["DETAIL"] = $rowHistory["his_detail"];
@@ -33,17 +33,9 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 			$arrHistory["RECEIVE_DATE"] = $lib->convertdate($rowHistory["receive_date"],'D m Y',true);
 			$arrGroupHis[] = $arrHistory;
 		}
-		if(sizeof($arrGroupHis) > 0 || isset($new_token)){
-			$arrayResult['HISTORY'] = $arrGroupHis;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['HISTORY'] = $arrGroupHis;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

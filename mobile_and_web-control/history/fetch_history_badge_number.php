@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $payload["member_no"]
 		]);
 		if($getBadge->rowCount() > 0){
-			while($badgeData = $getBadge->fetch()){
+			while($badgeData = $getBadge->fetch(PDO::FETCH_ASSOC)){
 				$arrayResult['BADGE_'.$badgeData["his_type"]] = isset($badgeData["badge"]) ? $badgeData["badge"] : 0;
 			}
 			if(isset($arrayResult['BADGE_1'])){
@@ -24,9 +24,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['BADGE_2'] = 0;
 			}
 			$arrayResult['BADGE_SUMMARY'] = $arrayResult['BADGE_1'] + $arrayResult['BADGE_2'];
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

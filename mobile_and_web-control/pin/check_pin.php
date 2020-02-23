@@ -8,17 +8,22 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		':member_no' => $payload["member_no"]
 	]);
 	if($checkPin->rowCount() > 0){
-		$rowaccount = $checkPin->fetch();
-		$arrayResult['RESULT'] = TRUE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
+		$rowaccount = $checkPin->fetch(PDO::FETCH_ASSOC);
+		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
+		$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
+		if(!$is_refreshToken_arr){
+			$arrayResult['RESPONSE_CODE'] = "WS0014";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(401);
+			echo json_encode($arrayResult);
+			exit();
 		}
+		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
+		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESULT'] = FALSE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		echo json_encode($arrayResult);
 	}
 }else{

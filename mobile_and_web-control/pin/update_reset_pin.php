@@ -7,9 +7,6 @@ if($updateResetPin->execute([
 ])){
 	if($func->logoutAll(null,$payload["member_no"],'-10')){
 		$arrayResult['RESULT'] = TRUE;
-		if(isset($new_token)){
-			$arrayResult['NEW_TOKEN'] = $new_token;
-		}
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS1017";

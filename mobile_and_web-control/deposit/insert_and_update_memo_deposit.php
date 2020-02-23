@@ -20,9 +20,6 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			':deptaccount_no' => $account_no,
 			':seq_no' => $dataComing["seq_no"]
 		]) && $updateMemoDept->rowCount() > 0){
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
@@ -34,9 +31,6 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 				':deptaccount_no' => $account_no,
 				':seq_no' => $dataComing["seq_no"]
 			])){
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
