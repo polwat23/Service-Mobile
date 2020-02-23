@@ -502,7 +502,7 @@ class library {
 			for ($i = 0; $i < $millions; $i++) {
 				$millions_text .= BAHT_TEXT_UNITS[6];
 			}
-			return baht_text($normalised_million, false) . $millions_text . baht_text($rest, true, false);
+			return $this->baht_text($normalised_million, false) . $millions_text . $this->baht_text($rest, true, false);
 		}
 
 		$number_str = (string)floor($number);
@@ -542,7 +542,7 @@ class library {
 			$satang = explode('.', number_format($number, 2, '.', ''))[1];
 			$text .= $satang == 0
 				? BAHT_TEXT_INTEGER
-				: baht_text($satang, false) . BAHT_TEXT_SATANG;
+				: $this->baht_text($satang, false) . BAHT_TEXT_SATANG;
 		} else {
 			$exploded = explode('.', $number);
 			if (isset($exploded[1])) {

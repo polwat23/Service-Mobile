@@ -143,13 +143,13 @@ if(!$anonymous){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
-						if($rowMenu["id_menu"] == 1){
+						if($rowMenu["menu_component"] == "DepositInfo"){
 							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 							$fetchMenuDep->execute([':member_no' => $member_no]);
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
-						}else if($rowMenu["id_menu"] == 2){
+						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 							$fetchMenuLoan->execute([':member_no' => $member_no]);
 							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
