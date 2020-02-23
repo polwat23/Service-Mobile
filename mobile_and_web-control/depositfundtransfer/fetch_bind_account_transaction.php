@@ -6,11 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$time = date("Hi");
 		if($time >= 0000 && $time <= 0200){
 			$arrayResult['RESPONSE_CODE'] = "WS0035";
-			if($lang_locale == 'th'){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถทำธุรกรรมได้ในช่วงเวลา 00.00 - 02.00";
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "Transaction is not available at 00.00 - 02.00 AM";
-			}
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -22,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
 		if($fetchBindAccount->rowCount() > 0){
-			while($rowAccBind = $fetchBindAccount->fetch()){
+			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
 				$arrAccBind = array();
 				$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
 				$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
@@ -39,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													and dpm.membcat_code = dpt.membcat_code
 													WHERE dpm.deptaccount_no = :deptaccount_no");
 				$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
-				$rowDataAcc = $getDataAcc->fetch();
+				$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDataAcc["DEPTTYPE_DESC"])){
 					$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
 					$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
@@ -48,11 +44,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccBind[] = $arrAccBind;
 				}
 			}
-			if(sizeof($arrGroupAccBind) > 0 || isset($new_token)){
+			if(sizeof($arrGroupAccBind) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

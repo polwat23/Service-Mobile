@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						$getIdPermission = $conmysql->prepare("SELECT id_permission_menu FROM corepermissionmenu WHERE username = :username and id_coremenu = 1 and is_use = '1'");
 						$getIdPermission->execute([':username' => $username]);
 						if($getIdPermission->rowCount() > 0){
-							$rowIdPermission = $getIdPermission->fetch();
+							$rowIdPermission = $getIdPermission->fetch(PDO::FETCH_ASSOC);
 							$arrayInsert[] = "(".$id_submenu.",".$rowIdPermission["id_permission_menu"].")";
 						}
 					}else{
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 																	WHERE cpm.id_coremenu = 1 and cpm.is_use = '1' and cu.id_section_system = :id_section_system");
 						$selectUserinSystem->execute([':id_section_system' => $id_section_system]);
 						if($selectUserinSystem->rowCount() > 0){
-							while($rowUser = $selectUserinSystem->fetch()){
+							while($rowUser = $selectUserinSystem->fetch(PDO::FETCH_ASSOC)){
 								$arrayInsert[] = "(".$id_submenu.",".$rowUser["id_permission_menu"].")";
 							}
 						}

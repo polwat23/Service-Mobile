@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												smscs_value as constant_value
 												FROM smsconstantsystem WHERE is_use = '1'");
 		$fetchConstant->execute();
-		while($rowMenuMobile = $fetchConstant->fetch()){
+		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["id_constant"];
 			$arrConstans["CONSTANT_NAME"] = $rowMenuMobile["constant_name"];

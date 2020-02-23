@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','sendmessage')){
+	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$blukInsertNot = array();
 				$destination = array();
 				foreach($dataComing["destination"] as $target){
-					$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+					$destination[] = strtolower(mb_str_pad($target));
 				}
 				$arrToken = $func->getFCMToken('person',$destination);
 				foreach($arrToken["LIST_SEND"] as $dest){
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								$blukInsert = array();
 							}
 						}else{
-							$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+							$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 							if(sizeof($blukInsertNot) == 1000){
 								$func->logSMSWasNotSent($blukInsertNot);
 								unset($blukInsertNot);
@@ -91,33 +91,28 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrAllToken[] = $dest["TOKEN"];
 						}else{
 							$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
-							'mobile_app',null,'".$dest["TOKEN"]."','".$payload["username"]."','".$id_template."')";
+							'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."','".$id_template."')";
 						}
 						if(sizeof($bulkInsert) == 1000){
-							if($func->logSMSWasNotSent($bulkInsert)){
-								unset($bulkInsert);
-								$bulkInsert = array();
-								continue;
-							}
+							$func->logSMSWasNotSent($bulkInsert);
+							unset($bulkInsert);
+							$bulkInsert = array();
 						}
 					}else{
 						$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
-						'mobile_app',null,null,'".$payload["username"]."','".$id_template."')";
+						'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."','".$id_template."')";
 						if(sizeof($bulkInsert) == 1000){
-							if($func->logSMSWasNotSent($bulkInsert)){
-								unset($bulkInsert);
-								$bulkInsert = array();
-								continue;
-							}
+							$func->logSMSWasNotSent($bulkInsert);
+							unset($bulkInsert);
+							$bulkInsert = array();
 						}
 					}
 				}
 				if(sizeof($arrAllToken) > 0){
 					if(sizeof($bulkInsert) > 0){
-						if($func->logSMSWasNotSent($bulkInsert)){
-							unset($bulkInsert);
-							$bulkInsert = array();
-						}
+						$func->logSMSWasNotSent($bulkInsert);
+						unset($bulkInsert);
+						$bulkInsert = array();
 					}
 					$arrPayloadNotify["TO"] = $arrAllToken;
 					$arrPayloadNotify["MEMBER_NO"] = $arrAllMember_no;
@@ -145,10 +140,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 				}else{
 					if(sizeof($bulkInsert) > 0){
-						if($func->logSMSWasNotSent($bulkInsert)){
-							unset($bulkInsert);
-							$bulkInsert = array();
-						}
+						$func->logSMSWasNotSent($bulkInsert);
+						unset($bulkInsert);
+						$bulkInsert = array();
 					}
 					$arrayResult['RESPONSE'] = "ไม่พบบัญชีที่สามารถส่งได้กรุณาลองใหม่อีกครั้ง";
 					$arrayResult['RESULT'] = FALSE;
@@ -164,7 +158,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($dataComing["destination"] as $target){
 					$destination_temp = array();
 					if(mb_strlen($target) <= 8){
-						$destination[] = strtolower(str_pad($target,8,0,STR_PAD_LEFT));
+						$destination[] = strtolower(mb_str_pad($target));
 					}else if(mb_strlen($target) == 10){
 						$destination_temp["MEMBER_NO"] = null;
 						$destination_temp["TEL"] = $target;

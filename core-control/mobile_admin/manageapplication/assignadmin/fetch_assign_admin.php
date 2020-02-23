@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayAdmin = array();
 		$fetchAdmin = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE user_type = '1'");
 		$fetchAdmin->execute();
-		while($rowAdmin = $fetchAdmin->fetch()){
+		while($rowAdmin = $fetchAdmin->fetch(PDO::FETCH_ASSOC)){
 			$arrayAdmin[] = $rowAdmin["member_no"];
 		}
 		$arrayResult['ADMIN'] = $arrayAdmin;

@@ -8,23 +8,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch()){
+		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
 			$arrIntrate = array();
 			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
 			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
 			$arrIntGroup[] = $arrIntrate;
 		}
-		if(sizeof($arrIntGroup) > 0 || isset($new_token)){
-			$arrayResult['INT_RATE'] = $arrIntGroup;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['INT_RATE'] = $arrIntGroup;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

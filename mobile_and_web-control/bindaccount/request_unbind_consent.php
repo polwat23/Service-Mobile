@@ -39,9 +39,6 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$conmysql->commit();
-					if(isset($new_token)){
-						$arrayResult['NEW_TOKEN'] = $new_token;
-					}
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

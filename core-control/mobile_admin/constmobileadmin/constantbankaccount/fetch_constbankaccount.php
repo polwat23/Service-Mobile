@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											JOIN gcpalettecolor pc ON pc.id_palette = cbpc.id_palette
 											WHERE cbpc.is_use = '1'");
 		$fetchConstant->execute();
-		while($rowAccount = $fetchConstant->fetch()){
+		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["ID_BANKPALETTE"] = $rowAccount["id_bankpalette"];
 			$arrConstans["ID_PALETTE"] = $rowAccount["id_palette"];

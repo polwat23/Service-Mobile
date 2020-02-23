@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserAccount = $conmysql->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status, user_type
 												FROM gcmemberaccount WHERE user_type IN('0','1')");
 		$fetchUserAccount->execute();
-		while($rowUserlogin = $fetchUserAccount->fetch()){
+		while($rowUserlogin = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupUserAcount = array();
 			$arrGroupUserAcount["MEMBER_NO"] = $rowUserlogin["member_no"];
 			$arrGroupUserAcount["TEL"] = $lib->formatphone($rowUserlogin["phone_number"]);

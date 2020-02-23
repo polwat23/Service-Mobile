@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_WHOCOLLU"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_WHOCOLLU"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayResult = array();
 		if(isset($dataComing["contract_no"])){
 			$arrayGroupLoan = array();
@@ -22,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and lnm.contract_status = '1'
 												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
-			$rowWhocollu = $getWhocollu->fetch();
+			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 			$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 			$arrGroupAll['CONTRACT_NO'] = $dataComing["contract_no"];
@@ -36,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LCC.LOANCOLLTYPE_CODE = '01'
 													AND LCC.LOANCONTRACT_NO = :contract_no ");
 			$whocolluMember->execute([':contract_no' => $contract_no]);
-			while($rowCollMember = $whocolluMember->fetch()){
+			while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 				$arrMember = array();
 				$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
 				$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
@@ -47,17 +41,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrGroupAll['MEMBER'] = $arrGroupAllMember;
 			$arrayGroupLoan[] = $arrGroupAll;
-			if(sizeof($arrayGroupLoan) > 0 || isset($new_token)){
-				$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				http_response_code(204);
-				exit();
-			}
+			$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			$arrayGroupLoan = array();
 			$getWhocollu = $conoracle->prepare("SELECT lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
@@ -66,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and lnm.contract_status = '1'
                          						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':member_no' => $member_no]);
-			while($rowWhocollu = $getWhocollu->fetch()){
+			while($rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupAll = array();
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
@@ -82,7 +68,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														LCC.LOANCOLLTYPE_CODE = '01'
 														AND LCC.LOANCONTRACT_NO = :contract_no ");
 				$whocolluMember->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
-				while($rowCollMember = $whocolluMember->fetch()){
+				while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 					$arrMember = array();
 					$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
 					$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
@@ -94,25 +80,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAll['MEMBER'] = $arrGroupAllMember;
 				$arrayGroupLoan[] = $arrGroupAll;
 			}
-			if(sizeof($arrayGroupLoan) > 0 || isset($new_token)){
-				$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				http_response_code(204);
-				exit();
-			}
+			$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		if($lang_locale == 'th'){
-			$arrayResult['RESPONSE_MESSAGE'] = "ท่านไม่มีสิทธิ์ใช้งานเมนูนี้";
-		}else{
-			$arrayResult['RESPONSE_MESSAGE'] = "You not have permission for this menu";
-		}
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
@@ -120,11 +94,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	if($lang_locale == 'th'){
-		$arrayResult['RESPONSE_MESSAGE'] = "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004";
-	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "Something wrong please contact cooperative #WS4004";
-	}
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);

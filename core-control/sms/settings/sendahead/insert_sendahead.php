@@ -2,7 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead')){
+	if($func->check_permission_core($payload,'sms','manageahead') || 
+	$func->check_permission_core($payload,'sms','sendmessageall') || 
+	$func->check_permission_core($payload,'sms','sendmessageperson')){
 		$platform = null;
 		$pathImg = null;
 		$id_smsquery = isset($dataComing["id_smsquery"]) && $dataComing["id_smsquery"] != '' ? $dataComing["id_smsquery"] : null;
@@ -15,9 +17,8 @@ if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$
 				case "mobile_app" :
 					$platform = '2';
 					break;
-				case "all" :
-					$platform = '3';
-					break;
+				default :
+					$platform = '1';
 			}
 		}
 		if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -34,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$
 				exit();
 			}else{
 				if($createImage){
-					$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
+					$pathImg = "resource/image_wait_to_be_sent/".$createImage["normal_path"];
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					$arrayResult['RESULT'] = FALSE;

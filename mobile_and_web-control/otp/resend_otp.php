@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 										and gul.is_login = '1' and gtk.fcm_token IS NOT NULL ORDER BY gul.id_userlogin DESC");
 	$getFCMToken->execute([':member_no' => 'dev@mode']);
 	if($getFCMToken->rowCount() > 0){
-		$rowFCMToken = $getFCMToken->fetch();
+		$rowFCMToken = $getFCMToken->fetch(PDO::FETCH_ASSOC);
 		$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp");
 		$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 		$templateMessage = $func->getTemplatSystem("OTPChecker",1);

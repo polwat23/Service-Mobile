@@ -10,9 +10,6 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			':seq_no' => $dataComing["seq_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [

@@ -10,18 +10,25 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			':member_no' => $payload["member_no"],
 			':from_account' => $dataComing["deptaccount_no"]
 		]);
-		$rowBalLimit = $checkLimitBalance->fetch();
+		$rowBalLimit = $checkLimitBalance->fetch(PDO::FETCH_ASSOC);
 		$limit_amt = 0;
 		$limit_withdraw = $func->getConstant("limit_withdraw");
-		$getDataUser = $conmysql->prepare("SELECT limit_amt,citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
+		$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
 											and member_no = :member_no and bindaccount_status = '1'");
 		$getDataUser->execute([
 			':deptaccount_no' => $dataComing["deptaccount_no"],
 			':member_no' => $payload["member_no"]
 		]);
-		$rowDataUser = $getDataUser->fetch();
-		if($limit_withdraw >= $rowDataUser["limit_amt"]){
-			$limit_amt = (int)$rowDataUser["limit_amt"];
+		$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
+		$fetchLimitTransaction = $conmysql->prepare("SELECT limit_transaction_amt FROM gcuserallowacctransaction 
+														WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
+		$fetchLimitTransaction->execute([
+			':member_no' => $payload["member_no"],
+			':deptaccount_no' => $dataComing["deptaccount_no"]
+		]);
+		$rowLimitTransaction = $fetchLimitTransaction->fetch(PDO::FETCH_ASSOC);
+		if($limit_withdraw >= $rowLimitTransaction["limit_transaction_amt"]){
+			$limit_amt = (int)$rowLimitTransaction["limit_transaction_amt"];
 		}else{
 			$limit_amt = (int)$limit_withdraw;
 		}
@@ -81,9 +88,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
 			$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
 			$arrayResult['RESULT'] = TRUE;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			echo json_encode($arrayResult);
 		}else{
 			$text = '#Verify Data withdraw Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);

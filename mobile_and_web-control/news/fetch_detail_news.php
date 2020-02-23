@@ -3,36 +3,27 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
-		$fetchDetailNews = $conmysql->prepare("SELECT ga.name_gallery,ga.update_date,ga.path_img_1,ga.path_img_2,ga.path_img_3,
-											ga.path_img_4,ga.path_img_5,gn.news_title,gn.news_detail,gn.create_by
-											FROM gcnews gn LEFT JOIN gcgallery ga ON gn.id_gallery = ga.id_gallery 
+		$fetchDetailNews = $conmysql->prepare("SELECT gn.update_date,gn.img_gallery_1,gn.img_gallery_2,gn.img_gallery_3,
+											gn.img_gallery_4,gn.img_gallery_5,gn.news_title,gn.news_detail,gn.create_by
+											FROM gcnews gn
 											WHERE gn.id_news = :id_news");
 		$fetchDetailNews->execute([':id_news' => $dataComing["id_news"]]);
-		$rowDetailNews = $fetchDetailNews->fetch();
+		$rowDetailNews = $fetchDetailNews->fetch(PDO::FETCH_ASSOC);
 		$arrayDetailNews = array();
 		$arrayDetailNews["TITLE"] = $rowDetailNews["news_title"];
 		$arrayDetailNews["DETAIL"] = $rowDetailNews["news_detail"];
-		$arrayDetailNews["NAME_GALLERY"] = $rowDetailNews["name_gallery"];
 		$arrayDetailNews["CREATE_BY"] = $rowDetailNews["create_by"];
 		$arrayDetailNews["UPDATE_DATE"] = $lib->convertdate($rowDetailNews["update_date"],'D m Y',true);
 		$path_img = array();
-		for($i = 1; $i <=5; $i++){
-			if(isset($rowDetailNews["path_img_".$i])){
-				$path_img[] = $rowDetailNews["path_img_".$i];
-			}
-		}
+		$path_img[] = $rowDetailNews["img_gallery_1"];
+		$path_img[] = $rowDetailNews["img_gallery_2"];
+		$path_img[] = $rowDetailNews["img_gallery_3"];
+		$path_img[] = $rowDetailNews["img_gallery_4"];
+		$path_img[] = $rowDetailNews["img_gallery_5"];
 		$arrayDetailNews["IMG"] = $path_img;
-		if(sizeof($arrayDetailNews) > 0 || isset($new_token)){
-			$arrayResult['DETAIL_NEWS'] = $arrayDetailNews;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['DETAIL_NEWS'] = $arrayDetailNews;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

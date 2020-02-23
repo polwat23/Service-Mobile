@@ -8,9 +8,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'
 			':allow_status' => $dataComing["allow_status"],
 			':deptaccount_no' => $dataComing["deptaccount_no"]
 		])){
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

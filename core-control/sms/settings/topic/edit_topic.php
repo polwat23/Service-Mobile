@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						$getIdPermission->execute([
 							':username' => $username
 						]);
-						while($rowidPermission = $getIdPermission->fetch()){
+						while($rowidPermission = $getIdPermission->fetch(PDO::FETCH_ASSOC)){
 							$arrIdPermission[] = $rowidPermission["id_permission_menu"];
 						}
 					}else{
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 																	RIGHT JOIN corepermissionmenu cpm ON cu.username = cpm.username 
 																	WHERE cpm.id_coremenu = 1 and cpm.is_use = '1' and cu.id_section_system = :id_section_system");
 						$selectUserinSystem->execute([':id_section_system' => $id_section_system]);
-						while($rowUser = $selectUserinSystem->fetch()){
+						while($rowUser = $selectUserinSystem->fetch(PDO::FETCH_ASSOC)){
 							$arrIdPermission[] = $rowUser["id_permission_menu"];
 						}
 					}
@@ -41,7 +41,6 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 				$updateNotPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '-9' WHERE id_permission_menu 
 														NOT IN(".implode(',',$arrIdPermission).") and id_submenu = :id_submenu");
 				if($updateNotPermit->execute([':id_submenu' => $dataComing["id_submenu"]])){
-					continue;
 				}else{
 					$conmysql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
@@ -56,7 +55,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						':id_submenu' => $dataComing["id_submenu"]
 					]);
 					if($findHaving->rowCount() > 0){
-						while($rowHaving = $findHaving->fetch()){
+						while($rowHaving = $findHaving->fetch(PDO::FETCH_ASSOC)){
 							if($rowHaving["is_use"] != '1'){
 								$arrWaitForUpdate[] = $id_permission;
 							}
@@ -69,7 +68,6 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					$updateTopicMatch = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = '1' 
 															WHERE id_permission_menu IN(".implode(',',$arrWaitForUpdate).") and id_submenu = :id_submenu");
 					if($updateTopicMatch->execute([':id_submenu' => $dataComing["id_submenu"]])){
-						continue;
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";
@@ -82,7 +80,6 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 					$insertMatchPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu) 
 													VALUES".implode(',',$arrWaitForInsert));
 					if($insertMatchPermit->execute()){
-						continue;
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานระบบได้ กรุณาติดต่อผู้พัฒนา";

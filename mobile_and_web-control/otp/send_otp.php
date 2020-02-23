@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 										and gul.is_login = '1' and gtk.fcm_token IS NOT NULL ORDER BY gul.id_userlogin DESC");
 	$getFCMToken->execute([':member_no' => 'dev@mode']);
 	if($getFCMToken->rowCount() > 0){
-		$rowFCMToken = $getFCMToken->fetch();
+		$rowFCMToken = $getFCMToken->fetch(PDO::FETCH_ASSOC);
 		$templateMessage = $func->getTemplatSystem("OTPChecker",1);
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);

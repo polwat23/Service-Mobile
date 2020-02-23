@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
+	$member_no = strtolower(mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT id_account FROM mdbmemberaccount 
 										WHERE member_no = :member_no and email = :email");
 	$checkMember->execute([
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 	if($checkMember->rowCount() > 0){
 		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
 		$getNameMember->execute([':member_no' => $member_no]);
-		$rowName = $getNameMember->fetch();
+		$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
 		$template = $func->getTemplate('send_mail_forget_password');
 		$arrayDataTemplate = array();
 		$temp_pass = $lib->randomText('number',6);

@@ -8,9 +8,6 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 			':bind_status' => $dataComing["bind_status"],
 			':id_bindaccount' => $dataComing["id_bindaccount"]
 		])){
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

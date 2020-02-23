@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_LOAN"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_LOAN"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrLoanGrp = array();
@@ -19,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
-			while($rowAccAllow = $fetchAccAllowTrans->fetch()){
+			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
 			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
@@ -27,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													and dpm.membcat_code = dpt.membcat_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
 			$getDataBalAcc->execute();
-			while($rowDataAccAllow = $getDataBalAcc->fetch()){
+			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllow = array();
 				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
@@ -43,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and gfl.member_no = gts.member_no
 												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gts.destination_type = '3'");
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
-			while($rowAccFav = $getAccFav->fetch()){
+			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
 				$arrAccFav = array();
 				$arrAccFav["DESTINATION"] = $rowAccFav["destination"];
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
@@ -53,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
 													WHERE member_no = :member_no and contract_status = 1");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
-			while($rowLoan = $fetchLoanRepay->fetch()){
+			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$arrLoan = array();
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
@@ -62,13 +56,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;
 			}
-			if(sizeof($arrGroupAccAllow) > 0 || isset($new_token) || sizeof($arrGroupAccFav) > 0){
+			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['LOAN'] = $arrLoanGrp;
-				if(isset($new_token)){
-					$arrayResult['NEW_TOKEN'] = $new_token;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

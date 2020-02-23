@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_CREDIT"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_CREDIT"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupCredit = array();
 		$loantype_notshow = $func->getConstant('loantype_notshow');
 		$fetchCredit = $conoracle->prepare("SELECT lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,
@@ -23,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											AND NVL(mb.salary_amount,15000) BETWEEN lc.startsalary_amt AND lc.endsalary_amt
 											GROUP BY lt.loantype_desc,lc.maxloan_amt,(sm.sharestk_amt*sh.unitshare_value*lc.multiple_share ) + (NVL(mb.salary_amount,15000)*lc.multiple_salary)");
 		$fetchCredit->execute([':member_no' => $member_no]);
-		while($rowCredit = $fetchCredit->fetch()){
+		while($rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC)){
 			$arrCredit = array();
 			if($rowCredit["CREDIT_AMT"] > $rowCredit["MAXLOAN_AMT"]){
 				$loan_amt = $rowCredit["MAXLOAN_AMT"];
@@ -35,17 +29,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrCredit["MAXLOAN_AMT"] = number_format($rowCredit["MAXLOAN_AMT"],2);
 			$arrGroupCredit[] = $arrCredit;
 		}
-		if(sizeof($arrGroupCredit) > 0 || isset($new_token)){
-			$arrayResult["CREDIT"] = $arrGroupCredit;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult["CREDIT"] = $arrGroupCredit;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

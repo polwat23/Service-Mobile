@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,create_by,update_date,id_news,link_news_more
 										FROM gcnews LIMIT 5");
 		$fetchNews->execute();
-		while($rowNews = $fetchNews->fetch()){
+		while($rowNews = $fetchNews->fetch(PDO::FETCH_ASSOC)){
 			$arrayNews = array();
 			$arrayNews["TITLE"] = $lib->text_limit($rowNews["news_title"]);
 			$arrayNews["DETAIL"] = $lib->text_limit($rowNews["news_detail"],100);
@@ -18,17 +18,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayNews["LINK_NEWS_MORE"] = $rowNews["link_news_more"];
 			$arrayGroupNews[] = $arrayNews;
 		}
-		if(sizeof($arrayGroupNews) > 0 || isset($new_token)){
-			$arrayResult['NEWS'] = $arrayGroupNews;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
-		}
+		$arrayResult['NEWS'] = $arrayGroupNews;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
