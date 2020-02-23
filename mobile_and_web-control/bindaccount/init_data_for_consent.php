@@ -3,18 +3,12 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		if($payload["member_no"] == 'dev@mode' || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || $payload["member_no"] == "etnmode3"){
-			$member_no = $configAS["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $configAS["MEMBER_NO_SALE_TRANSACTION"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$fetchDataMember = $conoracle->prepare("SELECT card_person,membcat_code FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
-		$rowDataMember = $fetchDataMember->fetch();
+		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
@@ -24,13 +18,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 			]);
 			if($fetchConstantAllowDept->rowCount() > 0){
 				$arrayDeptAllow = array();
-				while($rowAllowDept = $fetchConstantAllowDept->fetch()){
+				while($rowAllowDept = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC)){
 					$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 				}
 				$arrAccBeenBind = array();
 				$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
-				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch()){
+				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 					$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
 				}
 				if(sizeof($arrAccBeenBind) > 0){
@@ -50,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					':membcat_code' => $rowDataMember["MEMBCAT_CODE"]
 				]);
 				$arrayGroupAccount = array();
-				while($rowDataAccount = $fetchDataAccount->fetch()){
+				while($rowDataAccount = $fetchDataAccount->fetch(PDO::FETCH_ASSOC)){
 					$arrayAccount = array();
 					$arrayAccount["DEPTTYPE_DESC"] = $rowDataAccount["DEPTTYPE_DESC"];
 					$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
@@ -61,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrayResult['ACCOUNT'] = $arrayGroupAccount;
 					$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
 					$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
-					$rowFormatBank = $getFormatBank->fetch();
+					$rowFormatBank = $getFormatBank->fetch(PDO::FETCH_ASSOC);
 					$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? $config["ACCOUNT_BANK_FORMAT"];
 					$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 					$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];

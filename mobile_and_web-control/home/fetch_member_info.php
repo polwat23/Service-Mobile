@@ -4,11 +4,11 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
 		$arrayResult = array();
-		$member_no = $configAS[$payload["member_no"]];
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		if($memberInfoMobile->rowCount() > 0){
-			$rowInfoMobile = $memberInfoMobile->fetch();
+			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 												WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
-			$rowMember = $memberInfo->fetch();
+			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$address = $rowMember["ADDR_NO"];
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);

@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch()){
+		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
 			$arrIntrate = array();
 			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
 			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];

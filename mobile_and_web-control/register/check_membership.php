@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
+	$member_no = strtolower(mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			':member_no' => $member_no,
 			':card_person' => $dataComing["id_card"]
 		]);
-		$rowMember = $checkValid->fetch();
+		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
 		if($rowMember){
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];

@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													GROUP BY unique_id ORDER BY id_userlogin DESC");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
 		if($fetchSettingDevice->rowCount() > 0){
-			while($rowSetting = $fetchSettingDevice->fetch()){
+			while($rowSetting = $fetchSettingDevice->fetch(PDO::FETCH_ASSOC)){
 				$arrDevice = array();
 				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
 				$arrDevice["CHANNEL"] = $rowSetting["channel"];

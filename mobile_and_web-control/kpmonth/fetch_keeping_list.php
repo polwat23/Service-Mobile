@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $configAS["MEMBER_NO_DEV_KEEPINGMONTH"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $configAS["MEMBER_NO_SALE_KEEPINGMONTH"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth');
 		$dateNow = date('d');
@@ -33,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_no' => $member_no,
 				':limit_period' => $limit_period
 		]);
-		while($rowPeriod = $getPeriodKP->fetch()){
+		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
@@ -54,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_no' => $member_no,
 				':recv_period' => $rowPeriod["RECV_PERIOD"]
 			]);
-			$rowKPDetali = $getKPDetail->fetch();
+			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
 			$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["RECEIVE_AMT"],2);
 			$arrayGroupPeriod[] = $arrKpmonth;

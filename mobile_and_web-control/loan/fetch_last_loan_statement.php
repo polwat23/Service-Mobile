@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $configAS["MEMBER_NO_DEV_LOAN"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $configAS["MEMBER_NO_DEV_LOAN"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayResult = array();
 		$arrGroupAccount = array();
 		$arrayGroupSTM = array();
@@ -22,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE lnm.member_no = :member_no and lnm.contract_status = 1 
 												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
-		$rowLoanLastSTM = $fetchLastStmAcc->fetch();
+		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,period_payamt as PERIOD,
@@ -34,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no,
 			':contract_no' => $contract_no
 		]);
-		$rowContract = $getContract->fetch();
+		$rowContract = $getContract->fetch(PDO::FETCH_ASSOC);
 		$arrContract = array();
 		$arrContract["CONTRACT_NO"] = $contract_no;
 		$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
@@ -44,6 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 		$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 		$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+		$arrContract["DATA_TIME"] = date('H:i');
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
@@ -68,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		while($rowStm = $getStatement->fetch()){
+		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SLIP_NO"] = $rowStm["PAYINSLIP_NO"];

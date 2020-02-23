@@ -128,7 +128,7 @@ class library {
 	public function formataccount_hidden($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$account_text = '';
-			if(strlen($account_no) === 10){
+			if(strpos($account_no,'-') !== FALSE){
 				$account_no = $this->formataccount($account_no,$format);
 			}
 			for($i = 0; $i < strlen($account_no);$i++){
@@ -233,49 +233,51 @@ class library {
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
 		if(self::getBase64ImageSize($encode_string) < 1500){
 			$data_Img = explode(',',$encode_string);
-			$dataImg = base64_decode($data_Img[1]);
-			$info_img = explode('/',$data_Img[0]);
-			$ext_img = str_replace('base64','',$info_img[1]);
-			$im_string = imageCreateFromString($dataImg);
-			if (!$im_string) {
-				return false;
-			}else{
-				if(isset($webP)){
-					$filename = $file_name.'.'.$ext_img;
-					$destination = $output_file.'/'.$filename;
-					$webP_destination = $output_file.'/'.$file_name.'.webp';
-					if($ext_img == 'png'){
-						imagepng($im_string, $destination, 2);
-						$webP->convert($destination,$webP_destination,[]);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						$arrPath["webP_path"] = $file_name.'.webp';
-						return $arrPath;
-					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-						imagejpeg($im_string, $destination, 70);
-						$webP->convert($destination,$webP_destination,[]);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						$arrPath["webP_path"] = $file_name.'.webp';
-						return $arrPath;
-					}else{
-						return false;
-					}
+			if(isset($data_Img[1])){
+				$dataImg = base64_decode($data_Img[1]);
+				$info_img = explode('/',$data_Img[0]);
+				$ext_img = str_replace('base64','',$info_img[1]);
+				$im_string = imageCreateFromString($dataImg);
+				if (!$im_string) {
+					return false;
 				}else{
-					$filename = $file_name.'.'.$ext_img;
-					$destination = $output_file.'/'.$filename;
-					if($ext_img == 'png'){
-						imagepng($im_string, $destination, 2);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						return $arrPath;
-					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-						imagejpeg($im_string, $destination, 70);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						return $arrPath;
+					if(isset($webP)){
+						$filename = $file_name.'.'.$ext_img;
+						$destination = $output_file.'/'.$filename;
+						$webP_destination = $output_file.'/'.$file_name.'.webp';
+						if($ext_img == 'png'){
+							imagepng($im_string, $destination, 2);
+							$webP->convert($destination,$webP_destination,[]);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							$arrPath["webP_path"] = $file_name.'.webp';
+							return $arrPath;
+						}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+							imagejpeg($im_string, $destination, 70);
+							$webP->convert($destination,$webP_destination,[]);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							$arrPath["webP_path"] = $file_name.'.webp';
+							return $arrPath;
+						}else{
+							return false;
+						}
 					}else{
-						return false;
+						$filename = $file_name.'.'.$ext_img;
+						$destination = $output_file.'/'.$filename;
+						if($ext_img == 'png'){
+							imagepng($im_string, $destination, 2);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							return $arrPath;
+						}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+							imagejpeg($im_string, $destination, 70);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							return $arrPath;
+						}else{
+							return false;
+						}
 					}
 				}
 			}
@@ -334,7 +336,6 @@ class library {
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"icon" => $json_data["ICON"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
@@ -346,7 +347,6 @@ class library {
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"icon" => $json_data["ICON"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
@@ -555,6 +555,9 @@ class library {
 		}
 
 		return $text;
+	}
+	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
+		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 }
 ?>

@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $configAS["MEMBER_NO_DEV_WHOCOLLU"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $configAS["MEMBER_NO_SALE_WHOCOLLU"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayResult = array();
 		if(isset($dataComing["contract_no"])){
 			$arrayGroupLoan = array();
@@ -22,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and lnm.contract_status = '1'
 												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
-			$rowWhocollu = $getWhocollu->fetch();
+			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 			$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 			$arrGroupAll['CONTRACT_NO'] = $dataComing["contract_no"];
@@ -36,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LCC.LOANCOLLTYPE_CODE = '01'
 													AND LCC.LOANCONTRACT_NO = :contract_no ");
 			$whocolluMember->execute([':contract_no' => $contract_no]);
-			while($rowCollMember = $whocolluMember->fetch()){
+			while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 				$arrMember = array();
 				$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
 				$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
@@ -58,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and lnm.contract_status = '1'
                          						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':member_no' => $member_no]);
-			while($rowWhocollu = $getWhocollu->fetch()){
+			while($rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupAll = array();
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
@@ -74,7 +68,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														LCC.LOANCOLLTYPE_CODE = '01'
 														AND LCC.LOANCONTRACT_NO = :contract_no ");
 				$whocolluMember->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
-				while($rowCollMember = $whocolluMember->fetch()){
+				while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 					$arrMember = array();
 					$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
 					$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];

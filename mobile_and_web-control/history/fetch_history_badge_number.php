@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $payload["member_no"]
 		]);
 		if($getBadge->rowCount() > 0){
-			while($badgeData = $getBadge->fetch()){
+			while($badgeData = $getBadge->fetch(PDO::FETCH_ASSOC)){
 				$arrayResult['BADGE_'.$badgeData["his_type"]] = isset($badgeData["badge"]) ? $badgeData["badge"] : 0;
 			}
 			if(isset($arrayResult['BADGE_1'])){

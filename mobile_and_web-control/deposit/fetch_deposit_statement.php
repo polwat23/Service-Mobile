@@ -35,11 +35,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$getAccount->execute([
 			':account_no' => $account_no
 		]);
-		$rowAccount = $getAccount->fetch();
+		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT
+											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
@@ -50,22 +50,23 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		while($rowStm = $getStatement->fetch()){
+		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path FROM gcmemodept 
 											WHERE deptaccount_no = :account_no and seq_no = :seq_no");
 			$getMemoDP->execute([
 				':account_no' => $account_no,
 				':seq_no' => $rowStm["SEQ_NO"]
 			]);
-			$rowMemo = $getMemoDP->fetch();
+			$rowMemo = $getMemoDP->fetch(PDO::FETCH_ASSOC);
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
 			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
-			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"];
-			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"];
+			$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
+			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"] ?? null;
+			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"] ?? null;
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;

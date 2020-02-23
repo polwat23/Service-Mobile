@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
+error_reporting(E_ERROR);
 
 header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						echo json_encode($arrayResult);
 						exit();
 					}
-					$rowLogin = $func->checkLogin($payload["id_token"],$conmysql);
+					$rowLogin = $func->checkLogin($payload["id_token"]);
 					if(!$rowLogin["RETURN"]){
 						if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
 							$func->revoke_alltoken($payload["id_token"],'-9',true);
@@ -89,6 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_CODE'] = "WS0010";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
+						http_response_code(401);
+						echo json_encode($arrayResult);
+						exit();
+					}
+					$rowStatus = $func->checkAccStatus($payload["member_no"]);
+					if(!$rowStatus){
+						$func->revoke_alltoken($payload["id_token"],'-88');
+						$arrayResult['RESPONSE_CODE'] = "WS0010";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT-88'][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						http_response_code(401);
 						echo json_encode($arrayResult);
 						exit();
 					}
@@ -102,19 +114,33 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						echo json_encode($arrayResult);
 						exit();
 					}else if($errorCode === 4){
-						$new_token = null;
-						$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-						$dataComing["channel"],$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
-						if(!$is_refreshToken_arr){
+						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
+							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
+								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
+								if($is_refreshToken_arr){
+									$arrayResult['RESPONSE_CODE'] = "WS0046";
+									$arrayResult['RESPONSE_MESSAGE'] = "";
+									$arrayResult['RESULT'] = FALSE;
+									http_response_code(401);
+									echo json_encode($arrayResult);
+									exit();
+								}else{
+									$arrayResult['RESPONSE_CODE'] = "WS0014";
+									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+									$arrayResult['RESULT'] = FALSE;
+									http_response_code(401);
+									echo json_encode($arrayResult);
+									exit();
+								}
+							}
+						}else{
 							$arrayResult['RESPONSE_CODE'] = "WS0014";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							echo json_encode($arrayResult);
 							exit();
-						}else{
-							$new_token = $is_refreshToken_arr["ACCESS_TOKEN"];
-							$payload = $lib->fetch_payloadJWT($new_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 						}
 					}else{
 						$arrayResult['RESPONSE_CODE'] = "WS0032";

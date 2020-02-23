@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		':ref_no' => $dataComing["ref_no"]
 	]);
 	if($checkOTP->rowCount() > 0){
-		$rowOTP = $checkOTP->fetch();
+		$rowOTP = $checkOTP->fetch(PDO::FETCH_ASSOC);
 		$expire = strtotime($rowOTP["expire_date"]);
 		if($expire >= $callfile_now){
 			if($rowOTP["otp_status"] == '-9'){
