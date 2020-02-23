@@ -31,8 +31,8 @@ if(!$anonymous){
 		default : $permission[] = '0';
 			break;
 	}
-	if(isset($dataComing["id_menu"])){
-		if($dataComing["id_menu"] == 1){
+	if(isset($dataComing["menu_component"])){
+		if($dataComing["menu_component"] == "DepositInfo"){
 			$arrMenuDep = array();
 			$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 			$fetchMenuDep->execute([':member_no' => $member_no]);
@@ -40,7 +40,7 @@ if(!$anonymous){
 			$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 			$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
-		}else if($dataComing["id_menu"] == 2){
+		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
 			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 			$fetchMenuLoan->execute([':member_no' => $member_no]);
