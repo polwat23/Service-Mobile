@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/core_error.log');
+error_reporting(E_ERROR);
 
 header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");

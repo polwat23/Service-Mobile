@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchConstant = $conmysql->prepare("SELECT id_constant,constant_name,constant_desc,constant_value
 											 FROM gcconstant WHERE is_use = '1'");
 		$fetchConstant->execute();
-		while($rowMenuMobile = $fetchConstant->fetch()){
+		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["id_constant"];
 			$arrConstans["CONSTANT_NAME"] = $rowMenuMobile["constant_name"];

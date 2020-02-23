@@ -8,10 +8,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN smstemplate stm ON smt.id_smstemplate = stm.id_smstemplate
                                             LEFT JOIN corepermissionsubmenu smp ON sm.id_submenu = smp.id_submenu
 											LEFT JOIN corepermissionmenu cpm ON smp.id_permission_menu = cpm.id_permission_menu
-											WHERE sm.menu_status = '1' and sm.id_menuparent = 8");
+											WHERE sm.menu_status = '1' and sm.id_menuparent = 8 and smp.is_use = '1'");
 		$fetchTopic->execute();
 		$arrAllTopic = array();
-		while($rowTopic = $fetchTopic->fetch()){
+		while($rowTopic = $fetchTopic->fetch(PDO::FETCH_ASSOC)){
 			$arrayTopic = array();
 			$arrayTopic["TOPIC_NAME"] = $rowTopic["menu_name"];
 			$arrayTopic["ID_SUBMENU"] = $rowTopic["id_submenu"];

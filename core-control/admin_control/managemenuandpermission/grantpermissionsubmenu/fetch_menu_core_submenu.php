@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id','title_menu'],$dataComing)){
 												WHERE cbs.id_menuparent != 0 and cbs.menu_status = '1'
 												ORDER BY cbs.id_menuparent ASC");
 		$fetchMenuMobile->execute();
-		while($rowCoreSubMenu = $fetchMenuMobile->fetch()){
+		while($rowCoreSubMenu = $fetchMenuMobile->fetch(PDO::FETCH_ASSOC)){
 			$arrCoreSubMenu = array();
 			$arrGroupCoreSubMenu = array();
 			$arrGroupCoreSubMenu["TITLE"] = $rowCoreSubMenu["coremenu_name"];

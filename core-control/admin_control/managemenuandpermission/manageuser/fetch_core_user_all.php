@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											INNER JOIN coresectionsystem
 											ON coresectionsystem.id_section_system = coreuser.id_section_system");
 		$fetchUser->execute();
-		while($rowCoreSubMenu = $fetchUser->fetch()){
+		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreUser = array();
 			$arrGroupCoreUser["USERNAME"] = $rowCoreSubMenu["username"];
 			$arrGroupCoreUser["ID_SECTION_SYSTEM"] = $rowCoreSubMenu["id_section_system"];

@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										JOIN gcpalettecolor pc ON pc.id_palette = cad.id_palette
 										WHERE cad.is_use = '1' OR cad.is_use = '0' AND pc.is_use = '1'");
 		$fetchConstant->execute();
-		while($rowMenuMobile = $fetchConstant->fetch()){
+		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["ID_ACCCONSTANT"] = $rowMenuMobile["id_accountconstant"];
 			$arrConstans["DEPT_TYPE_CODE"] = $rowMenuMobile["dept_type_code"];

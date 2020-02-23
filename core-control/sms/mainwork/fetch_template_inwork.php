@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id','page_name'],$dataComing)){
 		$getTemplate->execute([':page_name' => $dataComing["page_name"]]);
 		if($getTemplate->rowCount() > 0){
 			$arrTemplate = array();
-			$rowTemplate = $getTemplate->fetch();
+			$rowTemplate = $getTemplate->fetch(PDO::FETCH_ASSOC);
 			$arrTemplate["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
 			$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
 			$arrTemplate["TEMPLATE_MESSAGE"] = $rowTemplate["smstemplate_body"];

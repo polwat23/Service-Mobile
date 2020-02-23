@@ -1,12 +1,12 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
-	if($func->check_permission_core($payload,'admincontrol','manageuser')){
-		$deletecoreuser = $conmysql->prepare("DELETE FROM coreuser 
-										  WHERE username=:username");
-		if($deletecoreuser->execute([
-			':username' => $dataComing["username"]
+if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
+	if($func->check_permission_core($payload,'adminmobile','managenew')){
+	$updatemenu = $conmysql->prepare("DELETE FROM gcnews 
+										  WHERE id_news=:id_news");
+		if($updatemenu->execute([
+			':id_news' => $dataComing["id_news"]
 		])){
 			$arrayResult["RESULT"] = TRUE;
 		}else{
