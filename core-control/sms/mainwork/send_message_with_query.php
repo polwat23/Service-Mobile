@@ -122,7 +122,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						}
 					}
 					foreach($dataComing["destination"] as $target){
-						$target = strtolower(mb_str_pad($target));
+						$target = strtolower($lib->mb_str_pad($target));
 						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$rowQuery["target_field"] => $target]);
 						$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
@@ -272,7 +272,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 					foreach($dataComing["destination"] as $target){
 						if(mb_strlen($target) <= 8){
-							$destination = strtolower(mb_str_pad($target));
+							$destination = strtolower($lib->mb_str_pad($target));
 						}else{
 							$destination = $target;
 						}
