@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$getBadge = $conmysql->prepare("SELECT IFNULL(COUNT(id_history),0) as badge,his_type FROM gchistory 
 										WHERE member_no = :member_no AND his_read_status = '0'
@@ -13,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $payload["member_no"]
 		]);
 		if($getBadge->rowCount() > 0){
-			while($badgeData = $getBadge->fetch()){
+			while($badgeData = $getBadge->fetch(PDO::FETCH_ASSOC)){
 				$arrayResult['BADGE_'.$badgeData["his_type"]] = isset($badgeData["badge"]) ? $badgeData["badge"] : 0;
 			}
 			if(isset($arrayResult['BADGE_1'])){

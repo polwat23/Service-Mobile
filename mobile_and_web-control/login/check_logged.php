@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	$checkUserlogin = $conmysql->prepare("SELECT id_userlogin,is_login FROM gcuserlogin WHERE id_token = :id_token and is_login <> '0'
 											and member_no = :member_no and unique_id = :unique_id");
 	$checkUserlogin->execute([
@@ -13,7 +10,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		':unique_id' => $dataComing["unique_id"]
 	]);
 	if($checkUserlogin->rowCount() > 0){
-		$rowLog = $checkUserlogin->fetch();
+		$rowLog = $checkUserlogin->fetch(PDO::FETCH_ASSOC);
 		if($rowLog["is_login"] == '1'){
 			$lib->addLogtoTxt([
 				"access_date" => date('Y-m-d H:i:s'), 
@@ -35,6 +32,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$func->revoke_alltoken($payload["id_token"],'-6',true);
 			}
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLog["is_login"]][0][$lang_locale];
+			http_response_code(401);
 			$arrayResult['RESULT'] = FALSE;
 		}
 		echo json_encode($arrayResult);

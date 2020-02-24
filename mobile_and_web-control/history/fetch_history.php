@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$arrGroupHis = array();
 		$executeData = [
@@ -27,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status FROM gchistory 
 											WHERE member_no = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
 		$getHistory->execute($executeData);
-		while($rowHistory = $getHistory->fetch()){
+		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();
 			$arrHistory["TITLE"] = $rowHistory["his_title"];
 			$arrHistory["DETAIL"] = $rowHistory["his_detail"];

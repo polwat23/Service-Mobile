@@ -177,19 +177,23 @@ class library {
 	}
 	public function mergeTemplate($template_subject,$template_body,$data=[]) {
 		$arrayText = array();
-		preg_match_all('/\\${(.*?)\\}/',$template_subject,$arrayColSubject);
-		preg_match_all('/\\${(.*?)\\}/',$template_body,$arrayColBody);
-		foreach($arrayColSubject[1] as $key => $column){
-			if(isset($data[strtoupper($column)])){
-				$template_subject = preg_replace('/\\'.$arrayColSubject[0][$key].'/',$data[strtoupper($column)],$template_subject);
+		if(isset($template_subject)){
+			preg_match_all('/\\${(.*?)\\}/',$template_subject,$arrayColSubject);
+			foreach($arrayColSubject[1] as $key => $column){
+				if(isset($data[strtoupper($column)])){
+					$template_subject = preg_replace('/\\'.$arrayColSubject[0][$key].'/',$data[strtoupper($column)],$template_subject);
+				}
 			}
 		}
+		preg_match_all('/\\${(.*?)\\}/',$template_body,$arrayColBody);
 		foreach($arrayColBody[1] as $key => $column){
 			if(isset($data[strtoupper($column)])){
 				$template_body = preg_replace('/\\'.$arrayColBody[0][$key].'/',$data[strtoupper($column)],$template_body);
 			}
 		}
-		$arrayText["SUBJECT"] = $template_subject;
+		if(isset($template_subject)){
+			$arrayText["SUBJECT"] = $template_subject;
+		}
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}
@@ -205,14 +209,15 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.isocare.co.th';
+		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
 		$mailFunction->SMTPAuth = true;
-		$mailFunction->Username = 'no-reply@isocare.co.th';
-		$mailFunction->Password = '@Iso1888';
-		$mailFunction->SMTPSecure = 'tls';
-		$mailFunction->Port = 587;
+		$mailFunction->Username = 'noreply@gensoft.co.th';
+		$mailFunction->Password = 'h>-^yM3cPd3&';
+		$mailFunction->SMTPSecure = 'ssl';
+		$mailFunction->Port = 465;
+		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
-		$mailFunction->setFrom('no-reply@isocare.co.th', $json_data["NAME_APP"]);
+		$mailFunction->setFrom('noreply@gensoft.co.th', $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
@@ -228,49 +233,51 @@ class library {
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
 		if(self::getBase64ImageSize($encode_string) < 1500){
 			$data_Img = explode(',',$encode_string);
-			$dataImg = base64_decode($data_Img[1]);
-			$info_img = explode('/',$data_Img[0]);
-			$ext_img = str_replace('base64','',$info_img[1]);
-			$im_string = imageCreateFromString($dataImg);
-			if (!$im_string) {
-				return false;
-			}else{
-				if(isset($webP)){
-					$filename = $file_name.'.'.$ext_img;
-					$destination = $output_file.'/'.$filename;
-					$webP_destination = $output_file.'/'.$file_name.'.webp';
-					if($ext_img == 'png'){
-						imagepng($im_string, $destination, 2);
-						$webP->convert($destination,$webP_destination,[]);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						$arrPath["webP_path"] = $file_name.'.webp';
-						return $arrPath;
-					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-						imagejpeg($im_string, $destination, 70);
-						$webP->convert($destination,$webP_destination,[]);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						$arrPath["webP_path"] = $file_name.'.webp';
-						return $arrPath;
-					}else{
-						return false;
-					}
+			if(isset($data_Img[1])){
+				$dataImg = base64_decode($data_Img[1]);
+				$info_img = explode('/',$data_Img[0]);
+				$ext_img = str_replace('base64','',$info_img[1]);
+				$im_string = imageCreateFromString($dataImg);
+				if (!$im_string) {
+					return false;
 				}else{
-					$filename = $file_name.'.'.$ext_img;
-					$destination = $output_file.'/'.$filename;
-					if($ext_img == 'png'){
-						imagepng($im_string, $destination, 2);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						return $arrPath;
-					}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
-						imagejpeg($im_string, $destination, 70);
-						$arrPath = array();
-						$arrPath["normal_path"] = $filename;
-						return $arrPath;
+					if(isset($webP)){
+						$filename = $file_name.'.'.$ext_img;
+						$destination = $output_file.'/'.$filename;
+						$webP_destination = $output_file.'/'.$file_name.'.webp';
+						if($ext_img == 'png'){
+							imagepng($im_string, $destination, 2);
+							$webP->convert($destination,$webP_destination,[]);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							$arrPath["webP_path"] = $file_name.'.webp';
+							return $arrPath;
+						}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+							imagejpeg($im_string, $destination, 70);
+							$webP->convert($destination,$webP_destination,[]);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							$arrPath["webP_path"] = $file_name.'.webp';
+							return $arrPath;
+						}else{
+							return false;
+						}
 					}else{
-						return false;
+						$filename = $file_name.'.'.$ext_img;
+						$destination = $output_file.'/'.$filename;
+						if($ext_img == 'png'){
+							imagepng($im_string, $destination, 2);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							return $arrPath;
+						}else if($ext_img == 'jpg' || $ext_img == 'jpeg'){
+							imagejpeg($im_string, $destination, 70);
+							$arrPath = array();
+							$arrPath["normal_path"] = $filename;
+							return $arrPath;
+						}else{
+							return false;
+						}
 					}
 				}
 			}
@@ -329,7 +336,6 @@ class library {
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"icon" => $json_data["ICON"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
@@ -341,7 +347,6 @@ class library {
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
-					"icon" => $json_data["ICON"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				]
@@ -357,8 +362,8 @@ class library {
 		curl_setopt( $ch,CURLOPT_POST, true );  
 		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode($data));                                                                  
 																												 
 		$result = curl_exec($ch);

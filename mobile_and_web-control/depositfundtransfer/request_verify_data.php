@@ -2,22 +2,16 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
-		if($payload["member_no"] == "dev@mode" || $payload["member_no"] == "salemode" || $payload["member_no"] == "etnmode1" || $payload["member_no"] == "etnmode2" || 
-		$payload["member_no"] == "etnmode3" || $payload["member_no"] == "etnmode4"){
-			$member_no = $config[$payload["member_no"]];
-		}else{
-			$member_no = $payload["member_no"];
-		}
-		$fetchMemberName = $conoracle->prepare("SELECT MEMB_NAME,MEMB_SURNAME FROM MBMEMBMASTER WHERE member_no = :member_no");
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+													WHERE MB.member_no = :member_no");
 		$fetchMemberName->execute([
 			':member_no' => $member_no
 		]);
-		$rowMember = $fetchMemberName->fetch();
-		$account_name_th = $rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
+		$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 		$arrayResult['FEE_AMT'] = 0;
 		$arrayResult['ACCOUNT_NAME'] = $account_name_th;
 		$arrayResult['RESULT'] = TRUE;

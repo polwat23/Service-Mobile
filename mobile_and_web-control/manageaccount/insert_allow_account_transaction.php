@@ -2,15 +2,13 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountconstant'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$insertDeptAllow = $conmysql->prepare("INSERT INTO gcuserallowacctransaction(deptaccount_no,member_no,id_accountconstant) 
-												VALUES(:deptaccount_no,:member_no,:id_accountconstant)");
+		$insertDeptAllow = $conmysql->prepare("INSERT INTO gcuserallowacctransaction(deptaccount_no,member_no,limit_transaction_amt,id_accountconstant) 
+												VALUES(:deptaccount_no,:member_no,:limit_transaction_amt,:id_accountconstant)");
 		if($insertDeptAllow->execute([
 			':deptaccount_no' => $dataComing["deptaccount_no"],
 			':member_no' => $payload["member_no"],
+			':limit_transaction_amt' => $func->getConstant("limit_withdraw"),
 			':id_accountconstant' => $dataComing["id_accountconstant"]
 		])){
 			$arrayResult['RESULT'] = TRUE;

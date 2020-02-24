@@ -2,7 +2,7 @@
 	"DBMOBILE_HOST" : "mobilecloud.coopsiam.com:3306",
 	"DBMOBILE_USERNAME" : "root",
 	"DBMOBILE_PASSWORD" : "@Gensoft2018",
-	"DBMOBILE_DATABASENAME" : "mobile_mhd",
+	"DBMOBILE_DATABASENAME" : "mobile_mhd_test",
 	"DBORACLE_HOST" : "127.0.0.1",
 	"DBORACLE_SERVICE" : "gcoop",
 	"DBORACLE_USERNAME" : "iscocen",
