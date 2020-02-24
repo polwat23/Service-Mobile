@@ -128,7 +128,7 @@ class library {
 	public function formataccount_hidden($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$account_text = '';
-			if(strpos($account_no,'-') !== FALSE){
+			if(strpos($account_no,'-') === FALSE){
 				$account_no = $this->formataccount($account_no,$format);
 			}
 			for($i = 0; $i < strlen($account_no);$i++){

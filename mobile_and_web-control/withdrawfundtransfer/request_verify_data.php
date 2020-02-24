@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
 		try {
 			$argumentWS = [
-							"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
+							"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscuat;Password=iscorfscuat;Unicode=True;coop_id=050001;coop_control=050001;",
 							"as_account_no" => $dataComing["deptaccount_no"],
 							"as_itemtype_code" => "WTX",
 							"adc_amt" => $dataComing["amt_transfer"],

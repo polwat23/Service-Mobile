@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		try{
 			try {
 				$argumentWS = [
-						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
+						"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscuat;Password=iscorfscuat;Unicode=True;coop_id=050001;coop_control=050001;",
 						"astr_dept_inf_serv" => $arrayGroup
 				];
 				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));

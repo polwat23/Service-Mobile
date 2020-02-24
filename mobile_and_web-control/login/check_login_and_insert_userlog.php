@@ -79,11 +79,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['user_type'] = $rowPassword['user_type'];
 						$arrPayloadNew['id_token'] = $id_token;
 						$arrPayloadNew['member_no'] = $member_no;
-						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-							$arrPayloadNew['exp'] = time() + 86400;
-						}else {
-							$arrPayloadNew['exp'] = time() + 900;
-						}
+						$arrPayloadNew['exp'] = time() + 900;
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 						$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
