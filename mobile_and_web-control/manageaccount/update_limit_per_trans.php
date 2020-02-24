@@ -1,22 +1,22 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','sigma_key','limit_amt'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
+if($lib->checkCompleteArgument(['menu_component','limit_amt','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$updateLimitTrans = $conmysql->prepare("UPDATE gcbindaccount SET limit_amt = :limit_amt WHERE sigma_key = :sigma_key");
+		$updateLimitTrans = $conmysql->prepare("UPDATE gcuserallowacctransaction SET limit_transaction_amt = :limit_amt 
+												WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
 		if($updateLimitTrans->execute([
 			':limit_amt' => $dataComing["limit_amt"],
-			':sigma_key' => $dataComing["sigma_key"]
+			':member_no' => $payload["member_no"],
+			':deptaccount_no' => $dataComing["deptaccount_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [
 				':limit_amt' => $dataComing["limit_amt"],
-				':sigma_key' => $dataComing["sigma_key"]
+				':member_no' => $payload["member_no"],
+				':deptaccount_no' => $dataComing["deptaccount_no"]
 			];
 			$arrError = array();
 			$arrError["EXECUTE"] = $arrExecute;

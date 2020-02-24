@@ -20,6 +20,8 @@
 			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเปลี่ยนรหัสผ่าน","en" : "You was forced logout because password has been change"}],
 		"LOGOUT-10" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการรีเซ็ตรหัส PIN","en" : "You was forced logout because pin has been change"}],
+		"LOGOUT-88" : 
+			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากบัญชีของท่านถูกระงับ","en" : "You was forced logout because account is withhold"}],
 		"LOGOUT-99" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากโทเคนถูกยกเลิก","en" : "You was forced logout because token was cancel"}]
 		}],
@@ -38,7 +40,7 @@
 	"WS0023" : [{"th" : "ไม่พบบัญชีที่สามารถทำรายการได้ ท่านต้องอนุญาตบัญชีที่สามารถทำรายการได้ก่อนจะทำธุรกรรม","en" : "You must allow account before transaction"}],
 	"WS0024" : [{"th" : "ไม่พบประเภทบัญชีเงินฝากที่สหกรณ์อนุญาตให้ทำธุรกรรมได้","en" : "Not found deposits type that cooperative allow to transaction"}],
 	"WS0025" : [{"th" : "ไม่พบบัญชีปลายทาง กรุณาตรวจสอบเลขบัญชีปลายทางอีกครั้ง","en" : "Not found destination deposit account please please recheck"}],
-	"WS0026" : [{"th" : "บัญชีปลายทางยังไม่ได้อนุญาตเพื่อทำธุรกรรม","en" : "Destination deposit account does not allow for transaction"}],
+	"WS0026" : [{"th" : "บัญชีปลายทางยังไม่ได้เปิดใช้งานแอพพลิเคชั่น","en" : "Destination deposit account do not use application"}],
 	"WS0027" : [{"th" : "ไม่สามารถฝากเงินเข้าบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0027","en" : "Cannot deposit to account please contact cooperative #WS0027"}],
 	"WS0028" : [{"th" : "ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ กรุณาติดต่อสหกรณ์ #WS0028","en" : "Cannot check destination account please contact cooperative #WS0028"}],
 	"WS0029" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีได้ กรุณาติดต่อสหกรณ์ #WS0029","en" : "Cannot unbind account please contact cooperative #WS0029"}],
@@ -58,6 +60,8 @@
 	"WS0043" : [{"th" : "วงเงินการทำธุรกรรมวันนี้ของท่านเต็มจำนวนแล้ว","en" : "Your money limit of transaction today is full"}],
 	"WS0044" : [{"th" : "ไม่สามารถสร้างไฟล์เรียกเก็บแบบ PDF ได้กรุณาลองใหม่อีกครั้ง","en" : "Cannot create report for charge monthly in type PDF"}],
 	"WS0045" : [{"th" : "ไม่สามารถโอนเข้าบัญชีเดียวกันได้ กรุณาเปลี่ยนบัญชีปลายทาง","en" : "Cannot fund transfer same account please change account"}],
+	"WS0047" : [{"th" : "ไม่พบบัญชีปลายทาง กรุณาตรวจสอบอีกครั้ง","en" : "Not found account please recheck"}],
+	"WS0048" : [{"th" : "บัญชีของท่านถูกระงับ","en" : "Your account is withhold"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],
@@ -86,6 +90,7 @@
 	"WS1026" : [{"th" : "ไม่สามารถเปลี่ยนแปลงวงเงินได้ กรุณาติดต่อสหกรณ์ #WS1026","en" : "Cannot change limit please contact cooperative #WS1026"}],
 	"WS1027" : [{"th" : "ไม่สามารถตั้งค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1027","en" : "Cannot set alias name account please contact cooperative #WS1027"}],
 	"WS1028" : [{"th" : "ไม่สามารถล้างค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1028","en" : "Cannot reset alias name account please contact cooperative #WS1028"}],
+	"WS1029" : [{"th" : "ไม่สามารถสร้างรายการโปรดได้ กรุณาติดต่อสหกรณ์ #WS1029","en" : "Cannot create favorite transaction please contact cooperative #WS1029"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],

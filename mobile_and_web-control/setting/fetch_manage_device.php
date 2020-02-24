@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
 		$arrGroupDevice = array();
 		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
@@ -12,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													GROUP BY unique_id ORDER BY id_userlogin DESC");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
 		if($fetchSettingDevice->rowCount() > 0){
-			while($rowSetting = $fetchSettingDevice->fetch()){
+			while($rowSetting = $fetchSettingDevice->fetch(PDO::FETCH_ASSOC)){
 				$arrDevice = array();
 				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
 				$arrDevice["CHANNEL"] = $rowSetting["channel"];

@@ -2,9 +2,6 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingChangePassword')){
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		$conmysql->beginTransaction();

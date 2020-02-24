@@ -13,11 +13,17 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 	}
 	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
 	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
-										WHERE member_no = :member_no and account_status NOT IN('-8','-7','-6')");
+										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
-		$rowPassword = $checkLogin->fetch();
-		if($rowPassword['account_status'] == '-9'){
+		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
+		if($rowPassword['account_status'] == '-8'){
+			$arrayResult['RESPONSE_CODE'] = "WS0048";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}else if($rowPassword['account_status'] == '-9'){
 			if($dataComing["password"] == $rowPassword['temppass']){
 				$valid_pass = true;
 			}else{
@@ -30,35 +36,27 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$refresh_token = $lib->generate_token();
 			try{
 				$conmysql->beginTransaction();
-				$updateOldToken = $conmysql->prepare("UPDATE gctoken SET at_is_revoke = '-9',rt_is_revoke = '-9',
-														rt_expire_date = NOW(),at_expire_date = NOW() 
-														WHERE unique_id = :unique_id and (at_is_revoke = '0' OR rt_is_revoke = '0')");
-				$updateOldToken->execute([
-					':unique_id' => $dataComing["unique_id"]
-				]);
-				if($member_no != 'dev@mode' && $member_no != 'salemode' && $arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-					$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = 'mobile_app' and is_login = '1'");
-					$getMemberLogged->execute([':member_no' => $member_no]);
-					if($getMemberLogged->rowCount() > 0){
-						$arrayIdToken = array();
-						$rowIdToken = $getMemberLogged->fetch();
+				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = 'mobile_app' and is_login = '1'");
+				$getMemberLogged->execute([':member_no' => $member_no]);
+				if($getMemberLogged->rowCount() > 0){
+					$arrayIdToken = array();
+					while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
 						$arrayIdToken[] = $rowIdToken["id_token"];
-						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
-																	gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
-																	gu.is_login = '-5',gu.logout_date = NOW()
-																	WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
-						$updateLoggedOneDevice->execute();
 					}
+					$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
+																gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
+																gu.is_login = '-5',gu.logout_date = NOW()
+																WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
+					$updateLoggedOneDevice->execute();
 				}
-				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address,fcm_token) 
-													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address,:fcm_token)");
+				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
+													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
 				if($insertToken->execute([
 					':refresh_token' => $refresh_token,
 					':unique_id' => $dataComing["unique_id"],
 					':channel' => $arrPayload["PAYLOAD"]["channel"],
 					':device_name' => $arrPayload["PAYLOAD"]["device_name"],
-					':ip_address' => $arrPayload["PAYLOAD"]["ip_address"],
-					':fcm_token' => $dataComing["fcm_token"] ?? null
+					':ip_address' => $arrPayload["PAYLOAD"]["ip_address"]
 				])){
 					$id_token = $conmysql->lastInsertId();
 					if(isset($dataComing["firsttime"])){
@@ -88,11 +86,15 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						}
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
+						$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([
 							':access_token' => $access_token,
 							':id_token' => $id_token
-						])){
+						]) && ($updateFCMToken->execute([
+							':fcm_token' => $dataComing["fcm_token"] ?? null,
+							':member_no' => $member_no
+						]))){
 							$conmysql->commit();
 							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 							$arrayResult['ACCESS_TOKEN'] = $access_token;

@@ -2,25 +2,8 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_TRANSACTION"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_TRANSACTION"];
-		}else if($payload["member_no"] == 'etnmode1'){
-			$member_no = $config["MEMBER_NO_ETN1"];
-		}else if($payload["member_no"] == 'etnmode2'){
-			$member_no = $config["MEMBER_NO_ETN2"];
-		}else if($payload["member_no"] == 'etnmode3'){
-			$member_no = $config["MEMBER_NO_ETN3"];
-		}else if($payload["member_no"] == 'etnmode4'){
-			$member_no = $config["MEMBER_NO_ETN4"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDeptAllowed = array();
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
@@ -28,12 +11,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE is_use = '1'");
 		$getDeptTypeAllow->execute();
 		if($getDeptTypeAllow->rowCount() > 0 ){
-			while($rowDeptAllow = $getDeptTypeAllow->fetch()){
+			while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrDeptAllowed[] = $rowDeptAllow["dept_type_code"];
 			}
 			$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
 			$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
-			while($rowAccountAllowed = $InitDeptAccountAllowed->fetch()){
+			while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 			}
 			if(sizeof($arrAccAllowed) > 0){
@@ -50,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 
 			}
 			$getAccountAllinCoop->execute([':member_no' => $member_no]);
-			while($rowAccIncoop = $getAccountAllinCoop->fetch()){
+			while($rowAccIncoop = $getAccountAllinCoop->fetch(PDO::FETCH_ASSOC)){
 				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
@@ -61,21 +44,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getIDDeptTypeAllow->execute([
 					':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
 				]);
-				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch();
+				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
 				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
 				$arrAllowAccGroup[] = $arrAccInCoop;
 			}
-			if(sizeof($arrAllowAccGroup) > 0){
-				$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0024";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
+			$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0024";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

@@ -2,17 +2,8 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if(isset($new_token)){
-		$arrayResult['NEW_TOKEN'] = $new_token;
-	}
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'InsureInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_INSURANCE"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_INSURANCE"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$fetchinSureInfo = $conoracle->prepare("SELECT ist.INSURETYPE_DESC,isit.INSITEMTYPE_DESC,isit.SIGN_FLAG,issm.PREMIUM_PAYMENT
 												FROM insinsuremaster ism LEFT JOIN insinsuretype ist ON ism.insuretype_code = ist.insuretype_code
 												LEFT JOIN insinsurestatement issm ON ism.insurance_no = issm.insurance_no
@@ -22,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$arrGroupAllIns = array();
-		while($rowInsure = $fetchinSureInfo->fetch()){
+		while($rowInsure = $fetchinSureInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayInsure = array();
 			$arrGroupIns = array();
 			$arrayInsure["PAYMENT"] = number_format($rowInsure["PREMIUM_PAYMENT"],2);
