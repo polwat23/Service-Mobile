@@ -23,6 +23,12 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				exit();
 			}
 			$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':ip_address' => $dataComing["ip_address"]
+			];
+			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
@@ -54,6 +60,12 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				exit();
 			}
 			$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':ip_address' => $dataComing["ip_address"]
+			];
+			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['username','password','device_name','ip_address'
 			if($insertLog->execute([
 				':username' => $dataComing["username"],
 				':unique_id' => $dataComing["unique_id"],
-				':device_name' => $lib->getDeviceName(),
+				':device_name' => 'test',
 				':token' => $access_token,
 				':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour'))
 			])){

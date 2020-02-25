@@ -43,8 +43,8 @@ $config = json_decode($jsonConfig,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
-	$dataComing["device_name"] = $lib->getDeviceName();
-	$dataComing["ip_address"] = $lib->getClientIP();
+	$dataComing["device_name"] = 'wait';
+	$dataComing["ip_address"] = '111.111.111.111';
 	// Complete Argument
 	if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 15){
 		$author_token = $headers["Authorization"];
