@@ -11,9 +11,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
-			$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
-			$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-			$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+			if(isset($rowInfoMobile["path_avatar"])){
+				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
+				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+			}else{
+				$arrayResult["AVATAR_PATH"] = null;
+				$arrayResult["AVATAR_PATH_WEBP"] = null;
+			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
@@ -29,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
-			$address = $rowMember["ADDR_NO"];
+			$address = (isset($rowMember["ADDR_NO"]) ? ' ม.'.$rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
 				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);

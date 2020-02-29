@@ -41,6 +41,33 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			exit();
 		}
 		$arrSendData = array();
+		/*$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+		try {
+			$argumentWS = [
+				"as_wspass" => $config["WS_STRC_DB"],
+				"as_account_no" => $dataComing["deptaccount_no"],
+				"as_itemtype_code" => "WTX",
+				"adc_amt" => $dataComing["amt_transfer"],
+				"adtm_date" => date('c')
+			];
+			$resultWS = $clientWS->__call("of_chk_withdrawcount_amt", array($argumentWS));
+			$arrayResult['PENALTY_AMT'] = $resultWS->of_chk_withdrawcount_amtResult;
+		}catch(SoapFault $e){
+			$arrayResult["RESPONSE_CODE"] = 'WS8002';
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':deptaccount_no' => $dataComing["deptaccount_no"],
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $e->getMessage()
+			];
+			$log->writeLog('withdrawtrans',$arrayStruc);
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}*/
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
@@ -50,8 +77,17 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
 		$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/verifydata_kbank',$arrSendData);
-		if(!$responseAPI){
+		if(!$responseAPI["RESULT"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0028";
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':deptaccount_no' => $dataComing["deptaccount_no"],
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $responseAPI["RESPONSE_MESSAGE"]
+			];
+			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -59,7 +95,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
-			$arrayResult['PENALTY_AMT'] = 0;
+			$arrayResult['PENALTY_AMT']  = 0;
 			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 			$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
@@ -70,9 +106,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$text = '#Verify Data withdraw Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
-			file_put_contents(__DIR__.'/../../log/verifydata_error.txt', $text . PHP_EOL, FILE_APPEND);
 			$arrayResult['RESPONSE_CODE'] = "WS0042";
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':deptaccount_no' => $dataComing["deptaccount_no"],
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $arrResponse->RESPONSE_MESSAGE
+			];
+			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

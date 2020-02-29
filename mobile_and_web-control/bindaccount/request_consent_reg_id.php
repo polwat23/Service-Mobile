@@ -65,8 +65,18 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				':id_token' => $payload["id_token"]
 			])){
 				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_reg_id_for_consent',$arrSendData);
-				if(!$responseAPI){
+				if(!$responseAPI["RESULT"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
+					$arrayStruc = [
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':bind_status' => '-9',
+						':response_code' => $arrayResult['RESPONSE_CODE'],
+						':response_message' => $responseAPI["RESPONSE_MESSAGE"],
+						':coop_account_no' => $coop_account_no,
+						':query_flag' => '1'
+					];
+					$log->writeLog('bindaccount',$arrayStruc);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -75,14 +85,29 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$conmysql->commit();
+					$arrayStruc = [
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':bind_status' => '1',
+						':coop_account_no' => $coop_account_no
+					];
+					$log->writeLog('bindaccount',$arrayStruc);
 					$arrayResult["URL_CONSENT"] = $arrResponse->URL_CONSENT;
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
 					$conmysql->rollback();
-					$text = '#Bind #WS0039 : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
-					file_put_contents(__DIR__.'/../../log/consentbind_error.txt', $text . PHP_EOL, FILE_APPEND);
 					$arrayResult['RESPONSE_CODE'] = "WS0039";
+					$arrayStruc = [
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':bind_status' => '-9',
+						':response_code' => $arrayResult['RESPONSE_CODE'],
+						':response_message' => $arrResponse->RESPONSE_MESSAGE,
+						':coop_account_no' => $coop_account_no,
+						':query_flag' => '1'
+					];
+					$log->writeLog('bindaccount',$arrayStruc);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -90,34 +115,44 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				}
 			}else{
 				$conmysql->rollback();
-				$arrExecute = [
-					':sigma_key' => $sigma_key,
-					':member_no' => $payload["member_no"],
-					':coop_account_no' => $coop_account_no,
-					':citizen_id' => $dataComing["citizen_id"],
-					':mobile_no' => $mobile_no,
-					':bank_account_name' => $account_name_th,
-					':bank_account_name_en' => $account_name_en,
-					':limit_amt' => $func->getConstant('limit_withdraw'),
-					':id_token' => $payload["id_token"]
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $insertPendingBindAccount;
-				$arrError["ERROR_CODE"] = 'WS1022';
-				$lib->addLogtoTxt($arrError,'bind_error');
 				$arrayResult['RESPONSE_CODE'] = "WS1022";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':bind_status' => '-9',
+					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_message' => $arrayResult['RESPONSE_MESSAGE'],
+					':coop_account_no' => $coop_account_no,
+					':data_bind_error' => json_encode([
+						':sigma_key' => $sigma_key,
+						':member_no' => $payload["member_no"],
+						':coop_account_no' => $coop_account_no,
+						':citizen_id' => $dataComing["citizen_id"],
+						':mobile_no' => $mobile_no,
+						':bank_account_name' => $account_name_th,
+						':bank_account_name_en' => $account_name_th,
+						':id_token' => $payload["id_token"]
+					]),
+					':query_error' => $insertPendingBindAccount->queryString,
+					':query_flag' => '-9'
+				];
+				$log->writeLog('bindaccount',$arrayStruc);
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}catch(Throwable $e) {
-			$arrError = array();
-			$arrError["MESSAGE"] = $e->getMessage();
-			$arrError["ERROR_CODE"] = 'WS9999';
-			$lib->addLogtoTxt($arrError,'exception_error');
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':bind_status' => '-9',
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $e->getMessage(),
+				':query_flag' => '1'
+			];
+			$log->writeLog('bindaccount',$arrayStruc,true);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
