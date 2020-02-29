@@ -56,19 +56,25 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
 		$ref_no = time().substr($coop_account_no,3);
-		$clientWS = new SoapClient("http://localhost:81/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
+		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 		try {
 			try {
 				$argumentWS = [
-						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
-						"astr_dept_inf_serv" => $arrayGroup
+					"as_wspass" => $config["WS_STRC_DB"],
+					"astr_dept_inf_serv" => $arrayGroup
 				];
 				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
 				$responseSoap = $resultWS->of_dept_inf_serv_cenResult;
 				if($responseSoap->msg_status != '0000'){
-					$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoap->msg_output).' | '.json_encode($responseSoap);
-					file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 					$arrayResult['RESPONSE_CODE'] = "WS0041";
+					$arrayStruc = [
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':sigma_key' => $dataComing["sigma_key"],
+						':response_code' => $arrayResult['RESPONSE_CODE'],
+						':response_message' => $responseSoap->msg_output
+					];
+					$log->writeLog('deposittrans',$arrayStruc);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -77,9 +83,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$ref_slipno = $responseSoap->ref_slipno;
 				$flag_transaction_coop = true;
 			}catch(SoapFault $e){
-				$text = '#Deposit #WS0041 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($e).' | '.json_encode($arrVerifyToken);
-				file_put_contents(__DIR__.'/../../log/soapfundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':sigma_key' => $dataComing["sigma_key"],
+					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_message' => $e->getMessage()
+				];
+				$log->writeLog('deposittrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
@@ -87,7 +99,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}
 			// -----------------------------------------------
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/depositfundtransfer_kbank',$arrSendData);
-			if(!$responseAPI){
+			if(!$responseAPI["RESULT"]){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
 															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1','-9',
@@ -107,16 +119,20 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
 				$argumentWS = [
-						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
-						"astr_dept_inf_serv" => $arrayGroup
+					"as_wspass" => $config["WS_STRC_DB"],
+					"astr_dept_inf_serv" => $arrayGroup
 				];
 				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
 				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
-				$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
-				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
-				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > Timout | '.json_encode($arrVerifyToken);
-				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':sigma_key' => $dataComing["sigma_key"],
+					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_message' => $responseAPI["RESPONSE_MESSAGE"]
+				];
+				$log->writeLog('deposittrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
@@ -199,16 +215,20 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
 				$argumentWS = [
-						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
-						"astr_dept_inf_serv" => $arrayGroup
+					"as_wspass" => $config["WS_STRC_DB"],
+					"astr_dept_inf_serv" => $arrayGroup
 				];
 				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
 				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
-				$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
-				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
-				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrVerifyToken);
-				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayResult['RESPONSE_CODE'] = "WS0038";
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':sigma_key' => $dataComing["sigma_key"],
+					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_message' => $arrResponse->RESPONSE_MESSAGE
+				];
+				$log->writeLog('deposittrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;//$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
@@ -234,20 +254,21 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
 				$argumentWS = [
-						"as_wspass" => "Data Source=127.0.0.1/gcoop;Persist Security Info=True;User ID=iscocen;Password=iscocen;Unicode=True;coop_id=001001;coop_control=001001;",
-						"astr_dept_inf_serv" => $arrayGroup
+					"as_wspass" => $config["WS_STRC_DB"],
+					"astr_dept_inf_serv" => $arrayGroup
 				];
 				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
 				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
-				$text = '#Deposit-Cancel Fund transfer : '.date("Y-m-d H:i:s").' > '.json_encode($responseSoapCancel);
-				file_put_contents(__DIR__.'/../../log/soapfundtransfer-cancel.txt', $text . PHP_EOL, FILE_APPEND);
-				$text = '#Deposit #WS0038 Fund transfer : '.date("Y-m-d H:i:s").' > Catch | '.json_encode($arrVerifyToken);
-				file_put_contents(__DIR__.'/../../log/fundtransfer_error.txt', $text . PHP_EOL, FILE_APPEND);
 			}
-			$arrError["MESSAGE"] = $e->getMessage();
-			$arrError["ERROR_CODE"] = 'WS9999';
-			$lib->addLogtoTxt($arrError,'exception_error');
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrError["RESPONSE_CODE"] = 'WS9999';
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':sigma_key' => $dataComing["sigma_key"],
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $e->getMessage()
+			];
+			$log->writeLog('deposittrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

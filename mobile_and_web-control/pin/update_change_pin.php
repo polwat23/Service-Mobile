@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ChangePin')){
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
-			':pin' => $dataComing["pin"],
+			':pin' => password_hash($dataComing["pin"], PASSWORD_DEFAULT),
 			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
