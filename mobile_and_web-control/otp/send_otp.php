@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['member_no','tel','menu_component'],$dataComing)
 	$getFCMToken = $conmysql->prepare("SELECT gtk.fcm_token,gul.member_no FROM gcuserlogin gul LEFT JOIN gctoken gtk ON gul.id_token = gtk.id_token 
 										WHERE gul.receive_notify_transaction = '1' and gul.member_no = :member_no and gtk.at_is_revoke = '0' and gul.channel = 'mobile_app'
 										and gul.is_login = '1' and gtk.fcm_token IS NOT NULL ORDER BY gul.id_userlogin DESC");
-	$getFCMToken->execute([':member_no' => 'dev@mode']);
+	$getFCMToken->execute([':member_no' => $dataComing["member_no"]]);
 	if($getFCMToken->rowCount() > 0){
 		$rowFCMToken = $getFCMToken->fetch(PDO::FETCH_ASSOC);
-		$templateMessage = $func->getTemplatSystem("OTPChecker",1);
+		$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);
 		$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '15';

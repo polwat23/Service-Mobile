@@ -62,6 +62,9 @@
 	"WS0045" : [{"th" : "ไม่สามารถโอนเข้าบัญชีเดียวกันได้ กรุณาเปลี่ยนบัญชีปลายทาง","en" : "Cannot fund transfer same account please change account"}],
 	"WS0047" : [{"th" : "ไม่พบบัญชีปลายทาง กรุณาตรวจสอบอีกครั้ง","en" : "Not found account please recheck"}],
 	"WS0048" : [{"th" : "บัญชีของท่านถูกระงับ","en" : "Your account is withhold"}],
+	"WS0049" : [{"th" : "ไม่พบอีเมลของท่านกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Not found your email please recheck email"}],
+	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please recheck email"}],
+	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องท่านจากพ้นสภาพการเป็นสมาชิก","en" : "Cannot use application because membership is terminate"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],
@@ -94,5 +97,51 @@
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
-	"WS4004" : [{"th" : "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004","en" : "Something wrong please contact cooperative #WS4004"}]
+	"WS4004" : [{"th" : "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004","en" : "Something wrong please contact cooperative #WS4004"}],
+	"KBANK_ERR" : [{
+		"1001" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1002" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1003" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1004" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1005" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1006" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1007" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"1008" : 
+			[{"th" : "ขออภัย ท่านทำรายการยอดเงินเกินกว่าที่กำหนด","en" : "Sorry, your amount in transaction over limit"}],
+		"1009" : 
+			[{"th" : "ขออภัย ท่านทำรายการยอดเงินเกินกว่าที่กำหนด","en" : "Sorry, your amount in transaction over limit"}],
+		"1010" : 
+			[{"th" : "ขออภัย ท่านทำรายการเกินจำนวนครั้งที่กำหนด","en" : "Sorry, your transaction over limit"}],
+		"1011" : 
+			[{"th" : "หมายเลขบัตรประชาชนไม่ถูกต้อง กรุณาทำรายการใหม่อีกครั้ง","en" : "Citizen id is not correct please try again"}],
+		"1012" : 
+			[{"th" : "บัญชีปลายทางไม่สามารถรับเงินเข้าบัญชีได้","en" : "Destination account cannot receive money"}],
+		"1013" : 
+			[{"th" : "หมายเลขบัตรประชาชนหรือเลขบัญชีไม่ถูกต้อง กรุณาตรวจสอบ และทำรายการใหม่อีกครั้ง ","en" : "Citizen id or number account is not correct please recheck and try again"}],
+		"4000" : 
+			[{"th" : "บัญชีปลายทางไม่สามารถรับเงินเข้าบัญชีได้","en" : "Destination account cannot receive money"}],
+		"4001" : 
+			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
+		"4002" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"4003" : 
+			[{"th" : "บัญชีปลายทางไม่สามารถรับเงินเข้าบัญชีได้","en" : "Destination account cannot receive money"}],
+		"4004" : 
+			[{"th" : "บัญชีปลายทางไม่สามารถรับเงินเข้าบัญชีได้","en" : "Destination account cannot receive money"}],
+		"4005" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"4006" : 
+			[{"th" : "ขออภัย ไม่สามารถทำรายการได้ กรุณาติดต่อสหกรณ์","en" : "Sorry, cannot provide transaction please contact cooperative #WS0037"}],
+		"4007" : 
+			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
+		"9999" : 
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
+		}]
 }

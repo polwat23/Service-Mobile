@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserlogin = $conmysql->prepare("SELECT member_no, device_name, login_date, id_token 
 												FROM  gcuserlogin WHERE is_login = '1' ");
 		$fetchUserlogin->execute();
-		while($rowUserlogin = $fetchUserlogin->fetch()){
+		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
 			$arrGroupRootUserlogin["MEMBER_NO"] = $rowUserlogin["member_no"];
 			$arrGroupRootUserlogin["DEVICE"] = $rowUserlogin["device_name"];

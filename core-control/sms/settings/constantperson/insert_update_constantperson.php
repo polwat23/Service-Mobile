@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageconstantperson')){
+	if($func->check_permission_core($payload,'sms','manageconstperson')){
 		//edit list
 		if($dataComing["edit_list"]){
 			$conmysql->beginTransaction();

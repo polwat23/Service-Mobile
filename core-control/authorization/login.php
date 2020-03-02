@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['username','password','device_name','ip_address','unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['username','password','device_name','unique_id'],$dataComing)){
 	$checkPassword = $conmysql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
 										FROM coreuser cu LEFT JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
 										WHERE cu.username = :username");
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['username','password','device_name','ip_address'
 			if($insertLog->execute([
 				':username' => $dataComing["username"],
 				':unique_id' => $dataComing["unique_id"],
-				':device_name' => $lib->getDeviceName(),
+				':device_name' => $dataComing["device_name"],
 				':token' => $access_token,
 				':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour'))
 			])){

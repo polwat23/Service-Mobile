@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$email = $dataComing["email"];
+	$email = preg_replace('/\s+/', '', $dataComing["email"]);
 	$phone = $dataComing["phone"];
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email) 

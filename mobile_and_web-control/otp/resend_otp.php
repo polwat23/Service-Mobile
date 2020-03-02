@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp','menu_component'
 		$rowFCMToken = $getFCMToken->fetch(PDO::FETCH_ASSOC);
 		$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp");
 		$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
-		$templateMessage = $func->getTemplatSystem("OTPChecker",1);
+		$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 		$otp_password = $lib->randomText('number',6);
 		$reference = $lib->randomText('all',10);
 		$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '15';

@@ -1,11 +1,14 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_date'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead')){
+if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$dataComing)){
+	if($func->check_permission_core($payload,'sms','manageahead') || 
+	$func->check_permission_core($payload,'sms','sendmessageall') || 
+	$func->check_permission_core($payload,'sms','sendmessageperson')){
 		$platform = null;
 		$pathImg = null;
-		$id_smsquery = $dataComing["id_smsquery"] != '' ? $dataComing["id_smsquery"] : null ?? null;
+		$id_smsquery = isset($dataComing["id_smsquery"]) && $dataComing["id_smsquery"] != '' ? $dataComing["id_smsquery"] : null;
+		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != '' ? $dataComing["id_smstemplate"] : null;
 		if(isset($dataComing["send_platform"])){
 			switch($dataComing["send_platform"]) {
 				case "sms" :
@@ -14,9 +17,8 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 				case "mobile_app" :
 					$platform = '2';
 					break;
-				case "all" :
-					$platform = '3';
-					break;
+				default :
+					$platform = '1';
 			}
 		}
 		if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -33,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 				exit();
 			}else{
 				if($createImage){
-					$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
+					$pathImg = "resource/image_wait_to_be_sent/".$createImage["normal_path"];
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					$arrayResult['RESULT'] = FALSE;
@@ -43,14 +45,17 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 			}
 		}
 		if(isset($dataComing["type_send"]) && $dataComing["type_send"] == "all"){
-			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,id_smsquery,send_platform,send_image)
-													VALUES(:send_topic,:send_message,'all',:send_date,:username,:id_smsquery,:send_platform,:send_image)");
+			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,repeat_send,send_date,create_by,
+													id_smsquery,id_smstemplate,send_platform,send_image)
+													VALUES(:send_topic,:send_message,'all',:is_repeat,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 			if($insertSendAhead->execute([
-				':send_topic' => $dataComing["send_topic"],
-				':send_message' => $dataComing["send_message"],
+				':send_topic' => $dataComing["send_topic_emoji_"],
+				':send_message' => $dataComing["send_message_emoji_"],
+				':is_repeat' => ($dataComing["is_repeat"] ? '1' : '0'),
 				':send_date' => $dataComing["send_date"],
 				':username' => $payload["username"],
 				':id_smsquery' => $id_smsquery,
+				':id_template' => $id_template,
 				':send_platform' => $platform ?? '3',
 				':send_image' => $pathImg ?? null
 			])){
@@ -63,15 +68,18 @@ if($lib->checkCompleteArgument(['unique_id','send_topic','send_message','send_da
 				exit();
 			}
 		}else{
-			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,id_smsquery,send_platform,send_image)
-													VALUES(:send_topic,:send_message,:destination,:send_date,:username,:id_smsquery,:send_platform,:send_image)");
+			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,repeat_send,send_date,create_by,
+													id_smsquery,id_smstemplate,send_platform,send_image)
+													VALUES(:send_topic,:send_message,:destination,:is_repeat,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 			if($insertSendAhead->execute([
-				':send_topic' => $dataComing["send_topic"],
-				':send_message' => $dataComing["send_message"],
+				':send_topic' => $dataComing["send_topic_emoji_"],
+				':send_message' => $dataComing["send_message_emoji_"],
 				':destination' => isset($dataComing["destination"]) ? implode(',',$dataComing["destination"]) : 'all',
+				':is_repeat' => ($dataComing["is_repeat"] ? '1' : '0'),
 				':send_date' => $dataComing["send_date"],
 				':username' => $payload["username"],
 				':id_smsquery' => $id_smsquery,
+				':id_template' => $id_template,
 				':send_platform' => $platform ?? '3',
 				':send_image' => $pathImg ?? null
 			])){

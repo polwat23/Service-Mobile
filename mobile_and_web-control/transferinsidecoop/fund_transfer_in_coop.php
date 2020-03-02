@@ -14,8 +14,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				"as_src_deptaccount_no" => $from_account_no,
 				"as_dest_deptaccount_no" => $to_account_no,
 				"adtm_operate" => date('c'),
-				"as_wslipitem_code" => "WTX",
-				"as_dslipitem_code" => "DTX",
+				"as_wslipitem_code" => "WTB",
+				"as_dslipitem_code" => "DTB",
 				"adc_amt" => $dataComing["amt_transfer"],
 				"adc_fee" => $dataComing["fee_transfer"]
 			];
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,penalty_amt,result_transaction,member_no,
 															ref_no_1,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+															VALUES(:ref_no,'WTB',:from_account,:destination,'1',:amount,:penalty_amt,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
 			$insertTransactionLog->execute([
 				':ref_no' => $ref_no,
 				':from_account' => $from_account_no,
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':ref_no_source' => $slip_no
 			]);
 			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
-			$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
+			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				$dataMerge = array();
 				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
