@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ChangePin')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ChangePin' || $func->check_permission($payload["user_type"],$dataComing["menu_component"],'Pin')){
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
 			':pin' => password_hash($dataComing["pin"], PASSWORD_DEFAULT),

@@ -29,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														stm.sharestk_amt as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
 														WHERE stm.member_no = :member_no and stm.ENTRY_DATE
-														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD')");
+														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no DESC");
 			$getShareStatement->execute([
 				':member_no' => $member_no,
 				':datebefore' => $date_before,

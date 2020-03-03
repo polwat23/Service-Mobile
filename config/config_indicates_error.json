@@ -65,6 +65,7 @@
 	"WS0049" : [{"th" : "ไม่พบอีเมลของท่านกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Not found your email please recheck email"}],
 	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please recheck email"}],
 	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องท่านจากพ้นสภาพการเป็นสมาชิก","en" : "Cannot use application because membership is terminate"}],
+	"WS0052" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีสหกรณ์ได้ ท่านต้องยกเลิกผูกบัญชีฝั่งธนาคารก่อน","en" : "Cannot unbind cooperative account, you need to unbind bank account"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],

@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
-		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use,limit_transaction_amt FROM gcuserallowacctransaction WHERE member_no = :member_no");
+		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use,limit_transaction_amt FROM gcuserallowacctransaction WHERE member_no = :member_no and id_use <> '-9'");
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){

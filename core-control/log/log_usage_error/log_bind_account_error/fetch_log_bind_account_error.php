@@ -2,14 +2,24 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','loginlog')){
+	if($func->check_permission_core($payload,'log','logbindaccounterror')){
 		$arrayGroup = array();
-		$fetchLogBindAccountError = $conmysql->prepare("SELECT bind.id_logbindaccount,bind.member_no,bind.bind_status,bind.attempt_bind_date,bind.response_code,	
-														bind.response_message,bind.data_bind_error,bind.query_error,bind.query_flag,bind.coop_account_no,login.device_name,login.channel
+		$fetchLogBindAccountError = $conmysql->prepare("SELECT bind.id_logbindaccount,
+															bind.member_no,
+															bind.bind_status,
+															bind.attempt_bind_date,
+															bind.response_code,	
+															bind.response_message,
+															bind.data_bind_error,
+															bind.query_error,
+															bind.query_flag,
+															bind.coop_account_no,
+															login.device_name,
+															login.channel
 													FROM logbindaccount bind
 													INNER JOIN gcuserlogin login
 													ON login.id_userlogin = bind.id_userlogin
-													WHERE bind.bind_status = '-9'");
+													WHERE bind.bind_status !=1");
 		$fetchLogBindAccountError->execute();
 		while($rowLogBindAccountError = $fetchLogBindAccountError->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccountError = array();
