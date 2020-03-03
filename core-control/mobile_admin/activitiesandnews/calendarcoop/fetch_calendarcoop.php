@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before
 												FROM gctaskevent");
 		$fetchCalendar->execute();
-		while($rowCalendar = $fetchCalendar->fetch()){
+		while($rowCalendar = $fetchCalendar->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["ID_TASK"] = $rowCalendar["id_task"];
 			$arrConstans["TASK_TOPIC"] = $rowCalendar["task_topic"];

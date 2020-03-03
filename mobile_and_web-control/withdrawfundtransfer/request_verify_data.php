@@ -82,6 +82,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => date('Y-m-d H:i:s'),
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
@@ -110,6 +111,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => date('Y-m-d H:i:s'),
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],

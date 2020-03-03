@@ -7,6 +7,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$flag_transaction_coop = false;
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 		$time = time();
+		$dateOper = date('Y-m-d H:i:s');
+		$dateOperC = date('c');
 		$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		$arrSendData = array();
 		$arrVerifyToken['exp'] = time() + 60;
@@ -45,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrayGroup["moneytype_code"] = "CBT";
 		$arrayGroup["msg_output"] = null;
 		$arrayGroup["msg_status"] = null;
-		$arrayGroup["operate_date"] = date('c');
+		$arrayGroup["operate_date"] = $dateOperC;
 		$arrayGroup["oprate_cd"] = "002";
 		$arrayGroup["post_status"] = "1";
 		$arrayGroup["principal_amt"] = null;
@@ -70,7 +72,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
+						':operate_date' => $dateOper,
 						':sigma_key' => $dataComing["sigma_key"],
+						':amt_transfer' => $amt_transfer,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $responseSoap->msg_output
 					];
@@ -87,7 +91,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
 					':sigma_key' => $dataComing["sigma_key"],
+					':amt_transfer' => $amt_transfer,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $e->getMessage()
 				];
@@ -128,7 +134,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
 					':sigma_key' => $dataComing["sigma_key"],
+					':amt_transfer' => $amt_transfer,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $responseAPI["RESPONSE_MESSAGE"]
 				];
@@ -153,9 +161,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
-															,amount,fee_amt,amount_receive,trans_flag,result_transaction,member_no,
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'DTX',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1','1',:member_no,
+															VALUES(:ref_no,'DTX',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
 															:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
@@ -164,6 +172,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':amount_receive' => $amt_transfer,
+					':operate_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -172,7 +181,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':ref_no_source' => $transaction_no
 				]);
 				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
-				$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
+				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				foreach($arrToken["LIST_SEND"] as $dest){
 					$dataMerge = array();
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
@@ -198,8 +207,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				echo json_encode($arrayResult);
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
-															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1','-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
+															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
@@ -207,6 +216,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':amount_receive' => $amt_transfer,
+					':operate_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -224,12 +234,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
 					':sigma_key' => $dataComing["sigma_key"],
+					':amt_transfer' => $amt_transfer,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $arrResponse->RESPONSE_MESSAGE
 				];
 				$log->writeLog('deposittrans',$arrayStruc);
-				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;//$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -237,8 +249,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}catch(Throwable $e) {
 			if($flag_transaction_coop){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
-															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1','-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
+															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
@@ -246,6 +258,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':amount_receive' => $amt_transfer,
+					':operate_date' => $dateOper,	
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -264,7 +277,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $dateOper,
 				':sigma_key' => $dataComing["sigma_key"],
+				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $e->getMessage()
 			];

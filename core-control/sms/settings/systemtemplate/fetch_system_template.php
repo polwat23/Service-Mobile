@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSysTemplate = $conmysql->prepare("SELECT subject,body,id_systemplate FROM smssystemtemplate WHERE is_use = '1'");
 		$fetchSysTemplate->execute();
 		if($fetchSysTemplate->rowCount() > 0){
-			while($rowSysTemplate = $fetchSysTemplate->fetch()){
+			while($rowSysTemplate = $fetchSysTemplate->fetch(PDO::FETCH_ASSOC)){
 				$arraySysTem = array();
 				$arraySysTem["SUBJECT"] = $rowSysTemplate["subject"];
 				$arraySysTem["BODY"] = $rowSysTemplate["body"];

@@ -84,33 +84,33 @@ class insertLog {
 			$insertLog->execute($log_struc);
 		}
 		private function logDepositTransfer($log_struc){
-			$insertLog = $this->con->prepare("INSERT INTO logdepttransbankerror(member_no,id_userlogin,sigma_key
+			$insertLog = $this->con->prepare("INSERT INTO logdepttransbankerror(member_no,id_userlogin,transaction_date,sigma_key,amt_transfer
 												,response_code,response_message) 
-												VALUES(:member_no,:id_userlogin,:sigma_key,:response_code,:response_message)");
+												VALUES(:member_no,:id_userlogin,:operate_date,:sigma_key,:amt_transfer,:response_code,:response_message)");
 			$insertLog->execute($log_struc);
 		}
 		private function logWithdrawTransfer($log_struc){
 			if(isset($log_struc[":fee_amt"])){
-				$insertLog = $this->con->prepare("INSERT INTO logwithdrawtransbankerror(member_no,id_userlogin,amt_transfer,penalty_amt,fee_amt,deptaccount_no
+				$insertLog = $this->con->prepare("INSERT INTO logwithdrawtransbankerror(member_no,id_userlogin,transaction_date,amt_transfer,penalty_amt,fee_amt,deptaccount_no
 												,response_code,response_message) 
-												VALUES(:member_no,:id_userlogin,:amt_transfer,:penalty_amt,:fee_amt,:deptaccount_no,:response_code,:response_message)");
+												VALUES(:member_no,:id_userlogin,:operate_date,:amt_transfer,:penalty_amt,:fee_amt,:deptaccount_no,:response_code,:response_message)");
 			}else{
-				$insertLog = $this->con->prepare("INSERT INTO logwithdrawtransbankerror(member_no,id_userlogin,amt_transfer,deptaccount_no
+				$insertLog = $this->con->prepare("INSERT INTO logwithdrawtransbankerror(member_no,id_userlogin,transaction_date,amt_transfer,deptaccount_no
 												,response_code,response_message) 
-												VALUES(:member_no,:id_userlogin,:amt_transfer,:deptaccount_no,:response_code,:response_message)");
+												VALUES(:member_no,:id_userlogin,:operate_date,:amt_transfer,:deptaccount_no,:response_code,:response_message)");
 			}
 			$insertLog->execute($log_struc);
 		}
 		private function logTransferInsideCoop($log_struc){
 			if(isset($log_struc[":penalty_amt"])){
-				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,deptaccount_no,amt_transfer,penalty_amt,type_request,transfer_flag
+				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,penalty_amt,type_request,transfer_flag
 													,destination,response_code,response_message) 
-													VALUES(:member_no,:id_userlogin,:deptaccount_no,:amt_transfer,:penalty_amt,:type_request,:transfer_flag,
+													VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:penalty_amt,:type_request,:transfer_flag,
 													:destination,:response_code,:response_message)");
 			}else{
-				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,deptaccount_no,amt_transfer,type_request,transfer_flag
+				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,type_request,transfer_flag
 													,destination,response_code,response_message) 
-													VALUES(:member_no,:id_userlogin,:deptaccount_no,:amt_transfer,:type_request,:transfer_flag,
+													VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:type_request,:transfer_flag,
 													:destination,:response_code,:response_message)");
 
 			}

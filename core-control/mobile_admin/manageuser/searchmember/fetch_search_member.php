@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroupAll = array();
 		$arrayExecute = array();
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){
-			$arrayExecute[':member_no'] = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
+			$arrayExecute[':member_no'] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 		}
 		if(isset($dataComing["member_name"]) && $dataComing["member_name"] != ''){
 			$arrName = explode(' ',$dataComing["member_name"]);
@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											(isset($arrayExecute[':member_surname']) ? " and mb.memb_surname LIKE :member_surname" : null).
 											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null));
 		$fetchMember->execute($arrayExecute);
-		while($rowMember = $fetchMember->fetch()){
+		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
 			$address = $rowMember["ADDR_NO"];
 			$address .= (isset($rowMember["ADDR_MOO"]) ? '  ม.'.$rowMember["ADDR_MOO"] : null);

@@ -31,7 +31,7 @@ class connection {
 			$dbpass = $json_data["DBORACLE_PASSWORD"];
 			$dbname = "(DESCRIPTION =
 						(ADDRESS_LIST =
-						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = 15242))
+						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = 1522))
 						)
 						(CONNECT_DATA =
 						  (SERVICE_NAME = ".$json_data["DBORACLE_SERVICE"].")

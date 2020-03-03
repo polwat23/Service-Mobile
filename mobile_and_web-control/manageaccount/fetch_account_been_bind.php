@@ -29,9 +29,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccount["BANNER_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
 					$arrAccount["BANNER_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 				}
-				$arrAccount["ICON_BANK"] = $rowAccountBind["bank_logo_path"];
+				$arrAccount["ICON_BANK"] = $config['URL_SERVICE'].$rowAccountBind["bank_logo_path"];
 				$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
-				$arrAccount["ICON_BANK_WEBP"] = $explodePathBankLOGO[0].'.webp';
+				$arrAccount["ICON_BANK_WEBP"] = $config['URL_SERVICE'].$explodePathBankLOGO[0].'.webp';
 				$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
 				$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
 				$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];

@@ -2,21 +2,19 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','sendmessage')){
+	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		$arrGroupTemplate = array();
-		$getTemplateUnMatch = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery,
-													sq.is_bind_param
-													FROM smstemplate stp LEFT JOIN smsquery sq ON stp.id_smsquery = sq.id_smsquery 
-													WHERE stp.is_use = '1' and stp.id_smstemplate NOT IN(SELECT id_smstemplate FROM smstopicmatchtemplate WHERE is_use <> '-9')");
+		$getTemplateUnMatch = $conmysql->prepare("SELECT id_smstemplate,smstemplate_name,smstemplate_body
+													FROM smstemplate 
+													WHERE is_use = '1' and id_smstemplate NOT IN(SELECT id_smstemplate FROM smstopicmatchtemplate WHERE is_use <> '-9')
+													and id_smsquery IS NULL");
 		$getTemplateUnMatch->execute();
 		if($getTemplateUnMatch->rowCount() > 0){
-			while($rowTemplate = $getTemplateUnMatch->fetch()){
+			while($rowTemplate = $getTemplateUnMatch->fetch(PDO::FETCH_ASSOC)){
 				$arrTemplate = array();
 				$arrTemplate["ID_TEMPLATE"] = $rowTemplate["id_smstemplate"];
 				$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["smstemplate_name"];
 				$arrTemplate["TEMPLATE_MESSAGE"] = $rowTemplate["smstemplate_body"];
-				$arrTemplate["ID_SMSQUERY"] = $rowTemplate["id_smsquery"];
-				$arrTemplate["BIND_PARAM"] = $rowTemplate["is_bind_param"];
 				$arrGroupTemplate[] = $arrTemplate;
 			}
 			$arrayResult["TEMPLATE"] = $arrGroupTemplate;

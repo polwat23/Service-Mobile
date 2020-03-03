@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										type_palette_prev,color_main_prev,color_secon_prev,color_text_prev,color_deg_prev,update_date
 										FROM gcpalettecolor WHERE is_use = '1'");
 		$fetchPalette->execute();
-		while($rowPalette = $fetchPalette->fetch()){
+		while($rowPalette = $fetchPalette->fetch(PDO::FETCH_ASSOC)){
 			$arrPalette = array();
 			$arrPalette["ID_PALETTE"] = $rowPalette["id_palette"];
 			$arrPalette["TYPE_PALETTE"] = $rowPalette["type_palette"];

@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$member_no = str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT);
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	if($member_no == "00007688" || $member_no == "00007797" || $member_no == "00015546" || $member_no == "00017748" || $member_no == "00018703" || 
 	   $member_no == "00020089" || $member_no == "00020137" || $member_no == "00021596" || $member_no == "00021598" || $member_no == "00021599" ||
 	   $member_no == "00022039" || $member_no == "00022853" || $member_no == "00022854" || $member_no == "00022855" || $member_no == "00024001" ||
@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	   $member_no == "00051376" || $member_no == "00056739" || $member_no == "00012427" || $member_no == "00002041" || $member_no == "00006930" ||
 	   $member_no == "00018505" || $member_no == "00010350" || $member_no == "00017448" || $member_no == "00006231" || $member_no == "00009431" ||
 	   $member_no == "00012067" || $member_no == "00011090" || $member_no == "00014782" || $member_no == "00007560" || $member_no == "00008647" ||
-	   $member_no == "00015818" || $member_no == "00029856"){
-		$checkMember = $conmysql->prepare("SELECT id_account FROM gcmemberaccount WHERE member_no = :member_no");
+	   $member_no == "00015818" || $member_no == "00029856" || $member_no == "00519022" || $member_no == "00518529"){
+		$checkMember = $conmysql->prepare("SELECT mebmer_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);
 		if($checkMember->rowCount() > 0){
 			$arrayResult['RESPONSE_CODE'] = "WS0020";
@@ -35,14 +35,21 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			echo json_encode($arrayResult);
 			exit();
 		}else{
-			$checkValid = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster 
-												WHERE member_no = :member_no and card_person = :card_person and resign_status = 0");
+			$checkValid = $conoracle->prepare("SELECT memb_name,memb_surname,resign_status FROM mbmembmaster 
+												WHERE member_no = :member_no and card_person = :card_person");
 			$checkValid->execute([
 				':member_no' => $member_no,
 				':card_person' => $dataComing["id_card"]
 			]);
 			$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
-			if($rowMember){
+			if(isset($rowMember)){
+				if($rowMember["RESIGN_STATUS"] == '1'){
+					$arrayResult['RESPONSE_CODE'] = "WS0051";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 				$arrayResult['MEMBER_NO'] = $member_no;
 				$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
 				$arrayResult['MEMBER_FULLNAME'] = $rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];

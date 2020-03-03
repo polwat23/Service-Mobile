@@ -2,6 +2,17 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
+	$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+	$checkResign->execute([':member_no' => $payload["member_no"]]);
+	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
+	if($rowResign["RESIGN_STATUS"] == '1'){
+		$arrayResult['RESPONSE_CODE'] = "WS0051";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(401);
+		echo json_encode($arrayResult);
+		exit();
+	}
 	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 	$rowPinNull = $checkPinNull->fetch(PDO::FETCH_ASSOC);

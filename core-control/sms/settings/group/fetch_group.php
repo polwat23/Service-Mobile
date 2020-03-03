@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1' and id_groupmember = :id_group");
 			$fetchGroup->execute([':id_group' => $dataComing["id_group"]]);
-			$rowGroup = $fetchGroup->fetch();
+			$rowGroup = $fetchGroup->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll["ID_GROUP"] = $rowGroup["id_groupmember"];
 			$arrGroupAll["GROUP_NAME"] = $rowGroup["group_name"];
 			$arrGroupAll["GROUP_MEMBER"] = explode(',',$rowGroup["group_member"]);
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1'");
 			$fetchGroup->execute();
-			while($rowGroup = $fetchGroup->fetch()){
+			while($rowGroup = $fetchGroup->fetch(PDO::FETCH_ASSOC)){
 				$arrGroup = array();
 				$arrGroup["ID_GROUP"] = $rowGroup["id_groupmember"];
 				$arrGroup["GROUP_NAME"] = $rowGroup["group_name"];

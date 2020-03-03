@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/core_error.log');
+error_reporting(E_ERROR);
 
 header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -42,8 +43,6 @@ $config = json_decode($jsonConfig,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
-	$dataComing["device_name"] = $lib->getDeviceName();
-	$dataComing["ip_address"] = $lib->getClientIP();
 	// Complete Argument
 	if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 15){
 		$author_token = $headers["Authorization"];
