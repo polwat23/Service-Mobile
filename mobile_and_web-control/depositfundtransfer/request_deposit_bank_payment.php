@@ -108,7 +108,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			if(!$responseAPI["RESULT"]){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
-															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1','-9',
+															VALUES(:ref_no,'DTB',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1','-9',
 															NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
@@ -163,7 +163,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'DTX',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
+															VALUES(:ref_no,'DTB',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
 															:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
@@ -208,7 +208,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
-															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
+															VALUES(:ref_no,'DTB',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
@@ -250,7 +250,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			if($flag_transaction_coop){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin)
-															VALUES(:ref_no,'DTX',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
+															VALUES(:ref_no,'DTB',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],

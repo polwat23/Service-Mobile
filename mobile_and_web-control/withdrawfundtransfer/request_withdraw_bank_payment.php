@@ -62,8 +62,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrayGroup["post_status"] = "1";
 		$arrayGroup["principal_amt"] = null;
 		$arrayGroup["ref_slipno"] = null;
-		$arrayGroup["slipitemtype_code"] = "DTB";
-		$arrayGroup["stmtitemtype_code"] = "WTB";
+		$arrayGroup["slipitemtype_code"] = "WTB";
+		$arrayGroup["stmtitemtype_code"] = "DTB";
 		$arrayGroup["system_cd"] = "02";
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
@@ -122,7 +122,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -178,9 +178,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':seq_no' => $rowSeqno["SEQ_NO"]
 				]);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
 															:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -222,9 +222,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				echo json_encode($arrayResult);
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -274,9 +274,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		}catch(Throwable $e) {
 			if($flag_transaction_coop){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
