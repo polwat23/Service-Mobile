@@ -402,7 +402,11 @@ class library {
 		}
 		return true;
 	}
-	
+	public function addLogtoTxt($dataLog,$pathfile){
+		$dataLog["TIME"] = date("Y-m-d H:i:s");
+		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
+	}
+
 	public function getnumberofYear($year){
 		$days=0; 
 		for($month=1;$month<=12;$month++){ 

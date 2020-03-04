@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrDeptAllowed[] = $rowDeptAllow["dept_type_code"];
 			}
-			$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no");
+			$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 			$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
