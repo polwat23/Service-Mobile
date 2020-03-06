@@ -19,28 +19,34 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
 		if($fetchBindAccount->rowCount() > 0){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
-				$arrAccBind = array();
-				$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
-				$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
-				$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
-				$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
-				$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
-				$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
-				$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
-				$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
-				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
-				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-				$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
-													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													WHERE dpm.deptaccount_no = :deptaccount_no");
-				$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
-				$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-				if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-					$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
-					$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-					$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"];
-					$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["PRNCBAL"],2);
-					$arrGroupAccBind[] = $arrAccBind;
+				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no
+																FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use <> '-9' and gct.is_use ='1' and gct.allow_transaction = '1'");
+				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
+				if($fetchAccountBeenAllow->rowCount() > 0){
+					$arrAccBind = array();
+					$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
+					$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
+					$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
+					$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
+					$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
+					$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
+					$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
+					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
+					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
+					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
+					$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt
+														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
+					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
+					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
+					if(isset($rowDataAcc["DEPTACCOUNT_NAME"])){
+						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
+						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+						$arrAccBind["BALANCE"] = $rowDataAcc["WITHDRAWABLE_AMT"];
+						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["WITHDRAWABLE_AMT"],2);
+						$arrGroupAccBind[] = $arrAccBind;
+					}
 				}
 			}
 			if(sizeof($arrGroupAccBind) > 0){

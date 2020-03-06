@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					}else if($errorCode === 4){
 						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
 							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-							if(isset($dataComing["menu_component"]) && $dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
+							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
 							&& $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
 								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
 								if($is_refreshToken_arr){

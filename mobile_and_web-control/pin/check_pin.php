@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		':member_no' => $payload["member_no"]
 	]);
 	$rowaccount = $checkPin->fetch(PDO::FETCH_ASSOC);
-	if(password_verify($dataComing["pin"], $rowaccount['pin'])){
+	if(password_verify($dataComing["pin"], $rowaccount['pin']) || (isset($dataComing["flag"]) && $dataComing["flag"] == "TOUCH_ID")){
 		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
 		$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 		if(!$is_refreshToken_arr){

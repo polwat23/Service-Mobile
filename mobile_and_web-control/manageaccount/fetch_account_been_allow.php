@@ -4,7 +4,9 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
-		$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no,is_use,limit_transaction_amt FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
+		$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no,gat.is_use,gat.limit_transaction_amt 
+														FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+														WHERE gat.member_no = :member_no and gat.is_use <> '-9' and gct.is_use ='1' and gct.allow_transaction = '1'");
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
@@ -14,15 +16,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
-				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
-				$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
-				$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
-				$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $func->getConstant("limit_withdraw");
-				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
-				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
-				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
-				$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
-				$arrGroupAccAllow[] = $arrAccBeenAllow;
+				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
+					$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
+					$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
+					$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
+					$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $func->getConstant("limit_withdraw");
+					$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
+					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
+					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
+					$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
+					$arrGroupAccAllow[] = $arrAccBeenAllow;
+				}
 			}
 			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 			$arrayResult['RESULT'] = TRUE;
