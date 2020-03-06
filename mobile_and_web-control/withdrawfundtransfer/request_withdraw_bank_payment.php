@@ -9,6 +9,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 		$time = time();
 		$arrSendData = array();
+		$dateOper = date('Y-m-d H:i:s');
+		$dateOperC = date('c');
 		$penalty_include = $func->getConstant("include_penalty");
 		if($penalty_include == '0'){
 			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["penalty_amt"] - $dataComing["fee_amt"];
@@ -47,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrayGroup["coop_id"] = $config["COOP_ID"];
 		$arrayGroup["deptaccount_no"] = $coop_account_no;
 		$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-		$arrayGroup["entry_id"] = "admin";
+		$arrayGroup["entry_id"] = "KBANK";
 		$arrayGroup["fee_amt"] = $dataComing["penalty_amt"];
 		$arrayGroup["feeinclude_status"] = $penalty_include;
 		$arrayGroup["item_amt"] = $amt_transfer;
@@ -55,13 +57,13 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrayGroup["moneytype_code"] = "CBT";
 		$arrayGroup["msg_output"] = null;
 		$arrayGroup["msg_status"] = null;
-		$arrayGroup["operate_date"] = date('c');
+		$arrayGroup["operate_date"] = $dateOperC;
 		$arrayGroup["oprate_cd"] = "003";
 		$arrayGroup["post_status"] = "1";
 		$arrayGroup["principal_amt"] = null;
 		$arrayGroup["ref_slipno"] = null;
-		$arrayGroup["slipitemtype_code"] = "DTX";
-		$arrayGroup["stmtitemtype_code"] = "WTX";
+		$arrayGroup["slipitemtype_code"] = "WTB";
+		$arrayGroup["stmtitemtype_code"] = "DTB";
 		$arrayGroup["system_cd"] = "02";
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
@@ -72,13 +74,17 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					"as_wspass" => $config["WS_STRC_DB"],
 					"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoap = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
+				$responseSoap = $resultWS->of_dept_inf_serv_cenResult;
 				if($responseSoap->msg_status != '0000'){
 					$arrayResult['RESPONSE_CODE'] = "WS0041";
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
+						':operate_date' => $dateOper,
+						':amt_transfer' => $dataComing["amt_transfer"],
+						':penalty_amt' => $dataComing["penalty_amt"],
+						':fee_amt' => $dataComing["fee_amt"],
 						':deptaccount_no' => $coop_account_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $responseSoap->msg_output
@@ -96,9 +102,13 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
+					':amt_transfer' => $dataComing["amt_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
+					':fee_amt' => $dataComing["fee_amt"],
 					':deptaccount_no' => $coop_account_no,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => json_encode($e)
+					':response_message' => $e->getMessage()
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -110,9 +120,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/withdrawdeposit_kbank',$arrSendData);
 			if(!$responseAPI["RESULT"]){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1','-9',NOW(),:member_no
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -122,6 +132,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':amount_receive' => $amt_transfer,
+					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -134,15 +145,19 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 						"as_wspass" => $config["WS_STRC_DB"],
 						"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
+				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
 				$arrayResult['RESPONSE_CODE'] = "WS0030";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
+					':amt_transfer' => $dataComing["amt_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
+					':fee_amt' => $dataComing["fee_amt"],
 					':deptaccount_no' => $coop_account_no,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $responseAPI["RESPONSE_MESSAGE"]
+					':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -163,9 +178,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':seq_no' => $rowSeqno["SEQ_NO"]
 				]);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1','1',:member_no,:ref_no1,
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
 															:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -175,6 +190,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':amount_receive' => $amt_transfer,
+					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -182,12 +198,12 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':ref_no_source' => $dataComing["kbank_ref_no"]
 				]);
 				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
-				$templateMessage = $func->getTemplatSystem($dataComing["menu_component"],1);
+				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				foreach($arrToken["LIST_SEND"] as $dest){
 					$dataMerge = array();
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
 					$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+					$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
 					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 					$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
@@ -201,13 +217,14 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					}
 				}
 				$arrayResult['TRANSACTION_NO'] = $dataComing["tran_id"];
+				$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1','-9',NOW(),:member_no
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -217,6 +234,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':amount_receive' => $amt_transfer,
+					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -229,18 +247,26 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 						"as_wspass" => $config["WS_STRC_DB"],
 						"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
+				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
 				$arrayResult['RESPONSE_CODE'] = "WS0037";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
+					':amt_transfer' => $dataComing["amt_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
+					':fee_amt' => $dataComing["fee_amt"],
 					':deptaccount_no' => $coop_account_no,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $arrResponse->RESPONSE_MESSAGE
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
-				$arrayResult['RESPONSE_MESSAGE'] = $arrResponse->RESPONSE_MESSAGE;//$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -248,9 +274,9 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		}catch(Throwable $e) {
 			if($flag_transaction_coop){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,result_transaction,cancel_date,member_no,
+															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:,'-1','-9',NOW(),:member_no
+															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 															,:ref_no1,:slip_no,:id_userlogin,:ref_no_source)");
 				$insertTransactionLog->execute([
 					':ref_no' => $dataComing["tran_id"],
@@ -260,6 +286,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':amount_receive' => $amt_transfer,
+					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -272,13 +299,17 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 						"as_wspass" => $config["WS_STRC_DB"],
 						"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
+				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
 			}
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $dateOper,
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':penalty_amt' => $dataComing["penalty_amt"],
+				':fee_amt' => $dataComing["fee_amt"],
 				':deptaccount_no' => $coop_account_no,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $e->getMessage()

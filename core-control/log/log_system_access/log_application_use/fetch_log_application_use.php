@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','loginlog')){
 		$arrayGroup = array();
-		$fetchApplicationUseLog = $conmysql->prepare("SELECT l.id_loguseapp,l.member_no,l.id_userlogin,l.access_date,l.ip_address,g.device_name,g.channel,g.login_date,g.logout_date,g.is_login
+		$fetchApplicationUseLog = $conmysql->prepare("SELECT l.id_loguseapp,l.member_no,l.id_userlogin,l.access_date,l.ip_address,g.device_name,g.login_date,g.logout_date,g.is_login
 													FROM loguseapplication l
 													INNER JOIN gcuserlogin g
 													ON g.id_userlogin = l.id_userlogin");
@@ -14,10 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupApplicationUseLog["ID_USERLOGIN"] = $rowAppUseLog["id_userlogin"];
 			$arrGroupApplicationUseLog["MEMBER_NO"] = $rowAppUseLog["member_no"];
 			$arrGroupApplicationUseLog["DEVICE_NAME"] = $rowAppUseLog["device_name"];
-			$arrGroupApplicationUseLog["CHANNEL"] = $rowAppUseLog["channel"];
-			 
-			$arrGroupApplicationUseLog["LOGIN_DATE"] =  $lib->convertdate($rowAppUseLog["login_date"],'d m Y',true); 
-			$arrGroupApplicationUseLog["LOGOUT_DATE"] =  $lib->convertdate( $rowAppUseLog["logout_date"],'d m Y',true);
+			$arrGroupApplicationUseLog["ACCESS_DATE"] =  $lib->convertdate($rowAppUseLog["access_date"],'d m Y',true); 
 			$arrGroupApplicationUseLog["IS_LOGIN"] = $rowAppUseLog["is_login"];
 			//$arrGroupApplicationUseLog["UNIQUE_ID"] = $rowAppUseLog["unique_id"];
 			//$arrGroupApplicationUseLog["STATUS_FIRSTAPP"] = $rowAppUseLog["status_firstapp"];

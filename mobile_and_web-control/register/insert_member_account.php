@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','email','phone','password','api_token','unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','email','phone','password','api_toke
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$email = $dataComing["email"];
+	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email) 

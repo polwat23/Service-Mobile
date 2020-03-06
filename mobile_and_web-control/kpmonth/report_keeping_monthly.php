@@ -155,7 +155,7 @@ function GenerateReport($dataReport,$header){
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
 				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 					<div style="text-align:center;position: absolute;width:100%">
-						<p style="margin-top: 10px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด</p>
+						<p style="margin-top: 10px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
 						<p style="margin-top: -15px;font-size: 18px;font-weight: bold">รายการเรียกเก็บประจำเดือน</p>
 						<p style="margin-top: -28px;font-size: 18px;font-weight: bold">'.$header["recv_period"].'</p>
 					</div>

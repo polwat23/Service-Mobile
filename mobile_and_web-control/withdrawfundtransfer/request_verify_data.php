@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
-													and transaction_type_code = 'WTX' and from_account = :from_account and destination_type = '1'
+													and transaction_type_code = 'WTB' and from_account = :from_account and destination_type = '1'
 													and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
 		$checkLimitBalance->execute([
 			':member_no' => $payload["member_no"],
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			exit();
 		}
 		$arrSendData = array();
-		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+		/*$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 		try {
 			$argumentWS = [
 				"as_wspass" => $config["WS_STRC_DB"],
@@ -57,6 +57,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $e->getMessage()
@@ -66,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
-		}
+		}*/
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
@@ -81,9 +82,11 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => date('Y-m-d H:i:s'),
+				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $responseAPI["RESPONSE_MESSAGE"]
+				':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
 			];
 			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -93,6 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
+			$arrayResult['PENALTY_AMT']  = 0;
 			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 			$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
@@ -107,9 +111,11 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => date('Y-m-d H:i:s'),
+				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $arrayResult["RESPONSE_MESSAGE"]
+				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

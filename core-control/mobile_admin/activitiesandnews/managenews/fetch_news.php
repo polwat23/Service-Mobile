@@ -9,22 +9,22 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										WHERE is_use ='1'
 										ORDER BY update_date DESC");
 		$fetchNews->execute();
-		while($rowCoreSubMenu = $fetchNews->fetch(PDO::FETCH_ASSOC)){
-			$arrGroupCoreUser = array();
-			$arrGroupCoreUser["ID_NEW"] = $rowCoreSubMenu["id_news"];
-			$arrGroupCoreUser["NEWS_TITLE"] = $rowCoreSubMenu["news_title"];
-			$arrGroupCoreUser["NEWS_DETAIL"] = $rowCoreSubMenu["news_detail"];
-			$arrGroupCoreUser["PATH_IMG_HEADER"] = $rowCoreSubMenu["path_img_header"];
-			$arrGroupCoreUser["LINK_News_MORE"] = $rowCoreSubMenu["link_news_more"];
-			$arrGroupCoreUser["CREATE_DATE"] = $lib->convertdate($rowCoreSubMenu["create_date"],'d m Y',true); 
-			$arrGroupCoreUser["UPDATE_DATE"] = $lib->convertdate($rowCoreSubMenu["update_date"],'d m Y',true);  
-			$arrGroupCoreUser["PATH_IMG_1"] = $rowCoreSubMenu["img_gallery_1"];
-			$arrGroupCoreUser["PATH_IMG_2"] = $rowCoreSubMenu["img_gallery_2"];
-			$arrGroupCoreUser["PATH_IMG_3"] = $rowCoreSubMenu["img_gallery_3"];
-			$arrGroupCoreUser["PATH_IMG_4"] = $rowCoreSubMenu["img_gallery_4"];
-			$arrGroupCoreUser["PATH_IMG_5"] = $rowCoreSubMenu["img_gallery_5"];
+		while($rowNews = $fetchNews->fetch(PDO::FETCH_ASSOC)){
+			$arrGroupNews = array();
+			$arrGroupNews["ID_NEW"] = $rowNews["id_news"];
+			$arrGroupNews["NEWS_TITLE"] = $rowNews["news_title"];
+			$arrGroupNews["NEWS_DETAIL"] = $rowNews["news_detail"];
+			$arrGroupNews["PATH_IMG_HEADER"] = $rowNews["path_img_header"];
+			$arrGroupNews["LINK_News_MORE"] = $rowNews["link_news_more"];
+			$arrGroupNews["CREATE_DATE"] = $lib->convertdate($rowNews["create_date"],'d m Y',true); 
+			$arrGroupNews["UPDATE_DATE"] = $lib->convertdate($rowNews["update_date"],'d m Y',true);  
+			$arrGroupNews["PATH_IMG_1"] = $rowNews["img_gallery_1"];
+			$arrGroupNews["PATH_IMG_2"] = $rowNews["img_gallery_2"];
+			$arrGroupNews["PATH_IMG_3"] = $rowNews["img_gallery_3"];
+			$arrGroupNews["PATH_IMG_4"] = $rowNews["img_gallery_4"];
+			$arrGroupNews["PATH_IMG_5"] = $rowNews["img_gallery_5"];
 			
-			$arrayGroup[] = $arrGroupCoreUser;
+			$arrayGroup[] = $arrGroupNews;
 		}
 		$arrayResult["NEWS_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;

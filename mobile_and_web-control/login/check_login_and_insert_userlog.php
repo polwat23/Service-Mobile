@@ -17,6 +17,16 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
+		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign->execute([':member_no' => $member_no]);
+		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
+		if($rowResign["RESIGN_STATUS"] == '1'){
+			$arrayResult['RESPONSE_CODE'] = "WS0051";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		if($rowPassword['account_status'] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -36,8 +46,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$refresh_token = $lib->generate_token();
 			try{
 				$conmysql->beginTransaction();
-				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = 'mobile_app' and is_login = '1'");
-				$getMemberLogged->execute([':member_no' => $member_no]);
+				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
+				$getMemberLogged->execute([
+					':member_no' => $member_no,
+					':channel' => $dataComing["channel"]
+				]);
 				if($getMemberLogged->rowCount() > 0){
 					$arrayIdToken = array();
 					while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
