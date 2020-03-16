@@ -128,7 +128,7 @@ class library {
 	public function formataccount_hidden($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$account_text = '';
-			if(strpos($account_no,'-') !== FALSE){
+			if(strpos($account_no,'-') === FALSE){
 				$account_no = $this->formataccount($account_no,$format);
 			}
 			for($i = 0; $i < strlen($account_no);$i++){
@@ -406,61 +406,7 @@ class library {
 		$dataLog["TIME"] = date("Y-m-d H:i:s");
 		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
 	}
-	public function getClientIP() {
-        $ipaddress = '';
-        if (isset($_SERVER['HTTP_CLIENT_IP']))
-            $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
-        else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-            $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        else if(isset($_SERVER['HTTP_X_FORWARDED']))
-            $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
-        else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
-            $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
-        else if(isset($_SERVER['HTTP_FORWARDED']))
-            $ipaddress = $_SERVER['HTTP_FORWARDED'];
-        else if(isset($_SERVER['REMOTE_ADDR']))
-            $ipaddress = $_SERVER['REMOTE_ADDR'];
-        else
-            $ipaddress = '';
-        return $ipaddress;
-    }
-	
-	public function getDeviceName() { 
-        $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']); 
-        if(strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE){
-			$name = 'Internet explorer';
-		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== FALSE){
-			$name =  'Internet explorer';
-		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Firefox') !== FALSE){
-			$name =  'Mozilla Firefox';
-		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== FALSE){
-			$name =  'Google Chrome';
-		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera Mini') !== FALSE){
-			$name =  "Opera Mini";
-		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') !== FALSE){
-			$name =  "Opera";
-		}else if(strpos($_SERVER['HTTP_USER_AGENT'], 'Safari') !== FALSE){
-		   $name =  "Safari";
-		}else{
-		   $name =  'Something else';
-		}
-        if (preg_match('/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/', $userAgent, $matches)) { 
-            $version = $matches[1]; 
-        }else { 
-            $version = 'unknown'; 
-        }
-        if (preg_match('/linux/', $userAgent)) { 
-            $os_platform = 'linux'; 
-        }elseif (preg_match('/macintosh|mac os x/', $userAgent)) { 
-            $os_platform = 'mac'; 
-        }elseif (preg_match('/windows|win32/', $userAgent)) { 
-            $os_platform = 'windows'; 
-        }else { 
-            $os_platform = 'unrecognized'; 
-        }
-		$device_name = $name.' V.'.$version.' ('.$os_platform.')';
-        return $device_name;
-    }
+
 	public function getnumberofYear($year){
 		$days=0; 
 		for($month=1;$month<=12;$month++){ 
@@ -475,16 +421,17 @@ class library {
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt( $ch, CURLOPT_TIMEOUT, 180);
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 300);
 		$result = curl_exec($ch);
 		if($result){
 			curl_close($ch);
 			return $result;
 		}else{
-			$text = '#PostData Error : '.date("Y-m-d H:i:s").' > '.$url.' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/log_api_error.txt', $text . PHP_EOL, FILE_APPEND);
+			$arrayErr = array();
+			$arrayErr["RESPONSE_MESSAGE"] = curl_error($ch);
+			$arrayErr["RESULT"] = FALSE;
 			curl_close ($ch);
-			return false;
+			return $arrayErr;
 		}
 	}
 	public function baht_text($number, $include_unit = true, $display_zero = true){
@@ -502,7 +449,7 @@ class library {
 			for ($i = 0; $i < $millions; $i++) {
 				$millions_text .= BAHT_TEXT_UNITS[6];
 			}
-			return baht_text($normalised_million, false) . $millions_text . baht_text($rest, true, false);
+			return $this->baht_text($normalised_million, false) . $millions_text . $this->baht_text($rest, true, false);
 		}
 
 		$number_str = (string)floor($number);
@@ -542,7 +489,7 @@ class library {
 			$satang = explode('.', number_format($number, 2, '.', ''))[1];
 			$text .= $satang == 0
 				? BAHT_TEXT_INTEGER
-				: baht_text($satang, false) . BAHT_TEXT_SATANG;
+				: $this->baht_text($satang, false) . BAHT_TEXT_SATANG;
 		} else {
 			$exploded = explode('.', $number);
 			if (isset($exploded[1])) {

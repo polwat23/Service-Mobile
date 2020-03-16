@@ -4,10 +4,10 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
-		$clientWS = new SoapClient("http://web.siamcoop.com/CORE/GCOOP/WcfService125/n_deposit.svc?singleWsdl");
+		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 		try {
 			$argumentWS = [
-							"as_wspass" => "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
+							"as_wspass" => $config["WS_STRC_DB"],
 							"as_account_no" => $dataComing["deptaccount_no"],
 							"as_itemtype_code" => "WTX",
 							"adc_amt" => $dataComing["amt_transfer"],
@@ -20,10 +20,19 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){
-			$arrError = array();
-			$arrError["MESSAGE"] = $e->getMessage();
-			$arrError["ERROR_CODE"] = 'WS8002';
-			$lib->addLogtoTxt($arrError,'soap_error');
+			$arrayResult["RESPONSE_CODE"] = 'WS8002';
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':deptaccount_no' => $dataComing["deptaccount_no"],
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':type_request' => '1',
+				':transfer_flag' => '1',
+				':destination' => null,
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $e->getMessage()
+			];
+			$log->writeLog('transferinside',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

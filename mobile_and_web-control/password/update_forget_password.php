@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$member_no = strtolower(mb_str_pad($dataComing["member_no"]));
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT id_account FROM mdbmemberaccount 
 										WHERE member_no = :member_no and email = :email");
 	$checkMember->execute([

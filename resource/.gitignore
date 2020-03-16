@@ -1,1 +1,8 @@
+alias_account_dept/*
 avatar/*
+cover-dept/*
+dept-type/*
+loan-type/*
+gallery/*
+image_wait_to_be_sent/*
+!.gitignore

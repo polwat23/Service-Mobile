@@ -28,12 +28,14 @@ require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
+require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
 use Utility\Library;
 use Authorized\Authorization;
 use Component\functions;
+use ControlLog\insertLog;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
@@ -45,6 +47,7 @@ $lib = new library();
 $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
+$log = new insertLog();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
@@ -116,7 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					}else if($errorCode === 4){
 						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
 							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
+							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
+							&& $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
 								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
 								if($is_refreshToken_arr){
 									$arrayResult['RESPONSE_CODE'] = "WS0046";

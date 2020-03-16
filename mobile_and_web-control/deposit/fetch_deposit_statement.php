@@ -38,26 +38,52 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
-		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
-											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
-											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-											WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
+		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
+		$arrSlipTrans = array();
+		$arrSlipStm = array();
+		while($rowslipTrans = $fetchSlipTrans->fetch(PDO::FETCH_ASSOC)){
+			$arrSlipTrans[] = $rowslipTrans["coop_slip_no"];
+		}
+		if(sizeof($arrSlipTrans) > 0){
+			$fetchStmSeqDept = $conoracle->prepare("SELECT dpstm_no FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
+			$fetchStmSeqDept->execute([':deptacc_no' => $account_no]);
+			while($rowstmseq = $fetchStmSeqDept->fetch(PDO::FETCH_ASSOC)){
+				$arrSlipStm[] = $rowstmseq["DPSTM_NO"];
+			}
+		}
+		if(sizeof($arrSlipStm) > 0){
+			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
+												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
+												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
+												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
+												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+		}else{
+			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
+												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
+												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
+												WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
+												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+		}
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
+		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
+											WHERE deptaccount_no = :account_no");
+		$getMemoDP->execute([
+			':account_no' => $account_no
+		]);
+		$arrMemo = array();
+		while($rowMemo = $getMemoDP->fetch(PDO::FETCH_ASSOC)){
+			$arrMemo[] = $rowMemo;
+		}
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
-			$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path FROM gcmemodept 
-											WHERE deptaccount_no = :account_no and seq_no = :seq_no");
-			$getMemoDP->execute([
-				':account_no' => $account_no,
-				':seq_no' => $rowStm["SEQ_NO"]
-			]);
-			$rowMemo = $getMemoDP->fetch(PDO::FETCH_ASSOC);
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
 			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];
@@ -65,8 +91,13 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
 			$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
-			$arrSTM["MEMO_TEXT"] = $rowMemo["memo_text"] ?? null;
-			$arrSTM["MEMO_ICON_PATH"] = $rowMemo["memo_icon_path"] ?? null;
+			if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no')) === False){
+				$arrSTM["MEMO_TEXT"] = null;
+				$arrSTM["MEMO_ICON_PATH"] = null;
+			}else{
+				$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
+				$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
+			}
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;

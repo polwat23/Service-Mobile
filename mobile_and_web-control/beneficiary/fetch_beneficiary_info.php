@@ -3,13 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
-		if($payload["member_no"] == 'dev@mode'){
-			$member_no = $config["MEMBER_NO_DEV_BENEFICIARY"];
-		}else if($payload["member_no"] == 'salemode'){
-			$member_no = $config["MEMBER_NO_SALE_BENEFICIARY"];
-		}else{
-			$member_no = $payload["member_no"];
-		}
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$getBeneficiary = $conoracle->prepare("SELECT fm.base64_img,fmt.mimetypes,fm.data_type FROM fomimagemaster fm LEFT JOIN fomucfmimetype fmt ON fm.data_type = fmt.typefile
 												where fm.system_code = 'mbshr' and fm.column_name = 'member_no' 
 												and fm.column_data = :member_no and fm.img_type_code = '003' and fm.seq_no = 1");
@@ -19,9 +13,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if((isset($DataURLBase64) && $DataURLBase64 != '') || isset($new_token)){
 			$arrayResult['DATA_TYPE'] = $rowBenefit["DATA_TYPE"] ?? 'pdf';
 			$arrayResult['BENEFICIARY'] = $DataURLBase64;
-			if(isset($new_token)){
-				$arrayResult['NEW_TOKEN'] = $new_token;
-			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
