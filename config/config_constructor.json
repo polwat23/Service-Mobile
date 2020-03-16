@@ -5,6 +5,8 @@
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.forestcoop.mobile",
 	"URL_SERVICE" : "https://demo.gensoft.co.th/Service-RFSC/",
+	"URL_CORE_COOP" : "http://web.siamcoop.com/CORE/GCOOP/WcfService125/",
+	"WS_STRC_DB" : "Data Source=web.siamcoop.com/gcoop;Persist Security Info=True;User ID=iscorfscmas;Password=iscorfscmas;Unicode=True;coop_id=050001;coop_control=050001;",
 	"FIREBASE_API_KEY" : "AIzaSyB33QdFt_epzbZwBQFeZYowfnD797hDW_w",
 	"FIREBASE_SERVER_KEY" : "AAAA4HJFZEU:APA91bE6zE8uiv_kkEVfr9lI_mmXsykcKu60KkNjxZ1pXKXAUlVZ30TlW7VIRMM6vkGmr7NhLY4abPG1Q5PrcKMU-4Lu4e540OMXQVUzIb4Q3TMcY7vhS1Z3osXXQc2z9Zw2rlrQNAjU",
 	"ICON" : "ic_stat_ic_notification",

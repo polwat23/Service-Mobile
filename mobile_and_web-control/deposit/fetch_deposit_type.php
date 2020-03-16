@@ -39,6 +39,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccount["COVER_IMG"] = null;
 				}
 			}
+			if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowAccount["DEPTTYPE_CODE"].'.png')){
+				$arrGroupAccount["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowAccount["DEPTTYPE_CODE"].'.png';
+			}else{
+				$arrGroupAccount["DEPT_TYPE_IMG"] = null;
+			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);

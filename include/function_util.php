@@ -280,17 +280,7 @@ class functions {
 			}
 			return $returnResult;
 		}
-		public function getTemplate($template_name,$seq_no){
-			$getTemplatedata = $this->con->prepare("SELECT template_subject,template_body 
-													FROM gctemplate WHERE template_name = :template_name and is_use = '1'");
-			$getTemplatedata->execute([':template_name' => $template_name]);
-			$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
-			$arrayResult = array();
-			$arrayResult["SUBJECT"] = $rowTemplate["template_subject"];
-			$arrayResult["BODY"] = $rowTemplate["template_body"];
-			return $arrayResult;
-		}
-		public function getTemplatSystem($component_system,$seq_no){
+		public function getTemplateSystem($component_system,$seq_no='1'){
 			$getTemplatedata = $this->con->prepare("SELECT subject,body 
 													FROM smssystemtemplate WHERE component_system = :component_system and is_use = '1' and seq_no = :seq_no");
 			$getTemplatedata->execute([
