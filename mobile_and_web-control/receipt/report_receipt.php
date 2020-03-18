@@ -9,22 +9,17 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		if($payload["member_no"] != 'dev@mode' && $payload["member_no"] != 'salemode'){
-			$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
 												WHERE mb.member_no = :member_no");
-			$fetchName->execute([
-				':member_no' => $member_no
-			]);
-			$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-			$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
-		}else{
-			$header["fullname"] = "นายไอโซแคร์ ซิสเต็มส์";
-			$header["member_group"] = "บริษัทไอโซแคร์ จำกัด";
-		}
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$arrGroupDetail = array();
 		$getDetailSlip = $conoracle->prepare("SELECT slt.slipitemtype_desc,slt.slipitemtype_code,sld.loancontract_no,sld.interest_payamt,
 											sld.item_payamt,sld.item_balance,sld.period
@@ -59,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 				':slip_no' => $dataComing["slip_no"]
 			]);
 			$rowHeader = $getDetailHeader->fetch(PDO::FETCH_ASSOC);
-			$header["member_no"] = $payload["member_no"];
+			$header["member_no"] = $member_no;
 			$header["slip_no"] = $dataComing["slip_no"];
 			$header["operate_date"] = $lib->convertdate($rowHeader["SLIP_DATE"],'D m Y');
 			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -123,10 +118,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">ตู้ปณ. 169 ปณศ. จตุจักร กรุงเทพมหานคร 10900</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 02-579-7070 โทรสาร 02-579-9774</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.025798899.com</p>
+			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 2 อาคารศรีสวรินทิรา ชั้น 1 และ ชั้น 6 ถนนวังหลัง</p>
+			<p style="margin-top: -25px;font-size: 18px;">แขวงศิริราช เขตบางกอกน้อย กรุงเทพมหานคร 10700</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2444-7741-3, 0-2419-7543-5, 0-2419-8363-4</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.si.mahidol.ac.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -153,7 +149,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</tbody>
 			</table>
 			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
+			<div style="border: 0.5px solid black;width: 100%; height: 255px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
 			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
@@ -164,15 +160,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
 			</div>';
 			// Detail
-	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
+	$html .= '<div style="width: 100%;height: 190px" class="sub-table">';
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
+			<div style="width: 350px;border-right: 0.5px solid black;height: 180px;">&nbsp;</div>
+			<div style="width: 100px;border-right: 0.5px solid black;height: 180px;margin-left: 355px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black;height: 200px;margin-left: 465px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black;height: 200px;margin-left: 580px;">&nbsp;</div>
+			<div style="width: 120px;border-right: 0.5px solid black;height: 200px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
 			</div>
@@ -229,13 +225,13 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
-			<div style="width:100px;margin-left: 600px;display:flex;">
-			<img src="../../resource/utility_icon/sig.png" width="100" height="50" style="margin-top:20px;"/>
-			<div style="font-size: 18px;margin-left: 150px;margin-top:10px;">ผู้จัดการ</div>
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			</div>
+			<div style="width:200px;margin-left: 700px;display:flex;">
+			<img src="../../resource/utility_icon/signature/receive_money.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 590px;margin-top:-10px;">(นายไอโซแคร์ ซิสเต็มส์)</div>
+			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
 			';
 
 	$dompdf = new DOMPDF();

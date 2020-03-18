@@ -70,7 +70,7 @@ class library {
 			}
 		}
 		if($is_time){
-			$dateConverted .= ' เวลา '.$datearray[3].':'.$datearray[4].(isset($datearray[5]) && $datearray[5] > 0 ? ':'.$datearray[5] : null).' น.';
+			$dateConverted .= ' '.$datearray[3].':'.$datearray[4].(isset($datearray[5]) && $datearray[5] > 0 ? ':'.$datearray[5] : null).' น.';
 		}
 		return $dateConverted;
 	}

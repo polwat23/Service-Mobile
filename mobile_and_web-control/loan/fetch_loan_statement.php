@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
-											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
+											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([

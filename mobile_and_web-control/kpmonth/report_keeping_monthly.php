@@ -9,18 +9,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		if($payload["member_no"] != 'dev@mode'){
-			$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc FROM mbmembmaster mb LEFT JOIN 
-												mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.member_no = :member_no");
-			$fetchName->execute([
-				':member_no' => $member_no
-			]);
-			$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-		}else{
-			$header["fullname"] = "นายไอโซแคร์ ซิสเต็มส์";
-		}
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc FROM mbmembmaster mb LEFT JOIN 
+											mbucfprename mp ON mb.prename_code = mp.prename_code
+											WHERE mb.member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare("SELECT * FROM (
 												SELECT 
@@ -29,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													case kut.keepitemtype_grp 
 														WHEN 'DEP' THEN kpd.description
 														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE null END as PAY_ACCOUNT,
+													ELSE kpd.description END as PAY_ACCOUNT,
 													kpd.period,
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
@@ -45,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													case kut.keepitemtype_grp 
 														WHEN 'DEP' THEN kpd.description
 														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE null END as PAY_ACCOUNT,
+													ELSE kpd.description END as PAY_ACCOUNT,
 													kpd.period,
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
@@ -71,6 +67,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"]." ( ".$rowDetail["PAY_ACCOUNT"]." )";
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
@@ -157,7 +155,7 @@ function GenerateReport($dataReport,$header){
 					<div style="text-align:center;position: absolute;width:100%">
 						<p style="margin-top: 10px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
 						<p style="margin-top: -15px;font-size: 18px;font-weight: bold">รายการเรียกเก็บประจำเดือน</p>
-						<p style="margin-top: -28px;font-size: 18px;font-weight: bold">'.$header["recv_period"].'</p>
+						<p style="margin-top: -25px;font-size: 18px;font-weight: bold">'.$header["recv_period"].'</p>
 					</div>
 				</div>
 				<div style="margin: 30px 0 20px 0;">
