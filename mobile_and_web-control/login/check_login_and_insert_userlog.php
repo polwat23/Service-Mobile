@@ -46,8 +46,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$refresh_token = $lib->generate_token();
 			try{
 				$conmysql->beginTransaction();
-				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = 'mobile_app' and is_login = '1'");
-				$getMemberLogged->execute([':member_no' => $member_no]);
+				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
+				$getMemberLogged->execute([
+					':member_no' => $member_no,
+					':channel' => $dataComing["channel"]
+				]);
 				if($getMemberLogged->rowCount() > 0){
 					$arrayIdToken = array();
 					while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){

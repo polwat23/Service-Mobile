@@ -10,16 +10,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
-											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,period_payamt as PERIOD,
-											LAST_PERIODPAY as LAST_PERIOD,
+											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,
+											ln.LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 											WHERE ln.member_no = :member_no and ln.contract_status = 1");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
+			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 			$arrContract = array();
-			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];
+			$arrContract["CONTRACT_NO"] = $contract_no;
+			if(mb_stripos($contract_no,'.') === FALSE){
+				$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
+				if(mb_strlen($contract_no) == 10){
+					$arrContract["CONTRACT_NO_FORMAT"] = $loan_format;
+				}else if(mb_strlen($contract_no) == 11){
+					$arrContract["CONTRACT_NO_FORMAT"] = $loan_format.'-'.mb_substr($contract_no,10);
+				}
+			}else{
+				$arrContract["CONTRACT_NO_FORMAT"] = $contract_no;
+			}
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');

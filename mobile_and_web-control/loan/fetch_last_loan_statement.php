@@ -23,6 +23,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
 		$arrContract = array();
 		$arrContract["CONTRACT_NO"] = $contract_no;
+		if(mb_stripos($contract_no,'.') === FALSE){
+			$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
+			if(mb_strlen($contract_no) == 10){
+				$arrContract["CONTRACT_NO_FORMAT"] = $loan_format;
+			}else if(mb_strlen($contract_no) == 11){
+				$arrContract["CONTRACT_NO_FORMAT"] = $loan_format.'-'.mb_substr($contract_no,10);
+			}
+		}else{
+			$arrContract["CONTRACT_NO_FORMAT"] = $contract_no;
+		}
 		$arrContract["LOAN_BALANCE"] = number_format($rowLoanLastSTM["LOAN_BALANCE"],2);
 		$arrContract["APPROVE_AMT"] = number_format($rowLoanLastSTM["APPROVE_AMT"],2);
 		$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowLoanLastSTM["LAST_OPERATE_DATE"],'y-n-d');
@@ -46,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
-											WHERE lsm.loancontract_no = :contract_no and lsm.operate_date
+											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
