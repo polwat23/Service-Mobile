@@ -144,5 +144,6 @@
 			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
-		}]
+		}],
+	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ปิดไม่ให้ทำธุรกรรมผ่านบัญชีประเภทนี้ได้แล้ว","en" : "This deposit type was closed from cooperative"}]
 }

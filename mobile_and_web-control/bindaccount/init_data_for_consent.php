@@ -11,8 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1' and gad.allow_transaction = '1'");
+															WHERE gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
 			]);
@@ -31,12 +30,12 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 															ON dpm.depttype_code = dpt.depttype_code 
 															WHERE dpm.member_no = :member_no and
-															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0
+															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0 and dpm.transonline_flag = '1'
 															and dpm.deptaccount_no NOT IN(".implode(',',$arrAccBeenBind).")");
 				}else{
 					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 															ON dpm.depttype_code = dpt.depttype_code 
-															WHERE dpm.member_no = :member_no and
+															WHERE dpm.member_no = :member_no and dpm.transonline_flag = '1' and
 															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0");
 				}
 				$fetchDataAccount->execute([
