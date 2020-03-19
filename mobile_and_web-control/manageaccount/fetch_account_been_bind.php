@@ -15,9 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($fetchAccountBeenBind->rowCount() > 0){
 			$arrBindAccount = array();
 			while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
-				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no
-																FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use <> '-9' and gct.is_use ='1' and gct.allow_transaction = '1'");
+				$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccountBind["deptaccount_no_coop"]]);
 				if($fetchAccountBeenAllow->rowCount() > 0){
 					$getDetailAcc = $conoracle->prepare("SELECT deptaccount_name FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and deptclose_status = 0");
