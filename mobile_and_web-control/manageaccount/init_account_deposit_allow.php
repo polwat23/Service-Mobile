@@ -8,10 +8,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
 		$getDeptTypeAllow = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster
-												WHERE member_no = :member_no and transonline_flag = '1'");
+												WHERE member_no = :member_no and transonline_flag = '1' GROUP BY depttype_code");
 		$getDeptTypeAllow->execute([':member_no' => $member_no]);
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
-			$arrDeptAllowed[] = $rowDeptAllow["depttype_code"];
+			$arrDeptAllowed[] = $rowDeptAllow["DEPTTYPE_CODE"];
 		}
 		$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 		$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
