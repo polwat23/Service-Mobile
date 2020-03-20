@@ -437,8 +437,8 @@ class functions {
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 					}
 					if(sizeof($arrayMemberTemp) > 0){
-						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
-																resign_status = 0 and MEM_TELMOBILE IS NOT NULL");
+						$fetchDataOra = $this->conora->prepare("SELECT sms_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
+																resign_status = 0 and sms_mobilephone IS NOT NULL");
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
@@ -453,7 +453,7 @@ class functions {
 						}
 					}
 				}else{
-					$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
+					$fetchDataOra = $this->conora->prepare("SELECT sms_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
 					$fetchDataOra->execute();
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
