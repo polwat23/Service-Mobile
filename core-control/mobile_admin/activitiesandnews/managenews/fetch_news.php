@@ -4,6 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'adminmobile','managenew')){
 		$arrayGroup = array();
+			 
 		$fetchNews = $conmysql->prepare("SELECT id_news,news_title,news_detail,path_img_header,create_date,update_date,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5 
 										FROM gcnews
 										WHERE is_use ='1'
@@ -14,6 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupNews["ID_NEW"] = $rowNews["id_news"];
 			$arrGroupNews["NEWS_TITLE"] = $rowNews["news_title"];
 			$arrGroupNews["NEWS_DETAIL"] = $rowNews["news_detail"];
+			$arrGroupNews["NEWS_DETAIL_SHORT"] = $lib->text_limit($rowNews["news_detail"],480);
 			$arrGroupNews["PATH_IMG_HEADER"] = $rowNews["path_img_header"];
 			$arrGroupNews["LINK_News_MORE"] = $rowNews["link_news_more"];
 			$arrGroupNews["CREATE_DATE"] = $lib->convertdate($rowNews["create_date"],'d m Y',true); 
@@ -23,6 +25,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupNews["PATH_IMG_3"] = $rowNews["img_gallery_3"];
 			$arrGroupNews["PATH_IMG_4"] = $rowNews["img_gallery_4"];
 			$arrGroupNews["PATH_IMG_5"] = $rowNews["img_gallery_5"];
+			$arrGroupNews["str_count"] = $str_count;
 			
 			$arrayGroup[] = $arrGroupNews;
 		}
