@@ -12,11 +12,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		if(sizeof($arrayUserRegister) > 0){
 			$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
-													,mb.sms_mobilephone,mb.addr_email FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													,mb.mem_telmobile,mb.email FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													WHERE mb.resign_status = '0' and mb.member_no NOT IN('".implode("','",$arrayUserRegister)."')");
 		}else{
 			$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
-													,mb.sms_mobilephone,mb.addr_email FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													,mb.mem_telmobile,mb.email FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													WHERE mb.resign_status = '0'");
 		}
 		$fetchUserNotRegis->execute();
@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserNotRegister["MEMBER_NO"] = $rowUserNotRegis["MEMBER_NO"];
 			$arrayUserNotRegister["NAME"] = $rowUserNotRegis["PRENAME_DESC"].$rowUserNotRegis["MEMB_NAME"]." ".$rowUserNotRegis["MEMB_SURNAME"];
 			$arrayUserNotRegister["MEMBER_DATE"] = $lib->convertdate($rowUserNotRegis["MEMBER_DATE"],'D m Y');
-			$arrayUserNotRegister["TEL"] = $lib->formatphone($rowUserNotRegis["SMS_MOBILEPHONE"],'-');
-			$arrayUserNotRegister["EMAIL"] = $rowUserNotRegis["ADDR_EMAIL"] ?? "-";
+			$arrayUserNotRegister["TEL"] = $lib->formatphone($rowUserNotRegis["MEM_TELMOBILE"],'-');
+			$arrayUserNotRegister["EMAIL"] = $rowUserNotRegis["EMAIL"] ?? "-";
 			$arrayGroup[] = $arrayUserNotRegister;
 		}
 		$arrayResult["USER_NOT_REGISTER"] = $arrayGroup;

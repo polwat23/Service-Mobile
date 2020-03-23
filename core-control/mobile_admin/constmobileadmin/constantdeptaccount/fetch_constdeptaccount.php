@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ID_ACCCONSTANT"] = $rowMenuMobile["id_accountconstant"];
 			$arrConstans["DEPT_TYPE_CODE"] = $rowMenuMobile["dept_type_code"];
 			$arrConstans["MEMBER_CATE_CODE"] = $rowMenuMobile["member_cate_code"];
-			$arrConstans["DEPT_TYPE_CODE"] = $rowMenuMobile["dept_type_desc"];
+			$arrConstans["DEPT_TYPE_DESC"] = $rowMenuMobile["dept_type_desc"];
 			$arrConstans["ID_PALETTE"] = $rowMenuMobile["id_palette"];
 			$arrConstans["ALLOW_TRANSACTION"] = $rowMenuMobile["allow_transaction"];
 			$arrConstans["TYPE_PALETTE"] = $rowMenuMobile["type_palette"];

@@ -11,8 +11,8 @@ if(!$anonymous){
 	}
 	$fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,announce_detail
 									FROM gcannounce 
-									WHERE ((DATE_FORMAT(effect_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
-									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i')) OR first_time = :first_time) and flag_granted = 'member'");
+									WHERE (DATE_FORMAT(effect_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i')) OR first_time = :first_time");
 	$fetchAnn->execute([':first_time' => $firstapp]);
 	while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 		$arrAnn = array();
@@ -35,7 +35,7 @@ if(!$anonymous){
 	$fetchAnn = $conmysql->prepare("SELECT flag_granted,priority,announce_cover,announce_title,announce_detail
 									FROM gcannounce 
 									WHERE (DATE_FORMAT(effect_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
-									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i')) OR first_time = :first_time");
+									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i') OR first_time = :first_time) and flag_granted = 'all'");
 	$fetchAnn->execute([':first_time' => $firstapp]);
 	while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 		$arrAnn = array();
