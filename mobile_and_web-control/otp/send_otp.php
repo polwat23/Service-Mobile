@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
-	/*$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
+	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -10,22 +10,24 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		http_response_code(401);
 		echo json_encode($arrayResult);
 		exit();
-	}*/
+	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
-	$reference = $lib->randomText('all',10);
-	$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '15';
+	$reference = $lib->randomText('all',6);
+	$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '5';
 	$expire_date = date('Y-m-d H:i:s',strtotime('+'.$duration_expire.' minutes'));
 	$arrTarget["RANDOM_NUMBER"] = $otp_password;
 	$arrTarget["RANDOM_ALL"] = $reference;
 	$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 	$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
-	$arrayTel = $func->getSMSPerson('person',array($member_no));
+	$arrayComing["TEL"] = $dataComing["tel"];
+	$arrayComing["MEMBER_NO"] = $dataComing["member_no"];
+	$arrayTel[] = $arrayComing;
 	$bulkInsert = array();
 	$arrayDest = array();
-	if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
+	if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != "" && mb_strlen($arrayTel[0]["TEL"]) == 10){
 		$insertOTP = $conmysql->prepare("INSERT INTO gcotp(refno_otp,otp_password,destination_number,expire_date,otp_text)
 											VALUES(:ref_otp,:otp_pass,:destination,:expire_date,:otp_text)");
 		if($insertOTP->execute([
