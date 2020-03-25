@@ -15,12 +15,12 @@ if(!$anonymous){
 									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i')) OR first_time = :first_time) and flag_granted <> 'anonymous'");
 	$fetchAnn->execute([':first_time' => $firstapp]);
 	while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
-		$checkResAnn = $conmysql->prepare("SELECT id_resp_ann FROM logresponseannounce WHERE member_no = :member_no and id_announce = :id_announce");
-		$checkResAnn->execute([
+		$checkAcceptAnn = $conmysql->prepare("SELECT id_accept_ann FROM logacceptannounce WHERE member_no = :member_no and id_announce = :id_announce");
+		$checkAcceptAnn->execute([
 			':member_no' => $payload["member_no"],
 			':id_announce' => $rowAnn["id_announce"]
 		]);
-		if($checkResAnn->rowCount() > 0){
+		if($checkAcceptAnn->rowCount() == 0){
 			$arrAnn = array();
 			$arrAnn["PRIORITY"] = $rowAnn["priority"];
 			$arrAnn["ID_ANNOUNCE"] = $rowAnn["id_announce"];

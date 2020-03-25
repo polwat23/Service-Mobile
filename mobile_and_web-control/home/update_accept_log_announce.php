@@ -1,13 +1,12 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['id_announce','status_response'],$dataComing)){
-	$insertResponseAnn = $conmysql->prepare("INSERT INTO logresponseannounce(member_no,id_announce,status_response,id_userlogin)
-																	VALUES(:member_no,:id_announce,:status_response,:id_userlogin)");
+if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
+	$insertResponseAnn = $conmysql->prepare("INSERT INTO logacceptannounce(member_no,id_announce,id_userlogin)
+																	VALUES(:member_no,:id_announce,:id_userlogin)");
 	if($insertResponseAnn->execute([
 		':member_no' => $payload["member_no"],
 		':id_announce' => $dataComing["id_announce"],
-		':status_response' => $dataComing["status_response"],
 		':id_userlogin' => $payload["id_userlogin"]
 	])){
 		$arrayResult['RESULT'] = TRUE;
@@ -16,7 +15,6 @@ if($lib->checkCompleteArgument(['id_announce','status_response'],$dataComing)){
 		$arrExecute = [
 			':member_no' => $payload["member_no"],
 			':id_announce' => $dataComing["id_announce"],
-			':status_response' => $dataComing["status_response"],
 			':id_userlogin' => $payload["id_userlogin"]
 		];
 		$arrError = array();
