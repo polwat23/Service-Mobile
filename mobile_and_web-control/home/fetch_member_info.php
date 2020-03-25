@@ -21,6 +21,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.MEMB_ADDR as ADDR_NO, mb.SOI as ADDR_SOI,mb.MOOBAN as ADDR_MOO,mb.ROAD AS ADDR_ROAD,
+													mb.PROVINCE_CODE,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
@@ -28,22 +30,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.AMPHUR_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
-			$address = (isset($rowMember["ADDR_NO"]) ? ' ม.'.$rowMember["ADDR_NO"] : null);
+			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
 				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
 				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
 				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง '.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? 'เขต '.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? $rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? $rowMember["ADDR_POSTCODE"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}else{
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
 				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
@@ -52,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
 				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? $rowMember["ADDR_POSTCODE"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
