@@ -35,6 +35,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupBindAccountLog["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowBindAccountLog["deptaccount_no_coop"],$func->getConstant('dep_format'));
 			$arrGroupBindAccountLog["COOP_ACCOUNT_NO"] = $rowBindAccountLog["deptaccount_no_coop"];
 			$arrGroupBindAccountLog["BANK_ACCOUNT_NO"] = $rowBindAccountLog["deptaccount_no_bank"];
+			$arrGroupBindAccountLog["BANK_ACCOUNT_NO_FORMAT"] = $lib->formataccount( $rowBindAccountLog["deptaccount_no_bank"],$func->getConstant('dep_format'));
 			$arrayGroup[] = $arrGroupBindAccountLog;
 		}
 		$arrayResult["BIND_ACCOUNT_LOG"] = $arrayGroup;
