@@ -1,5 +1,6 @@
 <?php
 $anonymous = '';
+$skip_autoload = true;
 require_once('../autoload.php');
 
 if(!$anonymous){
@@ -9,7 +10,7 @@ if(!$anonymous){
 	}else{
 		$firstapp = '-1';
 	}
-	$fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,announce_detail,effect_date,id_announce
+	$fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,announce_detail,effect_date,id_announce,flag_granted
 									FROM gcannounce 
 									WHERE ((DATE_FORMAT(effect_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
 									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i')) OR first_time = :first_time) and flag_granted <> 'anonymous'");
@@ -22,6 +23,7 @@ if(!$anonymous){
 		]);
 		if($checkAcceptAnn->rowCount() == 0){
 			$arrAnn = array();
+			$arrAnn["FLAG_GRANTED"] = $rowAnn["flag_granted"];
 			$arrAnn["PRIORITY"] = $rowAnn["priority"];
 			$arrAnn["ID_ANNOUNCE"] = $rowAnn["id_announce"];
 			$arrAnn["EFFECT_DATE"] = $rowAnn["effect_date"];

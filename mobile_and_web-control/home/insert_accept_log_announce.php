@@ -1,4 +1,5 @@
 <?php
+$skip_autoload = true;
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
