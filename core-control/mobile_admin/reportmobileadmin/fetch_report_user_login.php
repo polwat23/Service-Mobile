@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'adminmobile','userusagereport')){
+	if($func->check_permission_core($payload,'mobileadmin','userusagereport')){
 		$arrayExecute = array();
 		$arrayGrpAll = array();
 			if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ""){

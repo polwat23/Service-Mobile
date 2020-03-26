@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and mb.memb_name LIKE :member_name" : null).
-											(isset($arrayExecute[':member_surname']) ? " and mb.memb_surname LIKE :member_surname" : null).
+											(isset($arrayExecute[':member_surname']) ? " and (mb.memb_surname LIKE :member_surname )" : "and mb.memb_surname LIKE :member_name").
 											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null).
 											(isset($dataComing["age_start"]) && $dataComing["age_start"] != '' ? " and ft_calage(mb.birth_date,sysdate,4) >= :age_start" : null).
 											(isset($dataComing["age_end"]) && $dataComing["age_end"] != '' ? " and ft_calage(mb.birth_date,sysdate,4) <= :age_end" : null)

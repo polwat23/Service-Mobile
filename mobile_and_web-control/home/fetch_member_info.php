@@ -20,16 +20,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mg.membgroup_desc,mt.membtype_desc,
+													mb.address_no as ADDR_NO,mb.address_moo AS ADDR_MOO,
+													mb.address_soi as ADDR_SOI,mb.address_village as ADDR_VILLAGE,mb.address_road as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MBD.POSTCODE AS ADDR_POSTCODE
+													MB.POSTCODE AS ADDR_POSTCODE,
+													mpos.POSITION_DESC AS POSITION_DESC,
+													mb.PROVINCE_CODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													LEFT JOIN mbucfposition mpos ON mb.position_code = mpos.position_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.AMPHUR_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
@@ -65,7 +70,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
-			$arrayResult["FULL_ADDRESS"] = $address;
+			$arrayResult["FULL_ADDRESS_CURR"] = $address;
+			$arrayResult["FULL_ADDRESS_REGIS"] = $address;
+			$arrayResult["FULL_ADDRESS_DOC"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);

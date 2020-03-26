@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'adminmobile','managenew')){
+	if($func->check_permission_core($payload,'mobileadmin','managenews')){
 		$arrayGroup = array();
 			 
 		$fetchNews = $conmysql->prepare("SELECT id_news,news_title,news_detail,path_img_header,create_date,update_date,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5 

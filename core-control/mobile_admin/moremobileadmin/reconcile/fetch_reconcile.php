@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'adminmobile','reconcile')){
+	if($func->check_permission_core($payload,'mobileadmin','reconcile')){
 		$arrayExecute = array();
 		$arrayGrpAll = array();
 		if(isset($dataComing["date_type"]) && $dataComing["date_type"] != ""){
@@ -127,6 +127,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGrpAll[] = $arrayRecon;
 		}
 		$arrayResult['SUMMARY'] = $summary;
+		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['RECONCILE'] = $arrayGrpAll;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

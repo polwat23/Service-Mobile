@@ -29,13 +29,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTranfertError["AMT_TRANSFER"] = $rowLogTranferError["amt_transfer"];
 			$arrLogTranfertError["AMT_TRANSFER_FORMAT"] = number_format($rowLogTranferError["amt_transfer"],2);
 			$arrLogTranfertError["SIGMA_KEY"] = $rowLogTranferError["sigma_key"];
-			//$arrLogTranfertError["TYPE_REQUEST"] = $rowLogTranferError["type_request"];
-		
-			//$arrLogTranfertError["TRANSFER_FLAG"] = $rowLogTranferError["transfer_flag"];
-			//$arrLogTranfertError["DESTINATION"] = $rowLogTranferError["destination"];
-			//$arrLogTranfertError["DESTINATION_NO_FORMAT"]= $lib->formataccount($rowLogTranferError["destination"],$func->getConstant('dep_format'));
-			//$arrLogTranfertError["DEPTACCOUNT_NO"] = $rowLogTranferError["deptaccount_no"];
-			//$arrLogTranfertError["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogTranferError["deptaccount_no"],$func->getConstant('dep_format'));
 			$arrLogTranfertError["RESPONSE_CODE"] = $rowLogTranferError["response_code"];
 			$arrLogTranfertError["RESPONSE_MESSAGE"] = $rowLogTranferError["response_message"];
 			

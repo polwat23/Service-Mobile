@@ -7,7 +7,7 @@
 	"DBORACLE_SERVICE" : "gcoop",
 	"DBORACLE_USERNAME" : "iscorfscuat",
 	"DBORACLE_PASSWORD" : "iscorfscuat",
-	"DBORACLE_DATABASENAME" : "iscorfscuat",
+	"DBORACLE_PORT" : "1521",
 	"DBORACLE_HOST_BACKUP" : "web.coopsiam.com",
 	"DBORACLE_SERVICE_BACKUP" : "gcoop",
 	"DBORACLE_USERNAME_BACKUP" : "iscorfsc",
