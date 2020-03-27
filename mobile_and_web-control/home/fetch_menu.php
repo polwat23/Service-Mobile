@@ -101,10 +101,14 @@ if(!$anonymous){
 			$arrayResult['MENU'] = $arrayAllMenu;
 			if($dataComing["menu_parent"] == '0'){
 				$arrayResult['REFRESH_MENU'] = "MENU_HOME";
-			}else if($dataComing["menu_parent"] == '18'){
-				$arrayResult['REFRESH_MENU'] = "MENU_TRANSACTION";
 			}else if($dataComing["menu_parent"] == '24'){
 				$arrayResult['REFRESH_MENU'] = "MENU_SETTING";
+			}else if($dataComing["menu_parent"] == '18'){
+				if($dataComing["channel"] == 'mobile_app'){
+					$arrayResult['REFRESH_MENU'] = "MENU_HOME";
+				}else{
+					$arrayResult['REFRESH_MENU'] = "MENU_TRANSACTION";
+				}
 			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
