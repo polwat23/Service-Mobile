@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'adminmobile','announce')){
+	if($func->check_permission_core($payload,'mobileadmin','announce')){
 		$arrayExecute = array();
 		$arrayGroup = array();
 		
@@ -21,20 +21,24 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													effect_date,
 													priority,
 													username,
-													flag_granted	
+													flag_granted,
+													effect_date,	
+													date_format(effect_date,'%Y-%m-%d') AS 'effect_day',
+													date_format(effect_date,'%H:%i') AS 'effect_time'
 											 FROM gcannounce
 											 WHERE id_announce !='-1'
 												".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-												"and date_format(announce_date,'%Y-%m-%d') >= :start_date" : null)."
+												"and date_format(effect_date,'%Y-%m-%d') >= :start_date" : null)."
 												".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-												"and date_format(announce_date,'%Y-%m-%d') <= :end_date" : null). 
-											 "ORDER BY gcannounce.announce_date DESC");
+												"and date_format(effect_date,'%Y-%m-%d') <= :end_date" : null). 
+											 "ORDER BY gcannounce.effect_date DESC");
 		$fetchAnnounce->execute($arrayExecute);		
 		while($rowAnnounce = $fetchAnnounce->fetch(PDO::FETCH_ASSOC)){
-	
+	    $day_now=date("Y-m-d");
+		$time_now=date("H:i");
 			$arrGroupAnnounce = array();
+			$arrGroupAnnounce["ID_ANNOUNCE"] = $rowAnnounce["id_announce"];
 			$arrGroupAnnounce["ANNOUNCE_COVER"] = $rowAnnounce["announce_cover"];
-		
 			$arrGroupAnnounce["ANNOUNCE_TITLE"] = $rowAnnounce["announce_title"];
 			$arrGroupAnnounce["ANNOUNCE_DETAIL"] = $rowAnnounce["announce_detail"];
 			$arrGroupAnnounce["ANNOUNCE_DETAIL_SHORT"] = $lib->text_limit($rowAnnounce["announce_detail"],390);
@@ -42,7 +46,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupAnnounce["ANNOUNCE_DATE"] = $rowAnnounce["announce_date"];
 			$arrGroupAnnounce["ANNOUNCE_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["announce_date"],'d m Y',true); 
 			$arrGroupAnnounce["USERNAME"] = $rowAnnounce["username"];
-			$arrGroupAnnounce["FLAG_GRANTED"] = $rowAnnounce["flag_granted"];
+			$arrGroupAnnounce["FLAG_GRANTED"] = $rowAnnounce["flag_granted"];	
+			$arrGroupAnnounce["EFFECT_DATE"] = $rowAnnounce["effect_date"];
+			$arrGroupAnnounce["EFFECT_DATE_FORMAT"] = $rowAnnounce["effect_date"]==null?null:$lib->convertdate($rowAnnounce["effect_date"],'d m Y',true); 
+						
+			if($day_now==$rowAnnounce["effect_day"]&&$time_now>=$rowAnnounce["effect_time"]){
+					$arrGroupAnnounce["ACTIVE"] = "now";
+			}else if(($day_now==$rowAnnounce["effect_day"]&&$time_now<=$rowAnnounce["effect_time"])||$day_now<$rowAnnounce["effect_day"]){
+					$arrGroupAnnounce["ACTIVE"] = "future"; 
+ 			}else{
+				$arrGroupAnnounce["ACTIVE"] = "actived"; 
+			}
+			
 			$arrayGroup[] = $arrGroupAnnounce;
 		}
 		$arrayResult["ANNOUNCE_DATA"] = $arrayGroup;

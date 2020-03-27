@@ -24,6 +24,7 @@ foreach ($_SERVER as $header_key => $header_value){
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
+require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 

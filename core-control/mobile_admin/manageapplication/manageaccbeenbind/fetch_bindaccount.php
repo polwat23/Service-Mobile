@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manage')){
+	if($func->check_permission_core($payload,'mobileadmin','manageaccbeenbind')){
 		$bindaccount = array();
 		$fetchidUserallowAcctrantion = $conmysql->prepare("SELECT id_userallowacctran,deptaccount_no,member_no,limit_transaction_amt,gcconstantaccountdept.dept_type_desc AS 'dept_type'
 														   FROM gcuserallowacctransaction

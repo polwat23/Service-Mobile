@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
-	if($func->check_permission_core($payload,'adminmobile','managenew')){
+	if($func->check_permission_core($payload,'mobileadmin','managenews')){
 	$updatemenu = $conmysql->prepare("DELETE FROM gcnews 
 										  WHERE id_news=:id_news");
 		if($updatemenu->execute([
