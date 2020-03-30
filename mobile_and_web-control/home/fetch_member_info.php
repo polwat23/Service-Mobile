@@ -21,11 +21,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.ADDR_NO as ADDR_NO,
+													mb.ADDR_MOO as ADDR_MOO,
+													mb.ADDR_SOI as ADDR_SOI,
+													mb.ADDR_VILLAGE as ADDR_VILLAGE,
+													mb.ADDR_ROAD as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MB.PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MBD.POSTCODE AS ADDR_POSTCODE
+													MB.ADDR_POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
@@ -66,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
-			$arrayResult["FULL_ADDRESS"] = $address;
+			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);

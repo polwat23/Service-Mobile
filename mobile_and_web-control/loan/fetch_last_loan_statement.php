@@ -26,12 +26,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(mb_stripos($contract_no,'.') === FALSE){
 			$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
 			if(mb_strlen($contract_no) == 10){
-				$arrContract["CONTRACT_NO_FORMAT"] = $loan_format;
+				$arrContract["CONTRACT_REFNO"] = $loan_format;
 			}else if(mb_strlen($contract_no) == 11){
-				$arrContract["CONTRACT_NO_FORMAT"] = $loan_format.'-'.mb_substr($contract_no,10);
+				$arrContract["CONTRACT_REFNO"] = $loan_format.'-'.mb_substr($contract_no,10);
 			}
 		}else{
-			$arrContract["CONTRACT_NO_FORMAT"] = $contract_no;
+			$arrContract["CONTRACT_REFNO"] = $contract_no;
 		}
 		$arrContract["LOAN_BALANCE"] = number_format($rowLoanLastSTM["LOAN_BALANCE"],2);
 		$arrContract["APPROVE_AMT"] = number_format($rowLoanLastSTM["APPROVE_AMT"],2);

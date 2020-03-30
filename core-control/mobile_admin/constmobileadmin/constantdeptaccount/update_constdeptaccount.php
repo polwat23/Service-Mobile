@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id','id_accountconstant','id_palette','d
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขค่าคงที่ประเภทบัญชีได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขค่าคงที่ประเภทบัญชีเงินฝากนี้ได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

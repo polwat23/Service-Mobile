@@ -20,7 +20,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["province"]) && $dataComing["province"] != ''){
 			$arrayExecute[':province_code'] = $dataComing["province"];
 		}
-		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
+		if(isset($dataComing["age_start"]) && $dataComing["age_start"] != ''){
+			$arrayExecute[':age_start'] = $dataComing["age_start"];
+		}
+		if(isset($dataComing["age_end"]) && $dataComing["age_end"] != ''){
+			$arrayExecute[':age_end'] = $dataComing["age_end"];
+		}
+		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"]) && empty($dataComing["age_start"]) && empty($dataComing["age_end"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -36,7 +42,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											mb.POSTCODE AS ADDR_POSTCODE
+											mb.POSTCODE AS ADDR_POSTCODE,
+											mb.birth_date as BIRTH_DATE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
 											LEFT JOIN mbucfdistrict MBD ON mb.district_code = MBD.district_code
@@ -44,7 +51,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and mb.memb_name LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and mb.memb_surname LIKE :member_surname" : null).
-											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null));
+											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null).
+											(isset($dataComing["age_start"]) && $dataComing["age_start"] != '' ? " and ft_calage(mb.birth_date,sysdate,4) >= :age_start" : null).
+											(isset($dataComing["age_end"]) && $dataComing["age_end"] != '' ? " and ft_calage(mb.birth_date,sysdate,4) <= :age_end" : null)
+											);
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
@@ -58,6 +68,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$address .= (isset($rowMember["PROVINCE_DESC"]) ? '  จ.'.$rowMember["PROVINCE_DESC"] : null);
 			$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			$arrayGroup["ADDRESS"] = $address;
+			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
+			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];

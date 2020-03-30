@@ -197,6 +197,53 @@ class library {
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}
+	public function sendSMS($arrayDestination,$bulk=false) {
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$config = json_decode($json,true);
+		$arrayGrpSms = array();
+		try{
+			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
+			try {
+				if($bulk){
+					foreach($arrayDestination as $dest){
+						$argumentWS = [
+							"Member_No" => $dest["member_no"],
+							"MobilePhone" => $dest["tel"],
+							"Message" => $dest["message"]
+						];
+						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+						$responseSoap = $resultWS->RqSendOTPResult;
+						$arraySms["MEMBER_NO"] = $dest["member_no"];
+						$arraySms["RESULT"] = $responseSoap;
+						$arrayGrpSms[] = $arraySms;
+					}
+					return $arrayGrpSms;
+				}else{
+					$argumentWS = [
+						"Member_No" => $arrayDestination["member_no"],
+						"MobilePhone" => $arrayDestination["tel"],
+						"Message" => $arrayDestination["message"]
+					];
+					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+					$responseSoap = $resultWS->RqSendOTPResult;
+					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
+					$arrayGrpSms["RESULT"] = $responseSoap;
+					return $arrayGrpSms;
+				}
+			}catch(SoapFault $e){
+				$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
+				file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
+				$arrayGrpSms["RESULT"] = FALSE;
+				return $arrayGrpSms;
+			}
+		}catch(Throwable $e){
+			$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
+			file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
+			$arrayGrpSms["RESULT"] = FALSE;
+			return $arrayGrpSms;
+			return false;
+		}
+	}
 	public function sendMail($email,$subject,$body,$mailFunction) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
