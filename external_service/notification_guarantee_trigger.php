@@ -20,7 +20,7 @@ $fetchDataGuarantee = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_nam
 										WHERE lcm.loanapprove_date >= (sysdate - 1) and lcc.sync_notify_flag = '0' and lcc.coll_status = '1' and lcm.contract_status = '1' and lcc.loancolltype_code = '01' ");
 $fetchDataGuarantee->execute();
 while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array('dev@mode'));
+	$arrToken = $func->getFCMToken('person',array($rowGuarantee["REF_COLLNO"]));
 	$templateMessage = $func->getTemplateSystem('GuaranteeInfo',1);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
