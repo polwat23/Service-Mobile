@@ -20,28 +20,34 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
+		$slip_no = explode('/',$dataComing["slip_no"]);
 		$arrGroupDetail = array();
-		$getDetailSlip = $conoracle->prepare("SELECT slt.slipitemtype_desc,slt.slipitemtype_code,sld.loancontract_no,sld.interest_payamt,
-											sld.item_payamt,sld.item_balance,sld.period
-											FROM slslippayindet sld LEFT JOIN slucfslipitemtype slt ON sld.slipitemtype_code = slt.slipitemtype_code
-											WHERE payinslip_no = :slip_no");
+		$getDetailSlip = $conoracle->prepare("SELECT kit.KEEPITEMTYPE_DESC,kit.KEEPITEMTYPE_CODE,kmd.seq_no,kit.keepitemtype_grp,
+											CASE kit.keepitemtype_grp 
+													WHEN 'DEP' THEN kmd.description
+													WHEN 'LON' THEN kmd.loancontract_no
+											ELSE kmd.description END as PAY_ACCOUNT,
+											kmd.item_payment as ITEM_PAYAMT,kmd.item_balance,kmd.period,kmd.INTEREST_PAYMENT as INTEREST_PAYAMT
+											FROM kpmastreceivedet kmd LEFT JOIN KPUCFKEEPITEMTYPE kit ON kmd.keepitemtype_code = kit.keepitemtype_code
+											WHERE kmd.kpslip_no = :slip_no and kmd.seq_no = :seq_no");
 		$getDetailSlip->execute([
-			':slip_no' => $dataComing["slip_no"]
+			':slip_no' => $slip_no[0],
+			':seq_no' => $slip_no[1]
 		]);
 		while($rowDetail = $getDetailSlip->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["SLIPITEMTYPE_DESC"];			
-			if($rowDetail["SLIPITEMTYPE_CODE"] == 'SHR'){
+			$arrDetail["TYPE_DESC"] = $rowDetail["KEEPITEMTYPE_DESC"];			
+			if($rowDetail["KEEPITEMTYPE_GRP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
-			}else if($rowDetail["SLIPITEMTYPE_CODE"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $rowDetail["LOANCONTRACT_NO"];
+			}else if($rowDetail["KEEPITEMTYPE_GRP"] == 'LON'){
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["ITEM_PAYAMT"] = number_format($rowDetail["ITEM_PAYAMT"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INTEREST_PAYAMT"],2);
-			}else if($rowDetail["SLIPITEMTYPE_CODE"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["LOANCONTRACT_NO"],$func->getConstant('dep_format'));
+			}else if($rowDetail["KEEPITEMTYPE_GRP"] == 'DEP'){
+				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 			}
 			$item_payment = $rowDetail["INTEREST_PAYAMT"] + $rowDetail["ITEM_PAYAMT"];
 			$arrDetail["ITEM_PAYMENT"] = number_format($item_payment,2);
@@ -49,13 +55,13 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		if(sizeof($arrGroupDetail) > 0){
-			$getDetailHeader = $conoracle->prepare("SELECT SLIP_DATE FROM slslippayin WHERE payinslip_no = :slip_no");
+			$getDetailHeader = $conoracle->prepare("SELECT receipt_date as SLIP_DATE FROM kpmastreceive WHERE kpslip_no = :slip_no");
 			$getDetailHeader->execute([
-				':slip_no' => $dataComing["slip_no"]
+				':slip_no' => $slip_no[0]
 			]);
 			$rowHeader = $getDetailHeader->fetch(PDO::FETCH_ASSOC);
 			$header["member_no"] = $member_no;
-			$header["slip_no"] = $dataComing["slip_no"];
+			$header["slip_no"] = $slip_no[0].'-'.$slip_no[1];
 			$header["operate_date"] = $lib->convertdate($rowHeader["SLIP_DATE"],'D m Y');
 			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 			if($arrayPDF["RESULT"]){

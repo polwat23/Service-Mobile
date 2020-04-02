@@ -15,7 +15,7 @@ $fetchDataSTM = $conoracle->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMB
 												WHERE SHS.SYNC_NOTIFY_FLAG = '0' AND SHS.OPERATE_DATE >= (SYSDATE - 30)");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array('dev@mode'));
+	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
 	$templateMessage = $func->getTemplateSystem('ShareInfo',1);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
