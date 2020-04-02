@@ -25,8 +25,9 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	   $member_no == "00051376" || $member_no == "00056739" || $member_no == "00012427" || $member_no == "00002041" || $member_no == "00006930" ||
 	   $member_no == "00018505" || $member_no == "00010350" || $member_no == "00017448" || $member_no == "00006231" || $member_no == "00009431" ||
 	   $member_no == "00012067" || $member_no == "00011090" || $member_no == "00014782" || $member_no == "00007560" || $member_no == "00008647" ||
-	   $member_no == "00015818" || $member_no == "00029856" || $member_no == "00519022" || $member_no == "00518529"){
-		$checkMember = $conmysql->prepare("SELECT mebmer_no FROM gcmemberaccount WHERE member_no = :member_no");
+	   $member_no == "00015818" || $member_no == "00029856" || $member_no == "00519022" || $member_no == "00518529" || $member_no = "00022856" ||
+	   $member_nk == "00043755"){
+		$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);
 		if($checkMember->rowCount() > 0){
 			$arrayResult['RESPONSE_CODE'] = "WS0020";
@@ -35,14 +36,15 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			echo json_encode($arrayResult);
 			exit();
 		}else{
-			$checkValid = $conoracle->prepare("SELECT memb_name,memb_surname,resign_status FROM mbmembmaster 
-												WHERE member_no = :member_no and card_person = :card_person");
+			$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc 
+												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												WHERE mb.member_no = :member_no and mb.card_person = :card_person");
 			$checkValid->execute([
 				':member_no' => $member_no,
 				':card_person' => $dataComing["id_card"]
 			]);
 			$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowMember)){
+			if(isset($rowMember["MEMB_NAME"])){
 				if($rowMember["RESIGN_STATUS"] == '1'){
 					$arrayResult['RESPONSE_CODE'] = "WS0051";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -52,7 +54,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				}
 				$arrayResult['MEMBER_NO'] = $member_no;
 				$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
-				$arrayResult['MEMBER_FULLNAME'] = $rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+				$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
