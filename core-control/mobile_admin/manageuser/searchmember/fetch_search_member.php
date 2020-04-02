@@ -20,18 +20,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["province"]) && $dataComing["province"] != ''){
 			$arrayExecute[':province_code'] = $dataComing["province"];
 		}
-		if(isset($dataComing["age_start"]) && $dataComing["age_start"] != ''){
-			$arrayExecute[':age_start'] = $dataComing["age_start"];
-		}
-		if(isset($dataComing["age_end"]) && $dataComing["age_end"] != ''){
-			$arrayExecute[':age_end'] = $dataComing["age_end"];
-		}
 		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"]) && empty($dataComing["age_start"]) && empty($dataComing["age_end"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
+		$ageMonthStart = $dataComing["age_start"] * 12;
+		$ageMonthEnd = $dataComing["age_end"] * 12;
 		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,
 											mb.member_date,mb.member_no,
 											mb.ADDR_NO as ADDR_NO,
@@ -51,42 +47,43 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and TRIM(mb.memb_name) LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name" : null)).
-											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null).
-											(isset($dataComing["age_start"]) && $dataComing["age_start"] != '' ? " and ft_calmembage(mb.member_no) >= :age_start" : null).
-											(isset($dataComing["age_end"]) && $dataComing["age_end"] != '' ? " and ft_calmembage(mb.member_no) <= :age_end" : null)
+											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null)
 											);
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
-			$arrayGroup = array();
-			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
-			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
-			}else{
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			$MonthonBD = $lib->count_duration($rowMember["BIRTH_DATE"],"m");
+			if($ageMonthStart <= $MonthonBD && $ageMonthEnd >= $MonthonBD){
+				$arrayGroup = array();
+				$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
+				if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
+					$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+					$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+					$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+					$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+					$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
+					$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
+					$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
+					$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+				}else{
+					$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+					$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+					$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+					$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+					$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
+					$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
+					$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+					$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+				}
+				$arrayGroup["ADDRESS"] = $address;
+				$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
+				$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
+				$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+				$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
+				$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
+				$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
+				$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
+				$arrayGroupAll[] = $arrayGroup;
 			}
-			$arrayGroup["ADDRESS"] = $address;
-			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
-			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
-			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
-			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
-			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
-			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
-			$arrayGroupAll[] = $arrayGroup;
 		}
 		$arrayResult["MEMBER_DATA"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
