@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 													WHEN 'DEP' THEN kmd.description
 													WHEN 'LON' THEN kmd.loancontract_no
 											ELSE kmd.description END as PAY_ACCOUNT,
-											kmd.item_payment as ITEM_PAYAMT,kmd.item_balance,kmd.period,kmd.INTEREST_PAYMENT as INTEREST_PAYAMT
+											kmd.principal_payment as ITEM_PAYAMT,kmd.item_balance,kmd.period,kmd.INTEREST_PAYMENT as INTEREST_PAYAMT
 											FROM kpmastreceivedet kmd LEFT JOIN KPUCFKEEPITEMTYPE kit ON kmd.keepitemtype_code = kit.keepitemtype_code
 											WHERE kmd.kpslip_no = :slip_no and kmd.seq_no = :seq_no");
 		$getDetailSlip->execute([

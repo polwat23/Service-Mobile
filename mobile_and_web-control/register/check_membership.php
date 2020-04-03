@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	   $member_no == "00051376" || $member_no == "00056739" || $member_no == "00012427" || $member_no == "00002041" || $member_no == "00006930" ||
 	   $member_no == "00018505" || $member_no == "00010350" || $member_no == "00017448" || $member_no == "00006231" || $member_no == "00009431" ||
 	   $member_no == "00012067" || $member_no == "00011090" || $member_no == "00014782" || $member_no == "00007560" || $member_no == "00008647" ||
-	   $member_no == "00015818" || $member_no == "00029856" || $member_no == "00519022" || $member_no == "00518529" || $member_no = "00022856" ||
-	   $member_nk == "00043755"){
+	   $member_no == "00015818" || $member_no == "00029856" || $member_no == "00519022" || $member_no == "00518529" || $member_no == "00022856" ||
+	   $member_no == "00043755"){
 		$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$checkMember->execute([':member_no' => $member_no]);
 		if($checkMember->rowCount() > 0){
