@@ -278,7 +278,7 @@ class functions {
 			}
 		}
 		public function getPathpic($member_no){
-			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no");
+			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no and path_avatar IS NOT NULL");
 			$getAvatar->execute([':member_no' => $member_no]);
 			if($getAvatar->rowCount() > 0){
 				$rowPathpic = $getAvatar->fetch(\PDO::FETCH_ASSOC);
