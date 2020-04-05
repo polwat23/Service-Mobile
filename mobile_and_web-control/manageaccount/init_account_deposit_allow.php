@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
 		$getDeptTypeAllow = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster
-												WHERE member_no = :member_no and transonline_flag = '1' GROUP BY depttype_code");
+												WHERE member_no = :member_no and transonline_flag = 1 GROUP BY depttype_code");
 		$getDeptTypeAllow->execute([':member_no' => $member_no]);
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrDeptAllowed[] = $rowDeptAllow["DEPTTYPE_CODE"];
@@ -23,12 +23,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
-														and dpm.member_no = :member_no and dpm.deptclose_status = 0");
+														and dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.transonline_flag = 1 ORDER BY dpm.deptaccount_no");
 		}else{
 			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
-														and dpm.member_no = :member_no and dpm.deptclose_status = 0");
+														and dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.transonline_flag = 1 ORDER BY dpm.deptaccount_no");
 
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);
