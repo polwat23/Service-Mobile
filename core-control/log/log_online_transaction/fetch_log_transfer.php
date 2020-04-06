@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM gctransaction trans
 												INNER JOIN gcuserlogin login
 												ON login.id_userlogin = trans.id_userlogin
-												WHERE trans.trans_flag = '1'");
+												WHERE trans.trans_flag = '1' and trans.transfer_mode = '1'");
 		$fetLogTranfer->execute();
 		while($rowLogTransfer = $fetLogTranfer->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTransfer = array();
