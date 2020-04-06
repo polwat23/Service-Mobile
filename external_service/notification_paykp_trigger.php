@@ -34,11 +34,11 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 		if($func->insertHistory($arrPayloadNotify,'2')){
 			if($lib->sendNotify($arrPayloadNotify,"person")){
-				$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
+				/*$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
-				]);
+				]);*/
 			}else{
 				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_share');
 			}

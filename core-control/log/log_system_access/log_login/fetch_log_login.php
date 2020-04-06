@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupLoginLog["DEVICE_NAME"] = $rowLoginLog["device_name"];
 			$arrGroupLoginLog["CHANNEL"] = $rowLoginLog["channel"];
 			$arrGroupLoginLog["LOGIN_DATE"] =  $lib->convertdate($rowLoginLog["login_date"],'d m Y',true); 
-			$arrGroupLoginLog["LOGOUT_DATE"] =  $lib->convertdate( $rowLoginLog["logout_date"],'d m Y',true);
+			$arrGroupLoginLog["LOGOUT_DATE"] =  isset($rowLoginLog["logout_date"]) ? $lib->convertdate($rowLoginLog["logout_date"],'d m Y',true) : null;
 			$arrGroupLoginLog["IS_LOGIN"] = $rowLoginLog["is_login"];
 			
 			//$arrGroupLoginLog["UNIQUE_ID"] = $rowLoginLog["unique_id"];
