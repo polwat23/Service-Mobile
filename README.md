@@ -27,6 +27,7 @@ Link : [Package Installer](https://mobilecloud.coopsiam.com/installer/)
 ##### 1. Git config ทำครั้งเดียวตอนลง Git
     git config --global user.name "dev_gensoft"
     git config --global user.email "developer@gensoft.co.th"
+    git config --global credential.helper 'cache --timeout=60'
 
 ##### 2. Git clone ดึงไฟล์ทั้งหมดลงมาจาก Gitlab แยกตาม Branch สหกรณ์
     cd to destination folder
