@@ -7,9 +7,9 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 		$menuName = "manageuseraccount";
 		$list_name = null;
 		if($dataComing["account_status"]=='1'){
-			$list_name = "unlock account";
-		}else{
 			$list_name = "lock account";
+		}else{
+			$list_name = "unlock account";
 		}
 		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = :account_status
 									 WHERE member_no = :member_no");

@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
 							if(!$skip_autoload){
 								if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
-								&& $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
+								&& $dataComing["menu_component"] != 'Landing' && $dataComing["menu_component"] != 'Event'  && $dataComing["menu_component"] != 'UpdateFCMToken' && $payload["user_type"] != '9'){
 									$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
 									if($is_refreshToken_arr){
 										$arrayResult['RESPONSE_CODE'] = "WS0046";

@@ -163,12 +163,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				]);
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
-															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,'DTB',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
-															:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
-				$insertTransactionLog->execute([
+				$arrExecute = [
 					':ref_no' => $ref_no,
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
@@ -183,7 +178,19 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $transaction_no,
 					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
-				]);
+				];
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
+															VALUES(:ref_no,'DTB',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
+															:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
+				if($insertTransactionLog->execute($arrExecute)){
+				}else{
+					$arrLogTemp = array();
+					$arrLogTemp["DATA"] = $arrExecute;
+					$arrLogTemp["QUERY"] = $insertTransactionLog;
+					$lib->addLogtoTxt($arrLogTemp,'log_deposit_transaction_temp');
+				}
 				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				foreach($arrToken["LIST_SEND"] as $dest){

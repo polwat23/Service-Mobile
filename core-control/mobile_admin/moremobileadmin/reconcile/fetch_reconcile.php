@@ -123,12 +123,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon["RESULT_TRANSACTION"] = $rowRecon["result_transaction"];
 			$arrayRecon["MEMBER_NO"] = $rowRecon["member_no"];
 			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["amount_receive"],2);
-			if( $rowRecon["result_transaction"] == '1'){
-				$summary += $rowRecon["amount_receive"];
-			}
+			$summary += $rowRecon["amount_receive"];
 			$arrayGrpAll[] = $arrayRecon;
 		}
-		
 		$arrayResult['SUMMARY'] = $summary;
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['RECONCILE'] = $arrayGrpAll;
