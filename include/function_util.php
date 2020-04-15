@@ -351,7 +351,7 @@ class functions {
 				return true;
 			}
 		}
-		public function check_permission_core($payload,$root_menu,$page_name){
+		public function check_permission_core($payload,$root_menu,$page_name=null){
 			if(isset($payload["section_system"]) && isset($payload["username"])){
 				if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 					return true;

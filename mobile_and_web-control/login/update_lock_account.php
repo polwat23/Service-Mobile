@@ -13,6 +13,12 @@ if($lib->checkCompleteArgument(['member_no','unique_id','api_token'],$dataComing
 	}
 	$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8' WHERE member_no = :member_no");
 	if($updateAccountStatus->execute([':member_no' => $dataComing["member_no"]])){
+		$struc = [
+			':member_no' =>  $dataComing["member_no"],
+			':device_name' =>  $dataComing["device_name"],
+			':unique_id' =>  $dataComing["unique_id"]
+		];
+		$log->writeLog("lockaccount",$struc);
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
