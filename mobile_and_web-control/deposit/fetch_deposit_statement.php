@@ -56,6 +56,9 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}
 		$arrHeaderAPISTM[] = 'Req-trans : '.date('YmdHis');
 		$arrDataAPISTM["MemberID"] = substr($member_no,-6);
+		$arrDataAPISTM["CoopAccountNo"] = $account_no;
+		$arrDataAPISTM["FromDate"] = date('c',strtotime($date_before));
+		$arrDataAPISTM["ToDate"] = date('c',strtotime($date_now));
 		$arrResponseAPISTM = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryBalance",$arrDataAPISTM,$arrHeaderAPISTM);
 		if(!$arrResponseAPISTM["RESULT"]){
 			$arrayResult['RESPONSE_CODE'] = "WS9001";
@@ -65,27 +68,26 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			exit();
 		}
 		$arrResponseAPISTM = json_decode($arrResponseAPISTM);
-		/*if($arrResponseAPI->responseCode == "200"){
-			foreach($arrResponseAPI->accountDetail as $accData){
+		if($arrResponseAPISTM->responseCode == "200"){
+			foreach($arrResponseAPISTM->inquieryBalanceDetail as $accData){
 				$arrSTM = array();
-				$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
-				$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];
-				$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
-				$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
-				$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
-				$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
-				if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no')) === False){
+				$arrSTM["TYPE_TRAN"] = $accData->trxDesc;
+				$arrSTM["SIGN_FLAG"] = $accData->trxOperate == '+' ? "1" : "-1";
+				$arrSTM["SEQ_NO"] = $accData->trxSeqno;
+				$arrSTM["OPERATE_DATE"] = $lib->convertdate($accData->trxDate,'D m Y');
+				$arrSTM["TRAN_AMOUNT"] = str_replace('-','',$accData->totalAmount);
+				if(array_search($accData->trxSeqno,array_column($arrMemo,'seq_no')) === False){
 					$arrSTM["MEMO_TEXT"] = null;
 					$arrSTM["MEMO_ICON_PATH"] = null;
 				}else{
-					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
-					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
+					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($accData->trxSeqno,array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
+					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($accData->trxSeqno,array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
 				}
 				$arrayGroupSTM[] = $arrSTM;
 			}
-		}*/
+		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
-		$arrayResult["STATEMENT"] = $arrResponseAPISTM;
+		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

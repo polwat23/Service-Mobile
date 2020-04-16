@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','newusername'],$dataComing)){
-	if($func->check_permission_core($payload,'admincontrol','manageuser')){
+	if($func->check_permission_core($payload,'admincontrol','managecoreusers')){
 		$updaeusername = $conmysql->prepare("UPDATE coreuser 
 										  SET username = :newusername
 								          WHERE  username = :username;");
@@ -10,9 +10,17 @@ if($lib->checkCompleteArgument(['unique_id','username','newusername'],$dataComin
 			':newusername' => $dataComing["newusername"],
 			':username' => $dataComing["username"]
 		])){
+			$arrayStruc = [
+				':menu_name' => "manageuser",
+				':username' => $payload["username"],
+				':use_list' => "edit username",
+				':details' => $dataComing["username"].' , '.$dataComing["newusername"]
+			];
+			
+			$log->writeLog('editadmincontrol',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขชื่อเมนูได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่เปลื่อยนชื่อผู้ใช้ได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

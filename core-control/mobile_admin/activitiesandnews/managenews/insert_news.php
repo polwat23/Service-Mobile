@@ -163,7 +163,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				':path_img_3' => $pathImg3 ?? null,
 				':path_img_4' => $pathImg4 ?? null,
 				':path_img_5' => $pathImg5 ?? null,
-				':create_by' => $dataComing["create_by"]
+				':create_by' => $payload["username"]
 		
 			])){
 				$arrayResult["RESULT"] = TRUE;

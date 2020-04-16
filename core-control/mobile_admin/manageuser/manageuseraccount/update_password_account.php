@@ -3,6 +3,10 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
+		$menuName = "manageuseraccount";
+		$list_name = "reset password";
+
+		$dateNow = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$fetchCitizenID = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchCitizenID->execute([
 			':member_no' => $dataComing["member_no"]
@@ -15,6 +19,14 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 				':newpassword' => $new_password,
 				':member_no' => $dataComing["member_no"]
 		])){
+			$arrayStruc = [
+				':menu_name' => $menuName,
+				':username' => $payload["username"],
+				':use_list' => $list_name,
+				':details' => $dataComing["member_no"]
+			];
+			
+			$log->writeLog('manageuser',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
