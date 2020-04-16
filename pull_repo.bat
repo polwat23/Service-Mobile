@@ -1,7 +1,7 @@
 @echo off
 
-cd C:\File Mobile\Demo\Service-Demo-Test
+cd D:\EgatscMobile\Service-Egat-Test
 
-"C:\Program Files\Git\bin\git" pull origin demo-test
+"D:\swsetup\Git\bin\git" pull origin egat-test
 
 pause

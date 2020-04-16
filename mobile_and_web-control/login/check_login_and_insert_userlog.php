@@ -95,15 +95,18 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['exp'] = time() + 900;
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
-						$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
+						if($dataComing["channel"] == 'mobile_app'){
+							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
+							$updateFCMToken->execute([
+								':fcm_token' => $dataComing["fcm_token"] ?? null,
+								':member_no' => $member_no
+							]);
+						}
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([
 							':access_token' => $access_token,
 							':id_token' => $id_token
-						]) && ($updateFCMToken->execute([
-							':fcm_token' => $dataComing["fcm_token"] ?? null,
-							':member_no' => $member_no
-						]))){
+						])){
 							$conmysql->commit();
 							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 							$arrayResult['ACCESS_TOKEN'] = $access_token;

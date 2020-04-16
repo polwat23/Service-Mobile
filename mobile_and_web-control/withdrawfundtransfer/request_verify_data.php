@@ -3,6 +3,8 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+		$dateOperC = date('c');
+		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
 													and transaction_type_code = 'WTB' and from_account = :from_account and destination_type = '1'
 													and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
@@ -70,6 +72,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}*/
 		$arrVerifyToken['exp'] = time() + 60;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+		$arrVerifyToken["operate_date"] =  $dateOperC;
 		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
 		$arrVerifyToken['deptaccount_no'] = $dataComing["deptaccount_no"];
 		$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
@@ -82,7 +85,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
-				':operate_date' => date('Y-m-d H:i:s'),
+				':operate_date' => $dateOper,
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
@@ -111,7 +114,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
-				':operate_date' => date('Y-m-d H:i:s'),
+				':operate_date' => $dateOper,
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],

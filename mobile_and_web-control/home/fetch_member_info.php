@@ -67,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
-			$arrayResult["FULL_ADDRESS"] = $address;
+			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);

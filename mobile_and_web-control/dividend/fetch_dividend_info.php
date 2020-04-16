@@ -33,12 +33,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["ETC_AMT"] = number_format($rowDivEtc["ETC_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"] + $rowDivEtc["ETC_AMT"],2);
-			$getMethpay = $conoracle->prepare("SELECT MDP.DIVPAYTYPE_DESC AS TYPE_DESC,MDM.ITEM_AMT AS ITEM_AMT ,MDM.CUT_TYPE
+			$getMethpay = $conoracle->prepare("SELECT MDP.DIVPAYTYPE_DESC AS TYPE_DESC,MDM.ITEM_AMT AS ITEM_AMT ,MDM.CUT_TYPE,
 											TRIM( CASE WHEN CUT_TYPE = 1 THEN CUT_PERCENT * 100
 											WHEN CUT_TYPE = 2 THEN CUT_AMOUNT
 											ELSE 0 END ) AS CUT_AMOUNT ,
 											(CASE
-												WHEN  MDP.DIVPAYTYPE_CODE IN ('SHR','ACC','LJD','LON','D00','D01','D02','D03') THEN ''
+												WHEN MDP.DIVPAYTYPE_CODE IN ('SHR','ACC','LJD','LON','D00','D01','D02','D03') THEN ''
 												ELSE CUB.BANK_DESC 
 											END ) AS BANK ,
 											(CASE WHEN MDP.DIVPAYTYPE_CODE IN ('SHR','ACC','LJD','LON') THEN ''
@@ -61,7 +61,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayRecv["CUT_TYPE"] = $rowMethpay["CUT_TYPE"];
 				$arrayRecv["CUT_AMOUNT"] = $rowMethpay["CUT_AMOUNT"];
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["ITEM_AMT"],2);
-				$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($rowMethpay["BANK_ACCOUNT"],'hhh-hhxxxx-h');
+				if(isset($rowMethpay["BANK_DESC"])){
+					$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+				}else{
+					$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
 				$arrayRecv["BANK"] = $rowMethpay["BANK"];
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
