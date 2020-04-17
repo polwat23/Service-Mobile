@@ -10,6 +10,8 @@
 	"WS0009" : [{"th" : "กรุณาเข้าสู่ระบบ","en" : "Please login"}],
 	"WS0010" : 
 		[{
+		"LOGOUT0" : 
+			[{"th" : "ท่านได้ออกจากระบบแล้ว","en" : "You have been logged out"}],
 		"LOGOUT-5" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเข้าสู่ระบบจากอุปกรณ์อื่น","en" : "You was forced logout because login duplicate other device"}],
 		"LOGOUT-7" : 

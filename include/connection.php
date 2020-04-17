@@ -5,7 +5,6 @@ namespace Connection;
 class connection {
 	public $conmysql;
 	public $conoracle;
-	public $conmongo;
 	
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');

@@ -171,7 +171,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			if($arrResponse->RESULT){
 				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
 				$fetchSeqno->execute([':deptslip_no' => $ref_slipno]);
-				$rowSeqno = $fetchSeqno->fetch();
+				$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
 				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 													VALUES(:remark,:deptaccount_no,:seq_no)");
 				$insertRemark->execute([
@@ -200,7 +200,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 															ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
 															VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
 															:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
-				if($insertTransactionLog->execute($arrExecute){
+				if($insertTransactionLog->execute($arrExecute)){
 				}else{
 					$arrLogTemp = array();
 					$arrLogTemp["DATA"] = $arrExecute;

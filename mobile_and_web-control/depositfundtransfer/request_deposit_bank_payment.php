@@ -153,7 +153,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			if($arrResponse->RESULT){
 				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
 				$fetchSeqno->execute([':deptslip_no' => $ref_slipno]);
-				$rowSeqno = $fetchSeqno->fetch();
+				$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
 				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 													VALUES(:remark,:deptaccount_no,:seq_no)");
 				$insertRemark->execute([
