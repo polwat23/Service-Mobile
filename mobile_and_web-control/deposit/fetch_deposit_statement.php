@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		if($arrResponseAPI->responseCode == "200"){
 			foreach($arrResponseAPI->accountDetail as $accData){
 				if($accData->coopAccountNo == $account_no){
-					$arrayHeaderAcc["BALANCE"] = number_format($accData->accountBalance,2);
+					$arrayHeaderAcc["BALANCE"] = number_format(preg_replace('/,/', '', $accData->accountBalance),2);
 				}
 			}
 		}else{

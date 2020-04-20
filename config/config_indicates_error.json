@@ -149,10 +149,48 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
+	"SAVING_EGAT_ERR" : [{
+		"401" : 
+			[{"th" : "ไม่พบบัญชีของสมาชิก","en" : "Not found account of member"}],
+		"405" : 
+			[{"th" : "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง","en" : "Information is incorrect please check and retry"}],
+		"411" : 
+			[{"th" : "บัญชีเงินฝากต้นทางถูกปิดไปแล้ว","en" : "Source deposit account was closed"}],
+		"412" : 
+			[{"th" : "ไม่พบข้อมูลบัญชีเงินฝากต้นทาง","en" : "Not found source deposit account"}],
+		"413" : 
+			[{"th" : "ยอดถอนต่อวันเกินเกณฑ์ที่สหกรณ์กำหนด","en" : "Withdraw amount per day over limit that cooperative"}],
+		"414" : 
+			[{"th" : "ยอดเงินที่ถอนได้ในบัญชีเงินฝากไม่เพียงพอ","en" : "Available balance in deposit account is not enough"}],
+		"415" : 
+			[{"th" : "ยอดทำรายการต่ำกว่าเกณฑ์ที่สหกรณ์กำหนด","en" : "The amount lower than cooperative is define"}],
+		"416" : 
+			[{"th" : "ยอดคงเหลือหลังการถอนต่ำกว่าเกณฑ์ที่กำหนด","en" : "Balance after withdrawal lower than define"}],
+		"421" : 
+			[{"th" : "บัญชีเงินฝากปลายทางถูกปิดบัญชีไปแล้ว","en" : "Destination deposit account was closed"}],
+		"422" : 
+			[{"th" : "ไม่พบข้อมูลบัญชีเงินฝากปลายทาง","en" : "Not found destination deposit account"}],
+		"423" : 
+			[{"th" : "ยอดคงเหลือหลังจากการฝากสูงกว่าสิทธิ์การฝากสูงสุด","en" : "Balance after deposit is upper than right deposit amount"}],
+		"424" : 
+			[{"th" : "ยอดคงเหลือหลังจากการฝากสูงกว่าเกณฑ์ที่กำหนด","en" : "Balance after deposit is upper than define"}],
+		"425" : 
+			[{"th" : "ยอดเงินฝากต่ำกว่าเกณฑ์ที่กำหนด","en" : "The amount deposit is lower than define"}],
+		"426" : 
+			[{"th" : "บัญชีนี้รับฝากเฉพาะหักเงินเดือนเท่านั้น","en" : "This account can deposit only deduct salary"}],
+		"427" : 
+			[{"th" : "ยอดฝากต่อครั้งต้องเท่ากันทุกงวด","en" : "The amount of deposits per time must be equal in every installment"}],
+		"428" : 
+			[{"th" : "เดือนนี้มีการฝากแล้ว ไม่สามารถทำรายการได้","en" : "This month has already been deposited. Unable to perform the transaction"}],
+		"429" : 
+			[{"th" : "บัญชีนี้ฝากครบ 24 งวดแล้ว","en" : "This account has been deposited in 24 installments"}],
+		"444" : 
+			[{"th" : "ไม่สามารถทำรายการได้ ผิดเงื่อนไขบางประเภท กรุณาติดต่อสหกรณ์","en" : "Cannot transaction because condition was wrong please contact cooperative"}]
+	}],
 	"ACC_SHOW_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถดูข้อมูลได้","en" : "This deposit type was closed see information from cooperative"}],
 	"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
 	"ACC_ONLINE_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมและดูข้อมูลได้","en" : "This deposit type was closed transaction online and see information from cooperative"}],
-	"ALLOW_ACC_SHOW_FLAG_ON" : [{"th" : "สำหรีบดูข้อมูลได้เท่านั้น","en" : "Only see information"}],
+	"ALLOW_ACC_SHOW_FLAG_ON" : [{"th" : "สำหรับดูข้อมูลได้เท่านั้น","en" : "Only see information"}],
 	"ALLOW_TRANS_FLAG_ON" : [{"th" : "สาหรับทำธุรกรรมเท่านั้น","en" : "Only transaction online"}],
 	"ALLOW_ONLINE_FLAG_ON" : [{"th" : "สามารถดูข้อมูลและทำธุรกรรมได้","en" : "See information and transaction online"}]
 }

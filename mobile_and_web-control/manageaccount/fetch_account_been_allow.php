@@ -30,16 +30,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 								$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_ONLINE_FLAG_OFF'][0][$lang_locale];
 							}else if($rowAccBeenAllow["allow_transaction"] == '1' && $rowAccBeenAllow["allow_showdetail"] == '0'){
 								$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_SHOW_FLAG_OFF'][0][$lang_locale];
-							}else if($rowAccBeenAllow["allow_transaction"] == '0' && $rowAccBeenAllow["allow_showdetail"] == '1'){
-								$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
-							}
-							if($rowAccBeenAllow["allow_transaction"] == '1' && $rowAccBeenAllow["allow_showdetail"] == '1'){
-								$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_ONLINE_FLAG_ON'][0][$lang_locale];
-							}else if($rowAccBeenAllow["allow_transaction"] == '1' && $rowAccBeenAllow["allow_showdetail"] == '0'){
 								$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_FLAG_ON'][0][$lang_locale];
 							}else if($rowAccBeenAllow["allow_transaction"] == '0' && $rowAccBeenAllow["allow_showdetail"] == '1'){
+								$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
 								$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_ACC_SHOW_FLAG_ON'][0][$lang_locale];
+							}else if($rowAccBeenAllow["allow_transaction"] == '1' && $rowAccBeenAllow["allow_showdetail"] == '1'){
+								$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_ONLINE_FLAG_ON'][0][$lang_locale];
 							}
+							$arrAccBeenAllow["ALLOW_TRANSACTION"] = $rowAccBeenAllow["allow_transaction"];
 							$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$accData->coopAccountName));
 							$arrAccBeenAllow["DEPT_TYPE"] = $accData->accountDesc;
 							$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];

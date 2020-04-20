@@ -34,11 +34,36 @@ if(!$anonymous){
 	if(isset($dataComing["id_menu"])){
 		if($dataComing["menu_component"] == "DepositInfo"){
 			$arrMenuDep = array();
-			$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
-			$fetchMenuDep->execute([':member_no' => $member_no]);
-			$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
-			$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
-			$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+			$arrTypeAllow = array();
+			$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
+													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+													WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+			$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
+			while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
+				$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
+			}
+			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+			$arrDataAPI["MemberID"] = substr($member_no,-6);
+			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+			if(!$arrResponseAPI["RESULT"]){
+				$arrayResult['RESPONSE_CODE'] = "WS9999";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			$accNum = 0;
+			$arrResponseAPI = json_decode($arrResponseAPI);
+			if($arrResponseAPI->responseCode == "200"){
+				foreach($arrResponseAPI->accountDetail as $accData){
+					if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
+						$balance += preg_replace('/,/', '', $accData->accountBalance);
+						$accNum++;
+					}
+				}
+			}
+			$arrMenuDep["BALANCE"] = number_format($balance,2);
+			$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
@@ -155,11 +180,35 @@ if(!$anonymous){
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
-							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
-							$fetchMenuDep->execute([':member_no' => $member_no]);
-							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
-							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
-							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+							$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
+																	FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+																	WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+							$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
+							while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
+								$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
+							}
+							$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+							$arrDataAPI["MemberID"] = substr($member_no,-6);
+							$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+							if(!$arrResponseAPI["RESULT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS9999";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								echo json_encode($arrayResult);
+								exit();
+							}
+							$accNum = 0;
+							$arrResponseAPI = json_decode($arrResponseAPI);
+							if($arrResponseAPI->responseCode == "200"){
+								foreach($arrResponseAPI->accountDetail as $accData){
+									if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
+										$balance += preg_replace('/,/', '', $accData->accountBalance);
+										$accNum++;
+									}
+								}
+							}
+							$arrMenuDep["BALANCE"] = number_format($balance,2);
+							$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 							$fetchMenuLoan->execute([':member_no' => $member_no]);
