@@ -53,6 +53,13 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			]);
 			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+			$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,ref_no)
+												VALUES(:remark,:deptaccount_no,:seq_no)");
+			$insertRemark->execute([
+				':remark' => $dataComing["remark"] ?? null,
+				':deptaccount_no' => $from_account_no,
+				':seq_no' => $dataComing["trans_ref_code"]
+			]);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				$dataMerge = array();
 				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));

@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}
 		
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
-		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
+		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,ref_no FROM gcmemodept 
 											WHERE deptaccount_no = :account_no");
 		$getMemoDP->execute([
 			':account_no' => $account_no
@@ -73,15 +73,15 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				$arrSTM = array();
 				$arrSTM["TYPE_TRAN"] = $accData->trxDesc;
 				$arrSTM["SIGN_FLAG"] = $accData->trxOperate == '+' ? "1" : "-1";
-				$arrSTM["SEQ_NO"] = $accData->trxSeqno;
+				$arrSTM["SEQ_NO"] = $accData->trxRefno;
 				$arrSTM["OPERATE_DATE"] = $lib->convertdate($accData->trxDate,'D m Y');
 				$arrSTM["TRAN_AMOUNT"] = str_replace('-','',$accData->totalAmount);
-				if(array_search($accData->trxSeqno,array_column($arrMemo,'seq_no')) === False){
+				if(array_search($accData->trxRefno,array_column($arrMemo,'ref_no')) === False){
 					$arrSTM["MEMO_TEXT"] = null;
 					$arrSTM["MEMO_ICON_PATH"] = null;
 				}else{
-					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($accData->trxSeqno,array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
-					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($accData->trxSeqno,array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
+					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($accData->trxRefno,array_column($arrMemo,'ref_no'))]["memo_text"] ?? null;
+					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($accData->trxRefno,array_column($arrMemo,'ref_no'))]["memo_icon_path"] ?? null;
 				}
 				$arrayGroupSTM[] = $arrSTM;
 			}

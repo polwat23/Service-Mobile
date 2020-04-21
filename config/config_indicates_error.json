@@ -68,7 +68,8 @@
 	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please recheck email"}],
 	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องท่านจากพ้นสภาพการเป็นสมาชิก","en" : "Cannot use application because membership is terminate"}],
 	"WS0052" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีสหกรณ์ได้ ท่านต้องยกเลิกผูกบัญชีฝั่งธนาคารก่อน","en" : "Cannot unbind cooperative account, you need to unbind bank account"}],
-	"WS0053" : [{"th" : "เวลาการใช้งานถูกจำกัดไว้ที่ 15 นาที กรุณาเข้าสู่ระบบใหม่อีกครั้ง","en" : "Time limit for using is 15 minutes, Please log in again."}],
+	"WS0053" : [{"th" : "เวลาการใช้งานถูกจำกัดไว้ที่ 15 นาที กรุณาเข้าสู่ระบบใหม่อีกครั้ง","en" : "Time limit for using is 15 minutes, Please log in again"}],
+	"WS0054" : [{"th" : "บัญชีเงินฝากดังกล่าวได้ปิดบัญชีหรือสหกรณ์ไม่อนุญาตให้รับโอนได้","en" : "This deposit account was closed or cooperative is not allow to receive transaction"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],
@@ -152,6 +153,8 @@
 	"SAVING_EGAT_ERR" : [{
 		"401" : 
 			[{"th" : "ไม่พบบัญชีของสมาชิก","en" : "Not found account of member"}],
+		"403" : 
+			[{"th" : "ไม่พบบัญชีเงินฝาก","en" : "Not found account of deposit"}],
 		"405" : 
 			[{"th" : "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง","en" : "Information is incorrect please check and retry"}],
 		"411" : 
