@@ -11,12 +11,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																alow.deptaccount_no,
 																alow.limit_transaction_amt,
 																alow.create_date,
-																cont.dept_type_desc,
+																cont.dept_type_code,
 																cont.allow_transaction
 															FROM
 																gcuserallowacctransaction alow
-															INNER JOIN gcconstantaccountdept cont
-															ON alow.id_accountconstant = cont.id_accountconstant");
+															INNER JOIN gcconstantaccountdept cont ON
+																alow.id_accountconstant = cont.id_accountconstant");
 		$fetLogAllowAccountTransation->execute();
 		while($rowLogAllowAccountTransation = $fetLogAllowAccountTransation->fetch(PDO::FETCH_ASSOC)){
 			$arrLogAllowTransation = array();

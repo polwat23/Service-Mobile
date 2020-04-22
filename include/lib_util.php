@@ -419,7 +419,7 @@ class library {
 																												 
 		$result = curl_exec($ch);
 		
-		if(isset($result)){
+		if(isset($result) && $result !== FALSE){
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
 			if(isset($resultNoti)){

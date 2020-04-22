@@ -17,7 +17,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM
 													logdepttransbankerror db
 												INNER JOIN gcuserlogin log
-												ON log.id_userlogin = db.id_userlogin");
+												ON log.id_userlogin = db.id_userlogin
+												ORDER BY 	db.transaction_date DESC ");
 		$fetchTranfertError->execute();
 		while($rowLogTranferError = $fetchTranfertError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTranfertError = array();
