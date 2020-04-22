@@ -27,11 +27,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													date_format(effect_date,'%H:%i') AS 'effect_time'
 											 FROM gcannounce
 											 WHERE id_announce !='-1'
-												".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-												"and date_format(effect_date,'%Y-%m-%d') >= :start_date" : null)."
-												".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-												"and date_format(effect_date,'%Y-%m-%d') <= :end_date" : null). 
-											 "ORDER BY gcannounce.effect_date DESC");
+													".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
+														"and date_format(effect_date,'%Y-%m-%d') >= :start_date" : null)."
+													".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
+														"and date_format(effect_date,'%Y-%m-%d') <= :end_date" : null). " ORDER BY effect_date DESC");
 		$fetchAnnounce->execute($arrayExecute);		
 		while($rowAnnounce = $fetchAnnounce->fetch(PDO::FETCH_ASSOC)){
 	    $day_now=date("Y-m-d");
@@ -61,6 +60,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup[] = $arrGroupAnnounce;
 		}
 		$arrayResult["ANNOUNCE_DATA"] = $arrayGroup;
+
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
@@ -76,3 +76,4 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	exit();
 }
 ?>
+

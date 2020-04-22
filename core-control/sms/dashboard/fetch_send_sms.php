@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms')){
+	if($func->check_permission_core($payload,'sms',null)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
 		$fetchSmsSend = $conmysql->prepare("SELECT

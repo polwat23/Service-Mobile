@@ -1,12 +1,12 @@
 <?php
 require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin')){
+	if($func->check_permission_core($payload,'mobileadmin',null)){
 		$arrayGroup = array();
-		$date_now = date("Y-m-d");
+		
 		
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login FROM gcuserlogin WHERE is_login = '1' AND  date_format(login_date,'%Y-%m-%d') = '$date_now'");
+		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login FROM gcuserlogin WHERE is_login = '1'");
 		$fetchUserlogin->execute();
 	    $rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC);
 		
@@ -22,9 +22,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC);
 		$arrGroupRootUserlogin = array();
 		
-		$arrGroupRootUserlogin["USER_LOGIN_TODAY"] = $rowUserlogin["c_user_login"];
-		$arrGroupRootUserlogin["USER_NOT_REGISTER"] = $rowUserNotRegis["c_usernotregis"]==null?0: $rowUserNotRegis["c_usernotregis"];
-		$arrGroupRootUserlogin["USER_REGISTER"] = $rowUserRegis["c_userregit"];
+		$arrGroupRootUserlogin["USER_LOGIN_TODAY"] = $rowUserlogin["c_user_login"]??0;
+		$arrGroupRootUserlogin["USER_NOT_REGISTER"] = $rowUserNotRegis["c_usernotregis"]??0;
+	$arrGroupRootUserlogin["USER_REGISTER"] = $rowUserRegis["c_userregit"]??0;
 
 
 		$arrayGroup[] = $arrGroupRootUserlogin;	

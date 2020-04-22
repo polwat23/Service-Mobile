@@ -4,10 +4,17 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageaccbeenbind')){
 		$bindaccount = array();
-		$fetchidUserallowAcctrantion = $conmysql->prepare("SELECT id_userallowacctran,deptaccount_no,member_no,limit_transaction_amt,gcconstantaccountdept.dept_type_desc AS 'dept_type'
-														   FROM gcuserallowacctransaction
-														   INNER JOIN gcconstantaccountdept
-														   ON gcconstantaccountdept.id_accountconstant = gcuserallowacctransaction.id_accountconstant");
+		$fetchidUserallowAcctrantion = $conmysql->prepare("SELECT
+																					allow.id_userallowacctran,
+																					allow.deptaccount_no,
+																					allow.member_no,
+																					allow.limit_transaction_amt,
+																					cont.dept_type_code
+																				   
+																				FROM
+																					gcuserallowacctransaction allow
+																					LEFT JOIN gcconstantaccountdept cont
+																					ON allow.id_accountconstant= cont.id_accountconstant");
 		$fetchidUserallowAcctrantion->execute();
 		while($rowBindAccount = $fetchidUserallowAcctrantion->fetch(PDO::FETCH_ASSOC)){
 			$bindaccount["ID_USERALLOWACCTRAN"] = $rowBindAccount["id_userallowacctran"];
@@ -16,7 +23,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$bindaccount["DEPTACCOUNT_NO_COOP_FORMAT"] = $lib->formataccount($rowBindAccount["deptaccount_no"],$func->getConstant('dep_format'));
 			$bindaccount["LIMIT_TRANSACTION_AMT_FORMAT"] = number_format($rowBindAccount["limit_transaction_amt"],2);
 			$bindaccount["LIMIT_TRANSACTION_AMT"] = $rowBindAccount["limit_transaction_amt"];
-			$bindaccount["DEPT_TYPE"] = $rowBindAccount["dept_type"];
+			
+			$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_DESC FROM DPDEPTTYPE WHERE   DEPTTYPE_CODE =:DEPT_TYPE ");
+		    $fetchDepttype->execute([':DEPT_TYPE' => $rowBindAccount["dept_type_code"]]);
+			$dept_type_dics = $fetchDepttype -> fetch(PDO::FETCH_ASSOC);
+			$bindaccount["DEPT_TYPE"] =$dept_type_dics["DEPTTYPE_DESC"];
 			
 			
 			$fetchBindAcount = $conmysql->prepare("SELECT 
@@ -35,8 +46,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													FROM gcbindaccount 
 												    INNER JOIN csbankdisplay
 												    ON csbankdisplay.bank_code = gcbindaccount.bank_code 
-													WHERE deptaccount_no_coop='$rowBindAccount[deptaccount_no]'");
-			$fetchBindAcount->execute();
+													WHERE deptaccount_no_coop=:dept_no");
+			$fetchBindAcount->execute([':dept_no' =>$rowBindAccount[deptaccount_no]]);
 			$dataBindAcount = $fetchBindAcount -> fetch(PDO::FETCH_ASSOC);
 			$bindaccount["ID_BINDACCOUNT"] = $dataBindAcount["id_bindaccount"];
 			$bindaccount["DEPTACCOUNT_NO_BANK"] = $dataBindAcount["deptaccount_no_bank"];

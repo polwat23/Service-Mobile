@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin')){
+	if($func->check_permission_core($payload,'mobileadmin',null)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
 		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH

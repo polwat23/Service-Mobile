@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															login.channel
 													FROM logdepttransbankerror tb
 													INNER JOIN gcuserlogin login
-													ON login.id_userlogin = tb.id_userlogin");
+													ON login.id_userlogin = tb.id_userlogin ORDER BY  tb.transaction_date DESC");
 		$fetchLogDepositError->execute();
 		while($rowLogDepositError = $fetchLogDepositError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositError = array();
