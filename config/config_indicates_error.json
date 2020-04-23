@@ -148,5 +148,5 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
-	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ปิดไม่ให้ทำธุรกรรมผ่านบัญชีประเภทนี้ได้แล้ว","en" : "This deposit type was closed from cooperative"}]
+	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}]
 }
