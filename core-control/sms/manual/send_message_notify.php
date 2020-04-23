@@ -114,7 +114,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						unset($bulkInsert);
 						$bulkInsert = array();
 					}
-					$arrPayloadNotify["TO"] = $arrAllToken;
+					$arrPayloadNotify["TO"] = '/topics/member';
 					$arrPayloadNotify["MEMBER_NO"] = $arrAllMember_no;
 					$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
 					$arrMessage["BODY"] = $dataComing["message_emoji_"];
@@ -122,8 +122,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 					if($func->insertHistory($arrPayloadNotify,'1')){
-						if($lib->sendNotify($arrPayloadNotify,'person')){
-						//if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
+						if($lib->sendNotify($arrPayloadNotify,'all')){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
 							$arrayResult['RESULT'] = TRUE;
 							echo json_encode($arrayResult);
 						}else{

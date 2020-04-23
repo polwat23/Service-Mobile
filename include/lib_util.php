@@ -409,21 +409,25 @@ class library {
 		];      
 		$ch = curl_init();  
 
-		curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );                                                                  
-		curl_setopt( $ch,CURLOPT_POST, true );  
-		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
-		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );                                                                  
+		curl_setopt( $ch, CURLOPT_POST, true );  
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
+		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode($data));                                                                  
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($data));                                                                  
 																												 
 		$result = curl_exec($ch);
 		
-		if(isset($result)){
+		if(isset($result) && $result !== FALSE){
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
 			if(isset($resultNoti)){
-				if($resultNoti->success){
+				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
+					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
+					file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return true;
 				}else{
 					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);

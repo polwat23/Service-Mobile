@@ -9,19 +9,19 @@ use Component\functions;
 $lib = new library();
 $func = new functions();
 
-$fetchDataSTM = $conoracle->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,dm.MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO
-									FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
-									LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no and dsm.coop_id = dm.coop_id
-									WHERE dsm.operate_date >= (SYSDATE - 1) and dsm.sync_notify_flag = '0' ");
+$fetchDataSTM = $conoracle->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMBER_NO,(SHS.SHARE_AMOUNT * 10) AS AMOUNT,
+												(SHS.SHARESTK_AMT * 10) AS SHARE_BALANCE,SHI.SHRITEMTYPE_DESC
+												FROM SHSHARESTATEMENT SHS LEFT JOIN SHUCFSHRITEMTYPE SHI ON SHS.SHRITEMTYPE_CODE = SHI.SHRITEMTYPE_CODE
+												WHERE SHS.SYNC_NOTIFY_FLAG = '0' AND SHS.OPERATE_DATE >= (SYSDATE - 30)");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
-	$templateMessage = $func->getTemplateSystem('DepositInfo',1);
+	$templateMessage = $func->getTemplateSystem('ShareInfo',1);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
-		$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 		$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
-		$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
+		$dataMerge["SHARE_BALANCE"] = number_format($rowSTM["SHARE_BALANCE"],2);
+		$dataMerge["ITEMTYPE_DESC"] = $rowSTM["SHRITEMTYPE_DESC"];
 		$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
 		$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
 		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -34,13 +34,13 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 		if($func->insertHistory($arrPayloadNotify,'2')){
 			if($lib->sendNotify($arrPayloadNotify,"person")){
-				$updateSyncFlag = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+				$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
-					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
+					':member_no' => $rowSTM["MEMBER_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
 				]);
 			}else{
-				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_deposit');
+				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_share');
 			}
 		}
 	}

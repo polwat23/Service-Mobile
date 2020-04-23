@@ -51,8 +51,6 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':id_userlogin' => $payload["id_userlogin"],
 				':ref_no_source' => $dataComing["trans_ref_code"]
 			]);
-			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
-			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,ref_no)
 												VALUES(:remark,:deptaccount_no,:seq_no)");
 			$insertRemark->execute([
@@ -60,21 +58,25 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':deptaccount_no' => $from_account_no,
 				':seq_no' => $dataComing["trans_ref_code"]
 			]);
+			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
-				$dataMerge = array();
-				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
-				$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
-				$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-				$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-				$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-				$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-				$arrMessage["BODY"] = $message_endpoint["BODY"];
-				$arrMessage["PATH_IMAGE"] = null;
-				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-				if($func->insertHistory($arrPayloadNotify,'2')){
-					$lib->sendNotify($arrPayloadNotify,"person");
+				if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+					$dataMerge = array();
+					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
+					$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+					$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+					$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+					$arrMessage["BODY"] = $message_endpoint["BODY"];
+					$arrMessage["PATH_IMAGE"] = null;
+					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+					if($func->insertHistory($arrPayloadNotify,'2')){
+						$lib->sendNotify($arrPayloadNotify,"person");
+					}
 				}
 			}
 			$arrayResult['TRANSACTION_NO'] = $ref_no;
