@@ -423,7 +423,7 @@ class library {
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
 			if(isset($resultNoti)){
-				if($resultNoti->success || $type_send == 'all'){
+				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
 					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
