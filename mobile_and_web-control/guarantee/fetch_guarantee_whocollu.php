@@ -19,7 +19,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 			$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-			$arrGroupAll['CONTRACT_NO'] = $dataComing["contract_no"];
+			if(mb_stripos($contract_no,'.') === FALSE){
+				$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
+				if(mb_strlen($contract_no) == 10){
+					$arrGroupAll["CONTRACT_NO"] = $loan_format;
+				}else if(mb_strlen($contract_no) == 11){
+					$arrGroupAll["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
+				}
+			}else{
+				$arrGroupAll["CONTRACT_NO"] = $contract_no;
+			}
 			$whocolluMember = $conoracle->prepare("SELECT
 													MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 													LCC.REF_COLLNO AS MEMBER_NO			
@@ -57,7 +66,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$arrGroupAll['CONTRACT_NO'] =  $rowWhocollu["LOANCONTRACT_NO"];
+				$contract_no = $rowWhocollu["LOANCONTRACT_NO"];
+				if(mb_stripos($contract_no,'.') === FALSE){
+					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
+					if(mb_strlen($contract_no) == 10){
+						$arrGroupAll["CONTRACT_NO"] = $loan_format;
+					}else if(mb_strlen($contract_no) == 11){
+						$arrGroupAll["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
+					}
+				}else{
+					$arrGroupAll["CONTRACT_NO"] = $contract_no;
+				}
 				$whocolluMember = $conoracle->prepare("SELECT
 														MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 														LCC.REF_COLLNO AS MEMBER_NO			
