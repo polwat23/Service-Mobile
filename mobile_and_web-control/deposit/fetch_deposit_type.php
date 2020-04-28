@@ -54,8 +54,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrAllAccount[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
 			}
 		}
+		
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
+		file_put_contents(__DIR__.'/../../log/test.txt', json_encode($arrayResult) . PHP_EOL, FILE_APPEND);
 		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
