@@ -30,6 +30,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																					login.id_userlogin = trans.id_userlogin
 																				WHERE
 																					trans.trans_flag = '1'
+																					AND trans.transfer_mode = '9'
 																				ORDER BY
 																					trans.operate_date
 																				DESC");

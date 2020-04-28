@@ -26,11 +26,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		login.channel
 																	FROM
 																		gctransaction trans
-																	INNER JOIN gcuserlogin login ON
+																	LEFT JOIN gcuserlogin login ON
 																		login.id_userlogin = trans.id_userlogin
-																	WHERE
-																		trans.trans_flag = '1' AND trans.transfer_mode = '1'
-																		ORDER BY trans.operate_date DESC");
+																	WHERE  trans.transfer_mode != '9'
+																	ORDER BY trans.operate_date DESC");
 		$fetLogTranfer->execute();
 		while($rowLogTransfer = $fetLogTranfer->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTransfer = array();

@@ -30,7 +30,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																			login.id_userlogin = trans.id_userlogin
 																		WHERE
 																			trans.trans_flag = '-1'
-																			ORDER BY trans.operate_date DESC");
+																			AND trans.transfer_mode = '9'
+																		ORDER BY trans.operate_date DESC");
 		$fetLogTransection->execute();
 		while($rowLogTransection = $fetLogTransection->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTransection = array();
