@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]));
+			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\s\s+/', ' ',preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]));
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 			$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
@@ -54,6 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrAllAccount[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
 			}
 		}
+		
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

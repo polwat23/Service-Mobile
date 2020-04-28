@@ -37,11 +37,16 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				echo json_encode($arrayResult);
 				exit();
 			}
-			$arrayResult['MEMBER_NO'] = $member_no;
+			/*$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
 			$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);*/
+			$arrayResult['RESPONSE_CODE'] = "WS0006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
+			exit();
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

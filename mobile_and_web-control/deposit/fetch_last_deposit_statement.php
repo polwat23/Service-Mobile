@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$account_no_format = $lib->formataccount($account_no,$func->getConstant('dep_format'));
 		$arrAccount["DEPTACCOUNT_NO"] = $account_no_format;
 		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowAccountLastSTM["DEPTACCOUNT_NAME"]));
+		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\s\s+/', ' ',preg_replace('/\"/','',$rowAccountLastSTM["DEPTACCOUNT_NAME"]));
 		$arrAccount["BALANCE"] = number_format($rowAccountLastSTM["BALANCE"],2);
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'D m Y');

@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
 					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-						$arrAccBind["ACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]));
+						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\s\s+/', ' ',preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]));
 						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
 						$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"];
 						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["PRNCBAL"],2);

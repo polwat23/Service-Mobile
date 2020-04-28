@@ -5,14 +5,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
-													and transaction_type_code = 'WTB' and from_account = :from_account and destination_type = '1'
-													and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
-		$checkLimitBalance->execute([
-			':member_no' => $payload["member_no"],
-			':from_account' => $dataComing["deptaccount_no"]
-		]);
-		$rowBalLimit = $checkLimitBalance->fetch(PDO::FETCH_ASSOC);
 		$limit_amt = 0;
 		$limit_withdraw = $func->getConstant("limit_withdraw");
 		$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
@@ -22,20 +14,19 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			':member_no' => $payload["member_no"]
 		]);
 		$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
-		$fetchLimitTransaction = $conmysql->prepare("SELECT limit_transaction_amt FROM gcuserallowacctransaction 
-														WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
+		$fetchLimitTransaction = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount 
+														WHERE member_no = :member_no");
 		$fetchLimitTransaction->execute([
 			':member_no' => $payload["member_no"],
 			':deptaccount_no' => $dataComing["deptaccount_no"]
 		]);
 		$rowLimitTransaction = $fetchLimitTransaction->fetch(PDO::FETCH_ASSOC);
-		if($limit_withdraw >= $rowLimitTransaction["limit_transaction_amt"]){
-			$limit_amt = (int)$rowLimitTransaction["limit_transaction_amt"];
+		if($limit_withdraw >= $rowLimitTransaction["limit_amount_transaction"]){
+			$limit_amt = (int)$rowLimitTransaction["limit_amount_transaction"];
 		}else{
 			$limit_amt = (int)$limit_withdraw;
 		}
-		$balance_request = $rowBalLimit["sum_amt"] + $dataComing["amt_transfer"];
-		if($balance_request > $limit_amt){
+		if($dataComing["amt_transfer"] > $limit_amt){
 			$arrayResult['RESPONSE_CODE'] = "WS0043";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
