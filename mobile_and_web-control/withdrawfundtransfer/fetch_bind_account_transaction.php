@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0023";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = TRUE;
+				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}

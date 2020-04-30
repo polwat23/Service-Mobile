@@ -1,9 +1,9 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','limit_amt'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','limit_amt','limit_name'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingLimitTrans')){
-		$updateLimitTrans = $conmysql->prepare("UPDATE gcmemberaccount SET limit_amount_transaction = :limit_amt 
+		$updateLimitTrans = $conmysql->prepare("UPDATE gcmemberaccount SET ".preg_replace('/[^a-zA-Z_]/','',$dataComing['limit_name'])." = :limit_amt 
 												WHERE member_no = :member_no");
 		if($updateLimitTrans->execute([
 			':limit_amt' => $dataComing["limit_amt"],
