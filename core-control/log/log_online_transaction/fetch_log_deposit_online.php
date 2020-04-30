@@ -4,36 +4,29 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logdepositonline')){
 		$arrayGroup = array();
-		$fetLogDepositOnline = $conmysql->prepare("SELECT
-																					trans.ref_no,
-																					trans.member_no,
-																					trans.transaction_type_code,
-																					trans.from_account,
-																					trans.destination_type,
-																					trans.destination,
-																					trans.transfer_mode,
-																					trans.amount,
-																					trans.fee_amt,
-																					trans.penalty_amt,
-																					trans.amount_receive,
-																					trans.trans_flag,
-																					trans.operate_date,
-																					trans.result_transaction,
-																					trans.ref_no_1,
-																					trans.coop_slip_no,
-																					trans.ref_no_source,
-																					login.device_name,
-																					login.channel
-																				FROM
-																					gctransaction trans
-																				LEFT JOIN gcuserlogin login ON
-																					login.id_userlogin = trans.id_userlogin
-																				WHERE
-																					trans.trans_flag = '1'
-																					AND trans.transfer_mode = '9'
-																				ORDER BY
-																					trans.operate_date
-																				DESC");
+		$fetLogDepositOnline = $conmysql->prepare("SELECT 
+													trans.ref_no,trans.member_no,
+													trans.transaction_type_code,
+													trans.from_account,
+													trans.destination_type,
+													trans.destination,
+													trans.transfer_mode,
+													trans.amount,
+													trans.fee_amt,
+													trans.penalty_amt,
+													trans.amount_receive,
+													trans.trans_flag,
+													trans.operate_date,
+													trans.result_transaction,
+													trans.ref_no_1,trans.coop_slip_no,
+													trans.ref_no_source,
+													login.device_name,login.channel	
+												FROM gctransaction trans
+												INNER JOIN gcuserlogin login
+												ON login.id_userlogin = trans.id_userlogin
+												WHERE trans.trans_flag = '1'
+													  AND transfer_mode ='9'
+												ORDER BY trans.operate_date DESC");
 		$fetLogDepositOnline->execute();
 		while($rowLogDepositOnline = $fetLogDepositOnline->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositOnline = array();

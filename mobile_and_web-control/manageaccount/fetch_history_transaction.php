@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 						$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 					}
 					$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
-					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\s\s+/', ' ',preg_replace('/\"/','',$rowNameAcc["DEPTACCOUNT_NAME"]));
+					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',$rowNameAcc["DEPTACCOUNT_NAME"]);
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
 					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["bank_format_account"]);
 					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["bank_format_account_hide"]);
@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 				$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 				$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 				$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
-				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\s\s+/', ' ',preg_replace('/\"/','',$rowNameAcc["DEPTACCOUNT_NAME"]));
+				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',$rowNameAcc["DEPTACCOUNT_NAME"]);
 				$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
 				$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format'));
 				$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$func->getConstant('hidden_dep'));

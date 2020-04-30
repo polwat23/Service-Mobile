@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					if($rowDetailAcc["TRANSONLINE_FLAG"] == '0'){
 						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_FLAG_OFF'][0][$lang_locale];
 					}
-					$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\s\s+/', ' ',preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]));
+					$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDetailAcc["DEPTACCOUNT_NAME"]);
 					$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
 					$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
