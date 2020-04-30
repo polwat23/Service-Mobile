@@ -1,22 +1,20 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','limit_amt','deptaccount_no'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$updateLimitTrans = $conmysql->prepare("UPDATE gcuserallowacctransaction SET limit_transaction_amt = :limit_amt 
-												WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
+if($lib->checkCompleteArgument(['menu_component','limit_amt','limit_name'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingLimitTrans')){
+		$updateLimitTrans = $conmysql->prepare("UPDATE gcmemberaccount SET ".preg_replace('/[^a-zA-Z_]/','',$dataComing['limit_name'])." = :limit_amt 
+												WHERE member_no = :member_no");
 		if($updateLimitTrans->execute([
 			':limit_amt' => $dataComing["limit_amt"],
-			':member_no' => $payload["member_no"],
-			':deptaccount_no' => $dataComing["deptaccount_no"]
+			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [
 				':limit_amt' => $dataComing["limit_amt"],
-				':member_no' => $payload["member_no"],
-				':deptaccount_no' => $dataComing["deptaccount_no"]
+				':member_no' => $payload["member_no"]
 			];
 			$arrError = array();
 			$arrError["EXECUTE"] = $arrExecute;

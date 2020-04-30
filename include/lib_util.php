@@ -248,7 +248,7 @@ class library {
 			return false;
 		}
 	}
-	public function sendMail($email,$subject,$body,$mailFunction) {
+	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
@@ -273,6 +273,11 @@ class library {
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
 		$mailFunction->Body = $body;
+		if(sizeof($attachment_path) > 0){
+			foreach($attachment_path as $attch_path){
+				$mailFunction->addAttachment($attch_path);
+			}
+		}
 		if(!$mailFunction->send()){
 			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
 			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);

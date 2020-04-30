@@ -1,5 +1,5 @@
 {
-	"NAME_APP" : "MHD-GCoop Connect",
+	"NAME_APP" : "MU Saving",
 	"COOP_KEY" : "mhd-test",
 	"COOP_ID" : "001001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
@@ -18,5 +18,23 @@
 	"DEFAULT_BANNER_COLOR_MAIN" : "#8e9eab",
 	"DEFAULT_BANNER_COLOR_SECON" : "#eef2f3",
 	"DEFAULT_BANNER_COLOR_TEXT" : "#000000",
-	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x"
+	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x",
+	"LIMIT_TRANSACTION" : {
+		"0" : {
+			"LIMIT_NAME" : "limit_amount_transaction_incoop",
+			"LIMIT_TYPE_TH" : "ธุรกรรมภายใน",
+			"LIMIT_TYPE_EN" : "Transaction in Coop",
+			"LIMIT_AMOUNT" : "2000000",
+			"LIMIT_AMOUNT_COOP" : "2000000",
+			"IS_USE" : "false"
+		},
+		"1" : {
+			"LIMIT_NAME" : "limit_amount_transaction",
+			"LIMIT_TYPE_TH" : "ธุรกรรมภายนอก",
+			"LIMIT_TYPE_EN" : "Transaction in Bank",
+			"LIMIT_AMOUNT" : "2000000",
+			"LIMIT_AMOUNT_COOP" : "2000000",
+			"IS_USE" : "true"
+		}
+	}
 }
