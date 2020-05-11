@@ -5,7 +5,6 @@ namespace Connection;
 class connection {
 	public $conmysql;
 	public $conoracle;
-	public $conmongo;
 	
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
@@ -31,7 +30,7 @@ class connection {
 			$dbpass = $json_data["DBORACLE_PASSWORD"];
 			$dbname = "(DESCRIPTION =
 						(ADDRESS_LIST =
-						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = 1521))
+						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = ".$json_data["DBORACLE_PORT"]."))
 						)
 						(CONNECT_DATA =
 						  (SERVICE_NAME = ".$json_data["DBORACLE_SERVICE"].")

@@ -103,6 +103,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["HEADER"] = $arrAccount;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

@@ -9,22 +9,17 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		if($payload["member_no"] != 'dev@mode' && $payload["member_no"] != 'salemode'){
-			$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
-												FROM mbmembmaster mb LEFT JOIN 
-												mbucfprename mp ON mb.prename_code = mp.prename_code
-												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
-												WHERE mb.member_no = :member_no");
-			$fetchName->execute([
-				':member_no' => $member_no
-			]);
-			$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-			$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
-		}else{
-			$header["fullname"] = "นายไอโซแคร์ ซิสเต็มส์";
-			$header["member_group"] = "บริษัทไอโซแคร์ จำกัด";
-		}
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+											FROM mbmembmaster mb LEFT JOIN 
+											mbucfprename mp ON mb.prename_code = mp.prename_code
+											LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
+											WHERE mb.member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$arrGroupDetail = array();
 		$getDetailSlip = $conoracle->prepare("SELECT slt.slipitemtype_desc,slt.slipitemtype_code,sld.loancontract_no,sld.interest_payamt,
 											sld.item_payamt,sld.item_balance,sld.period
@@ -120,7 +115,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
 			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด</p>

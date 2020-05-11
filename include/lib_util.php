@@ -20,59 +20,63 @@ class library {
 		return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
 	}
 	public function convertdate($date,$format="D m Y",$is_time=false){
-		$date = preg_replace('|/|','-',$date);
-		$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-		$thaishort = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-		$arrSeparate = [" ","-","/"];
-		if($is_time){
-			$dateConvert = date("Y-m-d-H-i-s",strtotime($date));
-		}else{
-			$dateConvert = date("Y-m-d",strtotime($date));
-		}
-		$separate;
-		foreach($arrSeparate as $sep_value) {
-			if(strpos($format, $sep_value)){
-				$separate = $sep_value;
-				break;
-			}
-		}
-		$datearray = explode('-',$dateConvert);
-		$formatArray = explode($separate,$format);
-		$dateConverted;
-		foreach($formatArray as $key_format => $value_format) {
-			if($key_format == 0){
-				switch($value_format){
-					case "D" :
-					case "d" : $dateConverted = $datearray[2];
-						break;
-					case "Y" : $dateConverted = ($datearray[0]+543);
-						break;
-					case "y" : $dateConverted = $datearray[0];
-						break;				
-				}
+		if(isset($date)){
+			$date = preg_replace('|/|','-',$date);
+			$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+			$thaishort = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+			$arrSeparate = [" ","-","/"];
+			if($is_time){
+				$dateConvert = date("Y-m-d-H-i-s",strtotime($date));
 			}else{
-				switch($value_format){
-					case "D" :
-					case "d" : $dateConverted .= $separate.$datearray[2];
-						break;
-					case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
-						break;
-					case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
-						break;
-					case "N" :
-					case "n" : $dateConverted .= $separate.$datearray[1];
-						break;
-					case "Y" : $dateConverted .= $separate.($datearray[0]+543);
-						break;
-					case "y" : $dateConverted .= $separate.($datearray[0]);
-						break;
+				$dateConvert = date("Y-m-d",strtotime($date));
+			}
+			$separate;
+			foreach($arrSeparate as $sep_value) {
+				if(strpos($format, $sep_value)){
+					$separate = $sep_value;
+					break;
 				}
 			}
+			$datearray = explode('-',$dateConvert);
+			$formatArray = explode($separate,$format);
+			$dateConverted;
+			foreach($formatArray as $key_format => $value_format) {
+				if($key_format == 0){
+					switch($value_format){
+						case "D" :
+						case "d" : $dateConverted = $datearray[2];
+							break;
+						case "Y" : $dateConverted = ($datearray[0]+543);
+							break;
+						case "y" : $dateConverted = $datearray[0];
+							break;				
+					}
+				}else{
+					switch($value_format){
+						case "D" :
+						case "d" : $dateConverted .= $separate.$datearray[2];
+							break;
+						case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
+							break;
+						case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
+							break;
+						case "N" :
+						case "n" : $dateConverted .= $separate.$datearray[1];
+							break;
+						case "Y" : $dateConverted .= $separate.($datearray[0]+543);
+							break;
+						case "y" : $dateConverted .= $separate.($datearray[0]);
+							break;
+					}
+				}
+			}
+			if($is_time){
+				$dateConverted .= ' '.$datearray[3].':'.$datearray[4].(isset($datearray[5]) && $datearray[5] > 0 ? ':'.$datearray[5] : null).' น.';
+			}
+			return $dateConverted;
+		}else{
+			return '-';
 		}
-		if($is_time){
-			$dateConverted .= ' เวลา '.$datearray[3].':'.$datearray[4].(isset($datearray[5]) && $datearray[5] > 0 ? ':'.$datearray[5] : null).' น.';
-		}
-		return $dateConverted;
 	}
 	public function count_duration($date,$format="ym"){
 		$date = preg_replace('|/|','-',$date);
@@ -197,7 +201,54 @@ class library {
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}
-	public function sendMail($email,$subject,$body,$mailFunction) {
+	public function sendSMS($arrayDestination,$bulk=false) {
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$config = json_decode($json,true);
+		$arrayGrpSms = array();
+		try{
+			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
+			try {
+				if($bulk){
+					foreach($arrayDestination as $dest){
+						$argumentWS = [
+							"Member_No" => $dest["member_no"],
+							"MobilePhone" => $dest["tel"],
+							"Message" => $dest["message"]
+						];
+						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+						$responseSoap = $resultWS->RqSendOTPResult;
+						$arraySms["MEMBER_NO"] = $dest["member_no"];
+						$arraySms["RESULT"] = $responseSoap;
+						$arrayGrpSms[] = $arraySms;
+					}
+					return $arrayGrpSms;
+				}else{
+					$argumentWS = [
+						"Member_No" => $arrayDestination["member_no"],
+						"MobilePhone" => $arrayDestination["tel"],
+						"Message" => $arrayDestination["message"]
+					];
+					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+					$responseSoap = $resultWS->RqSendOTPResult;
+					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
+					$arrayGrpSms["RESULT"] = $responseSoap;
+					return $arrayGrpSms;
+				}
+			}catch(SoapFault $e){
+				$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
+				file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
+				$arrayGrpSms["RESULT"] = FALSE;
+				return $arrayGrpSms;
+			}
+		}catch(Throwable $e){
+			$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
+			file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
+			$arrayGrpSms["RESULT"] = FALSE;
+			return $arrayGrpSms;
+			return false;
+		}
+	}
+	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
@@ -222,6 +273,11 @@ class library {
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
 		$mailFunction->Body = $body;
+		if(sizeof($attachment_path) > 0){
+			foreach($attachment_path as $attch_path){
+				$mailFunction->addAttachment($attch_path);
+			}
+		}
 		if(!$mailFunction->send()){
 			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
 			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
@@ -368,11 +424,11 @@ class library {
 																												 
 		$result = curl_exec($ch);
 		
-		if(isset($result)){
+		if(isset($result) && $result !== FALSE){
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
 			if(isset($resultNoti)){
-				if($resultNoti->success){
+				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
 					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
@@ -414,10 +470,10 @@ class library {
 		}
 		return $days;
 	}
-	public function posting_data($url,$payload) {
+	public function posting_data($url,$payload,$header=[]) {
 		$ch = curl_init( $url );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'));
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);

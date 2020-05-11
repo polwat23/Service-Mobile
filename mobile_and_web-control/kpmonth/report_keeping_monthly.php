@@ -9,18 +9,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		if($payload["member_no"] != 'dev@mode'){
-			$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc FROM mbmembmaster mb LEFT JOIN 
-												mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.member_no = :member_no");
-			$fetchName->execute([
-				':member_no' => $member_no
-			]);
-			$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-			$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-		}else{
-			$header["fullname"] = "นายไอโซแคร์ ซิสเต็มส์";
-		}
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc FROM mbmembmaster mb LEFT JOIN 
+											mbucfprename mp ON mb.prename_code = mp.prename_code
+											WHERE mb.member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare("SELECT * FROM (
 												SELECT 
@@ -153,7 +149,7 @@ function GenerateReport($dataReport,$header){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 					<div style="text-align:center;position: absolute;width:100%">
 						<p style="margin-top: 10px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด</p>
 						<p style="margin-top: -15px;font-size: 18px;font-weight: bold">รายการเรียกเก็บประจำเดือน</p>
