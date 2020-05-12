@@ -5,12 +5,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAssistGrp = array();
-		$fetchAssistType = $conmysql->prepare("SELECT id_const_welfare,welfare_type_desc FROM gcconstantwelfare WHERE is_use = '1'");
+		$fetchAssistType = $conmysql->prepare("SELECT id_const_welfare,welfare_type_desc,welfare_type_code FROM gcconstantwelfare WHERE is_use = '1'");
 		$fetchAssistType->execute();
 		while($rowAssistType = $fetchAssistType->fetch(PDO::FETCH_ASSOC)){
 			$arrAssist = array();
 			$arrAssist["ID_CONST_WELFARE"] = $rowAssistType["id_const_welfare"];
 			$arrAssist["WELFARE_DESC"] = $rowAssistType["welfare_type_desc"];
+			$arrAssist["ASSISTTYPE_CODE"] = $rowAssistType["welfare_type_code"];
 			$arrAssistGrp[] = $arrAssist;
 		}
 		$arrayResult['WELFARE_TYPE'] = $arrAssistGrp;

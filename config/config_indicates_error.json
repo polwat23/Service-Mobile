@@ -10,6 +10,8 @@
 	"WS0009" : [{"th" : "กรุณาเข้าสู่ระบบ","en" : "Please login"}],
 	"WS0010" : 
 		[{
+		"LOGOUT0" : 
+			[{"th" : "ท่านได้ออกจากระบบแล้ว","en" : "You have been logged out"}],
 		"LOGOUT-5" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบ เนื่องจากมีการเข้าสู่ระบบจากอุปกรณ์อื่น","en" : "You was forced logout because login duplicate other device"}],
 		"LOGOUT-7" : 
@@ -65,6 +67,9 @@
 	"WS0049" : [{"th" : "ไม่พบอีเมลของท่านกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Not found your email please recheck email"}],
 	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบกรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please recheck email"}],
 	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องท่านจากพ้นสภาพการเป็นสมาชิก","en" : "Cannot use application because membership is terminate"}],
+	"WS0052" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีสหกรณ์ได้ ท่านต้องยกเลิกผูกบัญชีฝั่งธนาคารก่อน","en" : "Cannot unbind cooperative account, you need to unbind bank account"}],
+	"WS0053" : [{"th" : "เวลาการใช้งานถูกจำกัดไว้ที่ 15 นาที กรุณาเข้าสู่ระบบใหม่อีกครั้ง","en" : "Time limit for using is 15 minutes, Please log in again"}],
+	"WS0055" : [{"th" : "ไม่สามารถขอทุนสวัสดิการได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง","en" : "Cannot request welfare in this moment please try again"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
 	"WS1003" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1003","en" : "Cannot login this moment #WS1003"}],
@@ -98,4 +103,5 @@
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "มีบางอย่างผิดพลาดกรุณาติดต่อสหกรณ์ #WS4004","en" : "Something wrong please contact cooperative #WS4004"}]
+
 }

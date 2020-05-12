@@ -6,22 +6,56 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth');
+		$keep_forward = $func->getConstant('process_keep_forward');
 		$dateNow = date('d');
 		$arrayGroupPeriod = array();
-		if($dateNow >= $dateshow_kpmonth){
-			$getPeriodKP = $conoracle->prepare("SELECT * from ((
-													select recv_period from kpmastreceive where member_no = :member_no
-												UNION  
-													select recv_period  from kptempreceive where member_no = :member_no
-												) ORDER BY recv_period DESC) where rownum <= :limit_period");
+		if($keep_forward == '1'){
+			$getMaxRecv = $conoracle->prepare("SELECT max(recv_period) as MAX_RECV_PERIOD FROM kptempreceive WHERE rownum <= 1");
+			$getMaxRecv->execute();
+			$rowMaxRecv = $getMaxRecv->fetch(PDO::FETCH_ASSOC);
+			$max_recv = (int) substr($rowMaxRecv["MAX_RECV_PERIOD"],4);
+			$thisMonth = date("m");
+			if($max_recv >= $thisMonth){
+				$getPeriodKP = $conoracle->prepare("SELECT * from ((
+															select recv_period from kpmastreceive where member_no = :member_no and 
+															recv_period <> ( select MAX(recv_period) from kptempreceive)
+														UNION 
+															select recv_period  from kptempreceive where member_no = :member_no and 
+															recv_period <> ( select MAX(recv_period) from kptempreceive)
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+			}else{
+				if($dateNow >= $dateshow_kpmonth){
+					$getPeriodKP = $conoracle->prepare("SELECT * from ((
+															select recv_period from kpmastreceive where member_no = :member_no
+														UNION  
+															select recv_period  from kptempreceive where member_no = :member_no
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+				}else{
+					$getPeriodKP = $conoracle->prepare("SELECT * from ((
+															select recv_period from kpmastreceive where member_no = :member_no and 
+															recv_period <> ( select MAX(recv_period) from kpmastreceive where member_no = :member_no)
+														UNION 
+															select recv_period  from kptempreceive where member_no = :member_no and 
+															recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+				}
+			}
 		}else{
-			$getPeriodKP = $conoracle->prepare("SELECT * from ((
-													select recv_period from kpmastreceive where member_no = :member_no and 
-													recv_period <> ( select MAX(recv_period) from kpmastreceive where member_no = :member_no)
-												UNION 
-													select recv_period  from kptempreceive where member_no = :member_no and 
-													recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
-												) ORDER BY recv_period DESC) where rownum <= :limit_period");
+			if($dateNow >= $dateshow_kpmonth){
+				$getPeriodKP = $conoracle->prepare("SELECT * from ((
+														select recv_period from kpmastreceive where member_no = :member_no
+													UNION  
+														select recv_period  from kptempreceive where member_no = :member_no
+													) ORDER BY recv_period DESC) where rownum <= :limit_period");
+			}else{
+				$getPeriodKP = $conoracle->prepare("SELECT * from ((
+														select recv_period from kpmastreceive where member_no = :member_no and 
+														recv_period <> ( select MAX(recv_period) from kpmastreceive where member_no = :member_no)
+													UNION 
+														select recv_period  from kptempreceive where member_no = :member_no and 
+														recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+													) ORDER BY recv_period DESC) where rownum <= :limit_period");
+			}
 		}
 		$getPeriodKP->execute([
 				':member_no' => $member_no,
