@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAccInCoop["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
 						$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 						$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-						$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$accData->coopAccountName));
+						$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 						$arrAccInCoop["DEPT_TYPE"] = $accData->accountDesc;
 						$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant,allow_showdetail,allow_transaction FROM gcconstantaccountdept
 																WHERE dept_type_code = :depttype_code");

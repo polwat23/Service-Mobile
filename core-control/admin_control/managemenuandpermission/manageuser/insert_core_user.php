@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id','username','password','id_section_sy
 			$arrayStruc = [
 				':menu_name' => "manageuser",
 				':username' => $payload["username"],
-				':use_list' => "inset core user",
+				':use_list' => "insert core user",
 				':details' => $dataComing["username"]
 			];
 			

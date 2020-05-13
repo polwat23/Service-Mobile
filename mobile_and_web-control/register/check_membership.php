@@ -26,9 +26,10 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 		|| $member_no == "00862533" || $member_no == "00862487" || $member_no == "00863076" || $member_no == "00863173"
 		|| $member_no == "00863203" || $member_no == "00863254" || $member_no == "00862878" || $member_no == "00863290"
 		|| $member_no == "00862681" || $member_no == "00862908" || $member_no == "00862746" || $member_no == "00862762"
-		|| $member_no == "00862827" || $member_no == "00862991" || $member_no == "00863299" || $member_no == "00863294"){
+		|| $member_no == "00862827" || $member_no == "00862991" || $member_no == "00863299" || $member_no == "00863294"
+		|| $member_no == "00508780" || $member_no == "00862355" || $member_no == "00863106" || $member_no == "00863149"){
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-			$arrDataAPI["MemberID"] = substr($dataComing["member_no"],-6);
+			$arrDataAPI["MemberID"] = substr($member_no,-6);
 			$arrDataAPI["CitizenID"] = $dataComing["id_card"];
 			$arrDataAPI["CoopAccountNo"] = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."MemberProfile/VerifyMember",$arrDataAPI,$arrHeaderAPI);

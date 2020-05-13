@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 							$arrarDataAcc["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
 							$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 							$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-							$arrarDataAcc["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$accData->coopAccountName));
+							$arrarDataAcc["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 							$arrarDataAcc["DEPT_TYPE"] = $accData->accountDesc;
 							$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
 							$arrayResult['RESULT'] = TRUE;

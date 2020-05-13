@@ -473,9 +473,12 @@ class library {
 		$ch = curl_init( $url );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
+		curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
+		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
-		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 300);
 		$result = curl_exec($ch);
 		if($result){

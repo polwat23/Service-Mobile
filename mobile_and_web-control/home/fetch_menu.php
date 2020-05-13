@@ -45,13 +45,6 @@ if(!$anonymous){
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
 			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-			if(!$arrResponseAPI["RESULT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS9999";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
 			$accNum = 0;
 			$arrResponseAPI = json_decode($arrResponseAPI);
 			if($arrResponseAPI->responseCode == "200"){
@@ -64,6 +57,7 @@ if(!$anonymous){
 			}
 			$arrMenuDep["BALANCE"] = number_format($balance,2);
 			$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
+			$arrMenuDep["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
@@ -72,6 +66,7 @@ if(!$anonymous){
 			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
 		$arrayResult['RESULT'] = TRUE;
@@ -82,11 +77,12 @@ if(!$anonymous){
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent
+												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status IN('0','1')
-												and (menu_channel = :channel OR menu_channel = 'both')
+												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else{
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
@@ -145,11 +141,12 @@ if(!$anonymous){
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') 
+												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status IN('0','1')
-												and (menu_channel = :channel OR menu_channel = 'both')
+												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else{
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu
@@ -190,13 +187,6 @@ if(!$anonymous){
 							$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 							$arrDataAPI["MemberID"] = substr($member_no,-6);
 							$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-							if(!$arrResponseAPI["RESULT"]){
-								$arrayResult['RESPONSE_CODE'] = "WS9999";
-								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
-							}
 							$accNum = 0;
 							$arrResponseAPI = json_decode($arrResponseAPI);
 							if($arrResponseAPI->responseCode == "200"){
@@ -209,12 +199,14 @@ if(!$anonymous){
 							}
 							$arrMenuDep["BALANCE"] = number_format($balance,2);
 							$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
+							$arrMenuDep["LAST_STATEMENT"] = FALSE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 							$fetchMenuLoan->execute([':member_no' => $member_no]);
 							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
 						}					
 					}
 				}else{

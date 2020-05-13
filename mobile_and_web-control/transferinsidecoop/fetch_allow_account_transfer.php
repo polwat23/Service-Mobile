@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAccAllow["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
 						$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 						$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-						$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$accData->coopAccountName));
+						$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 						$arrAccAllow["DEPT_TYPE"] = $accData->accountDesc;
 						$arrAccAllow["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
 						$arrAccAllow["BALANCE_FORMAT"] = $accData->accountBalance;

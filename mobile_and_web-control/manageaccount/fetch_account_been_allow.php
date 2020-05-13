@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 								$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_ONLINE_FLAG_ON'][0][$lang_locale];
 							}
 							$arrAccBeenAllow["ALLOW_TRANSACTION"] = $rowAccBeenAllow["allow_transaction"];
-							$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$accData->coopAccountName));
+							$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 							$arrAccBeenAllow["DEPT_TYPE"] = $accData->accountDesc;
 							$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
 							$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $func->getConstant("limit_withdraw");

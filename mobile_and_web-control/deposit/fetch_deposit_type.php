@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccount = array();
 					$arrAccount["DEPTACCOUNT_NO"] =  $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 					$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($arrAccount["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-					$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$accData->coopAccountName));
+					$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 					$arrAccount["BALANCE"] = $accData->accountBalance;
 					if($dataComing["channel"] == 'mobile_app'){
 						$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
