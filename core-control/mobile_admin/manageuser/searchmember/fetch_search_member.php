@@ -20,13 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["province"]) && $dataComing["province"] != ''){
 			$arrayExecute[':province_code'] = $dataComing["province"];
 		}
-		if(isset($dataComing["age_start"]) && $dataComing["age_start"] != ''){
-			$arrayExecute[':age_start'] = $dataComing["age_start"];
-		}
-		if(isset($dataComing["age_end"]) && $dataComing["age_end"] != ''){
-			$arrayExecute[':age_end'] = $dataComing["age_end"];
-		}
-		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"]) && empty($dataComing["age_start"]) && empty($dataComing["age_end"])){
+		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -49,11 +43,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
-											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and TRIM(mb.memb_name) LIKE :member_name" : null).
-											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name" : null)).
-											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null).
-											(isset($dataComing["age_start"]) && $dataComing["age_start"] != '' ? " and ft_calmembage(mb.member_no) >= :age_start" : null).
-											(isset($dataComing["age_end"]) && $dataComing["age_end"] != '' ? " and ft_calmembage(mb.member_no) <= :age_end" : null)
+											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
+											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).
+											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null)
 											);
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){

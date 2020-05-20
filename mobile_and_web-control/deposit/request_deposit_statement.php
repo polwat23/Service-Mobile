@@ -31,7 +31,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 				$arraySTM = array();
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
-				$arraySTM["DEPTITEMTYPE_DESC"] = $rowDataSTM["DEPTITEMTYPE_DESC"];
 				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
 				$arraySTM["DEPTSLIP_NO"] = $rowDataSTM["DEPTSLIP_NO"];
 				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
@@ -164,13 +163,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		}
 		  </style>
 		';
-
 	//head table
 	$html .='
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
 					สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด
 			   </div>
@@ -239,7 +237,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 				<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>';
 			}
 		  $html .= '<td style="text-align:right">'.number_format($stm["PRNCBAL"],2).'</td>
-		  <td style="text-align:center">'.$stm["DEPTSLIP_NO"].'</td>
+		  <td style="text-align:center">'.($stm["DEPTSLIP_NO"] ?? "-").'</td>
 		</tr>
 	';
 	}
@@ -256,8 +254,8 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	  <tr>
 		<td ></td>
 		<td ><b>รายการฝาก '.$count_deposit.' รายการ</b></td>
-		<td ></td>
 		<td style="text-align:right"><b>'.number_format($sum_deposit,2).'</b></td>
+		<td ></td>
 		<td ></td>
 		<td ></td>
 	  </tr>
@@ -279,9 +277,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
-	$font = $dompdf->getFontMetrics()->get_font("THSarabun", "");
-	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}", $font, 12, array(0,0,0));
-	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
+	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;

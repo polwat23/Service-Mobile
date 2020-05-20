@@ -159,6 +159,15 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 				}
 			}
 		}
+		$detail_html = '<!DOCTYPE HTML>
+								<html>
+								<head>
+							  <meta charset="UTF-8">
+							  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							  '.$dataComing["news_html_root_"].'
+							  </body>
+								</html>';
+		
 
 		$update_news= $conmysql->prepare("UPDATE gcnews SET 
 												news_title = :news_title,
@@ -170,12 +179,13 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 												img_gallery_2=:path_img_2,
 												img_gallery_3=:path_img_3,
 												img_gallery_4=:path_img_4,
-												img_gallery_5=:path_img_5
-										  WHERE id_news = :id_news;");
+												img_gallery_5=:path_img_5,
+												news_html = :news_html
+										  WHERE id_news = :id_news");
 			if($update_news->execute([
 				':id_news' =>  $dataComing["id_news"],
-				':news_title' =>  $dataComing["news_title"],
-				':news_detail' =>  $dataComing["news_detail"],
+				':news_title' =>  $dataComing["news_title"]?? null,
+				':news_detail' =>  $dataComing["news_detail"] ?? null,
 				':path_img_header' => $pathImgHeadNews ?? null,
 				':link_news_more' =>  $dataComing["link_news_more"],
 				':path_img_1' => $pathImg1 ?? null,
@@ -183,7 +193,8 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 				':path_img_3' => $pathImg3 ?? null,
 				':path_img_4' => $pathImg4 ?? null,
 				':path_img_5' => $pathImg5 ?? null,
-				':create_by' => $payload["username"]
+				':create_by' => $payload["username"],
+				':news_html' => $detail_html
 			])){
 				$arrayResult["RESULT"] = TRUE;
 				echo json_encode($arrayResult);

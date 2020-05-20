@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
 				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no
 																FROM gcuserallowacctransaction gat 
-																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use <> '-9'");
+																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
 				if($fetchAccountBeenAllow->rowCount() > 0){
 					$arrAccBind = array();
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_CODE'] = "WS0021";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

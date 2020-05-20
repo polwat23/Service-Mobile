@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		}else{
 			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		}
-		$arrVerifyToken['exp'] = time() + 60;
+		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken['amt_transfer'] = $amt_transfer;
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$fetchDepttype->execute([':deptaccount_no' => $coop_account_no]);
 		$rowDataDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC);
 		$arrayGroup = array();
-		$arrayGroup["account_id"] = "11121700";
+		$arrayGroup["account_id"] = $func->getConstant("operative_account");
 		$arrayGroup["action_status"] = "1";
 		$arrayGroup["atm_no"] = "mobile";
 		$arrayGroup["atm_seqno"] = null;
@@ -97,6 +97,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					exit();
 				}
 				$ref_slipno = $responseSoap->ref_slipno;
+				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+				$updateSyncNoti->execute([':ref_slipno' => $ref_slipno]);
 				$flag_transaction_coop = true;
 			}catch(SoapFault $e){
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
@@ -139,7 +141,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':slip_no' => $ref_slipno,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"],
-					':bank_code' => $dataComing["bank_code"] ?? '004'
+					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 				]);
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
@@ -193,7 +195,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':slip_no' => $ref_slipno,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"],
-					':bank_code' => $dataComing["bank_code"] ?? '004'
+					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 				];
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
@@ -252,7 +254,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':slip_no' => $ref_slipno,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"],
-					':bank_code' => $dataComing["bank_code"] ?? '004'
+					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 				]);
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
@@ -305,7 +307,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					':slip_no' => $ref_slipno,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $dataComing["kbank_ref_no"],
-					':bank_code' => $dataComing["bank_code"] ?? '004'
+					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 				]);
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;

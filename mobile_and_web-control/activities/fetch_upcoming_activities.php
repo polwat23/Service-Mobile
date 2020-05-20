@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										date_format(event_end_time,'%H:%i') as event_end_time,
 										is_settime,create_date,update_date,is_notify,is_notify_before,create_by
 										FROM gctaskevent
-										WHERE start_date >= CURDATE() or end_date >= CURDATE() ORDER BY start_date DESC");
+										WHERE start_date >= CURDATE() or end_date >= CURDATE()");
 		$fetchEvent->execute();
 		while($rowEvent = $fetchEvent->fetch(PDO::FETCH_ASSOC)){
 			$arrayEvent = array();

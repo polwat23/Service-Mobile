@@ -10,7 +10,7 @@ if(!$anonymous){
 	}else{
 		$firstapp = '-1';
 	}
-	$fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,announce_detail,effect_date,id_announce,flag_granted
+	$fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,announce_detail,announce_html,effect_date,id_announce,flag_granted
 									FROM gcannounce 
 									WHERE ((DATE_FORMAT(effect_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
 									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i')) OR first_time = :first_time) and flag_granted <> 'anonymous'");
@@ -30,6 +30,7 @@ if(!$anonymous){
 			$arrAnn["ANNOUNCE_COVER"] = $rowAnn["announce_cover"];
 			$arrAnn["ANNOUNCE_TITLE"] = $rowAnn["announce_title"];
 			$arrAnn["ANNOUNCE_DETAIL"] = $rowAnn["announce_detail"];
+			$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
 			$arrGroupAnn[] = $arrAnn;
 		}
 	}
@@ -43,7 +44,7 @@ if(!$anonymous){
 	}else{
 		$firstapp = '-1';
 	}
-	$fetchAnn = $conmysql->prepare("SELECT flag_granted,priority,announce_cover,announce_title,announce_detail,effect_date,id_announce
+	$fetchAnn = $conmysql->prepare("SELECT flag_granted,priority,announce_cover,announce_title,announce_detail,announce_html,effect_date,id_announce
 									FROM gcannounce 
 									WHERE (DATE_FORMAT(effect_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
 									and DATE_FORMAT(NOW(),'%H%i') >= DATE_FORMAT(effect_date,'%H%i') OR first_time = :first_time) ");
@@ -57,6 +58,7 @@ if(!$anonymous){
 		$arrAnn["ANNOUNCE_COVER"] = $rowAnn["announce_cover"];
 		$arrAnn["ANNOUNCE_TITLE"] = $rowAnn["announce_title"];
 		$arrAnn["ANNOUNCE_DETAIL"] = $rowAnn["announce_detail"];
+		$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
 		$arrGroupAnn[] = $arrAnn;
 	}
 	$arrayResult['ANNOUNCE'] = $arrGroupAnn;

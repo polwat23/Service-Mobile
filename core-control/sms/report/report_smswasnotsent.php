@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute["id_template"] = $dataComing["id_template"];
 		}
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){
-			$arrayExecute["member_no"] = $dataComing["member_no"];
+			$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 		}
 		if(isset($dataComing["send_by"]) && $dataComing["send_by"] != ''){
 			$arrayExecute["send_by"] = $dataComing["send_by"];

@@ -151,11 +151,21 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				}
 			}
 		}
-		$insert_news = $conmysql->prepare("INSERT INTO gcnews (news_title, news_detail,path_img_header,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5,create_by)
-						  VALUES (:news_title, :news_detail,:path_img_header,:link_news_more,:path_img_1,:path_img_2,:path_img_3,:path_img_4,:path_img_5,:create_by)");
+		if(isset($dataComing["news_html_root_"])){
+		$detail_html = '<!DOCTYPE HTML>
+								<html>
+								<head>
+							  <meta charset="UTF-8">
+							  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							  '.$dataComing["news_html_root_"].'
+							  </body>
+								</html>';
+		}
+		$insert_news = $conmysql->prepare("INSERT INTO gcnews (news_title, news_detail,path_img_header,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5,create_by,news_html)
+						  VALUES (:news_title, :news_detail,:path_img_header,:link_news_more,:path_img_1,:path_img_2,:path_img_3,:path_img_4,:path_img_5,:create_by,:news_html)");
 			if($insert_news->execute([
-				':news_title' =>  $dataComing["news_title"],
-				':news_detail' =>  $dataComing["news_detail"],
+				':news_title' =>  $dataComing["news_title"]?? null,
+				':news_detail' =>  $dataComing["news_detail"]?? null,
 				':path_img_header' => $pathImgHeadNews ?? null,
 				':link_news_more' =>  $dataComing["link_news_more"],
 				':path_img_1' => $pathImg1 ?? null,
@@ -163,7 +173,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				':path_img_3' => $pathImg3 ?? null,
 				':path_img_4' => $pathImg4 ?? null,
 				':path_img_5' => $pathImg5 ?? null,
-				':create_by' => $payload["username"]
+				':create_by' => $payload["username"],
+				':news_html' => $detail_html
 		
 			])){
 				$arrayResult["RESULT"] = TRUE;

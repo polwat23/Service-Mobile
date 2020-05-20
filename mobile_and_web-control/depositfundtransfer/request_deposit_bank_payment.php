@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		$arrSendData = array();
-		$arrVerifyToken['exp'] = time() + 60;
+		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken['amt_transfer'] = $amt_transfer;
@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$fetchDepttype->execute([':deptaccount_no' => $coop_account_no]);
 		$rowDataDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC);
 		$arrayGroup = array();
-		$arrayGroup["account_id"] = "11121700";
+		$arrayGroup["account_id"] = $func->getConstant("operative_account");
 		$arrayGroup["action_status"] = "1";
 		$arrayGroup["atm_no"] = "mobile";
 		$arrayGroup["atm_seqno"] = null;
@@ -86,6 +86,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					exit();
 				}
 				$ref_slipno = $responseSoap->ref_slipno;
+				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+				$updateSyncNoti->execute([':ref_slipno' => $ref_slipno]);
 				$flag_transaction_coop = true;
 			}catch(SoapFault $e){
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
@@ -289,7 +291,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$resultWS = $clientWS->__call("of_dept_inf_serv_cen", array($argumentWS));
 				$responseSoapCancel = $resultWS->of_dept_inf_serv_cenResult;
 			}
-			$arrError["RESPONSE_CODE"] = 'WS9999';
+			$arrayResult["RESPONSE_CODE"] = 'WS9999';
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
