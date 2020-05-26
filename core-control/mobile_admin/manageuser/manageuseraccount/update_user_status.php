@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 		}else{
 			$list_name = "unlock account";
 		}
-		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = :account_status
+		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = :account_status,counter_wrongpass = 0
 									 WHERE member_no = :member_no");
 		if($updateStatus->execute([
 			':account_status' => $dataComing["account_status"],

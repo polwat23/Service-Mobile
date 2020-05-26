@@ -11,7 +11,6 @@ if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
 				':menu_order' => $menu_list["order"],
 				':id_submenu' => $menu_list["menu_id"]
 			])){
-				continue;
 			}else{
 				$conmysql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถจัดเรียงเมนูได้ กรุณาติดต่อผู้พัฒนา";
@@ -21,6 +20,13 @@ if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
 			}
 		}
 		$conmysql->commit();
+		$arrayStruc = [
+			':menu_name' => "managemenu",
+			':username' => $payload["username"],
+			':use_list' => "order menu",
+			':details' => json_encode($dataComing["menu_list"])
+		];
+		$log->writeLog('editadmincontrol',$arrayStruc);
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);	
 	}else{

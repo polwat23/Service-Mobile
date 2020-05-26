@@ -31,6 +31,13 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 						':status_permission' => $dataComing["status_permission"],
 						':id_permission_submenu' => $rowid_permission_submenu["id_permission_submenu"]
 					])){
+						$arrayStruc = [
+							':menu_name' => "permissionmenu",
+							':username' => $payload["username"],
+							':use_list' => "change permission menu",
+							':details' => 'change sub permission id '.$rowid_permission_submenu["id_permission_submenu"].' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+						];
+						$log->writeLog('editadmincontrol',$arrayStruc);
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{
@@ -47,6 +54,13 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 						':id_permission_menu' => $rowid_permission["id_permission_menu"],
 						':status_permission' => $dataComing["status_permission"]
 					])){
+						$arrayStruc = [
+							':menu_name' => "permissionmenu",
+							':username' => $payload["username"],
+							':use_list' => "change permission menu",
+							':details' => 'change permission id '.$rowid_permission["id_permission_menu"].' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+						];
+						$log->writeLog('editadmincontrol',$arrayStruc);
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{
@@ -73,6 +87,13 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 						':status_permission' => $dataComing["status_permission"]
 					])){
 						$conmysql->commit();
+						$arrayStruc = [
+							':menu_name' => "permissionmenu",
+							':username' => $payload["username"],
+							':use_list' => "change permission menu",
+							':details' => 'insert permission id '.$id_permission.' on submenu id : '.$dataComing["id_submenu"].' status menu is '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+						];
+						$log->writeLog('editadmincontrol',$arrayStruc);
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{

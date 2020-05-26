@@ -3,6 +3,14 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+		$min_amount_deposit = $func->getConstant("min_amount_deposit");
+		if($dataComing["amt_transfer"] < (int) $min_amount_deposit){
+			$arrayResult['RESPONSE_CODE'] = "WS0056";
+			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',$min_amount_deposit,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$limit_amt = 0;
@@ -26,6 +34,18 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$limit_amt = (int)$limit_withdraw;
 		}
 		if($dataComing["amt_transfer"] > $limit_amt){
+			$arrayResult['RESPONSE_CODE'] = "WS0043";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$getLimitPerDay = $conmysql->prepare("SELECT SUM(amount) AS all_amt_in_day FROM gctransaction WHERE result_transaction = '1' and trans_flag = '-1' and destination_type = '1'
+																and member_no = :member_no and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
+		$getLimitPerDay->execute([':member_no' => $payload["member_no"]]);
+		$rowLimitPerDay = $getLimitPerDay->fetch(PDO::FETCH_ASSOC);
+		$limitPerDay = $rowLimitPerDay["all_amt_in_day"] + $dataComing["amt_transfer"];
+		if($limitPerDay > 10000000){
 			$arrayResult['RESPONSE_CODE'] = "WS0043";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -60,7 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			echo json_encode($arrayResult);
 			exit();
 		}*/
-		$arrVerifyToken['exp'] = time() + 60;
+		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken["operate_date"] =  $dateOperC;
 		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];

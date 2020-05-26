@@ -34,11 +34,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			echo json_encode($arrayResult);
 			exit();
 		}else if($rowPassword['account_status'] == '-9'){
-			if($dataComing["password"] == $rowPassword['temppass']){
-				$valid_pass = true;
-			}else{
-				$valid_pass = false;
-			}
+			$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
 		}else{
 			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
 		}
@@ -96,7 +92,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 						if($dataComing["channel"] == 'mobile_app'){
-							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
+							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token,counter_wrongpass = 0  WHERE member_no = :member_no");
 							$updateFCMToken->execute([
 								':fcm_token' => $dataComing["fcm_token"] ?? null,
 								':member_no' => $member_no
@@ -192,6 +188,27 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				exit();
 			}
 		}else{
+			$updateCounter = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
+			$updateCounter->execute([':member_no' => $member_no]);
+			$getCounter = $conmysql->prepare("SELECT counter_wrongpass FROM gcmemberaccount WHERE member_no = :member_no");
+			$getCounter->execute([':member_no' => $member_no]);
+			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
+			if($rowCounter["counter_wrongpass"] >= 5){
+				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				$updateAccountStatus->execute([':member_no' => $member_no]);
+				$struc = [
+					':member_no' =>  $member_no,
+					':device_name' =>  $arrPayload["PAYLOAD"]["device_name"],
+					':unique_id' =>  $dataComing["unique_id"]
+				];
+				$log->writeLog("lockaccount",$struc);
+				$arrayResult['RESPONSE_CODE'] = "WS0048";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			$arrayResult['COUNTER_CAUTION'] = 5 - $rowCounter["counter_wrongpass"];
 			$arrayResult['RESPONSE_CODE'] = "WS0002";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

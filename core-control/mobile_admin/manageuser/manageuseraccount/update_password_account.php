@@ -12,11 +12,11 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 			':member_no' => $dataComing["member_no"]
 		]);
 		$rowcitizenid = $fetchCitizenID->fetch(PDO::FETCH_ASSOC);
-		$new_password = password_hash($rowcitizenid["CARD_PERSON"], PASSWORD_DEFAULT);
-		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :newpassword,account_status = '-9'
+		$new_password = $rowcitizenid["CARD_PERSON"];
+		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :newpassword,account_status = '-9',counter_wrongpass = 0
 										WHERE member_no = :member_no");
 		if($repassword->execute([
-				':newpassword' => $new_password,
+				':newpassword' => password_hash($new_password,PASSWORD_DEFAULT),
 				':member_no' => $dataComing["member_no"]
 		])){
 			$arrayStruc = [

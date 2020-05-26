@@ -8,11 +8,7 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 	if($getOldPassword->rowCount() > 0){
 		$rowAccount = $getOldPassword->fetch(PDO::FETCH_ASSOC);
 		if($rowAccount['account_status'] == '-9'){
-			if($dataComing["password"] == $rowAccount["temppass"]){
-				$validpassword = true;
-			}else{
-				$validpassword = false;
-			}
+			$validpassword = password_verify($dataComing["password"], $rowAccount['temppass']);
 		}else{
 			$validpassword = password_verify($dataComing["password"], $rowAccount['password']);
 		}

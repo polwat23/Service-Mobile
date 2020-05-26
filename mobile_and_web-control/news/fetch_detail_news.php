@@ -15,11 +15,21 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 		$arrayDetailNews["CREATE_BY"] = $rowDetailNews["create_by"];
 		$arrayDetailNews["UPDATE_DATE"] = $lib->convertdate($rowDetailNews["update_date"],'D m Y',true);
 		$path_img = array();
-		$path_img[] = $rowDetailNews["img_gallery_1"];
-		$path_img[] = $rowDetailNews["img_gallery_2"];
-		$path_img[] = $rowDetailNews["img_gallery_3"];
-		$path_img[] = $rowDetailNews["img_gallery_4"];
-		$path_img[] = $rowDetailNews["img_gallery_5"];
+		if(isset($rowDetailNews["img_gallery_1"])){
+			$path_img[] = $rowDetailNews["img_gallery_1"];
+		}
+		if(isset($rowDetailNews["img_gallery_2"])){
+			$path_img[] = $rowDetailNews["img_gallery_2"];
+		}
+		if(isset($rowDetailNews["img_gallery_3"])){
+			$path_img[] = $rowDetailNews["img_gallery_3"];
+		}
+		if(isset($rowDetailNews["img_gallery_4"])){
+			$path_img[] = $rowDetailNews["img_gallery_4"];
+		}
+		if(isset($rowDetailNews["img_gallery_5"])){
+			$path_img[] = $rowDetailNews["img_gallery_5"];
+		}
 		$arrayDetailNews["IMG"] = $path_img;
 		$arrayResult['DETAIL_NEWS'] = $arrayDetailNews;
 		$arrayResult['RESULT'] = TRUE;

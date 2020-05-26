@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["ref_no"] = $dataComing["ref_no"];
 			}
 			if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ""){
-				$arrayExecute["member_no"] = $dataComing["member_no"];
+				$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 			}
 			if($dataComing["date_type"] == 'year'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
@@ -63,7 +63,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["ref_no"] = $dataComing["ref_no"];
 			}
 			if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ""){
-				$arrayExecute["member_no"] = $dataComing["member_no"];
+				$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 			}
 			if($dataComing["date_type"] == 'year'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,

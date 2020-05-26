@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		details
 																	FROM
 																		logeditadmincontrol
-																	ORDER BY  edit_date DESC");
+																	ORDER BY edit_date DESC");
 		$fetchLogAdminUsage->execute();
 		while($rowLogAdminUsage = $fetchLogAdminUsage->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogAdminUsage = array();
