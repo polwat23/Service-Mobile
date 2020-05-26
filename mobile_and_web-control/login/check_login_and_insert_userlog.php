@@ -196,6 +196,12 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			if($rowCounter["counter_wrongpass"] >= 5){
 				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
 				$updateAccountStatus->execute([':member_no' => $member_no]);
+				$struc = [
+					':member_no' =>  $member_no,
+					':device_name' =>  $arrPayload["PAYLOAD"]["device_name"],
+					':unique_id' =>  $dataComing["unique_id"]
+				];
+				$log->writeLog("lockaccount",$struc);
 				$arrayResult['RESPONSE_CODE'] = "WS0048";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

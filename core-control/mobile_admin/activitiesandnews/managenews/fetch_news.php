@@ -4,7 +4,14 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managenews')){
 		$arrayGroup = array();
-			 
+		$arrayExecute = array();
+		if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ""){
+			$arrayExecute["start_date"] = $dataComing["start_date"];
+		}
+		if(isset($dataComing["end_date"]) && $dataComing["end_date"] != ""){
+			$arrayExecute["end_date"] = $dataComing["end_date"];
+		}
+			
 		$fetchNews = $conmysql->prepare("SELECT 
 																id_news,news_title,
 																news_detail,
@@ -19,9 +26,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																img_gallery_4,
 																img_gallery_5 
 															FROM gcnews
-															WHERE is_use ='1'
-															ORDER BY update_date DESC");
-		$fetchNews->execute();
+															WHERE is_use = '1' 
+															".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
+																"and date_format(create_date,'%Y-%m-%d') >= :start_date" : null)."
+															".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
+																"and date_format(create_date,'%Y-%m-%d') <= :end_date" : null). "
+															ORDER BY create_date DESC LIMIT 20");
+		$fetchNews->execute($arrayExecute);
 		while($rowNews = $fetchNews->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupNews = array();
 			$arrGroupNews["ID_NEW"] = $rowNews["id_news"];

@@ -126,21 +126,21 @@ if(!$anonymous){
 			$arrayMenuTransaction = array();
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') 
+												WHERE menu_permission IN (".implode(',',$permission).") 
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
 				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
-												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent IN('0','24','18') 
+												WHERE gm.menu_permission IN (".implode(',',$permission).")
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
 												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
 				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
-												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent IN('0','24','18') 
+												WHERE gm.menu_permission IN (".implode(',',$permission).") 
 												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
 												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
 			}

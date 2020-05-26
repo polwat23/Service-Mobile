@@ -16,6 +16,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 				':id_coremenu' => $rowidcoremenu["id_coremenu"]
 			]);
 			if($checkPermissionCoremenu->rowCount() > 0){
+				$conmysql->beginTransaction();
 				$updatePermitCoreMenu = $conmysql->prepare("UPDATE corepermissionmenu SET
 																							is_use = :status_permission
 																							WHERE id_coremenu = :id_coremenu AND  username = :username ");
@@ -34,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 				$arrayGroupChkSubMenu = array();
 				while($rowCheckSubmenu = $checkSubmenu->fetch(PDO::FETCH_ASSOC)){
 					$arraycheckSubmenu = $rowCheckSubmenu["id_submenu"];
-					$arrayGroupChkSubMenu[]=$arraycheckSubmenu;
+					$arrayGroupChkSubMenu[] = $arraycheckSubmenu;
 				}
 				$checkPermissSubmenu = $conmysql->prepare("SELECT id_submenu
 																					FROM corepermissionsubmenu
@@ -46,108 +47,118 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 					$arrayGroupChkPermissSubMenu = array();
 					while($rowCheckSubmenu = $checkPermissSubmenu->fetch(PDO::FETCH_ASSOC)){
 						$arraycheckPermissSubmenu = $rowCheckSubmenu["id_submenu"];
-					    $arrayGroupChkPermissSubMenu[]=$arraycheckPermissSubmenu;
+					    $arrayGroupChkPermissSubMenu[] = $arraycheckPermissSubmenu;
 					}
 					
 					if($arrayGroupChkPermissSubMenu !== $arrayGroupChkSubMenu){
+						$bulk_insert = array();
 						$not_menu = array_diff($arrayGroupChkSubMenu,$arrayGroupChkPermissSubMenu);
 						foreach($not_menu as $value_diff){
-							$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
-															VALUES(:id_submenu,:id_permission_menu,:status_permission)");
-							if($insertSubMenuPermit->execute([
-								':id_submenu' => $value_diff,
-								':id_permission_menu' => $row_Permiss_submenu["id_permission_menu"],
-								':status_permission' => $dataComing["status_permission"]
-							])){
-							}else{
-								$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
-								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
-							}
+							$bulk_insert[] = "(".$value_diff.",".$row_Permiss_submenu["id_permission_menu"].",'".$dataComing["status_permission"]."')";
 						}
-						$arrayResult['DATA_SUB_MENU'] = $arrayGroupChkSubMenu;
-						$arrayResult['PERMISSS_SUB_MENU'] = $arrayGroupChkPermissSubMenu;
+						$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
+																VALUES".implode(',',$bulk_insert));
+						if($insertSubMenuPermit->execute()){
+							$conmysql->commit();
+							$arrayStruc = [
+								':menu_name' => "permissionmenu",
+								':username' => $payload["username"],
+								':use_list' => "change permission menu",
+								':details' => 'insert permission group id '.$row_Permiss_submenu["id_permission_menu"].' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+							];
+							$log->writeLog('editadmincontrol',$arrayStruc);
+							$arrayResult['RESULT'] = TRUE;
+							echo json_encode($arrayResult);
+						}else{
+							$conmysql->rollback();
+							$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
+							$arrayResult['RESULT'] = FALSE;
+							echo json_encode($arrayResult);
+							exit();
+						}
+					}else{
+						$UpdateSubmenuPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = :status_permission
+																	WHERE id_permission_menu = :id_permission_menu");
+						if($UpdateSubmenuPermit->execute([
+							':status_permission' => $dataComing["status_permission"],
+							':id_permission_menu' => $row_Permiss_submenu["id_permission_menu"],
+						])){
+							$conmysql->commit();
+							$arrayStruc = [
+								':menu_name' => "permissionmenu",
+								':username' => $payload["username"],
+								':use_list' => "change permission menu",
+								':details' => 'change permission group id '.$row_Permiss_submenu["id_permission_menu"].' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+							];
+							$log->writeLog('editadmincontrol',$arrayStruc);
+							$arrayResult['RESULT'] = TRUE;
+							echo json_encode($arrayResult);
+						}else{
+							$conmysql->rollback();
+							$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
+							$arrayResult['RESULT'] = FALSE;
+							echo json_encode($arrayResult);
+							exit();
+						}
+					}
+			}else{
+				$conmysql->beginTransaction();
+				$insertPermitCoreMenu = $conmysql->prepare("INSERT INTO corepermissionmenu(id_coremenu,username,is_use)
+																						VALUES(:id_coremenu,:username,:status_permission)");
+				if($insertPermitCoreMenu->execute([
+					':id_coremenu' => $rowidcoremenu["id_coremenu"],
+					':username' => $dataComing["username"],
+					':status_permission' => $dataComing["status_permission"]
+				])){
+					$checkSubmenu = $conmysql->prepare("SELECT id_permission_menu FROM corepermissionmenu
+																			WHERE username = :username AND id_coremenu = :id_coremenu");
+					$checkSubmenu->execute([
+						':id_coremenu' => $dataComing["id_coremenu"],
+						':username' => $dataComing["username"]
+					]);
+					$idSubMenu = $checkSubmenu->fetch(PDO::FETCH_ASSOC);
+					$checkSubmenu = $conmysql->prepare("SELECT id_submenu FROM coresubmenu 
+																			WHERE id_coremenu =:id_coremenu  AND id_menuparent != '0' AND  menu_status ='1'
+																			ORDER BY id_submenu ASC");
+					$checkSubmenu->execute([
+						':id_coremenu' => $dataComing["id_coremenu"]
+					]);
+					$arrayGroupChkSubMenu = array();
+					while($rowCheckSubmenu = $checkSubmenu->fetch(PDO::FETCH_ASSOC)){
+						$arraycheckSubmenu = $rowCheckSubmenu["id_submenu"];
+						$arrayGroupChkSubMenu[] = $arraycheckSubmenu;
+					}
+					$bulk_insert = array();
+					foreach($arrayGroupChkSubMenu as $id_sub){
+						$bulk_insert[] = "(".$id_sub.",".$idSubMenu["id_permission_menu"].",'".$dataComing["status_permission"]."')";
+					}
+					$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
+																				VALUES".implode(',',$bulk_insert));
+					if($insertSubMenuPermit->execute()){
+						$conmysql->commit();
+						$arrayStruc = [
+							':menu_name' => "permissionmenu",
+							':username' => $payload["username"],
+							':use_list' => "change permission menu",
+							':details' => 'insert permission group id '.$idSubMenu["id_permission_menu"].' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+						];
+						$log->writeLog('editadmincontrol',$arrayStruc);
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
-						exit();
-						
 					}else{
-							$UpdateSubmenuPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = :status_permission
-																		WHERE id_permission_menu = :id_permission_menu");
-							if($UpdateSubmenuPermit->execute([
-								':status_permission' => $dataComing["status_permission"],
-								':id_permission_menu' => $row_Permiss_submenu["id_permission_menu"],
-							])){
-								$arrayResult['RESULT'] = TRUE;
-								echo json_encode($arrayResult);
-							}else{
-								$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
-								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
-							}
+						$conmysql->rollback();
+						$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
 					}
-			
-	
-			}else{
-					$insertPermitCoreMenu = $conmysql->prepare("INSERT INTO corepermissionmenu(id_coremenu,username,is_use)
-																							VALUES(:id_coremenu,:username,:status_permission)");
-					if($insertPermitCoreMenu->execute([
-								':id_coremenu' => $rowidcoremenu["id_coremenu"],
-								':username' => $dataComing["username"],
-								':status_permission' => $dataComing["status_permission"]
-							])){
-								$checkSubmenu = $conmysql->prepare("SELECT
-																								id_permission_menu
-																							FROM
-																								corepermissionmenu
-																							WHERE username = :username AND id_coremenu = :id_coremenu");
-								$checkSubmenu->execute([
-									':id_coremenu' => $dataComing["id_coremenu"],
-									':username' => $dataComing["username"]
-								]);
-								$id = $checkSubmenu->fetch(PDO::FETCH_ASSOC);
-								
-								$checkSubmenu = $conmysql->prepare("SELECT id_submenu FROM coresubmenu 
-									WHERE id_coremenu =:id_coremenu  AND id_menuparent != '0' AND  menu_status ='1'
-									ORDER BY id_submenu ASC");
-									$checkSubmenu->execute([
-									':id_coremenu' => $dataComing["id_coremenu"]
-									]);
-									$arrayGroupChkSubMenu = array();
-									while($rowCheckSubmenu = $checkSubmenu->fetch(PDO::FETCH_ASSOC)){
-										$arraycheckSubmenu = $rowCheckSubmenu["id_submenu"];
-										$arrayGroupChkSubMenu[]=$arraycheckSubmenu;
-									}
-								 	foreach($arrayGroupChkSubMenu as $id_sub){
-										$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
-																VALUES(:id_submenu,:id_permission_menu,:status_permission)");
-										if($insertSubMenuPermit->execute([
-											':id_submenu' => $id_sub,
-											':id_permission_menu' => $id["id_permission_menu"],
-											':status_permission' => $dataComing["status_permission"]
-										])){
-											//$arrayResult['RESULT'] = TRUE;
-											//echo json_encode($arrayResult);
-										}else{
-											
-											$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
-											$arrayResult['RESULT'] = FALSE;
-											echo json_encode($arrayResult);
-											exit();
-										}
-									}
-							}else{
-								$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
-								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
-					}
-					
-					$arrayResult['RESPONSE'] = "ไม่มีสิทธ์ในเมนูหลัก";
-					$arrayResult['RESULT'] = TRUE;
+				}else{
+					$conmysql->rollback();
+					$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
+					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
+					exit();
+				}
 			}
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่พบเมนูหลักของระบบ";

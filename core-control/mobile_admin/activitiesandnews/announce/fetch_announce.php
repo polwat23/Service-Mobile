@@ -6,19 +6,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayExecute = array();
 		$arrayGroup = array();
 		
-			if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ""){
-				$arrayExecute["start_date"] = $dataComing["start_date"];
-			}
-			if(isset($dataComing["end_date"]) && $dataComing["end_date"] != ""){
-				$arrayExecute["end_date"] = $dataComing["end_date"];
-			}
-			
+		if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ""){
+			$arrayExecute["start_date"] = $dataComing["start_date"];
+		}
+		if(isset($dataComing["end_date"]) && $dataComing["end_date"] != ""){
+			$arrayExecute["end_date"] = $dataComing["end_date"];
+		}
+		$dateNow = date('YmdHis');
 		$fetchAnnounce = $conmysql->prepare("SELECT id_announce,
 													announce_cover,
 													announce_title,
 													announce_detail,
 													announce_html,
-													announce_date,
 													effect_date,
 													due_date,
 													is_show_between_due,
@@ -26,41 +25,43 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													priority,
 													username,
 													flag_granted,
-													effect_date,	
-													date_format(effect_date,'%Y-%m-%d') AS 'effect_day',
-													date_format(effect_date,'%H:%i') AS 'effect_time'
+													is_check,
+													check_text,
+													accept_text,
+													cancel_text,
+													date_format(effect_date,'%Y%m%d%H%i%s') AS effect_date_check,
+													date_format(due_date,'%Y%m%d%H%i%s') AS due_date_check
 											 FROM gcannounce
-											 WHERE id_announce !='-1'
+											 WHERE id_announce <> '-1'
 													".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
 														"and date_format(effect_date,'%Y-%m-%d') >= :start_date" : null)."
 													".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(effect_date,'%Y-%m-%d') <= :end_date" : null). " ORDER BY effect_date DESC");
+														"and date_format(effect_date,'%Y-%m-%d') <= :end_date" : null). " ORDER BY effect_date DESC LIMIT 20");
 		$fetchAnnounce->execute($arrayExecute);		
 		while($rowAnnounce = $fetchAnnounce->fetch(PDO::FETCH_ASSOC)){
-			$day_now=date("Y-m-d");
-			$time_now=date("H:i");
 			$arrGroupAnnounce = array();
 			$arrGroupAnnounce["ID_ANNOUNCE"] = $rowAnnounce["id_announce"];
 			$arrGroupAnnounce["ANNOUNCE_COVER"] = $rowAnnounce["announce_cover"];
 			$arrGroupAnnounce["ANNOUNCE_TITLE"] = $rowAnnounce["announce_title"];
 			$arrGroupAnnounce["ANNOUNCE_DETAIL"] = $rowAnnounce["announce_detail"];
-			$arrGroupAnnounce["ANNOUNCE_DETAIL_SHORT"] = $lib->text_limit($rowAnnounce["announce_detail"],390);
-			$arrGroupAnnounce["ANNOUNCE_HTML"] = $rowAnnounce["announce_html"];
+			//$arrGroupAnnounce["ANNOUNCE_HTML"] = $rowAnnounce["announce_html"];
 			$arrGroupAnnounce["PRIORITY"] = $rowAnnounce["priority"];
-			$arrGroupAnnounce["ANNOUNCE_DATE"] = $rowAnnounce["announce_date"];
-			$arrGroupAnnounce["ANNOUNCE_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["announce_date"],'d m Y',true); 
 			$arrGroupAnnounce["USERNAME"] = $rowAnnounce["username"];
+			$arrGroupAnnounce["IS_CHECK"] = $rowAnnounce["is_check"];
+			$arrGroupAnnounce["CHECK_TEXT"] = $rowAnnounce["check_text"];
+			$arrGroupAnnounce["ACCEPT_TEXT"] = $rowAnnounce["accept_text"];
+			$arrGroupAnnounce["CANCEL_TEXT"] = $rowAnnounce["cancel_text"];
 			$arrGroupAnnounce["FLAG_GRANTED"] = $rowAnnounce["flag_granted"];	
 			$arrGroupAnnounce["EFFECT_DATE"] = $rowAnnounce["effect_date"];		
 			$arrGroupAnnounce["DUE_DATE"] = $rowAnnounce["due_date"];	
-				$arrGroupAnnounce["DUE_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["due_date"],'d m Y',true); 
+			$arrGroupAnnounce["DUE_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["due_date"],'d m Y',true); 
 			$arrGroupAnnounce["IS_SHOW_BETWEEN_DUE"] = $rowAnnounce["is_show_between_due"];
 			$arrGroupAnnounce["IS_UPDATE"] = $rowAnnounce["is_update"];
 			$arrGroupAnnounce["EFFECT_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["effect_date"],'d m Y',true); 
 						
-			if($day_now==$rowAnnounce["effect_day"]&&$time_now>=$rowAnnounce["effect_time"]&&$time_now<=$rowAnnounce["due_date"] ){
+			if(($rowAnnounce["effect_date_check"] <= $dateNow && $dateNow <= $rowAnnounce["due_date_check"]) || ($rowAnnounce["priority"] == 'high' || $rowAnnounce["priority"] == 'ask')){
 					$arrGroupAnnounce["ACTIVE"] = "now";
-			}else if(($day_now==$rowAnnounce["effect_day"]&&$time_now<=$rowAnnounce["effect_time"])||$day_now<$rowAnnounce["effect_day"]){
+			}else if($rowAnnounce["effect_date_check"] > $dateNow){
 					$arrGroupAnnounce["ACTIVE"] = "future"; 
  			}else{
 				$arrGroupAnnounce["ACTIVE"] = "actived"; 

@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,
+		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.sms_mobilephone as MEM_TELMOBILE,
 											mb.member_date,mb.member_no,
 											mb.ADDR_NO as ADDR_NO,
 											mb.ADDR_MOO as ADDR_MOO,
