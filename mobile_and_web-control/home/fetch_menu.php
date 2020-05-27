@@ -80,15 +80,19 @@ if(!$anonymous){
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status IN('0','1')
-												and (menu_channel = :channel OR 1=1)
-												ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent
+												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' 
-												and (menu_channel = :channel OR menu_channel = 'both')
-												ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent 
+												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
 			}
 			$fetch_menu->execute([
 				':menu_parent' => $dataComing["menu_parent"],
@@ -140,18 +144,23 @@ if(!$anonymous){
 			$arrayMenuTransaction = array();
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') 
+												WHERE menu_permission IN (".implode(',',$permission).") 
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status IN('0','1')
-												and (menu_channel = :channel OR 1=1)
-												ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).")
+												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status = '1'
-												and (menu_channel = :channel OR menu_channel = 'both') ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).") 
+												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
 			}
 			$fetch_menu->execute([
 				':channel' => $dataComing["channel"]
@@ -178,7 +187,8 @@ if(!$anonymous){
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
 							$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
-																	FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+																	FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct 
+																	ON gat.id_accountconstant = gct.id_accountconstant
 																	WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
 							$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
 							while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){

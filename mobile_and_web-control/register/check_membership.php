@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 		|| $member_no == "00863203" || $member_no == "00863254" || $member_no == "00862878" || $member_no == "00863290"
 		|| $member_no == "00862681" || $member_no == "00862908" || $member_no == "00862746" || $member_no == "00862762"
 		|| $member_no == "00862827" || $member_no == "00862991" || $member_no == "00863299" || $member_no == "00863294"
-		|| $member_no == "00508780" || $member_no == "00862355" || $member_no == "00863106" || $member_no == "00863149"){
+		|| $member_no == "00508780" || $member_no == "00862355" || $member_no == "00863106" || $member_no == "00525162"){
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
 			$arrDataAPI["CitizenID"] = $dataComing["id_card"];

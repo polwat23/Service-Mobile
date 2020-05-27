@@ -31,6 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrResponseAPI = json_decode($arrResponseAPI);
 			if($arrResponseAPI->responseCode == "200"){
+				$limit_trans = $func->getConstant("limit_withdraw");
 				foreach($arrResponseAPI->accountDetail as $accData){
 					if (in_array($accData->accountType, $arrDeptAllowed) && !in_array($accData->coopAccountNo, $arrAccAllowed) && $accData->accountStatus == "0"){
 						$arrAccInCoop["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
@@ -52,6 +53,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}else if($rowIDDeptTypeAllow["allow_transaction"] == '0' && $rowIDDeptTypeAllow["allow_showdetail"] == '1'){
 							$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_ACC_SHOW_FLAG_ON'][0][$lang_locale];
 						}
+						$arrAccInCoop["LIMIT_TRANSACTION_COOP"] = $limit_trans;
+						$arrAccInCoop["LIMIT_TRANSACTION_ACCOUNT"] = $limit_trans;
 						$arrAllowAccGroup[] = $arrAccInCoop;
 					}
 				}

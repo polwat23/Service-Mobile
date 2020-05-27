@@ -12,7 +12,7 @@ const BAHT_TEXT_SATANG = 'สตางค์';
 const BAHT_TEXT_POINT = 'จุด';
 
 class library {
-	
+
 	public function generate_token(){
 		$data = openssl_random_pseudo_bytes( 16 );
 		$data[6] = chr( ord( $data[6] ) & 0x0f | 0x40 );

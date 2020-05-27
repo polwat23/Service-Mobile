@@ -9,9 +9,9 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id'],$da
 			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
 			$arrPayloadverify = array();
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['coop_account_no'] = $coop_account_no.$lib->randomText('all',2);
+			$arrPayloadverify['coop_account_no'] = time().$lib->randomText('all',2);
 			$arrPayloadverify['user_mobile_no'] = $mobile_no;
-			$arrPayloadverify['citizen_id'] = "3140207590757";//$dataComing["citizen_id"];
+			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['exp'] = time() + 60;
 			$sigma_key = $lib->generate_token();

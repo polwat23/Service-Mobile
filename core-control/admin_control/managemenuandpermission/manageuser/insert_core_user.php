@@ -15,13 +15,12 @@ if($lib->checkCompleteArgument(['unique_id','username','password','id_section_sy
 				':menu_name' => "manageuser",
 				':username' => $payload["username"],
 				':use_list' => "insert core user",
-				':details' => $dataComing["username"]
+				':details' => 'add username : '.$dataComing["username"]
 			];
-			
-			$log->writeLog('editadmincontrol',$arrayStruc);	
+			$log->writeLog('editadmincontrol',$arrayStruc);
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามาเพิ่มผู้ใช้งานได้กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มผู้ใช้งานได้กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

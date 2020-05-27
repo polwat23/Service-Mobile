@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													FROM logbindaccount bind
 													INNER JOIN gcuserlogin login
 													ON login.id_userlogin = bind.id_userlogin
-													WHERE bind.bind_status !=1");
+													WHERE bind.bind_status !=1 ORDER BY bind.attempt_bind_date DESC");
 		$fetchLogBindAccountError->execute();
 		while($rowLogBindAccountError = $fetchLogBindAccountError->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccountError = array();

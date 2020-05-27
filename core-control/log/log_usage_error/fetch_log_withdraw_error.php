@@ -19,7 +19,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														login.device_name
 													FROM logwithdrawtransbankerror wd
 													INNER JOIN gcuserlogin login
-													ON login.id_userlogin = wd.id_userlogin");
+													ON login.id_userlogin = wd.id_userlogin
+													ORDER BY 	wd.transaction_date DESC ");
 		$fetchLogWithdrawError->execute();
 		while($rowLogWithdrawError = $fetchLogWithdrawError->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogWithdrawError = array();

@@ -12,13 +12,13 @@ if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
 					':menu_name' => "manageuser",
 					':username' => $payload["username"],
 					':use_list' => "delete core user",
-					':details' => $dataComing["username"]
+					':details' => 'username '.$dataComing["username"].' was deleted'
 				];
 			
 			$log->writeLog('editadmincontrol',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขชื่อเมนูได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถลบผู้ใช้ได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

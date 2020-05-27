@@ -9,6 +9,13 @@ if($lib->checkCompleteArgument(['unique_id','menu_name','id_submenu'],$dataComin
 			':menu_name' => $dataComing["menu_name"],
 			':id_submenu' => $dataComing["id_submenu"]
 		])){
+			$arrayStruc = [
+				':menu_name' => "managemenu",
+				':username' => $payload["username"],
+				':use_list' => "change menu name",
+				':details' => 'menu_id : '.$dataComing["id_submenu"].' to > name : '.$dataComing["menu_name"]
+			];
+			$log->writeLog('editadmincontrol',$arrayStruc);
 			$arrayResult["RESULT"] = TRUE;
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขชื่อเมนูได้ กรุณาติดต่อผู้พัฒนา";

@@ -30,14 +30,30 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['FEE_AMT'] = preg_replace('/,/', '', $arrResponseAPI->coopFee);
 			$arrayResult['FEE_AMT_FORMAT'] = $arrResponseAPI->coopFee;
 			$arrayResult['TRANS_REF_CODE'] = $arrResponseAPI->transferRefCode;
+			if((int)$arrayResult['FEE_AMT'] > 0){
+				$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+				$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+				$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+				$arrayResult['CAUTION'] = $arrayCaution;
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS9001";
-			if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
-				$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+			if($arrResponseAPI->responseCode == '415'){
+				$type_account = substr(preg_replace('/-/','',$dataComing["deptaccount_no"]),3,2);
+				if($type_account == '10'){
+					$accountDesc = "NORMAL";
+				}else{
+					$accountDesc = "SPECIAL";
+				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$accountDesc][0][$lang_locale];
 			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
 			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
-			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
+			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(trim($rowPeriod["RECV_PERIOD"]));
 			$getKPDetail = $conoracle->prepare("select * from (
 													(select kpr.RECEIPT_NO,NVL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,(SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kpmastreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 

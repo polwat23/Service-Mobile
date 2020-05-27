@@ -91,6 +91,12 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
 				$arrayResult['PENALTY_AMT'] = $arrResponseAPI->coopFee;
+				if((int)preg_replace('/,/', '', $arrResponseAPI->coopFee) > 0){
+					$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+					$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+					$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+					$arrayResult['CAUTION'] = $arrayCaution;
+				}
 				$arrayResult['FEE_AMT'] = 0;
 				$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 				$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
@@ -108,11 +114,15 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					':operate_date' => $dateOper,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':deptaccount_no' => $dataComing["deptaccount_no"],
-					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_code' => $arrResponse->RESPONSE_CODE,
 					':response_message' => $arrResponse->RESPONSE_MESSAGE
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();

@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$fetchUser = $conmysql->prepare("SELECT  id_section_system, section_system, system_assign
 										 FROM  coresectionsystem
-										 WHERE is_use ='1'");
+										 WHERE is_use ='1' and section_system <> 'root'");
 		$fetchUser->execute();
 		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreSectionSystem = array();

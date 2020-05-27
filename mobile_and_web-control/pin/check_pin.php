@@ -22,8 +22,11 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
+		$arrayResult['RESPONSE_CODE'] = "WS0011";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
+		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
