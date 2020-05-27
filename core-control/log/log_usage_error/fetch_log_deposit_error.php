@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															login.channel
 													FROM logdepttransbankerror tb
 													INNER JOIN gcuserlogin login
-													ON login.id_userlogin = tb.id_userlogin");
+													ON login.id_userlogin = tb.id_userlogin ORDER BY  tb.transaction_date DESC");
 		$fetchLogDepositError->execute();
 		while($rowLogDepositError = $fetchLogDepositError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositError = array();
@@ -25,11 +25,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogDepositError["ATTEMPT_BIND_DATE"] =  $lib->convertdate($rowLogDepositError["transaction_date"],'d m Y',true); 
 			$arrLogDepositError["DEVICE_NAME"] = $rowLogDepositError["device_name"];
 			$arrLogDepositError["AMT_TRANSFER"] = $rowLogDepositError["amt_transfer"];
+			$arrLogDepositError["AMT_TRANSFER_FORMAT"] =number_format($rowLogDepositError["amt_transfer"],2);
 			
 			$arrLogDepositError["SIGMA_KEY"] = $rowLogDepositError["sigma_key"];
-			$arrLogDepositError["FEE_AMT"] = $rowLogDepositError["fee_amt"];
-			//$arrLogDepositError["DEPTACCOUNT_NO"] = $rowLogDepositError["deptaccount_no"];
-			//$arrLogDepositError["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogDepositError["deptaccount_no"],$func->getConstant('dep_format'));
 			$arrLogDepositError["RESPONSE_CODE"] = $rowLogDepositError["response_code"];
 			$arrLogDepositError["RESPONSE_MESSAGE"] = $rowLogDepositError["response_message"];
 			

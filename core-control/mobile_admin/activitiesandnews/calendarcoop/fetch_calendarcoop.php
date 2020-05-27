@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','calendarcoop')){
+	if($func->check_permission_core($payload,'mobileadmin','calendarcoop')){
 		$arrayGroup = array();
 		
 		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before

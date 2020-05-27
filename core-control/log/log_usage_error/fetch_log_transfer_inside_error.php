@@ -4,21 +4,25 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logtranferinsidecooperror')){
 		$arrayGroup = array();
-		$fetchTranfertError = $conmysql->prepare("SELECT tran.id_transferinsidecoop,
-														tran.member_no,
-														tran.transaction_date,
-														tran.deptaccount_no,
-														tran.amt_transfer,
-														tran.type_request,
-														tran.transfer_flag,
-														tran.destination,
-														tran.response_code,
-														tran.response_message,
-														login.device_name,
-														login.channel
-											FROM logtransferinsidecoop tran
-											INNER JOIN gcuserlogin login
-											ON login.id_userlogin = tran.id_userlogin");
+		$fetchTranfertError = $conmysql->prepare("SELECT
+																				tran.id_transferinsidecoop,
+																				tran.member_no,
+																				tran.transaction_date,
+																				tran.deptaccount_no,
+																				tran.amt_transfer,
+																				tran.type_request,
+																				tran.transfer_flag,
+																				tran.destination,
+																				tran.response_code,
+																				tran.response_message,
+																				login.device_name,
+																				login.channel
+																			FROM
+																				logtransferinsidecoop tran
+																			INNER JOIN gcuserlogin login ON
+																				login.id_userlogin = tran.id_userlogin
+																				ORDER BY   tran.transaction_date DESC
+																			 ");
 		$fetchTranfertError->execute();
 		while($rowLogTranferError = $fetchTranfertError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTranfertError = array();

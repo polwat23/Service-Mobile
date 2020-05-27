@@ -4,11 +4,12 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managesystemtemplate')){
 		$arrGroupSysTemplate = array();
-		$fetchSysTemplate = $conmysql->prepare("SELECT subject,body,id_systemplate FROM smssystemtemplate WHERE is_use = '1'");
+		$fetchSysTemplate = $conmysql->prepare("SELECT component_system,subject,body,id_systemplate FROM smssystemtemplate WHERE is_use = '1'");
 		$fetchSysTemplate->execute();
 		if($fetchSysTemplate->rowCount() > 0){
 			while($rowSysTemplate = $fetchSysTemplate->fetch(PDO::FETCH_ASSOC)){
 				$arraySysTem = array();
+				$arraySysTem["COMPONENT"] = $rowSysTemplate["component_system"];
 				$arraySysTem["SUBJECT"] = $rowSysTemplate["subject"];
 				$arraySysTem["BODY"] = $rowSysTemplate["body"];
 				$arraySysTem["ID_SYSTEMPLATE"] = $rowSysTemplate["id_systemplate"];

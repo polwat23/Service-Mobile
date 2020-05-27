@@ -8,27 +8,45 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
-													WHERE allow_transaction = '1' and is_use = '1'");
-		$fetchAccAllowTrans->execute();
+		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
+												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+												WHERE gct.allow_transaction = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-				$arrayDept[] = "'".$rowAccAllow["dept_type_code"]."'";
+				$arrayDept[] = $rowAccAllow["deptaccount_no"];
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
-													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													WHERE dpt.depttype_code IN(".implode(',',$arrayDept).") and dpm.member_no = :member_no");
-			$getDataBalAcc->execute([':member_no' => $member_no]);
-			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
-				$arrAccAllow = array();
-				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
-				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
-				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-				$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
-				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
-				$arrGroupAccAllow[] = $arrAccAllow;
+			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+			$arrDataAPI["MemberID"] = substr($member_no,-6);
+			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+			if(!$arrResponseAPI["RESULT"]){
+				$arrayResult['RESPONSE_CODE'] = "WS9999";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			$arrResponseAPI = json_decode($arrResponseAPI);
+			if($arrResponseAPI->responseCode == "200"){
+				foreach($arrResponseAPI->accountDetail as $accData){
+					if (in_array($accData->coopAccountNo, $arrayDept) && $accData->accountStatus == "0"){
+						$arrAccAllow = array();
+						$arrAccAllow["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
+						$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+						$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+						$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
+						$arrAccAllow["DEPT_TYPE"] = $accData->accountDesc;
+						$arrAccAllow["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
+						$arrAccAllow["BALANCE_FORMAT"] = $accData->accountBalance;
+						$arrGroupAccAllow[] = $arrAccAllow;
+					}
+				}
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS9001";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
 				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");

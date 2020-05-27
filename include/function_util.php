@@ -216,6 +216,7 @@ class functions {
 			}
 		}
 		public function check_permission($user_type,$menu_component,$service_component=null){
+			require('validate_input.php');
 			$permission = array();
 			switch($user_type){
 				case '0' : 
@@ -241,15 +242,26 @@ class functions {
 			}
 			if($user_type == '5' || $user_type == '9'){
 				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										 and menu_permission IN (".implode(',',$permission).")");
+										 and menu_permission IN (".implode(',',$permission).") ");
+				$checkPermission->execute([
+					':menu_component' => $menu_component
+				]);
 			}else if($user_type == '1'){
-				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										 and menu_status IN('0','1') and menu_permission IN (".implode(',',$permission).")");
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+										WHERE gm.menu_component = :menu_component and (gm2.menu_status IN('0','1') OR gm.menu_parent IN('0','-1','-2','-8','-9'))
+										 and gm.menu_status IN('0','1') and gm.menu_permission IN (".implode(',',$permission).")");
+				$checkPermission->execute([
+					':menu_component' => $menu_component
+				]);
 			}else{
-				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										and menu_status = '1' and menu_permission IN (".implode(',',$permission).")");
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+										WHERE gm.menu_component = :menu_component and (gm2.menu_status = '1' OR gm.menu_parent IN('0','-1','-2','-8','-9'))
+										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both')");
+				$checkPermission->execute([
+					':menu_component' => $menu_component,
+					':channel' => $dataComing["channel"]
+				]);
 			}
-			$checkPermission->execute([':menu_component' => $menu_component]);
 			if($checkPermission->rowCount() > 0 && $menu_component == $service_component){
 				return true;
 			}else{
@@ -267,7 +279,7 @@ class functions {
 			}
 		}
 		public function getPathpic($member_no){
-			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no");
+			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no and path_avatar IS NOT NULL");
 			$getAvatar->execute([':member_no' => $member_no]);
 			if($getAvatar->rowCount() > 0){
 				$rowPathpic = $getAvatar->fetch(\PDO::FETCH_ASSOC);
@@ -340,7 +352,7 @@ class functions {
 				return true;
 			}
 		}
-		public function check_permission_core($payload,$root_menu,$page_name){
+		public function check_permission_core($payload,$root_menu,$page_name=null){
 			if(isset($payload["section_system"]) && isset($payload["username"])){
 				if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 					return true;
@@ -442,13 +454,11 @@ class functions {
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
-								if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
 									$arrayMT = array();
 									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 									$arrayMember[] = $rowDataOra["MEMBER_NO"];
 									$arrayMemberGRP[] = $arrayMT;
-								}
 							}
 						}
 					}
@@ -458,36 +468,30 @@ class functions {
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
-								if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
 									$arrayMT = array();
 									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 									$arrayMember[] = $rowDataOra["MEMBER_NO"];
 									$arrayMemberGRP[] = $arrayMT;
-								}
 							}
 						}else{
-							if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 								$arrayMember[] = $rowDataOra["MEMBER_NO"];
 								$arrayMemberGRP[] = $arrayMT;
-							}
 						}
 					}
 				}
 			}else{
-				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster");
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0' and rownum <= 10");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
-					if(!in_array($rowDataOra["MEMBER_NO"],$arrayMember)){
 						$arrayMT = array();
 						$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 						$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 						$arrayMember[] = $rowDataOra["MEMBER_NO"];
 						$arrayMemberGRP[] = $arrayMT;
-					}
 				}
 			}
 			return $arrayMemberGRP;

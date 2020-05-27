@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
-			$arrayColl["COLL_MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
+			$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
 			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
 			$arrayColl["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
 			$arrayColl["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];

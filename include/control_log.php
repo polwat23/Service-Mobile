@@ -25,6 +25,12 @@ class insertLog {
 				$this->logWithdrawTransfer($log_struc);
 			}else if($type_log == 'transferinside'){
 				$this->logTransferInsideCoop($log_struc);
+			}else if($type_log == 'manageuser'){
+				$this->logManageUserAccount($log_struc);
+			}else if($type_log == 'editadmincontrol'){
+				$this->logEditAdminControl($log_struc);
+			}else if($type_log == 'lockaccount'){
+				$this->logLockAccount($log_struc);
 			}
 		}
 		
@@ -114,6 +120,21 @@ class insertLog {
 													:destination,:response_code,:response_message)");
 
 			}
+			$insertLog->execute($log_struc);
+		}
+		private function logManageUserAccount($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logeditmobileadmin(menu_name,username,use_list,details) 
+												VALUES(:menu_name,:username,:use_list,:details)");
+			$insertLog->execute($log_struc);
+		}
+		private function logEditAdminControl($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logeditadmincontrol(menu_name,username,use_list,details) 
+												VALUES(:menu_name,:username,:use_list,:details)");
+			$insertLog->execute($log_struc);
+		}
+		private function logLockAccount($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO loglockaccount(member_no,device_name,unique_id) 
+												VALUES(:member_no,:device_name,:unique_id)");
 			$insertLog->execute($log_struc);
 		}
 }

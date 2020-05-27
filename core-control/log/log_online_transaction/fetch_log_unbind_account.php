@@ -4,12 +4,26 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logunbindaccount')){
 		$arrayGroup = array();
-		$fetchLogBindAccount = $conmysql->prepare("SELECT unbin.id_logunbindaccount,unbin.member_no,unbin.id_userlogin,unbin.unbind_status,
-		unbin.attempt_unbind_date,unbin.response_code,unbin.response_message,unbin.id_bindaccount,unbin.data_unbind_error,unbin.query_error,unbin.query_flag,login.channel,login.device_name
-													FROM logunbindaccount unbin
-													INNER JOIN gcuserlogin login
-													 ON unbin.id_userlogin = login.id_userlogin");
-		$fetchLogBindAccount->execute();
+		$fetchLogBindAccount = $conmysql->prepare("SELECT
+																				unbin.id_logunbindaccount,
+																				unbin.member_no,
+																				unbin.id_userlogin,
+																				unbin.unbind_status,
+																				unbin.attempt_unbind_date,
+																				unbin.response_code,
+																				unbin.response_message,
+																				unbin.id_bindaccount,
+																				unbin.data_unbind_error,
+																				unbin.query_error,
+																				unbin.query_flag,
+																				login.channel,
+																				login.device_name
+																			FROM
+																				logunbindaccount unbin
+																			INNER JOIN gcuserlogin login ON
+																				unbin.id_userlogin = login.id_userlogin  
+																			ORDER BY unbin.attempt_unbind_date DESC");
+																					$fetchLogBindAccount->execute();
 		while($rowLogBindAccount = $fetchLogBindAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccount = array();
 			$fetchBinAccountCoopNo = $conmysql->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank FROM gcbindaccount WHERE id_bindaccount = '$rowLogBindAccount[id_bindaccount]' ");
@@ -28,6 +42,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupLogBindAccount["COOP_ACCOUNT_NO"] = $coop_no["deptaccount_no_coop"];
 			$arrGroupLogBindAccount["BANK_ACCOUNT_NO"] = $coop_no["deptaccount_no_bank"];
 			$arrGroupLogBindAccount["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_coop"],$func->getConstant('dep_format'));
+			$arrGroupLogBindAccount["BANK_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_bank"],$func->getConstant('dep_format'));
   		    $arrGroupLogBindAccount["DATA_UNBIND_ERROR"] = $rowLogBindAccount["data_unbind_error"];
 			$arrGroupLogBindAccount["QUERY_ERROR"] = $rowLogBindAccount["query_error"];
 			$arrGroupLogBindAccount["QUERY_FLAG"] = $rowLogBindAccount["query_flag"];

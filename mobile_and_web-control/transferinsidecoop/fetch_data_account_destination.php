@@ -12,33 +12,61 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			exit();
 		}
 		$arrarDataAcc = array();
-		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc
-												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												WHERE dpm.deptaccount_no = :deptaccount_no");
-		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
-		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-			$checkAllowToTransaction = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
-			$checkAllowToTransaction->execute([':member_no' => $payload["member_no"]]);
-			if($checkAllowToTransaction->rowCount() > 0){
-				$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
-				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
-				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));
-				$arrarDataAcc["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
-				$arrarDataAcc["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-				$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0026";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+		$arrDataAPI["MemberID"] = substr($member_no,-6);
+		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+		if(!$arrResponseAPI["RESULT"]){
+			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$arrResponseAPI = json_decode($arrResponseAPI);
+		if($arrResponseAPI->responseCode == "200"){
+			foreach($arrResponseAPI->accountDetail as $accData){
+				if ($accData->coopAccountNo == $dataComing["deptaccount_no"]){
+					if($accData->accountStatus == "0" && $accData->creditFlag == "0"){
+						$checkAllowToTransaction = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$checkAllowToTransaction->execute([':member_no' => $payload["member_no"]]);
+						if($checkAllowToTransaction->rowCount() > 0){
+							$arrarDataAcc["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
+							$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+							$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+							$arrarDataAcc["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
+							$arrarDataAcc["DEPT_TYPE"] = $accData->accountDesc;
+							$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
+							$arrayResult['RESULT'] = TRUE;
+							echo json_encode($arrayResult);
+						}else{
+							$arrayResult['RESPONSE_CODE'] = "WS0026";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							echo json_encode($arrayResult);
+							exit();
+						}
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "WS0054";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS0025";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0025";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESPONSE_CODE'] = "WS9001";
+			if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

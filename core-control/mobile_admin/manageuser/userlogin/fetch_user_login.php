@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','userlogin')){
 		$arrayGroup = array();
 		$fetchUserlogin = $conmysql->prepare("SELECT member_no, device_name, login_date, id_token 
-												FROM  gcuserlogin WHERE is_login = '1' ");
+												FROM  gcuserlogin WHERE is_login = '1' ORDER BY id_userlogin DESC");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();

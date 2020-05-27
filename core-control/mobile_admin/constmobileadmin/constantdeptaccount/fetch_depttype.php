@@ -5,12 +5,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
 		$arrDepttypeuse = array();
-		$fetchDepttypeUsed = $conmysql->prepare("SELECT DEPT_TYPE_CODE FROM gcconstantaccountdept WHERE is_use <> '-9'");
+		$fetchDepttypeUsed = $conmysql->prepare("SELECT DEPT_TYPE_CODE FROM gcconstantaccountdept");
 		$fetchDepttypeUsed->execute();
 		while($rowDepttypeUse = $fetchDepttypeUsed->fetch(PDO::FETCH_ASSOC)){
 			$arrDepttypeuse[] = $rowDepttypeUse["DEPT_TYPE_CODE"];
 		}
-		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE WHERE DEPTTYPE_CODE NOT IN('".implode("','",$arrDepttypeuse)."')");
+		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ");
 		$fetchDepttype->execute();
 		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
 			$arrayDepttype = array();

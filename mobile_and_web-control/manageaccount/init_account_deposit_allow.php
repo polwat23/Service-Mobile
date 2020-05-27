@@ -7,11 +7,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDeptAllowed = array();
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
-		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
-												WHERE is_use = '1'");
+		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept");
 		$getDeptTypeAllow->execute();
 		if($getDeptTypeAllow->rowCount() > 0 ){
 			while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
+				$arrayDepttype = array();
 				$arrDeptAllowed[] = $rowDeptAllow["dept_type_code"];
 			}
 			$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
@@ -19,34 +19,51 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 			}
-			if(sizeof($arrAccAllowed) > 0){
-				$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
-															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-															WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
-															and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
-															and dpm.member_no = :member_no and dpm.deptclose_status = 0");
-			}else{
-				$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
-															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-															WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
-															and dpm.member_no = :member_no and dpm.deptclose_status = 0");
-
+			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+			$arrDataAPI["MemberID"] = substr($member_no,-6);
+			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+			if(!$arrResponseAPI["RESULT"]){
+				$arrayResult['RESPONSE_CODE'] = "WS9001";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
 			}
-			$getAccountAllinCoop->execute([':member_no' => $member_no]);
-			while($rowAccIncoop = $getAccountAllinCoop->fetch(PDO::FETCH_ASSOC)){
-				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
-				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccIncoop["DEPTACCOUNT_NAME"]);
-				$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
-				$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
-														WHERE dept_type_code = :depttype_code");
-				$getIDDeptTypeAllow->execute([
-					':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
-				]);
-				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
-				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
-				$arrAllowAccGroup[] = $arrAccInCoop;
+			$arrResponseAPI = json_decode($arrResponseAPI);
+			if($arrResponseAPI->responseCode == "200"){
+				$limit_trans = $func->getConstant("limit_withdraw");
+				foreach($arrResponseAPI->accountDetail as $accData){
+					if (in_array($accData->accountType, $arrDeptAllowed) && !in_array($accData->coopAccountNo, $arrAccAllowed) && $accData->accountStatus == "0"){
+						$arrAccInCoop["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
+						$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+						$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+						$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
+						$arrAccInCoop["DEPT_TYPE"] = $accData->accountDesc;
+						$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant,allow_showdetail,allow_transaction FROM gcconstantaccountdept
+																WHERE dept_type_code = :depttype_code");
+						$getIDDeptTypeAllow->execute([
+							':depttype_code' => $accData->accountType
+						]);
+						$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+						$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
+						if($rowIDDeptTypeAllow["allow_transaction"] == '1' && $rowIDDeptTypeAllow["allow_showdetail"] == '1'){
+							$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_ONLINE_FLAG_ON'][0][$lang_locale];
+						}else if($rowIDDeptTypeAllow["allow_transaction"] == '1' && $rowIDDeptTypeAllow["allow_showdetail"] == '0'){
+							$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_FLAG_ON'][0][$lang_locale];
+						}else if($rowIDDeptTypeAllow["allow_transaction"] == '0' && $rowIDDeptTypeAllow["allow_showdetail"] == '1'){
+							$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_ACC_SHOW_FLAG_ON'][0][$lang_locale];
+						}
+						$arrAccInCoop["LIMIT_TRANSACTION_COOP"] = $limit_trans;
+						$arrAccInCoop["LIMIT_TRANSACTION_ACCOUNT"] = $limit_trans;
+						$arrAllowAccGroup[] = $arrAccInCoop;
+					}
+				}
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS9001";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
 			}
 			$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
 			$arrayResult['RESULT'] = TRUE;

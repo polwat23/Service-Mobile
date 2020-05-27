@@ -2,14 +2,14 @@
 set_time_limit(150);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coop_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		try {
-			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
+			$coop_account_no = $payload["member_no"];
 			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
 			$arrPayloadverify = array();
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['coop_account_no'] = $coop_account_no.$lib->randomText('all',2);
+			$arrPayloadverify['coop_account_no'] = time().$lib->randomText('all',2);
 			$arrPayloadverify['user_mobile_no'] = $mobile_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];

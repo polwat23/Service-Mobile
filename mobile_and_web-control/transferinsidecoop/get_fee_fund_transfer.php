@@ -4,36 +4,57 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
-		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
-		try {
-			$argumentWS = [
-							"as_wspass" => $config["WS_STRC_DB"],
-							"as_account_no" => $dataComing["deptaccount_no"],
-							"as_itemtype_code" => "WTX",
-							"adc_amt" => $dataComing["amt_transfer"],
-							"adtm_date" => date('c')
-			];
-			$resultWS = $clientWS->__call("of_chk_withdrawcount_amt", array($argumentWS));
-			$amt_transfer = $resultWS->of_chk_withdrawcount_amtResult;
-			$arrayResult['FEE_AMT'] = $amt_transfer;
-			$arrayResult['FEE_AMT_FORMAT'] = number_format($amt_transfer,2);
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$to_deptaccount_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
+		$getMemberNo = $conmysql->prepare("SELECT member_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no");
+		$getMemberNo->execute([':deptaccount_no' => $to_deptaccount_no]);
+		$rowMember_noDest = $getMemberNo->fetch(PDO::FETCH_ASSOC);
+		$member_no_dest = $configAS[$rowMember_noDest["member_no"]] ?? $rowMember_noDest["member_no"];
+		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+		$arrDataAPI["MemberID"] = substr($member_no,-6);
+		$arrDataAPI["FromCoopAccountNo"] = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		$arrDataAPI["ToMemberID"] = substr($member_no_dest,-6);
+		$arrDataAPI["ToCoopAccountNo"] = $to_deptaccount_no;
+		$arrDataAPI["TransferAmount"] = $dataComing["amt_transfer"];
+		$arrDataAPI["UserRequestDate"] = date('c');
+		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/CheckTransferFee",$arrDataAPI,$arrHeaderAPI);
+		if(!$arrResponseAPI["RESULT"]){
+			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$arrResponseAPI = json_decode($arrResponseAPI);
+		if($arrResponseAPI->responseCode == "200"){
+			$arrayResult['FEE_AMT'] = preg_replace('/,/', '', $arrResponseAPI->coopFee);
+			$arrayResult['FEE_AMT_FORMAT'] = $arrResponseAPI->coopFee;
+			$arrayResult['TRANS_REF_CODE'] = $arrResponseAPI->transferRefCode;
+			if((int)$arrayResult['FEE_AMT'] > 0){
+				$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+				$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+				$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+				$arrayResult['CAUTION'] = $arrayCaution;
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
-		}catch(SoapFault $e){
-			$arrayResult["RESPONSE_CODE"] = 'WS8002';
-			$arrayStruc = [
-				':member_no' => $payload["member_no"],
-				':id_userlogin' => $payload["id_userlogin"],
-				':deptaccount_no' => $dataComing["deptaccount_no"],
-				':amt_transfer' => $dataComing["amt_transfer"],
-				':type_request' => '1',
-				':transfer_flag' => '1',
-				':destination' => null,
-				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $e->getMessage()
-			];
-			$log->writeLog('transferinside',$arrayStruc);
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS9001";
+			if($arrResponseAPI->responseCode == '415'){
+				$type_account = substr(preg_replace('/-/','',$dataComing["deptaccount_no"]),3,2);
+				if($type_account == '10'){
+					$accountDesc = "NORMAL";
+				}else{
+					$accountDesc = "SPECIAL";
+				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$accountDesc][0][$lang_locale];
+			}else{
+				if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

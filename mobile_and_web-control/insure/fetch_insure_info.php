@@ -5,9 +5,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'InsureInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$fetchinSureInfo = $conoracle->prepare("SELECT ist.INSURETYPE_DESC,isit.INSITEMTYPE_DESC,isit.SIGN_FLAG,issm.PREMIUM_PAYMENT
-												FROM insinsuremaster ism LEFT JOIN insinsuretype ist ON ism.insuretype_code = ist.insuretype_code
-												LEFT JOIN insinsurestatement issm ON ism.insurance_no = issm.insurance_no
-												LEFT JOIN insucfinsitemtype isit ON issm.insitemtype_code = isit.insitemtype_code
+												FROM insgroupmaster ism
+												LEFT JOIN insgroupstatement issm ON ism.insurance_no = issm.insurance_no
 												WHERE ism.insurance_status = '1' and ism.member_no = :member_no ORDER BY issm.SEQ_NO DESC");
 		$fetchinSureInfo->execute([
 			':member_no' => $member_no

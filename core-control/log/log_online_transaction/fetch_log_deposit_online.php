@@ -24,7 +24,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM gctransaction trans
 												INNER JOIN gcuserlogin login
 												ON login.id_userlogin = trans.id_userlogin
-												WHERE trans.trans_flag = '1'");
+												WHERE trans.trans_flag = '1'
+													  AND transfer_mode ='9'
+												ORDER BY trans.operate_date DESC");
 		$fetLogDepositOnline->execute();
 		while($rowLogDepositOnline = $fetLogDepositOnline->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositOnline = array();

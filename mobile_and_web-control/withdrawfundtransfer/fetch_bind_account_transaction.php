@@ -3,6 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$time = date("Hi");
 		if($time >= 0000 && $time <= 0200){
 			$arrayResult['RESPONSE_CODE'] = "WS0035";
@@ -13,43 +14,72 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
-												csb.bank_format_account,csb.bank_format_account_hide
+												csb.bank_format_account,csb.bank_format_account_hide,gba.bank_code
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
 		if($fetchBindAccount->rowCount() > 0){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
-				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no
-																FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use <> '-9' and gct.is_use ='1' and gct.allow_transaction = '1'");
-				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
-				if($fetchAccountBeenAllow->rowCount() > 0){
-					$arrAccBind = array();
-					$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
-					$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
-					$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
-					$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
-					$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
-					$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
-					$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
-					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
-					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
-					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-					$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
-					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
-					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-					if(isset($rowDataAcc["DEPTACCOUNT_NAME"])){
-						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
-						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-						$arrAccBind["BALANCE"] = $rowDataAcc["WITHDRAWABLE_AMT"];
-						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["WITHDRAWABLE_AMT"],2);
-						$arrGroupAccBind[] = $arrAccBind;
-					}
-				}
+				$arrAccBind = array();
+				$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
+				$arrAccBind["BANK_CODE"] = $rowAccBind["bank_code"];
+				$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
+				$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
+				$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
+				$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
+				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
+				$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
+				$arrGroupAccBind["BIND"][] = $arrAccBind;
 			}
-			if(sizeof($arrGroupAccBind) > 0){
+			$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
+													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
+													gat.id_accountconstant = gct.id_accountconstant
+													WHERE gct.allow_transaction = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+			$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
+			if($fetchAccAllowTrans->rowCount() > 0){
+				while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
+					$arrayDept[] = $rowAccAllow["deptaccount_no"];
+				}
+				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+				$arrDataAPI["MemberID"] = substr($member_no,-6);
+				$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+				if(!$arrResponseAPI["RESULT"]){
+					$arrayResult['RESPONSE_CODE'] = "WS9999";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
+				$arrResponseAPI = json_decode($arrResponseAPI);
+				if($arrResponseAPI->responseCode == "200"){
+					foreach($arrResponseAPI->accountDetail as $accData){
+						if (in_array($accData->coopAccountNo, $arrayDept) && $accData->accountStatus == "0"){
+							$arrAccCoop = array();
+							$arrAccCoop["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
+							$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+							$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
+							$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
+							$arrAccCoop["DEPT_TYPE"] = $accData->accountDesc;
+							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
+							$arrAccCoop["BALANCE_FORMAT"] = $accData->accountBalance;
+							$arrGroupAccBind["COOP"][] = $arrAccCoop;
+						}
+					}
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS9001";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0023";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
@@ -61,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_CODE'] = "WS0021";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
