@@ -120,18 +120,22 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0042";
+			$arrayResult['RESPONSE_CODE'] =  'WS0042';
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
 				':operate_date' => $dateOper,
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
-				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_code' => $arrResponse->RESPONSE_CODE,
 				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('withdrawtrans',$arrayStruc);
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
