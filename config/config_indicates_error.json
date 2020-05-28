@@ -71,7 +71,7 @@
 	"WS0053" : [{"th" : "เวลาการใช้งานถูกจำกัดไว้ที่ 15 นาที กรุณาเข้าสู่ระบบใหม่อีกครั้ง","en" : "Time limit for using is 15 minutes, Please log in again"}],
 	"WS0054" : [{"th" : "บัญชีเงินฝากดังกล่าวได้ปิดบัญชีหรือสหกรณ์ไม่อนุญาตให้รับโอนได้","en" : "This deposit account was closed or cooperative is not allow to receive transaction"}],
 	"WS0055" : [{"th" : "ไม่สามารถขอทุนสวัสดิการได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง","en" : "Cannot request welfare in this moment please try again"}],
-	"WS0056" : [{"th" : "ยอดทำรายการขั้นต่ำ ${min_amount_deposit} บาท กรุณาลองใหม่อีกครั้ง","en" : "Minimun transaction amount is ${min_amount_deposit} Baht please try again"}],
+	"WS0056" : [{"th" : "ยอดทำรายการขั้นต่ำ ${min_amount_deposit} บาท กรุณาลองใหม่อีกครั้ง","en" : "Minimum transaction amount is ${min_amount_deposit} Baht please try again"}],
 	"WS0057" : [{"th" : "ตั้ง PIN ล้มเหลว เพื่อความปลอดภับของท่าน กรุณาตั้ง PIN โดยหลีกเลี่ยงเลขสมาชิก เลขที่เรียงกันและเลขซ้ำติดกัน 3 หลัก","en" : "Set PIN failed for secure of yourself please avoid member no, numbers in sequence and triple adjacent numbers"}],
 	"WS1001" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1001","en" : "Cannot login this moment #WS1001"}],
 	"WS1002" : [{"th" : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ #WS1002","en" : "Cannot login this moment #WS1002"}],
