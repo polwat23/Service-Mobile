@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
 			$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-			$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]));
+			$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowDataAccAllow["DEPTACCOUNT_NAME"]));
 			$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
 			$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
 			$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);

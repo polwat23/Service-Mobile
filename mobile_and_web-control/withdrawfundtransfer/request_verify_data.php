@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$min_amount_deposit = $func->getConstant("min_amount_deposit");
 		if($dataComing["amt_transfer"] < (int) $min_amount_deposit){
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
-			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',$min_amount_deposit,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

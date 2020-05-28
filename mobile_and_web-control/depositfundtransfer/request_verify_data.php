@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
-			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',$min_amount_deposit,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

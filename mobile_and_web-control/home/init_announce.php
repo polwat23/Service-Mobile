@@ -9,7 +9,8 @@ if(!$anonymous){
 	$flag_granted = 'member';
 }
 $arrGroupAnn = array();
-if(isset($dataComing["firsttime"]) && $dataComing["firsttime"] == "TRUE"){
+
+if(isset($dataComing["firsttime"]) && $dataComing["firsttime"] == '1'){
 	$firstapp = '1';
 }else{
 	$firstapp = '-1';
