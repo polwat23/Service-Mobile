@@ -66,6 +66,45 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			exit();
 		}
 	}else{
+		if(strtolower($lib->mb_str_pad($dataComing["pin"])) == $payload["member_no"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0057";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$pin_split = str_split($dataComing["pin"]);
+		$countSeqNumber = 1;
+		$countReverseSeqNumber = 1;
+		foreach($pin_split as $key => $value){
+			if(($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key + 1]) || 
+			($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key - 2])){
+				$arrayResult['RESPONSE_CODE'] = "WS0057";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			if($key < strlen($dataComing["pin"]) - 1){
+				if($value == ($dataComing["pin"][$key + 1] - 1)){
+					$countSeqNumber++;
+				}else{
+					$countSeqNumber = 1;
+				}
+				if($value - 1 == $dataComing["pin"][$key + 1]){
+					$countReverseSeqNumber++;
+				}else{
+					$countReverseSeqNumber = 1;
+				}
+			}
+		}
+		if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
+			$arrayResult['RESPONSE_CODE'] = "WS0057";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
