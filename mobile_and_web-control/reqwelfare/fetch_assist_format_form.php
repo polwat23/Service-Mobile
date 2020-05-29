@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','id_const_welfare'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
 		$arrayGrpForm = array();
-		$getFormatForm = $conmysql->prepare("SELECT input_type,input_length,input_name,label_text,placeholder,default_value,is_required
+		$getFormatForm = $conmysql->prepare("SELECT input_type,input_length,input_name,label_text,placeholder,default_value,is_required,input_format
 											FROM gcformatreqwelfare 
 											WHERE id_const_welfare = :id_const_welfare and is_use = '1'");
 		$getFormatForm->execute([
@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare'],$dataComing
 			$arrayForm["LABEL_TEXT"] = $rowForm["label_text"];
 			$arrayForm["PLACEHOLDER"] = $rowForm["placeholder"];
 			$arrayForm["DEFAULT_VALUE"] = $rowForm["default_value"];
+			$arrayForm["INPUT_FORMAT"] = $rowForm["input_format"];
 			$arrayForm["IS_REQUIRED"] = $rowForm["is_required"];
 			$arrayGrpForm[] = $arrayForm;
 		}

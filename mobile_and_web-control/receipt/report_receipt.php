@@ -242,7 +242,7 @@ function GenerateReport($dataReport,$header,$lib){
 		mkdir($pathfile, 0777, true);
 	}
 	$pathfile = $pathfile.'/'.$header["slip_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/receipt/'.$header["slip_no"].'.pdf';
+	$pathfile_show = '/resource/pdf/receipt/'.$header["slip_no"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

@@ -247,15 +247,16 @@ class functions {
 					':menu_component' => $menu_component
 				]);
 			}else if($user_type == '1'){
-				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										 and menu_status IN('0','1') and menu_permission IN (".implode(',',$permission).") and (menu_channel = :channel OR menu_channel = 'both')");
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+										WHERE gm.menu_component = :menu_component and (gm2.menu_status IN('0','1') OR gm.menu_parent IN('0','-1','-2','-8','-9'))
+										 and gm.menu_status IN('0','1') and gm.menu_permission IN (".implode(',',$permission).")");
 				$checkPermission->execute([
-					':menu_component' => $menu_component,
-					':channel' => $dataComing["channel"]
+					':menu_component' => $menu_component
 				]);
 			}else{
-				$checkPermission = $this->con->prepare("SELECT id_menu FROM gcmenu WHERE menu_component = :menu_component 
-										and menu_status = '1' and menu_permission IN (".implode(',',$permission).") and (menu_channel = :channel OR menu_channel = 'both')");
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+										WHERE gm.menu_component = :menu_component and (gm2.menu_status = '1' OR gm.menu_parent IN('0','-1','-2','-8','-9'))
+										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both')");
 				$checkPermission->execute([
 					':menu_component' => $menu_component,
 					':channel' => $dataComing["channel"]
@@ -316,7 +317,6 @@ class functions {
 						if($insertHis->execute()){
 							unset($bulkInsert);
 							$bulkInsert = array();
-							continue;
 						}else{
 							$this->con->rollback();
 							return false;
@@ -351,7 +351,7 @@ class functions {
 				return true;
 			}
 		}
-		public function check_permission_core($payload,$root_menu,$page_name){
+		public function check_permission_core($payload,$root_menu,$page_name=null){
 			if(isset($payload["section_system"]) && isset($payload["username"])){
 				if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 					return true;
@@ -513,7 +513,6 @@ class functions {
 							if($insertToLogSMS->execute()){
 								unset($textcombine);
 								$textcombine = array();
-								continue;
 							}else{
 								$this->con->rollback();
 								break;
@@ -547,7 +546,6 @@ class functions {
 							if($insertToLogSMS->execute()){
 								unset($textcombine);
 								$textcombine = array();
-								continue;
 							}else{
 								$this->con->rollback();
 								return false;
@@ -559,7 +557,6 @@ class functions {
 							if($insertToLogNotSentSMS->execute()){
 								unset($textcombinenotsent);
 								$textcombinenotsent = array();
-								continue;
 							}else{
 								$this->con->rollback();
 								return false;

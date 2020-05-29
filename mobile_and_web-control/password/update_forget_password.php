@@ -12,17 +12,38 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		exit();
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT id_account FROM mdbmemberaccount 
-										WHERE member_no = :member_no and email = :email");
+	$checkMember = $conmysql->prepare("SELECT account_status,email FROM gcmemberaccount 
+										WHERE member_no = :member_no");
 	$checkMember->execute([
-		':member_no' => $member_no,
-		':email' => $dataComing["email"]
+		':member_no' => $member_no
 	]);
 	if($checkMember->rowCount() > 0){
+		$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+		if($rowChkMemb["account_status"] == '-8'){
+			$arrayResult['RESPONSE_CODE'] = "WS0048";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		if(empty($rowChkMemb["email"])){
+			$arrayResult['RESPONSE_CODE'] = "WS0049";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		if($dataComing["email"] != $rowChkMemb["email"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0050";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
 		$getNameMember->execute([':member_no' => $member_no]);
 		$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
-		$template = $func->getTemplate('send_mail_forget_password');
+		$template = $func->getTemplateSystem('ForgetPassword');
 		$arrayDataTemplate = array();
 		$temp_pass = $lib->randomText('number',6);
 		$arrayDataTemplate["FULL_NAME"] = (isset($rowName["MEMB_NAME"]) ? $rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"] : $member_no);
@@ -30,10 +51,10 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		$arrayDataTemplate["DEVICE_NAME"] = $arrPayload["PAYLOAD"]["device_name"];
 		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
 		$conmysql->beginTransaction();
-		$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :temp_pass,account_status = '-9' 
+		$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0
 											WHERE member_no = :member_no");
 		if($updateTemppass->execute([
-			':temp_pass' => $temp_pass,
+			':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),
 			':member_no' => $member_no
 		])){
 			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);

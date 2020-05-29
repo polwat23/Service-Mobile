@@ -9,10 +9,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowLoantype = $getLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();
 			$arrayLoan["LOANTYPE_CODE"] = $rowLoantype["loantype_code"];
-			$getLoanTypeData = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
+			$getLoanTypeData = $conoracle->prepare("SELECT ln.LOANTYPE_DESC,lnt.interest_rate
+													FROM lnloantype ln LEFT JOIN lncfloanintratedet lnt ON ln.inttabrate_code = lnt.loanintrate_code
+													and sysdate BETWEEN lnt.effective_date and lnt.expire_date
+													WHERE ln.loantype_code = :loantype_code");
 			$getLoanTypeData->execute([':loantype_code' => $rowLoantype["loantype_code"]]);
 			$rowLoanData = $getLoanTypeData->fetch(PDO::FETCH_ASSOC);
 			$arrayLoan["LOANTYPE_DESC"] = $rowLoanData["LOANTYPE_DESC"];
+			$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
 			$arrayGrpLoan[] = $arrayLoan;
 		}
 		$arrayResult['LOAN_TYPE'] = $arrayGrpLoan;

@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['member_no','unique_id','api_token'],$dataComing
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8' WHERE member_no = :member_no");
+	$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
 	if($updateAccountStatus->execute([':member_no' => $dataComing["member_no"]])){
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

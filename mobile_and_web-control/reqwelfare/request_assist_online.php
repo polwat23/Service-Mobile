@@ -14,12 +14,10 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 			$insertBulkData[] = ':'.$rowColumn["input_name"];
 		}
 		$insertBulkColumn[] = "member_no";
-		$insertBulkColumn[] = "assist_year";
 		$insertBulkColumn[] = "assisttype_code";
 		$insertBulkColumn[] = "coop_id";
 		$insertBulkColumn[] = "req_status";
 		$insertBulkData[] = ":member_no";
-		$insertBulkData[] = ":assist_year";
 		$insertBulkData[] = ":assisttype_code";
 		$insertBulkData[] = ":coop_id";
 		$insertBulkData[] = ":req_status";
@@ -29,9 +27,9 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 		foreach($insertBulkColumn as $keyExe){
 			if($keyExe == 'coop_id'){
 				$arrayExecute[':'.$keyExe] = "050001";
-			}else if($keyExe != 'member_no'){
+			}else if($keyExe == 'member_no'){
 				$arrayExecute[':'.$keyExe] = $payload[$keyExe];
-			}else if($keyExe != 'req_status'){
+			}else if($keyExe == 'req_status'){
 				$arrayExecute[':'.$keyExe] = "8";
 			}else{
 				$arrayExecute[':'.$keyExe] = $dataComing[$keyExe];
@@ -42,6 +40,12 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
+			$arrError = array();
+			$arrError["EXECUTE"] = $arrayExecute;
+			$arrError["ERROR"] = $conoracle->errorInfo();
+			$arrError["QUERY"] = $insertToAssistMast;
+			$arrError["ERROR_CODE"] = 'WS0055';
+			$lib->addLogtoTxt($arrError,'welfare_error');
 			$arrayResult['RESPONSE_CODE'] = "WS0055";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
