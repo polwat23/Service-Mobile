@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 		$fetchDetailNews = $conmysql->prepare("SELECT gn.update_date,gn.img_gallery_1,gn.img_gallery_2,gn.img_gallery_3,
 											gn.img_gallery_4,gn.img_gallery_5,gn.news_title,gn.news_detail,gn.create_by
 											FROM gcnews gn
-											WHERE gn.id_news = :id_news");
+											WHERE gn.id_news = :id_news and gn.is_use = '1'");
 		$fetchDetailNews->execute([':id_news' => $dataComing["id_news"]]);
 		$rowDetailNews = $fetchDetailNews->fetch(PDO::FETCH_ASSOC);
 		$arrayDetailNews = array();

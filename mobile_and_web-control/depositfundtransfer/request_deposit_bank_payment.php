@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrayGroup["system_cd"] = "02";
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
-		$ref_no = time().substr($coop_account_no,3);
+		$ref_no = time().$lib->randomText('all',3);
 		try {
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 			try {

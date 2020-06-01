@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											FROM coreuser
 											INNER JOIN coresectionsystem
 											ON coresectionsystem.id_section_system = coreuser.id_section_system WHERE coresectionsystem.id_section_system NOT IN('1','11')
-											WHERE coreuser.user_status = '1'");
+											and coreuser.user_status = '1'");
 		$fetchUser->execute();
 		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreUser = array();
