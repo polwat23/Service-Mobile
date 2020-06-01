@@ -113,6 +113,12 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								}else{
 									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 1 : 0);
 								}
+							}else{
+								if($rowPassword['account_status'] == '-9'){
+									$arrayResult['TEMP_PASSWORD'] = TRUE;
+								}else{
+									$arrayResult['TEMP_PASSWORD'] = FALSE;
+								}
 							}
 							$arrayResult['RESULT'] = TRUE;
 							echo json_encode($arrayResult);

@@ -107,7 +107,7 @@ class library {
 		if(isset($phone)){
 			$str1 = substr($phone,0,3);
 			$str2 = substr($phone,3,3);
-			$str3 = substr($phone,6,4);
+			$str3 = substr($phone,6);
 			return $str1.$separate.$str2.$separate.$str3;
 		}else{
 			return '-';

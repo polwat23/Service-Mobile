@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','fee_transfer'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','penalty_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				"as_wslipitem_code" => "WTB",
 				"as_dslipitem_code" => "DTB",
 				"adc_amt" => $dataComing["amt_transfer"],
-				"adc_fee" => $dataComing["fee_transfer"]
+				"adc_fee" => $dataComing["penalty_amt"]
 			];
 			$resultWS = $clientWS->__call("of_withdraw_deposit_trans", array($argumentWS));
 			$slip_no = $resultWS->of_withdraw_deposit_transResult;
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':from_account' => $from_account_no,
 				':destination' => $to_account_no,
 				':amount' => $dataComing["amt_transfer"],
-				':penalty_amt' => $dataComing["fee_transfer"],
+				':penalty_amt' => $dataComing["penalty_amt"],
 				':member_no' => $payload["member_no"],
 				':ref_no1' => $from_account_no,
 				':id_userlogin' => $payload["id_userlogin"],
@@ -67,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':from_account' => $from_account_no,
 				':destination' => $to_account_no,
 				':amount' => $dataComing["amt_transfer"],
-				':penalty_amt' => $dataComing["fee_transfer"],
+				':penalty_amt' => $dataComing["penalty_amt"],
 				':member_no' => $payload["member_no"],
 				':ref_no1' => $from_account_no,
 				':id_userlogin' => $payload["id_userlogin"]
@@ -79,7 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					':id_userlogin' => $payload["id_userlogin"],
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
-					':penalty_amt' => $dataComing["fee_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
 					':type_request' => '2',
 					':transfer_flag' => '2',
 					':destination' => $to_account_no,
@@ -92,7 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					':id_userlogin' => $payload["id_userlogin"],
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
-					':penalty_amt' => $dataComing["fee_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
 					':type_request' => '2',
 					':transfer_flag' => '1',
 					':destination' => $to_account_no,

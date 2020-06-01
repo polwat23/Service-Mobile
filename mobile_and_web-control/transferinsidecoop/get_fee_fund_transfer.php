@@ -15,8 +15,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			];
 			$resultWS = $clientWS->__call("of_chk_withdrawcount_amt", array($argumentWS));
 			$amt_transfer = $resultWS->of_chk_withdrawcount_amtResult;
-			$arrayResult['FEE_AMT'] = $amt_transfer;
-			$arrayResult['FEE_AMT_FORMAT'] = number_format($amt_transfer,2);
+			$arrayResult['PENALTY_AMT'] = $amt_transfer;
+			$arrayResult['PENALTY_AMT_FORMAT'] = number_format($amt_transfer,2);
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}catch(SoapFault $e){

@@ -32,11 +32,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													date_format(effect_date,'%Y%m%d%H%i%s') AS effect_date_check,
 													date_format(due_date,'%Y%m%d%H%i%s') AS due_date_check
 											 FROM gcannounce
-											 WHERE id_announce <> '-1'
+											 WHERE id_announce <> '-1' and effect_date IS NOT NULL
 													".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and date_format(effect_date,'%Y-%m-%d') >= :start_date" : null)."
+														"and date_format(effect_date,'%Y-%m-%d') <= :start_date" : null)."
 													".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(effect_date,'%Y-%m-%d') <= :end_date" : null). " ORDER BY effect_date DESC LIMIT 20");
+														"and date_format(due_date,'%Y-%m-%d') >= :end_date" : null). " ORDER BY effect_date DESC LIMIT 20");
 		$fetchAnnounce->execute($arrayExecute);		
 		while($rowAnnounce = $fetchAnnounce->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupAnnounce = array();
@@ -59,9 +59,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupAnnounce["IS_UPDATE"] = $rowAnnounce["is_update"];
 			$arrGroupAnnounce["EFFECT_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["effect_date"],'d m Y',true); 
 						
-			if(($rowAnnounce["effect_date_check"] <= $dateNow && $dateNow <= $rowAnnounce["due_date_check"]) || ($rowAnnounce["priority"] == 'high' || $rowAnnounce["priority"] == 'ask')){
+			if(isset($rowAnnounce["effect_date"]) && (($rowAnnounce["effect_date_check"] <= $dateNow && $dateNow <= $rowAnnounce["due_date_check"]) || ($rowAnnounce["priority"] == 'high' || $rowAnnounce["priority"] == 'ask'))){
 					$arrGroupAnnounce["ACTIVE"] = "now";
-			}else if($rowAnnounce["effect_date_check"] > $dateNow){
+			}else if(isset($rowAnnounce["effect_date"]) && $rowAnnounce["effect_date_check"] > $dateNow){
 					$arrGroupAnnounce["ACTIVE"] = "future"; 
  			}else{
 				$arrGroupAnnounce["ACTIVE"] = "actived"; 
