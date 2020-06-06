@@ -77,6 +77,9 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':query_flag' => '1'
 					];
 					$log->writeLog('bindaccount',$arrayStruc);
+					$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+					$lib->sendLineNotify($message_error);
+					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -138,12 +141,24 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 					':query_flag' => '-9'
 				];
 				$log->writeLog('bindaccount',$arrayStruc);
+				$message_error = "ผูกบัญชีไม่ได้เพราะ Insert ลง gcbindaccount ไม่ได้ "."\n"."Query => ".$insertPendingBindAccount->queryString."\n"."Param =>". json_encode([
+					':sigma_key' => $sigma_key,
+					':member_no' => $payload["member_no"],
+					':coop_account_no' => $coop_account_no,
+					':citizen_id' => $dataComing["citizen_id"],
+					':mobile_no' => $mobile_no,
+					':bank_account_name' => $account_name_th,
+					':bank_account_name_en' => $account_name_th,
+					':id_token' => $payload["id_token"]
+				]);
+				$lib->sendLineNotify($message_error);
+				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}catch(Throwable $e) {
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrayResult['RESPONSE_CODE'] = "WS0039";
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
@@ -167,6 +182,16 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

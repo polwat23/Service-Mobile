@@ -5,6 +5,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		if(($dataComing["base64_img"] == "" || empty($dataComing["base64_img"])) && ($dataComing["alias_name_emoji_"] == "" || empty($dataComing["alias_name_emoji_"]))){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS4004",
+				":error_desc" => "ส่ง Argument มาไม่ครบ ".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ ".json_encode($dataComing);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -50,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$insertMemoDept = $conmysql->prepare("INSERT INTO gcdeptalias(alias_name,path_alias_img,deptaccount_no) 
+			$insertMemoDept = $conmysql->prepare("INSERT INTO gcdeptalias555(alias_name,path_alias_img,deptaccount_no)
 													VALUES(:alias_name,:path_alias_img,:deptaccount_no)");
 			if($insertMemoDept->execute([
 				':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],
@@ -60,17 +70,21 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrExecute2 = [
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1027",
+					":error_desc" => "เพิ่มชื่อเล่นบัญชีไม่ได้ "."\n".json_encode($dataComing),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "เพิ่มชื่อเล่นบัญชีไม่ได้เพราะ Insert ลงตาราง gcdeptalias ไม่ได้ "."\n"."Query => ".$insertMemoDept->queryString."\n"." Param =>".json_encode([
 					':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],
 					':path_alias_img' => $path_alias_img ?? null,
 					':deptaccount_no' => $account_no
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute2;
-				$arrError["QUERY"] = $insertMemoDept;
-				$arrError["ERROR_CODE"] = 'WS1005';
-				$lib->addLogtoTxt($arrError,'alias_error');
-				$arrayResult['RESPONSE_CODE'] = "WS1005";
+				]);
+				$lib->sendLineNotify($message_error);
+				$arrayResult['RESPONSE_CODE'] = "WS1027";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
@@ -86,6 +100,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

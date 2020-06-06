@@ -13,7 +13,7 @@ $fetchDataSTM = $conoracle->prepare("SELECT lut.loanitemtype_desc,lcn.loancontra
 									lcn.principal_payment,lcn.interest_payment,lcn.principal_balance
 									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
 									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
-									WHERE lcn.operate_date BETWEEN (SYSDATE - 1) and SYSDATE and lcn.sync_notify_flag = '0' ");
+									WHERE lcn.operate_date BETWEEN (SYSDATE - 1) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code NOT IN('AVG')");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
@@ -36,7 +36,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$dataMerge["PRINCIPAL_BALANCE"] = number_format($rowSTM["PRINCIPAL_BALANCE"],2);
 		$dataMerge["ITEMTYPE_DESC"] = $rowSTM["LOANITEMTYPE_DESC"];
 		$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
-		$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y',true) : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+		$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
 		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 		$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 		$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);

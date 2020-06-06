@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$dateNow = date('d');
 		if($recv_now == trim($dataComing["recv_period"])){
 			if($dateNow > $date_process){
-				$queyKpDetail = "SELECT 
+				$qureyKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											kpd.keepitemtype_code = kut.keepitemtype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$queyKpDetail = "SELECT 
+				$qureyKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
-			$queyKpDetail = "SELECT 
+			$qureyKpDetail = "SELECT 
 										kut.keepitemtype_desc as TYPE_DESC,
 										kut.keepitemtype_grp as TYPE_GROUP,
 										case kut.keepitemtype_grp 
@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 		}
 		$arrGroupDetail = array();
-		$getDetailKP = $conoracle->prepare($queyKpDetail);
+		$getDetailKP = $conoracle->prepare($qureyKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -105,6 +105,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
