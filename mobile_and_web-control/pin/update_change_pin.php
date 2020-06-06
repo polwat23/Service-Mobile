@@ -53,15 +53,19 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrExecute = [
-				':pin' => $dataComing["pin"],
-				':member_no' => $payload["member_no"]
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1015",
+				":error_desc" => "เปลี่ยน Pin ไม่ได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $updatePin;
-			$arrError["ERROR_CODE"] = 'WS1015';
-			$lib->addLogtoTxt($arrError,'pin_error');
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไม่สามารถเปลี่ยน PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updatePin->queryString."\n"."Param => ". json_encode([
+				':pin' => password_hash($dataComing["pin"], PASSWORD_DEFAULT),
+				':member_no' => $payload["member_no"]
+			]);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1015";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -77,6 +81,16 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

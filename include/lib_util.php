@@ -262,13 +262,13 @@ class library {
 		];
 		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
 		$mailFunction->SMTPAuth = true;
-		$mailFunction->Username = 'noreply@gensoft.co.th';
-		$mailFunction->Password = 'h>-^yM3cPd3&';
+		$mailFunction->Username = $json_data["MAIL"];
+		$mailFunction->Password = $json_data["PASS_MAIL"];
 		$mailFunction->SMTPSecure = 'ssl';
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
-		$mailFunction->setFrom('noreply@gensoft.co.th', $json_data["NAME_APP"]);
+		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
@@ -279,11 +279,12 @@ class library {
 			}
 		}
 		if(!$mailFunction->send()){
-			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
-			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
-			return false;
+			$arrRes["RESULT"] = FALSE;
+			$arrRes["MESSAGE_ERROR"] = $mailFunction->ErrorInfo;
+			return $arrRes;
 		}else{
-			return true;
+			$arrRes["RESULT"] = TRUE;
+			return $arrRes;
 		}
 	}
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
@@ -339,6 +340,19 @@ class library {
 			}
 		}else{
 			return 'oversize';
+		}
+	}
+	public function base64_to_pdf($encode_string,$file_name,$output_file) {
+		$data_Img = explode(',',$encode_string);
+		if(isset($data_Img[1])){
+			$dataPdf = base64_decode($data_Img[1]);
+			$destination = $output_file.'/'.$file_name.'.pdf';
+			if(file_put_contents($destination,$dataPdf)){
+				$arrPath["normal_path"] = $file_name.'.pdf';
+				return $arrPath;
+			}else{
+				return false;
+			}
 		}
 	}
 	private function getBase64ImageSize($base64Image){
@@ -561,6 +575,25 @@ class library {
 	}
 	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
+	}
+	public function sendLineNotify($message){
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$json_data = json_decode($json,true);
+		$token = $json_data["LINE_NOTIFY"];
+		$headers = array();
+		$headers[] = 'content-type: application/x-www-form-urlencoded';
+		$headers[] = 'Authorization: Bearer '.$token;
+		$ch = curl_init();
+
+		curl_setopt( $ch,CURLOPT_URL, "https://notify-api.line.me/api/notify" );                                                                  
+		curl_setopt( $ch,CURLOPT_POST, true );  
+		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch,CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
+																													 
+		curl_exec($ch);
 	}
 }
 ?>

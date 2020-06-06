@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
 		$arrayGroup = array();
 		$fetchMenuMobile = $conmysql->prepare("SELECT id_menu, menu_name, menu_status,menu_channel,menu_parent FROM gcmenu 
-											  WHERE menu_status <>'-99' AND menu_parent IN(0,18,19)
+											  WHERE menu_status <>'-99' AND menu_parent IN(0,18,19,-9,-8)
 											  ORDER BY menu_order ASC ");
 		$fetchMenuMobile->execute();
 		while($rowMenuMobile = $fetchMenuMobile->fetch(PDO::FETCH_ASSOC)){

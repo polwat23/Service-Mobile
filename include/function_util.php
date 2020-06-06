@@ -620,5 +620,10 @@ class functions {
 				}
 			}
 		}
+		public function MaintenanceMenu($menu_component){
+			$updateStatusMenu = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$updateStatusMenu->execute([':menu_component' => $menu_component]);
+			return true;
+		}
 }
 ?>

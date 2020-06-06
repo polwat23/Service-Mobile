@@ -4,6 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS0001",
+			":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
@@ -124,15 +132,19 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							echo json_encode($arrayResult);
 						}else{
 							$conmysql->rollback();
-							$arrExecute = [
+							$filename = basename(__FILE__, '.php');
+							$logStruc = [
+								":error_menu" => $filename,
+								":error_code" => "WS1001",
+								":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
+								":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+							];
+							$log->writeLog('errorusage',$logStruc);
+							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken."\n"."Data => ".json_encode([
 								':access_token' => $access_token,
 								':id_token' => $id_token
-							];
-							$arrError = array();
-							$arrError["EXECUTE"] = $arrExecute;
-							$arrError["QUERY"] = $updateAccessToken;
-							$arrError["ERROR_CODE"] = 'WS1001';
-							$lib->addLogtoTxt($arrError,'login_error');
+							]);
+							$lib->sendLineNotify($message_error);
 							$arrayResult['RESPONSE_CODE'] = "WS1001";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
@@ -141,20 +153,24 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						}
 					}else{
 						$conmysql->rollback();
-						$arrExecute = [
+						$filename = basename(__FILE__, '.php');
+						$logStruc = [
+							":error_menu" => $filename,
+							":error_code" => "WS1001",
+							":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
+							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+						];
+						$log->writeLog('errorusage',$logStruc);
+						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin."\n"."Data => ".json_encode([
 							':member_no' => $member_no,
 							':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 							':channel' => $arrPayload["PAYLOAD"]["channel"],
 							':unique_id' => $dataComing["unique_id"],
 							':firstapp' => $firstapp,
 							':id_token' => $id_token
-						];
-						$arrError = array();
-						$arrError["EXECUTE"] = $arrExecute;
-						$arrError["QUERY"] = $insertLogin;
-						$arrError["ERROR_CODE"] = 'WS1002';
-						$lib->addLogtoTxt($arrError,'login_error');
-						$arrayResult['RESPONSE_CODE'] = "WS1002";
+						]);
+						$lib->sendLineNotify($message_error);
+						$arrayResult['RESPONSE_CODE'] = "WS1001";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
@@ -162,20 +178,23 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					}
 				}else{
 					$conmysql->rollback();
-					$arrExecute = [
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS1001",
+						":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken."\n"."Data => ".json_encode([
 						':refresh_token' => $refresh_token,
 						':unique_id' => $dataComing["unique_id"],
 						':channel' => $arrPayload["PAYLOAD"]["channel"],
 						':device_name' => $arrPayload["PAYLOAD"]["device_name"],
-						':ip_address' => $arrPayload["PAYLOAD"]["ip_address"],
-						':fcm_token' => $dataComing["fcm_token"] ?? null
-					];
-					$arrError = array();
-					$arrError["EXECUTE"] = $arrExecute;
-					$arrError["QUERY"] = $insertToken;
-					$arrError["ERROR_CODE"] = 'WS1003';
-					$lib->addLogtoTxt($arrError,'login_error');
-					$arrayResult['RESPONSE_CODE'] = "WS1003";
+						':ip_address' => $arrPayload["PAYLOAD"]["ip_address"]
+					]);
+					$lib->sendLineNotify($message_error);
+					$arrayResult['RESPONSE_CODE'] = "WS1001";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -183,11 +202,17 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				}
 			}catch (PDOExecption $e) {
 				$conmysql->rollback();
-				$arrError = array();
-				$arrError["MESSAGE"] = $e->getMessage();
-				$arrError["ERROR_CODE"] = 'WS9999';
-				$lib->addLogtoTxt($arrError,'exception_error');
-				$arrayResult['RESPONSE_CODE'] = "WS9999";
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1001",
+					":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".$e->getMessage(),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "ไม่สามารถเข้าสู่ระบบได้"."\n"."Error => ".$e->getMessage()."\n"."Data => ".json_encode($dataComing);
+				$lib->sendLineNotify($message_error);
+				$arrayResult['RESPONSE_CODE'] = "WS1001";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
@@ -229,6 +254,16 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

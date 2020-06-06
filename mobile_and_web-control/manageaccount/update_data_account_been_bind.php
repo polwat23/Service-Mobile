@@ -11,15 +11,19 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrExecute = [
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1025",
+				":error_desc" => "ไม่สามารถเปลี่ยนสถานะบัญชีธนาคารได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไม่สามารถเปลี่ยนสถานะบัญชีธนาคารได้เพราะ Update ลง gcbindaccount ไม่ได้"."\n"."Query => ".$updateAccountBeenbind->queryString."\n"."Param => ". json_encode([
 				':bind_status' => $dataComing["bind_status"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
-			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $updateAccountBeenbind;
-			$arrError["ERROR_CODE"] = 'WS1025';
-			$lib->addLogtoTxt($arrError,'manageaccount_error');
+			]);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1025";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
