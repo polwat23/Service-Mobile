@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		exit();
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
+	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
@@ -42,7 +42,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			echo json_encode($arrayResult);
 			exit();
 		}else if($rowPassword['account_status'] == '-9'){
-			$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
+			if($rowPassword["temppass_is_md5"] == '1'){
+				$valid_pass = password_verify(md5($dataComing["password"]), $rowPassword['temppass']);
+			}else{
+				$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
+			}
 		}else{
 			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
 		}

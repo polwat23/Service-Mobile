@@ -165,6 +165,10 @@ if(!$anonymous){
 							$arrayMenuSetting[] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
+							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
+							$getMenuParentStatus->execute();
+							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
+							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){

@@ -8,6 +8,9 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$date_process = $func->getConstant('date_process_kp');
+		$recv_now = (date('Y') + 543).date('m');
+		$dateNow = date('d');
 		$header = array();
 		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
@@ -21,38 +24,58 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$arrGroupDetail = array();
-		$getDetailKP = $conoracle->prepare("SELECT * FROM (
-												SELECT 
-													kut.keepitemtype_desc as TYPE_DESC,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													case kut.keepitemtype_grp 
-														WHEN 'DEP' THEN kpd.description
-														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)
-												UNION 
-												(	SELECT 
-													kut.keepitemtype_desc as TYPE_DESC,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													case kut.keepitemtype_grp 
-														WHEN 'DEP' THEN kpd.description
-														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)");
+		if($recv_now == trim($dataComing["recv_period"])){
+			if($dateNow > $date_process){
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
+		}else{
+			$qureyKpDetail = "SELECT 
+										kut.keepitemtype_desc as TYPE_DESC,
+										kut.keepitemtype_grp as TYPE_GROUP,
+										case kut.keepitemtype_grp 
+											WHEN 'DEP' THEN kpd.description
+											WHEN 'LON' THEN kpd.loancontract_no
+										ELSE kpd.description END as PAY_ACCOUNT,
+										kpd.period,
+										NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+										NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+										NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+										NVL(kpd.interest_payment,0) AS INT_BALANCE
+										FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+										kpd.keepitemtype_code = kut.keepitemtype_code
+										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+		}
+		$getDetailKP = $conoracle->prepare($qureyKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -87,42 +110,47 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
 		}
-		if(sizeof($arrGroupDetail) > 0){
-			$getDetailKPHeader = $conoracle->prepare("SELECT * FROM (
-													SELECT 
-														kpd.RECEIPT_NO,
-														kpd.OPERATE_DATE
-														FROM kpmastreceive kpd
-														WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)
-													UNION 
-													(	SELECT 
-														kpd.RECEIPT_NO,
-														kpd.OPERATE_DATE
-														FROM kptempreceive kpd
-														WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)");
-			$getDetailKPHeader->execute([
-				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"]
-			]);
-			$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
-			$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
-			$header["member_no"] = $payload["member_no"];
-			$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
-			$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
-			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
-			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+		if($recv_now == trim($dataComing["recv_period"])){
+			if($dateNow > $date_process){
+				$qureyKpHeader = "SELECT 
+											kpd.RECEIPT_NO,
+											kpd.OPERATE_DATE
+											FROM kpmastreceive kpd
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0044";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				$qureyKpHeader = "SELECT 
+													kpd.RECEIPT_NO,
+													kpd.OPERATE_DATE
+													FROM kptempreceive kpd
+													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_periodd";
 			}
 		}else{
-			http_response_code(204);
+			$qureyKpHeader = "SELECT 
+											kpd.RECEIPT_NO,
+											kpd.OPERATE_DATE
+											FROM kpmastreceive kpd
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+		}
+		$getDetailKPHeader = $conoracle->prepare($qureyKpHeader);
+		$getDetailKPHeader->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
+		$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
+		$header["member_no"] = $payload["member_no"];
+		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
+		if($arrayPDF["RESULT"]){
+			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0044";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
