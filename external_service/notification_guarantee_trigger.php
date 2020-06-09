@@ -56,8 +56,6 @@ while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 					':seq_no' => $rowGuarantee["SEQ_NO"],
 					':ref_collno' => $rowGuarantee["REF_COLLNO"]
 				]);
-			}else{
-				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_loan');
 			}
 		}
 	}

@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
 												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
-												and lnm.contract_status = '1'
+												and lnm.contract_status > 0
 												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);

@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$insertMemoDept = $conmysql->prepare("INSERT INTO gcdeptalias555(alias_name,path_alias_img,deptaccount_no)
+			$insertMemoDept = $conmysql->prepare("INSERT INTO gcdeptalias(alias_name,path_alias_img,deptaccount_no)
 													VALUES(:alias_name,:path_alias_img,:deptaccount_no)");
 			if($insertMemoDept->execute([
 				':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],

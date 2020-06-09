@@ -100,6 +100,7 @@
 	"WS1027" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถตั้งค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1027","en" : "Something was wronged that cannot set alias name account please contact cooperative #WS1027"}],
 	"WS1028" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถล้างค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1028","en" : "Something was wronged that cannot reset alias name account please contact cooperative #WS1028"}],
 	"WS1029" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถสร้างรายการโปรดได้ กรุณาติดต่อสหกรณ์ #WS1029","en" : "Something was wronged that cannot create favorite transaction please contact cooperative #WS1029"}],
+	"WS1030" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนแปลงสถานะการพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1030","en" : "Something was wronged that cannot change status moratorium please contact cooperative #WS1030"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],

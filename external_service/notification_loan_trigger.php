@@ -52,8 +52,6 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 					':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
 				]);
-			}else{
-				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_loan');
 			}
 		}
 	}

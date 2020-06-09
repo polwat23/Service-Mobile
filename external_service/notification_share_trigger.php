@@ -39,8 +39,6 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
 				]);
-			}else{
-				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_share');
 			}
 		}
 	}
