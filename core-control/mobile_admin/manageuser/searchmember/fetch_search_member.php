@@ -26,38 +26,53 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_desc,mb.memb_name,mb.memb_surname,mb.mem_telmobile,mb.email,mb.member_no,
-											mb.member_date,
-											mb.ADDRESS_NO AS ADDR_NO, 
-											mb.ADDRESS_MOO AS ADDR_MOO,
-											mb.ADDRESS_SOI AS ADDR_SOI,
-											mb.ADDRESS_VILLAGE AS ADDR_VILLAGE,
-											mb.ADDRESS_ROAD AS ADDR_ROAD,
+		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.sms_mobilephone as MEM_TELMOBILE,
+											mb.member_date,mb.member_no,
+											mb.ADDR_NO as ADDR_NO,
+											mb.ADDR_MOO as ADDR_MOO,
+											mb.ADDR_SOI as ADDR_SOI,
+											mb.ADDR_VILLAGE as ADDR_VILLAGE,
+											mb.ADDR_ROAD as ADDR_ROAD,
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
+											MB.PROVINCE_CODE,
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											mb.POSTCODE AS ADDR_POSTCODE
+											MB.ADDR_POSTCODE AS ADDR_POSTCODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.district_code = MBD.district_code
+											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
-											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and mb.memb_name LIKE :member_name" : null).
-											(isset($arrayExecute[':member_surname']) ? " and mb.memb_surname LIKE :member_surname" : null).
-											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null));
+											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
+											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).
+											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null)
+											);
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
-			$address = $rowMember["ADDR_NO"];
-			$address .= (isset($rowMember["ADDR_MOO"]) ? '  ม.'.$rowMember["ADDR_MOO"] : null);
-			$address .= (isset($rowMember["ADDR_SOI"]) ? '  ซอย'.$rowMember["ADDR_SOI"] : null);
-			$address .= (isset($rowMember["ADDR_VILLAGE"]) ? '  หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
-			$address .= (isset($rowMember["ADDR_ROAD"]) ? '  ถนน'.$rowMember["ADDR_ROAD"] : null);
-			$address .= (isset($rowMember["TAMBOL_DESC"]) ? '  ต.'.$rowMember["TAMBOL_DESC"] : null);
-			$address .= (isset($rowMember["DISTRICT_DESC"]) ? '  อ.'.$rowMember["DISTRICT_DESC"] : null);
-			$address .= (isset($rowMember["PROVINCE_DESC"]) ? '  จ.'.$rowMember["PROVINCE_DESC"] : null);
-			$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
+			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}else{
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}
 			$arrayGroup["ADDRESS"] = $address;
+			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
+			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];

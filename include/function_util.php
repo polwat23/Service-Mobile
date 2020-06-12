@@ -54,15 +54,6 @@ class functions {
 				$this->revoke_alltoken($id_token,'-9',true);
 				return true;
 			}else{
-				$arrExecute = [
-					':type_login' => $type_login,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $logout;
-				$arrError["COMPONENT"] = "Logout";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -95,16 +86,6 @@ class functions {
 				}
 				return true;
 			}else{
-				$arrExecute = [
-					':type_login' => $type_login,
-					':member_no' => $member_no,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $logout;
-				$arrError["COMPONENT"] = "LogoutAll";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -119,15 +100,6 @@ class functions {
 				])){
 					return true;
 				}else{
-					$arrExecute = [
-						':type_revoke' => $type_revoke,
-						':id_token' => $id_token
-					];
-					$arrError = array();
-					$arrError["EXECUTE"] = $arrExecute;
-					$arrError["QUERY"] = $revokeAllToken;
-					$arrError["COMPONENT"] = "Revoke all token";
-					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
@@ -160,17 +132,6 @@ class functions {
 				])){
 					return true;
 				}else{
-					$arrExecute = [
-						':type_revoke' => $type_revoke,
-						':id_token' => $id_token,
-						':type_login' => $type_login
-					];
-					$arrError = array();
-					$arrError["EXECUTE"] = $arrExecute;
-					$arrError["QUERY"] = $revokeAllToken;
-					$arrError["QUERY_LOGOUT"] = $forceLogout;
-					$arrError["COMPONENT"] = "Revoke all token";
-					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}
@@ -183,15 +144,6 @@ class functions {
 			])){
 				return true;
 			}else{
-				$arrExecute = [
-					':type_revoke' => $type_revoke,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $revokeAT;
-				$arrError["COMPONENT"] = "Revoke access token";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -203,15 +155,6 @@ class functions {
 			])){
 				return true;
 			}else{
-				$arrExecute = [
-					':type_revoke' => $type_revoke,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $revokeRT;
-				$arrError["COMPONENT"] = "Revoke refresh token";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -247,16 +190,16 @@ class functions {
 					':menu_component' => $menu_component
 				]);
 			}else if($user_type == '1'){
-				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu ,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
 										WHERE gm.menu_component = :menu_component and (gm2.menu_status IN('0','1') OR gm.menu_parent IN('0','-1','-2','-8','-9'))
-										 and gm.menu_status IN('0','1') and gm.menu_permission IN (".implode(',',$permission).")");
+										 and gm.menu_status IN('0','1') and gm.menu_permission IN (".implode(',',$permission).") and menu_system.menu_status = '1'");
 				$checkPermission->execute([
 					':menu_component' => $menu_component
 				]);
 			}else{
-				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu ,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
 										WHERE gm.menu_component = :menu_component and (gm2.menu_status = '1' OR gm.menu_parent IN('0','-1','-2','-8','-9'))
-										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both')");
+										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both') and menu_system.menu_status = '1'");
 				$checkPermission->execute([
 					':menu_component' => $menu_component,
 					':channel' => $dataComing["channel"]
@@ -619,6 +562,10 @@ class functions {
 					return false;
 				}
 			}
+		}
+		public function MaintenanceMenu($menu_component) {
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
 }
 ?>

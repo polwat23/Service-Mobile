@@ -4,29 +4,44 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT cad.id_accountconstant,cad.dept_type_code,cad.member_cate_code,cad.dept_type_desc,cad.id_palette,cad.allow_transaction,
-										pc.type_palette, pc.color_main,pc.color_secon,pc.color_deg,pc.color_text,cad.is_use as cad_is_use
-										FROM gcconstantaccountdept cad 
-										JOIN gcpalettecolor pc ON pc.id_palette = cad.id_palette
-										WHERE cad.is_use = '1' OR cad.is_use = '0' AND pc.is_use = '1'");
+		$arrayChkG = array();
+		$fetchConstant = $conmysql->prepare("SELECT
+																		id_accountconstant,
+																		dept_type_code,
+																		member_cate_code,
+																		allow_transaction
+																	FROM
+																		gcconstantaccountdept
+																	ORDER BY dept_type_code ASC");
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["ID_ACCCONSTANT"] = $rowMenuMobile["id_accountconstant"];
-			$arrConstans["DEPT_TYPE_CODE"] = $rowMenuMobile["dept_type_code"];
-			$arrConstans["MEMBER_CATE_CODE"] = $rowMenuMobile["member_cate_code"];
-			$arrConstans["DEPT_TYPE_CODE"] = $rowMenuMobile["dept_type_desc"];
-			$arrConstans["ID_PALETTE"] = $rowMenuMobile["id_palette"];
+			$arrConstans["DEPTTYPE_CODE"] = $rowMenuMobile["dept_type_code"];
+			$arrConstans["MEMBER_TYPE_CODE"] = $rowMenuMobile["member_cate_code"];
 			$arrConstans["ALLOW_TRANSACTION"] = $rowMenuMobile["allow_transaction"];
-			$arrConstans["TYPE_PALETTE"] = $rowMenuMobile["type_palette"];
-			$arrConstans["COLOR_MAIN"] = $rowMenuMobile["color_main"];
-			$arrConstans["COLOR_SECON"] = $rowMenuMobile["color_secon"];
-			$arrConstans["COLOR_DEG"] = $rowMenuMobile["color_deg"];
-			$arrConstans["COLOR_TEXT"] = $rowMenuMobile["color_text"];
-			$arrConstans["DEPT_IS_USE"] = $rowMenuMobile["cad_is_use"];
-			$arrayGroup[] = $arrConstans;
+			$arrayChkG[] = $arrConstans;
 		}
+		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
+		$fetchDepttype->execute();
+		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
+			$arrayDepttype = array();
+				if(array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE')) === False){
+						$arrayDepttype["ALLOW_TRANSACTION"] = 0;
+						$arrayDepttype["MEMBER_TYPE_CODE"] = 'AL';
+				}else{
+					$arrayDepttype["ALLOW_TRANSACTION"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_TRANSACTION"];
+					$arrayDepttype["MEMBER_TYPE_CODE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["MEMBER_TYPE_CODE"];
+					//$arrayDepttype["ID_ACCCONSTANT"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ID_ACCCONSTANT"];
+				}
+				
+			$arrayDepttype["DEPTTYPE_CODE"] = $rowDepttype["DEPTTYPE_CODE"];
+			$arrayDepttype["DEPTTYPE_DESC"] = $rowDepttype["DEPTTYPE_DESC"];
+			$arrayGroup[] = $arrayDepttype;
+		}
+		
 		$arrayResult["ACCOUNT_DATA"] = $arrayGroup;
+		
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

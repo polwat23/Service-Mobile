@@ -179,6 +179,10 @@ if(!$anonymous){
 							$arrayMenuSetting[] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
+							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
+							$getMenuParentStatus->execute();
+							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
+							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '56'){
 							$arrayMenuTransactionInside[] = $arrMenu;
@@ -304,6 +308,14 @@ if(!$anonymous){
 	if($lib->checkCompleteArgument(['api_token'],$dataComing)){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0001",
+				":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -349,6 +361,16 @@ if(!$anonymous){
 			exit();
 		}
 	}else{
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS4004",
+			":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
+		$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+		$lib->sendLineNotify($message_error);
 		$arrayResult['RESPONSE_CODE'] = "WS4004";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;

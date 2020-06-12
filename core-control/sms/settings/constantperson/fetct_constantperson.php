@@ -22,17 +22,19 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$smsConstantMinWithdraw = $rowSMSConstantWithdraw["constant_value"];
 		}
 		
-		$fetchConstant = $conmysql->prepare("SELECT id_smscsperson as id_constantperson,smscsp_member as member_no,smscsp_mindeposit as mindeposit,
-												smscsp_minwithdraw as minwithdraw,is_use
-												FROM smsconstantperson");
+		$fetchConstant = $conmysql->prepare('SELECT id_smscsperson as id_constantperson,smscsp_account as account,smscsp_mindeposit as mindeposit,
+												smscsp_minwithdraw as minwithdraw,is_use,is_mindeposit, is_minwithdraw
+												FROM smsconstantperson WHERE smscsp_account in ('.implode(',',$dataComing["acc_list"]).')');
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["id_constantperson"];
-			$arrConstans["CONSTANT_MEMBERNO"] = $rowMenuMobile["member_no"];
+			$arrConstans["DEPTACCOUNT_NO"] = $rowMenuMobile["account"];
 			$arrConstans["MINDEPOSIT"] = $rowMenuMobile["mindeposit"];
 			$arrConstans["MINWITHDRAW"] = $rowMenuMobile["minwithdraw"];
 			$arrConstans["IS_USE"] = $rowMenuMobile["is_use"];
+			$arrConstans["IS_MINDEPOSIT"] = $rowMenuMobile["is_mindeposit"];
+			$arrConstans["IS_MINWITHDRAW"] = $rowMenuMobile["is_minwithdraw"];
 			$arrayGroup[] = $arrConstans;
 		}
 		$arrayResult["CONSTANT_MIN_DEPT"] = $smsConstantMinDept;

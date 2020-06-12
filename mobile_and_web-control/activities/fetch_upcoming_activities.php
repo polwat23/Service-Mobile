@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										date_format(event_end_time,'%H:%i') as event_end_time,
 										is_settime,create_date,update_date,is_notify,is_notify_before,create_by
 										FROM gctaskevent
-										WHERE start_date >= CURDATE() or end_date >= CURDATE() ORDER BY start_date DESC");
+										WHERE start_date >= CURDATE() or end_date >= CURDATE()");
 		$fetchEvent->execute();
 		while($rowEvent = $fetchEvent->fetch(PDO::FETCH_ASSOC)){
 			$arrayEvent = array();
@@ -42,6 +42,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

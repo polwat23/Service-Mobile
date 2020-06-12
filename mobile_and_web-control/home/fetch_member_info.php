@@ -19,7 +19,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc
 												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
@@ -56,9 +55,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$address .= (isset($rowAddress["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowAddress["ADDR_VILLAGE"] : null);
 					$address .= (isset($rowAddress["ADDR_ROAD"]) ? ' ถนน'.$rowAddress["ADDR_ROAD"] : null);
 					$address .= (isset($rowAddress["TAMBOL_DESC"]) ? ' แขวง '.$rowAddress["TAMBOL_DESC"] : null);
-					$address .= (isset($rowAddress["DISTRICT_DESC"]) ? 'เขต '.$rowAddress["DISTRICT_DESC"] : null);
-					$address .= (isset($rowAddress["PROVINCE_DESC"]) ? $rowAddress["PROVINCE_DESC"] : null);
-					$address .= (isset($rowAddress["ADDR_POSTCODE"]) ? $rowAddress["ADDR_POSTCODE"] : null);
+					$address .= (isset($rowAddress["DISTRICT_DESC"]) ? ' เขต '.$rowAddress["DISTRICT_DESC"] : null);
+					$address .= (isset($rowAddress["PROVINCE_DESC"]) ? ' '.$rowAddress["PROVINCE_DESC"] : null);
+					$address .= (isset($rowAddress["ADDR_POSTCODE"]) ? ' '.$rowAddress["ADDR_POSTCODE"] : null);
 				}else{
 					$address .= (isset($rowAddress["ADDR_MOO"]) ? ' ม.'.$rowAddress["ADDR_MOO"] : null);
 					$address .= (isset($rowAddress["ADDR_SOI"]) ? ' ซอย'.$rowAddress["ADDR_SOI"] : null);
@@ -67,7 +66,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$address .= (isset($rowAddress["TAMBOL_DESC"]) ? ' ต.'.$rowAddress["TAMBOL_DESC"] : null);
 					$address .= (isset($rowAddress["DISTRICT_DESC"]) ? ' อ.'.$rowAddress["DISTRICT_DESC"] : null);
 					$address .= (isset($rowAddress["PROVINCE_DESC"]) ? ' จ.'.$rowAddress["PROVINCE_DESC"] : null);
-					$address .= (isset($rowAddress["ADDR_POSTCODE"]) ? $rowAddress["ADDR_POSTCODE"] : null);
+					$address .= (isset($rowAddress["ADDR_POSTCODE"]) ? ' '.$rowAddress["ADDR_POSTCODE"] : null);
 				}
 				if($rowAddress["ADDRESS_CODE"] == '01'){
 					$arrayResult["FULL_ADDRESS_REGIS"] = $address;
@@ -76,6 +75,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrayResult["FULL_ADDRESS_CURR"] = $address;
 				}
+			}
+			$getSignature = $conoracle->prepare("SELECT fm.base64_img,fmt.mimetypes,fm.data_type FROM fomimagemaster fm LEFT JOIN fomucfmimetype fmt ON fm.data_type = fmt.typefile
+												where fm.system_code = 'mbshr' and fm.column_name = 'member_no' 
+												and fm.column_data = :member_no and fm.img_type_code = '002' and rownum <= 1 ORDER BY fm.seq_no DESC");
+			$getSignature->execute([':member_no' => $member_no]);
+			$rowSignature = $getSignature->fetch(PDO::FETCH_ASSOC);
+			$DataURLBase64 = isset($rowSignature["BASE64_IMG"]) ? "data:".$rowSignature["MIMETYPES"].";base64,".base64_encode(stream_get_contents($rowSignature["BASE64_IMG"])) : null;
+			if(isset($DataURLBase64) && $DataURLBase64 != ''){
+				$arrayResult['DATA_TYPE'] = $rowSignature["DATA_TYPE"] ?? 'pdf';
+				$arrayResult['SIGNATURE'] = $DataURLBase64;
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
@@ -91,8 +100,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
+
 		}else{
-			http_response_code(204);
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
@@ -104,6 +117,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

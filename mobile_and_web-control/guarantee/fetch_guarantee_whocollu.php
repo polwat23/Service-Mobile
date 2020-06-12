@@ -13,13 +13,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
 												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
-												and lnm.contract_status = '1'
+												and lnm.contract_status > 0
 												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 			$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-			$arrGroupAll['CONTRACT_NO'] = $dataComing["contract_no"];
+			$arrGroupAll['CONTRACT_NO'] = $contract_no;
 			$whocolluMember = $conoracle->prepare("SELECT
 													MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 													LCC.REF_COLLNO AS MEMBER_NO			
@@ -57,7 +57,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$arrGroupAll['CONTRACT_NO'] =  $rowWhocollu["LOANCONTRACT_NO"];
+				$contract_no = $rowWhocollu["LOANCONTRACT_NO"];
+				if(mb_stripos($contract_no,'.') === FALSE){
+					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
+					if(mb_strlen($contract_no) == 10){
+						$arrGroupAll["CONTRACT_NO"] = $loan_format;
+					}else if(mb_strlen($contract_no) == 11){
+						$arrGroupAll["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
+					}
+				}else{
+					$arrGroupAll["CONTRACT_NO"] = $contract_no;
+				}
 				$whocolluMember = $conoracle->prepare("SELECT
 														MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 														LCC.REF_COLLNO AS MEMBER_NO			
@@ -93,6 +103,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

@@ -55,11 +55,11 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 																	WHERE mb.member_no = :member_no");
 						$fetchNameAccDes->execute([':member_no' => $member_no]);
 					}else{
-						$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+						$fetchNameAccDes = $conoracle->prepare("SELECT TRIM(DEPTACCOUNT_NAME) as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 						$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 					}
 					$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
-					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',$rowNameAcc["DEPTACCOUNT_NAME"]);
+					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
 					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["bank_format_account"]);
 					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["bank_format_account_hide"]);
@@ -71,7 +71,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$arrayTrans["DESTINATION_NAME"] = $rowNameLn["LOANTYPE_DESC"];
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขสัญญา';
 					$contract_no = preg_replace('/\//','',$rowTrans["DESTINATION"]);
-					$arrContract = array();
 					if(mb_stripos($contract_no,'.') === FALSE){
 						$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
 						if(mb_strlen($contract_no) == 10){
@@ -80,7 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 							$arrayTrans["DESTINATION"] = $loan_format.'-'.mb_substr($contract_no,10);
 						}
 					}else{
-						$arrContract["DESTINATION"] = $contract_no;
+						$arrayTrans["DESTINATION"] = $contract_no;
 					}
 				}else{
 					$fetchNameDes = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME
@@ -93,10 +92,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$arrayTrans["DESTINATION"] = $rowTrans["DESTINATION"];
 				}
 			}else{
-				$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 				$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 				$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
-				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',$rowNameAcc["DEPTACCOUNT_NAME"]);
+				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
 				$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
 				$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format'));
 				$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$func->getConstant('hidden_dep'));
@@ -115,6 +114,16 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

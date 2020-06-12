@@ -4,7 +4,9 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
 		$arrGroupDevice = array();
-		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
+		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token,
+													(SELECT login_date FROM gcuserlogin WHERE is_login <> '1' and member_no = :member_no 
+													ORDER BY id_userlogin DESC LIMIT 1) as last_login_date
 													FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
 													GROUP BY unique_id ORDER BY id_userlogin DESC");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
@@ -12,6 +14,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowSetting = $fetchSettingDevice->fetch(PDO::FETCH_ASSOC)){
 				$arrDevice = array();
 				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
+				$arrDevice["LAST_LOGIN_DATE"] = isset($rowSetting["last_login_date"]) ? $lib->convertdate($rowSetting["last_login_date"],'d m Y',true) : null;
 				$arrDevice["CHANNEL"] = $rowSetting["channel"];
 				if($rowSetting["unique_id"] == $dataComing["unique_id"]){
 					$arrDevice["THIS_DEVICE"] = true;
@@ -37,6 +40,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

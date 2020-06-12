@@ -12,15 +12,19 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrExecute = [
-				':deptaccount_no' => $account_no,
-				':seq_no' => $dataComing["seq_no"]
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1004",
+				":error_desc" => "ลบข้อมูลไม่ได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $DeleteMemoDept;
-			$arrError["ERROR_CODE"] = 'WS1004';
-			$lib->addLogtoTxt($arrError,'memo_error');
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ลบชื่อเล่นบัญชีไม่ได้เพราะ Update ลงตาราง gcdeptalias ไม่ได้ "."\n"."Query => ".$DeleteMemoDept->queryString."\n"."Param => ".json_encode([
+				':deptaccount_no' => $account_no,
+			'	:seq_no' => $dataComing["seq_no"]
+			]);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -36,6 +40,16 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

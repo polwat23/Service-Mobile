@@ -4,6 +4,14 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','id_token','type_logout'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','userlogin')){
 		if($func->logout($dataComing['id_token'],$dataComing['type_logout'])){
+			$arrayStruc = [
+				':menu_name' => "userlogin",
+				':username' => $payload["username"],
+				':use_list' => "logout",
+				':details' => $dataComing["id_token"],
+			];
+			
+			$log->writeLog('manageuser',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);	
 		}else{
