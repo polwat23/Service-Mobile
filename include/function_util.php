@@ -180,7 +180,7 @@ class functions {
 					$permission[] = "'2'";
 					$permission[] = "'3'";
 					break;
-				default : $permission[] = "'0'";
+				default : return false;
 					break;
 			}
 			if($user_type == '5' || $user_type == '9'){

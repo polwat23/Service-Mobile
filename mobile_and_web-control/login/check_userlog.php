@@ -13,6 +13,26 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		echo json_encode($arrayResult);
 		exit();
 	}
+	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
+		if($dataComing["is_root"] == "1"){
+			$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist,new_id_token,old_id_token)
+												VALUES(:unique_id,:member_no,'1',:id_token,:id_token)");
+			if($insertBlackList->execute([
+				':unique_id' => $dataComing["unique_id"],
+				':member_no' => $payload["member_no"],
+				':id_token' => $payload["id_token"]
+			])){
+				$arrayResult['RESPONSE_CODE'] = "WS0069";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+		}else{
+			$updateBlacklist = $conmysql->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
+			$updateBlacklist->execute([':unique_id' => $dataComing["unique_id"]]);
+		}
+	}
 	if(isset($dataComing["flag"]) && $dataComing["flag"] == "TOUCH_ID"){
 		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
 		$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);

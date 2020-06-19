@@ -48,7 +48,8 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			$arrayDest["member_no"] = $member_no;
 			$arrayDest["tel"] = $arrayTel[0]["TEL"];
 			$arrayDest["message"] = $arrMessage["BODY"];
-			//$arraySendSMS = $lib->sendSMS($arrayDest);
+			$arrayDest["cmd_sms"] = "CMD=SENDMSG&FROM=Forest_COOP&TO=66820161367&REPORT=Y&CHARGE=66614103343&CODE=45140200001&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
+			$arraySendSMS = $lib->sendSMS($arrayDest);
 			$arraySendSMS["RESULT"] = TRUE;
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');

@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$time = date("Hi");
 		if($time >= 0000 && $time <= 0200){
 			$arrayResult['RESPONSE_CODE'] = "WS0035";
@@ -19,9 +19,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
 		if($fetchBindAccount->rowCount() > 0){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
-				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no
-																FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use <> '-9' and gct.is_use ='1' and gct.allow_transaction = '1'");
+				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no 
+													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
+													gat.id_accountconstant = gct.id_accountconstant
+													WHERE gct.allow_transaction = '1' and gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
 				if($fetchAccountBeenAllow->rowCount() > 0){
 					$arrAccBind = array();
@@ -35,16 +36,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-					$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt
+					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.prncbal
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
+														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.transonline_flag = 1");
 					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
 					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-					if(isset($rowDataAcc["DEPTACCOUNT_NAME"])){
-						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
+					if(isset($rowDataAcc["DEPTTYPE_DESC"])){
+						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
 						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-						$arrAccBind["BALANCE"] = $rowDataAcc["WITHDRAWABLE_AMT"];
-						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["WITHDRAWABLE_AMT"],2);
+						$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"];
+						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["PRNCBAL"],2);
 						$arrGroupAccBind[] = $arrAccBind;
 					}
 				}
@@ -61,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_CODE'] = "WS0021";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -76,6 +77,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

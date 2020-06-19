@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				];
 				$resultWS = $clientWS->__call("of_getloanpermiss_IVR", array($argumentWS));
 				$responseSoap = $resultWS->atr_lnatm;
+				$arrayResult['dddd'] = $responseSoap;
 				$arrayResult['ACCOUNT_RECEIVE'] = $responseSoap->account_id;
 				$arrayResult['CONTRACT_CLR'] = $responseSoap->contclr_no;
 				$arrayResult['PRINBAL_CLR'] = $responseSoap->prinbal_clr;
@@ -52,12 +53,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$logStruc = [
 						":error_menu" => $filename,
 						":error_code" => "WS0062",
-						":error_desc" => "ไม่สามารถคำนวณชำระต่องวดได้ "."\n".json_encode($e),
+						":error_desc" => "ไม่สามารถคำนวณชำระต่องวดได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณชำระต่องวดได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error => ".json_encode($e);
-					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_CODE'] = "WS0062";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -69,12 +68,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$logStruc = [
 					":error_menu" => $filename,
 					":error_code" => "WS0058",
-					":error_desc" => "คำนวณสิทธิ์กู้ไม่ได้ "."\n".json_encode($e),
+					":error_desc" => "คำนวณสิทธิ์กู้ไม่ได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
 					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 				];
 				$log->writeLog('errorusage',$logStruc);
-				$message_error = "ไฟล์ ".$filename." คำนวณสิทธิ์กู้ไม่ได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error => ".json_encode($e);
-				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_CODE'] = "WS0058";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

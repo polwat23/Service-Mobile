@@ -40,11 +40,11 @@ if($lib->checkCompleteArgument(['menu_component','account_receive','prinbal_clr'
 				$logStruc = [
 					":error_menu" => $filename,
 					":error_code" => "WS0063",
-					":error_desc" => "ไม่สามารถคำนวณสิทธิ์กู้ได้ "."\n".json_encode($e),
+					":error_desc" => "ไม่สามารถคำนวณสิทธิ์กู้ได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
 					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 				];
 				$log->writeLog('errorusage',$logStruc);
-				$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณสิทธิ์กู้ได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error => ".json_encode($e);
+				$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณสิทธิ์กู้ได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error Info => ".$e->getMessage()."\n"."Error => ".json_encode($e);
 				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_CODE'] = "WS0063";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

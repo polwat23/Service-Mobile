@@ -14,7 +14,6 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 		$arrarDataAcc = array();
 		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc
 												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												and dpm.membcat_code = dpt.membcat_code
 												WHERE dpm.deptaccount_no = :deptaccount_no");
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
 		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
@@ -53,6 +52,16 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

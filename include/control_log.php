@@ -33,6 +33,8 @@ class insertLog {
 				$this->logLockAccount($log_struc);
 			}else if($type_log == 'errorusage'){
 				$this->logErrorUsage($log_struc);
+			}else if($type_log == 'buyshare'){
+				$this->logBuyShare($log_struc);
 			}
 		}
 		
@@ -142,6 +144,13 @@ class insertLog {
 		private function logErrorUsage($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logerrorusageapplication(error_menu,error_code,error_desc,error_device) 
 												VALUES(:error_menu,:error_code,:error_desc,:error_device)");
+			$insertLog->execute($log_struc);
+		}
+		private function logBuyShare($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logbuyshare(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
+											,destination,response_code,response_message) 
+											VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:status_flag,
+											:destination,:response_code,:response_message)");
 			$insertLog->execute($log_struc);
 		}
 }

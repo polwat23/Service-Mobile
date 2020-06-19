@@ -48,7 +48,6 @@
 	"WS0029" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถยกเลิกผูกบัญชีได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม. #WS0029","en" : "Something was crashed that cannot unbind account. Cooperative wishes to close for the system maintenance please try again in 3 Hrs. #WS0029"}],
 	"WS0030" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถถอนเงินได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม. #WS0030","en" : "Something was crashed that cannot withdraw deposit. Cooperative wishes to close for the system maintenance please try again in 3 Hrs. #WS0030"}],
 	"WS0031" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถใช้งานได้ กรุณาเข้าสู่ระบบใหม่อีกครั้ง #WS0031","en" : "Something was wronged that cannot use please login again #WS0031"}],
-	"WS0032" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเช็คข้อมูลการใช้งานได้ กรุณาเข้าสู่ระบบใหม่อีกครั้ง #WS0032","en" : "Something was wronged that cannot check data for usage please login again #WS0032"}],
 	"WS0033" : [{"th" : "เกิดข้อผิดพลาดบางประการ OTP ไม่สามารถใช้งานได้กรุณากดส่งอีกครั้งหรือติดต่อสหกรณ์หากยังไม่สามารถใช้งานได้","en" : "Something was wronged that OTP cannot use please resend or contact cooperative"}],
 	"WS0034" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเช็คข้อมูลการใช้งานได้ กรุณาติดต่อสหกรณ์ #WS0034","en" : "Something was wronged that cannot check data for usage please contact cooperative #WS0034"}],
 	"WS0035" : [{"th" : "สหกรณ์ของดให้บริการการทำธุรกรรมในช่วงเวลา 00.00 - 02.00 น. ขออภัยในความไม่สะดวก","en" : "The cooperative cut the services for transactions between 00:00 - 02:00 Hrs. Apologize for the inconvenience"}],
@@ -79,7 +78,14 @@
 	"WS0061" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถแสดงสิทธิ์ค้ำประกันได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot calculate guarantee limit. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
 	"WS0062" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถคำนวณชำระต่องวดได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot calculate period payment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
 	"WS0063" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถขอกู้ได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot loan request. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
+	"WS0064" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถทำรายการโอนเงินภายในสหกรณ์ได้ ณ ขณะนี้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot fund transfer in the cooperative this moment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
+	"WS0065" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถซื้อหุ้นได้ ณ ขณะนี้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot buy shares this moment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
+	"WS0066" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถทำรายการชำระหนี้ได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot payment loan. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
+	"WS0067" : [{"th" : "ยอดคงเหลือของท่านไม่เพียงพอสำหรับทำรายการ เนื่องจากการทำรายการในครั้งนี้มีค่าปรับในการทำรายการให้ยอดคงเหลือของท่านไม่เพียงพอ","en" : "Withdrawable amount is not enough because this transaction does have add penalty. That is amount over more than withdrawable amount"}],
+	"WS0068" : [{"th" : "อุปกรณ์ของท่านถูกระงับการใช้งาน เนื่องจากบัญชีของท่านมีการใช้งานในอุปกรณ์ใหม่ หากต้องการกลับมาใช้งานในอุปกรณ์นี้ กรุณาติดต่อสหกรณ์","en" : "Your device was withheld because your account has login in new device if you want to use in this device please contact cooperative"}],
+	"WS0069" : [{"th" : "ระบบไม่รองรับอุปกรณ์ที่ผ่านการ Root หรือ Jailbreak หากอุปกรณ์ของท่านไม่ได้ผ่านการ Root หรือ Jailbreak กรุณาติดต่อสหกรณ์","en" : "The system not allow device that Root or Jailbreak if you do not Root or Jailbreak please contact cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
+	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
 	"WS1005" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเพิ่มบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1005","en" : "Something was wronged that cannot add memo please contact cooperative #WS1005"}],
 	"WS1006" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบประวัติการแจ้งเตือนได้ กรุณาติดต่อสหกรณ์ #WS1006","en" : "Something was wronged that cannot delete history please contact cooperative #WS1006"}],
@@ -154,5 +160,10 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
-	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}]
+	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}],
+	"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
+	"BUTTON_TEXT" : [{
+		"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
+		"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
+	}]
 }

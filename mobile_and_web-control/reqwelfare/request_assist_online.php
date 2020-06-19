@@ -40,12 +40,16 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrayExecute;
-			$arrError["ERROR"] = $conoracle->errorInfo();
-			$arrError["QUERY"] = $insertToAssistMast;
-			$arrError["ERROR_CODE"] = 'WS0055';
-			$lib->addLogtoTxt($arrError,'welfare_error');
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0055",
+				":error_desc" => "ไม่สามารถขอทุนสวัสดิการได้"."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." ไม่สามารถขอทุนสวัสดิการได้"."\n"."Query => ".$insertToAssistMast->queryString."\n"."DATA => ".json_encode($arrayExecute);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS0055";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
