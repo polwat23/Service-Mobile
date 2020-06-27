@@ -5,48 +5,38 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','processsmsservicefee')){
 		$arrayGroup = array();
 		$sumFee = 0;
-		$sumRount = 0;
+		$sumRound = 0;
 		$fetchSmsContant = $conmysql->prepare("SELECT
 													smscs_value
 												FROM
 													smsconstantsystem
 												WHERE
-													smscs_name = :smscs_name");
-		$fetchSmsContant->execute([
-			':smscs_name' => 'sms_fee_amt_per_trans',
-		]);	
-		$fee = $fetchSmsContant->fetch(PDO::FETCH_ASSOC);
+													smscs_name = 'sms_fee_amt_per_trans'");
+		$fetchSmsContant->execute();	
+		$rowfee = $fetchSmsContant->fetch(PDO::FETCH_ASSOC);
 		$fetchSmsTranWassent = $conmysql->prepare("SELECT
-													sms_message,
+													count(id_smssent) as round_send,
 													member_no,
-													tel_mobile,
-													process_round,
-													send_date,
-													send_by
+													tel_mobile
 												FROM
 													smstranwassent
-												WHERE payment_keep = :payment_keep AND process_flag = :process_flag");
-		$fetchSmsTranWassent->execute([
-			':payment_keep' => '1',
-			':process_flag' => '0',
-		]);
+												WHERE payment_keep = '1' AND process_flag = '0' GROUP BY member_no,tel_mobile");
+		$fetchSmsTranWassent->execute();
 		while($rowSmsTranWassent = $fetchSmsTranWassent->fetch(PDO::FETCH_ASSOC)){
+			$FeeNet = $rowfee["smscs_value"] * $rowSmsTranWassent["round_send"];
 			$arrGroupSmsTranWassent = array();
 			$arrGroupSmsTranWassent["MEMBER_NO"] = $rowSmsTranWassent["member_no"];
-			$arrGroupSmsTranWassent["SMS_MESSAGE"] = $rowSmsTranWassent["sms_message"];
+			$arrGroupSmsTranWassent["PROCESS_ROUND"] = $rowSmsTranWassent["round_send"];
 			$arrGroupSmsTranWassent["TEL_MOBILE"] = $rowSmsTranWassent["tel_mobile"];
-			$arrGroupSmsTranWassent["PROCESS_ROUND"] = $rowSmsTranWassent["process_round"];
-			$arrGroupSmsTranWassent["SEND_BY"] = $rowSmsTranWassent["send_by"];
-			$arrGroupSmsTranWassent["FEE"] = $fee["smscs_value"]* $rowSmsTranWassent["process_round"];
-			$arrGroupSmsTranWassent["FEE_FORMAT"] =  number_format($fee["smscs_value"]* $rowSmsTranWassent["process_round"],2);
-			$arrGroupSmsTranWassent["SEND_DATE"] = $lib->convertdate($rowSmsTranWassent["send_date"],'d m Y',true);
+			$arrGroupSmsTranWassent["FEE"] = $FeeNet;
+			$arrGroupSmsTranWassent["FEE_FORMAT"] =  number_format($FeeNet,2);
 			$arrayGroup[] = $arrGroupSmsTranWassent;
-			$sumFee += ($fee["smscs_value"]* $rowSmsTranWassent["process_round"]);
-			$sumRount += $rowSmsTranWassent["process_round"];
+			$sumFee += $FeeNet;
+			$sumRound += $rowSmsTranWassent["round_send"];
 		}
 		$arrayResult["SMS_TRAN_WASSENT"] = $arrayGroup;
 		$arrayResult["SUM_FEE"] =number_format($sumFee,2);
-		$arrayResult["SUM_ROUND"] =$sumRount;
+		$arrayResult["SUM_ROUND"] = $sumRound;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 		

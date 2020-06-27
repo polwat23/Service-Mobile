@@ -27,6 +27,12 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						if($getIdPermission->rowCount() > 0){
 							$rowIdPermission = $getIdPermission->fetch(PDO::FETCH_ASSOC);
 							$arrayInsert[] = "(".$id_submenu.",".$rowIdPermission["id_permission_menu"].")";
+						}else{
+							$insertCoreMenu = $conmysql->prepare("INSERT INTO corepermissionmenu(id_coremenu,username)
+																	VALUES(1,:username)");
+							$insertCoreMenu->execute([':username' => $username]);
+							$id_insert = $conmysql->lastInsertId();
+							$arrayInsert[] = "(".$id_submenu.",".$id_insert.")";
 						}
 					}else{
 						$id_section_system = str_replace("_system_","",$username);
@@ -38,6 +44,17 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','user_con
 						if($selectUserinSystem->rowCount() > 0){
 							while($rowUser = $selectUserinSystem->fetch(PDO::FETCH_ASSOC)){
 								$arrayInsert[] = "(".$id_submenu.",".$rowUser["id_permission_menu"].")";
+							}
+						}else{
+							$selectSystemCore = $conmysql->prepare("SELECT username FROM coreuser
+																	WHERE id_section_system = :id_section_system");
+							$selectSystemCore->execute([':id_section_system' => $id_section_system]);
+							while($rowSc = $selectSystemCore->fetch(PDO::FETCH_ASSOC)){
+								$insertCoreMenu = $conmysql->prepare("INSERT INTO corepermissionmenu(id_coremenu,username)
+																		VALUES(1,:username)");
+								$insertCoreMenu->execute([':username' => $rowSc["username"]]);
+								$id_insert = $conmysql->lastInsertId();
+								$arrayInsert[] = "(".$id_submenu.",".$id_insert.")";
 							}
 						}
 					}

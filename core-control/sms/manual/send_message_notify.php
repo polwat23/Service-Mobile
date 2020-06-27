@@ -173,12 +173,32 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayMerge as $dest){
 					$arrGroupCheckSend = array();
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-						$arrGRPAll[$dest["MEMBER_NO"]] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
+						$message_body = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
 						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+						$arraySendSMS = $lib->sendSMS($arrayDest);
+						if($arraySendSMS["RESULT"]){
+							$arrGRPAll[$dest["MEMBER_NO"]] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
+							$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						}else{
+							$bulkInsert[] = "('".$message_body."','".$dest["MEMBER_NO"]."',
+									'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."','".$id_template."')";
+							if(sizeof($bulkInsert) == 1000){
+								$func->logSMSWasNotSent($bulkInsert);
+								unset($bulkInsert);
+							}
+						}
 					}
 				}
-				$arrayLogSMS = $func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],true);
-				$arrayResult['RESULT'] = $arrayLogSMS;
+				if(sizeof($arrGRPAll) > 0){
+					$func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],true);
+				}
+				if(sizeof($bulkInsert) > 0){
+					$func->logSMSWasNotSent($bulkInsert);
+					unset($bulkInsert);
+					$bulkInsert = array();
+				}
+				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
 				$arrayTel = $func->getSMSPerson('all');

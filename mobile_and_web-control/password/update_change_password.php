@@ -3,6 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingChangePassword')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		$conmysql->beginTransaction();
 		$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1'
@@ -13,6 +14,27 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 		])){
 			if($func->logoutAll($payload["id_token"],$payload["member_no"],'-9')){
 				$conmysql->commit();
+				$getPhoneMember = $conoracle->prepare("SELECT mem_telmobile FROM mbmembmaster WHERE member_no = :member_no");
+				$getPhoneMember->execute([':member_no' => $member_no]);
+				$rowPhoneMember = $getPhoneMember->fetch(PDO::FETCH_ASSOC);
+				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+				$dataMerge = array();
+				$dataMerge["DEVICE_NAME"] = $dataComing["device_name"];
+				$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'d m Y',true);
+				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+				$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowPhoneMember["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
+				$arraySendSMS = $lib->sendSMS($arrayDest);
+				if($arraySendSMS["RESULT"]){
+					$arrayComing["TEL"] = $rowPhoneMember["MEM_TELMOBILE"];
+					$arrayComing["MEMBER_NO"] = $payload["member_no"];
+					$arrayTel[] = $arrayComing;
+					$arrayLogSMS = $func->logSMSWasSent(null,$message_endpoint["BODY"],$arrayTel,'system');
+				}else{
+					$bulkInsert[] = "('".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+							'sms','".$rowPhoneMember["MEM_TELMOBILE"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+					$func->logSMSWasNotSent($bulkInsert);
+					unset($bulkInsert);
+				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{

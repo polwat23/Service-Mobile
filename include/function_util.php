@@ -426,7 +426,7 @@ class functions {
 					}
 				}
 			}else{
-				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0' and rownum <= 10");
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0'");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMT = array();
@@ -438,14 +438,12 @@ class functions {
 			}
 			return $arrayMemberGRP;
 		}
-		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false,$payment_keep=false) {
+		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false) {
 			$this->con->beginTransaction();
 			$textcombine = array();
 			$textcombinenotsent = array();
 			if($trans_flag){
-				if($payment_keep){
-					
-				}
+				
 			}else{
 				if($multi_message){
 					foreach($destination as $dest){

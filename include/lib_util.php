@@ -1,5 +1,7 @@
 <?php
+//require_once(__DIR__.'/../extension/vendor/autoload.php');
 
+//use Vyuldashev\XmlToArray\XmlToArray;
 namespace Utility;
 
 const BAHT_TEXT_NUMBERS = array('ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า');
@@ -203,10 +205,11 @@ class library {
 	}
 	private function concatpercent($string) {
 		$strLen = strlen($string);
+		$output = "";
 		if($strLen > 0){
 			$output .= "%";
 			for($i=0; $i < $strLen; $i++) {
-				$output .= $string{$i};
+				$output .= $string[$i];
 				if($i % 2 != 0 && $i < $strLen - 1){
 					$output .= "%";
 				}
@@ -237,27 +240,26 @@ class library {
 			}
 			return $arrayGrpSms;*/
 		}else{
-			$resp = "";
-			$fp = fsockopen($config["IP_SMS"], $config["PORT_SMS"], $errno, $errstr, 30);
-			if (!$fp) {
-				$resp = $errno;
-			} else {
-				$length = strlen($data);
-				$out = "POST ".$config["URL_CORE_SMS"]." HTTP/1.0\r\n";
-				$out .= "Host: ".$config["IP_SMS"]."\r\n";
-				$out .= "Content-type: application/x-www-form-urlencoded\r\n";
-				$out .= "Content-length: ".strlen($arrayDestination["cmd_sms"])."\r\n\r\n";
-				$out .= $data;
-				fputs($fp, $out);
-				while (!feof($fp)) {
-					$temp = fgets($fp, 1000);
-					$resp .= $temp;
-				}
-				fclose($fp);
+			$headers[] = 'Content-Type: text/xml';
+			$ch = curl_init();  
+
+			curl_setopt( $ch,CURLOPT_URL, $config["URL_CORE_SMS"] );                                                                  
+			curl_setopt( $ch,CURLOPT_POST, true );  
+			curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+			curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt( $ch,CURLOPT_POSTFIELDS, $arrayDestination["cmd_sms"]);                                                                  
+																													 
+			$result = curl_exec($ch);
+			$beautyXML = simplexml_load_string($result);
+			if($beautyXML->STATUS == "OK"){
+				$arrayResponse["RESULT"] = TRUE;
+			}else{
+				$arrayResponse["MESSAGE"] = $beautyXML->DETAIL;
+				$arrayResponse["RESULT"] = FALSE;
 			}
-			return $resp;
-			//$arrayGrpSms["RESULT"] = TRUE;
-			//return $arrayGrpSms;
+			return $arrayResponse;
 		}
 	}
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
@@ -452,9 +454,9 @@ class library {
 		
 		if(isset($result) && $result !== FALSE){
 			$resultNoti = json_decode($result);
-			curl_close ($ch);
+			curl_close($ch);
 			if(isset($resultNoti)){
-				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
+				if((isset($resultNoti->success) && $resultNoti->success) || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
 					return false;
@@ -463,7 +465,7 @@ class library {
 				return false;
 			}
 		}else{
-			curl_close ($ch);
+			curl_close($ch);
 			return false;
 		}
 	}

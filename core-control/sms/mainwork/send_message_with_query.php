@@ -229,8 +229,20 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
 						$arrayTel = $func->getSMSPerson('person',array($rowTarget[$rowQuery["target_field"]]));
 						if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
-							$arrayMerge[] = $arrayTel[0];
-							$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
+							$arraySendSMS = $lib->sendSMS($arrayDest);
+							if($arraySendSMS["RESULT"]){
+								$arrayMerge[] = $arrayTel[0];
+								$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+							}else{
+								$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
+										'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."','".$id_template."')";
+								if(sizeof($bulkInsert) == 1000){
+									$func->logSMSWasNotSent($bulkInsert);
+									unset($bulkInsert);
+									$bulkInsert = array();
+								}
+							}
 						}else{
 							$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
 							'sms',null,null,'ไม่พบเบอร์โทรศัพท์','".$payload["username"]."','".$id_template."')";
@@ -289,8 +301,20 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
 							$arrayTel = $func->getSMSPerson('person',array($destination));
 							if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
-								$arrayMerge[] = $arrayTel[0];
-								$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+								$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
+								$arraySendSMS = $lib->sendSMS($arrayDest);
+								if($arraySendSMS["RESULT"]){
+									$arrayMerge[] = $arrayTel[0];
+									$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+								}else{
+									$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
+											'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."','".$id_template."')";
+									if(sizeof($bulkInsert) == 1000){
+										$func->logSMSWasNotSent($bulkInsert);
+										unset($bulkInsert);
+										$bulkInsert = array();
+									}
+								}
 							}else{
 								$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
 								'sms',null,null,'ไม่พบเบอร์โทรศัพท์','".$payload["username"]."','".$id_template."')";

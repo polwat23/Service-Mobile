@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogDepositOnline["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogDepositOnline["from_account"],$func->getConstant('dep_format'));
 			$arrLogDepositOnline["DESTINATION_TYPE"] = $rowLogDepositOnline["destination_type"];
 			$arrLogDepositOnline["DESTINATION"] = $rowLogDepositOnline["destination"];
-			$arrLogDepositOnline["DESTINATION_FORMAT"]= $lib->formataccount($rowLogDepositOnline["destination"],$func->getConstant('dep_format'));
+			$arrLogDepositOnline["DESTINATION_FORMAT"] = $rowLogDepositOnline["destination_type"]=='1'?$lib->formataccount($rowLogDepositOnline["destination"],$func->getConstant('dep_format')):$rowLogDepositOnline["destination"];
 			$arrLogDepositOnline["TRANSFER_MODE"] = $rowLogDepositOnline["transfer_mode"];
 			$arrLogDepositOnline["AMOUNT"] = $rowLogDepositOnline["amount"];
 			$arrLogDepositOnline["AMOUNT_FORMAT"] = number_format($rowLogDepositOnline["amount"],2);

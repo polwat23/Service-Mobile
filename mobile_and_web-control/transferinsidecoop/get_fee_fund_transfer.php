@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$logStruc = [
 					":error_menu" => $filename,
 					":error_code" => "WS0042",
-					":error_desc" => "ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
+					":error_desc" => "ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".($e->getMessage() ?? " Service ไม่ได้ Return Error มาให้"),
 					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 				];
 				$log->writeLog('errorusage',$logStruc);
@@ -68,16 +68,16 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				echo json_encode($arrayResult);
 				exit();
 			}
-		}catch(SoapFault $e){
+		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0042",
-				":error_desc" => "ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
+				":error_desc" => "ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage(),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e)."\n"."DATA => ".json_encode($dataComing);
+			$message_error = "ไฟล์ ".$filename." ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n"."DATA => ".json_encode($dataComing);
 			$lib->sendLineNotify($message_error);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult["RESPONSE_CODE"] = 'WS0042';

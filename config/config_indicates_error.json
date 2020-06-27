@@ -28,7 +28,7 @@
 			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากโทเคนถูกยกเลิก","en" : "You was forced logout because token was canceled"}]
 		}],
 	"WS0011" : [{"th" : "Pin ของท่านไม่ถูกต้องหากท่านกรอกผิดเกินกว่า 5 ครั้งระบบจะบังคับท่านออกจากระบบ กรุณาตรวจสอบ Pin อีกครั้ง","en" : "Invalid pin if invalid over 5 time you must will be relogin please check pin again"}],
-	"WS0012" : [{"th" : "OTP ไม่ถูกต้อง กรุณาตรวจสอบ OTP ของท่านกับรหัสอ้างอิงว่าตรงกันไหม","en" : "OTP is invalid please check OTP and reference number that match"}],
+	"WS0012" : [{"th" : "OTP ไม่ถูกต้อง กรุณาตรวจสอบ OTP ของท่านกับรหัสอ้างอิงว่าตรงกันหรือไม่","en" : "OTP is invalid please check OTP and reference number that match"}],
 	"WS0013" : [{"th" : "OTP หมดอายุการใช้งานแล้ว กรุณากดส่งอีกครั้งเพิ่มรับ OTP ใหม่","en" : "OTP has expired please resend for receive new OTP"}],
 	"WS0014" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถยืนยันตัวตนการใช้งานได้ กรุณาเข้าสู่ระบบใหม่อีกครั้ง","en" : "Something was wronged that unable to verify identity please relogin again"}],
 	"WS0015" : [{"th" : "OTP ถูกใช้งานแล้ว กรุณากดส่งอีกครั้งเพื่อรับ OTP ใหม่","en" : "OTP has been used please resend for receive new OTP"}],
@@ -48,6 +48,7 @@
 	"WS0029" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถยกเลิกผูกบัญชีได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม. #WS0029","en" : "Something was crashed that cannot unbind account. Cooperative wishes to close for the system maintenance please try again in 3 Hrs. #WS0029"}],
 	"WS0030" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถถอนเงินได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม. #WS0030","en" : "Something was crashed that cannot withdraw deposit. Cooperative wishes to close for the system maintenance please try again in 3 Hrs. #WS0030"}],
 	"WS0031" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถใช้งานได้ กรุณาเข้าสู่ระบบใหม่อีกครั้ง #WS0031","en" : "Something was wronged that cannot use please login again #WS0031"}],
+	"WS0032" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเช็คข้อมูลการใช้งานได้ กรุณาเข้าสู่ระบบใหม่อีกครั้ง #WS0032","en" : "Something was wronged that cannot check data for usage please login again #WS0032"}],
 	"WS0033" : [{"th" : "เกิดข้อผิดพลาดบางประการ OTP ไม่สามารถใช้งานได้กรุณากดส่งอีกครั้งหรือติดต่อสหกรณ์หากยังไม่สามารถใช้งานได้","en" : "Something was wronged that OTP cannot use please resend or contact cooperative"}],
 	"WS0034" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเช็คข้อมูลการใช้งานได้ กรุณาติดต่อสหกรณ์ #WS0034","en" : "Something was wronged that cannot check data for usage please contact cooperative #WS0034"}],
 	"WS0035" : [{"th" : "สหกรณ์ของดให้บริการการทำธุรกรรมในช่วงเวลา 00.00 - 02.00 น. ขออภัยในความไม่สะดวก","en" : "The cooperative cut the services for transactions between 00:00 - 02:00 Hrs. Apologize for the inconvenience"}],
@@ -84,6 +85,11 @@
 	"WS0067" : [{"th" : "ยอดคงเหลือของท่านไม่เพียงพอสำหรับทำรายการ เนื่องจากการทำรายการในครั้งนี้มีค่าปรับในการทำรายการให้ยอดคงเหลือของท่านไม่เพียงพอ","en" : "Withdrawable amount is not enough because this transaction does have add penalty. That is amount over more than withdrawable amount"}],
 	"WS0068" : [{"th" : "อุปกรณ์ของท่านถูกระงับการใช้งาน เนื่องจากบัญชีของท่านมีการใช้งานในอุปกรณ์ใหม่ หากต้องการกลับมาใช้งานในอุปกรณ์นี้ กรุณาติดต่อสหกรณ์","en" : "Your device was withheld because your account has login in new device if you want to use in this device please contact cooperative"}],
 	"WS0069" : [{"th" : "ระบบไม่รองรับอุปกรณ์ที่ผ่านการ Root หรือ Jailbreak หากอุปกรณ์ของท่านไม่ได้ผ่านการ Root หรือ Jailbreak กรุณาติดต่อสหกรณ์","en" : "The system not allow device that Root or Jailbreak if you do not Root or Jailbreak please contact cooperative"}],
+	"WS0070" : [{"th" : "ยอดเงินต่อรายการของท่านเกินจำนวนที่สหกรณ์กำหนด","en" : "Money of transactions per times is over more than th e cooperative has define"}],
+	"WS0071" : [{"th" : "ยอดชำระต่อเดือนของท่านเกินสิทธิ์ชำระต่อเดือน ท่านสามารถทำรายการต่อไปได้โดยการลดยอดขอกู้ลงหรือเพิ่มจำนวนงวดแต่ต้องไม่เกินจำนวนงวดสูงสุด","en" : "Your monthly payment is over the limit of monthly payment.You can continue transactions by reduce amount of loan request or change the period but you cannot change over highest limit"}],
+	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
+	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
+	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -113,7 +119,7 @@
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
-	"WS4004" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถใช้งานเมนูนี้ได้ กรุณาติดต่อสหกรณ์ #WS4004","en" : "Something was crashed that cannot use this menu please contact cooperative #WS4004"}],
+	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],
 	"KBANK_ERR" : [{
 		"1001" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
@@ -165,5 +171,13 @@
 	"BUTTON_TEXT" : [{
 		"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
 		"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
-	}]
+	}],
+	"REQ_WELFARE_STATUS" : [{
+		"8" : 
+			[{"th" : "รออนุมัติ","en" : "Pending"}],
+		"1" : 
+			[{"th" : "อนุมัติ","en" : "Approved"}],	
+		"-9" : 
+			[{"th" : "ไม่อุนมัติ","en" : "Reject"}]
+		}]
 }

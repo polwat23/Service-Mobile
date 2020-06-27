@@ -1,8 +1,9 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_code','assist_year'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$insertBulkColumn = array();
 		$insertBulkData = array();
 		$getColumnFormat = $conmysql->prepare("SELECT input_name
@@ -17,10 +18,14 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 		$insertBulkColumn[] = "assisttype_code";
 		$insertBulkColumn[] = "coop_id";
 		$insertBulkColumn[] = "req_status";
+		$insertBulkColumn[] = "assist_docno";
+		$insertBulkColumn[] = "assist_year";
 		$insertBulkData[] = ":member_no";
 		$insertBulkData[] = ":assisttype_code";
 		$insertBulkData[] = ":coop_id";
 		$insertBulkData[] = ":req_status";
+		$insertBulkData[] = ":assist_docno";
+		$insertBulkData[] = ":assist_year";
 		$textColumnInsert = "(".implode(",",$insertBulkColumn).")";
 		$textDataInsert = "(".implode(",",$insertBulkData).")";
 		$arrayExecute = array();
@@ -28,9 +33,13 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 			if($keyExe == 'coop_id'){
 				$arrayExecute[':'.$keyExe] = "050001";
 			}else if($keyExe == 'member_no'){
-				$arrayExecute[':'.$keyExe] = $payload[$keyExe];
+				$arrayExecute[':'.$keyExe] = $member_no;
 			}else if($keyExe == 'req_status'){
 				$arrayExecute[':'.$keyExe] = "8";
+			}else if($keyExe == 'assist_docno'){
+				$arrayExecute[':'.$keyExe] = substr(time(),0,10);
+			}else if($keyExe == 'assist_year'){
+				$arrayExecute[':'.$keyExe] = date('Y');
 			}else{
 				$arrayExecute[':'.$keyExe] = $dataComing[$keyExe];
 			}

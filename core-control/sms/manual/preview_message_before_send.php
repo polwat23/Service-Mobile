@@ -115,7 +115,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayMerge as $dest){
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
-						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
+						$arrGroupSuccess["TEL"] = $lib->formatphone(substr($dest["TEL"],0,10),'-');
 						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
 						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
@@ -149,7 +149,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayTel as $dest){
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
-						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
+						$arrGroupSuccess["TEL"] = $lib->formatphone(substr($dest["TEL"],0,10),'-');
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];

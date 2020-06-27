@@ -45,13 +45,12 @@ if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$
 			}
 		}
 		if(isset($dataComing["type_send"]) && $dataComing["type_send"] == "all"){
-			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,repeat_send,send_date,create_by,
+			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,
 													id_smsquery,id_smstemplate,send_platform,send_image)
-													VALUES(:send_topic,:send_message,'all',:is_repeat,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
+													VALUES(:send_topic,:send_message,'all',:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 			if($insertSendAhead->execute([
 				':send_topic' => $dataComing["send_topic_emoji_"],
 				':send_message' => $dataComing["send_message_emoji_"],
-				':is_repeat' => ($dataComing["is_repeat"] ? '1' : '0'),
 				':send_date' => $dataComing["send_date"],
 				':username' => $payload["username"],
 				':id_smsquery' => $id_smsquery,
@@ -68,14 +67,13 @@ if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$
 				exit();
 			}
 		}else{
-			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,repeat_send,send_date,create_by,
+			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,
 													id_smsquery,id_smstemplate,send_platform,send_image)
-													VALUES(:send_topic,:send_message,:destination,:is_repeat,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
+													VALUES(:send_topic,:send_message,:destination,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 			if($insertSendAhead->execute([
 				':send_topic' => $dataComing["send_topic_emoji_"],
 				':send_message' => $dataComing["send_message_emoji_"],
 				':destination' => isset($dataComing["destination"]) ? implode(',',$dataComing["destination"]) : 'all',
-				':is_repeat' => ($dataComing["is_repeat"] ? '1' : '0'),
 				':send_date' => $dataComing["send_date"],
 				':username' => $payload["username"],
 				':id_smsquery' => $id_smsquery,

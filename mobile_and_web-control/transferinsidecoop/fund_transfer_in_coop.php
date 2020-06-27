@@ -74,69 +74,96 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				];
 				$resultWS = $clientWS->__call("of_withdraw_deposit_trans", array($argumentWS));
 				$responseSoap = $resultWS->of_withdraw_deposit_transResult;
-				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
-				$fetchSeqno->execute([':deptslip_no' => $responseSoap->ref_slipno]);
-				$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-													VALUES(:remark,:deptaccount_no,:seq_no)");
-				$insertRemark->execute([
-					':remark' => $dataComing["remark"],
-					':deptaccount_no' => $from_account_no,
-					':seq_no' => $rowSeqno["SEQ_NO"]
-				]);
-				$arrayResult['TRANSACTION_NO'] = $ref_no;
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-																ref_no_1,id_userlogin,ref_no_source)
-																VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',:operate_date,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
-				$insertTransactionLog->execute([
-					':ref_no' => $ref_no,
-					':from_account' => $from_account_no,
-					':destination' => $to_account_no,
-					':amount' => $dataComing["amt_transfer"],
-					':penalty_amt' => $dataComing["penalty_amt"],
-					':operate_date' => $dateOper,
-					':member_no' => $payload["member_no"],
-					':ref_no1' => $from_account_no,
-					':id_userlogin' => $payload["id_userlogin"],
-					':ref_no_source' => $responseSoap->ref_slipno
-				]);
-				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
-				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
-				foreach($arrToken["LIST_SEND"] as $dest){
+				if($responseSoap->msg_status == '0000'){
+					$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
+					$fetchSeqno->execute([':deptslip_no' => $responseSoap->ref_slipno]);
+					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
+					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
+														VALUES(:remark,:deptaccount_no,:seq_no)");
+					$insertRemark->execute([
+						':remark' => $dataComing["remark"],
+						':deptaccount_no' => $from_account_no,
+						':seq_no' => $rowSeqno["SEQ_NO"]
+					]);
+					$arrayResult['TRANSACTION_NO'] = $ref_no;
+					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
+					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																	ref_no_1,id_userlogin,ref_no_source)
+																	VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',:operate_date,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+					$insertTransactionLog->execute([
+						':ref_no' => $ref_no,
+						':from_account' => $from_account_no,
+						':destination' => $to_account_no,
+						':amount' => $dataComing["amt_transfer"],
+						':penalty_amt' => $dataComing["penalty_amt"],
+						':operate_date' => $dateOper,
+						':member_no' => $payload["member_no"],
+						':ref_no1' => $from_account_no,
+						':id_userlogin' => $payload["id_userlogin"],
+						':ref_no_source' => $responseSoap->ref_slipno
+					]);
+					$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 					$dataMerge = array();
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
 					$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-					$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-					$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-					$arrMessage["BODY"] = $message_endpoint["BODY"];
-					$arrMessage["PATH_IMAGE"] = null;
-					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-					if($func->insertHistory($arrPayloadNotify,'2')){
-						$lib->sendNotify($arrPayloadNotify,"person");
+					foreach($arrToken["LIST_SEND"] as $dest){
+						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+						$arrMessage["BODY"] = $message_endpoint["BODY"];
+						$arrMessage["PATH_IMAGE"] = null;
+						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						if($func->insertHistory($arrPayloadNotify,'2')){
+							$lib->sendNotify($arrPayloadNotify,"person");
+						}
 					}
+					/*$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+					$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);*/
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{
+					if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':operate_date' => $dateOper,
+							':deptaccount_no' => $from_account_no,
+							':amt_transfer' => $dataComing["amt_transfer"],
+							':penalty_amt' => $dataComing["penalty_amt"],
+							':type_request' => '2',
+							':transfer_flag' => '2',
+							':destination' => $to_account_no,
+							':response_code' => "WS0064",
+							':response_message' => $responseSoap->msg_output
+						];
+					}else{
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':operate_date' => $dateOper,
+							':deptaccount_no' => $from_account_no,
+							':amt_transfer' => $dataComing["amt_transfer"],
+							':penalty_amt' => $dataComing["penalty_amt"],
+							':type_request' => '2',
+							':transfer_flag' => '1',
+							':destination' => $to_account_no,
+							':response_code' => "WS0064",
+							':response_message' => $responseSoap->msg_output
+						];
+					}
+					$log->writeLog('transferinside',$arrayStruc);
+					$arrayResult["RESPONSE_CODE"] = 'WS0064';
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
 				}
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
 			}catch(SoapFault $e){
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,id_userlogin)
-																VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:id_userlogin)");
-				$insertTransactionLog->execute([
-					':ref_no' => $ref_no,
-					':from_account' => $from_account_no,
-					':destination' => $to_account_no,
-					':amount' => $dataComing["amt_transfer"],
-					':operate_date' => $dateOper,
-					':penalty_amt' => $dataComing["penalty_amt"],
-					':member_no' => $payload["member_no"],
-					':ref_no1' => $from_account_no,
-					':id_userlogin' => $payload["id_userlogin"]
-				]);
 				if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
@@ -173,16 +200,16 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				echo json_encode($arrayResult);
 				exit();
 			}
-		}catch(SoapFault $e){
+		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0064",
-				":error_desc" => "ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
+				":error_desc" => "ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage(),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e)."\n"."DATA => ".json_encode($dataComing);
+			$message_error = "ไฟล์ ".$filename." ไมสามารถต่อไปยัง Service เงินฝากได้ "."\n"."Error => ".$e->getMessage()."\n"."DATA => ".json_encode($dataComing);
 			$lib->sendLineNotify($message_error);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult["RESPONSE_CODE"] = 'WS0064';

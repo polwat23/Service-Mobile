@@ -5,11 +5,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
 		$arrayResult = array();
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+		$memberInfoMobile = $conmysql->prepare("SELECT email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		if($memberInfoMobile->rowCount() > 0){
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
-			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
 				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
@@ -20,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc
+												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.mem_telmobile
 												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN MBUCFPOSITION mpos ON mb.position_code = mpos.position_code
 												LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
@@ -86,6 +85,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['DATA_TYPE'] = $rowSignature["DATA_TYPE"] ?? 'pdf';
 				$arrayResult['SIGNATURE'] = $DataURLBase64;
 			}
+			$arrayResult["PHONE"] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];

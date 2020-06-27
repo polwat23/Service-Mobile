@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransfer["from_account"],$func->getConstant('dep_format'));
 			$arrLogTransfer["DESTINATION_TYPE"] = $rowLogTransfer["destination_type"];
 			$arrLogTransfer["DESTINATION"] = $rowLogTransfer["destination"];
-			$arrLogTransfer["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransfer["destination"],$func->getConstant('dep_format'));
+			$arrLogTransfer["DESTINATION_FORMAT"] = $rowLogTransfer["destination_type"]=='1'?$lib->formataccount($rowLogTransfer["destination"],$func->getConstant('dep_format')):$rowLogTransfer["destination"];
 			$arrLogTransfer["TRANSFER_MODE"] = $rowLogTransfer["transfer_mode"];
 			$arrLogTransfer["AMOUNT"] = $rowLogTransfer["amount"];
 			$arrLogTransfer["AMOUNT_FORMAT"] = number_format($rowLogTransfer["amount"],2);

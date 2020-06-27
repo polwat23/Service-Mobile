@@ -163,6 +163,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 											http_response_code(401);
 											echo json_encode($arrayResult);
 											exit();
+										}else{
+											$arrayResult['RESPONSE_CODE'] = "WS0032";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
 										}
 									}
 								}

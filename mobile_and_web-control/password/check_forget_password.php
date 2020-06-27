@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id'],$dataComing)){
+if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$filename = basename(__FILE__, '.php');
@@ -19,42 +19,42 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
-	$phone = $dataComing["phone"];
-	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
-										VALUES(:member_no,:password,:phone,:email,:channel)");
-	if($insertAccount->execute([
-		':member_no' => $dataComing["member_no"],
-		':password' => $password,
-		':phone' => $phone,
-		':email' => $email,
-		':channel' => $dataComing["channel"]
-	])){
-		$updateFlagApply = $conoracle->prepare("UPDATE mbmembmaster SET moblieapply_status = 1 WHERE member_no = :member_no");
-		$updateFlagApply->execute([':member_no' => $dataComing["member_no"]]);
-		$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
-		$arrayResult['PASSWORD'] = $dataComing["password"];
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$checkMember = $conmysql->prepare("SELECT account_status,user_type FROM gcmemberaccount 
+										WHERE member_no = :member_no");
+	$checkMember->execute([
+		':member_no' => $member_no
+	]);
+	if($checkMember->rowCount() > 0){
+		$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+		if($rowChkMemb["account_status"] == '-8'){
+			$arrayResult['RESPONSE_CODE'] = "WS0048";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$member_no_RAW = $configAS[$member_no] ?? $member_no;
+		$getCardPerson = $conoracle->prepare("SELECT CARD_PERSON,MEM_TELMOBILE FROM mbmembmaster WHERE member_no = :member_no");
+		$getCardPerson->execute([':member_no' => $member_no_RAW]);
+		$rowMemb = $getCardPerson->fetch(PDO::FETCH_ASSOC);
+		if($rowMemb["CARD_PERSON"] != $dataComing["card_person"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0060";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		if($rowChkMemb['user_type'] == '0' || $rowChkMemb['user_type'] == '1'){
+			$arrayResult['IS_OTP'] = TRUE;
+		}
+		$arrayResult['TEL'] = $rowMemb["MEM_TELMOBILE"];
+		$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowMemb["MEM_TELMOBILE"]);
+		$arrayResult['TEMP_PASSWORD'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		$filename = basename(__FILE__, '.php');
-		$logStruc = [
-			":error_menu" => $filename,
-			":error_code" => "WS1018",
-			":error_desc" => "ไม่สามารถสมัครได้ "."\n".json_encode($dataComing),
-			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-		];
-		$log->writeLog('errorusage',$logStruc);
-		$message_error = "ไม่สามารถสมัครได้เพราะ Insert ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$insertAccount->queryString."\n"."Param => ". json_encode([
-			':member_no' => $dataComing["member_no"],
-			':password' => $password,
-			':phone' => $phone,
-			':email' => $email,
-			':channel' => $dataComing["channel"]
-		]);
-		$lib->sendLineNotify($message_error);
-		$arrayResult['RESPONSE_CODE'] = "WS1018";
+		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);

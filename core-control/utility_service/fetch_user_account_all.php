@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}
 		
-		$fetchDataOra = $conoracle->prepare("SELECT mb.sms_mobilephone as MEM_TELMOBILE,mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME 
+		$fetchDataOra = $conoracle->prepare("SELECT mb.MEM_TELMOBILE as MEM_TELMOBILE,mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME 
 											FROM mbmembmaster mb
 											LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code											
 											WHERE mb.resign_status = '0' 

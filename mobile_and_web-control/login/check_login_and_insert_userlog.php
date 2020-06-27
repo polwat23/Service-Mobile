@@ -208,7 +208,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							}
 						}
 						$arrayResult['MEMBER_NO'] = $member_no;
-						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && ($rowPassword['user_type'] == '0' || $rowPassword['user_type'] == '1')){
+						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && ($rowPassword['user_type'] == '0' || 
+						$rowPassword['user_type'] == '1') && $member_no != "etnmode1" && $member_no != "etnmode2"){
 							$arrayResult['IS_OTP'] = TRUE;
 						}
 						$arrayResult['RESULT'] = TRUE;

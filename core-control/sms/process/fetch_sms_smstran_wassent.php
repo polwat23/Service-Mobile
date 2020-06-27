@@ -12,10 +12,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													send_by
 												FROM
 													smstranwassent
-												WHERE process_flag = :process_flag");
-		$fetchSmsTranWassent->execute([
-			':process_flag' => '0'
-		]);
+												WHERE process_flag = '0'");
+		$fetchSmsTranWassent->execute();
 		while($rowSmsTranWassent = $fetchSmsTranWassent->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupSmsTranWassent = array();
 			$arrGroupSmsTranWassent["MEMBER_NO"] = $rowSmsTranWassent["member_no"];
