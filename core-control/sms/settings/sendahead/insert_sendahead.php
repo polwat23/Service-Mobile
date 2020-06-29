@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageahead') || 
 	$func->check_permission_core($payload,'sms','sendmessageall') || 
 	$func->check_permission_core($payload,'sms','sendmessageperson')){
@@ -67,27 +67,56 @@ if($lib->checkCompleteArgument(['unique_id','send_message_emoji_','send_date'],$
 				exit();
 			}
 		}else{
-			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,
-													id_smsquery,id_smstemplate,send_platform,send_image)
-													VALUES(:send_topic,:send_message,:destination,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
-			if($insertSendAhead->execute([
-				':send_topic' => $dataComing["send_topic_emoji_"],
-				':send_message' => $dataComing["send_message_emoji_"],
-				':destination' => isset($dataComing["destination"]) ? implode(',',$dataComing["destination"]) : 'all',
-				':send_date' => $dataComing["send_date"],
-				':username' => $payload["username"],
-				':id_smsquery' => $id_smsquery,
-				':id_template' => $id_template,
-				':send_platform' => $platform ?? '3',
-				':send_image' => $pathImg ?? null
-			])){
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+			foreach($dataComing["destination"] as $dest){
+				if(!in_array($dest,$dataComing["destination_revoke"])){
+					$destination[] = $dest;
+				}
+			}
+			if(isset($dataComing["message_importData"])){
+				$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,destination,send_date,create_by,is_import,
+														id_smsquery,id_smstemplate,send_platform,send_image)
+														VALUES(:send_topic,:destination,:send_date,:username,'1',:id_smsquery,:id_template,:send_platform,:send_image)");
+				if($insertSendAhead->execute([
+					':send_topic' => $dataComing["send_topic_emoji_"],
+					':destination' => json_encode($dataComing["message_importData"],JSON_UNESCAPED_UNICODE),
+					':send_date' => $dataComing["send_date"],
+					':username' => $payload["username"],
+					':id_smsquery' => $id_smsquery,
+					':id_template' => $id_template,
+					':send_platform' => $platform ?? '3',
+					':send_image' => $pathImg ?? null
+				])){
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{
+					$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}else{
-				$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,
+														id_smsquery,id_smstemplate,send_platform,send_image)
+														VALUES(:send_topic,:send_message,:destination,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
+				if($insertSendAhead->execute([
+					':send_topic' => $dataComing["send_topic_emoji_"],
+					':send_message' => $dataComing["send_message_emoji_"],
+					':destination' => isset($destination) ? implode(',',$destination) : 'all',
+					':send_date' => $dataComing["send_date"],
+					':username' => $payload["username"],
+					':id_smsquery' => $id_smsquery,
+					':id_template' => $id_template,
+					':send_platform' => $platform ?? '3',
+					':send_image' => $pathImg ?? null
+				])){
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{
+					$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}
 		}
 	}else{

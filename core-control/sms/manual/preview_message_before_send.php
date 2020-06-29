@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 							$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
-							$dataComing["message_importData"][$dest["MEMBER_NO"]].'^'.$dataComing["topic_emoji_"] : $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
+							$dataComing["message_importData"][$dest["MEMBER_NO"]].'^'.$dataComing["topic_emoji_"] : ($dataComing["message_emoji_"] ?? "-").'^'.$dataComing["topic_emoji_"];
 							$arrGroupAllSuccess[] = $arrGroupSuccess;
 						}else{
 							$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
@@ -116,14 +116,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["TEL"] = $lib->formatphone(substr($dest["TEL"],0,10),'-');
-						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
-						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$arrGroupSuccess["MESSAGE"] = isset($dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])]) ? 
+						$dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])] : ($dataComing["message_emoji_"] ?? "-");
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
-						$arrGroupCheckSend["MESSAGE"] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
-						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$arrGroupCheckSend["MESSAGE"] = isset($dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])]) ? 
+						$dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])] : ($dataComing["message_emoji_"] ?? "-");
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
 				}
