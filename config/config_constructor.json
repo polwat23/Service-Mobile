@@ -1,6 +1,6 @@
 {
-	"NAME_APP" : "MU Saving",
-	"COOP_KEY" : "mhd",
+	"NAME_APP" : "CRH Saving",
+	"COOP_KEY" : "crh",
 	"COOP_ID" : "001001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/kbank",
 	"APP_ID" : "com.musaving.mobile",
