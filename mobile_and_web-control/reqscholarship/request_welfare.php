@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','childcard_id','upload_list'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ScholarshipRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$checkRightsReq = $conoracle->prepare("SELECT child_name as CHILD_NAME FROM ASNREQSCHOLARSHIP 
