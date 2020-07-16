@@ -3,7 +3,13 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ScholarshipRequest')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$arrFileUploaded = array();
+		$checkFileUpload = $conoracle->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status = 1 order by seq_no");
+		$checkFileUpload->execute([':child_id' => $dataComing["childcard_id"]]);
+		while($rowFileUpload = $checkFileUpload->fetch(PDO::FETCH_ASSOC)){
+			$arrFileUploaded[] = $rowFileUpload;
+		}
 		$arrUploadFiles = array();
 		$arrayFileManda = [
 			(object) [
@@ -28,25 +34,30 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			]
 		];
 		foreach($arrayFileManda as $fileObj){
-			$arrayUpload = array();
-			$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$fileObj->seq_no;
-			$arrayUpload["UPLOAD_LABEL"] = $fileObj->document_desc;
-			$arrayUpload["IS_MANDATORY"] = $fileObj->mandatory;
-			$arrUploadFiles[] = $arrayUpload;
+			if(array_search($fileObj->seq_no,array_column($arrFileUploaded,'SEQ_NO')) === False){
+				$arrayUpload = array();
+				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$fileObj->seq_no;
+				$arrayUpload["UPLOAD_SEQ"] = $fileObj->seq_no;
+				$arrayUpload["UPLOAD_LABEL"] = $fileObj->document_desc;
+				$arrayUpload["IS_MANDATORY"] = $fileObj->mandatory;
+				$arrUploadFiles[] = $arrayUpload;
+			}
 		}
-		$getUploadFiles = $conoracle->prepare("
-																	SELECT 5 as seq_no, 'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
+		$getUploadFiles = $conoracle->prepare("SELECT 5 as seq_no, 'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
 																		FROM ASNREQSCHOLARSHIP 
 																		WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +542) and APPROVE_STATUS = 1 and 
 																		school_level in ('13', '26', '33', '43', '53', '62') and
 																		CHILDCARD_ID = :child_id");
 		$getUploadFiles->execute([':child_id' => $dataComing["childcard_id"]]);
 		while($rowUploadFile = $getUploadFiles->fetch(PDO::FETCH_ASSOC)){
-			$arrayUpload = array();
-			$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$rowUploadFile["SEQ_NO"];
-			$arrayUpload["UPLOAD_LABEL"] = $rowUploadFile["DOCUMENT_DESC"];
-			$arrayUpload["IS_MANDATORY"] = $rowUploadFile["MANDA"];
-			$arrUploadFiles[] = $arrayUpload;
+			if(array_search($rowUploadFile["SEQ_NO"],array_column($arrFileUploaded,'SEQ_NO')) === False){
+				$arrayUpload = array();
+				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$rowUploadFile["SEQ_NO"];
+				$arrayUpload["UPLOAD_SEQ"] = $rowUploadFile["SEQ_NO"];
+				$arrayUpload["UPLOAD_LABEL"] = $rowUploadFile["DOCUMENT_DESC"];
+				$arrayUpload["IS_MANDATORY"] = $rowUploadFile["MANDA"];
+				$arrUploadFiles[] = $arrayUpload;
+			}
 		}
 		$arrayResult['LIST_UPLOAD'] = $arrUploadFiles;
 		$arrayResult['RESULT'] = TRUE;

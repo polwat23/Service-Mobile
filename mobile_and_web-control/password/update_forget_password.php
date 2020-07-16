@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			echo json_encode($arrayResult);
 			exit();
 		}
-		if($dataComing["email"] != $rowChkMemb["email"]){
+		if(strtolower($dataComing["email"]) != strtolower($rowChkMemb["email"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0050";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

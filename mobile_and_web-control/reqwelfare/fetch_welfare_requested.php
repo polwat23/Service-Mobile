@@ -2,20 +2,21 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conoracle->prepare("select (lir.interest_rate * 100) as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
-												ON lp.inttabrate_code = lir.loanintrate_code where to_char(sysdate,'YYYY-MM-DD') BETWEEN 
-												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
-		$fetchIntrate->execute();
-		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
-			$arrIntrate = array();
-			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
-			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
-			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
-			$arrIntGroup[] = $arrIntrate;
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$arrChildGrp = array();
+		$checkChildHave = $conoracle->prepare("SELECT asch.childcard_id as CHILDCARD_ID, mp.prename_desc||asch.child_name||'   '||asch.child_surname as CHILD_NAME
+															FROM ASNREQSCHOLARSHIP asch LEFT JOIN mbucfprename mp ON  asch.childprename_code = mp.prename_code
+															WHERE  asch.approve_status = 1 and asch.scholarship_year = (EXTRACT(year from sysdate) +542) and asch.member_no = :member_no");
+		$checkChildHave->execute([':member_no' => $member_no]);
+		while($rowChild = $checkChildHave->fetch(PDO::FETCH_ASSOC)){
+			$arrChild = array();
+			$arrChild["CHILDCARD_ID"] = $rowChild["CHILDCARD_ID"];
+			$arrChild["CHILDCARD_ID_FORMAT"] = $lib->formatcitizen($rowChild["CHILDCARD_ID"]);
+			$arrChild["CHILD_NAME"] = $rowChild["CHILD_NAME"];
+			$arrChildGrp[] = $arrChild;
 		}
-		$arrayResult['INT_RATE'] = $arrIntGroup;
+		$arrayResult['CHILD'] = $arrChildGrp;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

@@ -8,59 +8,61 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
-		if($dataComing["menu_component"] == 'TransferSelfDepInsideCoop'){
-			$fetchAccAllowTrans = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster
-												WHERE member_no = :member_no and transonline_flag = '1'");
-			$fetchAccAllowTrans->execute([':member_no' => $member_no]);
+		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1'");
+		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
+		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-				$arrayDept[] = "'".$rowAccAllow["DEPTTYPE_CODE"]."'";
+				$arrayDept[] = $rowAccAllow["deptaccount_no"];
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
-													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													WHERE dpt.depttype_code IN(".implode(',',$arrayDept).") and dpm.member_no = :member_no");
-			$getDataBalAcc->execute([':member_no' => $member_no]);
-		}else if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
-			$arrayAllowAcc = array();
-			$fetchAccAllowTrans = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use = '1'");
-			$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
-			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-				$arrayAllowAcc[] = $rowAccAllow["deptaccount_no"];
+			$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt as PRNCBAL
+											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no");
+			$getAllAcc->execute([':member_no' => $member_no]);
+			while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){
+				$arrAccAllow = array();
+				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
+				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
+				$arrAccAllow["CAN_DEPOSIT"] = '1';
+				if(in_array($rowDataAccAll["DEPTACCOUNT_NO"],$arrayDept)){
+					$arrAccAllow["CAN_WITHDRAW"] = '1';
+				}else{
+					$arrAccAllow["CAN_WITHDRAW"] = '0';
+				}
+				$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"];
+				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAll["PRNCBAL"],2);
+				$arrGroupAccAllow[] = $arrAccAllow;
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
-													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													WHERE  dpm.member_no = :member_no and dpm.transonline_flag = '1' and dpm.deptaccount_no IN('".implode("','",$arrayAllowAcc)."')");
-			$getDataBalAcc->execute([':member_no' => $member_no]);
-		}
-		while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
-			$arrAccAllow = array();
-			$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
-			$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-			$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-			$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowDataAccAllow["DEPTACCOUNT_NAME"]));
-			$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-			$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
-			$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
-			$arrGroupAccAllow[] = $arrAccAllow;
-		}
-		if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
-			$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");
-			$getAccFav->execute([':member_no' => $payload["member_no"]]);
-			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
-				$arrFavMenu = array();
-				$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
-				$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
-				$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
-				$arrFavMenu["DESTINATION_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
-				$arrFavMenu["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
-				$arrGroupAccFav[] = $arrFavMenu;
+			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
+				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");
+				$getAccFav->execute([':member_no' => $payload["member_no"]]);
+				while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
+					$arrFavMenu = array();
+					$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
+					$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
+					$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
+					$arrFavMenu["DESTINATION_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
+					$arrFavMenu["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowAccFav["destination"],$func->getConstant('hidden_dep'));
+					$arrGroupAccFav[] = $arrFavMenu;
+				}
 			}
-		}
-		if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
-			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-			$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
-			$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
+				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
+				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
+				$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0023";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0023";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -77,6 +79,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

@@ -34,69 +34,124 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 					exit();
 				}
 			}else{
-				$conoracle->beginTransaction();
 				$insertSchShipOnline = $conoracle->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status)
 																				VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,8)");
 				if($insertSchShipOnline->execute([
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
 				])){
-					$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status)
-																						(SELECT (EXTRACT(year from sysdate) +543), :member_no, :child_id, seq_no, document_desc, 8 
-																							FROM(
-																									SELECT 1 as seq_no, 
-																										'หน้าปกสมุดผลการศึกษา (ถ้ามี)'			as document_desc
-																									from dual
-																									union
-																									SELECT 2 as seq_no, 
-																										'ผลการศึกษา ปีการศึกษา '||(EXTRACT(year from sysdate) +542)||' (ภาคเรียนที่ 1)' as document_desc
-																									from dual
-																									union
-																									SELECT 3 as seq_no, 
-																										'ผลการศึกษา ปีการศึกษา '||(EXTRACT(year from sysdate) +542)||' (ภาคเรียนที่ 2)' as document_desc
-																									from dual
-																									union
-																									SELECT 4 as seq_no, 
-																										'เอกสารอื่นๆ (ถ้ามี)' as document_desc
-																									from dual
-																									union
-																									SELECT 5 as seq_no, 
-																										'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc
-																									FROM ASNREQSCHOLARSHIP 
-																									WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +542) and APPROVE_STATUS = 1 and 
-																									school_level in ('13', '26', '33', '43', '53', '62') and
-																									CHILDCARD_ID = :child_id ))");
-					if($insertSchShipOnlineDoc->execute([
+					$conoracle->beginTransaction();
+					foreach($dataComing["upload_list"] as $list){
+						$subpath = $dataComing["childcard_id"].date('Ym');
+						$destination = __DIR__.'/../../resource/reqwelfare/'.$subpath;
+						$data_Img = explode(',',$list["upload_base64"]);
+						$info_img = explode('/',$data_Img[0]);
+						$ext_img = str_replace('base64','',$info_img[1]);
+						$full_file_name = $list["upload_name"].$ext_img;
+						if(!file_exists($destination)){
+							mkdir($destination, 0777, true);
+						}
+						if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+							$createImage = $lib->base64_to_img($list["upload_base64"],$list["upload_name"],$destination,null);
+							if($createImage == 'oversize'){
+							}else{
+								if($createImage){
+									$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
+									$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
+																									VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,1,:filename)");
+									if($insertSchShipOnlineDoc->execute([
+										':member_no' => $member_no,
+										':child_id' => $dataComing["childcard_id"],
+										':seq_no' => $list["upload_seq"],
+										':document_desc' => $list["upload_label"],
+										':filename' => $pathImgShowClient
+									])){
+										
+									}else{
+										$filename = basename(__FILE__, '.php');
+										$logStruc = [
+											":error_menu" => $filename,
+											":error_code" => "WS1032",
+											":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
+												':member_no' => $member_no,
+												':child_id' => $dataComing["childcard_id"],
+												':seq_no' => $list["upload_seq"],
+												':document_desc' => $list["upload_label"],
+												':filename' => $pathImgShowClient
+											]);
+											":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+										];
+										$log->writeLog('errorusage',$logStruc);
+										$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
+											':member_no' => $member_no,
+											':child_id' => $dataComing["childcard_id"],
+											':seq_no' => $list["upload_seq"],
+											':document_desc' => $list["upload_label"],
+											':filename' => $pathImgShowClient
+										]);
+										$lib->sendLineNotify($message_error);
+										$arrayResult['RESPONSE_CODE'] = "WS1032";
+										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+										$arrayResult['RESULT'] = FALSE;
+										echo json_encode($arrayResult);
+										exit();
+									}
+								}
+							}
+						}else if($ext_img == 'pdf'){
+							$createImage = $lib->base64_to_pdf($list["upload_base64"],$list["upload_name"],$destination);
+							if($createImage){
+								$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
+								$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
+																								VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,1,:filename)");
+								if($insertSchShipOnlineDoc->execute([
+									':member_no' => $member_no,
+									':child_id' => $dataComing["childcard_id"],
+									':seq_no' => $list["upload_seq"],
+									':document_desc' => $list["upload_label"],
+									':filename' => $pathImgShowClient
+								])){
+								}else{
+									$filename = basename(__FILE__, '.php');
+									$logStruc = [
+										":error_menu" => $filename,
+										":error_code" => "WS1032",
+										":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
+											':member_no' => $member_no,
+											':child_id' => $dataComing["childcard_id"],
+											':seq_no' => $list["upload_seq"],
+											':document_desc' => $list["upload_label"],
+											':filename' => $pathImgShowClient
+										]);
+										":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+									];
+									$log->writeLog('errorusage',$logStruc);
+									$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
+										':member_no' => $member_no,
+										':child_id' => $dataComing["childcard_id"],
+										':seq_no' => $list["upload_seq"],
+										':document_desc' => $list["upload_label"],
+										':filename' => $pathImgShowClient
+									]);
+									$lib->sendLineNotify($message_error);
+									$arrayResult['RESPONSE_CODE'] = "WS1032";
+									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+									$arrayResult['RESULT'] = FALSE;
+									echo json_encode($arrayResult);
+									exit();
+								}
+							}
+						}
+					}
+					$conoracle->commit();
+					$updateFlagUpload = $conoracle->prepare("UPDATE asnreqschshiponline SET request_status = 1, lastupload_date = sysdate 
+																			WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id");
+					$updateFlagUpload->execute([
 						':member_no' => $member_no,
 						':child_id' => $dataComing["childcard_id"]
-					])){
-						$conoracle->commit();
-						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
-					}else{
-						$conoracle->rollback();
-						$filename = basename(__FILE__, '.php');
-						$logStruc = [
-							":error_menu" => $filename,
-							":error_code" => "WS1032",
-							":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-								':member_no' => $member_no,
-								':child_id' => $dataComing["childcard_id"]
-							]),
-							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-						];
-						$log->writeLog('errorusage',$logStruc);
-						$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-							':member_no' => $member_no,
-							':child_id' => $dataComing["childcard_id"]
-						]);
-						$lib->sendLineNotify($message_error);
-						$arrayResult['RESPONSE_CODE'] = "WS1032";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
-					}
+					]);
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
 				}else{
 					$conoracle->rollback();
 					$filename = basename(__FILE__, '.php');

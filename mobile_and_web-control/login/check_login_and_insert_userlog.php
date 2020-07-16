@@ -144,7 +144,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 							];
 							$log->writeLog('errorusage',$logStruc);
-							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken."\n"."Data => ".json_encode([
+							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken->queryString."\n"."Data => ".json_encode([
 								':access_token' => $access_token,
 								':id_token' => $id_token
 							]);
@@ -165,7 +165,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 						];
 						$log->writeLog('errorusage',$logStruc);
-						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin."\n"."Data => ".json_encode([
+						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin->queryString."\n"."Data => ".json_encode([
 							':member_no' => $member_no,
 							':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 							':channel' => $arrPayload["PAYLOAD"]["channel"],
@@ -190,7 +190,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken."\n"."Data => ".json_encode([
+					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken->queryString."\n"."Data => ".json_encode([
 						':refresh_token' => $refresh_token,
 						':unique_id' => $dataComing["unique_id"],
 						':channel' => $arrPayload["PAYLOAD"]["channel"],
