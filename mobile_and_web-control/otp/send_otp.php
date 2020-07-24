@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		exit();
 	}
 	$conmysql->beginTransaction();
-	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
 	$reference = $lib->randomText('all',6);
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 	$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
 	$arrayComing["TEL"] = $dataComing["tel"];
-	$arrayComing["MEMBER_NO"] = $dataComing["member_no"];
+	$arrayComing["MEMBER_NO"] = $member_no;
 	$arrayTel[] = $arrayComing;
 	$bulkInsert = array();
 	$arrayDest = array();
