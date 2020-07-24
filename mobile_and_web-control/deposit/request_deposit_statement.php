@@ -187,10 +187,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด
+					สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Mahidol University Savings and Credit Co-Operative, Limited
+					Chiangrai Public Health Saving And Credit Co-operative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
