@@ -235,14 +235,10 @@ class library {
 					return $arrayGrpSms;
 				}
 			}catch(SoapFault $e){
-				$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
-				file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayGrpSms["RESULT"] = FALSE;
 				return $arrayGrpSms;
 			}
 		}catch(Throwable $e){
-			$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
-			file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
 			$arrayGrpSms["RESULT"] = FALSE;
 			return $arrayGrpSms;
 			return false;
@@ -445,16 +441,12 @@ class library {
 				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
-					//$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
-					//file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}

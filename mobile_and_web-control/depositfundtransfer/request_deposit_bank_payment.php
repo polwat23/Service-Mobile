@@ -80,11 +80,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':response_message' => $responseSoap->msg_output
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					if($responseSoap->msg_status == '0098'){
+						$arrayResult['RESPONSE_MESSAGE'] = str_replace($responseSoap->msg_status,'',str_ireplace(["\r","\n",'\r','\n'],'',$responseSoap->msg_output))." บาท";
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					}
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}
+				
 				$ref_slipno = $responseSoap->ref_slipno;
 				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
 				$updateSyncNoti->execute([':ref_slipno' => $ref_slipno]);

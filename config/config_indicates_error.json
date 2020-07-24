@@ -28,7 +28,7 @@
 			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากโทเคนถูกยกเลิก","en" : "You was forced logout because token was canceled"}]
 		}],
 	"WS0011" : [{"th" : "Pin ของท่านไม่ถูกต้องหากท่านกรอกผิดเกินกว่า 5 ครั้งระบบจะบังคับท่านออกจากระบบ กรุณาตรวจสอบ Pin อีกครั้ง","en" : "Invalid pin if invalid over 5 time you must will be relogin please check pin again"}],
-	"WS0012" : [{"th" : "OTP ไม่ถูกต้อง กรุณาตรวจสอบ OTP ของท่านกับรหัสอ้างอิงว่าตรงกันหรือไม่","en" : "OTP is invalid please check OTP and reference number that match"}],
+	"WS0012" : [{"th" : "OTP ไม่ถูกต้อง กรุณาตรวจสอบ OTP ของท่านกับรหัสอ้างอิงว่าตรงกันไหม","en" : "OTP is invalid please check OTP and reference number that match"}],
 	"WS0013" : [{"th" : "OTP หมดอายุการใช้งานแล้ว กรุณากดส่งอีกครั้งเพิ่มรับ OTP ใหม่","en" : "OTP has expired please resend for receive new OTP"}],
 	"WS0014" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถยืนยันตัวตนการใช้งานได้ กรุณาเข้าสู่ระบบใหม่อีกครั้ง","en" : "Something was wronged that unable to verify identity please relogin again"}],
 	"WS0015" : [{"th" : "OTP ถูกใช้งานแล้ว กรุณากดส่งอีกครั้งเพื่อรับ OTP ใหม่","en" : "OTP has been used please resend for receive new OTP"}],
@@ -70,7 +70,7 @@
 	"WS0052" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีสหกรณ์ได้ ท่านต้องยกเลิกผูกบัญชีฝั่งธนาคารก่อน","en" : "Cannot unbind cooperative account, you need to unbind bank account"}],
 	"WS0053" : [{"th" : "เซสชั่นหมดอายุ เวลาการใช้งานถูกจำกัดไว้ที่ 15 นาทีเพื่อความปลอดภัย กรุณาเข้าใช้งานใหม่อีกครั้ง","en" : "Session expired time limit for using is 15 minutes for secure, please access again"}],
 	"WS0054" : [{"th" : "บัญชีเงินฝากที่ระบุได้ปิดบัญชีไปแล้วหรือสหกรณ์ไม่อนุญาตให้รับโอนได้ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Deposit account that specify was closed or cooperative is not allow to receive money if you have any question, you can contact cooperative"}],
-	"WS0055" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถขอทุนสวัสดิการได้ในขณะนี้ กรุณาติดต่อสหกรณ์หรือลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot request welfare in this moment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
+	"WS0055" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถขอทุนสวัสดิการได้ในขณะนี้ กรุณาติดต่อสหกรณ์หรือลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot request welfare in this moment please contact cooperative or try again in 3 Hrs."}],
 	"WS0056" : [{"th" : "ท่านทำรายการต่ำกว่ายอดที่กำหนด ยอดทำรายการขั้นต่ำ ${min_amount_deposit} บาท กรุณาลองใหม่อีกครั้ง","en" : "Money transactions amount lower than define, minimum money transactions amount is ${min_amount_deposit} Baht please try again"}],
 	"WS0057" : [{"th" : "ตั้ง PIN ล้มเหลว เพื่อความปลอดภัยของท่าน กรุณาตั้ง PIN โดยหลีกเลี่ยงเลขสมาชิก เลขที่เรียงกันและเลขซ้ำติดกัน 3 หลัก","en" : "Set PIN failed for secure of yourself please avoid member no, numbers in sequence and triple adjacent numbers"}],
 	"WS0058" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถคำนวณสิทธิ์กู้ได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot calculate maximum in this moment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
@@ -90,6 +90,10 @@
 	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
+	"WS0076" : [{"th" : "สหกรณ์กำลังตรวจสอบเอกสารการขอทุนของท่าน ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has been considering your request. You can track request in Welfare request menu"}],
+	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can track request in Welfare request menu"}],
+	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
+	"WS0079" : [{"th" : "หมดเวลาการยื่นขอทุนแล้ว","en" : "Out of time for request welfare"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -116,6 +120,7 @@
 	"WS1028" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถล้างค่าชื่อเล่นบัญชีได้ กรุณาติดต่อสหกรณ์ #WS1028","en" : "Something was wronged that cannot reset alias name account please contact cooperative #WS1028"}],
 	"WS1029" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถสร้างรายการโปรดได้ กรุณาติดต่อสหกรณ์ #WS1029","en" : "Something was wronged that cannot create favorite transaction please contact cooperative #WS1029"}],
 	"WS1030" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนแปลงสถานะการพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1030","en" : "Something was wronged that cannot change status moratorium please contact cooperative #WS1030"}],
+	"WS1032" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นขอทุนได้ กรุณาติดต่อสหกรณ์ #WS1032","en" : "Something was wronged that cannot request welfare please contract cooperative #WS1032"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
@@ -166,18 +171,5 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
-	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}],
-	"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
-	"BUTTON_TEXT" : [{
-		"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
-		"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
-	}],
-	"REQ_WELFARE_STATUS" : [{
-		"8" : 
-			[{"th" : "รออนุมัติ","en" : "Pending"}],
-		"1" : 
-			[{"th" : "อนุมัติ","en" : "Approved"}],	
-		"-9" : 
-			[{"th" : "ไม่อุนมัติ","en" : "Reject"}]
-		}]
+	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}]
 }
