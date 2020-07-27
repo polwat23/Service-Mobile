@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		$arrayDataTemplate["DEVICE_NAME"] = $arrPayload["PAYLOAD"]["device_name"];
 		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
 		$conmysql->beginTransaction();
-		$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0,temppass_is_md5 = '0'
+		$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0,temppass_is_md5 = '0'
 											WHERE member_no = :member_no");
 		if($updateTemppass->execute([
 			':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),

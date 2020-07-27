@@ -40,7 +40,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
-											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+											ORDER BY kut.sort_in_receive ASC";
 			}else{
 				$qureyKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
@@ -56,7 +57,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
-											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+											ORDER BY kut.sort_in_receive ASC";
 			}
 		}else{
 			if(trim($dataComing["recv_period"]) > $recv_now){
@@ -74,7 +76,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
-											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+											ORDER BY kut.sort_in_receive ASC";
 			}else{
 				$qureyKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
@@ -90,7 +93,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
-											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+											ORDER BY kut.sort_in_receive ASC";
 			}
 		}
 		$getDetailKP = $conoracle->prepare($qureyKpDetail);
