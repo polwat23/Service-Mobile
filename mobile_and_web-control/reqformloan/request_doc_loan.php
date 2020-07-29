@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$getLastDocno = $conmysql->prepare("SELECT MAX(reqloan_doc) as REQLOAN_DOC FROM gcreqloan");
 		$getLastDocno->execute();
 		$rowLastDocno = $getLastDocno->fetch(PDO::FETCH_ASSOC);
-		$getLastDoc = substr($rowLastDocno["REQLOAN_DOC"],8);
+		$getLastDoc = isset($rowLastDocno["REQLOAN_DOC"]) && $rowLastDocno["REQLOAN_DOC"] != "" ? substr($rowLastDocno["REQLOAN_DOC"],8) : 0;
 		$reqloan_doc = date("Ymd").($getLastDoc + 1);
 		if(isset($dataComing["upload_slip_salary"]) && $dataComing["upload_slip_salary"] != ""){
 			$subpath = 'salary';
