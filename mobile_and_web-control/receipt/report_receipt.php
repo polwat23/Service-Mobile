@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+		$fetchName = $conmssql->prepare("SELECT mb.MEMB_NAME,mb.MEMB_SURNAME,mp.PRENAME_DESC,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
@@ -22,12 +22,12 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$slip_no = explode('/',$dataComing["slip_no"]);
 		$arrGroupDetail = array();
-		$getDetailSlip = $conoracle->prepare("SELECT kit.KEEPITEMTYPE_DESC,kit.KEEPITEMTYPE_CODE,kmd.seq_no,kit.keepitemtype_grp,
-											CASE kit.keepitemtype_grp 
+		$getDetailSlip = $conmssql->prepare("SELECT kit.KEEPITEMTYPE_DESC,kit.KEEPITEMTYPE_CODE,kmd.seq_no,kit.KEEPITEMTYPE_GRP,
+											CASE kit.KEEPITEMTYPE_GRP 
 													WHEN 'DEP' THEN kmd.description
 													WHEN 'LON' THEN kmd.loancontract_no
 											ELSE kmd.description END as PAY_ACCOUNT,
-											kmd.principal_payment as ITEM_PAYAMT,kmd.item_balance,kmd.period,kmd.INTEREST_PAYMENT as INTEREST_PAYAMT
+											kmd.principal_payment as ITEM_PAYAMT,kmd.ITEM_BALANCE,kmd.PERIOD,kmd.INTEREST_PAYMENT as INTEREST_PAYAMT
 											FROM kpmastreceivedet kmd LEFT JOIN KPUCFKEEPITEMTYPE kit ON kmd.keepitemtype_code = kit.keepitemtype_code
 											WHERE kmd.kpslip_no = :slip_no and kmd.seq_no = :seq_no");
 		$getDetailSlip->execute([
@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		if(sizeof($arrGroupDetail) > 0){
-			$getDetailHeader = $conoracle->prepare("SELECT receipt_date as SLIP_DATE FROM kpmastreceive WHERE kpslip_no = :slip_no");
+			$getDetailHeader = $conmssql->prepare("SELECT receipt_date as SLIP_DATE FROM kpmastreceive WHERE kpslip_no = :slip_no");
 			$getDetailHeader->execute([
 				':slip_no' => $slip_no[0]
 			]);

@@ -60,7 +60,7 @@
 	"WS0041" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถทำรายการได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม. #WS0041","en" : "Something was crashed that cannot transactions. Cooperative wishes to close for the system maintenance please try again in 3 Hrs. #WS0041"}],
 	"WS0042" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถเช็คข้อมูลบัญชีปลายทางได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม. #WS0042","en" : "Something was crashed that cannot check destination account. Cooperative wishes to close for the system maintenance please try again in 3 Hrs. #WS0042"}],
 	"WS0043" : [{"th" : "วงเงินในการถอนวันนี้ของท่านเต็มวงเงินแล้ว","en" : "Your money limit of withdraw on today is full"}],
-	"WS0044" : [{"th" : "ไม่สามารถสร้างไฟล์เรียกเก็บแบบ PDF ได้ กรุณาลองใหม่อีกครั้งหรือติดต่อสหกรณ์","en" : "Cannot create report for charge monthly in type PDF please try again or contact cooperative"}],
+	"WS0044" : [{"th" : "ไม่สามารถสร้างไฟล์ PDF ได้กรุณาลองใหม่อีกครั้งหรือติดต่อสหกรณ์","en" : "Cannot create report in type PDF please try again or contact cooperative"}],
 	"WS0045" : [{"th" : "ไม่สามารถโอนเข้าบัญชีเดียวกันได้ กรุณาเปลี่ยนบัญชีปลายทาง","en" : "Cannot fund transfer same account please change account"}],
 	"WS0047" : [{"th" : "ไม่พบบัญชีปลายทางที่ระบุ กรุณาตรวจสอบเลขบัญชีอีกครั้ง","en" : "Not found account that specify please check the account number again"}],
 	"WS0048" : [{"th" : "บัญชีของท่านถูกระงับการใช้งาน กรุณาติดต่อสหกรณ์เพื่อปลดล็อคบัญชี","en" : "Your account is withhold please contact cooperative for unlock account"}],

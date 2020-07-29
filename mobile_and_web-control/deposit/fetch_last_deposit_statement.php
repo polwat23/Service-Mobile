@@ -9,20 +9,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit');
 		$arrayResult['LIMIT_DURATION'] = $limit;
-		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
-		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
+		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
+			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
+		}else{
+			$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
+		}
+		if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+			$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+		}else{
+			$date_now = date('Y-m-d');
+		}
+		$fetchLastStmAcc = $conmssql->prepare("SELECT TOP 1 dps.DEPTACCOUNT_NO,dt.depttype_desc,dpm.DEPTACCOUNT_NAME,dpm.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
 												LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
-												WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
+												WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
 		$arrAccount = array();
-		$account_no_format = $lib->formataccount($account_no,$func->getConstant('dep_format'));
+		$account_no_format = isset($account_no) && $account_no != "" ? $lib->formataccount($account_no,$func->getConstant('dep_format')) : null;
 		$arrAccount["DEPTACCOUNT_NO"] = $account_no_format;
-		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
+		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = isset($account_no_format) ? $lib->formataccount_hidden($account_no_format,$func->getConstant('hidden_dep')) : null;
 		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccountLastSTM["DEPTACCOUNT_NAME"]));
 		$arrAccount["BALANCE"] = number_format($rowAccountLastSTM["BALANCE"],2);
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'y-n-d');
@@ -47,28 +55,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSlipTrans[] = $rowslipTrans["coop_slip_no"];
 		}
 		if(sizeof($arrSlipTrans) > 0){
-			$fetchStmSeqDept = $conoracle->prepare("SELECT dpstm_no FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
+			$fetchStmSeqDept = $conmssql->prepare("SELECT DPSTM_NO FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
 			$fetchStmSeqDept->execute([':deptacc_no' => $account_no]);
 			while($rowstmseq = $fetchStmSeqDept->fetch(PDO::FETCH_ASSOC)){
 				$arrSlipStm[] = $rowstmseq["DPSTM_NO"];
 			}
 		}
 		if(sizeof($arrSlipStm) > 0){
-			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+			$getStatement = $conmssql->prepare("SELECT TOP ".$rownum." dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.SEQ_NO,
+												dsm.OPERATE_DATE,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
-												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+												WHERE dsm.deptaccount_no = :account_no and dsm.SEQ_NO NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
+												BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :datenow, 23) ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC");
 		}else{
-			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+			$getStatement = $conmssql->prepare("SELECT TOP ".$rownum." dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.SEQ_NO,
+												dsm.OPERATE_DATE,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 												WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
-												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+												BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :datenow, 23) ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC");
 		}
 		$getStatement->execute([
 			':account_no' => $account_no,
@@ -101,7 +109,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayGroupSTM[] = $arrSTM;
 		}
-		$arrayResult["HEADER"] = $arrAccount;
+		if($dataComing["fetch_type"] != 'more'){
+			$arrayResult["HEADER"] = $arrAccount;
+		}
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;

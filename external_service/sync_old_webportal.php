@@ -10,50 +10,49 @@ $lib = new library();
 $func = new functions();
 $arrGrp = array();
 
-if(is_array($conmysqlold) && $conmysqlold["RESULT"] == FALSE){
-	echo $conmysqlold["ERROR"];
-}else{
+		$dbhost = "mobilecloud.coopsiam.com";
+		$dbuser = "root";
+		$dbpass = "@Gensoft2018";
+		$dbname = "mobile_mhd_test";
+		try{
+			$conmysql2 = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+			$conmysql2->exec("set names utf8mb4");
+		}catch(Throwable $e){
+			echo json_encode($e);
+		}
+
 	$bulkIns = array();
 	$arrayMember = array();
-	$getData_New = $conmysql->prepare("SELECT member_no FROM gcmemberaccount");
+	$getData_New = $conmysql->prepare("SELECT * FROM gcmemberaccount ");
 	$getData_New->execute();
+	$member = array();
+	$mmn = array();
 	while($row = $getData_New->fetch(PDO::FETCH_ASSOC)){
-		$arrayMember[] = $row["member_no"];
+		$member[] = $row["member_no"];
 	}
-	$getData_Old = $conmysqlold->prepare("SELECT * FROM mbmembmaster GROUP BY member_no");
-	$getData_Old->execute();
-	while($rowData = $getData_Old->fetch(PDO::FETCH_ASSOC)){
-		if(!in_array($rowData["member_no"], $arrayMember)){
-			$tel = preg_replace('/-/', '', $rowData["mobile"]);
-			$pass = password_hash($rowData["password"],PASSWORD_DEFAULT);
-			$bulkIns[] = "('".$rowData["member_no"]."','".$pass."','".substr($tel,0,10)."','".$rowData["email"]."','-9','".$pass."','".$rowData["date_reg"]."','web','1')";
-			/*if(sizeof($bulkIns) == 1000){
-				$ins = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,account_status,temppass,register_date,register_channel,temppass_is_md5) VALUES".implode(',',$bulkIns));
-				/*if($ins->execute()){
-					
-					echo 'Inserted';
-				}else{
-					echo json_encode($ins);
-				}
-				unset($bulkIns);
-				$bulkIns = array();
-			}*/
+		$getMe = $conmysql2->prepare("SELECT * FROM gcmemberaccount");
+		$getMe->execute();
+		while($rowMe = $getMe->fetch()){
+			if(in_array($rowMe["member_no"],$member)){
+				
+			}else{
+				$mmn[] = $rowMe["member_no"];
+			}
 		}
+		$insertTOMHD = array();
+		foreach($mmn as $rowMe2){
+			$getM = $conmysql2->prepare("SELECT * FROM gcmemberaccount WHERE member_no = :member_no");
+			$getM->execute([':member_no' => $rowMe2]);
+			if($getM->rowCount() > 0){
+				$rowMe = $getM->fetch();
+				$insertTOMHD[] = "('".$rowMe["member_no"]."','".$rowMe["password"]."','".$rowMe["pin"]."','".$rowMe["phone_number"]."','".$rowMe["email"]."','".$rowMe["account_status"]."','".$rowMe["temppass"]."','".$rowMe["path_avatar"]."','".$rowMe["fcm_token"]."')";
+			}
+		}
+	if(sizeof($insertTOMHD) > 0){
+		$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,fcm_token)
+												VALUES".implode(',',$insertTOMHD));
+		//$insert->execute();
 	}
-	/*if(sizeof($bulkIns) > 0){
-		$ins = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,account_status,temppass,register_date,register_channel,temppass_is_md5) VALUES".implode(',',$bulkIns));
-		if($ins->execute()){
-					
-					echo 'Inserted';
-				}else{
-					echo json_encode($ins);
-				}
-		unset($bulkIns);
-		$bulkIns = array();
-		
-	}*/
-	echo "INSERT INTO gcmemberaccount(member_no,password,phone_number,email,account_status,temppass,register_date,register_channel,temppass_is_md5) VALUES".implode(',',$bulkIns);
-	
-}
+	echo json_encode($insertTOMHD);
 
 ?>

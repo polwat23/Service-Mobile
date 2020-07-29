@@ -24,15 +24,11 @@ class Authorization {
 				$arrayReturn["VALIDATE"] = true;
 				return $arrayReturn;
 			}catch (ValidateException $e) {
-				$text = date("Y-m-d H:i:s").' > ['.$api_token.'] Error : '.$e->getMessage();
-				file_put_contents(__DIR__.'/../log/validate_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayReturn["ERROR_MESSAGE"] = $e->getMessage();
 				$arrayReturn["VALIDATE"] = false;
 				return $arrayReturn;
 			}
 		}else{
-			$text = date("Y-m-d H:i:s").' > Error : Not found API Token';
-			file_put_contents(__DIR__.'/../log/validate_error.txt', $text . PHP_EOL, FILE_APPEND);
 			$arrayReturn["ERROR_MESSAGE"] = "Not found token";
 			$arrayReturn["VALIDATE"] = false;
 			return $arrayReturn;

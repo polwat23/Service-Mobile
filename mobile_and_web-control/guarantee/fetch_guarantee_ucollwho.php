@@ -6,12 +6,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayResult = array();
 		$arrayGroupLoan = array();
-		$getUcollwho = $conoracle->prepare("SELECT
-											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
+		$getUcollwho = $conmssql->prepare("SELECT
+											RTRIM(LCC.LOANCONTRACT_NO) AS LOANCONTRACT_NO,
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
-											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT
+											ISNULL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT,
+											ISNULL(LCM.PRINCIPAL_BALANCE,0) as LOAN_BALANCE
 											FROM
 											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
 											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
@@ -41,6 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
 			$arrayColl["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
+			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOAN_BALANCE"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
 		}

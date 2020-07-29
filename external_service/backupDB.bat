@@ -1,15 +1,17 @@
 @echo off
 
 
-del C:\Mobile\Service-MHD\external_service\backupDB_mhd.zip
+del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip
 
-cd C:\Program Files\MariaDB 10.4\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@MUsaving2020 mobile_mhd > C:\Mobile\Service-MHD\external_service\backupDB_mhd.sql
+cd C:\Program Files\MariaDB 10.4\bin
+C:
+mysqldump.exe -hlocalhost -P3306 -u root -p@NSTH2020 mobile_nsth > D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
 
-"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\Service-MHD\external_service\backupDB_mhd.zip C:\Mobile\Service-MHD\external_service\backupDB_mhd.sql
+"C:\Program Files\7-Zip\7z.exe" a -r D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
 
-del C:\Mobile\Service-MHD\external_service\backupDB_mhd.sql
+del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
 
-ftp -i -s:C:\Mobile\Service-MHD\external_service\ftp_upload.bat
+ftp -i -s:D:\Mobile\Service-NSTH\external_service\ftp_upload.bat
 
-del C:\Mobile\Service-MHD\external_service\backupDB_mhd.zip
+del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip
 

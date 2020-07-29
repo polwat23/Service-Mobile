@@ -4,85 +4,75 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$limit_period = $func->getConstant('limit_kpmonth');
+		$limit_period = (int) $func->getConstant('limit_kpmonth');
 		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth');
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$dateNow = date('d');
 		$arrayGroupPeriod = array();
 		$this_period = (date('Y') + 543).date('m');
 		if($keep_forward == '1'){
-			$getMaxRecv = $conoracle->prepare("SELECT max(recv_period) as MAX_RECV_PERIOD FROM kptempreceive WHERE rownum <= 1");
+			$getMaxRecv = $conmssql->prepare("SELECT TOP 1 max(recv_period) as MAX_RECV_PERIOD FROM kptempreceive");
 			$getMaxRecv->execute();
 			$rowMaxRecv = $getMaxRecv->fetch(PDO::FETCH_ASSOC);
 			$max_recv = (int) substr($rowMaxRecv["MAX_RECV_PERIOD"],4);
 			$thisMonth = date("m");
-			if($max_recv >= $thisMonth){
-				$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															select recv_period from kpmastreceive where member_no = :member_no and 
-															recv_period <> '".$this_period."'
-														UNION 
-															select recv_period  from kptempreceive where member_no = :member_no and 
-															recv_period <> '".$this_period."'
-														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+			if($max_recv > $thisMonth){
+				$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." RECV_PERIOD from kpmastreceive where member_no = :member_no  ORDER BY recv_period DESC");
+				$getPeriodKP->execute([$member_no]);
 			}else{
 				if($dateNow >= $dateshow_kpmonth){
-					$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															select recv_period from kpmastreceive where member_no = :member_no
-														UNION  
-															select recv_period  from kptempreceive where member_no = :member_no
-														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+					$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." * from (
+															SELECT RECV_PERIOD from kpmastreceive where member_no = ?
+														UNION
+															SELECT RECV_PERIOD from kptempreceive where member_no = ?
+														) as t1 ORDER BY recv_period DESC");
 				}else{
-					$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															select recv_period from kpmastreceive where member_no = :member_no and 
+					$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." * from (
+															SELECT RECV_PERIOD from kpmastreceive where member_no = ? and 
 															recv_period <> '".$this_period."'
-														UNION 
-															select recv_period  from kptempreceive where member_no = :member_no and 
+														UNION  
+															SELECT RECV_PERIOD  from kptempreceive where member_no = ? and 
 															recv_period <> '".$this_period."'
-														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+														) as t1 ORDER BY recv_period DESC");
 				}
+				$getPeriodKP->execute([$member_no,$member_no]);
 			}
 		}else{
 			if($dateNow >= $dateshow_kpmonth){
-				$getPeriodKP = $conoracle->prepare("SELECT * from ((
-														select recv_period from kpmastreceive where member_no = :member_no
-													UNION  
-														select recv_period  from kptempreceive where member_no = :member_no
-													) ORDER BY recv_period DESC) where rownum <= :limit_period");
+				$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." * from (
+															SELECT RECV_PERIOD from kpmastreceive where member_no = ?
+														UNION  
+															SELECT RECV_PERIOD  from kptempreceive where member_no = ?
+														) as t1 ORDER BY recv_period DESC");
 			}else{
-				$getPeriodKP = $conoracle->prepare("SELECT * from ((
-														select recv_period from kpmastreceive where member_no = :member_no and 
-														recv_period <> '".$this_period."'
-													UNION 
-														select recv_period  from kptempreceive where member_no = :member_no and 
-														recv_period <> '".$this_period."'
-													) ORDER BY recv_period DESC) where rownum <= :limit_period");
+				$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." * from (
+															SELECT RECV_PERIOD from kpmastreceive where member_no = ? and 
+															recv_period <> '".$this_period."'
+														UNION  
+															SELECT RECV_PERIOD  from kptempreceive where member_no = ? and 
+															recv_period <> '".$this_period."'
+														) as t1 ORDER BY recv_period DESC");
 			}
+			$getPeriodKP->execute([$member_no,$member_no]);
 		}
-		$getPeriodKP->execute([
-				':member_no' => $member_no,
-				':limit_period' => $limit_period
-		]);
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
-			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
-			$getKPDetail = $conoracle->prepare("select * from (
-													(select kpr.RECEIPT_NO,NVL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,(SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kpmastreceivedet kpd
+			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(trim($rowPeriod["RECV_PERIOD"]));
+			$getKPDetail = $conmssql->prepare("SELECT * from (
+													(SELECT kpr.RECEIPT_NO,ISNULL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,(SELECT ISNULL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kpmastreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
-													where kpr.member_no = :member_no and kpr.recv_period = :recv_period )
+													where kpd.member_no = ? and kpd.recv_period = ?) as sum_item
+													where kpr.member_no = ? and kpr.recv_period = ? )
 												UNION
-													(select kpr.RECEIPT_NO,NVL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kptempreceive kpr,(SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kptempreceivedet kpd
+													(SELECT kpr.RECEIPT_NO,ISNULL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kptempreceive kpr,(SELECT ISNULL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT FROM kptempreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
-													where kpr.member_no = :member_no and kpr.recv_period = :recv_period )
-												)");
-			$getKPDetail->execute([
-				':member_no' => $member_no,
-				':recv_period' => $rowPeriod["RECV_PERIOD"]
-			]);
+													where kpd.member_no = ? and kpd.recv_period = ?) as sum_item
+													where kpr.member_no = ? and kpr.recv_period = ? )
+												) as t1");
+			$getKPDetail->execute([$member_no,$rowPeriod["RECV_PERIOD"],$member_no,$rowPeriod["RECV_PERIOD"],$member_no,$rowPeriod["RECV_PERIOD"],$member_no,$rowPeriod["RECV_PERIOD"]]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
 			$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["RECEIVE_AMT"],2);
@@ -104,11 +94,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
+		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
+	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

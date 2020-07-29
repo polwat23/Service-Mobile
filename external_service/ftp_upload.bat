@@ -3,5 +3,5 @@ ftp_backup
 @Gensoft2018
 cd incoming
 binary
-put C:\Mobile\Service-MHD\external_service\backupDB_mhd.zip
+put D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip
 bye

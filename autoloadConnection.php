@@ -7,5 +7,7 @@ use Connection\connection;
 
 $con = new connection();
 $conmysql = $con->connecttomysql();
-$conoracle = $con->connecttooracle();
+//$conoracle = $con->connecttooracle();
+$conmssql = $con->connecttosqlserver();
+
 ?>

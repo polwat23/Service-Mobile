@@ -1,5 +1,7 @@
 <?php
+//require_once(__DIR__.'/../extension/vendor/autoload.php');
 
+//use Vyuldashev\XmlToArray\XmlToArray;
 namespace Utility;
 
 const BAHT_TEXT_NUMBERS = array('ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า');
@@ -201,51 +203,63 @@ class library {
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}
+	private function concatpercent($string) {
+		$strLen = strlen($string);
+		$output = "";
+		if($strLen > 0){
+			$output .= "%";
+			for($i=0; $i < $strLen; $i++) {
+				$output .= $string[$i];
+				if($i % 2 != 0 && $i < $strLen - 1){
+					$output .= "%";
+				}
+			}
+		}
+		return $output;
+	 }
+	public function unicodeMessageEncode($string){
+		$string = strtoupper(mb_strtoupper(bin2hex(mb_convert_encoding($string, 'UTF-16BE', 'UTF-8'))));
+		return $this->concatpercent($string);
+	}
 	public function sendSMS($arrayDestination,$bulk=false) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($json,true);
 		$arrayGrpSms = array();
-		try{
-			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
-			try {
-				if($bulk){
-					foreach($arrayDestination as $dest){
-						$argumentWS = [
-							"Member_No" => $dest["member_no"],
-							"MobilePhone" => $dest["tel"],
-							"Message" => $dest["message"]
-						];
-						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-						$responseSoap = $resultWS->RqSendOTPResult;
-						$arraySms["MEMBER_NO"] = $dest["member_no"];
-						$arraySms["RESULT"] = $responseSoap;
-						$arrayGrpSms[] = $arraySms;
-					}
-					return $arrayGrpSms;
-				}else{
-					$argumentWS = [
-						"Member_No" => $arrayDestination["member_no"],
-						"MobilePhone" => $arrayDestination["tel"],
-						"Message" => $arrayDestination["message"]
-					];
-					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-					$responseSoap = $resultWS->RqSendOTPResult;
-					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
-					$arrayGrpSms["RESULT"] = $responseSoap;
-					return $arrayGrpSms;
-				}
-			}catch(SoapFault $e){
-				$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
-				file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
-				$arrayGrpSms["RESULT"] = FALSE;
-				return $arrayGrpSms;
+		if($bulk){
+			/*foreach($arrayDestination as $dest){
+				$argumentWS = [
+					"Member_No" => $dest["member_no"],
+					"MobilePhone" => $dest["tel"],
+					"Message" => $dest["message"]
+				];
+				$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+				$responseSoap = $resultWS->RqSendOTPResult;
+				$arraySms["MEMBER_NO"] = $dest["member_no"];
+				$arraySms["RESULT"] = $responseSoap;
+				$arrayGrpSms[] = $arraySms;
 			}
-		}catch(Throwable $e){
-			$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
-			file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
-			$arrayGrpSms["RESULT"] = FALSE;
-			return $arrayGrpSms;
-			return false;
+			return $arrayGrpSms;*/
+		}else{
+			$headers[] = 'Content-Type: text/xml';
+			$ch = curl_init();  
+
+			curl_setopt( $ch,CURLOPT_URL, $config["URL_CORE_SMS"] );                                                                  
+			curl_setopt( $ch,CURLOPT_POST, true );  
+			curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+			curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt( $ch,CURLOPT_POSTFIELDS, $arrayDestination["cmd_sms"]);                                                                  
+																													 
+			$result = curl_exec($ch);
+			$beautyXML = simplexml_load_string($result);
+			if($beautyXML->STATUS == "OK"){
+				$arrayResponse["RESULT"] = TRUE;
+			}else{
+				$arrayResponse["MESSAGE"] = $beautyXML->DETAIL ?? "Cannot connect to AIS Server";
+				$arrayResponse["RESULT"] = FALSE;
+			}
+			return $arrayResponse;
 		}
 	}
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
@@ -440,22 +454,18 @@ class library {
 		
 		if(isset($result) && $result !== FALSE){
 			$resultNoti = json_decode($result);
-			curl_close ($ch);
+			curl_close($ch);
 			if(isset($resultNoti)){
-				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
+				if((isset($resultNoti->success) && $resultNoti->success) || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
-					//$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
-					//file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
-			curl_close ($ch);
+			curl_close($ch);
 			return false;
 		}
 	}
