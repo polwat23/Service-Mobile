@@ -223,6 +223,7 @@ if(!$anonymous){
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
+				$arrayMenuTransaction["ID_PARENT"] = "18";
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
 				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;

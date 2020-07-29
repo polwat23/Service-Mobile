@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 		exit();
 	}
 	$conmysql->beginTransaction();
-	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp WHERE otp_status = '0'");
 	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 	$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
 	$arrayComing["TEL"] = $dataComing["tel"];
-	$arrayComing["MEMBER_NO"] = $dataComing["member_no"];
+	$arrayComing["MEMBER_NO"] = $member_no;
 	$arrayTel[] = $arrayComing;
 	$bulkInsert = array();
 	$arrayDest = array();

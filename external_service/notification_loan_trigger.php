@@ -13,7 +13,7 @@ $fetchDataSTM = $conoracle->prepare("SELECT lut.loanitemtype_desc,lcn.loancontra
 									lcn.principal_payment,lcn.interest_payment,lcn.principal_balance
 									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
 									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
-									WHERE lcn.operate_date BETWEEN (SYSDATE - 1) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code NOT IN('AVG')");
+									WHERE lcn.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code NOT IN('AVG')");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));

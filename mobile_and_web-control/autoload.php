@@ -146,12 +146,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 										echo json_encode($arrayResult);
 										exit();
 									}else{
-										$arrayResult['RESPONSE_CODE'] = "WS0014";
-										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-										$arrayResult['RESULT'] = FALSE;
-										http_response_code(401);
-										echo json_encode($arrayResult);
-										exit();
+										$rowLogin = $func->checkLogin($payload["id_token"]);
+										if(!$rowLogin["RETURN"]){
+											if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
+												$func->revoke_alltoken($payload["id_token"],'-9',true);
+											}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
+												$func->revoke_alltoken($payload["id_token"],'-8',true);
+											}else if($rowLogin["IS_LOGIN"] == '-7'){
+												$func->revoke_alltoken($payload["id_token"],'-7',true);
+											}else if($rowLogin["IS_LOGIN"] == '-5'){
+												$func->revoke_alltoken($payload["id_token"],'-6',true);
+											}
+											$arrayResult['RESPONSE_CODE'] = "WS0010";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
+										}else{
+											$arrayResult['RESPONSE_CODE'] = "WS0032";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
+										}
 									}
 								}
 							}
@@ -164,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							exit();
 						}
 					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0032";
+						$arrayResult['RESPONSE_CODE'] = "WS0014";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);

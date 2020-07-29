@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$recv_now = (date('Y') + 543).date('m');
 		$dateNow = date('d');
 		if($recv_now == trim($dataComing["recv_period"])){
-			if($dateNow > $date_process){
+			if($dateNow >= $date_process){
 				$qureyKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
@@ -42,7 +42,24 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
-			$qureyKpDetail = "SELECT 
+			if(trim($dataComing["recv_period"]) > $recv_now){
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpDetail = "SELECT 
 										kut.keepitemtype_desc as TYPE_DESC,
 										kut.keepitemtype_grp as TYPE_GROUP,
 										case kut.keepitemtype_grp 
@@ -57,6 +74,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 										FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 										kpd.keepitemtype_code = kut.keepitemtype_code
 										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}	
 		}
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare($qureyKpDetail);
@@ -81,14 +99,17 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				}else{
 					$arrDetail["PAY_ACCOUNT"] = $contract_no;
 				}
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;

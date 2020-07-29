@@ -180,7 +180,7 @@ class functions {
 					$permission[] = "'2'";
 					$permission[] = "'3'";
 					break;
-				default : $permission[] = "'0'";
+				default : return false;
 					break;
 			}
 			if($user_type == '5' || $user_type == '9'){
@@ -562,6 +562,10 @@ class functions {
 					return false;
 				}
 			}
+		}
+		public function MaintenanceMenu($menu_component) {
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
 }
 ?>

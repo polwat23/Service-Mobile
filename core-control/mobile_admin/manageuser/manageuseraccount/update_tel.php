@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','member_no','new_tel','old_tel'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','member_no','new_tel'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
 		$update_email = $conmysql->prepare("UPDATE gcmemberaccount 
 																SET phone_number = :new_tel

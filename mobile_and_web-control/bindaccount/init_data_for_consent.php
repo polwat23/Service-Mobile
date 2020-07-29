@@ -11,7 +11,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															WHERE gat.member_no = :member_no and gat.is_use = '1'");
+															LEFT JOIN gcconstantaccountdept gcd ON gat.id_accountconstant = gcd.id_accountconstant
+															WHERE gat.member_no = :member_no and gat.is_use = '1' and gcd.allow_deposit_outside = '1' and gcd.allow_withdraw_outside = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
 			]);
