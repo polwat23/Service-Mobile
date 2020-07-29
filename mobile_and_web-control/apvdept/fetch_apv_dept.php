@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchListApvDept = $conoracle->prepare("SELECT dpa.apv_docno,dpa.remark,dpa.dept_amt,aml.app_score,dpa.entry_time,dpa.deptaccount_no,amu.full_name
 													FROM dpdeptapprove dpa LEFT JOIN amsecapvlevel aml ON dpa.APV_LEVEL = aml.apvlevel_id
 													LEFT JOIN amsecusers amu ON TRIM(dpa.user_id) = amu.user_name
-													WHERE dpa.apv_status = 8 and dpa.sync_notify_flag = '0' and dpa.entry_date BETWEEN (SYSDATE - 2) and SYSDATE");
+													WHERE dpa.apv_status = 8 and dpa.sync_notify_flag = '0' and dpa.entry_date BETWEEN (SYSDATE - 30) and SYSDATE");
 		$fetchListApvDept->execute();
 		while($rowListApv = $fetchListApvDept->fetch(PDO::FETCH_ASSOC)){
 			$arrayList = array();
