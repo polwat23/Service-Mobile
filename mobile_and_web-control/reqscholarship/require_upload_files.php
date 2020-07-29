@@ -92,6 +92,15 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			}
 		}
 		usort($arrUploadFiles, 'compare_seqno');
+		$checkReqStatus = $conoracle->prepare("SELECT CHILDCARD_ID,REQUEST_STATUS, CANCEL_REMARK FROM asnreqschshiponline 
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and REQUEST_STATUS <> 8");
+		$checkReqStatus->execute([':child_id' => $dataComing["childcard_id"]]);
+		$rowReqStatus = $checkReqStatus->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowReqStatus["CHILDCARD_ID"])){
+			if($rowReqStatus["REQUEST_STATUS"] == 1){
+				$arrayResult['CAN_CLEAR'] = TRUE;
+			}
+		}
 		$arrayResult['LIST_UPLOAD'] = $arrUploadFiles;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

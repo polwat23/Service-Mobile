@@ -13,10 +13,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$getLastDocno->execute();
 		$rowLastDocno = $getLastDocno->fetch(PDO::FETCH_ASSOC);
 		$getLastDoc = isset($rowLastDocno["REQLOAN_DOC"]) && $rowLastDocno["REQLOAN_DOC"] != "" ? substr($rowLastDocno["REQLOAN_DOC"],8) : 0;
-		$reqloan_doc = date("Ymd").($getLastDoc + 1);
+		$reqloan_doc = date("Ymd").str_pad($getLastDoc + 1,7,0,STR_PAD_LEFT);
 		if(isset($dataComing["upload_slip_salary"]) && $dataComing["upload_slip_salary"] != ""){
 			$subpath = 'salary';
-			$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$subpath;
+			$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
 			$data_Img = explode(',',$dataComing["upload_slip_salary"]);
 			$info_img = explode('/',$data_Img[0]);
 			$ext_img = str_replace('base64','',$info_img[1]);
@@ -44,17 +44,17 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		}
 		if(isset($dataComing["upload_citizen_copy"]) && $dataComing["upload_citizen_copy"] != ""){
 			$subpath = 'citizen';
-			$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$subpath;
-			$data_Img = explode(',',$dataComing["upload_slip_salary"]);
+			$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+			$data_Img = explode(',',$dataComing["upload_citizen_copy"]);
 			$info_img = explode('/',$data_Img[0]);
 			$ext_img = str_replace('base64','',$info_img[1]);
 			if(!file_exists($destination)){
 				mkdir($destination, 0777, true);
 			}
 			if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
-				$createImage = $lib->base64_to_img($dataComing["upload_slip_salary"],$subpath,$destination,null);
+				$createImage = $lib->base64_to_img($dataComing["upload_citizen_copy"],$subpath,$destination,null);
 			}else if($ext_img == 'pdf'){
-				$createImage = $lib->base64_to_pdf($dataComing["upload_slip_salary"],$subpath,$destination);
+				$createImage = $lib->base64_to_pdf($dataComing["upload_citizen_copy"],$subpath,$destination);
 			}
 			if($createImage == 'oversize'){
 				unlink($fullPathSalary);
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$rowSalary = $getSalaryId->fetch(PDO::FETCH_ASSOC);
 		$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
 																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin)
-																VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate,:salary,:salary_img,:citizen_img,:id_userlogin)");
+																VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate,:salary,:salary_img,:citizen_img,:id_userlogin)");
 		if($InsertFormOnline->execute([
 			':reqloan_doc' => $reqloan_doc,
 			':member_no' => $payload["member_no"],
@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':period_payment' => $dataComing["period_payment"],
 			':period' => $dataComing["period"],
 			':loanpermit_amt' => $dataComing["loanpermit_amt"],
-			':int_rate' => $dataComing["int_rate"],
+			':int_rate' => $dataComing["int_rate"] / 100,
 			':salary' => $rowSalary["salary_amount"],
 			':salary_img' => $slipSalary,
 			':citizen_img' => $citizenCopy,

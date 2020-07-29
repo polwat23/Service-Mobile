@@ -16,11 +16,42 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ");
 		$fetchLoanIntRate->execute();
 		while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
-			$arrayDetailLoan = array();
-			$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
-			$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];
-			$arrayDetailLoan["INT_RATE"] = $rowIntRate["INTEREST_RATE"];
-			$arrGrpLoan[] = $arrayDetailLoan;
+			$fetchCredit = $conoracle->prepare("SELECT lc.maxloan_amt,lc.percentshare,lc.percentsalary,mb.salary_amount,(sh.sharestk_amt*10) as SHARE_AMT
+														FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb 
+														LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
+														WHERE mb.member_no = :member_no and LT.LOANTYPE_CODE = :loantype_code
+														and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
+			$fetchCredit->execute([
+				':member_no' => $member_no,
+				':loantype_code' => $rowIntRate["LOANTYPE_CODE"]
+			]);
+			$rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
+			if($rowCredit["MAXLOAN_AMT"] > 0){
+				$arrayDetailLoan = array();
+				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
+															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status <> '-9'");
+				$CheckIsReq->execute([
+					':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
+					':member_no' => $member_no
+				]);
+				if($CheckIsReq->rowCount() > 0){
+					$rowIsReq = $CheckIsReq->fetch(PDO::FETCH_ASSOC);
+					$arrayDetailLoan["IS_REQ"] = TRUE;
+					if($rowIsReq["req_status"] == '8'){
+						$arrayDetailLoan["REQ_STATUS"] = "รอลงรับ";
+					}else if($rowIsReq["req_status"] == '1'){
+						$arrayDetailLoan["REQ_STATUS"] = "อนุมัติ";
+					}else if($rowIsReq["req_status"] == '7'){
+						$arrayDetailLoan["REQ_STATUS"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
+					}
+				}else{
+					$arrayDetailLoan["IS_REQ"] = FALSE;
+				}
+				$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
+				$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];
+				$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"] * 100,2).' %';
+				$arrGrpLoan[] = $arrayDetailLoan;
+			}
 		}
 		$arrayResult["LOAN_LIST"] = $arrGrpLoan;
 		$arrayResult['RESULT'] = TRUE;

@@ -6,12 +6,16 @@ if($lib->checkCompleteArgument(['menu_component','apv_docno','user_score','apv_s
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$conoracle->beginTransaction();
 		$use_user_score = 0;
+		$getCoopId = $conoracle->prepare("SELECT coop_id FROM dpdeptapprove WHERE apv_docno = :apv_docno");
+		$getCoopId->execute([':apv_docno' => $dataComing["apv_docno"]]);
+		$rowCoopId = $getCoopId->fetch(PDO::FETCH_ASSOC);
 		$getScoreRemain = $conoracle->prepare("SELECT SUM(user_score) as score_remain,NVL(MAX(seq_no),0) as seq_no FROM dpdeptapprovedet WHERE apv_docno = :apv_docno");
 		$getScoreRemain->execute([':apv_docno' => $dataComing["apv_docno"]]);
 		$rowScoreRemain = $getScoreRemain->fetch(PDO::FETCH_ASSOC);
-		$ApvSeqDet = $conoracle->prepare("INSERT INTO dpdeptapprovedet(coop_id,apv_docno,seq_no,apv_id,user_level,user_score) 
-														VALUES('001001',:apv_docno,:seq_no,:username,null,:user_score)");
+		$ApvSeqDet = $conoracle->prepare("INSERT INTO dpdeptapprovedet(coop_id,apv_docno,seq_no,apv_id,user_score) 
+														VALUES(:coop_id,:apv_docno,:seq_no,:username,:user_score)");
 		if($ApvSeqDet->execute([
+			':coop_id' => $rowCoopId["COOP_ID"],
 			':apv_docno' => $dataComing["apv_docno"],
 			':seq_no' => $rowScoreRemain["SEQ_NO"] + 1,
 			':username' => $dataComing["user_id"],
@@ -59,6 +63,7 @@ if($lib->checkCompleteArgument(['menu_component','apv_docno','user_score','apv_s
 				":error_menu" => $filename,
 				":error_code" => "WS1034",
 				":error_desc" => "อนุมัติรายการเงินฝากไม่ได้เพราะ Insert ลงตาราง dpdeptapprovedet ไม่ได้"."\n"."Query => ".$ApvSeqDet->queryString."\n"."Param => ". json_encode([
+					':coop_id' => $rowCoopId["COOP_ID"],
 					':apv_docno' => $dataComing["apv_docno"],
 					':seq_no' => $rowScoreRemain["SEQ_NO"] + 1,
 					':username' => $dataComing["user_id"],
@@ -68,6 +73,7 @@ if($lib->checkCompleteArgument(['menu_component','apv_docno','user_score','apv_s
 			];
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "อนุมัติรายการเงินฝากไม่ได้เพราะ Insert ลง dpdeptapprovedet ไม่ได้"."\n"."Query => ".$ApvSeqDet->queryString."\n"."Param => ". json_encode([
+				':coop_id' => $rowCoopId["COOP_ID"],
 				':apv_docno' => $dataComing["apv_docno"],
 				':seq_no' => $rowScoreRemain["SEQ_NO"] + 1,
 				':username' => $dataComing["user_id"],

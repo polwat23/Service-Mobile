@@ -31,6 +31,8 @@ while($rowApv = $fetchApvDept->fetch(PDO::FETCH_ASSOC)){
 		$dataMerge["APV_DOCNO"] = $rowApv["APV_DOCNO"];
 		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 		$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+		$arrPayloadNotify["ACTION_PAGE"] = "ApproveWithdrawalDetails";
+		$arrPayloadNotify["ACTION_PARAMS"] = ["APV_DOCNO" => $rowApv["APV_DOCNO"]];
 		$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 		$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
 		$arrMessage["BODY"] = $message_endpoint["BODY"];

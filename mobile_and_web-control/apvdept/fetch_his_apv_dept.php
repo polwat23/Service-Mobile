@@ -5,10 +5,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ApproveWithdrawal')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGrp = array();
-		$getUseScoreInApv = $conoracle->prepare("SELECT dpa.apv_docno,dpa.remark,dpa.dept_amt,dpa.entry_time,dpa.deptaccount_no,amu.full_name 
+		$getUseScoreInApv = $conoracle->prepare("SELECT dpa.apv_docno,dpa.remark,dpa.dept_amt,dpa.approve_date,dpa.deptaccount_no,amu.full_name 
 																FROM dpdeptapprovedet dad LEFT JOIN amsecusers amu ON TRIM(dad.apv_id) = amu.user_name 
 																LEFT JOIN dpdeptapprove dpa ON dad.APV_DOCNO = dpa.APV_DOCNO
-																WHERE amu.member_no = :member_no and dpa.apv_status = 1 and dpa.entry_date BETWEEN (SYSDATE - 30) and SYSDATE");
+																WHERE amu.member_no = :member_no and dpa.apv_status = 1 and dpa.approve_date BETWEEN (SYSDATE - 8) and SYSDATE");
 		$getUseScoreInApv->execute([
 			':member_no' => $member_no
 		]);
@@ -19,7 +19,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayList["DEPT_AMT"] = number_format($rowUserScoreInApv["DEPT_AMT"],2);
 			$arrayList["REQ_NAME"] = $rowUserScoreInApv["FULL_NAME"];
 			$arrayList["DEPTACCOUNT_NO"] = $lib->formataccount($rowUserScoreInApv["DEPTACCOUNT_NO"],'-');
-			$arrayList["APV_DATE"] = $lib->convertdate($rowUserScoreInApv["ENTRY_TIME"],'d m Y',true);
+			$arrayList["APV_DATE"] = $lib->convertdate($rowUserScoreInApv["APPROVE_DATE"],'d m Y');
+			$arrayList["IS_REJECT"] = FALSE;
 			$arrGrp[] = $arrayList;
 		}
 		$arrayResult['LIST_APV'] = $arrGrp;

@@ -404,6 +404,10 @@ class library {
 					"body" => $payload["PAYLOAD"]["BODY"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
+				],
+				"data" => [
+					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
 				]
 			];
 		}else if($type_send == 'all'){
@@ -415,6 +419,10 @@ class library {
 					"body" => $payload["PAYLOAD"]["BODY"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
+				],
+				"data" => [
+					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
 				]
 			];
 		}

@@ -15,13 +15,13 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			$rowReqStatus = $checkReqStatus->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowReqStatus["CHILDCARD_ID"])){
 				if($rowReqStatus["REQUEST_STATUS"] == 1){
+					$arrayResult['CAN_CLEAR'] = TRUE;
 					$arrayResult['RESPONSE_CODE'] = "WS0077";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}else if($rowReqStatus["REQUEST_STATUS"] == 11){
-					$arrayResult['CAN_CLEAR'] = TRUE;
 					$arrayResult['RESPONSE_CODE'] = "WS0077";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -66,7 +66,6 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 							$data_Img = explode(',',$list["upload_base64"]);
 							$info_img = explode('/',$data_Img[0]);
 							$ext_img = str_replace('base64','',$info_img[1]);
-							$full_file_name = $list["upload_name"].$ext_img;
 							if(!file_exists($destination)){
 								mkdir($destination, 0777, true);
 							}
