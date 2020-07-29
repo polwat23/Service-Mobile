@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$recv_now = (date('Y') + 543).date('m');
 		$dateNow = date('d');
 		$header = array();
-		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+		$fetchName = $conmssql->prepare("SELECT mb.MEMB_NAME,mb.MEMB_SURNAME,mp.PRENAME_DESC,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$arrGroupDetail = array();
 		if($recv_now == trim($dataComing["recv_period"])){
-			if($dateNow > $date_process){
+			if($dateNow >= $date_process){
 				$qureyKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
@@ -33,11 +33,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 												WHEN 'DEP' THEN kpd.description
 												WHEN 'LON' THEN kpd.loancontract_no
 											ELSE kpd.description END as PAY_ACCOUNT,
-											kpd.period,
-											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											kpd.PERIOD,
+											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
@@ -49,33 +49,51 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 												WHEN 'DEP' THEN kpd.description
 												WHEN 'LON' THEN kpd.loancontract_no
 											ELSE kpd.description END as PAY_ACCOUNT,
-											kpd.period,
-											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											kpd.PERIOD,
+											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
-			$qureyKpDetail = "SELECT 
-										kut.keepitemtype_desc as TYPE_DESC,
-										kut.keepitemtype_grp as TYPE_GROUP,
-										case kut.keepitemtype_grp 
-											WHEN 'DEP' THEN kpd.description
-											WHEN 'LON' THEN kpd.loancontract_no
-										ELSE kpd.description END as PAY_ACCOUNT,
-										kpd.period,
-										NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-										NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-										NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-										NVL(kpd.interest_payment,0) AS INT_BALANCE
-										FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-										kpd.keepitemtype_code = kut.keepitemtype_code
-										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			if(trim($dataComing["recv_period"]) > $recv_now){
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.PERIOD,
+											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.PERIOD,
+											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
 		}
-		$getDetailKP = $conoracle->prepare($qureyKpDetail);
+		$getDetailKP = $conmssql->prepare($qureyKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -85,6 +103,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];			
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$contract_no = $rowDetail["PAY_ACCOUNT"];
 				if(mb_stripos($contract_no,'.') === FALSE){
@@ -122,7 +141,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													kpd.RECEIPT_NO,
 													kpd.OPERATE_DATE
 													FROM kptempreceive kpd
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_periodd";
+													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
 			$qureyKpHeader = "SELECT 
@@ -131,7 +150,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											FROM kpmastreceive kpd
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 		}
-		$getDetailKPHeader = $conoracle->prepare($qureyKpHeader);
+		$getDetailKPHeader = $conmssql->prepare($qureyKpHeader);
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -147,6 +166,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0044",
+				":error_desc" => "สร้าง PDF ไม่ได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "สร้างไฟล์ PDF ไม่ได้ ".$filename."\n"."DATA => ".json_encode($dataComing);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -206,11 +235,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 2 อาคารศรีสวรินทิรา ชั้น 1 และ ชั้น 6 ถนนวังหลัง</p>
-				<p style="margin-top: -25px;font-size: 18px;">แขวงศิริราช เขตบางกอกน้อย กรุงเทพมหานคร 10700</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2444-7741-3, 0-2419-7543-5, 0-2419-8363-4</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.si.mahidol.ac.th</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">เลขที่ จ. 55/96-98 ถ.ดาวดึงส์</p>
+				<p style="margin-top: -25px;font-size: 18px;">ต ปากน้ำโพ อ.เมือง จ.นครสวรรค์</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5622-2046</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.omsubsaman.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -316,10 +345,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/receive_money.png" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/receive_money.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
+			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new DOMPDF();

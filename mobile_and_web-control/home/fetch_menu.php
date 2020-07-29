@@ -34,7 +34,7 @@ if(!$anonymous){
 	if(isset($dataComing["id_menu"])){
 		if($dataComing["menu_component"] == "DepositInfo"){
 			$arrMenuDep = array();
-			$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
+			$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 			$fetchMenuDep->execute([':member_no' => $member_no]);
 			$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 			$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
@@ -43,7 +43,7 @@ if(!$anonymous){
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
-			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
+			$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 			$fetchMenuLoan->execute([':member_no' => $member_no]);
 			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
@@ -172,14 +172,14 @@ if(!$anonymous){
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
-							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
+							$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 							$fetchMenuDep->execute([':member_no' => $member_no]);
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							$arrMenuDep["LAST_STATEMENT"] = TRUE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
-							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
+							$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 							$fetchMenuLoan->execute([':member_no' => $member_no]);
 							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
@@ -204,14 +204,14 @@ if(!$anonymous){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
 					if($rowMenu["menu_component"] == "DepositInfo"){
-						$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
+						$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 						$fetchMenuDep->execute([':member_no' => $member_no]);
 						$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 						$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 						$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						$arrMenuDep["LAST_STATEMENT"] = TRUE;
 					}else if($rowMenu["menu_component"] == "LoanInfo"){
-						$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
+						$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 						$fetchMenuLoan->execute([':member_no' => $member_no]);
 						$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 						$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
@@ -223,6 +223,7 @@ if(!$anonymous){
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
+				$arrayMenuTransaction["ID_PARENT"] = "18";
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
 				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;

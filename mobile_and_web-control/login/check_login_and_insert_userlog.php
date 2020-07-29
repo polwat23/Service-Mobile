@@ -20,12 +20,12 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		exit();
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
+	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign = $conmssql->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 		if($rowResign["RESIGN_STATUS"] == '1'){
@@ -42,11 +42,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			echo json_encode($arrayResult);
 			exit();
 		}else if($rowPassword['account_status'] == '-9'){
-			if($rowPassword["temppass_is_md5"] == '1'){
-				$valid_pass = password_verify(md5($dataComing["password"]), $rowPassword['temppass']);
-			}else{
-				$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
-			}
+			$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
 		}else{
 			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
 		}
@@ -144,7 +140,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 							];
 							$log->writeLog('errorusage',$logStruc);
-							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken."\n"."Data => ".json_encode([
+							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken->queryString."\n"."Data => ".json_encode([
 								':access_token' => $access_token,
 								':id_token' => $id_token
 							]);
@@ -165,7 +161,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 						];
 						$log->writeLog('errorusage',$logStruc);
-						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin."\n"."Data => ".json_encode([
+						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin->queryString."\n"."Data => ".json_encode([
 							':member_no' => $member_no,
 							':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 							':channel' => $arrPayload["PAYLOAD"]["channel"],
@@ -190,7 +186,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken."\n"."Data => ".json_encode([
+					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken->queryString."\n"."Data => ".json_encode([
 						':refresh_token' => $refresh_token,
 						':unique_id' => $dataComing["unique_id"],
 						':channel' => $arrPayload["PAYLOAD"]["channel"],

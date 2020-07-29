@@ -110,13 +110,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 					':username' => $dataComing["username"],
 					':status_permission' => $dataComing["status_permission"]
 				])){
-					$checkSubmenu = $conmysql->prepare("SELECT id_permission_menu FROM corepermissionmenu
-																			WHERE username = :username AND id_coremenu = :id_coremenu");
-					$checkSubmenu->execute([
-						':id_coremenu' => $dataComing["id_coremenu"],
-						':username' => $dataComing["username"]
-					]);
-					$idSubMenu = $checkSubmenu->fetch(PDO::FETCH_ASSOC);
+					$idSubMenu = $conmysql->lastInsertId();
 					$checkSubmenu = $conmysql->prepare("SELECT id_submenu FROM coresubmenu 
 																			WHERE id_coremenu =:id_coremenu  AND id_menuparent != '0' AND  menu_status ='1'
 																			ORDER BY id_submenu ASC");
@@ -125,12 +119,11 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 					]);
 					$arrayGroupChkSubMenu = array();
 					while($rowCheckSubmenu = $checkSubmenu->fetch(PDO::FETCH_ASSOC)){
-						$arraycheckSubmenu = $rowCheckSubmenu["id_submenu"];
-						$arrayGroupChkSubMenu[] = $arraycheckSubmenu;
+						$arrayGroupChkSubMenu[] = $rowCheckSubmenu["id_submenu"];
 					}
 					$bulk_insert = array();
 					foreach($arrayGroupChkSubMenu as $id_sub){
-						$bulk_insert[] = "(".$id_sub.",".$idSubMenu["id_permission_menu"].",'".$dataComing["status_permission"]."')";
+						$bulk_insert[] = "(".$id_sub.",".$idSubMenu.",'".$dataComing["status_permission"]."')";
 					}
 					$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
 																				VALUES".implode(',',$bulk_insert));
@@ -140,7 +133,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 							':menu_name' => "permissionmenu",
 							':username' => $payload["username"],
 							':use_list' => "change permission menu",
-							':details' => 'insert permission group id '.$idSubMenu["id_permission_menu"].' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
+							':details' => 'insert permission group id '.$idSubMenu.' to status : '.$dataComing["status_permission"].' of username : '.$dataComing["username"]
 						];
 						$log->writeLog('editadmincontrol',$arrayStruc);
 						$arrayResult['RESULT'] = TRUE;

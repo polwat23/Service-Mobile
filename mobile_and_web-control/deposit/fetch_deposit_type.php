@@ -5,39 +5,40 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no");
+		$getSumAllAccount = $conmssql->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no");
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
-											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+		$getAccount = $conmssql->prepare("SELECT dp.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.prncbal as BALANCE,
+											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE DEPTACCOUNT_NO = dp.DEPTACCOUNT_NO) as LAST_OPERATE_DATE
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
+											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.DEPTACCOUNT_NO ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrayHeaderAcc = array();
-			if($dataComing["channel"] == 'mobile_app'){
-				$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
-				$fetchAlias->execute([
-					':account_no' => $rowAccount["DEPTACCOUNT_NO"]
-				]);
-				$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-				$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
-				if(isset($rowAlias["path_alias_img"])){
-					$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
-					$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
-				}else{
-					$arrAccount["ALIAS_PATH_IMG"] = null;
-				}
-			}else{
+			if($dataComing["channel"] == 'web'){
 				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
-					$arrAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg';
+					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
 				}else{
-					$arrAccount["COVER_IMG"] = null;
+					$arrGroupAccount["COVER_IMG"] = null;
 				}
+			}
+			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE DEPTACCOUNT_NO = :account_no");
+			$fetchAlias->execute([
+				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
+			]);
+			$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
+			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
+			if(isset($rowAlias["path_alias_img"])){
+				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
+				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
+				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["path_alias_img"].'?v='.$rowAlias["update_date"];
+			}else{
+				$arrAccount["ALIAS_PATH_IMG"] = null;
+				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));

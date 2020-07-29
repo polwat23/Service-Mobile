@@ -6,12 +6,12 @@ use Connection\connection;
 
 class functions {
 		private $con;
-		private $conora;
+		private $conms;
 		
 		function __construct() {
 			$connection = new connection();
 			$this->con = $connection->connecttomysql();
-			$this->conora = $connection->connecttooracle();
+			$this->conms = $connection->connecttosqlserver();
 		}
 		
 		public function checkLogin($id_token) {
@@ -180,7 +180,7 @@ class functions {
 					$permission[] = "'2'";
 					$permission[] = "'3'";
 					break;
-				default : $permission[] = "'0'";
+				default : return false;
 					break;
 			}
 			if($user_type == '5' || $user_type == '9'){
@@ -242,11 +242,15 @@ class functions {
 				':component_system' => $component_system,
 				':seq_no' => $seq_no
 			]);
-			$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
-			$arrayResult = array();
-			$arrayResult["SUBJECT"] = $rowTemplate["subject"];
-			$arrayResult["BODY"] = $rowTemplate["body"];
-			return $arrayResult;
+			if($getTemplatedata->rowCount() > 0){
+				$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
+				$arrayResult = array();
+				$arrayResult["SUBJECT"] = $rowTemplate["subject"];
+				$arrayResult["BODY"] = $rowTemplate["body"];
+				return $arrayResult;
+			}else{
+				return null;
+			}
 		}
 		public function insertHistory($payload,$type_history='1') {
 			$this->con->beginTransaction();
@@ -391,8 +395,8 @@ class functions {
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 					}
 					if(sizeof($arrayMemberTemp) > 0){
-						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
-																resign_status = 0 and MEM_TELMOBILE IS NOT NULL");
+						$fetchDataOra = $this->conms->prepare("SELECT addr_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
+																resign_status = 0 and addr_mobilephone IS NOT NULL");
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
@@ -405,7 +409,7 @@ class functions {
 						}
 					}
 				}else{
-					$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
+					$fetchDataOra = $this->conms->prepare("SELECT addr_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
 					$fetchDataOra->execute();
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
@@ -426,7 +430,7 @@ class functions {
 					}
 				}
 			}else{
-				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0' and rownum <= 10");
+				$fetchDataOra = $this->conms->prepare("SELECT addr_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0'");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMT = array();
@@ -438,14 +442,12 @@ class functions {
 			}
 			return $arrayMemberGRP;
 		}
-		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false,$payment_keep=false) {
+		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false) {
 			$this->con->beginTransaction();
 			$textcombine = array();
 			$textcombinenotsent = array();
 			if($trans_flag){
-				if($payment_keep){
-					
-				}
+				
 			}else{
 				if($multi_message){
 					foreach($destination as $dest){
@@ -562,6 +564,10 @@ class functions {
 					return false;
 				}
 			}
+		}
+		public function MaintenanceMenu($menu_component) {
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
 }
 ?>

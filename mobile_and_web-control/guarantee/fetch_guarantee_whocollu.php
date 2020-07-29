@@ -10,26 +10,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupAll = array();
 			$arrGroupAllMember = array();
 			$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
-			$getWhocollu = $conoracle->prepare("SELECT NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conmssql->prepare("SELECT ISNULL(lnm.loanapprove_amt,0) as APPROVE_AMT,ISNULL(lnm.principal_balance,0) as LOAN_BALANCE,lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
-												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
+												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE RTRIM(lnm.loancontract_no) = :contract_no
 												and lnm.contract_status > 0
-												GROUP BY NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
+												GROUP BY ISNULL(lnm.loanapprove_amt,0),ISNULL(lnm.principal_balance,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+			$arrGroupAll['LOAN_BALANCE'] = number_format($rowWhocollu["LOAN_BALANCE"],2);
 			$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-			if(mb_stripos($contract_no,'.') === FALSE){
-				$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-				if(mb_strlen($contract_no) == 10){
-					$arrGroupAll["CONTRACT_NO"] = $loan_format;
-				}else if(mb_strlen($contract_no) == 11){
-					$arrGroupAll["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-				}
-			}else{
-				$arrGroupAll["CONTRACT_NO"] = $contract_no;
-			}
-			$whocolluMember = $conoracle->prepare("SELECT
+			$arrGroupAll["CONTRACT_NO"] = $contract_no;
+			$whocolluMember = $conmssql->prepare("SELECT
 													MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 													LCC.REF_COLLNO AS MEMBER_NO			
 												FROM
@@ -55,29 +47,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			echo json_encode($arrayResult);
 		}else{
 			$arrayGroupLoan = array();
-			$getWhocollu = $conoracle->prepare("SELECT lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conmssql->prepare("SELECT RTRIM(lnm.LOANCONTRACT_NO) as LOANCONTRACT_NO,ISNULL(lnm.loanapprove_amt,0) as APPROVE_AMT,ISNULL(lnm.principal_balance,0) as LOAN_BALANCE,lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN lncontcoll lnc ON lnm.loancontract_no = lnc.loancontract_no
 												LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
 												and lnm.contract_status = '1'
-                         						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC");
+                         						GROUP BY lnm.loancontract_no,ISNULL(lnm.loanapprove_amt,0),ISNULL(lnm.principal_balance,0),lt.LOANTYPE_DESC");
 			$getWhocollu->execute([':member_no' => $member_no]);
 			while($rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupAll = array();
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+				$arrGroupAll['LOAN_BALANCE'] = number_format($rowWhocollu["LOAN_BALANCE"],2);
 				$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$contract_no = $rowWhocollu["LOANCONTRACT_NO"];
-				if(mb_stripos($contract_no,'.') === FALSE){
-					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-					if(mb_strlen($contract_no) == 10){
-						$arrGroupAll["CONTRACT_NO"] = $loan_format;
-					}else if(mb_strlen($contract_no) == 11){
-						$arrGroupAll["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-					}
-				}else{
-					$arrGroupAll["CONTRACT_NO"] = $contract_no;
-				}
-				$whocolluMember = $conoracle->prepare("SELECT
+				$arrGroupAll["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
+				$whocolluMember = $conmssql->prepare("SELECT
 														MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 														LCC.REF_COLLNO AS MEMBER_NO			
 													FROM
