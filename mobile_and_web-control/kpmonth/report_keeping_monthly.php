@@ -146,7 +146,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
-		$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
+		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
@@ -229,7 +229,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -27px;font-size: 18px;">เลขที่ จ. 55/96-98 ถ.ดาวดึงส์</p>
 				<p style="margin-top: -25px;font-size: 18px;">ต ปากน้ำโพ อ.เมือง จ.นครสวรรค์</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5622-2046</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.omsubsaman.com</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
