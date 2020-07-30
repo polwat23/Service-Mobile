@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		$member_no != '00000964' && $member_no != '00002599' && $member_no != '00003069' && $member_no != '00002170' && $member_no != '00000028' && $member_no != '00000030'
 		&& $member_no != '00000082' && $member_no != '00002865' && $member_no != '00000066' && $member_no != '00002370' && $member_no != '00001235' && $member_no != '00002521'
 		&& $member_no != '00002398' && $member_no != '00001718' && $member_no != '00002322' && $member_no != '00000977' && $member_no != '00001005' && $member_no != '00002692' 
-		&& $member_no != '00001917' && $member_no != '00000513' && $member_no != '00001108' && $member_no != '00000402' && $member_no != '00002394'){
+		&& $member_no != '00001917' && $member_no != '00000513' && $member_no != '00001108' && $member_no != '00000402'){
 			$arrayResult['RESPONSE_CODE'] = "WS0006";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
