@@ -9,21 +9,35 @@ if($updateResetPin->execute([
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS1017";
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS1016",
+			":error_desc" => "รีเซ็ต Pin ไม่ได้เพราะไม่สามารถบังคับอุปกรณ์อื่นออกจากระบบได้ "."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
+		$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะไม่สามารถบังคับอุปกรณ์อื่นออกจากระบบได้"."\n"."Data => ".json_encode($dataComing)."\n"."Payload => ".json_encode($payload);
+		$lib->sendLineNotify($message_error);
+		$arrayResult['RESPONSE_CODE'] = "WS1016";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();
 	}
 }else{
-	$arrExecute = [
-		':member_no' => $payload["member_no"]
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS1016",
+		":error_desc" => "รีเซ็ต Pin ไม่ได้ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
-	$arrError = array();
-	$arrError["EXECUTE"] = $arrExecute;
-	$arrError["QUERY"] = $updateResetPin;
-	$arrError["ERROR_CODE"] = 'WS1016';
-	$lib->addLogtoTxt($arrError,'pin_error');
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateResetPin->queryString."\n"."Param => ". json_encode([
+		':member_no' => $payload["member_no"]
+	]);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

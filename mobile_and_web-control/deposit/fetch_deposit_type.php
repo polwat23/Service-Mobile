@@ -19,29 +19,30 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrayHeaderAcc = array();
-			if($dataComing["channel"] == 'mobile_app'){
-				$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
-				$fetchAlias->execute([
-					':account_no' => $rowAccount["DEPTACCOUNT_NO"]
-				]);
-				$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-				$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
-				if(isset($rowAlias["path_alias_img"])){
-					$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
-					$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
-				}else{
-					$arrAccount["ALIAS_PATH_IMG"] = null;
-				}
-			}else{
+			if($dataComing["channel"] == 'web'){
 				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
-					$arrAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg';
+					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
 				}else{
-					$arrAccount["COVER_IMG"] = null;
+					$arrGroupAccount["COVER_IMG"] = null;
 				}
+			}
+			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE deptaccount_no = :account_no");
+			$fetchAlias->execute([
+				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
+			]);
+			$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
+			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
+			if(isset($rowAlias["path_alias_img"])){
+				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
+				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
+				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["path_alias_img"].'?v='.$rowAlias["update_date"];
+			}else{
+				$arrAccount["ALIAS_PATH_IMG"] = null;
+				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]));
+			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccount["DEPTACCOUNT_NAME"]));
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 			$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
@@ -54,6 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrAllAccount[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
 			}
 		}
+		
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
@@ -66,6 +68,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

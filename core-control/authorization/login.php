@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['username','password','device_name','unique_id'],$dataComing)){
 	$checkPassword = $conmysql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
 										FROM coreuser cu LEFT JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
-										WHERE cu.username = :username");
+										WHERE cu.username = :username and cu.user_status = '1'");
 	$checkPassword->execute([
 		':username' => $dataComing["username"]
 	]);

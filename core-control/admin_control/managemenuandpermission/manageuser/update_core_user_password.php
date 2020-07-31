@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id','username','newpassword'],$dataComin
 					':menu_name' => "manageuser",
 					':username' => $payload["username"],
 					':use_list' => "change password",
-					':details' => $dataComing["username"]
+					':details' => 'username : '.$dataComing["username"]
 				];
 			
 			$log->writeLog('editadmincontrol',$arrayStruc);	

@@ -13,14 +13,14 @@ if($lib->checkCompleteArgument(['unique_id','username','newusername'],$dataComin
 			$arrayStruc = [
 				':menu_name' => "manageuser",
 				':username' => $payload["username"],
-				':use_list' => "edit username",
-				':details' => $dataComing["username"].' , '.$dataComing["newusername"]
+				':use_list' => "change username",
+				':details' => 'from '.$dataComing["username"].' to '.$dataComing["newusername"]
 			];
 			
 			$log->writeLog('editadmincontrol',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่เปลื่อยนชื่อผู้ใช้ได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเปลื่อนชื่อผู้ใช้ได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

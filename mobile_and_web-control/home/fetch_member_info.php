@@ -21,22 +21,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
-													mb.ADDR_NO as ADDR_NO,
-													mb.ADDR_MOO as ADDR_MOO,
-													mb.ADDR_SOI as ADDR_SOI,
-													mb.ADDR_VILLAGE as ADDR_VILLAGE,
-													mb.ADDR_ROAD as ADDR_ROAD,
+													mb.CURRADDR_NO as ADDR_NO,
+													mb.CURRADDR_MOO as ADDR_MOO,
+													mb.CURRADDR_SOI as ADDR_SOI,
+													mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
+													mb.CURRADDR_ROAD as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
-													MB.PROVINCE_CODE AS PROVINCE_CODE,
+													MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.ADDR_POSTCODE AS ADDR_POSTCODE
+													MB.CURRADDR_POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.AMPHUR_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
@@ -91,6 +91,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

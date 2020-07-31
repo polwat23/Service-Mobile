@@ -4,6 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS0001",
+			":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
@@ -12,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		exit();
 	}
 	$conmysql->beginTransaction();
-	$member_no = strtolower(str_pad($dataComing["member_no"],8,0,STR_PAD_LEFT));
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
 	$reference = $lib->randomText('all',6);
@@ -23,7 +31,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 	$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
 	$arrayComing["TEL"] = $dataComing["tel"];
-	$arrayComing["MEMBER_NO"] = $dataComing["member_no"];
+	$arrayComing["MEMBER_NO"] = $member_no;
 	$arrayTel[] = $arrayComing;
 	$bulkInsert = array();
 	$arrayDest = array();
@@ -62,19 +70,20 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			}
 		}else{
 			$conmysql->rollback();
-			$arrExecute = [
-				':ref_otp' => $reference,
-				':otp_pass' => $otp_password,
-				':destination' => $arrayTel[0]["TEL"],
-				':expire_date' => $expire_date,
-				':otp_text' => $arrMessage["BODY"]
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1011",
+				":error_desc" => "ไม่สามารถ Resend OTP ได้"."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $insertOTP;
-			$arrError["ERROR_CODE"] = 'WS1011';
-			$lib->addLogtoTxt($arrError,'otp_error');
-			$arrayResult['RESPONSE_CODE'] = "WS1001";
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$deleteHistory->queryString."\n"."Param => ". json_encode([
+				':member_no' => $payload["member_no"],
+				':his_type' => $dataComing["type_history"]
+			]);
+			$lib->sendLineNotify($message_error);
+			$arrayResult['RESPONSE_CODE'] = "WS1011";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -88,6 +97,16 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
