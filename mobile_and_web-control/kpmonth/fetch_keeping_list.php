@@ -9,19 +9,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$dateNow = date('d');
 		$arrayGroupPeriod = array();
+		$this_period = (date('Y') + 543).date('m');
 		if($keep_forward == '1'){
 			$getMaxRecv = $conoracle->prepare("SELECT max(recv_period) as MAX_RECV_PERIOD FROM kptempreceive WHERE rownum <= 1");
 			$getMaxRecv->execute();
 			$rowMaxRecv = $getMaxRecv->fetch(PDO::FETCH_ASSOC);
 			$max_recv = (int) substr($rowMaxRecv["MAX_RECV_PERIOD"],4);
 			$thisMonth = date("m");
-			if($max_recv < $thisMonth){
+			if($max_recv > $thisMonth){
 				$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															select recv_period from kpmastreceive where member_no = :member_no and 
-															recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
-														UNION 
-															select recv_period  from kptempreceive where member_no = :member_no and 
-															recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+															select recv_period from kpmastreceive where member_no = :member_no
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 			}else{
 				if($dateNow >= $dateshow_kpmonth){
@@ -33,10 +30,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$getPeriodKP = $conoracle->prepare("SELECT * from ((
 															select recv_period from kpmastreceive where member_no = :member_no and 
-															recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+															recv_period <> '".$this_period."'
 														UNION 
 															select recv_period  from kptempreceive where member_no = :member_no and 
-															recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+															recv_period <> '".$this_period."'
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 				}
 			}
@@ -50,10 +47,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$getPeriodKP = $conoracle->prepare("SELECT * from ((
 														select recv_period from kpmastreceive where member_no = :member_no and 
-														recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+														recv_period <> '".$this_period."'
 													UNION 
 														select recv_period  from kptempreceive where member_no = :member_no and 
-														recv_period <> ( select MAX(recv_period) from kptempreceive where member_no = :member_no)
+														recv_period <> '".$this_period."'
 													) ORDER BY recv_period DESC) where rownum <= :limit_period");
 			}
 		}
@@ -99,6 +96,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

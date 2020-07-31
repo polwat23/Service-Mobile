@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_granted'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','announce')){
 		$pathImg = null;
 		if(isset($dataComing["announce_cover"]) && $dataComing["announce_cover"] != null){
@@ -24,45 +24,57 @@ if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
 				}
 			}
 		}
-		
 		$insert_announce = $conmysql->prepare("INSERT INTO gcannounce(
-											announce_cover,
-											announce_title,
-											announce_detail,
-											effect_date,
-											priority,
-											flag_granted,
-											username
-										)
-										VALUES(
-											:announce_cover,
-											:announce_title,
-											:announce_detail,
-											:effect_date,
-											:priority,
-											:flag_granted,
-											:username
-										)");
-			if($insert_announce->execute([
-				':announce_title' =>  $dataComing["announce_title"],
-				':announce_detail' =>  $dataComing["announce_detail"],
-				':effect_date' =>  $dataComing["effect_date"],
-				':priority' =>  $dataComing["priority"],
-				':flag_granted' =>  $dataComing["flag_granted"],
-				':username' =>  $dataComing["username"],
-				':announce_cover' =>  $pathImg??null
-				
-
-			])){
-				$arrayResult["RESULT"] = TRUE;
-				echo json_encode($arrayResult);
-
-			}else{
-				$arrayResult['RESPONSE'] = "ไม่สามารถแจ้งประกาศได้ กรุณาติดต่อผู้พัฒนา ";
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
+																	announce_cover,
+																	announce_title,
+																	announce_detail,
+																	effect_date,
+																	due_date,
+																	priority,
+																	flag_granted,
+																	is_check,
+																	check_text,
+																	accept_text,
+																	cancel_text,
+																	username,
+																	is_show_between_due)
+																VALUES(
+																	:announce_cover,
+																	:announce_title,
+																	:announce_detail,
+																	:effect_date,
+																	:due_date,
+																	:priority,
+																	:flag_granted,
+																	:is_check,
+																	:check_text,
+																	:accept_text,
+																	:cancel_text,
+																	:username,
+																	:is_show_between_due)");
+		if($insert_announce->execute([
+			':announce_title' =>  $dataComing["announce_title"],
+			':announce_detail' => $dataComing["announce_detail"],
+			':effect_date' =>  $dataComing["effect_date"],	
+			':due_date' =>  isset($dataComing["due_date"]) && $dataComing["due_date"] != '' ? $dataComing["due_date"] : null,
+			':priority' =>  $dataComing["priority"],
+			':flag_granted' =>  $dataComing["flag_granted"],
+			':is_check' =>  isset($dataComing["is_check"]) && $dataComing["is_check"] != '' ? $dataComing["is_check"] : '0',
+			':check_text' =>  isset($dataComing["check_text"]) && $dataComing["check_text"] != "" ? $dataComing["check_text"] : null,
+			':accept_text' =>  $dataComing["accept_text"],
+			':cancel_text' =>  $dataComing["cancel_text"],
+			':username' =>  $payload["username"],
+			':announce_cover' =>  $pathImg ?? null,
+			':is_show_between_due' => $dataComing["is_show_between_due"]
+		])){
+			$arrayResult["RESULT"] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE'] = "ไม่สามารถแจ้งประกาศได้ กรุณาติดต่อผู้พัฒนา ";
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);

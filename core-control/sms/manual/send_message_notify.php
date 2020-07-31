@@ -1,7 +1,7 @@
 <?php
 require_once('../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
 		if($dataComing["channel_send"] == "mobile_app"){
@@ -33,7 +33,10 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$blukInsertNot = array();
 				$destination = array();
 				foreach($dataComing["destination"] as $target){
-					$destination[] = strtolower($lib->mb_str_pad($target));
+					$dest_target = strtolower($lib->mb_str_pad($target));
+					if(!in_array($dest_target,$dataComing["destination_revoke"])){
+						$destination[] = $dest_target;
+					}
 				}
 				$arrToken = $func->getFCMToken('person',$destination);
 				foreach($arrToken["LIST_SEND"] as $dest){
@@ -42,7 +45,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrPayloadNotify["MEMBER_NO"] = $dest["MEMBER_NO"];
 						$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
 						$message = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
-						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$dataComing["message_importData"][$dest["MEMBER_NO"]] : ($dataComing["message_emoji_"] ?? "-");
 						$arrMessage["BODY"] = $message;
 						$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
@@ -91,7 +94,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrAllToken[] = $dest["TOKEN"];
 						}else{
 							$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
-							'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."','".$id_template."')";
+							'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 						}
 						if(sizeof($bulkInsert) == 1000){
 							$func->logSMSWasNotSent($bulkInsert);
@@ -100,7 +103,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						}
 					}else{
 						$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
-						'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."','".$id_template."')";
+						'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 						if(sizeof($bulkInsert) == 1000){
 							$func->logSMSWasNotSent($bulkInsert);
 							unset($bulkInsert);
@@ -114,7 +117,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						unset($bulkInsert);
 						$bulkInsert = array();
 					}
-					$arrPayloadNotify["TO"] = $arrAllToken;
+					$arrPayloadNotify["TO"] = '/topics/member';
 					$arrPayloadNotify["MEMBER_NO"] = $arrAllMember_no;
 					$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
 					$arrMessage["BODY"] = $dataComing["message_emoji_"];
@@ -122,8 +125,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 					if($func->insertHistory($arrPayloadNotify,'1')){
-						if($lib->sendNotify($arrPayloadNotify,'person')){
-						//if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
+						if($lib->sendNotify($arrPayloadNotify,'all')){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
 							$arrayResult['RESULT'] = TRUE;
 							echo json_encode($arrayResult);
 						}else{
@@ -158,11 +160,16 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($dataComing["destination"] as $target){
 					$destination_temp = array();
 					if(mb_strlen($target) <= 8){
-						$destination[] = strtolower($lib->mb_str_pad($target));
+						$dest_target = strtolower($lib->mb_str_pad($target));
+						if(!in_array($dest_target,$dataComing["destination_revoke"])){
+							$destination[] = $dest_target;
+						}
 					}else if(mb_strlen($target) == 10){
-						$destination_temp["MEMBER_NO"] = null;
-						$destination_temp["TEL"] = $target;
-						$arrDestGRP[] = $destination_temp;
+						if(!in_array($target,$dataComing["destination_revoke"])){
+							$destination_temp["MEMBER_NO"] = null;
+							$destination_temp["TEL"] = $target;
+							$arrDestGRP[] = $destination_temp;
+						}
 					}
 				}
 				$arrayTel = $func->getSMSPerson('person',$destination,false,true);
@@ -174,16 +181,36 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayMerge as $dest){
 					$arrGroupCheckSend = array();
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-						$arrGRPAll[$dest["MEMBER_NO"]] = isset($dataComing["message_importData"][$dest["MEMBER_NO"]]) ? 
-						$dataComing["message_importData"][$dest["MEMBER_NO"]] : $dataComing["message_emoji_"];
+						$message_body = isset($dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])]) ? 
+						$dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])] : ($dataComing["message_emoji_"] ?? "-");;
+						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+						$arraySendSMS = $lib->sendSMS($arrayDest);
+						if($arraySendSMS["RESULT"]){
+							$arrGRPAll[$dest["MEMBER_NO"]] = isset($dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])]) ? 
+							$dataComing["message_importData"][($dest["MEMBER_NO"] ?? $dest["TEL"])] : ($dataComing["message_emoji_"] ?? "-");;
+						}else{
+							$bulkInsert[] = "('".$message_body."','".$dest["MEMBER_NO"]."',
+									'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+							if(sizeof($bulkInsert) == 1000){
+								$func->logSMSWasNotSent($bulkInsert);
+								unset($bulkInsert);
+							}
+						}
 					}
 				}
-				$arrayLogSMS = $func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],true);
-				$arrayResult['RESULT'] = $arrayLogSMS;
+				if(sizeof($arrGRPAll) > 0){
+					$func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],true);
+				}
+				if(sizeof($bulkInsert) > 0){
+					$func->logSMSWasNotSent($bulkInsert);
+					unset($bulkInsert);
+					$bulkInsert = array();
+				}
+				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
 				$arrayTel = $func->getSMSPerson('all');
-				$arrayLogSMS = $func->logSMSWasSent($id_template,$dataComing["message_emoji_"],$arrayTel,$payload["username"]);
+				$arrayLogSMS = $func->logSMSWasSent($id_template,($dataComing["message_emoji_"] ?? "-"),$arrayTel,$payload["username"]);
 				$arrayResult['RESULT'] = $arrayLogSMS;
 				echo json_encode($arrayResult);
 			}

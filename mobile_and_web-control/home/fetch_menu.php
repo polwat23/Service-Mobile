@@ -39,6 +39,7 @@ if(!$anonymous){
 			$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 			$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 			$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+			$arrMenuDep["LAST_STATEMENT"] = TRUE;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
@@ -47,6 +48,7 @@ if(!$anonymous){
 			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
 		$arrayResult['RESULT'] = TRUE;
@@ -57,17 +59,22 @@ if(!$anonymous){
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent
+												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status IN('0','1')
-												and (menu_channel = :channel OR menu_channel = 'both')
-												ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent
+												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent and menu_status = '1' 
-												and (menu_channel = :channel OR menu_channel = 'both')
-												ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent 
+												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
 			}
 			$fetch_menu->execute([
 				':menu_parent' => $dataComing["menu_parent"],
@@ -119,17 +126,23 @@ if(!$anonymous){
 			$arrayMenuTransaction = array();
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') 
+												WHERE menu_permission IN (".implode(',',$permission).") 
+												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status IN('0','1')
-												and (menu_channel = :channel OR menu_channel = 'both')
-												ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).")
+												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu
-												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent IN('0','24','18') and menu_status = '1'
-												and (menu_channel = :channel OR menu_channel = 'both') ORDER BY menu_order ASC");
+				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+												gm.menu_parent,gm.menu_status,gm.menu_version 
+												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
+												WHERE gm.menu_permission IN (".implode(',',$permission).") 
+												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
+												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
 			}
 			$fetch_menu->execute([
 				':channel' => $dataComing["channel"]
@@ -152,6 +165,10 @@ if(!$anonymous){
 							$arrayMenuSetting[] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
+							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
+							$getMenuParentStatus->execute();
+							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
+							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
@@ -160,12 +177,14 @@ if(!$anonymous){
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+							$arrMenuDep["LAST_STATEMENT"] = TRUE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
 							$fetchMenuLoan->execute([':member_no' => $member_no]);
 							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
 						}					
 					}
 				}else{
@@ -184,11 +203,27 @@ if(!$anonymous){
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
+					if($rowMenu["menu_component"] == "DepositInfo"){
+						$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
+						$fetchMenuDep->execute([':member_no' => $member_no]);
+						$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
+						$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
+						$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+						$arrMenuDep["LAST_STATEMENT"] = TRUE;
+					}else if($rowMenu["menu_component"] == "LoanInfo"){
+						$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
+						$fetchMenuLoan->execute([':member_no' => $member_no]);
+						$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
+						$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
+						$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+						$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+					}
 				}
 			}
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
+				$arrayMenuTransaction["ID_PARENT"] = "18";
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
 				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;
@@ -216,10 +251,14 @@ if(!$anonymous){
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
 					$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
 					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
-					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
-					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
-
+					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep ?? [];
+					$arrayResult['MENU_LOAN'] = $arrMenuLoan ?? [];
 				}
+				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
+				$fetchLimitTrans->execute([':member_no' => $member_no]);
+				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
+				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
+				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
@@ -232,6 +271,14 @@ if(!$anonymous){
 	if($lib->checkCompleteArgument(['api_token'],$dataComing)){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0001",
+				":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -277,6 +324,16 @@ if(!$anonymous){
 			exit();
 		}
 	}else{
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS4004",
+			":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
+		$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+		$lib->sendLineNotify($message_error);
 		$arrayResult['RESPONSE_CODE'] = "WS4004";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;

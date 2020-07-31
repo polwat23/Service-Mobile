@@ -66,6 +66,45 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			exit();
 		}
 	}else{
+		if(strtolower($lib->mb_str_pad($dataComing["pin"])) == $payload["member_no"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0057";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$pin_split = str_split($dataComing["pin"]);
+		$countSeqNumber = 1;
+		$countReverseSeqNumber = 1;
+		foreach($pin_split as $key => $value){
+			if(($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key + 1]) || 
+			($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key - 2])){
+				$arrayResult['RESPONSE_CODE'] = "WS0057";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			if($key < strlen($dataComing["pin"]) - 1){
+				if($value == ($dataComing["pin"][$key + 1] - 1)){
+					$countSeqNumber++;
+				}else{
+					$countSeqNumber = 1;
+				}
+				if($value - 1 == $dataComing["pin"][$key + 1]){
+					$countReverseSeqNumber++;
+				}else{
+					$countReverseSeqNumber = 1;
+				}
+			}
+		}
+		if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
+			$arrayResult['RESPONSE_CODE'] = "WS0057";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
@@ -97,15 +136,19 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrExecute = [
-				':pin' => $dataComing["pin"],
-				':member_no' => $payload["member_no"]
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1009",
+				":error_desc" => "ตั้ง Pin ไม่ได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $updatePin;
-			$arrError["ERROR_CODE"] = 'WS1009';
-			$lib->addLogtoTxt($arrError,'pin_error');
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไม่สามารถตั้ง Pin ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updatePin->queryString."\n"."Param => ". json_encode([
+				':pin' => $pin,
+				':member_no' => $payload["member_no"]
+			]);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1009";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -114,6 +157,16 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		}
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
