@@ -29,11 +29,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 				}else{
 					$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															select recv_period from kpmastreceive where member_no = :member_no and 
-															recv_period <> '".$this_period."'
-														UNION 
-															select recv_period  from kptempreceive where member_no = :member_no and 
-															recv_period <> '".$this_period."'
+															select recv_period from kpmastreceive where member_no = :member_no
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 				}
 			}
@@ -46,11 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													) ORDER BY recv_period DESC) where rownum <= :limit_period");
 			}else{
 				$getPeriodKP = $conoracle->prepare("SELECT * from ((
-														select recv_period from kpmastreceive where member_no = :member_no and 
-														recv_period <> '".$this_period."'
-													UNION 
-														select recv_period  from kptempreceive where member_no = :member_no and 
-														recv_period <> '".$this_period."'
+														select recv_period from kpmastreceive where member_no = :member_no
 													) ORDER BY recv_period DESC) where rownum <= :limit_period");
 			}
 		}

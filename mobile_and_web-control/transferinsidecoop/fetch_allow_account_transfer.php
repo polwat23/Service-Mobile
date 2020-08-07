@@ -34,8 +34,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				]);
 				$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
 				$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-				if($rowDataAccAll["TRANSONLINE_FLAG"] == '1'){
-					$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+				if(in_array($rowDataAccAll["DEPTACCOUNT_NO"],$arrayDept)){
+					if($rowDataAccAll["TRANSONLINE_FLAG"] == '1'){
+						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+					}else{
+						$arrAccAllow["CAN_WITHDRAW"] = '0';
+					}
 				}else{
 					$arrAccAllow["CAN_WITHDRAW"] = '0';
 				}

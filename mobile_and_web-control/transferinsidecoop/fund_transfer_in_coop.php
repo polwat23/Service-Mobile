@@ -78,6 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => date('Y-m-d H:i:s'),
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -91,6 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => date('Y-m-d H:i:s'),
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],

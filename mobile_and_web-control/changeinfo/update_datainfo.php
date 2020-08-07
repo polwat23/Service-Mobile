@@ -15,11 +15,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT_EMAIL'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
+				$getOldEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
+				$getOldEmail->execute([':member_no' => $payload["member_no"]]);
+				$rowEmail = $getOldEmail->fetch(PDO::FETCH_ASSOC);
 				$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
 				if($updateEmail->execute([
 					':email' => $dataComing["email"],
 					':member_no' => $payload["member_no"]
 				])){
+					$logStruc = [
+						":member_no" => $payload["member_no"],
+						":old_data" => $rowEmail["email"] ?? "-",
+						":new_data" => $dataComing["email"] ?? "-",
+						":data_type" => "email",
+						":id_userlogin" => $payload["id_userlogin"]
+					];
+					$log->writeLog('editinfo',$logStruc);
 					$arrayResult['RESULT_EMAIL'] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
@@ -47,11 +58,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
+				$getOldTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+				$getOldTel->execute([':member_no' => $payload["member_no"]]);
+				$rowTel = $getOldTel->fetch(PDO::FETCH_ASSOC);
 				$updateTel = $conmysql->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE member_no = :member_no");
 				if($updateTel->execute([
 					':phone_number' => $dataComing["tel"],
 					':member_no' => $payload["member_no"]
 				])){
+					$logStruc = [
+						":member_no" => $payload["member_no"],
+						":old_data" => $rowTel["phone_number"] ?? "-",
+						":new_data" => $dataComing["tel"] ?? "-",
+						":data_type" => "tel",
+						":id_userlogin" => $payload["id_userlogin"]
+					];
+					$log->writeLog('editinfo',$logStruc);
 					$arrayResult["RESULT_TEL"] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
@@ -74,14 +96,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 		}
-		if(!$arrayResult["RESULT_EMAIL"]){
+		if(isset($arrayResult["RESULT_EMAIL"]) && !$arrayResult["RESULT_EMAIL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS1010";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
-		if(!$arrayResult["RESULT_TEL"]){
+		if(isset($arrayResult["RESULT_TEL"]) && !$arrayResult["RESULT_TEL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS1003";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

@@ -284,7 +284,7 @@ class library {
 		}
 	}
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
-		if(self::getBase64ImageSize($encode_string) < 1500){
+		if(self::getBase64ImageSize($encode_string) < 10000){
 			$data_Img = explode(',',$encode_string);
 			if(isset($data_Img[1])){
 				$dataImg = base64_decode($data_Img[1]);

@@ -26,6 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
 					$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
+					//$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_SHOW_FLAG_OFF'][0][$lang_locale];
+					//$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_FLAG_ON'][0][$lang_locale];
+
 					$arrGroupAccAllow[] = $arrAccBeenAllow;
 				}
 			}

@@ -42,8 +42,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 				$arrMember = array();
 				$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
-				$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
-				$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
+				$arrMember["AVATAR_PATH"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"];
+				$arrMember["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"];
 				$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 				$arrMember["MEMBER_NO"] = $rowCollMember["MEMBER_NO"];
 				$arrGroupAllMember[] = $arrMember;

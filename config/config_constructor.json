@@ -22,6 +22,7 @@
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
+	"URL_COOP" : "www.musaving.com",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",
@@ -40,5 +41,4 @@
 			"IS_USE" : "true"
 		}
 	}
-	
 }
