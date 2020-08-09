@@ -36,8 +36,10 @@ use ControlLog\insertLog;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
+use WebPConvert\WebPConvert;
 
 $mailFunction = new PHPMailer(false);
+$webP = new WebPConvert();
 $lib = new library();
 $jwt_token = new Token();
 $func = new functions();

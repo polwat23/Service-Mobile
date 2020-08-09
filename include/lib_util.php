@@ -595,5 +595,72 @@ class library {
 																													 
 		curl_exec($ch);
 	}
+	public function truncateDecimal($amt,$precision){
+		$step = pow(10,$precision);
+		$value = intval($step * $amt);
+		return $value / $step;
+	}
+	public function roundDecimal($amt,$round_type){
+		$amtRound = $this->truncateDecimal($amt,2);
+		$amtRaw = $this->truncateDecimal($amtRound,0);
+		$fraction = floatval($amtRound - $amtRaw);
+		$fractionRaw = $this->truncateDecimal($fraction,1);
+		$fracVal = floatval($fraction - $fractionRaw);
+		$roundFrac = 0.00;
+		switch ($round_type){
+			case 1:
+				//ปัดที่ละสลึง
+				if ($fraction > 0.00 && $fraction <= 0.25) { $roundFrac = 0.25; }
+				if ($fraction > 0.25 && $fraction <= 0.50) { $roundFrac = 0.50; }
+				if ($fraction > 0.25 && $fraction <= 0.75) { $roundFrac = 0.75; }
+				if ($fraction > 0.75 && $fraction <= 0.99) { $roundFrac = 1.00; }
+				break;
+			case 2:
+				//ปัดที่ละ 5 สตางค์
+				if ($fracVal == 0.00) { return $amt; }
+				if ($fracVal == 0.05) { return $amt; }
+				if ($fracVal >= 0.01 && $fracVal <= 0.04) { $fracVal = 0.05; }
+				if ($fracVal >= 0.06 && $fracVal <= 0.09) { $fracVal = 0.10; }
+				$roundFrac = floatval($fractionRaw) + $fracVal;
+
+				break;
+			case 3:
+				//ปัดที่ละ 10 สตางค์
+
+				if ($fracVal == 0.00)
+				{
+					return $amt;
+				}
+				else
+				{
+					$fracVal = 0.10;
+				}
+				$roundFrac = floatval($fractionRaw) + $fracVal;
+
+				break;
+
+			case 4:
+				//ปัดเต็มบาท
+
+				if ($fraction > 0.49)
+				{
+					$roundFrac = 1.00;
+				}
+				else
+				{
+					$roundFrac = 0.00;
+				}
+
+				break;
+			case 99:
+				$roundFrac = $fraction;
+				break;
+
+			default:
+				$roundFrac = $fraction;
+				break;
+		}
+		return $amtRaw + floatval($roundFrac);
+	}
 }
 ?>
