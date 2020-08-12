@@ -23,6 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowPhone = $getPhone->fetch(PDO::FETCH_ASSOC);
 			$arrayDataGrp["PHONE_NUMBER"] = $rowPhone["phone_number"];
 		}
+		$arrayResult['IS_OTP'] = FALSE;
 		$arrayResult['DATA'] = $arrayDataGrp;
 		$arrayResult['EMAIL_CAN_CHANGE'] = $arrayConst["email"] == '1' ? TRUE : FALSE;
 		$arrayResult['ADDRESS_CAN_CHANGE'] = $arrayConst["address"] == '1' ? TRUE : FALSE;

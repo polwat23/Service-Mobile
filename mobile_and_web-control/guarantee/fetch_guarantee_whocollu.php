@@ -33,10 +33,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getCollDetail->execute([':contract_no' => $contract_no]);
 			while($rowColl = $getCollDetail->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupAll = array();
+				$arrGroupAllMember = array();
 				$arrGroupAll['LOANCOLLTYPE_CODE'] = $rowColl["LOANCOLLTYPE_CODE"];
 				$arrGroupAll['COLLTYPE_DESC'] = $rowColl["LOANCOLLTYPE_DESC"];
 				if($rowColl["LOANCOLLTYPE_CODE"] == '01'){
-					$arrGroupAllMember = array();
 					$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 														FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 														WHERE MMB.member_no = :member_no");
@@ -47,33 +47,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAllMember["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
 					$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
-					$arrGroupAll['ASSET'] = $arrGroupAllMember;
-				}
-				if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
-					$arrGroupAllShare = array();
+				}else if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
 					$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 														FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 														WHERE MMB.member_no = :member_no");
 					$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
-					$arrGroupAllShare["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
-					$arrGroupAllShare["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
-					$arrGroupAllShare["MEMBER_NO"] = $rowColl["REF_COLLNO"];
-					$arrGroupAll['ASSET'] = $arrGroupAllShare;
-				}
-				if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
-					$arrGroupAllDep = array();
+					$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+					$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
+					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
+				}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
 					$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster
 														WHERE deptaccount_no = :deptaccount_no");
 					$whocolluDept->execute([':deptaccount_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollDept = $whocolluDept->fetch(PDO::FETCH_ASSOC);
-					$arrGroupAllDep["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
-					$arrGroupAllDep["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
-					$arrGroupAllDep["DEPT_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
-					$arrGroupAll['ASSET'] = $arrGroupAllDep;
-				}
-				if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
-					$arrGroupAllAsset = array();
+					$arrGroupAllMember["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+					$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
+					$arrGroupAllMember["DEPT_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+				}else if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
 					$whocolluAsset = $conoracle->prepare("SELECT lcm.COLLMAST_REFNO,lcd.LAND_LANDNO,lcd.POS_TUMBOL,MBD.DISTRICT_DESC,MBP.PROVINCE_DESC,lcm.COLLMAST_NO
 																		FROM lncollmaster lcm LEFT JOIN lncolldetail lcd ON lcm.COLLMAST_NO = lcd.COLLMAST_NO 
 																		LEFT JOIN MBUCFDISTRICT MBD ON lcd.POS_DISTRICT = MBD.DISTRICT_CODE
@@ -81,24 +72,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																		WHERE lcm.collmast_no = :collmast_no");
 					$whocolluAsset->execute([':collmast_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollAsset = $whocolluAsset->fetch(PDO::FETCH_ASSOC);
-					$arrGroupAllAsset["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
+					$arrGroupAllMember["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
 					if(isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != ""){
 						$address =  isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != "" ? "โฉนดเลขที่ ".$rowCollAsset["COLLMAST_REFNO"] : "";
 						$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " บ้านเลขที่ ".$rowCollAsset["LAND_LANDNO"] : "";
 						$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " ต.".$rowCollAsset["POS_TUMBOL"] : "";
 						$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " อ.".$rowCollAsset["DISTRIC_DESC"] : "";
 						$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " จ.".$rowCollAsset["PROVINCE_DESC"] : "";
-						$arrGroupAllAsset["DESCRIPTION"] = $address;
+						$arrGroupAllMember["DESCRIPTION"] = $address;
 					}else{
-						$arrGroupAllAsset['DESCRIPTION'] = $rowColl["DESCRIPTION"];
+						$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 					}
-					$arrGroupAll['ASSET'] = $arrGroupAllAsset;
+				}else if($rowColl["LOANCOLLTYPE_CODE"] == '05'){
+					$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 				}
-				if($rowColl["LOANCOLLTYPE_CODE"] == '05'){
-					$arrGroupAllAsset['DESCRIPTION'] = $rowColl["DESCRIPTION"];
-					$arrGroupAll['ASSET'] = $arrGroupAllAsset;
+				if(array_search($rowColl["LOANCOLLTYPE_CODE"],array_column($arrGrpAllLoan,'LOANCOLLTYPE_CODE')) === False){
+					$arrGroupAll['ASSET'][] = $arrGroupAllMember;
+					$arrGrpAllLoan[] = $arrGroupAll;
+				}else{
+					($arrGrpAllLoan[array_search($rowColl["LOANCOLLTYPE_CODE"],array_column($arrGrpAllLoan,'LOANCOLLTYPE_CODE'))]["ASSET"])[] = $arrGroupAllMember;
 				}
-				$arrGrpAllLoan[] = $arrGroupAll;
 			}
 			$arrayGroupLoan["GUARANTEE"] = $arrGrpAllLoan;
 			$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
@@ -134,10 +127,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getCollDetail->execute([':contract_no' => $contract_no]);
 				while($rowColl = $getCollDetail->fetch(PDO::FETCH_ASSOC)){
 					$arrGroupAll = array();
+					$arrGroupAllMember = array();
 					$arrGroupAll['LOANCOLLTYPE_CODE'] = $rowColl["LOANCOLLTYPE_CODE"];
 					$arrGroupAll['COLLTYPE_DESC'] = $rowColl["LOANCOLLTYPE_DESC"];
 					if($rowColl["LOANCOLLTYPE_CODE"] == '01'){
-						$arrGroupAllMember = array();
 						$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 															FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 															WHERE MMB.member_no = :member_no");
@@ -148,33 +141,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrGroupAllMember["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
 						$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 						$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
-						$arrGroupAll['ASSET'] = $arrGroupAllMember;
-					}
-					if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
-						$arrGroupAllShare = array();
+					}else if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
 						$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 															FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
 															WHERE MMB.member_no = :member_no");
 						$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
-						$arrGroupAllShare["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
-						$arrGroupAllShare["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
-						$arrGroupAllShare["MEMBER_NO"] = $rowColl["REF_COLLNO"];
-						$arrGroupAll['ASSET'] = $arrGroupAllShare;
-					}
-					if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
-						$arrGroupAllDep = array();
+						$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+						$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
+						$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
+					}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
 						$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster
 															WHERE deptaccount_no = :deptaccount_no");
 						$whocolluDept->execute([':deptaccount_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollDept = $whocolluDept->fetch(PDO::FETCH_ASSOC);
-						$arrGroupAllDep["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
-						$arrGroupAllDep["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
-						$arrGroupAllDep["DEPT_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
-						$arrGroupAll['ASSET'] = $arrGroupAllDep;
-					}
-					if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
-						$arrGroupAllAsset = array();
+						$arrGroupAllMember["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+						$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
+						$arrGroupAllMember["DEPT_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+					}else if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
 						$whocolluAsset = $conoracle->prepare("SELECT lcm.COLLMAST_REFNO,lcd.LAND_LANDNO,lcd.POS_TUMBOL,MBD.DISTRICT_DESC,MBP.PROVINCE_DESC,lcm.COLLMAST_NO
 																			FROM lncollmaster lcm LEFT JOIN lncolldetail lcd ON lcm.COLLMAST_NO = lcd.COLLMAST_NO 
 																			LEFT JOIN MBUCFDISTRICT MBD ON lcd.POS_DISTRICT = MBD.DISTRICT_CODE
@@ -182,24 +166,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																			WHERE lcm.collmast_no = :collmast_no");
 						$whocolluAsset->execute([':collmast_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollAsset = $whocolluAsset->fetch(PDO::FETCH_ASSOC);
-						$arrGroupAllAsset["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
+						$arrGroupAllMember["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
 						if(isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != ""){
 							$address =  isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != "" ? "โฉนดเลขที่ ".$rowCollAsset["COLLMAST_REFNO"] : "";
 							$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " บ้านเลขที่ ".$rowCollAsset["LAND_LANDNO"] : "";
 							$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " ต.".$rowCollAsset["POS_TUMBOL"] : "";
 							$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " อ.".$rowCollAsset["DISTRIC_DESC"] : "";
 							$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " จ.".$rowCollAsset["PROVINCE_DESC"] : "";
-							$arrGroupAllAsset["DESCRIPTION"] = $address;
+							$arrGroupAllMember["DESCRIPTION"] = $address;
 						}else{
-							$arrGroupAllAsset['DESCRIPTION'] = $rowColl["DESCRIPTION"];
+							$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 						}
-						$arrGroupAll['ASSET'] = $arrGroupAllAsset;
+					}else if($rowColl["LOANCOLLTYPE_CODE"] == '05'){
+						$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 					}
-					if($rowColl["LOANCOLLTYPE_CODE"] == '05'){
-						$arrGroupAllAsset['DESCRIPTION'] = $rowColl["DESCRIPTION"];
-						$arrGroupAll['ASSET'] = $arrGroupAllAsset;
+					if(array_search($rowColl["LOANCOLLTYPE_CODE"],array_column($arrGrpAllLoan,'LOANCOLLTYPE_CODE')) === False){
+						$arrGroupAll['ASSET'][] = $arrGroupAllMember;
+						$arrGrpAllLoan[] = $arrGroupAll;
+					}else{
+						($arrGrpAllLoan[array_search($rowColl["LOANCOLLTYPE_CODE"],array_column($arrGrpAllLoan,'LOANCOLLTYPE_CODE'))]["ASSET"])[] = $arrGroupAllMember;
 					}
-					$arrGrpAllLoan[] = $arrGroupAll;
 				}
 				$arrayGroupLoan["GUARANTEE"] = $arrGrpAllLoan;
 				$arrGroupAllLoan[] = $arrayGroupLoan;

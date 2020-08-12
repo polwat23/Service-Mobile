@@ -32,14 +32,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);
+		$checkBindAccount = $conmysql->prepare("SELECT COUNT(id_bindaccount) as C_BIND FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('1','0')");
+		$checkBindAccount->execute([':member_no' => $payload["member_no"]]);
+		$rowBindAcc = $checkBindAccount->fetch(PDO::FETCH_ASSOC);
 		while($rowAccIncoop = $getAccountAllinCoop->fetch(PDO::FETCH_ASSOC)){
-			$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
-													WHERE dept_type_code = :depttype_code and (allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1')");
+			$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant,allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
+													FROM gcconstantaccountdept
+													WHERE dept_type_code = :depttype_code and allow_withdraw_inside = '1'");
 			$getIDDeptTypeAllow->execute([
 				':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
 			]);
 			if($getIDDeptTypeAllow->rowCount() > 0){
 				$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+				if($rowBindAcc["C_BIND"] > 0){
+					$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+				}else{
+					if(($rowIDDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowIDDeptTypeAllow["allow_deposit_outside"] == '0') && 
+					$rowIDDeptTypeAllow["allow_withdraw_inside"] == '1'){
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+					}else if($rowIDDeptTypeAllow["allow_withdraw_outside"] == '1' || $rowIDDeptTypeAllow["allow_deposit_outside"] == '1'){
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_MENU'][0][$lang_locale];
+					}
+				}
 				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));

@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			exit();
 		}
 		$arrarDataAcc = array();
-		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
+		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.transonline_flag
 												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 												WHERE dpm.deptaccount_no = :deptaccount_no");
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 				':dept_type_code' => $rowDataAcc["DEPTTYPE_CODE"]
 			]);
 			$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
-			if($rowContAllow["allow_deposit_inside"] == '1'){
+			if($rowContAllow["allow_deposit_inside"] == '1' && $rowDataAcc["TRANSONLINE_FLAG"] == '1'){
 				$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
 				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
 				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));
