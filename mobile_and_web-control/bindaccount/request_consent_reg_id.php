@@ -71,6 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':bind_status' => '-9',
+						':mobile_no' => $mobile_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $responseAPI["RESPONSE_MESSAGE"],
 						':coop_account_no' => $coop_account_no,
@@ -92,6 +93,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':bind_status' => '1',
+						':mobile_no' => $mobile_no,
 						':coop_account_no' => $coop_account_no
 					];
 					$log->writeLog('bindaccount',$arrayStruc);
@@ -105,6 +107,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':bind_status' => '-9',
+						':mobile_no' => $mobile_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $arrResponse->RESPONSE_MESSAGE,
 						':coop_account_no' => $coop_account_no,
@@ -163,6 +166,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
 				':bind_status' => '-9',
+				':mobile_no' => $mobile_no,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $e->getMessage(),
 				':query_flag' => '1'

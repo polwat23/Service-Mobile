@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													FROM gcbindaccount gba
 												    LEFT JOIN csbankdisplay cs
 												    ON cs.bank_code = gba.bank_code 
-													WHERE gba.bindaccount_status = '1'");
+													WHERE gba.bindaccount_status = '1' ORDER BY gba.bind_date DESC");
 		$fetchBindAcount->execute();
 		while($dataBindAcount = $fetchBindAcount->fetch(PDO::FETCH_ASSOC)){
 			$bindaccount = array();

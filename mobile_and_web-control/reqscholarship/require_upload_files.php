@@ -100,6 +100,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			if($rowReqStatus["REQUEST_STATUS"] == 1){
 				$arrayResult['CAN_CLEAR'] = TRUE;
 			}
+			$arrayResult['REQUEST_STATUS'] = $rowReqStatus["REQUEST_STATUS"];
 		}
 		$arrayResult['LIST_UPLOAD'] = $arrUploadFiles;
 		$arrayResult['RESULT'] = TRUE;

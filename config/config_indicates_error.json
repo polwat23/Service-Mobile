@@ -13,19 +13,19 @@
 		"LOGOUT0" : 
 			[{"th" : "ท่านออกจากระบบแล้ว","en" : "You have been logged out"}],
 		"LOGOUT-5" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการเข้าใช้งานจากอุปกรณ์อื่น","en" : "You was forced logout because login duplicate on other device"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการเข้าใช้งานจากอุปกรณ์อื่น","en" : "You were forced logout because login duplicate on other device"}],
 		"LOGOUT-7" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบจากอุปกรณ์อื่น","en" : "You was forced logout from other device"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบจากอุปกรณ์อื่น","en" : "You were forced logout from other device"}],
 		"LOGOUT-8" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบจากสหกรณ์","en" : "You was forced logout from cooperative"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบจากสหกรณ์","en" : "You were forced logout from cooperative"}],
 		"LOGOUT-9" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการเปลี่ยนแปลงรหัสผ่าน","en" : "You was forced logout because password has been change"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการเปลี่ยนแปลงรหัสผ่าน","en" : "You were forced logout because password has been change"}],
 		"LOGOUT-10" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการรีเซ็ตรหัส PIN","en" : "You was forced logout because pin has been change"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการรีเซ็ตรหัส PIN","en" : "You were forced logout because pin has been change"}],
 		"LOGOUT-88" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากบัญชีของท่านถูกระงับ","en" : "You was forced logout because account is withhold"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากบัญชีของท่านถูกระงับ","en" : "You were forced logout because account is withhold"}],
 		"LOGOUT-99" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากโทเคนถูกยกเลิก","en" : "You was forced logout because token was canceled"}]
+			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากโทเคนถูกยกเลิก","en" : "You were forced logout because token was canceled"}]
 		}],
 	"WS0011" : [{"th" : "Pin ของท่านไม่ถูกต้องหากท่านกรอกผิดเกินกว่า 5 ครั้งระบบจะบังคับท่านออกจากระบบ กรุณาตรวจสอบ Pin อีกครั้ง","en" : "Invalid pin if invalid over 5 time you must will be relogin please check pin again"}],
 	"WS0012" : [{"th" : "OTP ไม่ถูกต้อง กรุณาตรวจสอบ OTP ของท่านกับรหัสอ้างอิงว่าตรงกันไหม","en" : "OTP is invalid please check OTP and reference number that match"}],
@@ -91,18 +91,23 @@
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
 	"WS0076" : [{"th" : "สหกรณ์กำลังตรวจสอบเอกสารการขอทุนของท่าน ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has been considering your request. You can track request in Welfare request menu"}],
-	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can track request in Welfare request menu"}],
+	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามผลการขอทุนได้ที่เมนูสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can follow the result of request in Welfare menu"}],
 	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
 	"WS0079" : [{"th" : "หมดเวลาการยื่นขอทุนแล้ว","en" : "Out of time for request welfare"}],
 	"WS0080" : [{"th" : "มีการยื่นเอกสารที่สหกรณ์เรียบร้อยแล้ว","en" : "You have already submitted documents at the cooperative"}],
+	"WS0081" : [{"th" : "สหกรณ์ได้ทำการตรวจสอบเอกสารขอทุนเรียบร้อยแล้ว สามารถติดตามประกาศผลการขอรับทุกได้ที่ ${URL_COOP}","en" : "The cooperative has check your document of request you can follow the result of request on ${URL_COOP}"}],
+	"WS0083" : [{"th" : "สหกรณ์ได้ลงรับใบคำขอของท่านแล้ว ทำให้ท่านไม่สามารถยกเลิกใบคำขอได้ หากต้องการยกเลิกให้ติดต่อสหกรณ์","en" : "The cooperative has accept your request which you cannot cancel request please contact cooperative"}],
+	"WS0084" : [{"th" : "ไม่สามารถยื่นกู้ได้เนื่องจากสิทธิ์การกู้ของท่านไม่เพียงพอ กรุณาตรวจสอบสิทธิ์การกู้ของท่านได้ที่เมนูสิทธิ์กู้โดยประมาณหรือติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot request loan because your loan rights amount not enough please check your rights in menu Loan Estimate or contact cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
+	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
 	"WS1005" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเพิ่มบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1005","en" : "Something was wronged that cannot add memo please contact cooperative #WS1005"}],
 	"WS1006" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบประวัติการแจ้งเตือนได้ กรุณาติดต่อสหกรณ์ #WS1006","en" : "Something was wronged that cannot delete history please contact cooperative #WS1006"}],
 	"WS1007" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถออกจากระบบได้ในขณะนี้ #WS1007","en" : "Something was wronged that cannot logout this moment #WS1007"}],
 	"WS1008" : [{"th" : "เกิดข้อผิดพลาดบางประการทำไม่สามารถอัพโหลดรูปโปรไฟล์ได้ กรุณาติดต่อสหกรณ์ #WS1008","en" : "Something was wronged that cannot upload avatar please contact cooperative #WS1008"}],
 	"WS1009" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถตั้ง Pin ได้กรุณาติดต่อสหกรณ์ #WS1009","en" : "Something was wronged that cannot set Pin please contact cooperative #WS1009"}],
+	"WS1010" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขอีเมลได้ กรุณาติดต่อสหกรณ์ #WS1010","en" : "Something was wronged that cannot change email please contact cooperative #WS1010"}],
 	"WS1011" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถบันทึก OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์ #WS1011","en" : "Something was wronged that cannot save OTP please contact cooperative #WS1011"}],
 	"WS1012" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนรหัสผ่านได้กรุณาติดต่อสหกรณ์ #WS1012","en" : "Something was wronged that cannot change password please contact cooperative #WS1012"}],
 	"WS1014" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถขอรหัสผ่านชั่วคราวได้ กรุณาติดต่อสหกรณ์ #WS1014","en" : "Something was wronged that cannot request temp password please contact cooperative #WS1014"}],
@@ -126,6 +131,7 @@
 	"WS1034" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถอนุมัติการทำรายการเงินฝากได้ ตอนนี้โปรแกรมเมอร์ได้รับเรื่องแล้วกำลังดำเนินการแก้ไข #WS1034","en" : "Something was wronged that cannot approve deposit list. Now programmer has received the issue #WS1034"}],
 	"WS1035" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถปฏิเสธรายการอนุมัติเงินฝากได้ ตอนนี้โปรแกรมเมอร์ได้รับเรื่องแล้วกำลังดำเนินการแก้ไข #WS1035","en" : "Something was wronged that cannot deny approve deposit list. Now programmer has received the issue #WS1035"}],
 	"WS1036" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นใบคำขอกู้ออนไลน์ได้ กรุณาติดต่อสหกรณ์ #WS1036","en" : "Something was wronged that cannot request loan online please contact cooperative #WS1036"}],
+	"WS1037" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกใบคำขอกู้ได้ กรุณาติดต่อสหกรณ์ #WS1037","en" : "Something was wronged that cannot cancel request loan online please contact cooperative #WS1037"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
@@ -176,5 +182,36 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
-	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}]
+		"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
+		"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
+		"ACC_OUTSIDE_FLAG_OFF" : [{"th" : "ท่านมีการผูกบัญชีกับธนาคารแล้วทำให้บัญชีนี้ไม่สามารถทำรายการกับธนาคารได้","en" : "This account has been bind account with bank account. You cannot transaction with bank on this account"}],
+		"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมภายในเท่านั้น","en" : "Only transaction inside"}],
+		"ALLOW_TRANS_ALL_MENU" : [{"th" : "สามารถทำธุรกรรมได้ทั้งภายในและธนาคาร","en" : "Can transaction inside and transaction with bank"}],
+		"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
+		"BUTTON_TEXT" : [{
+			"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
+			"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
+		}],
+		"STATUS_REQ_SCHOLAR" : [{
+			"APPROVE_STATUS" : [{
+				"REQUESTED" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
+			}],
+			"REQUEST_STATUS" : [{
+				"8" : [{"th" : "รอส่งเอกสารเพิ่มเติม","en" : "Wait for send more document"}],
+				"1" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
+				"9" : [{"th" : "ต้องการเอกสารเพิ่มเติม","en" : "Officer want more your document"}],
+				"11" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
+				"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
+				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
+			}]
+		}],
+		"REQ_LOAN_STATUS" : [{
+			"8" : [{"th" : "รอลงรับ","en" : "Wait for accept"}],
+			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
+			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
+			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
+			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+		}],
+		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
+		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}]
 }

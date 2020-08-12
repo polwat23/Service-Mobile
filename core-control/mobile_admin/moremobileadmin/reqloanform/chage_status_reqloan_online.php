@@ -4,8 +4,9 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','loanrequestform')){
 		if($dataComing["req_status"] == '1'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '1',approve_date = NOW(),username = :username WHERE reqloan_doc = :reqloan_doc");
+			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '1',remark = :remark,approve_date = NOW(),username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
+				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
@@ -18,8 +19,9 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				exit();
 			}
 		}else if($dataComing["req_status"] == '7'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '7',username = :username WHERE reqloan_doc = :reqloan_doc");
+			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '7',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
+				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){

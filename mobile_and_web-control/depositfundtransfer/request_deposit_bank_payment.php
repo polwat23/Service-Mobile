@@ -91,8 +91,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				}
 				
 				$ref_slipno = $responseSoap->ref_slipno;
-				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
-				$updateSyncNoti->execute([':ref_slipno' => $ref_slipno]);
+				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
+				$updateSyncNoti->execute([
+					':ref_slipno' => $ref_slipno,
+					':deptaccount_no' => $coop_account_no
+				]);
 				$flag_transaction_coop = true;
 			}catch(SoapFault $e){
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
@@ -158,8 +161,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
-				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
-				$fetchSeqno->execute([':deptslip_no' => $ref_slipno]);
+				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no and deptaccount_no = :deptaccount_no");
+				$fetchSeqno->execute([
+					':deptslip_no' => $ref_slipno,
+					':deptaccount_no' => $coop_account_no
+				]);
 				$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
 				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 													VALUES(:remark,:deptaccount_no,:seq_no)");
@@ -214,8 +220,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						if($func->insertHistory($arrPayloadNotify,'2')){
-							$lib->sendNotify($arrPayloadNotify,"person");
+						if($lib->sendNotify($arrPayloadNotify,"person")){
+							$func->insertHistory($arrPayloadNotify,'2');
 						}
 					}
 				}

@@ -9,6 +9,7 @@ use Component\functions;
 $lib = new library();
 $func = new functions();
 
+$templateMessage = $func->getTemplateSystem('GuaranteeInfo',1);
 $fetchDataGuarantee = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME,
 										lcc.LOANCONTRACT_NO,lcc.seq_no,
 										 lcc.REF_COLLNO, lcm.startcont_date as STARTCONT_DATE,lt.loantype_desc as LOAN_TYPE,lcm.loanapprove_amt as AMOUNT
@@ -21,7 +22,6 @@ $fetchDataGuarantee = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_nam
 $fetchDataGuarantee->execute();
 while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',array($rowGuarantee["REF_COLLNO"]));
-	$templateMessage = $func->getTemplateSystem('GuaranteeInfo',1);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$contract_no = $rowGuarantee["LOANCONTRACT_NO"];
@@ -48,15 +48,14 @@ while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-		if($func->insertHistory($arrPayloadNotify,'2')){
-			if($lib->sendNotify($arrPayloadNotify,"person")){
-				$updateSyncFlag = $conoracle->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
-				$updateSyncFlag->execute([
-					':loancontract_no' => $rowGuarantee["LOANCONTRACT_NO"],
-					':seq_no' => $rowGuarantee["SEQ_NO"],
-					':ref_collno' => $rowGuarantee["REF_COLLNO"]
-				]);
-			}
+		if($lib->sendNotify($arrPayloadNotify,"person")){
+			$func->insertHistory($arrPayloadNotify,'2');
+			$updateSyncFlag = $conoracle->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
+			$updateSyncFlag->execute([
+				':loancontract_no' => $rowGuarantee["LOANCONTRACT_NO"],
+				':seq_no' => $rowGuarantee["SEQ_NO"],
+				':ref_collno' => $rowGuarantee["REF_COLLNO"]
+			]);
 		}
 	}
 }

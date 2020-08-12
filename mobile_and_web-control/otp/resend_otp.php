@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp WHERE otp_status = '0'");
+	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
 	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
@@ -76,13 +76,16 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS1011",
-				":error_desc" => "ไม่สามารถ Resend OTP ได้"."\n".json_encode($dataComing),
+				":error_desc" => "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n".json_encode($dataComing),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$deleteHistory->queryString."\n"."Param => ". json_encode([
-				':member_no' => $payload["member_no"],
-				':his_type' => $dataComing["type_history"]
+			$message_error = "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$insertOTP->queryString."\n"."Param => ". json_encode([
+				':ref_otp' => $reference,
+				':otp_pass' => $otp_password,
+				':destination' => $arrayTel[0]["TEL"],
+				':expire_date' => $expire_date,
+				':otp_text' => $arrMessage["BODY"]
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1011";
