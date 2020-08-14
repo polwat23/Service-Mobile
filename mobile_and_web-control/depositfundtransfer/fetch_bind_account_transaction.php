@@ -15,14 +15,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
 												csb.bank_format_account,csb.bank_format_account_hide
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
-												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
+												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1' ORDER BY gba.deptaccount_no_coop");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
 		if($fetchBindAccount->rowCount() > 0){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
 				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no 
 													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 													gat.id_accountconstant = gct.id_accountconstant
-													WHERE gct.allow_transaction = '1' and gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
+													WHERE gct.allow_deposit_outside = '1' and gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
 				if($fetchAccountBeenAllow->rowCount() > 0){
 					$arrAccBind = array();
@@ -36,12 +36,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.prncbal
+					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.prncbal,dpm.depttype_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
+														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01'");
 					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
 					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowDataAcc["DEPTTYPE_DESC"])){
+						if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
+							$arrAccBind["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+						}else{
+							$arrAccBind["DEPT_TYPE_IMG"] = null;
+						}
 						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
 						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
 						$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"];

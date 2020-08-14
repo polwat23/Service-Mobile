@@ -23,7 +23,6 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 			$structureReqLoanPayment["loanpayment_type"] = 2;
 			$structureReqLoanPayment["loantype_code"] = $dataComing["loantype_code"];
 			$structureReqLoanPayment["period_installment"] = $dataComing["period"];
-			$structureReqLoanPayment["period_installment"] = $dataComing["period"];
 			$structureReqLoanPayment["period_payment"] = 0;
 			$structureReqLoanPayment["progess_flag"] = 0;
 			$structureReqLoanPayment["progess_rate"] = 0;

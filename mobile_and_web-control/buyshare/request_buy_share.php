@@ -78,14 +78,17 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						if($func->insertHistory($arrPayloadNotify,'2')){
-							$lib->sendNotify($arrPayloadNotify,"person");
+						if($lib->sendNotify($arrPayloadNotify,"person")){
+							$func->insertHistory($arrPayloadNotify,'2');
+							$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+							$updateSyncNoti->execute([
+								':deptaccount_no' => $responseSh->deptaccount_no,
+								':seq_no' => $rowSeqno["SEQ_NO"]
+							]);
+							$updateSyncNoti = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
+							$updateSyncNoti->execute([':ref_slipno' => $responseSh->payinslip_no]);
 						}
 					}
-					/*$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
-					$updateSyncNoti->execute([':ref_slipno' => $responseSh->payinslip_no]);*/
-					/*$updateSyncNoti = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
-					$updateSyncNoti->execute([':ref_slipno' => $responseSh->payinslip_no]);*/
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

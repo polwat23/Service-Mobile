@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
-		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,ln.contract_status,
+		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_CODE,lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,ln.contract_status,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,
 											ln.LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
@@ -28,6 +28,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 			$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 			$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+			if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowContract["LOANTYPE_CODE"].'.png')){
+				$arrGroupContract["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowContract["LOANTYPE_CODE"].'.png?v='.date('Ym');
+			}else{
+				$arrGroupContract["LOAN_TYPE_IMG"] = null;
+			}
+			$arrGroupContract['TYPE_LOAN_CODE'] = $rowContract["LOANTYPE_CODE"];
 			$arrGroupContract['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;

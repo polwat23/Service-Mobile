@@ -242,11 +242,15 @@ class functions {
 				':component_system' => $component_system,
 				':seq_no' => $seq_no
 			]);
-			$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
-			$arrayResult = array();
-			$arrayResult["SUBJECT"] = $rowTemplate["subject"];
-			$arrayResult["BODY"] = $rowTemplate["body"];
-			return $arrayResult;
+			if($getTemplatedata->rowCount() > 0){
+				$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
+				$arrayResult = array();
+				$arrayResult["SUBJECT"] = $rowTemplate["subject"];
+				$arrayResult["BODY"] = $rowTemplate["body"];
+				return $arrayResult;
+			}else{
+				return null;
+			}
 		}
 		public function insertHistory($payload,$type_history='1') {
 			$this->con->beginTransaction();
@@ -347,8 +351,13 @@ class functions {
 			$arrayAll = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
-					$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
-					$fetchFCMToken->execute();
+					if(is_array($member_no) && sizeof($member_no) > 0){
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken->execute();
+					}else{
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken->execute([':member_no' => $member_no]);
+					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 							$arrayMT = array();
@@ -381,7 +390,6 @@ class functions {
 		}
 		
 		public function getSMSPerson($type_target,$member_no=null,$trans_flag=false,$check_tel=false){
-			$arrayMember = array();
 			$arrayMemberGRP = array();
 			if($type_target == 'person'){
 				if($trans_flag){
@@ -396,32 +404,34 @@ class functions {
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
-									$arrayMT = array();
-									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-									$arrayMember[] = $rowDataOra["MEMBER_NO"];
-									$arrayMemberGRP[] = $arrayMT;
+								$arrayMT = array();
+								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMemberGRP[] = $arrayMT;
 							}
 						}
 					}
 				}else{
-					$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
-					$fetchDataOra->execute();
+					if(is_array($member_no) && sizeof($member_no) > 0){
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra->execute();
+					}else{
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra->execute([':member_no' => $member_no]);
+					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
-									$arrayMT = array();
-									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-									$arrayMember[] = $rowDataOra["MEMBER_NO"];
-									$arrayMemberGRP[] = $arrayMT;
-							}
-						}else{
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-								$arrayMember[] = $rowDataOra["MEMBER_NO"];
 								$arrayMemberGRP[] = $arrayMT;
+							}
+						}else{
+							$arrayMT = array();
+							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMemberGRP[] = $arrayMT;
 						}
 					}
 				}
@@ -432,7 +442,6 @@ class functions {
 						$arrayMT = array();
 						$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 						$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-						$arrayMember[] = $rowDataOra["MEMBER_NO"];
 						$arrayMemberGRP[] = $arrayMT;
 				}
 			}

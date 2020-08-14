@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowslipcountyear = $fetchSlipCount->fetch(PDO::FETCH_ASSOC)){
 			$arraySlipYear = array();
 			$arraySlipYear["COUNT_SLIP_YEAR"] = $rowslipcountyear["COUNT_SLIP_YEAR"];
-			$arraySlipYear["YEAR_SLIP"] = $rowslipcountyear["YEAR_SLIP"];
+			$arraySlipYear["YEAR_SLIP"] = $rowslipcountyear["YEAR_SLIP"] + 543;
 			$fetchSlipMonthCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'MM')) as COUNT_SLIP_MONTH,to_char(slip_date,'MM') as MONTH_SLIP
 														FROM slslippayin WHERE member_no = :member_no and 
 														to_char(slip_date,'YYYY') = :year_slip GROUP BY to_char(slip_date,'MM')");
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowslipcountmonth = $fetchSlipMonthCount->fetch(PDO::FETCH_ASSOC)){
 				$arraySlipMonth = array();
 				$arraySlipMonth["COUNT_SLIP_MONTH"] = $rowslipcountmonth["COUNT_SLIP_MONTH"];
-				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp(($rowslipcountyear["YEAR_SLIP"] - 543).$rowslipcountmonth["MONTH_SLIP"],true);
+				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp(($rowslipcountyear["YEAR_SLIP"]).$rowslipcountmonth["MONTH_SLIP"],true);
 				$fetchSlipInMonth = $conoracle->prepare("SELECT slt.sliptype_desc,sl.payinslip_no
 														FROM slslippayin sl LEFT JOIN slucfsliptype slt ON sl.sliptype_code = slt.sliptype_code
 														WHERE member_no = :member_no and to_char(slip_date,'YYYYMM') = :slip_date");

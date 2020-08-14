@@ -10,18 +10,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.dept_type_code = '01'");
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_pay_loan = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
+			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt as prncbal,dpm.depttype_code
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
+													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.acccont_type = '01' and dpm.deptclose_status = 0
+													ORDER BY dpm.deptaccount_no ASC");
 			$getDataBalAcc->execute();
 			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllow = array();
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png')){
+					$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrAccAllow["DEPT_TYPE_IMG"] = null;
+				}
 				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
@@ -42,12 +48,34 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}
-			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay
+			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
 													WHERE member_no = :member_no and contract_status = 1");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$arrLoan = array();
+				try {
+					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
+					try {
+						$argumentWS = [
+							"as_wspass" => $config["WS_STRC_DB"],
+							"as_coopid" => $config["COOP_ID"],
+							"as_contno" => $rowLoan["LOANCONTRACT_NO"],
+							"adtm_lastcalint" => date('c')							
+						];
+						$resultWS = $clientWS->__call("of_computeinterest", array($argumentWS));
+						$arrLoan["INT_BALANCE"] = $resultWS->of_computeinterestResult ?? 0;
+					}catch(Throwable $e){
+						$arrLoan["INT_BALANCE"] = 0;
+					}
+				}catch(Throwable $e){
+					$arrLoan["INT_BALANCE"] = 0;
+				}
+				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
+					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrLoan["LOAN_TYPE_IMG"] = null;
+				}
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);

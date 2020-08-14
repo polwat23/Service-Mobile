@@ -171,7 +171,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$arrPayloadNew['refresh_amount'] = 0;
 					$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 					if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-						$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token,counter_wrongpass = 0  WHERE member_no = :member_no");
+						$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
 						$updateFCMToken->execute([
 							':fcm_token' => $dataComing["fcm_token"] ?? null,
 							':member_no' => $member_no
@@ -209,9 +209,13 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						}
 						$arrayResult['MEMBER_NO'] = $member_no;
 						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && ($rowPassword['user_type'] == '0' || 
-						$rowPassword['user_type'] == '1') && $member_no != "etnmode1" && $member_no != "etnmode2"){
+						$rowPassword['user_type'] == '1') && $member_no != "etnmode1" && $member_no != "etnmode2" && $member_no != "dev@mode"){
 							$arrayResult['IS_OTP'] = TRUE;
 						}
+						$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
+						$updateWrongPassCount->execute([
+							':member_no' => $member_no
+						]);
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}else{
@@ -242,7 +246,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						":error_menu" => $filename,
 						":error_code" => "WS1001",
 						":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
-						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+						":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
 					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin->queryString."\n"."Data => ".json_encode([

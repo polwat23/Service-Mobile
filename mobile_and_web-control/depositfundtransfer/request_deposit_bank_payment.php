@@ -291,7 +291,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			exit();
 		}
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);*/
+		echo json_encode($arrayResult);
 		$transaction_no = time();//$arrResponse->TRANSACTION_NO;
 		$etn_ref = time();//$arrResponse->EXTERNAL_REF;
 		$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
@@ -329,10 +329,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrMessage["PATH_IMAGE"] = null;
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-			if($func->insertHistory($arrPayloadNotify,'2')){
-				$lib->sendNotify($arrPayloadNotify,"person");
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
 			}
-		}
+		}*/
 		$arrayResult['EXTERNAL_REF'] = $etn_ref;
 		$arrayResult['TRANSACTION_NO'] = $ref_no;
 		$arrayResult['RESULT'] = TRUE;

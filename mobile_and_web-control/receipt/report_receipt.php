@@ -24,13 +24,13 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		$getDetailSlip = $conoracle->prepare("SELECT slt.slipitemtype_desc,slt.slipitemtype_code,sld.loancontract_no,sld.interest_payamt,
 											sld.item_payamt,sld.item_balance,sld.period
 											FROM slslippayindet sld LEFT JOIN slucfslipitemtype slt ON sld.slipitemtype_code = slt.slipitemtype_code
-											WHERE payinslip_no = :slip_no");
+											WHERE sld.payinslip_no = :slip_no");
 		$getDetailSlip->execute([
 			':slip_no' => $dataComing["slip_no"]
 		]);
 		while($rowDetail = $getDetailSlip->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["SLIPITEMTYPE_DESC"];			
+			$arrDetail["TYPE_DESC"] = $rowDetail["SLIPITEMTYPE_DESC"].' '.$rowDetail["LOANCONTRACT_NO"];			
 			if($rowDetail["SLIPITEMTYPE_CODE"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 				$arrDetail["ITEM_PAYAMT"] = number_format($rowDetail["ITEM_PAYAMT"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INTEREST_PAYAMT"],2);
 			}else if($rowDetail["SLIPITEMTYPE_CODE"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["LOANCONTRACT_NO"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["LOANCONTRACT_NO"];
 			}
 			$item_payment = $rowDetail["INTEREST_PAYAMT"] + $rowDetail["ITEM_PAYAMT"];
 			$arrDetail["ITEM_PAYMENT"] = number_format($item_payment,2);
@@ -210,7 +210,7 @@ function GenerateReport($dataReport,$header,$lib){
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport["TYPE_DESC"].'</div>
+				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>

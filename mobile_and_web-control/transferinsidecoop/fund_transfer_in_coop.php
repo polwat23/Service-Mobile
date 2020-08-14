@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','penalty_amt'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		try {
@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$getLimitAllDay->execute();
 			$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
 			$getSumAllDay = $conoracle->prepare("SELECT SUM(DEPTITEM_AMT) AS SUM_AMT FROM DPDEPTSTATEMENT 
-												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1'");
+												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1' and entry_id = 'MOBILE'");
 			$getSumAllDay->execute();
 			$rowSumAllDay = $getSumAllDay->fetch(PDO::FETCH_ASSOC);
 			$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $dataComing["amt_transfer"];
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			}
 			$penalty_include = $func->getConstant("include_penalty");
 			if($penalty_include == '0'){
-				$recv_amt = $dataComing["amt_transfer"] - $dataComing["penalty_amt"];
+				$recv_amt = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 			}else{
 				$recv_amt = $dataComing["amt_transfer"];
 			}
@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["dest_slipitemtype_code"] = "DTX";
 			$arrayGroup["dest_stmitemtype_code"] = "WTX";
 			$arrayGroup["entry_id"] = "mobile";
-			$arrayGroup["fee_amt"] = $dataComing["penalty_amt"];
+			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
 			$arrayGroup["feeinclude_status"] = $penalty_include;
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
 			$arrayGroup["member_no"] = $member_no;
@@ -118,12 +118,12 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						if($func->insertHistory($arrPayloadNotify,'2')){
-							$lib->sendNotify($arrPayloadNotify,"person");
+						if($lib->sendNotify($arrPayloadNotify,"person")){
+							$func->insertHistory($arrPayloadNotify,'2');
+							$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+							$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
 						}
 					}
-					/*$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
-					$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);*/
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{
@@ -171,7 +171,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':operate_date' => $dateOper,
 						':deptaccount_no' => $from_account_no,
 						':amt_transfer' => $dataComing["amt_transfer"],
-						':penalty_amt' => $dataComing["penalty_amt"],
+						':penalty_amt' => $dataComing["fee_amt"],
 						':type_request' => '2',
 						':transfer_flag' => '2',
 						':destination' => $to_account_no,
@@ -185,7 +185,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':operate_date' => $dateOper,
 						':deptaccount_no' => $from_account_no,
 						':amt_transfer' => $dataComing["amt_transfer"],
-						':penalty_amt' => $dataComing["penalty_amt"],
+						':penalty_amt' => $dataComing["fee_amt"],
 						':type_request' => '2',
 						':transfer_flag' => '1',
 						':destination' => $to_account_no,

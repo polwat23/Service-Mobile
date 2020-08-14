@@ -26,7 +26,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$getLimitAllDay->execute();
 					$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
 					$getSumAllDay = $conoracle->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) AS SUM_AMT FROM DPDEPTSTATEMENT 
-														WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1'");
+														WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
+														and ITEM_STATUS = '1' and entry_id = 'mobile'");
 					$getSumAllDay->execute();
 					$rowSumAllDay = $getSumAllDay->fetch(PDO::FETCH_ASSOC);
 					if(($rowSumAllDay["SUM_AMT"] + $SumAmt_transfer) > $rowLimitAllDay["TOTAL_LIMIT"]){
@@ -42,8 +43,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 						$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
 						$arrayResult['CAUTION'] = $arrayCaution;
 					}
-					$arrayResult['PENALTY_AMT'] = $amt_transfer;
-					$arrayResult['PENALTY_AMT_FORMAT'] = number_format($amt_transfer,2);
+					$arrayResult['FEE_AMT'] = $amt_transfer;
+					$arrayResult['FEE_AMT_FORMAT'] = number_format($amt_transfer,2);
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

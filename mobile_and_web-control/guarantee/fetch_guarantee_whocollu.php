@@ -33,8 +33,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 				$arrMember = array();
 				$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
-				$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
-				$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
+				$arrMember["AVATAR_PATH"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"];
+				$arrMember["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"];
 				$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 				$arrMember["MEMBER_NO"] = $rowCollMember["MEMBER_NO"];
 				$arrGroupAllMember[] = $arrMember;
@@ -57,17 +57,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAllMember = array();
 				$arrGroupAll['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrGroupAll['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$contract_no = $rowWhocollu["LOANCONTRACT_NO"];
-				if(mb_stripos($contract_no,'.') === FALSE){
-					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-					if(mb_strlen($contract_no) == 10){
-						$arrGroupAll["CONTRACT_NO"] = $loan_format;
-					}else if(mb_strlen($contract_no) == 11){
-						$arrGroupAll["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-					}
-				}else{
-					$arrGroupAll["CONTRACT_NO"] = $contract_no;
-				}
+				$arrGroupAll["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
 				$whocolluMember = $conoracle->prepare("SELECT
 														MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME,
 														LCC.REF_COLLNO AS MEMBER_NO			
@@ -81,8 +71,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				while($rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC)){
 					$arrMember = array();
 					$arrayAvarTar = $func->getPathpic($rowCollMember["MEMBER_NO"]);
-					$arrMember["AVATAR_PATH"] = $arrayAvarTar["AVATAR_PATH"];
-					$arrMember["AVATAR_PATH_WEBP"] = $arrayAvarTar["AVATAR_PATH_WEBP"];
+					$arrMember["AVATAR_PATH"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"];
+					$arrMember["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"];
 					$arrMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrMember["MEMBER_NO"] = $rowCollMember["MEMBER_NO"];
 					$arrGroupAllMember[] = $arrMember;

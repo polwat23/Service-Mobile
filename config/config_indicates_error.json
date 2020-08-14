@@ -90,6 +90,7 @@
 	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
+	"WS0075" : [{"th" : "ไม่สามาถซื้อหุ้นได้เนื่องจากเหตุผลบางประการ กรุณาติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot buy shares because something was wronged please contact cooperative for more information"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -165,8 +166,16 @@
 			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
-		}],
-	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}],
+	}],
+	"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
+	"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
+	"ACC_ONLINE_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมและดูข้อมูลได้","en" : "This deposit type was closed transaction online and see information from cooperative"}],
+	"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมโอนภายในเท่านั้น","en" : "Only transaction transfer inside"}],
+	"ALLOW_TRANS_OUTSIDE_FLAG_ON" : [{"th" : "สามารถทำธุรกรรมกับธนาคารได้","en" : "Can transaction with bank"}],
+	"ALLOW_TRANS_INSIDE_ALL_FLAG_ON" : [{"th" : "สามารถทำธุรกรรมภายในได้ทั้งหมด","en" : "Can transaction all menu inside"}],
+	"ALLOW_TRANS_BUY_SHARE_FLAG_ON" : [{"th" : "สามารถโอนภายในและซื้อหุ้นได้","en" : "Can transfer inside and buy share"}],
+	"ALLOW_TRANS_PAY_LOAN_FLAG_ON" : [{"th" : "สามารถโอนภายในและชำระหนี้ได้","en" : "Can transfer inside and pay loan"}],
+	"ALLOW_TRANS_ALL_FLAG_ON" : [{"th" : "สามารถทำธุรกรรมได้ทุกประเภท","en" : "Can transaction all menu"}],
 	"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
 	"BUTTON_TEXT" : [{
 		"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
@@ -179,5 +188,10 @@
 			[{"th" : "อนุมัติ","en" : "Approved"}],	
 		"-9" : 
 			[{"th" : "ไม่อุนมัติ","en" : "Reject"}]
-		}]
+	}],
+	"BUY_SHARES_ERR" : [{
+		"0001" : [{"th" : "ไม่สามารถถือหุ้นเกิน ${MAXHOLD_AMT} ได้","en" : "Cannot hold shares over ${MAXHOLD_AMT}"}],
+		"0002" : [{"th" : "ไม่สามารถซื้อหุ้นต่อครั้งเกิน ${MAXSHAREPX_AMT} ได้","en" : "Cannot buy shares per times over ${MAXSHAREPX_AMT}"}],
+		"0003" : [{"th" : "ขั้นต่ำที่สามารถซื้อได้คือ ${SHAREROUND_FACTOR} บาท","en" : "Minimum can buy is ${SHAREROUND_FACTOR} baht"}]
+	}]
 }

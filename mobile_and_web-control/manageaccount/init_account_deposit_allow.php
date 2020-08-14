@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
 		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
-												WHERE allow_transaction = '1'");
+												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'
+												OR allow_buy_share = '1' OR allow_pay_loan = '1'");
 		$getDeptTypeAllow->execute();
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrDeptAllowed[] = "'".$rowDeptAllow["dept_type_code"]."'";
@@ -23,28 +24,56 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
-														and dpm.member_no = :member_no and dpm.deptclose_status = 0 ORDER BY dpm.deptaccount_no");
+														and dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01' ORDER BY dpm.deptaccount_no");
 		}else{
 			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
-														and dpm.member_no = :member_no and dpm.deptclose_status = 0 ORDER BY dpm.deptaccount_no");
+														and dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01' ORDER BY dpm.deptaccount_no");
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);
 		while($rowAccIncoop = $getAccountAllinCoop->fetch(PDO::FETCH_ASSOC)){
-			$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
-			$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-			$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-			$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowAccIncoop["DEPTACCOUNT_NAME"]));
-			$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
-			$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
-													WHERE dept_type_code = :depttype_code");
+			$getIDDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside,allow_deposit_inside,
+													allow_buy_share,allow_pay_loan,id_accountconstant FROM gcconstantaccountdept
+													WHERE dept_type_code = :depttype_code and 
+													(allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'
+													OR allow_buy_share = '1' OR allow_pay_loan = '1')");
 			$getIDDeptTypeAllow->execute([
 				':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
 			]);
-			$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
-			$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
-			$arrAllowAccGroup[] = $arrAccInCoop;
+			if($getIDDeptTypeAllow->rowCount() > 0){
+				$rowDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+				if($rowDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowDeptTypeAllow["allow_withdraw_inside"] == '1' && 
+				$rowDeptTypeAllow["allow_deposit_outside"] == '0' && $rowDeptTypeAllow["allow_deposit_inside"] == '1'){
+					if($rowDeptTypeAllow["allow_buy_share"] == '1' && $rowDeptTypeAllow["allow_pay_loan"] == '1'){
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_ALL_FLAG_ON'][0][$lang_locale];
+					}else if($rowDeptTypeAllow["allow_buy_share"] == '1' && $rowDeptTypeAllow["allow_pay_loan"] == '0'){
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_BUY_SHARE_FLAG_ON'][0][$lang_locale];
+					}else if($rowDeptTypeAllow["allow_buy_share"] == '0' && $rowDeptTypeAllow["allow_pay_loan"] == '1'){
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_PAY_LOAN_FLAG_ON'][0][$lang_locale];
+					}else{
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+					}
+				}else if($rowDeptTypeAllow["allow_withdraw_outside"] == '1' && $rowDeptTypeAllow["allow_deposit_outside"] == '1'){
+					if($rowDeptTypeAllow["allow_deposit_inside"] == '0' && $rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_OUTSIDE_FLAG_ON'][0][$lang_locale];
+					}else{
+						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_FLAG_ON'][0][$lang_locale];
+					}
+				}
+				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
+				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowAccIncoop["DEPTACCOUNT_NAME"]));
+				$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowAccIncoop["DEPTTYPE_CODE"].'.png')){
+					$arrAccInCoop["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowAccIncoop["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrAccInCoop["DEPT_TYPE_IMG"] = null;
+				}
+				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowDeptTypeAllow["id_accountconstant"];
+				$arrAllowAccGroup[] = $arrAccInCoop;
+			}
 		}
 		$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
 		$arrayResult['RESULT'] = TRUE;

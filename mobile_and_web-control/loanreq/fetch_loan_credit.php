@@ -1,12 +1,12 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','int_rate'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$checkCreditLoan = $conoracle->prepare("SELECT contcredit_no FROM lncontcredit WHERE loantype_code = :loantype_code and member_no = :member_no and credit_status = '1'");
+		$checkCreditLoan = $conoracle->prepare("SELECT contcredit_no FROM lncontcredit WHERE loangroup_code = :loangrp_code and member_no = :member_no and credit_status = 1");
 		$checkCreditLoan->execute([
-			':loantype_code' => $dataComing["loantype_code"],
+			':loangrp_code' => substr($dataComing["loantype_code"],0,2),
 			':member_no' => $member_no
 		]);
 		$rowCreditLoan = $checkCreditLoan->fetch(PDO::FETCH_ASSOC);
@@ -35,19 +35,28 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 					$arrayResult['ACCOUNT_RECEIVE'] = $lib->formataccount($responseSoap->account_id,$func->getConstant('dep_format'));
 					$arrayResult['ACCOUNT_RECEIVE_HIDDEN'] = $lib->formataccount_hidden($arrayResult['ACCOUNT_RECEIVE'],$func->getConstant('hidden_dep'));
 					$arrayResult['CONTRACT_CLR'] = $responseSoap->contclr_no;
-					$arrayResult['LOANPERMIT_AMT'] = $responseSoap->loanpermiss_amt;
-					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
 					$arrayResult['DIFF_OLD_CONTRACT'] = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
+					$arrayResult['LOANPERMIT_AMT'] = round($responseSoap->loanpermiss_amt,2);
+					if($dataComing["loantype_code"] == '02023'){
+						$arrayResult['REQUEST_AMT'] = round($responseSoap->maxreceive_amt + $arrayResult['DIFF_OLD_CONTRACT'],2);
+						if($arrayResult['REQUEST_AMT'] > $responseSoap->loanrequest_amt){
+							$arrayResult['REQUEST_AMT'] = $responseSoap->loanrequest_amt;
+						}
+					}else{
+						$arrayResult['REQUEST_AMT'] = round($responseSoap->loanpermiss_amt,2);
+					}
+					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
+					$arrayResult['PERIOD'] = $responseSoap->period_payamt;
+					$arrayResult['DDD'] = $responseSoap;
 					$structureReqLoanPayment = array();
 					$structureReqLoanPayment["calperiod_intrate"] = $dataComing["int_rate"];
-					$structureReqLoanPayment["calperiod_maxinstallment"] = $dataComing["max_period"];
-					$structureReqLoanPayment["calperiod_prnamt"] = $responseSoap->loanpermiss_amt;
+					$structureReqLoanPayment["calperiod_maxinstallment"] = $responseSoap->period_payamt;
+					$structureReqLoanPayment["calperiod_prnamt"] = $arrayResult['REQUEST_AMT'];
 					$structureReqLoanPayment["loanpayment_type"] = 2;
 					$structureReqLoanPayment["loantype_code"] = $dataComing["loantype_code"];
-					$structureReqLoanPayment["period_installment"] = $dataComing["max_period"];
-					$structureReqLoanPayment["period_lastpayment"] = $dataComing["max_period"];
+					$structureReqLoanPayment["period_installment"] = $responseSoap->period_payamt;
+					$structureReqLoanPayment["period_lastpayment"] = $responseSoap->period_payamt;
 					$structureReqLoanPayment["period_payment"] = 0;
-					$structureReqLoanPayment["progess_flag"] = 0;
 					$structureReqLoanPayment["progess_flag"] = 0;
 					$structureReqLoanPayment["roundpay_flag"] = $responseSoap->roundpay_factor;
 					$structureReqLoanPayment["salary_amount"] = $responseSoap->approve_amt;
@@ -78,7 +87,13 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 						$arrayResult['MAXPERIOD_PAYMENT'] = $responseSoap->maxperiod_payment ?? 0;
 						$arrayResult['PERIOD_PAYMENT'] = round($responseSoap_Credit->period_payment,2) ?? 0;
 						$arrayResult['MAXRECEIVE_AMT'] = $responseSoap->maxreceive_amt;
-						$arrayResult['RECEIVE_AMT'] = round($responseSoap->loanpermiss_amt - $arrayResult['DIFF_OLD_CONTRACT'],2);
+						$arrayResult['DISABLE_AMOUNT'] = FALSE;
+						$arrayResult['DISABLE_PERIOD'] = TRUE;
+						if($dataComing["loantype_code"] == '02023'){
+							$arrayResult['RECEIVE_AMT'] = round($arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'],2);
+						}else{
+							$arrayResult['RECEIVE_AMT'] = round($responseSoap->loanpermiss_amt - $arrayResult['DIFF_OLD_CONTRACT'],2);
+						}
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
 					}catch(SoapFault $e){

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managetemplate')){
-		if(strtolower(substr($dataComing["query_message_spc_"],0,6)) === "select"){
+		if(strtolower(substr(trim($dataComing["query_message_spc_"]),0,6)) === "select"){
 			$arrayData = array();
 			$arrColumn = array();
 			$queryDataForm = $conoracle->prepare($dataComing["query_message_spc_"]);

@@ -59,8 +59,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$resultWS = $clientWS->__call("of_saveslip_payin_mobile", array($argumentWS));
 				$responseSaveLN = $resultWS->of_saveslip_payin_mobileResult;
 				if($responseSaveLN->msg_output == '0000'){
-					$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
-					$fetchSeqno->execute([':deptslip_no' => $responseSaveLN->deptslip_no]);
+					$fetchSeqno = $conoracle->prepare("SELECT MAX(SEQ_NO) as SEQ_NO FROM dpdeptstatement 
+													WHERE deptaccount_no = :deptaccount_no and deptitem_amt = :slip_amt
+													and to_char(operate_date,'YYYY-MM-DD') = :slip_date");
+					$fetchSeqno->execute([
+						':deptaccount_no' => $responseSaveLN->deptaccount_no,
+						':slip_amt' => $responseSaveLN->slip_amt,
+						':slip_date' => $lib->convertdate($responseSaveLN->slip_date,'y-n-d')
+					]);
 					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 														VALUES(:remark,:deptaccount_no,:seq_no)");
@@ -69,8 +75,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						':deptaccount_no' => $from_account_no,
 						':seq_no' => $rowSeqno["SEQ_NO"]
 					]);
-					$arrayResult['INTEREST_PAYMENT'] = number_format($responseSaveLN->interest_payment,2);
-					$arrayResult['PRIN_PAYMENT'] = number_format($responseSaveLN->principal_payment,2);
+					$arrayResult['INTEREST_PAYMENT'] = $responseSaveLN->interest_payment;
+					$arrayResult['PRIN_PAYMENT'] = $responseSaveLN->principal_payment;
+					$arrayResult['INTEREST_PAYMENT_FORMAT'] = number_format($responseSaveLN->interest_payment,2);
+					$arrayResult['PRIN_PAYMENT_FORMAT'] = number_format($responseSaveLN->principal_payment,2);
 					$arrayResult['TRANSACTION_NO'] = $ref_no;
 					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
@@ -87,7 +95,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						':member_no' => $payload["member_no"],
 						':ref_no1' => $from_account_no,
 						':id_userlogin' => $payload["id_userlogin"],
-						':ref_no_source' => $responseSaveLN->deptslip_no
+						':ref_no_source' => $responseSaveLN->payinslip_no
 					]);
 					$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
@@ -95,8 +103,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
 					$dataMerge["AMOUNT"] = number_format($dataComing["amt_transfer"],2);
 					$dataMerge["CONTRACT_NO"] = $dataComing["contract_no"];
-					$dataMerge["INT_PAY"] = $arrayResult['INTEREST_PAYMENT'];
-					$dataMerge["PRIN_PAY"] = $arrayResult['PRIN_PAYMENT'];
+					$dataMerge["INT_PAY"] = number_format($arrayResult['INTEREST_PAYMENT'],2);
+					$dataMerge["PRIN_PAY"] = number_format($arrayResult['PRIN_PAYMENT'],2);
 					$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 					foreach($arrToken["LIST_SEND"] as $dest){
@@ -107,14 +115,17 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						if($func->insertHistory($arrPayloadNotify,'2')){
-							$lib->sendNotify($arrPayloadNotify,"person");
+						if($lib->sendNotify($arrPayloadNotify,"person")){
+							$func->insertHistory($arrPayloadNotify,'2');
+							$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+							$updateSyncNoti->execute([
+								':deptaccount_no' => $responseSaveLN->deptaccount_no,
+								':seq_no' => $rowSeqno["SEQ_NO"]
+							]);
+							$updateSyncNoti = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
+							$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->payinslip_no]);
 						}
 					}
-					/*$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
-					$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->deptslip_no]);*/
-					/*$updateSyncNoti = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
-					$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->payinslip_no]);*/
 					$arrayResult['RESULT'] = TRUE;
 					echo json_encode($arrayResult);
 				}else{

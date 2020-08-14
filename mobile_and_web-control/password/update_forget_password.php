@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 		':password' => $password,
 		':member_no' => $member_no
 	])){
-		if($func->logoutAll(null,$member_no,'-9')){
+		if($func->logoutAll(null,$dataComing["member_no"],'-9')){
 			$conmysql->commit();
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);

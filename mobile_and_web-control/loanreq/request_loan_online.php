@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 							"atr_lnatm" => $structureReqLoanPayment
 						];
 						$resultWS = $clientWS->__call("of_saveloanmobile_atm_ivr", array($argumentWS));
-						$responseSoapSave = $resultWS->astr_lncalperiod;
+						$responseSoapSave = $resultWS->of_saveloanmobile_atm_ivrResult;
 						$insertReqLoan = $conmysql->prepare("INSERT INTO gcreqloan(member_no,loantype_code,request_amt,period_payment,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
 															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
@@ -59,7 +59,31 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 							':receive_net' => round($responseSoap->loanpermiss_amt - $diff_old_contract,2),
 							':id_userlogin' => $payload["id_userlogin"]
 						]);
-						$arrayResult['PERIOD_PAYMENT'] = $responseSoapSave;
+						$getLoanDesc = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
+						$getLoanDesc->execute([':loantype_code' => $dataComing["loantype_code"]]);
+						$rowLoanDesc = $getLoanDesc->fetch(PDO::FETCH_ASSOC);
+						$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"]);
+						$dataMerge = array();
+						$dataMerge["LOANTYPE_DESC"] = $rowLoanDesc["LOANTYPE_DESC"];
+						$dataMerge["REQUEST_AMT"] = number_format($dataComing["request_amt"],2);
+						$dataMerge["PERIOD"] = $responseSoap->period_payamt;
+						$dataMerge["PERIOD_PAYMENT"] = number_format($responseSoap->period_payment,2);
+						$dataMerge["CLRAMT"] = number_format($diff_old_contract,2);
+						$dataMerge["RECEIVENET_AMT"] = number_format($dataComing["request_amt"] - $diff_old_contract,2);
+						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+						foreach($arrToken["LIST_SEND"] as $dest){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							if($lib->sendNotify($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
+							}
+						}
 						$arrayResult['TRANSACTION_DATE'] = $lib->convertdate(date('Y-m-d'),'d m Y');
 						$arrayResult['RESULT'] = TRUE;
 						echo json_encode($arrayResult);
@@ -88,7 +112,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 						$arrayResult['RESPONSE_CODE'] = "WS0063";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['TRANSACTION_DATE'] = $lib->convertdate(date('Y-m-d'),'d m Y');
-						$arrayResult['RESULT'] = TRUE;
+						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
 					}
@@ -103,11 +127,11 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 					$log->writeLog('errorusage',$logStruc);
 					$arrayResult['RESPONSE_CODE'] = "WS0058";
 					if(isset($responseSoap->msg_output) && $responseSoap->msg_output != ""){
-						$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output;
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];//$responseSoap->msg_output;
 					}else{
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					}
-					$arrayResult['RESULT'] = TRUE;
+					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
 				}

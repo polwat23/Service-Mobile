@@ -4,21 +4,52 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
-		$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no,gat.is_use 
+		$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no,gat.is_use
 														FROM gcuserallowacctransaction gat
-														WHERE gat.member_no = :member_no and gat.is_use <> '-9'");
+														WHERE gat.member_no = :member_no and gat.is_use <> '-9' ORDER BY gat.deptaccount_no ASC");
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrAccBeenAllow = array();
-				$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code
+				$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code,dpm.acccont_type
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
-					if($rowDetailAcc["TRANSONLINE_FLAG"] == '0'){
-						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_FLAG_OFF'][0][$lang_locale];
+					if($rowDetailAcc["ACCCONT_TYPE"] != '01'){
+						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_JOIN_FLAG_OFF'][0][$lang_locale];
+					}
+					$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside,allow_deposit_inside,
+															allow_buy_share,allow_pay_loan
+															FROM gcconstantaccountdept
+															WHERE dept_type_code = :depttype_code");
+					$getDeptTypeAllow->execute([
+						':depttype_code' => $rowDetailAcc["DEPTTYPE_CODE"]
+					]);
+					$rowDeptTypeAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+					if($rowDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowDeptTypeAllow["allow_withdraw_inside"] == '1' && 
+					$rowDeptTypeAllow["allow_deposit_outside"] == '0' && $rowDeptTypeAllow["allow_deposit_inside"] == '1'){
+						if($rowDeptTypeAllow["allow_buy_share"] == '1' && $rowDeptTypeAllow["allow_pay_loan"] == '1'){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_ALL_FLAG_ON'][0][$lang_locale];
+						}else if($rowDeptTypeAllow["allow_buy_share"] == '1' && $rowDeptTypeAllow["allow_pay_loan"] == '0'){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_BUY_SHARE_FLAG_ON'][0][$lang_locale];
+						}else if($rowDeptTypeAllow["allow_buy_share"] == '0' && $rowDeptTypeAllow["allow_pay_loan"] == '1'){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_PAY_LOAN_FLAG_ON'][0][$lang_locale];
+						}else{
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+						}
+					}else if($rowDeptTypeAllow["allow_withdraw_outside"] == '1' && $rowDeptTypeAllow["allow_deposit_outside"] == '1'){
+						if($rowDeptTypeAllow["allow_deposit_inside"] == '0' && $rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_OUTSIDE_FLAG_ON'][0][$lang_locale];
+						}else{
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_FLAG_ON'][0][$lang_locale];
+						}
+					}
+					if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDetailAcc["DEPTTYPE_CODE"].'.png')){
+						$arrAccBeenAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDetailAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+					}else{
+						$arrAccBeenAllow["DEPT_TYPE_IMG"] = null;
 					}
 					$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDetailAcc["DEPTACCOUNT_NAME"]));
 					$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];

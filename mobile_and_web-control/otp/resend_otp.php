@@ -78,9 +78,12 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$deleteHistory->queryString."\n"."Param => ". json_encode([
-				':member_no' => $payload["member_no"],
-				':his_type' => $dataComing["type_history"]
+			$message_error = "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$insertOTP->queryString."\n"."Param => ". json_encode([
+				':ref_otp' => $reference,
+				':otp_pass' => $otp_password,
+				':destination' => $arrayTel[0]["TEL"],
+				':expire_date' => $expire_date,
+				':otp_text' => $arrMessage["BODY"]
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1011";
