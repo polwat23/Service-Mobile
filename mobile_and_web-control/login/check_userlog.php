@@ -6,6 +6,8 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkResign->execute([':member_no' => $payload["member_no"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 	if($rowResign["RESIGN_STATUS"] == '1'){
+		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
+		$updateStatus->execute([':member_no' => $payload["member_no"]]);
 		$arrayResult['RESPONSE_CODE'] = "WS0051";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
