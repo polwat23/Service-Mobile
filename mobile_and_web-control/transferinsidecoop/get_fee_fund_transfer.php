@@ -4,6 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
+		$min_amount_deposit = $func->getConstant("min_amount_deposit");
+		if($dataComing["amt_transfer"] < (int) $min_amount_deposit){
+			$arrayResult['RESPONSE_CODE'] = "WS0056";
+			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		try{
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 			$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);

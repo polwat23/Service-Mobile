@@ -5,14 +5,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','processsmsservicefee')){
 		$arrayGroup = array();
 		$MonthNow = date("Ym");
-		$sumFee = 0;
-		$sumRound = 0;
+		$dateNow = date('d/m/y');
 		$arrSMSCont = array();
 		$getSMSConstant = $conmysql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 		$getSMSConstant->execute();
 		while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
 		}
+		$bulkInsert = array();
 		$fetchSmsTranWassent = $conmysql->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
 												sc.smscsp_pay_type,sc.accrued_amt
 												FROM smstranwassent sm LEFT JOIN smsconstantperson sc ON sm.deptaccount_no = sc.smscsp_account
@@ -28,31 +28,39 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["round_send"];
 				}
 			}
-			$arrGroupSmsTranWassent = array();
-			$arrGroupSmsTranWassent["MEMBER_NO"] = $rowSmsTranWassent["member_no"];
-			$arrGroupSmsTranWassent["ACCRUED_AMT"] = $rowSmsTranWassent["accrued_amt"];
-			$arrGroupSmsTranWassent["PROCESS_ROUND"] = number_format($rowSmsTranWassent["round_send"],0);
-			$arrGroupSmsTranWassent["DEPTACCOUNT_NO"] = $lib->formataccount($rowSmsTranWassent["deptaccount_no"],$func->getConstant('dep_format'));
-			if($rowSmsTranWassent["smscsp_pay_type"] == '1'){
-				if($MonthNow > $rowSmsTranWassent["request_flat_date"]){
-					$arrGroupSmsTranWassent["PAY_TYPE"] = '1';
+			$fee_amt = $FeeNet + $rowSmsTranWassent["accrued_amt"];
+			$getSeqNo = $conoracle->prepare("SELECT MAX(seq_no) as MAX_SEQNO FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no");
+			$getSeqNo->execute([':deptaccount_no' => $rowSmsTranWassent["deptaccount_no"]]);
+			$rowSeqNo = $getSeqNo->fetch(PDO::FETCH_ASSOC);
+			$lastSeqNo = $rowSeqNo["MAX_SEQNO"] + 1;
+			$bulkInsert[] = "INTO dpdepttran (coop_id,deptaccount_no,seq_no,system_code,tran_date,tran_status,member_no,deptitem_amt,ref_coopid) VALUES('".$config["COOP_ID"]."','".$rowSmsTranWassent["deptaccount_no"]."',".$lastSeqNo.",'SMS','".$dateNow."',0,'".$rowSmsTranWassent["member_no"]."',".$fee_amt.",'".$config["COOP_ID"]."')";
+			if(sizeof($bulkInsert) == 1000){
+				$insertDeptTran = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)."
+													SELECT * FROM dual");
+				if($insertDeptTran->execute()){
 				}else{
-					$arrGroupSmsTranWassent["PAY_TYPE"] = '0';
+					$arrayResult['RESPONSE'] = "ไม่สามารถผ่านรายการลง dpdepttran ได้กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
 				}
-			}else{
-				$arrGroupSmsTranWassent["PAY_TYPE"] = $rowSmsTranWassent["smscsp_pay_type"];
+				unset($bulkInsert);
+				$bulkInsert = array();
 			}
-			$arrGroupSmsTranWassent["FEE_FORMAT"] = number_format($FeeNet,2);
-			$sumFee += $FeeNet + $rowSmsTranWassent["accrued_amt"];
-			$sumRound += $rowSmsTranWassent["round_send"];
-			$arrayGroup[] = $arrGroupSmsTranWassent;
 		}
-		$arrayResult["SUM_FEE"] = number_format($sumFee,2);
-		$arrayResult["SUM_ROUND"] = number_format($sumRound,0);
-		$arrayResult["SMS_TRAN_WASSENT"] = $arrayGroup;
+		if(sizeof($bulkInsert) > 0){
+			$insertDeptTran = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)."
+													SELECT * FROM dual");
+			if($insertDeptTran->execute()){
+			}else{
+				$arrayResult['RESPONSE'] = "ไม่สามารถผ่านรายการลง dpdepttran ได้กรุณาติดต่อผู้พัฒนา";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+		}
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
-		
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);

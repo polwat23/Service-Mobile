@@ -94,7 +94,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 			$arrayGroupLoan["GUARANTEE"] = $arrGrpAllLoan;
-			$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
+			$arrayResult['CONTRACT_COLL'][] = $arrayGroupLoan;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
