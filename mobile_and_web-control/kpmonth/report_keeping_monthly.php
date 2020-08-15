@@ -109,17 +109,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$contract_no = $rowDetail["PAY_ACCOUNT"];
-				if(mb_stripos($contract_no,'.') === FALSE){
-					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-					if(mb_strlen($contract_no) == 10){
-						$arrDetail["PAY_ACCOUNT"] = $loan_format;
-					}else if(mb_strlen($contract_no) == 11){
-						$arrDetail["PAY_ACCOUNT"] = $loan_format.'-'.mb_substr($contract_no,10);
-					}
-				}else{
-					$arrDetail["PAY_ACCOUNT"] = $contract_no;
-				}
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["ITEM_PAYAMT"] = number_format($rowDetail["PRN_BALANCE"],2);
@@ -148,11 +138,19 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
-			$qureyKpHeader = "SELECT 
-											kpd.RECEIPT_NO,
-											kpd.OPERATE_DATE
-											FROM kpmastreceive kpd
-											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			if(trim($dataComing["recv_period"]) > $recv_now){
+				$qureyKpHeader = "SELECT 
+												kpd.RECEIPT_NO,
+												kpd.OPERATE_DATE
+												FROM kptempreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpHeader = "SELECT 
+												kpd.RECEIPT_NO,
+												kpd.OPERATE_DATE
+												FROM kpmastreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
 		}
 		$getDetailKPHeader = $conoracle->prepare($qureyKpHeader);
 		$getDetailKPHeader->execute([
@@ -239,11 +237,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 2 อาคารศรีสวรินทิรา ชั้น 1 และ ชั้น 6 ถนนวังหลัง</p>
-				<p style="margin-top: -25px;font-size: 18px;">แขวงศิริราช เขตบางกอกน้อย กรุงเทพมหานคร 10700</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2444-7741-3, 0-2419-7543-5, 0-2419-8363-4</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.si.mahidol.ac.th</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมุกดาหาร จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">30/1 ถนนชยางกูร ก. ตำบลมุกดาหาร</p>
+				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองมุกดาหาร จังหวัดมุกดาหาร</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 042-611-454</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.muktc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">

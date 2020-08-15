@@ -141,7 +141,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:#0C6DBF;
+			background-color:#185F83;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -187,10 +187,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด
+					สหกรณ์ออมทรัพย์ครูมุกดาหาร จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Mahidol University Savings and Credit Co-Operative, Limited
+					Mukdahan Teacher Savings and Credit Cooperative, Limited.
 			   </div>
 			   </div>
 				<div class="frame-info-user">

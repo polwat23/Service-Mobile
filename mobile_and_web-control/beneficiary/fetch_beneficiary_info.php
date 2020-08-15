@@ -5,18 +5,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mc.gain_concern,mg.remark
-												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
-												WHERE mg.member_no = :member_no");
+		$getBeneficiary = $conoracle->prepare("SELECT gain_name,gain_address as GAIN_ADDR
+												FROM mbgainmaster WHERE member_no = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = TRIM($rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"]);
+			$arrBenefit["FULL_NAME"] = TRIM($rowBenefit["GAIN_NAME"]);
 			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
-			$arrBenefit["TYPE_PERCENT"] = 'text';
-			$arrBenefit["PERCENT_TEXT"] = TRIM($rowBenefit["REMARK"]);
-			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
+			//$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
+			//$arrBenefit["TYPE_PERCENT"] = 'text';
+			//$arrBenefit["PERCENT_TEXT"] = TRIM($rowBenefit["REMARK"]);
+			//$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
