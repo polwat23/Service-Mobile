@@ -32,6 +32,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupBindAccountLog["CONSENT_DATE"] =  $rowBindAccountLog["consent_date"]==null?"-":$lib->convertdate($rowBindAccountLog["consent_date"],'d m Y',true); 
 			$arrGroupBindAccountLog["BIND_DATE"] =  $rowBindAccountLog["bind_date"]==null?"-":$lib->convertdate($rowBindAccountLog["bind_date"],'d m Y',true); 
 			$arrGroupBindAccountLog["DEVICE_NAME"] = $rowBindAccountLog["device_name"];
+			$arrGroupBindAccountLog["MOBILE_NO"] = $lib->formatphone($rowBindAccountLog["mobile_no"]);
 			$arrGroupBindAccountLog["IP_ADDRESS"] = $rowBindAccountLog["ip_address"];
 			$arrGroupBindAccountLog["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowBindAccountLog["deptaccount_no_coop"],$func->getConstant('dep_format'));
 			$arrGroupBindAccountLog["COOP_ACCOUNT_NO"] = $rowBindAccountLog["deptaccount_no_coop"];

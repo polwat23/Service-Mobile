@@ -31,6 +31,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
+			exit();
 		}
 	}else{
 		$insertResponseAnn = $conmysql->prepare("INSERT INTO logacceptannounce(member_no,id_announce,id_userlogin)
@@ -59,6 +60,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
+			exit();
 		}
 	}
 }else{
