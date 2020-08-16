@@ -488,7 +488,7 @@ class functions {
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 							$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						}else{
-							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','äÁè¾ºàºÍÃìâ·ÃÈÑ¾·ì','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','à¹„à¸¡à¹ˆà¸žà¸šà¹€à¸šà¸­à¸£à¹Œà¹‚à¸—à¸£à¸¨à¸±à¸žà¸—à¹Œ','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 						}
 						if(sizeof($textcombine) == 1000){
 							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
