@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupAnnounce["ANNOUNCE_COVER"] = $rowAnnounce["announce_cover"];
 			$arrGroupAnnounce["ANNOUNCE_TITLE"] = $rowAnnounce["announce_title"];
 			$arrGroupAnnounce["ANNOUNCE_DETAIL"] = $rowAnnounce["announce_detail"];
-			//$arrGroupAnnounce["ANNOUNCE_HTML"] = $rowAnnounce["announce_html"];
+			$arrGroupAnnounce["ANNOUNCE_HTML"] = $rowAnnounce["announce_html"];
 			$arrGroupAnnounce["PRIORITY"] = $rowAnnounce["priority"];
 			$arrGroupAnnounce["USERNAME"] = $rowAnnounce["username"];
 			$arrGroupAnnounce["IS_CHECK"] = $rowAnnounce["is_check"];
