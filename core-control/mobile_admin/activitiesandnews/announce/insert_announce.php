@@ -24,6 +24,23 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 				}
 			}
 		}
+		
+		if(isset($dataComing["news_html_root_"]) && $dataComing["news_html_root_"] != null){
+		$detail_html = '<!DOCTYPE HTML>
+								<html>
+								<head>
+								<style>
+								img {
+									max-width: 100%;
+								}
+								</style>
+							  <meta charset="UTF-8">
+							  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							  '.$dataComing["news_html_root_"].'
+							  </body>
+								</html>';
+		}
+		
 		$insert_announce = $conmysql->prepare("INSERT INTO gcannounce(
 																	announce_cover,
 																	announce_title,
@@ -37,7 +54,8 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	accept_text,
 																	cancel_text,
 																	username,
-																	is_show_between_due)
+																	is_show_between_due,
+																	announce_html)
 																VALUES(
 																	:announce_cover,
 																	:announce_title,
@@ -51,7 +69,8 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	:accept_text,
 																	:cancel_text,
 																	:username,
-																	:is_show_between_due)");
+																	:is_show_between_due,
+																	:detail_html)");
 		if($insert_announce->execute([
 			':announce_title' =>  $dataComing["announce_title"],
 			':announce_detail' => $dataComing["announce_detail"],
@@ -65,7 +84,9 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 			':cancel_text' =>  $dataComing["cancel_text"],
 			':username' =>  $payload["username"],
 			':announce_cover' =>  $pathImg ?? null,
-			':is_show_between_due' => $dataComing["is_show_between_due"]
+			':is_show_between_due' => $dataComing["is_show_between_due"],
+			':detail_html' => $detail_html ?? null
+			
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
