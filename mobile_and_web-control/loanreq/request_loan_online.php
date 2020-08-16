@@ -30,6 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 					$structureReqLoanPayment["loancontract_no"] = 'AUTO';
 					$structureReqLoanPayment["entry_id"] = 'mobile';
 					$structureReqLoanPayment["loanpermiss_amt"] = $responseSoap->loanpermiss_amt;
+					$structureReqLoanPayment["period_payamt"] = $dataComing["period"];
 					$structureReqLoanPayment["loanrequest_amt"] = $dataComing["request_amt"];
 					$structureReqLoanPayment["account_id"] = $responseSoap->account_id;
 					$structureReqLoanPayment["approve_amt"] = $responseSoap->approve_amt;
@@ -46,13 +47,14 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 						];
 						$resultWS = $clientWS->__call("of_saveloanmobile_atm_ivr", array($argumentWS));
 						$responseSoapSave = $resultWS->of_saveloanmobile_atm_ivrResult;
-						$insertReqLoan = $conmysql->prepare("INSERT INTO gcreqloan(member_no,loantype_code,request_amt,period_payment,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
-															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
+						$insertReqLoan = $conmysql->prepare("INSERT INTO logreqloan(member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
+															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
 							':member_no' => $payload["member_no"],
 							':loantype_code' => $dataComing["loantype_code"],
 							':request_amt' => $dataComing["request_amt"],
 							':period_payment' => round($responseSoap->period_payment,2),
+							':period' => $dataComing["period"],
 							':account_id' => $responseSoap->account_id,
 							':loan_permit' => $responseSoap->loanpermiss_amt,
 							':diff_old_contract' => $diff_old_contract,
@@ -67,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 						$dataMerge = array();
 						$dataMerge["LOANTYPE_DESC"] = $rowLoanDesc["LOANTYPE_DESC"];
 						$dataMerge["REQUEST_AMT"] = number_format($dataComing["request_amt"],2);
-						$dataMerge["PERIOD"] = $responseSoap->period_payamt;
+						$dataMerge["PERIOD"] = $dataComing["period"];
 						$dataMerge["PERIOD_PAYMENT"] = number_format($responseSoap->period_payment,2);
 						$dataMerge["CLRAMT"] = number_format($diff_old_contract,2);
 						$dataMerge["RECEIVENET_AMT"] = number_format($dataComing["request_amt"] - $diff_old_contract,2);
@@ -96,13 +98,14 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 						];
 						$log->writeLog('errorusage',$logStruc);
-						$insertReqLoan = $conmysql->prepare("INSERT INTO gcreqloan(member_no,loantype_code,request_amt,period_payment,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
-															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
+						$insertReqLoan = $conmysql->prepare("INSERT INTO logreqloan(member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
+															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
 							':member_no' => $payload["member_no"],
 							':loantype_code' => $dataComing["loantype_code"],
 							':request_amt' => $dataComing["request_amt"],
 							':period_payment' => round($responseSoap->period_payment,2),
+							':period' => $dataComing["period"],
 							':account_id' => $responseSoap->account_id,
 							':loan_permit' => $responseSoap->loanpermiss_amt,
 							':diff_old_contract' => $diff_old_contract,

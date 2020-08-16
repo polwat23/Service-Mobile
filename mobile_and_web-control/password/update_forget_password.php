@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$conmysql->beginTransaction();
-	$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1'
+	$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,password = :password,temppass = null,account_status = '1'
 											WHERE member_no = :member_no");
 	if($changePassword->execute([
 		':password' => $password,

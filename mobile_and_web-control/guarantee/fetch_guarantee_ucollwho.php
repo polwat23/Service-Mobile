@@ -4,58 +4,8 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$arrayResult = array();
 		$arrayGroupLoan = array();
-		try{
-			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
-			$structureReqLoan = array();
-			$structureReqLoan["coop_id"] = $config["COOP_ID"];
-			$structureReqLoan["member_no"] = $member_no;
-			$structureReqLoan["loantype_code"] = "02001";
-			$structureReqLoan["operate_date"] = date("c");
-			$structureReqLoan["colltype_code"] = "01";
-			try {
-				$argumentWS = [
-					"as_wspass" => $config["WS_STRC_DB"],
-					"atr_lnatm" => $structureReqLoan
-				];
-				$resultWS = $clientWS->__call("of_getcollpermissmemno_IVR", array($argumentWS));
-				$responseSoap = $resultWS->atr_lnatm;
-				$arrayResult['LIMIT_GUARANTEE'] = $responseSoap->loanrequest_amt;
-			}catch(SoapFault $e){
-				$filename = basename(__FILE__, '.php');
-				$logStruc = [
-					":error_menu" => $filename,
-					":error_code" => "WS0061",
-					":error_desc" => "ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n"."Error => ".($e->getMessage() ?? " Service ไม่ได้ Return Error มาให้"),
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-				];
-				$log->writeLog('errorusage',$logStruc);
-				$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n"."Error => ".($e->getMessage() ?? " Service ไม่ได้ Return Error มาให้")."\n"."DATA => ".json_encode($dataComing);
-				$lib->sendLineNotify($message_error);
-				$arrayResult['RESPONSE_CODE'] = 'WS0061';
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
-		}catch(SoapFault $e){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS0061",
-				":error_desc" => "ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n".json_encode($e),
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n".json_encode($e)."\n"."DATA => ".json_encode($dataComing);
-			$lib->sendLineNotify($message_error);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = 'WS0061';
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
-		}
 		$getUcollwho = $conoracle->prepare("SELECT
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
 											LNTYPE.loantype_desc as TYPE_DESC,
@@ -74,12 +24,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getUcollwho->execute([':member_no' => $member_no]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
-			$arrayColl["CONTRACT_NO"] = preg_replace('/\//','',$rowUcollwho["LOANCONTRACT_NO"]);
+			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
 			$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
 			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
-			$arrayColl["AVATAR_PATH"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"];
-			$arrayColl["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"];
+			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
+			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;

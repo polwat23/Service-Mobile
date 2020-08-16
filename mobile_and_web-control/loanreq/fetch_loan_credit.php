@@ -47,7 +47,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					}
 					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
 					$arrayResult['PERIOD'] = $responseSoap->period_payamt;
-					$arrayResult['DDD'] = $responseSoap;
 					$structureReqLoanPayment = array();
 					$structureReqLoanPayment["calperiod_intrate"] = $dataComing["int_rate"];
 					$structureReqLoanPayment["calperiod_maxinstallment"] = $responseSoap->period_payamt;
@@ -88,7 +87,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['PERIOD_PAYMENT'] = round($responseSoap_Credit->period_payment,2) ?? 0;
 						$arrayResult['MAXRECEIVE_AMT'] = $responseSoap->maxreceive_amt;
 						$arrayResult['DISABLE_AMOUNT'] = FALSE;
-						$arrayResult['DISABLE_PERIOD'] = TRUE;
+						$arrayResult['DISABLE_PERIOD'] = FALSE;
 						if($dataComing["loantype_code"] == '02023'){
 							$arrayResult['RECEIVE_AMT'] = round($arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'],2);
 						}else{
@@ -121,7 +120,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					];
 					$log->writeLog('errorusage',$logStruc);
 					$arrayResult['RESPONSE_CODE'] = "WS0058";
-					if(isset($responseSoap->msg_output) && $responseSoap->msg_output != ""){
+					if($responseSoap->msg_status == "013"){
 						$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output;
 					}else{
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

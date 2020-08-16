@@ -4,16 +4,25 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$arrLoanAllow = array();
 		$getLoanCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
 		$getLoanCredit->execute();
+		while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
+			$arrLoanAllow[] = "'".$rowCreditAllow["loantype_code"]."'";
+		}
 		$arrCreditGrp = array();
+		$checkMembtype = $conoracle->prepare("SELECT lt.loantype_desc,lt.loantype_code FROM lnloantype lt 
+											LEFT JOIN lnloantypembtype lm ON lt.loantype_code = lm.loantype_code
+											LEFT JOIN mbmembmaster mb ON lm.membtype_code = mb.membtype_code
+											WHERE mb.member_no = :member_no and lt.loantype_code IN(".implode(',',$arrLoanAllow).")");
+		$checkMembtype->execute([':member_no' => $member_no]);
 		try {
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
-			while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
+			while($rowLoanAllow = $checkMembtype->fetch(PDO::FETCH_ASSOC)){
 				$structureReqLoan = array();
 				$structureReqLoan["coop_id"] = $config["COOP_ID"];
 				$structureReqLoan["member_no"] = $member_no;
-				$structureReqLoan["loantype_code"] = $rowCreditAllow["loantype_code"];
+				$structureReqLoan["loantype_code"] = $rowLoanAllow["LOANTYPE_CODE"];
 				$structureReqLoan["operate_date"] = date("c");
 				try {
 					$argumentWS = [
@@ -22,11 +31,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					];
 					$resultWS = $clientWS->__call("of_getloanpermiss_IVR", array($argumentWS));
 					$responseSoap = $resultWS->atr_lnatm;
-					$getLoantypeDESC = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
-					$getLoantypeDESC->execute([':loantype_code' => $rowCreditAllow["loantype_code"]]);
-					$rowLoantypeDESC = $getLoantypeDESC->fetch(PDO::FETCH_ASSOC);
-					$arrCredit["LOANTYPE_DESC"] = $rowLoantypeDESC["LOANTYPE_DESC"];
-					$arrCredit["LOANTYPE_CODE"] = $rowCreditAllow["loantype_code"];
+					$arrCredit["LOANTYPE_DESC"] = $rowLoanAllow["LOANTYPE_DESC"];
+					$arrCredit["LOANTYPE_CODE"] = $rowLoanAllow["LOANTYPE_CODE"];
 					$arrCredit["BUY_SHARE_MORE"] = $responseSoap->buyshr_amt ?? 0;
 					$arrCredit['LOAN_PERMIT_AMT'] = $responseSoap->loanpermiss_amt ?? 0;
 					$arrLoanClr = explode(',',$responseSoap->contclr_no);

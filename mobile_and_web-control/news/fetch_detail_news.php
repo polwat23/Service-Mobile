@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
 		$fetchDetailNews = $conmysql->prepare("SELECT gn.update_date,gn.img_gallery_1,gn.img_gallery_2,gn.img_gallery_3,
-											gn.img_gallery_4,gn.img_gallery_5,gn.news_title,gn.news_detail,gn.create_by,gn.link_news_more
+											gn.img_gallery_4,gn.img_gallery_5,gn.news_title,gn.news_detail,gn.create_by,gn.link_news_more,gn.news_html,gn.file_upload
 											FROM gcnews gn
 											WHERE gn.id_news = :id_news and gn.is_use = '1'");
 		$fetchDetailNews->execute([':id_news' => $dataComing["id_news"]]);
@@ -13,6 +13,8 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 		$arrayDetailNews["TITLE"] = $rowDetailNews["news_title"];
 		$arrayDetailNews["LINK_NEWS_MORE"] = $rowDetailNews["link_news_more"];
 		$arrayDetailNews["DETAIL"] = $rowDetailNews["news_detail"];
+		$arrayDetailNews["NEWS_HTML"] = $rowDetailNews["news_html"];
+		$arrayDetailNews["FILE_UPLOAD"] = $rowDetailNews["file_upload"];
 		$arrayDetailNews["CREATE_BY"] = $rowDetailNews["create_by"];
 		$arrayDetailNews["UPDATE_DATE"] = $lib->convertdate($rowDetailNews["update_date"],'D m Y',true);
 		$path_img = array();
