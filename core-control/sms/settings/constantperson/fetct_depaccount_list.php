@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageconstperson')){
 		$arrayGroup = array();
 		//fetch smsConstantDept
-		$fetchConstant = $conoracle->prepare("select deptaccount_no from dpdeptmaster where member_no = :member_no");
+		$fetchConstant = $conoracle->prepare("select deptaccount_no from dpdeptmaster where member_no = :member_no and deptclose_status = 0 ORDER BY deptaccount_no ASC");
 		$fetchConstant->execute([
 					':member_no' => $dataComing["member_no"]
 				]);

@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ALLOW_SMSCONSTANTDEPT"] = $rowMenuMobile["allow_smsconstantdept"];
 			$arrayChkG[] = $arrConstans;
 		}
-		$fetchDepttype = $conmssql->prepare("SELECT DEPTITEMTYPE_CODE,DEPTITEMTYPE_DESC FROM DPUCFDEPTITEMTYPE ORDER BY DEPTITEMTYPE_CODE ASC");
+		$fetchDepttype = $conoracle->prepare("SELECT DEPTITEMTYPE_CODE,DEPTITEMTYPE_DESC FROM DPUCFDEPTITEMTYPE ORDER BY DEPTITEMTYPE_CODE ASC");
 		$fetchDepttype->execute();
 		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
 			$arrayDepttype = array();

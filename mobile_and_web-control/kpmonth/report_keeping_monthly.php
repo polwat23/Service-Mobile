@@ -134,11 +134,19 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
-			$qureyKpHeader = "SELECT 
-											kpd.RECEIPT_NO,
-											kpd.OPERATE_DATE
-											FROM kpmastreceive kpd
-											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			if(trim($dataComing["recv_period"]) > $recv_now){
+				$qureyKpHeader = "SELECT 
+												kpd.RECEIPT_NO,
+												kpd.OPERATE_DATE
+												FROM kptempreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpHeader = "SELECT 
+												kpd.RECEIPT_NO,
+												kpd.OPERATE_DATE
+												FROM kpmastreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
 		}
 		$getDetailKPHeader = $conmssql->prepare($qureyKpHeader);
 		$getDetailKPHeader->execute([

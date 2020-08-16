@@ -39,14 +39,13 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-		if($func->insertHistory($arrPayloadNotify,'2')){
-			if($lib->sendNotify($arrPayloadNotify,"person")){
-				$updateSyncFlag = $conmssql->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
-				$updateSyncFlag->execute([
-					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
-					':seq_no' => $rowSTM["SEQ_NO"]
-				]);
-			}
+		if($lib->sendNotify($arrPayloadNotify,"person")){
+			$func->insertHistory($arrPayloadNotify,'2');
+			$updateSyncFlag = $conmssql->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+			$updateSyncFlag->execute([
+				':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
+				':seq_no' => $rowSTM["SEQ_NO"]
+			]);
 		}
 	}
 }

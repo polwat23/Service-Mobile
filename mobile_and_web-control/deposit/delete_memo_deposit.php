@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ลบชื่อเล่นบัญชีไม่ได้เพราะ Update ลงตาราง gcdeptalias ไม่ได้ "."\n"."Query => ".$DeleteMemoDept->queryString."\n"."Param => ".json_encode([
+			$message_error = "ลบชื่อเล่นบัญชีไม่ได้เพราะ Update ลงตาราง gcmemodept ไม่ได้ "."\n"."Query => ".$DeleteMemoDept->queryString."\n"."Param => ".json_encode([
 				':deptaccount_no' => $account_no,
 			'	:seq_no' => $dataComing["seq_no"]
 			]);
