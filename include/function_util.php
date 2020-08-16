@@ -351,8 +351,13 @@ class functions {
 			$arrayAll = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
-					$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
-					$fetchFCMToken->execute();
+					if(is_array($member_no) && sizeof($member_no) > 0){
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken->execute();
+					}else{
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken->execute([':member_no' => $member_no]);
+					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 							$arrayMT = array();
@@ -409,8 +414,13 @@ class functions {
 						}
 					}
 				}else{
-					$fetchDataOra = $this->conms->prepare("SELECT addr_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
-					$fetchDataOra->execute();
+					if(is_array($member_no) && sizeof($member_no) > 0){
+						$fetchDataOra = $this->conms->prepare("SELECT addr_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra->execute();
+					}else{
+						$fetchDataOra = $this->conms->prepare("SELECT addr_mobilephone as MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra->execute([':member_no' => $member_no]);
+					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){

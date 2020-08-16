@@ -26,16 +26,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														UNION
 															SELECT RECV_PERIOD from kptempreceive where member_no = ?
 														) as t1 ORDER BY recv_period DESC");
+					$getPeriodKP->execute([$member_no,$member_no]);
 				}else{
 					$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." * from (
-															SELECT RECV_PERIOD from kpmastreceive where member_no = ? and 
-															recv_period <> '".$this_period."'
-														UNION  
-															SELECT RECV_PERIOD  from kptempreceive where member_no = ? and 
-															recv_period <> '".$this_period."'
+															SELECT RECV_PERIOD from kpmastreceive where member_no = ?
 														) as t1 ORDER BY recv_period DESC");
+					$getPeriodKP->execute([$member_no]);
 				}
-				$getPeriodKP->execute([$member_no,$member_no]);
 			}
 		}else{
 			if($dateNow >= $dateshow_kpmonth){
@@ -44,16 +41,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														UNION  
 															SELECT RECV_PERIOD  from kptempreceive where member_no = ?
 														) as t1 ORDER BY recv_period DESC");
+				$getPeriodKP->execute([$member_no,$member_no]);
 			}else{
 				$getPeriodKP = $conmssql->prepare("SELECT TOP ".$limit_period." * from (
-															SELECT RECV_PERIOD from kpmastreceive where member_no = ? and 
-															recv_period <> '".$this_period."'
-														UNION  
-															SELECT RECV_PERIOD  from kptempreceive where member_no = ? and 
-															recv_period <> '".$this_period."'
+															SELECT RECV_PERIOD from kpmastreceive where member_no = ?
 														) as t1 ORDER BY recv_period DESC");
+				$getPeriodKP->execute([$member_no]);
 			}
-			$getPeriodKP->execute([$member_no,$member_no]);
 		}
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
