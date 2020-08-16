@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 				$arrColumn = explode(',',$rowQuery["column_selected"]);
 				if($rowQuery["is_bind_param"] == '0'){
-					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+					$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrGroupCheckSend = array();
@@ -93,7 +93,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						}else{
 							$target = $target;
 						}
-						$queryTarget = $conoracle->prepare($query);
+						$queryTarget = $conmssql->prepare($query);
 						$queryTarget->execute([':'.$condition[1] => $target]);
 						$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
 						if(isset($rowTarget[$rowQuery["target_field"]])){
@@ -166,7 +166,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 				$arrColumn = explode(',',$rowQuery["column_selected"]);
 				if($rowQuery["is_bind_param"] == '0'){
-					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+					$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrTarget = array();
@@ -223,7 +223,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						}else{
 							$destination = $target;
 						}
-						$queryTarget = $conoracle->prepare($query);
+						$queryTarget = $conmssql->prepare($query);
 						$queryTarget->execute([':'.$condition[1] => $destination]);
 						while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 							$arrGroupCheckSend = array();
