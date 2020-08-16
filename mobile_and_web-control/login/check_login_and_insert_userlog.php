@@ -24,6 +24,31 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
+		if($arrPayload["PAYLOAD"]["channel"] == "mobile_app" && isset($dataComing["is_root"])){
+			$checkBlackList = $conmysql->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1' and type_blacklist = '1'");
+			$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
+			if($checkBlackList->rowCount() > 0){
+				$arrayResult['RESPONSE_CODE'] = "WS0069";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+			if($dataComing["is_root"] == "1"){
+				$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist)
+													VALUES(:unique_id,:member_no,'1')");
+				if($insertBlackList->execute([
+					':unique_id' => $dataComing["unique_id"],
+					':member_no' => $member_no
+				])){
+					$arrayResult['RESPONSE_CODE'] = "WS0069";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}
+		}
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
 		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);

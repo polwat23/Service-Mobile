@@ -11,6 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															bind.response_code,	
 															bind.response_message,
 															bind.data_bind_error,
+															bind.mobile_no,
 															bind.query_error,
 															bind.query_flag,
 															bind.coop_account_no,
@@ -29,6 +30,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupLogBindAccountError["BIND_STATUS"] = $rowLogBindAccountError["bind_status"];
 			$arrGroupLogBindAccountError["RESPONSE_CODE"] = $rowLogBindAccountError["response_code"];
 			$arrGroupLogBindAccountError["DEVICE_NAME"] = $rowLogBindAccountError["device_name"];
+			$arrGroupLogBindAccountError["MOBILE_NO"] = $lib->formatphone($rowLogBindAccountError["mobile_no"]);
 			$arrGroupLogBindAccountError["ATTEMPT_BIND_DATE"] =  $lib->convertdate($rowLogBindAccountError["attempt_bind_date"],'d m Y',true); 
 			$arrGroupLogBindAccountError["RESPONSE_MESSAGE"] = $rowLogBindAccountError["response_message"];
 			$arrGroupLogBindAccountError["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogBindAccountError["coop_account_no"],$func->getConstant('dep_format'));

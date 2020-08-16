@@ -37,6 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		]);
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
+		$arrayHeaderAcc["SEQUEST_AMOUNT"] = number_format(0,2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
 		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);

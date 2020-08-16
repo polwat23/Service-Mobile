@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		if($recv_now == trim($dataComing["recv_period"])){
 			if($dateNow >= $date_process){
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -23,10 +23,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -39,12 +40,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
 			if(trim($dataComing["recv_period"]) > $recv_now){
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -57,10 +59,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
 				$qureyKpDetail = "SELECT 
-										kut.keepitemtype_desc as TYPE_DESC,
+										NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 										kut.keepitemtype_grp as TYPE_GROUP,
 										case kut.keepitemtype_grp 
 											WHEN 'DEP' THEN kpd.description
@@ -73,6 +76,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 										NVL(kpd.interest_payment,0) AS INT_BALANCE
 										FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 										kpd.keepitemtype_code = kut.keepitemtype_code
+										LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}	
 		}
