@@ -26,7 +26,7 @@ if(isset($templateMessage)){
 		$arrTarget["SLIP_DATE"] = $lib->convertdate($rowTarget["SLIP_DATE"],'D m Y');
 		$arrTarget["PAYOUTNET_AMT"] = $rowTarget["PAYOUTNET_AMT"];
 		$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
-		$arrayTel = $func->getSMSPerson('person',array($rowTarget["MEMBER_NO"]));
+		$arrayTel = $func->getSMSPerson('person',$rowTarget["MEMBER_NO"]);
 		if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
 			$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 			$arraySendSMS = $lib->sendSMS($arrayDest);
