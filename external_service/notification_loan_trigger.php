@@ -23,7 +23,7 @@ $fetchDataSTM = $conoracle->prepare("SELECT lut.loanitemtype_desc,lcn.loancontra
 									WHERE lcn.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$contract_no = $rowSTM["LOANCONTRACT_NO"];

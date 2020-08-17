@@ -18,7 +18,7 @@ $fetchDataAss = $conoracle->prepare("select asp.PAYOUTSLIP_NO,asp.PAYOUT_AMT,asp
 															TRUNC(asp.operate_date) BETWEEN TRUNC(sysdate - 1) and TRUNC(sysdate)");
 $fetchDataAss->execute();
 while($rowAss = $fetchDataAss->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowAss["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowAss["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["ASSISTTYPE_DESC"] = $rowAss["ASSISTTYPE_DESC"];

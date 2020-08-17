@@ -15,7 +15,7 @@ $fetchReqResignList = $conoracle->prepare("select mrr.resignreq_docno,mrr.member
 												where mrr.resignreq_status = 8 and TRUNC(mrr.resignreq_date) BETWEEN TRUNC(sysdate-40) and TRUNC(sysdate) and mrr.sync_notify_flag = '0'");
 $fetchReqResignList->execute();
 while($rowReqResign = $fetchReqResignList->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowReqResign["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowReqResign["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["RESIGN_DESC"] = $rowReqResign["RESIGNCAUSE_DESC"];

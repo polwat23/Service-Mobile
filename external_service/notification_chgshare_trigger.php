@@ -15,7 +15,7 @@ $fetchDataChgShr = $conoracle->prepare("SELECT PAYADJUST_DOCNO, OLD_PERIODVALUE,
 														approve_date IS NOT NULL and TRUNC(approve_date) BETWEEN TRUNC(sysdate - 1) and TRUNC(sysdate)");
 $fetchDataChgShr->execute();
 while($rowChgShr = $fetchDataChgShr->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowChgShr["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowChgShr["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["OLD_VALUESHARE"] = number_format($rowChgShr["OLD_PERIODVALUE"],2);
