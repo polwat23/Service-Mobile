@@ -23,7 +23,7 @@ $fetchDataSTM = $conmssql->prepare("SELECT lut.loanitemtype_desc,lcn.loancontrac
 									WHERE lcn.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (lcn.sync_notify_flag IS NULL OR lcn.sync_notify_flag = '0') and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["LOANCONTRACT_NO"] = $rowSTM["LOANCONTRACT_NO"];

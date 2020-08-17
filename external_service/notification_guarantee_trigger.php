@@ -21,7 +21,7 @@ $fetchDataGuarantee = $conmssql->prepare("SELECT mp.prename_desc + mb.memb_name 
 										WHERE lcm.startcont_date BETWEEN (GETDATE() - 2) and GETDATE() and (lcc.sync_notify_flag IS NULL OR lcc.sync_notify_flag = '0') and lcc.coll_status = '1' and lcm.contract_status = '1' and lcc.loancolltype_code = '01' ");
 $fetchDataGuarantee->execute();
 while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowGuarantee["REF_COLLNO"]));
+	$arrToken = $func->getFCMToken('person',$rowGuarantee["REF_COLLNO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["LOANCONTRACT_NO"] = $rowGuarantee["LOANCONTRACT_NO"];

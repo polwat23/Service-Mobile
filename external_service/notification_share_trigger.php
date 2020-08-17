@@ -22,7 +22,7 @@ $fetchDataSTM = $conmssql->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMBE
 												WHERE SHS.OPERATE_DATE BETWEEN (GETDATE() - 2) and GETDATE() AND (SHS.sync_notify_flag IS NULL OR SHS.sync_notify_flag = '0') AND SHS.SHRITEMTYPE_CODE IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);

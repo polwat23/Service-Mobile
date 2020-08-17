@@ -22,7 +22,7 @@ $fetchDataSTM = $conmssql->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DE
 									WHERE dsm.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (dsm.sync_notify_flag IS NULL OR dsm.sync_notify_flag = '0') and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	$templateMessage = $func->getTemplateSystem('DepositInfo',1);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
