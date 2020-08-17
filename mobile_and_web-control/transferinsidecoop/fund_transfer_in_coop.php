@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','fee_transfer','trans_ref_code'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','penalty_amt','trans_ref_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		$ref_no = date('YmdHis').substr($from_account_no,-3);
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-		$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_transfer"];
+		$amt_transfer = $dataComing["amt_transfer"] - $dataComing["penalty_amt"];
 		$getMemberNo = $conmysql->prepare("SELECT member_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no");
 		$getMemberNo->execute([':deptaccount_no' => $to_account_no]);
 		$rowMember_noDest = $getMemberNo->fetch(PDO::FETCH_ASSOC);
@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':from_account' => $from_account_no,
 				':destination' => $to_account_no,
 				':amount' => $dataComing["amt_transfer"],
-				':penalty_amt' => $dataComing["fee_transfer"],
+				':penalty_amt' => $dataComing["penalty_amt"],
 				':amount_receive' => $amt_transfer,
 				':operate_date' => $dateOper,
 				':member_no' => $payload["member_no"],
@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':deptaccount_no' => $from_account_no,
 				':seq_no' => $dataComing["trans_ref_code"]
 			]);
-			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+			/*$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$lib->sendNotify($arrPayloadNotify,"person");
 					}
 				}
-			}
+			}*/
 			$arrayResult['TRANSACTION_NO'] = $ref_no;
 			$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 			$arrayResult['RESULT'] = TRUE;
@@ -92,7 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':from_account' => $from_account_no,
 				':destination' => $to_account_no,
 				':amount' => $dataComing["amt_transfer"],
-				':penalty_amt' => $dataComing["fee_transfer"],
+				':penalty_amt' => $dataComing["penalty_amt"],
 				':amount_receive' => $amt_transfer,
 				':operate_date' => $dateOper,
 				':member_no' => $payload["member_no"],
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					':id_userlogin' => $payload["id_userlogin"],
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
-					':penalty_amt' => $dataComing["fee_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
 					':type_request' => '2',
 					':transfer_flag' => '2',
 					':destination' => $to_account_no,
@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					':id_userlogin' => $payload["id_userlogin"],
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
-					':penalty_amt' => $dataComing["fee_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
 					':type_request' => '2',
 					':transfer_flag' => '1',
 					':destination' => $to_account_no,
@@ -146,10 +146,21 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS1016",
+		":error_desc" => "รีเซ็ต Pin ไม่ได้ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateResetPin->queryString."\n"."Param => ". json_encode([
+		':member_no' => $payload["member_no"]
+	]);
+	$lib->sendLineNotify($message_error);
+	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }

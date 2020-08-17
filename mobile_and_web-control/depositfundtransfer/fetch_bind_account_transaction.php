@@ -59,8 +59,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
 							$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 							$arrAccCoop["DEPT_TYPE"] = $accData->accountDesc;
-							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
-							$arrAccCoop["BALANCE_FORMAT"] = $accData->accountBalance;
+							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
+							$arrAccCoop["BALANCE_FORMAT"] = $accData->availableBalance;
 							$arrGroupAccBind["COOP"][] = $arrAccCoop;
 						}
 					}

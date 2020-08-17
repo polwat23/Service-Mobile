@@ -9,7 +9,8 @@ if(!$anonymous){
 	$flag_granted = 'member';
 }
 $arrGroupAnn = array();
-if(isset($dataComing["firsttime"]) && $dataComing["firsttime"] == "TRUE"){
+
+if(isset($dataComing["firsttime"]) && $dataComing["firsttime"] == '1'){
 	$firstapp = '1';
 }else{
 	$firstapp = '-1';
@@ -34,30 +35,21 @@ while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 		':id_announce' => $rowAnn["id_announce"]
 	]);
 	if($checkAcceptAnn->rowCount() == 0){
-		if(isset($rowAnn["announce_html"])){
-			$arrAnn = array();
-			$arrAnn["FLAG_GRANTED"] = $rowAnn["flag_granted"];
-			$arrAnn["PRIORITY"] = $rowAnn["priority"];
-			$arrAnn["ID_ANNOUNCE"] = $rowAnn["id_announce"];
-			$arrAnn["EFFECT_DATE"] = $rowAnn["effect_date"];
-			$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
-			$arrGroupAnn[] = $arrAnn;
-		}else{
-			$arrAnn = array();
-			$arrAnn["FLAG_GRANTED"] = $rowAnn["flag_granted"];
-			$arrAnn["PRIORITY"] = $rowAnn["priority"];
-			$arrAnn["ID_ANNOUNCE"] = $rowAnn["id_announce"];
-			$arrAnn["EFFECT_DATE"] = $rowAnn["effect_date"];
-			$arrAnn["END_DATE"] = $rowAnn["due_date"];
-			$arrAnn["ANNOUNCE_COVER"] = $rowAnn["announce_cover"];
-			$arrAnn["ANNOUNCE_TITLE"] = $rowAnn["announce_title"];
-			$arrAnn["ANNOUNCE_DETAIL"] = $rowAnn["announce_detail"];
-			$arrAnn["IS_CHECK"] = $rowAnn["is_check"];
-			$arrAnn["CHECK_TEXT"] = $rowAnn["check_text"];
-			$arrAnn["ACCEPT_TEXT"] = $rowAnn["accept_text"];
-			$arrAnn["CANCEL_TEXT"] = $rowAnn["cancel_text"];
-			$arrGroupAnn[] = $arrAnn;
-		}
+		$arrAnn = array();
+		$arrAnn["FLAG_GRANTED"] = $rowAnn["flag_granted"];
+		$arrAnn["PRIORITY"] = $rowAnn["priority"];
+		$arrAnn["ID_ANNOUNCE"] = $rowAnn["id_announce"];
+		$arrAnn["EFFECT_DATE"] = $rowAnn["effect_date"];
+		$arrAnn["END_DATE"] = $rowAnn["due_date"];
+		$arrAnn["ANNOUNCE_COVER"] = $rowAnn["announce_cover"];
+		$arrAnn["ANNOUNCE_TITLE"] = $rowAnn["announce_title"];
+		$arrAnn["ANNOUNCE_DETAIL"] = $rowAnn["announce_detail"];
+		$arrAnn["IS_CHECK"] = $rowAnn["is_check"];
+		$arrAnn["CHECK_TEXT"] = $rowAnn["check_text"];
+		$arrAnn["ACCEPT_TEXT"] = $rowAnn["accept_text"];
+		$arrAnn["CANCEL_TEXT"] = $rowAnn["cancel_text"];
+		$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
+		$arrGroupAnn[] = $arrAnn;
 	}
 }
 $arrayResult['ANNOUNCE'] = $arrGroupAnn;

@@ -4,6 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['member_no','phone','password','api_token','unique_id'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS0001",
+			":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
@@ -13,6 +21,23 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
+	$checkPhoneNumber = $conoracle->prepare("SELECT TRIM(mem_telmobile) as mem_telmobile FROM mbmembmaster WHERE member_no = :member_no");
+	$checkPhoneNumber->execute([':member_no' => $dataComing["member_no"]]);
+	$rowNumber = $checkPhoneNumber->fetch(PDO::FETCH_ASSOC);
+	if(empty($rowNumber["MEM_TELMOBILE"])){
+		$arrayResult['RESPONSE_CODE'] = "WS0017";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		echo json_encode($arrayResult);
+		exit();
+	}
+	if($rowNumber["MEM_TELMOBILE"] != $phone){
+		$arrayResult['RESPONSE_CODE'] = "WS0059";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		echo json_encode($arrayResult);
+		exit();
+	}
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$conmysql->beginTransaction();
 	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel,deptaccount_no_regis) 
@@ -32,7 +57,18 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrDataAPI["UserRequestDate"] = date('c');
 		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."MemberProfile/SaveMember",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1031",
+				":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI);
+			$lib->sendLineNotify($message_error);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
+			$arrayResult['RESPONSE_CODE'] = "WS1031";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -47,39 +83,37 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 			echo json_encode($arrayResult);
 		}else{
 			$conmysql->rollback();
-			$arrExecute = [
-				':member_no' => $dataComing["member_no"],
-				':password' => $password,
-				':phone' => $phone,
-				':email' => $email,
-				'error_message' => $arrResponseAPI->responseMessage,
-				'card_person' => $dataComing["card_person"],
-				'deptaccount_no' => $dataComing["deptaccount_no"]
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1031",
+				":error_desc" => "Error ขาติดต่อ Server เงินฝาก Egat"."\n".json_encode($arrResponseAPI),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $insertAccount;
-			$arrError["ERROR_CODE"] = 'WS1018';
-			$lib->addLogtoTxt($arrError,'register_error');
-			$arrayResult['RESPONSE_CODE'] = "WS1018";
+			$log->writeLog('errorusage',$logStruc);
+			$arrayResult['RESPONSE_CODE'] = "WS1031";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
-		$conmysql->rollback();
-		$arrExecute = [
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS1018",
+			":error_desc" => "ไม่สามารถสมัครได้ "."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
+		$message_error = "ไม่สามารถสมัครได้เพราะ Insert ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$insertAccount->queryString."\n"."Param => ". json_encode([
 			':member_no' => $dataComing["member_no"],
 			':password' => $password,
 			':phone' => $phone,
-			':email' => $email
-		];
-		$arrError = array();
-		$arrError["EXECUTE"] = $arrExecute;
-		$arrError["QUERY"] = $insertAccount;
-		$arrError["ERROR_CODE"] = 'WS1018';
-		$lib->addLogtoTxt($arrError,'register_error');
+			':email' => $email,
+			':channel' => $dataComing["channel"]
+		]);
+		$lib->sendLineNotify($message_error);
 		$arrayResult['RESPONSE_CODE'] = "WS1018";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
@@ -87,6 +121,16 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

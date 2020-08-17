@@ -7,7 +7,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUser = $conmysql->prepare("SELECT coreuser.username,coreuser.id_section_system, coresectionsystem.section_system, coresectionsystem.system_assign ,coreuser.user_status
 											FROM coreuser
 											INNER JOIN coresectionsystem
-											ON coresectionsystem.id_section_system = coreuser.id_section_system WHERE coresectionsystem.id_section_system NOT IN('1','11')");
+											ON coresectionsystem.id_section_system = coreuser.id_section_system WHERE coresectionsystem.id_section_system NOT IN('1','11')
+											and coreuser.user_status = '1'");
 		$fetchUser->execute();
 		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreUser = array();

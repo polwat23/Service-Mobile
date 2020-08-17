@@ -8,6 +8,9 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$date_process = $func->getConstant('date_process_kp');
+		$recv_now = (date('Y') + 543).date('m');
+		$dateNow = date('d');
 		$header = array();
 		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
@@ -21,38 +24,80 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$arrGroupDetail = array();
-		$getDetailKP = $conoracle->prepare("SELECT * FROM (
-												SELECT 
-													kut.keepitemtype_desc as TYPE_DESC,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													case kut.keepitemtype_grp 
-														WHEN 'DEP' THEN kpd.description
-														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)
-												UNION 
-												(	SELECT 
-													kut.keepitemtype_desc as TYPE_DESC,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													case kut.keepitemtype_grp 
-														WHEN 'DEP' THEN kpd.description
-														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)");
+		if($recv_now == trim($dataComing["recv_period"])){
+			if($dateNow > $date_process){
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+												WHEN 'INS' THEN kpd.description
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+												WHEN 'INS' THEN kpd.description
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
+		}else{
+			if(trim($dataComing["recv_period"]) > $recv_now){
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+												WHEN 'INS' THEN kpd.description
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpDetail = "SELECT 
+											kut.keepitemtype_desc as TYPE_DESC,
+											kut.keepitemtype_grp as TYPE_GROUP,
+											case kut.keepitemtype_grp 
+												WHEN 'DEP' THEN kpd.description
+												WHEN 'LON' THEN kpd.loancontract_no
+												WHEN 'INS' THEN kpd.description
+											ELSE kpd.description END as PAY_ACCOUNT,
+											kpd.period,
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
+											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+											kpd.keepitemtype_code = kut.keepitemtype_code
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
+		}
+		$getDetailKP = $conoracle->prepare($qureyKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -72,48 +117,62 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"]." ( ".$rowDetail["PAY_ACCOUNT"]." )";
+			}else if($rowDetail["TYPE_GROUP"] == 'INS'){
+				$arrDetail["TYPE_DESC"] = $rowDetail["PAY_ACCOUNT"];
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
 		}
-		if(sizeof($arrGroupDetail) > 0){
-			$getDetailKPHeader = $conoracle->prepare("SELECT * FROM (
-													SELECT 
-														kpd.RECEIPT_NO,
-														kpd.RECEIPT_DATE as OPERATE_DATE
-														FROM kpmastreceive kpd
-														WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)
-													UNION 
-													(	SELECT 
-														kpd.RECEIPT_NO,
-														kpd.RECEIPT_DATE as OPERATE_DATE
-														FROM kptempreceive kpd
-														WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period)");
-			$getDetailKPHeader->execute([
-				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"]
-			]);
-			$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
-			$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
-			$header["member_no"] = $payload["member_no"];
-			$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-			$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
-			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
-			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+		if($recv_now == trim($dataComing["recv_period"])){
+			if($dateNow > $date_process){
+				$qureyKpHeader = "SELECT 
+											kpd.RECEIPT_NO,
+											kpd.RECEIPT_DATE as OPERATE_DATE
+											FROM kpmastreceive kpd
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0044";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				http_response_code(403);
-				echo json_encode($arrayResult);
-				exit();
+				$qureyKpHeader = "SELECT 
+										kpd.RECEIPT_NO,
+										kpd.RECEIPT_DATE as OPERATE_DATE
+									FROM kptempreceive kpd
+										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
-			http_response_code(204);
+			if(trim($dataComing["recv_period"]) > $recv_now){
+				$qureyKpHeader = "SELECT 
+												kpd.RECEIPT_NO,
+												kpd.RECEIPT_DATE as OPERATE_DATE
+												FROM kptempreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}else{
+				$qureyKpHeader = "SELECT 
+												kpd.RECEIPT_NO,
+												kpd.RECEIPT_DATE as OPERATE_DATE
+												FROM kpmastreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+			}
+		}
+		$getDetailKPHeader = $conoracle->prepare($qureyKpHeader);
+		$getDetailKPHeader->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
+		$header["recv_period"] = $lib->convertperiodkp(trim($dataComing["recv_period"]));
+		$header["member_no"] = $payload["member_no"];
+		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
+		if($arrayPDF["RESULT"]){
+			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0044";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{
@@ -125,6 +184,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
@@ -132,7 +201,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	echo json_encode($arrayResult);
 	exit();
 }
-
 function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
@@ -156,7 +224,7 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="120" height="120" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="120" height="120" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บรายเดือน</p>
 				<p style="margin-top: -25px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด</p>
@@ -190,7 +258,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</tbody>
 			</table>
 			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 355px;">
+			<div style="border: 0.5px solid black;width: 100%; height: 255px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
 			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
@@ -201,17 +269,17 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
 			</div>';
 				// Detail
-	$html .= '<div style="width: 100%;height: 290px" class="sub-table">';
+	$html .= '<div style="width: 100%;height: 190px" class="sub-table">';
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 280px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 280px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 310px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 310px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 310px;margin-left: 700px;">&nbsp;</div>
+			<div style="width: 350px;border-right: 0.5px solid black;height: 180px;">&nbsp;</div>
+			<div style="width: 100px;border-right: 0.5px solid black;height: 180px;margin-left: 355px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black;height: 200px;margin-left: 465px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black;height: 200px;margin-left: 580px;">&nbsp;</div>
+			<div style="width: 120px;border-right: 0.5px solid black;height: 200px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
-			<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
+			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -232,7 +300,7 @@ function GenerateReport($dataReport,$header,$lib){
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
+				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -265,6 +333,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
+			<div style="display:flex;">
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			</div>
+			<div style="width:200px;margin-left: 700px;display:flex;">
+			<img src="../../resource/utility_icon/signature/receive_money.png" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			</div>
+			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
 			';
 
 	$dompdf = new DOMPDF();
@@ -276,7 +352,7 @@ function GenerateReport($dataReport,$header,$lib){
 		mkdir($pathfile, 0777, true);
 	}
 	$pathfile = $pathfile.'/'.$header["member_no"].$header["receipt_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["member_no"].$header["receipt_no"].'.pdf';
+	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["member_no"].$header["receipt_no"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

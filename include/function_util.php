@@ -54,15 +54,6 @@ class functions {
 				$this->revoke_alltoken($id_token,'-9',true);
 				return true;
 			}else{
-				$arrExecute = [
-					':type_login' => $type_login,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $logout;
-				$arrError["COMPONENT"] = "Logout";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -95,16 +86,6 @@ class functions {
 				}
 				return true;
 			}else{
-				$arrExecute = [
-					':type_login' => $type_login,
-					':member_no' => $member_no,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $logout;
-				$arrError["COMPONENT"] = "LogoutAll";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -119,15 +100,6 @@ class functions {
 				])){
 					return true;
 				}else{
-					$arrExecute = [
-						':type_revoke' => $type_revoke,
-						':id_token' => $id_token
-					];
-					$arrError = array();
-					$arrError["EXECUTE"] = $arrExecute;
-					$arrError["QUERY"] = $revokeAllToken;
-					$arrError["COMPONENT"] = "Revoke all token";
-					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
@@ -160,17 +132,6 @@ class functions {
 				])){
 					return true;
 				}else{
-					$arrExecute = [
-						':type_revoke' => $type_revoke,
-						':id_token' => $id_token,
-						':type_login' => $type_login
-					];
-					$arrError = array();
-					$arrError["EXECUTE"] = $arrExecute;
-					$arrError["QUERY"] = $revokeAllToken;
-					$arrError["QUERY_LOGOUT"] = $forceLogout;
-					$arrError["COMPONENT"] = "Revoke all token";
-					file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}
@@ -183,15 +144,6 @@ class functions {
 			])){
 				return true;
 			}else{
-				$arrExecute = [
-					':type_revoke' => $type_revoke,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $revokeAT;
-				$arrError["COMPONENT"] = "Revoke access token";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -203,15 +155,6 @@ class functions {
 			])){
 				return true;
 			}else{
-				$arrExecute = [
-					':type_revoke' => $type_revoke,
-					':id_token' => $id_token
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $revokeRT;
-				$arrError["COMPONENT"] = "Revoke refresh token";
-				file_put_contents(__DIR__.'/../log/logout_error.txt', json_encode($arrError) . PHP_EOL, FILE_APPEND);
 				return false;
 			}
 		}
@@ -237,7 +180,7 @@ class functions {
 					$permission[] = "'2'";
 					$permission[] = "'3'";
 					break;
-				default : $permission[] = "'0'";
+				default : return false;
 					break;
 			}
 			if($user_type == '5' || $user_type == '9'){
@@ -247,16 +190,16 @@ class functions {
 					':menu_component' => $menu_component
 				]);
 			}else if($user_type == '1'){
-				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu ,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
 										WHERE gm.menu_component = :menu_component and (gm2.menu_status IN('0','1') OR gm.menu_parent IN('0','-1','-2','-8','-9'))
-										 and gm.menu_status IN('0','1') and gm.menu_permission IN (".implode(',',$permission).")");
+										 and gm.menu_status IN('0','1') and gm.menu_permission IN (".implode(',',$permission).") and menu_system.menu_status = '1'");
 				$checkPermission->execute([
 					':menu_component' => $menu_component
 				]);
 			}else{
-				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu 
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu ,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
 										WHERE gm.menu_component = :menu_component and (gm2.menu_status = '1' OR gm.menu_parent IN('0','-1','-2','-8','-9'))
-										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both')");
+										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both') and menu_system.menu_status = '1'");
 				$checkPermission->execute([
 					':menu_component' => $menu_component,
 					':channel' => $dataComing["channel"]
@@ -299,11 +242,15 @@ class functions {
 				':component_system' => $component_system,
 				':seq_no' => $seq_no
 			]);
-			$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
-			$arrayResult = array();
-			$arrayResult["SUBJECT"] = $rowTemplate["subject"];
-			$arrayResult["BODY"] = $rowTemplate["body"];
-			return $arrayResult;
+			if($getTemplatedata->rowCount() > 0){
+				$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
+				$arrayResult = array();
+				$arrayResult["SUBJECT"] = $rowTemplate["subject"];
+				$arrayResult["BODY"] = $rowTemplate["body"];
+				return $arrayResult;
+			}else{
+				return null;
+			}
 		}
 		public function insertHistory($payload,$type_history='1') {
 			$this->con->beginTransaction();
@@ -317,7 +264,6 @@ class functions {
 						if($insertHis->execute()){
 							unset($bulkInsert);
 							$bulkInsert = array();
-							continue;
 						}else{
 							$this->con->rollback();
 							return false;
@@ -405,8 +351,13 @@ class functions {
 			$arrayAll = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
-					$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
-					$fetchFCMToken->execute();
+					if(is_array($member_no) && sizeof($member_no) > 0){
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken->execute();
+					}else{
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken->execute([':member_no' => $member_no]);
+					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 							$arrayMT = array();
@@ -439,7 +390,6 @@ class functions {
 		}
 		
 		public function getSMSPerson($type_target,$member_no=null,$trans_flag=false,$check_tel=false){
-			$arrayMember = array();
 			$arrayMemberGRP = array();
 			if($type_target == 'person'){
 				if($trans_flag){
@@ -454,56 +404,55 @@ class functions {
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
-									$arrayMT = array();
-									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-									$arrayMember[] = $rowDataOra["MEMBER_NO"];
-									$arrayMemberGRP[] = $arrayMT;
+								$arrayMT = array();
+								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMemberGRP[] = $arrayMT;
 							}
 						}
 					}
 				}else{
-					$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$member_no).")");
-					$fetchDataOra->execute();
+					if(is_array($member_no) && sizeof($member_no) > 0){
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra->execute();
+					}else{
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra->execute([':member_no' => $member_no]);
+					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
-									$arrayMT = array();
-									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-									$arrayMember[] = $rowDataOra["MEMBER_NO"];
-									$arrayMemberGRP[] = $arrayMT;
-							}
-						}else{
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-								$arrayMember[] = $rowDataOra["MEMBER_NO"];
 								$arrayMemberGRP[] = $arrayMT;
+							}
+						}else{
+							$arrayMT = array();
+							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMemberGRP[] = $arrayMT;
 						}
 					}
 				}
 			}else{
-				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0' and rownum <= 10");
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0'");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMT = array();
 						$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 						$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-						$arrayMember[] = $rowDataOra["MEMBER_NO"];
 						$arrayMemberGRP[] = $arrayMT;
 				}
 			}
 			return $arrayMemberGRP;
 		}
-		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false,$payment_keep=false) {
+		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false) {
 			$this->con->beginTransaction();
 			$textcombine = array();
 			$textcombinenotsent = array();
 			if($trans_flag){
-				if($payment_keep){
-					
-				}
+				
 			}else{
 				if($multi_message){
 					foreach($destination as $dest){
@@ -514,7 +463,6 @@ class functions {
 							if($insertToLogSMS->execute()){
 								unset($textcombine);
 								$textcombine = array();
-								continue;
 							}else{
 								$this->con->rollback();
 								break;
@@ -548,7 +496,6 @@ class functions {
 							if($insertToLogSMS->execute()){
 								unset($textcombine);
 								$textcombine = array();
-								continue;
 							}else{
 								$this->con->rollback();
 								return false;
@@ -560,7 +507,6 @@ class functions {
 							if($insertToLogNotSentSMS->execute()){
 								unset($textcombinenotsent);
 								$textcombinenotsent = array();
-								continue;
 							}else{
 								$this->con->rollback();
 								return false;
@@ -623,6 +569,10 @@ class functions {
 					return false;
 				}
 			}
+		}
+		public function MaintenanceMenu($menu_component) {
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
 }
 ?>

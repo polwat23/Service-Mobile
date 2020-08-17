@@ -4,6 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','deptaccount_no'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS0001",
+			":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
 		$arrayResult['RESPONSE_CODE'] = "WS0001";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
@@ -21,49 +29,55 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 		echo json_encode($arrayResult);
 		exit();
 	}else{
-		if($member_no == "00035319" || $member_no == "00166294" || $member_no == "00373222" || $member_no == "00124796"
-		|| $member_no == "00340499" || $member_no == "00862320" || $member_no == "00862819" || $member_no == "00862207"
-		|| $member_no == "00862533" || $member_no == "00862487" || $member_no == "00863076" || $member_no == "00863173"
-		|| $member_no == "00863203" || $member_no == "00863254" || $member_no == "00862878" || $member_no == "00863290"
-		|| $member_no == "00862681" || $member_no == "00862908" || $member_no == "00862746" || $member_no == "00862762"
-		|| $member_no == "00862827" || $member_no == "00862991" || $member_no == "00863299" || $member_no == "00863294"
-		|| $member_no == "00508780" || $member_no == "00862355" || $member_no == "00863106" || $member_no == "00525162"){
-			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-			$arrDataAPI["MemberID"] = substr($member_no,-6);
-			$arrDataAPI["CitizenID"] = $dataComing["id_card"];
-			$arrDataAPI["CoopAccountNo"] = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."MemberProfile/VerifyMember",$arrDataAPI,$arrHeaderAPI);
-			if(!$arrResponseAPI["RESULT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS9999";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
-			$arrResponseAPI = json_decode($arrResponseAPI);
-			if($arrResponseAPI->responseCode == "200"){
-				$arrayResult['MEMBER_NO'] = $member_no;
-				$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
-				$arrayResult['MEMBER_FULLNAME'] = $arrResponseAPI->firstName.' '.$arrResponseAPI->lastName;
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0003";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
-		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+		$arrDataAPI["MemberID"] = substr($member_no,-6);
+		$arrDataAPI["CitizenID"] = $dataComing["id_card"];
+		$arrDataAPI["CoopAccountNo"] = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."MemberProfile/VerifyMember",$arrDataAPI,$arrHeaderAPI);
+		if(!$arrResponseAPI["RESULT"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1031",
+				":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI);
+			$lib->sendLineNotify($message_error);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
+			$arrayResult['RESPONSE_CODE'] = "WS1031";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			http_response_code(403);
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$arrResponseAPI = json_decode($arrResponseAPI);
+		if($arrResponseAPI->responseCode == "200"){
+			$arrayResult['MEMBER_NO'] = $member_no;
+			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
+			$arrayResult['MEMBER_FULLNAME'] = $arrResponseAPI->firstName.' '.$arrResponseAPI->lastName;
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		}
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

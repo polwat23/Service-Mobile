@@ -27,10 +27,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		}
 		$arrResponseAPI = json_decode($arrResponseAPI);
 		if($arrResponseAPI->responseCode == "200"){
-			$arrayResult['FEE_AMT'] = preg_replace('/,/', '', $arrResponseAPI->coopFee);
-			$arrayResult['FEE_AMT_FORMAT'] = $arrResponseAPI->coopFee;
+			$arrayResult['PENALTY_AMT'] = preg_replace('/,/', '', $arrResponseAPI->coopFee);
+			$arrayResult['PENALTY_AMT_FORMAT'] = $arrResponseAPI->coopFee;
 			$arrayResult['TRANS_REF_CODE'] = $arrResponseAPI->transferRefCode;
-			if((int)$arrayResult['FEE_AMT'] > 0){
+			if((int)$arrayResult['PENALTY_AMT'] > 0){
 				$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 				$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
 				$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
@@ -68,10 +68,21 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS1016",
+		":error_desc" => "รีเซ็ต Pin ไม่ได้ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateResetPin->queryString."\n"."Param => ". json_encode([
+		':member_no' => $payload["member_no"]
+	]);
+	$lib->sendLineNotify($message_error);
+	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }
