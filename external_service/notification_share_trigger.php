@@ -22,7 +22,7 @@ $fetchDataSTM = $conoracle->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMB
 												WHERE SHS.OPERATE_DATE BETWEEN (SYSDATE - 2) and SYSDATE AND SHS.SYNC_NOTIFY_FLAG = '0' AND SHS.SHRITEMTYPE_CODE IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
+	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
