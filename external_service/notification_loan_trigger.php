@@ -26,17 +26,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
-		$contract_no = $rowSTM["LOANCONTRACT_NO"];
-		if(mb_stripos($contract_no,'.') === FALSE){
-			$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-			if(mb_strlen($contract_no) == 10){
-				$dataMerge["LOANCONTRACT_NO"] = $loan_format;
-			}else if(mb_strlen($contract_no) == 11){
-				$dataMerge["LOANCONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-			}
-		}else{
-			$dataMerge["LOANCONTRACT_NO"] = $contract_no;
-		}
+		$dataMerge["LOANCONTRACT_NO"] = $rowSTM["LOANCONTRACT_NO"];
 		$dataMerge["PRINCIPAL_PAYMENT"] = number_format($rowSTM["PRINCIPAL_PAYMENT"],2);
 		$dataMerge["INTEREST_PAYMENT"] = number_format($rowSTM["INTEREST_PAYMENT"],2);
 		$dataMerge["PRINCIPAL_BALANCE"] = number_format($rowSTM["PRINCIPAL_BALANCE"],2);

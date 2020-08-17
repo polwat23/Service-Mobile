@@ -24,17 +24,7 @@ while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowGuarantee["REF_COLLNO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
-		$contract_no = $rowGuarantee["LOANCONTRACT_NO"];
-		if(mb_stripos($contract_no,'.') === FALSE){
-			$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-			if(mb_strlen($contract_no) == 10){
-				$dataMerge["LOANCONTRACT_NO"] = $loan_format;
-			}else if(mb_strlen($contract_no) == 11){
-				$dataMerge["LOANCONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-			}
-		}else{
-			$dataMerge["LOANCONTRACT_NO"] = $contract_no;
-		}
+		$dataMerge["LOANCONTRACT_NO"] = $rowGuarantee["LOANCONTRACT_NO"];
 		$dataMerge["AMOUNT"] = number_format($rowGuarantee["AMOUNT"],2);
 		$dataMerge["FULL_NAME"] = $rowGuarantee["FULL_NAME"];
 		$dataMerge["LOAN_TYPE"] = $rowGuarantee["LOAN_TYPE"];
