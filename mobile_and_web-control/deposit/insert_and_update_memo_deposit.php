@@ -5,6 +5,16 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		if(($dataComing["memo_text_emoji_"] == "" || empty($dataComing["memo_text_emoji_"])) && ($dataComing["memo_icon_path"] == "" || empty($dataComing["memo_icon_path"]))){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS4004",
+				":error_desc" => "ส่ง Argument มาไม่ครบ ".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ ".json_encode($dataComing);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -34,17 +44,21 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$arrExecute = [
-					':memo_text' => $dataComing["memo_text_emoji_"],
-					':memo_icon_path' => $dataComing["memo_icon_path"],
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1005",
+					":error_desc" => "เพิ่มบันทึกช่วยจำไม่ได้ "."\n".json_encode($dataComing),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "เพิ่มบันทึกช่วยจำไม่ได้เพราะ Insert ลงตาราง gcmemodept ไม่ได้ "."\n"."Query => ".$insertMemoDept->queryString."\n"."Param =>".json_encode([
+					':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
+					':memo_icon_path' => $dataComing["memo_icon_path"] == "" ? null : $dataComing["memo_icon_path"],
 					':deptaccount_no' => $account_no,
 					':seq_no' => $dataComing["seq_no"]
-				];
-				$arrError = array();
-				$arrError["EXECUTE"] = $arrExecute;
-				$arrError["QUERY"] = $insertMemoDept;
-				$arrError["ERROR_CODE"] = 'WS1005';
-				$lib->addLogtoTxt($arrError,'memo_error');
+				]);
+				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_CODE'] = "WS1005";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -61,6 +75,16 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

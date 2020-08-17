@@ -6,12 +6,34 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkResign->execute([':member_no' => $payload["member_no"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 	if($rowResign["RESIGN_STATUS"] == '1'){
+		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
+		$updateStatus->execute([':member_no' => $payload["member_no"]]);
 		$arrayResult['RESPONSE_CODE'] = "WS0051";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		echo json_encode($arrayResult);
 		exit();
+	}
+	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
+		if($dataComing["is_root"] == "1"){
+			$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist,new_id_token,old_id_token)
+												VALUES(:unique_id,:member_no,'1',:id_token,:id_token)");
+			if($insertBlackList->execute([
+				':unique_id' => $dataComing["unique_id"],
+				':member_no' => $payload["member_no"],
+				':id_token' => $payload["id_token"]
+			])){
+				$arrayResult['RESPONSE_CODE'] = "WS0069";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+		}else{
+			$updateBlacklist = $conmysql->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
+			$updateBlacklist->execute([':unique_id' => $dataComing["unique_id"]]);
+		}
 	}
 	if(isset($dataComing["flag"]) && $dataComing["flag"] == "TOUCH_ID"){
 		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
@@ -136,15 +158,19 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrExecute = [
-				':pin' => $dataComing["pin"],
-				':member_no' => $payload["member_no"]
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1009",
+				":error_desc" => "ตั้ง Pin ไม่ได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
-			$arrError = array();
-			$arrError["EXECUTE"] = $arrExecute;
-			$arrError["QUERY"] = $updatePin;
-			$arrError["ERROR_CODE"] = 'WS1009';
-			$lib->addLogtoTxt($arrError,'pin_error');
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไม่สามารถตั้ง Pin ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updatePin->queryString."\n"."Param => ". json_encode([
+				':pin' => $pin,
+				':member_no' => $payload["member_no"]
+			]);
+			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1009";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -153,6 +179,16 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		}
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

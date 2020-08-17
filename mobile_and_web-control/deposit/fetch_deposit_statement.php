@@ -70,18 +70,19 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$arrResponseAPISTM = json_decode($arrResponseAPISTM);
 		if($arrResponseAPISTM->responseCode == "200"){
 			foreach($arrResponseAPISTM->inquieryBalanceDetail as $accData){
+				$seq_no = isset($accData->trxRefno) && $accData->trxRefno != "" ? $accData->trxRefno : $accData->trxSeqno;
 				$arrSTM = array();
 				$arrSTM["TYPE_TRAN"] = $accData->trxDesc;
 				$arrSTM["SIGN_FLAG"] = $accData->trxOperate == '+' ? "1" : "-1";
-				$arrSTM["SEQ_NO"] = $accData->trxRefno;
+				$arrSTM["SEQ_NO"] = $seq_no;
 				$arrSTM["OPERATE_DATE"] = $lib->convertdate($accData->trxDate,'D m Y');
 				$arrSTM["TRAN_AMOUNT"] = str_replace('-','',$accData->totalAmount);
-				if(array_search($accData->trxRefno,array_column($arrMemo,'ref_no')) === False){
+				if(array_search($seq_no,array_column($arrMemo,'ref_no')) === False){
 					$arrSTM["MEMO_TEXT"] = null;
 					$arrSTM["MEMO_ICON_PATH"] = null;
 				}else{
-					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($accData->trxRefno,array_column($arrMemo,'ref_no'))]["memo_text"] ?? null;
-					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($accData->trxRefno,array_column($arrMemo,'ref_no'))]["memo_icon_path"] ?? null;
+					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($seq_no,array_column($arrMemo,'ref_no'))]["memo_text"] ?? null;
+					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($seq_no,array_column($arrMemo,'ref_no'))]["memo_icon_path"] ?? null;
 				}
 				$arrayGroupSTM[] = $arrSTM;
 			}
@@ -99,6 +100,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

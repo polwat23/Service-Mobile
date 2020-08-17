@@ -88,10 +88,21 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS1016",
+		":error_desc" => "รีเซ็ต Pin ไม่ได้ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateResetPin->queryString."\n"."Param => ". json_encode([
+		':member_no' => $payload["member_no"]
+	]);
+	$lib->sendLineNotify($message_error);
+	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }
@@ -123,10 +134,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">ตู้ปณ. 169 ปณศ. จตุจักร กรุงเทพมหานคร 10900</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 02-579-7070 โทรสาร 02-579-9774</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.025798899.com</p>
+			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 53 หมู่ 2 ถนนจรัญสนิทวงศ์ ตำบลบางกรวย</p>
+			<p style="margin-top: -25px;font-size: 18px;">อำเภอบางกรวย นนทบุรี ประเทศไทย 11130</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร. 02-436-5911 โทรสาร 02-436-5921, 02-436-5918</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">saving.egat.co.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -247,7 +259,7 @@ function GenerateReport($dataReport,$header,$lib){
 		mkdir($pathfile, 0777, true);
 	}
 	$pathfile = $pathfile.'/'.$header["slip_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/receipt/'.$header["slip_no"].'.pdf';
+	$pathfile_show = '/resource/pdf/receipt/'.$header["slip_no"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,TRIM(mg.membgroup_code) as membgroup_code,
 													mb.MEMB_ADDR as ADDR_NO, mb.SOI as ADDR_SOI,mb.MOOBAN as ADDR_MOO,mb.ROAD AS ADDR_ROAD,
 													mb.PROVINCE_CODE,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
@@ -69,6 +69,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["IGNORE_INFO"] = ["CARD_PERSON","MEMBERGROUP_DESC","BIRTH_DATE","POSITION_DESC"];
+			$arrayResult["RECEIVE_MONEY_FROM"] = $rowMember["MEMBGROUP_DESC"]." (".$rowMember["MEMBGROUP_CODE"].")";
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
@@ -87,6 +89,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

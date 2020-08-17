@@ -7,12 +7,15 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 		$menuName = "manageuseraccount";
 		$list_name = null;
 		if($dataComing["account_status"]=='1'){
-			$list_name = "lock account";
-		}else{
+			$queryString = 'UPDATE gcmemberaccount SET account_status = prev_acc_status,prev_acc_status = :account_status,counter_wrongpass = 0
+								WHERE member_no = :member_no';
 			$list_name = "unlock account";
+		}else{
+			$queryString = 'UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = :account_status,counter_wrongpass = 0
+								WHERE member_no = :member_no';
+			$list_name = "lock account";
 		}
-		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = :account_status,counter_wrongpass = 0
-									 WHERE member_no = :member_no");
+		$updateStatus = $conmysql->prepare($queryString);
 		if($updateStatus->execute([
 			':account_status' => $dataComing["account_status"],
 			':member_no' => $dataComing["member_no"]
@@ -21,12 +24,10 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 				':menu_name' => $menuName,
 				':username' => $payload["username"],
 				':use_list' => $list_name,
-				':details' => $dataComing[member_no]
+				':details' => $dataComing["member_no"]
 			];
 			
 			$log->writeLog('manageuser',$arrayStruc);	
-			
-			$arrayResult["test"] = $arrayStruc;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

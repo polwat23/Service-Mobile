@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$arrResponseAPI = json_decode($arrResponseAPI);
 		if($arrResponseAPI->responseCode == "200"){
 			$arrSendData = array();
-			$arrVerifyToken['exp'] = time() + 60;
+			$arrVerifyToken['exp'] = time() + 300;
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 			$arrVerifyToken["operate_date"] = $dateOperC;
 			$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
@@ -129,11 +129,31 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0028";
-			if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
-				$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+			if($arrResponseAPI->responseCode == '415'){
+				$type_account = substr(preg_replace('/-/','',$dataComing["deptaccount_no"]),3,2);
+				if($type_account == '10'){
+					$accountDesc = "NORMAL";
+				}else{
+					$accountDesc = "SPECIAL";
+				}
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$accountDesc][0][$lang_locale];
 			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
 			}
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $dateOper,
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':deptaccount_no' => $dataComing["deptaccount_no"],
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $arrResponseAPI->responseMessage
+			];
+			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

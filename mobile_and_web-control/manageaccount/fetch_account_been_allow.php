@@ -16,7 +16,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDataAPI["MemberID"] = substr($member_no,-6);
 				$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 				if(!$arrResponseAPI["RESULT"]){
-					$arrayResult['RESPONSE_CODE'] = "WS9999";
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS1031",
+						":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$message_error = "ไฟล์ ".$filename." ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI);
+					$lib->sendLineNotify($message_error);
+					$func->MaintenanceMenu($dataComing["menu_component"]);
+					$arrayResult['RESPONSE_CODE'] = "WS1031";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -40,8 +51,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccBeenAllow["ALLOW_TRANSACTION"] = $rowAccBeenAllow["allow_transaction"];
 							$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 							$arrAccBeenAllow["DEPT_TYPE"] = $accData->accountDesc;
-							$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
-							$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $func->getConstant("limit_withdraw");
+							$limit_coop = $func->getConstant("limit_withdraw");
+							if($rowAccBeenAllow["limit_transaction_amt"] > $limit_coop){
+								$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $limit_coop;
+							}else{
+								$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
+							}
+							$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $limit_coop;
 							$arrAccBeenAllow["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
 							$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 							$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
@@ -50,7 +66,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}
 					}
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS9001";
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS1031",
+						":error_desc" => "Error ขาติดต่อ Server เงินฝาก Egat"."\n".json_encode($arrResponseAPI),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$arrayResult['RESPONSE_CODE'] = "WS1031";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -73,6 +97,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

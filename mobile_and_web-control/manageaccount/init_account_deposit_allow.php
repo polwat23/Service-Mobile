@@ -23,7 +23,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
 			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 			if(!$arrResponseAPI["RESULT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS9001";
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1031",
+					":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "ไฟล์ ".$filename." ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI);
+				$lib->sendLineNotify($message_error);
+				$func->MaintenanceMenu($dataComing["menu_component"]);
+				$arrayResult['RESPONSE_CODE'] = "WS1031";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
@@ -53,8 +64,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}else if($rowIDDeptTypeAllow["allow_transaction"] == '0' && $rowIDDeptTypeAllow["allow_showdetail"] == '1'){
 							$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_ACC_SHOW_FLAG_ON'][0][$lang_locale];
 						}
-						$arrAccInCoop["LIMIT_TRANSACTION_COOP"] = $limit_trans;
-						$arrAccInCoop["LIMIT_TRANSACTION_ACCOUNT"] = $limit_trans;
+						$arrAccInCoop["LIMIT_COOP_TRANS_AMT"] = $limit_trans;
+						$arrAccInCoop["LIMIT_TRANSACTION_AMT"] = $limit_trans;
 						$arrAllowAccGroup[] = $arrAccInCoop;
 					}
 				}
@@ -69,7 +80,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0024";
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1031",
+				":error_desc" => "Error ขาติดต่อ Server เงินฝาก Egat"."\n".json_encode($arrResponseAPI),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$arrayResult['RESPONSE_CODE'] = "WS1031";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -84,6 +103,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

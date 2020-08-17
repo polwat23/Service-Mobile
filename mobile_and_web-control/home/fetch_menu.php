@@ -183,6 +183,10 @@ if(!$anonymous){
 							$arrayMenuSetting[] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
+							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
+							$getMenuParentStatus->execute();
+							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
+							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
@@ -217,7 +221,7 @@ if(!$anonymous){
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-						}					
+						}				
 					}
 				}else{
 					$arrMenu = array();
@@ -240,6 +244,7 @@ if(!$anonymous){
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
+				$arrayMenuTransaction["ID_PARENT"] = "18";
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
 				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;
@@ -271,6 +276,13 @@ if(!$anonymous){
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 
 				}
+				$arrayLiveMenu = array();
+				$getLiveList = $conmysql->prepare("SELECT live_title,live_url FROM gclive WHERE is_use = '1'");
+				$getLiveList->execute();
+				$rowLive = $getLiveList->fetch(PDO::FETCH_ASSOC);
+				$arrayLiveMenu["LIVE_URL"] = $rowLive["live_url"];
+				$arrayLiveMenu["LIVE_TITLE"] = $rowLive["live_title"];
+				$arrayResult['MENU_LIVE'] = $arrayLiveMenu;
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
@@ -283,6 +295,14 @@ if(!$anonymous){
 	if($lib->checkCompleteArgument(['api_token'],$dataComing)){
 		$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 		if(!$arrPayload["VALIDATE"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0001",
+				":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
 			$arrayResult['RESPONSE_CODE'] = "WS0001";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -328,6 +348,16 @@ if(!$anonymous){
 			exit();
 		}
 	}else{
+		$filename = basename(__FILE__, '.php');
+		$logStruc = [
+			":error_menu" => $filename,
+			":error_code" => "WS4004",
+			":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+		];
+		$log->writeLog('errorusage',$logStruc);
+		$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+		$lib->sendLineNotify($message_error);
 		$arrayResult['RESPONSE_CODE'] = "WS4004";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;

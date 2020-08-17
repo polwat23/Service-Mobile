@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
 													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 													gat.id_accountconstant = gct.id_accountconstant
-													WHERE gct.allow_transaction = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+													WHERE gct.allow_transaction = '1' and gat.member_no = :member_no and gat.is_use = '1' and gct.dept_type_code <> '50'");
 			$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 			if($fetchAccAllowTrans->rowCount() > 0){
 				while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
@@ -60,8 +60,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
 							$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 							$arrAccCoop["DEPT_TYPE"] = $accData->accountDesc;
-							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
-							$arrAccCoop["BALANCE_FORMAT"] = $accData->accountBalance;
+							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
+							$arrAccCoop["BALANCE_FORMAT"] = $accData->availableBalance;
 							$arrGroupAccBind["COOP"][] = $arrAccCoop;
 						}
 					}

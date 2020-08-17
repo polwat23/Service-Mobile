@@ -36,8 +36,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
 						$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 						$arrAccAllow["DEPT_TYPE"] = $accData->accountDesc;
-						$arrAccAllow["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
-						$arrAccAllow["BALANCE_FORMAT"] = $accData->accountBalance;
+						$arrAccAllow["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
+						$arrAccAllow["BALANCE_FORMAT"] = $accData->availableBalance;
+						$arrAccAllow["CAN_DEPOSIT"] = $accData->creditFlag == '1' ? '0' : '1';
+						$arrAccAllow["CAN_WITHDRAW"] = $accData->debitFlag == '1' ? '0' : '1';
 						$arrGroupAccAllow[] = $arrAccAllow;
 					}
 				}
@@ -90,10 +92,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
-	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS1016",
+		":error_desc" => "รีเซ็ต Pin ไม่ได้ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateResetPin->queryString."\n"."Param => ". json_encode([
+		':member_no' => $payload["member_no"]
+	]);
+	$lib->sendLineNotify($message_error);
+	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }

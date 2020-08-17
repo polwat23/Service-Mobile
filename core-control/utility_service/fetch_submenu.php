@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			$arrayGroup = array();
 			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
 											ON css.id_coremenu = cm.id_coremenu
-											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' ORDER BY css.menu_order ASC");
+											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' ORDER BY cm.coremenu_order,css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
 			while($rowMenu = $fetchMenu->fetch()){
 				$arrGroupRootMenu = array();
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			$arrayGroup = array();
 			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
 											ON css.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
-											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status = '1' ORDER BY css.menu_order ASC");
+											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status = '1' ORDER BY cm.coremenu_order,css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
 			while($rowMenu = $fetchMenu->fetch()){
 				$arrGroupRootMenu = array();
@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 													LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
 													WHERE csm.menu_status = '1' and csm.id_menuparent = :id_submenu and cpm.username = :username 
 													and csm.id_coremenu = cm.id_coremenu
-													ORDER BY csm.menu_order ASC");
+													ORDER BY cm.coremenu_order,csm.menu_order ASC");
 				$fetchSubMenu->execute([
 					':id_submenu' => $rowMenu["id_submenu"],
 					':username' => $payload["username"]
