@@ -18,7 +18,12 @@ class connection {
 			$this->conmysql->exec("set names utf8mb4");
 			return $this->conmysql;
 		}catch(\Throwable $e){
-			http_response_code(500);
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To MySQL";
+			return $arrayError;
+			http_response_code(200);
 			exit();
 		}
 	}
@@ -33,7 +38,7 @@ class connection {
 						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = ".$json_data["DBORACLE_PORT"]."))
 						)
 						(CONNECT_DATA =
-						  (SID = ".$json_data["DBORACLE_SERVICE"].")
+						  (".$json_data["DBORACLE_TYPESERVICE"]." = ".$json_data["DBORACLE_SERVICE"].")
 						)
 					  )";
 			$this->conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
@@ -41,7 +46,12 @@ class connection {
 			$this->conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 			return $this->conoracle;
 		}catch(\Throwable $e){
-			http_response_code(500);
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To Oracle";
+			return $arrayError;
+			http_response_code(200);
 			exit();
 		}
 	}
