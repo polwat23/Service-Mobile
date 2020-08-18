@@ -35,6 +35,8 @@ class insertLog {
 				$this->logErrorUsage($log_struc);
 			}else if($type_log == 'editsms'){
 				$this->logEditSMS($log_struc);
+			}else if($type_log == 'editinfo'){
+				$this->logEditInfo($log_struc);
 			}
 		}
 		
@@ -149,6 +151,11 @@ class insertLog {
 		private function logEditSMS($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logeditsms(menu_name,username,use_list,details) 
 												VALUES(:menu_name,:username,:use_list,:details)");
+			$insertLog->execute($log_struc);
+		}
+		private function logEditInfo($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logchangeinfo(member_no,old_data,new_data,data_type,id_userlogin) 
+			VALUES(:member_no,:old_data,:new_data,:data_type,:id_userlogin)");
 			$insertLog->execute($log_struc);
 		}
 }
