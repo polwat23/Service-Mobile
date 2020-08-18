@@ -33,6 +33,10 @@ class insertLog {
 				$this->logLockAccount($log_struc);
 			}else if($type_log == 'errorusage'){
 				$this->logErrorUsage($log_struc);
+			}else if($type_log == 'editsms'){
+				$this->logEditSMS($log_struc);
+			}else if($type_log == 'editinfo'){
+				$this->logEditInfo($log_struc);
 			}
 		}
 		
@@ -142,6 +146,16 @@ class insertLog {
 		private function logErrorUsage($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logerrorusageapplication(error_menu,error_code,error_desc,error_device) 
 												VALUES(:error_menu,:error_code,:error_desc,:error_device)");
+			$insertLog->execute($log_struc);
+		}
+		private function logEditSMS($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logeditsms(menu_name,username,use_list,details) 
+												VALUES(:menu_name,:username,:use_list,:details)");
+			$insertLog->execute($log_struc);
+		}
+		private function logEditInfo($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logchangeinfo(member_no,old_data,new_data,data_type,id_userlogin) 
+												VALUES(:member_no,:old_data,:new_data,:data_type,:id_userlogin)");
 			$insertLog->execute($log_struc);
 		}
 }
