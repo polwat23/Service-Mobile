@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$getPaymentDetail = $conoracle->prepare("SELECT 
-																	kut.keepitemtype_desc as TYPE_DESC,
+																	NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
 																	kut.keepitemtype_grp as TYPE_GROUP,
 																	case kut.keepitemtype_grp 
 																		WHEN 'DEP' THEN kpd.description
@@ -22,7 +22,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	NVL(kpd.interest_payment,0) AS INT_BALANCE
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																	kpd.keepitemtype_code = kut.keepitemtype_code
-																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
