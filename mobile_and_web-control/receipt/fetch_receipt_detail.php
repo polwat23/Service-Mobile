@@ -4,9 +4,11 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$showSplitSlip = $func->getConstant('show_split_slip_report');
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare("SELECT 
 													NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+													kpd.SEQ_NO,
 													kut.keepitemtype_grp as TYPE_GROUP,
 													kpd.MONEY_RETURN_STATUS,
 													kpd.ADJUST_ITEMAMT,
@@ -69,8 +71,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			}
+			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 			$arrGroupDetail[] = $arrDetail;
 		}
+		$arrayResult['SPLIT_SLIP'] = $showSplitSlip == "1" ? TRUE : FALSE;
+		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

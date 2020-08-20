@@ -8,31 +8,61 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getPaymentDetail = $conoracle->prepare("SELECT 
-																	NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
-																	kut.keepitemtype_grp as TYPE_GROUP,
-																	kpd.MONEY_RETURN_STATUS,
-																	kpd.ADJUST_ITEMAMT,
-																	kpd.ADJUST_PRNAMT,
-																	kpd.ADJUST_INTAMT,
-																	case kut.keepitemtype_grp 
-																		WHEN 'DEP' THEN kpd.description
-																		WHEN 'LON' THEN kpd.loancontract_no
-																	ELSE kpd.description END as PAY_ACCOUNT,
-																	kpd.period,
-																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	NVL(kpd.interest_payment,0) AS INT_BALANCE
-																	FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																	kpd.keepitemtype_code = kut.keepitemtype_code
-																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																	ORDER BY kut.SORT_IN_RECEIVE ASC");
-		$getPaymentDetail->execute([
-			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
-		]);
+		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
+			$getPaymentDetail = $conoracle->prepare("SELECT 
+																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																		kut.keepitemtype_grp as TYPE_GROUP,
+																		kpd.MONEY_RETURN_STATUS,
+																		kpd.ADJUST_ITEMAMT,
+																		kpd.ADJUST_PRNAMT,
+																		kpd.ADJUST_INTAMT,
+																		case kut.keepitemtype_grp 
+																			WHEN 'DEP' THEN kpd.description
+																			WHEN 'LON' THEN kpd.loancontract_no
+																		ELSE kpd.description END as PAY_ACCOUNT,
+																		kpd.period,
+																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		NVL(kpd.interest_payment,0) AS INT_BALANCE
+																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+																		kpd.keepitemtype_code = kut.keepitemtype_code
+																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																		and kpd.seq_no = :seq_no
+																		ORDER BY kut.SORT_IN_RECEIVE ASC");
+			$getPaymentDetail->execute([
+				':member_no' => $member_no,
+				':recv_period' => $dataComing["recv_period"],
+				':seq_no' => $dataComing["seq_no"]
+			]);
+		}else{
+			$getPaymentDetail = $conoracle->prepare("SELECT 
+																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																		kut.keepitemtype_grp as TYPE_GROUP,
+																		kpd.MONEY_RETURN_STATUS,
+																		kpd.ADJUST_ITEMAMT,
+																		kpd.ADJUST_PRNAMT,
+																		kpd.ADJUST_INTAMT,
+																		case kut.keepitemtype_grp 
+																			WHEN 'DEP' THEN kpd.description
+																			WHEN 'LON' THEN kpd.loancontract_no
+																		ELSE kpd.description END as PAY_ACCOUNT,
+																		kpd.period,
+																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		NVL(kpd.interest_payment,0) AS INT_BALANCE
+																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+																		kpd.keepitemtype_code = kut.keepitemtype_code
+																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																		ORDER BY kut.SORT_IN_RECEIVE ASC");
+			$getPaymentDetail->execute([
+				':member_no' => $member_no,
+				':recv_period' => $dataComing["recv_period"]
+			]);
+		}
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
