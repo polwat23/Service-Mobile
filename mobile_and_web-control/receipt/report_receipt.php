@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
-		$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
+		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
@@ -196,7 +196,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
 			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
