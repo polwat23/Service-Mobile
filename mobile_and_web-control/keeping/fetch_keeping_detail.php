@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$MonthForCheck = date('m');
 		$DayForCheck = date('d');
-		$getLastReceive = $conmssql->prepare("SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
-															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT");
+		$getLastReceive = $conmssql->prepare("SELECT TOP 1 MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
+															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC");
 		$getLastReceive->execute([':member_no' => $member_no]);
 		$rowLastRecv = $getLastReceive->fetch(PDO::FETCH_ASSOC);
 		$checkHasBeenPay = $conmssql->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no and recv_period = :max_recv and keeping_status = 1");
@@ -44,19 +44,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
 		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
 		$getPaymentDetail = $conmssql->prepare("SELECT 
-																	ISNULL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
-																	kut.keepitemtype_grp as TYPE_GROUP,
-																	case kut.keepitemtype_grp 
-																		WHEN 'DEP' THEN kpd.description
-																		WHEN 'LON' THEN kpd.loancontract_no
-																	ELSE kpd.description END as PAY_ACCOUNT,
-																	kpd.period,
-																	ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																	ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																	ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	ISNULL(kpd.interest_payment,0) AS INT_BALANCE
-																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																	kpd.keepitemtype_code = kut.keepitemtype_code
+																	ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC) AS TYPE_DESC,
+																	KUT.KEEPITEMTYPE_GRP AS TYPE_GROUP,
+																	CASE KUT.KEEPITEMTYPE_GRP 
+																		WHEN 'DEP' THEN KPD.DESCRIPTION
+																		WHEN 'LON' THEN KPD.LOANCONTRACT_NO
+																	ELSE KPD.DESCRIPTION END AS PAY_ACCOUNT,
+																	KPD.PERIOD,
+																	ISNULL(KPD.ITEM_PAYMENT * KUT.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																	ISNULL(KPD.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																	ISNULL(KPD.PRINCIPAL_PAYMENT,0) AS PRN_BALANCE,
+																	ISNULL(KPD.INTEREST_PAYMENT,0) AS INT_BALANCE
+																	FROM KPTEMPRECEIVEDET KPD LEFT JOIN KPUCFKEEPITEMTYPE KUT ON 
+																	KPD.KEEPITEMTYPE_CODE = KUT.KEEPITEMTYPE_CODE
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");

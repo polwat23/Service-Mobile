@@ -6,28 +6,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
-		$getPeriodKP = $conmssql->prepare("SELECT * from ((
-															SELECT recv_period from kpmastreceive where member_no = :member_no
-														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+		$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");
 		$getPeriodKP->execute([
-				':member_no' => $member_no,
-				':limit_period' => $limit_period
+				':member_no' => $member_no
 		]);
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
-			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
-			$getKPDetail = $conmssql->prepare("SELECT kpr.RECEIPT_DATE,kpr.RECEIPT_NO,ISNULL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,
-													(SELECT ISNULL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
-													FROM kpmastreceivedet kpd
-													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
-													where kpr.member_no = :member_no and kpr.recv_period = :recv_period and kpr.KEEPING_STATUS = 1");
-			$getKPDetail->execute([
-				':member_no' => $member_no,
-				':recv_period' => $rowPeriod["RECV_PERIOD"]
-			]);
+			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
+			$getKPDetail = $conmssql->prepare("SELECT KPR.RECEIPT_DATE,KPR.RECEIPT_NO,ISNULL(SUM_ITEM.ITEM_PAYMENT,KPR.RECEIVE_AMT) AS RECEIVE_AMT FROM KPMASTRECEIVE KPR,
+													(SELECT ISNULL(SUM(KPD.ITEM_PAYMENT * KUT.SIGN_FLAG),0) AS ITEM_PAYMENT 
+													FROM KPMASTRECEIVEDET KPD
+													LEFT JOIN KPUCFKEEPITEMTYPE KUT ON 
+													KPD.KEEPITEMTYPE_CODE = KUT.KEEPITEMTYPE_CODE
+													where kpd.member_no = ? and kpd.recv_period = ?) sum_item
+													where kpr.member_no = ? and kpr.recv_period = ? and kpr.KEEPING_STATUS = 1");
+			$getKPDetail->execute([$member_no,$rowPeriod["RECV_PERIOD"],$member_no,$rowPeriod["RECV_PERIOD"]]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
 			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowKPDetali["RECEIPT_DATE"],'d m Y');
