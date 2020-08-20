@@ -4,49 +4,37 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arraySlipGrp = array();
-		$fetchSlipCount = $conmssql->prepare("SELECT COUNT(kmd.kpslip_no) as COUNT_SLIP_YEAR,YEAR(km.receipt_date) as YEAR_SLIP
-														FROM kpmastreceive km LEFT JOIN kpmastreceivedet kmd ON km.kpslip_no = kmd.kpslip_no and km.coop_id = kmd.coop_id
-														WHERE km.member_no = :member_no and km.keeping_status = '1' GROUP BY YEAR(km.receipt_date) ORDER BY YEAR_SLIP DESC");
-		$fetchSlipCount->execute([':member_no' => $member_no]);
-		while($rowslipcountyear = $fetchSlipCount->fetch(PDO::FETCH_ASSOC)){
-			$arraySlipYear = array();
-			$arraySlipYear["COUNT_SLIP_YEAR"] = $rowslipcountyear["COUNT_SLIP_YEAR"];
-			$arraySlipYear["YEAR_SLIP"] = $rowslipcountyear["YEAR_SLIP"] + 543;
-			$fetchSlipMonthCount = $conmssql->prepare("SELECT COUNT(kmd.kpslip_no) as COUNT_SLIP_MONTH,MONTH(km.receipt_date) as MONTH_SLIP
-														FROM kpmastreceive km LEFT JOIN kpmastreceivedet kmd ON km.kpslip_no = kmd.kpslip_no and km.coop_id = kmd.coop_id
-													 	WHERE km.member_no = :member_no and 
-														YEAR(km.receipt_date) = :year_slip GROUP BY MONTH(km.receipt_date) ORDER BY MONTH_SLIP DESC");
-			$fetchSlipMonthCount->execute([
+		$limit_period = $func->getConstant('limit_kpmonth');
+		$arrayGroupPeriod = array();
+		$getPeriodKP = $conmssql->prepare("SELECT * from ((
+															SELECT recv_period from kpmastreceive where member_no = :member_no
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+		$getPeriodKP->execute([
 				':member_no' => $member_no,
-				':year_slip' => $rowslipcountyear["YEAR_SLIP"]
+				':limit_period' => $limit_period
+		]);
+		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
+			$arrKpmonth = array();
+			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
+			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp($rowPeriod["RECV_PERIOD"]);
+			$getKPDetail = $conmssql->prepare("SELECT kpr.RECEIPT_DATE,kpr.RECEIPT_NO,ISNULL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,
+													(SELECT ISNULL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
+													FROM kpmastreceivedet kpd
+													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
+													where kpr.member_no = :member_no and kpr.recv_period = :recv_period and kpr.KEEPING_STATUS = 1");
+			$getKPDetail->execute([
+				':member_no' => $member_no,
+				':recv_period' => $rowPeriod["RECV_PERIOD"]
 			]);
-			while($rowslipcountmonth = $fetchSlipMonthCount->fetch(PDO::FETCH_ASSOC)){
-				$arraySlipMonth = array();
-				$arraySlipMonth["COUNT_SLIP_MONTH"] = $rowslipcountmonth["COUNT_SLIP_MONTH"];
-				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp($rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"],true);
-				$fetchSlipInMonth = $conmssql->prepare("SELECT kit.KEEPITEMTYPE_DESC,km.KPSLIP_NO,km.SEQ_NO,
-													CASE kit.keepitemtype_grp 
-														WHEN 'DEP' THEN km.description
-														WHEN 'LON' THEN km.loancontract_no
-													ELSE km.description END as PAY_ACCOUNT
-														FROM kpmastreceivedet km LEFT JOIN KPUCFKEEPITEMTYPE kit ON km.keepitemtype_code = kit.keepitemtype_code
-														WHERE km.member_no = :member_no and LEFT(CONVERT(varchar, km.posting_date,112),6) = :slip_date");
-				$fetchSlipInMonth->execute([
-					':member_no' => $member_no,
-					':slip_date' => $rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"]
-				]);
-				while($rowslip = $fetchSlipInMonth->fetch(PDO::FETCH_ASSOC)){
-					$arraySlip = array();
-					$arraySlip["SLIP_TYPE"] = $rowslip["KEEPITEMTYPE_DESC"].' '.$rowslip["PAY_ACCOUNT"];
-					$arraySlip["SLIP_NO"] = $rowslip["KPSLIP_NO"].'/'.$rowslip["SEQ_NO"];
-					$arraySlipMonth["SLIP_LIST"][] = $arraySlip;
-				}
-				$arraySlipYear["MONTH_SLIP_LIST"][] = $arraySlipMonth;
-			}
-			$arraySlipGrp[] = $arraySlipYear;
+			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
+			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
+			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowKPDetali["RECEIPT_DATE"],'d m Y');
+			$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["RECEIVE_AMT"],2);
+			$arrayGroupPeriod[] = $arrKpmonth;
 		}
-		$arrayResult['SLIP_LIST'] = $arraySlipGrp;
+		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
