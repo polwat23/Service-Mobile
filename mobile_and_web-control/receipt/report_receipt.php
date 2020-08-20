@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conmssql->prepare("SELECT 
-																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																		ISNULL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
 																		kpd.MONEY_RETURN_STATUS,
 																		kpd.ADJUST_ITEMAMT,
@@ -21,10 +21,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
 																		kpd.period,
-																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		NVL(kpd.interest_payment,0) AS INT_BALANCE
+																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		ISNULL(kpd.interest_payment,0) AS INT_BALANCE
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			]);
 		}else{
 			$getPaymentDetail = $conmssql->prepare("SELECT 
-																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																		ISNULL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
 																		kpd.MONEY_RETURN_STATUS,
 																		kpd.ADJUST_ITEMAMT,
@@ -49,10 +49,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
 																		kpd.period,
-																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		NVL(kpd.interest_payment,0) AS INT_BALANCE
+																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		ISNULL(kpd.interest_payment,0) AS INT_BALANCE
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
