@@ -212,7 +212,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["ITEM_PAYAMT"] ?? null).'</div>
+			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
@@ -233,7 +233,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["ITEM_PAYAMT"] ?? null).'</div>
+			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>

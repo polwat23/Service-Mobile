@@ -26,13 +26,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.sms_mobilephone as MEM_TELMOBILE,
-											mb.member_date,mb.member_no,
-											mb.ADDR_NO as ADDR_NO,
-											mb.ADDR_MOO as ADDR_MOO,
-											mb.ADDR_SOI as ADDR_SOI,
-											mb.ADDR_VILLAGE as ADDR_VILLAGE,
-											mb.ADDR_ROAD as ADDR_ROAD,
+		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.ADDR_EMAIL AS EMAIL,MB.ADDR_MOBILEPHONE AS MEM_TELMOBILE,
+											MB.MEMBER_DATE,MB.MEMBER_NO,
+											MB.ADDR_NO AS ADDR_NO,
+											MB.ADDR_MOO AS ADDR_MOO,
+											MB.ADDR_SOI AS ADDR_SOI,
+											MB.ADDR_VILLAGE AS ADDR_VILLAGE,
+											MB.ADDR_ROAD AS ADDR_ROAD,
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,
