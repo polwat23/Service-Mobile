@@ -14,13 +14,12 @@ if($lib->checkCompleteArgument(['unique_id','username','id_section_system'],$dat
 				':menu_name' => "manageuser",
 				':username' => $payload["username"],
 				':use_list' => "change department ",
-				':details' => $dataComing["username"]
+				':details' => 'id_section : '.$dataComing["id_section_system"].' on username : '.$dataComing["username"]
 			];
-			
 			$log->writeLog('editadmincontrol',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขชื่อเมนูได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขแผนกได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

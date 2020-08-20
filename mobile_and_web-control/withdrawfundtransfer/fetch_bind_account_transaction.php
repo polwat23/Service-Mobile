@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
 				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no
 																FROM gcuserallowacctransaction gat 
-																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use <> '-9'");
+																WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
 				if($fetchAccountBeenAllow->rowCount() > 0){
 					$arrAccBind = array();
@@ -35,13 +35,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-					$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt
+					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.withdrawable_amt
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.transonline_flag = 1");
 					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
 					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowDataAcc["DEPTACCOUNT_NAME"])){
-						$arrAccBind["ACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]));
+						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
 						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
 						$arrAccBind["BALANCE"] = $rowDataAcc["WITHDRAWABLE_AMT"];
 						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["WITHDRAWABLE_AMT"],2);
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				exit();
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_CODE'] = "WS0021";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
