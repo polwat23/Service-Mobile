@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 														WHEN 'DEP' THEN kpd.description
 														WHEN 'LON' THEN kpd.loancontract_no
 													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.period,
+													kpd.PERIOD,
 													ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 													ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,

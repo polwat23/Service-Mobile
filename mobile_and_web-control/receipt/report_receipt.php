@@ -8,6 +8,18 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$header = array();
+		$fetchName = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MBG.MEMBGROUP_DESC,MBG.MEMBGROUP_CODE
+												FROM MBMEMBMASTER MB LEFT JOIN 
+												MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+												LEFT JOIN MBUCFMEMBGROUP MBG ON MB.MEMBGROUP_CODE = MBG.MEMBGROUP_CODE
+												WHERE mb.member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conmssql->prepare("SELECT 
 																		ISNULL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
@@ -20,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.period,
+																		kpd.PERIOD,
 																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -48,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.period,
+																		kpd.PERIOD,
 																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -90,8 +102,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
+				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ADJUST_ITEMAMT"];
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
 			$arrGroupDetail[] = $arrDetail;
 		}
@@ -105,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
-		$header["recv_period"] = $lib->convertperiodkp($dataComing["recv_period"]);
+		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
@@ -215,7 +229,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</tbody>
 			</table>
 			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 255px;">
+			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
 			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
@@ -226,15 +240,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
 			</div>';
 				// Detail
-	$html .= '<div style="width: 100%;height: 190px" class="sub-table">';
+	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 180px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 180px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 200px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 200px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 200px;margin-left: 700px;">&nbsp;</div>
+			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
+			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
+			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
 			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
@@ -242,7 +256,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["ITEM_PAYAMT"] ?? null).'</div>
+			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
@@ -263,7 +277,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["ITEM_PAYAMT"] ?? null).'</div>
+			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
