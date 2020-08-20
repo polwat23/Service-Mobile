@@ -6,7 +6,7 @@ use Dompdf\Dompdf;
 $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
 		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
@@ -20,61 +20,27 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
-		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
-			$getPaymentDetail = $conoracle->prepare("SELECT 
-																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
-																		kut.keepitemtype_grp as TYPE_GROUP,
-																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ADJUST_ITEMAMT,
-																		kpd.ADJUST_PRNAMT,
-																		kpd.ADJUST_INTAMT,
-																		case kut.keepitemtype_grp 
-																			WHEN 'DEP' THEN kpd.description
-																			WHEN 'LON' THEN kpd.loancontract_no
-																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.period,
-																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		NVL(kpd.interest_payment,0) AS INT_BALANCE
-																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																		kpd.keepitemtype_code = kut.keepitemtype_code
-																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		and kpd.seq_no = :seq_no
-																		ORDER BY kut.SORT_IN_RECEIVE ASC");
-			$getPaymentDetail->execute([
-				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"],
-				':seq_no' => $dataComing["seq_no"]
-			]);
-		}else{
-			$getPaymentDetail = $conoracle->prepare("SELECT 
-																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
-																		kut.keepitemtype_grp as TYPE_GROUP,
-																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ADJUST_ITEMAMT,
-																		kpd.ADJUST_PRNAMT,
-																		kpd.ADJUST_INTAMT,
-																		case kut.keepitemtype_grp 
-																			WHEN 'DEP' THEN kpd.description
-																			WHEN 'LON' THEN kpd.loancontract_no
-																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.period,
-																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		NVL(kpd.interest_payment,0) AS INT_BALANCE
-																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																		kpd.keepitemtype_code = kut.keepitemtype_code
-																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		ORDER BY kut.SORT_IN_RECEIVE ASC");
-			$getPaymentDetail->execute([
-				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"]
-			]);
-		}
+		$getPaymentDetail = $conoracle->prepare("SELECT 
+																	NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																	kut.keepitemtype_grp as TYPE_GROUP,
+																	case kut.keepitemtype_grp 
+																		WHEN 'DEP' THEN kpd.description
+																		WHEN 'LON' THEN kpd.loancontract_no
+																	ELSE kpd.description END as PAY_ACCOUNT,
+																	kpd.period,
+																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																	NVL(kpd.interest_payment,0) AS INT_BALANCE
+																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+																	kpd.keepitemtype_code = kut.keepitemtype_code
+																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																	ORDER BY kut.SORT_IN_RECEIVE ASC");
+		$getPaymentDetail->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
@@ -83,36 +49,26 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = '‡≈¢ —≠≠“';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = '‡πÄ‡∏•‡∏Ç‡∏™‡∏±‡∏ç‡∏ç‡∏≤';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
-					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
-					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
-				}else{
-					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
-					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
-				}
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
+				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
-				$arrDetail["PAY_ACCOUNT_LABEL"] = '‡≈¢∫—≠™’';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = '‡πÄ‡∏•‡∏Ç‡∏ö‡∏±‡∏ç‡∏ä‡∏µ';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = '®Ë“¬';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = '‡∏à‡πà‡∏≤‡∏¢';
 			}
-			if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
-				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
-				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ADJUST_ITEMAMT"];
-			}else{
-				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
-				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
-			}
+			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE
-																FROM kpmastreceive kpd
+																FROM kptempreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
@@ -133,11 +89,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0044",
-				":error_desc" => " √È“ß PDF ‰¡Ë‰¥È "."\n".json_encode($dataComing),
+				":error_desc" => "‡∏™‡∏£‡πâ‡∏≤‡∏á PDF ‡πÑ‡∏°‡πà‡πÑ‡∏î‡πâ "."\n".json_encode($dataComing),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = " √È“ß‰ø≈Ï PDF ‰¡Ë‰¥È ".$filename."\n"."DATA => ".json_encode($dataComing);
+			$message_error = "‡∏™‡∏£‡πâ‡∏≤‡∏á‡πÑ‡∏ü‡∏•‡πå PDF ‡πÑ‡∏°‡πà‡πÑ‡∏î‡πâ ".$filename."\n"."DATA => ".json_encode($dataComing);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -158,11 +114,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => " Ëß Argument ¡“‰¡Ë§√∫ "."\n".json_encode($dataComing),
+		":error_desc" => "‡∏™‡πà‡∏á Argument ‡∏°‡∏≤‡πÑ‡∏°‡πà‡∏Ñ‡∏£‡∏ö "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "‰ø≈Ï ".$filename."  Ëß Argument ¡“‰¡Ë§√∫¡“·§Ë "."\n".json_encode($dataComing);
+	$message_error = "‡πÑ‡∏ü‡∏•‡πå ".$filename." ‡∏™‡πà‡∏á Argument ‡∏°‡∏≤‡πÑ‡∏°‡πà‡∏Ñ‡∏£‡∏ö‡∏°‡∏≤‡πÅ‡∏Ñ‡πà "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -172,59 +128,59 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	exit();
 }
 
+
 function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
-			@font-face {
-				font-family: THSarabun;
-				src: url(../../resource/fonts/THSarabun.ttf);
-			}
-			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
-				font-weight: bold;
-			}
-			* {
-			  font-family: THSarabun;
-			}
-			body {
-			  padding: 0 30px;
-			}
-			.sub-table div{
-				padding : 5px;
-			}
+				@font-face {
+				  font-family: THSarabun;
+				  src: url(../../resource/fonts/THSarabun.ttf);
+				}
+				@font-face {
+					font-family: "THSarabun";
+					src: url(../../resource/fonts/THSarabun Bold.ttf);
+					font-weight: bold;
+				}
+				* {
+				  font-family: THSarabun;
+				}
+				body {
+				  padding: 0 30px;
+				}
+				.sub-table div{
+					padding : 5px;
+				}
 			</style>
-
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
-			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
-			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">„∫‡ √Á®√—∫‡ß‘π</p>
-			<p style="margin-top: -30px;font-size: 22px;font-weight: bold"> À°√≥ÏÕÕ¡∑√—æ¬Ï§√Ÿ¡ÿ°¥“À“√ ®”°—¥</p>
-			<p style="margin-top: -27px;font-size: 18px;">30/1 ∂ππ™¬“ß°Ÿ√ °. µ”∫≈¡ÿ°¥“À“√</p>
-			<p style="margin-top: -25px;font-size: 18px;">Õ”‡¿Õ‡¡◊Õß¡ÿ°¥“À“√ ®—ßÀ«—¥¡ÿ°¥“À“√</p>
-			<p style="margin-top: -25px;font-size: 18px;">‚∑√ : 042-611-454</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.muktc.com</p>
-			</div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
+				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">‡πÉ‡∏ö‡πÄ‡∏£‡∏µ‡∏¢‡∏Å‡πÄ‡∏Å‡πá‡∏ö‡πÄ‡∏á‡∏¥‡∏ô</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">‡∏™‡∏´‡∏Å‡∏£‡∏ì‡πå‡∏≠‡∏≠‡∏°‡∏ó‡∏£‡∏±‡∏û‡∏¢‡πå‡∏Ñ‡∏£‡∏π‡∏°‡∏∏‡∏Å‡∏î‡∏≤‡∏´‡∏≤‡∏£ ‡∏à‡∏≥‡∏Å‡∏±‡∏î</p>
+				<p style="margin-top: -27px;font-size: 18px;">30/1 ‡∏ñ‡∏ô‡∏ô‡∏ä‡∏¢‡∏≤‡∏á‡∏Å‡∏π‡∏£ ‡∏Å. ‡∏ï‡∏≥‡∏ö‡∏•‡∏°‡∏∏‡∏Å‡∏î‡∏≤‡∏´‡∏≤‡∏£</p>
+				<p style="margin-top: -25px;font-size: 18px;">‡∏≠‡∏≥‡πÄ‡∏†‡∏≠‡πÄ‡∏°‡∏∑‡∏≠‡∏á‡∏°‡∏∏‡∏Å‡∏î‡∏≤‡∏´‡∏≤‡∏£ ‡∏à‡∏±‡∏á‡∏´‡∏ß‡∏±‡∏î‡∏°‡∏∏‡∏Å‡∏î‡∏≤‡∏´‡∏≤‡∏£</p>
+				<p style="margin-top: -25px;font-size: 18px;">‡πÇ‡∏ó‡∏£ : 042-611-454</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.muktc.com</p>
+				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
 			<table style="width: 100%;">
 			<tbody>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">‡≈¢ ¡“™‘° :</td>
+			<td style="width: 50px;font-size: 18px;">‡πÄ‡∏•‡∏Ç‡∏™‡∏°‡∏≤‡∏ä‡∏¥‡∏Å :</td>
 			<td style="width: 350px;">'.$header["member_no"].'</td>
-			<td style="width: 50px;font-size: 18px;">‡≈¢∑’Ë„∫‡ √Á® :</td>
+			<td style="width: 50px;font-size: 18px;">‡πÄ‡∏•‡∏Ç‡∏ó‡∏µ‡πà‡πÉ‡∏ö‡πÄ‡∏™‡∏£‡πá‡∏à :</td>
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ß«¥ :</td>
+			<td style="width: 50px;font-size: 18px;">‡∏á‡∏ß‡∏î :</td>
 			<td style="width: 350px;">'.$header["recv_period"].'</td>
-			<td style="width: 50px;font-size: 18px;">«—π∑’Ë :</td>
+			<td style="width: 50px;font-size: 18px;">‡∏ß‡∏±‡∏ô‡∏ó‡∏µ‡πà :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">™◊ËÕ -  °ÿ≈ :</td>
+			<td style="width: 50px;font-size: 18px;">‡∏ä‡∏∑‡πà‡∏≠ - ‡∏™‡∏Å‡∏∏‡∏• :</td>
 			<td style="width: 350px;">'.$header["fullname"].'</td>
-			<td style="width: 50px;font-size: 18px;"> —ß°—¥ :</td>
+			<td style="width: 50px;font-size: 18px;">‡∏™‡∏±‡∏á‡∏Å‡∏±‡∏î :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
 			</tbody>
@@ -233,14 +189,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">√“¬°“√™”√–</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">ß«¥∑’Ë</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">‡ß‘πµÈπ</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">¥Õ°‡∫’È¬</div>
-			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">√«¡‡ªÁπ‡ß‘π</div>
-			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">¬Õ¥§ß‡À≈◊Õ</div>
+			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡∏ä‡∏≥‡∏£‡∏∞</div>
+			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">‡∏á‡∏ß‡∏î‡∏ó‡∏µ‡πà</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">‡πÄ‡∏á‡∏¥‡∏ô‡∏ï‡πâ‡∏ô</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">‡∏î‡∏≠‡∏Å‡πÄ‡∏ö‡∏µ‡πâ‡∏¢</div>
+			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">‡∏£‡∏ß‡∏°‡πÄ‡∏õ‡πá‡∏ô‡πÄ‡∏á‡∏¥‡∏ô</div>
+			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">‡∏¢‡∏≠‡∏î‡∏Ñ‡∏á‡πÄ‡∏´‡∏•‡∏∑‡∏≠</div>
 			</div>';
-			// Detail
+				// Detail
 	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
@@ -251,7 +207,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
+			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -272,7 +228,7 @@ function GenerateReport($dataReport,$header,$lib){
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
+				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -300,23 +256,18 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
 			<div style="width: 110px;text-align: center;font-size: 18px;border-right : 0.5px solid black;padding-top: 0px;height:30px;margin-left: 580px">
-			√«¡‡ß‘π
+			‡∏£‡∏ß‡∏°‡πÄ‡∏á‡∏¥‡∏ô
 			</div>
 			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">À¡“¬‡Àµÿ : „∫√—∫‡ß‘πª√–®”‡¥◊Õπ®– ¡∫Ÿ√≥Ï°ÁµËÕ‡¡◊ËÕ∑“ß À°√≥Ï‰¥È√—∫‡ß‘π∑’Ë‡√’¬°‡°Á∫‡√’¬∫√ÈÕ¬·≈È«<br>µ‘¥µËÕ À°√≥Ï ‚ª√¥π” 1. ∫—µ√ª√–®”µ—« 2. „∫‡ √Á®√—∫‡ß‘π 3.  ≈‘ª‡ß‘π‡¥◊Õπ¡“¥È«¬∑ÿ°§√—Èß
-			</div>
-			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
-			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:500px;font-size: 18px;">‡∏´‡∏°‡∏≤‡∏¢‡πÄ‡∏´‡∏ï‡∏∏ : ‡πÉ‡∏ö‡∏£‡∏±‡∏ö‡πÄ‡∏á‡∏¥‡∏ô‡∏õ‡∏£‡∏∞‡∏à‡∏≥‡πÄ‡∏î‡∏∑‡∏≠‡∏ô‡∏à‡∏∞‡∏™‡∏°‡∏ö‡∏π‡∏£‡∏ì‡πå‡∏Å‡πá‡∏ï‡πà‡∏≠‡πÄ‡∏°‡∏∑‡πà‡∏≠‡∏ó‡∏≤‡∏á‡∏™‡∏´‡∏Å‡∏£‡∏ì‡πå‡πÑ‡∏î‡πâ‡∏£‡∏±‡∏ö‡πÄ‡∏á‡∏¥‡∏ô‡∏ó‡∏µ‡πà‡πÄ‡∏£‡∏µ‡∏¢‡∏Å‡πÄ‡∏Å‡πá‡∏ö‡πÄ‡∏£‡∏µ‡∏¢‡∏ö‡∏£‡πâ‡∏≠‡∏¢‡πÅ‡∏•‡πâ‡∏ß<br>‡∏ï‡∏¥‡∏î‡∏ï‡πà‡∏≠‡∏™‡∏´‡∏Å‡∏£‡∏ì‡πå ‡πÇ‡∏õ‡∏£‡∏î‡∏ô‡∏≥ 1. ‡∏ö‡∏±‡∏ï‡∏£‡∏õ‡∏£‡∏∞‡∏à‡∏≥‡∏ï‡∏±‡∏ß 2. ‡πÉ‡∏ö‡πÄ‡∏£‡∏µ‡∏¢‡∏Å‡πÄ‡∏Å‡πá‡∏ö‡πÄ‡∏á‡∏¥‡∏ô 3. ‡∏™‡∏•‡∏¥‡∏õ‡πÄ‡∏á‡∏¥‡∏ô‡πÄ‡∏î‡∏∑‡∏≠‡∏ô‡∏°‡∏≤‡∏î‡πâ‡∏ß‡∏¢‡∏ó‡∏∏‡∏Å‡∏Ñ‡∏£‡∏±‡πâ‡∏á
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ºŸÈ®—¥°“√</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">‡®È“ÀπÈ“∑’Ë√—∫‡ß‘π</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
+			.........................................................
+			<p style="margin-left: 50px;">‡πÄ‡∏à‡πâ‡∏≤‡∏´‡∏ô‡πâ‡∏≤‡∏ó‡∏µ‡πà‡∏£‡∏±‡∏ö‡πÄ‡∏á‡∏¥‡∏ô</p></div>
 			';
 
 	$dompdf = new DOMPDF();
@@ -337,6 +288,6 @@ function GenerateReport($dataReport,$header,$lib){
 		$arrayPDF["RESULT"] = FALSE;
 	}
 	$arrayPDF["PATH"] = $pathfile_show;
-	return $arrayPDF;
+	return $arrayPDF; 
 }
 ?>
