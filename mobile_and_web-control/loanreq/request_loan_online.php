@@ -114,7 +114,6 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 						]);
 						$arrayResult['RESPONSE_CODE'] = "WS0063";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['TRANSACTION_DATE'] = $lib->convertdate(date('Y-m-d'),'d m Y');
 						$arrayResult['RESULT'] = FALSE;
 						echo json_encode($arrayResult);
 						exit();
