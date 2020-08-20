@@ -9,15 +9,21 @@ use Component\functions;
 $lib = new library();
 $func = new functions();
 
+$arrayStmItem = array();
+$getStmItemTypeAllow = $conmysql->prepare("SELECT loan_itemtype_code FROM smsconstantloan WHERE allow_smsconstantloan = '1'");
+$getStmItemTypeAllow->execute();
+while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
+	$arrayStmItem[] = "'".$rowStmItemType["loan_itemtype_code"]."'";
+}
+$templateMessage = $func->getTemplateSystem('LoanInfo',1);
 $fetchDataSTM = $conoracle->prepare("SELECT lut.loanitemtype_desc,lcn.loancontract_no,lcn.OPERATE_DATE,lcm.member_no,lcn.seq_no,
 									lcn.principal_payment,lcn.interest_payment,lcn.principal_balance
 									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
 									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
-									WHERE lcn.operate_date >= (SYSDATE - 1) and lcn.sync_notify_flag = '0' ");
+									WHERE lcn.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$arrToken = $func->getFCMToken('person',array($rowSTM["MEMBER_NO"]));
-	$templateMessage = $func->getTemplateSystem('LoanInfo',1);
+	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		$dataMerge = array();
 		$contract_no = $rowSTM["LOANCONTRACT_NO"];
@@ -36,7 +42,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$dataMerge["PRINCIPAL_BALANCE"] = number_format($rowSTM["PRINCIPAL_BALANCE"],2);
 		$dataMerge["ITEMTYPE_DESC"] = $rowSTM["LOANITEMTYPE_DESC"];
 		$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
-		$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y',true) : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+		$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
 		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 		$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 		$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
@@ -45,16 +51,13 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-		if($func->insertHistory($arrPayloadNotify,'2')){
-			if($lib->sendNotify($arrPayloadNotify,"person")){
-				$updateSyncFlag = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
-				$updateSyncFlag->execute([
-					':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
-					':seq_no' => $rowSTM["SEQ_NO"]
-				]);
-			}else{
-				$lib->addLogtoTxt($arrPayloadNotify,'sync_noti_loan');
-			}
+		if($lib->sendNotify($arrPayloadNotify,"person")){
+			$func->insertHistory($arrPayloadNotify,'2');
+			$updateSyncFlag = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
+			$updateSyncFlag->execute([
+				':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
+				':seq_no' => $rowSTM["SEQ_NO"]
+			]);
 		}
 	}
 }
