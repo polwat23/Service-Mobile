@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											(isset($arrayExecute[':member_name']) ? " OR LTRIM(RTRIM(mb.memb_surname)) LIKE ".$arrayExecute[':member_name'].")" : null)).
 											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null)
 											);
-		$fetchMember->execute();
+		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
