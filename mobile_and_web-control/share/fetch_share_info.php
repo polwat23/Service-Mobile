@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SUM_SHARE_AMT"],2);
 				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
 				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
-				$arrayStm["SLIP_NO"] = TRIM($rowStm["REF_SLIPNO"]);
+				$arrayStm["SLIP_NO"] = trim($rowStm["REF_SLIPNO"]);
 				$arrGroupStm[] = $arrayStm;
 			}
 			$arrayResult['STATEMENT'] = $arrGroupStm;
@@ -61,6 +61,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

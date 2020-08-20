@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','id_task'],$dataComing)){
 		$fetchEvent = $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
 										date_format(event_start_time,'%H:%i') as event_start_time,
 										date_format(event_end_time,'%H:%i') as event_end_time,
-										is_settime,create_date,update_date,is_notify,is_notify_before,create_by
+										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html
 										FROM gctaskevent
 										WHERE id_task = :id_task");
 		$fetchEvent->execute([':id_task' => $dataComing["id_task"]]);
@@ -28,6 +28,7 @@ if($lib->checkCompleteArgument(['menu_component','id_task'],$dataComing)){
 		$arrayEvent["IS_NOTIFY"] = $rowEvent["is_notify"];
 		$arrayEvent["IS_NOTIFY_BEFORE"] = $rowEvent["is_notify_before"];
 		$arrayEvent["CREATE_BY"] = $rowEvent["create_by"];
+		$arrayEvent["EVENT_HTML"] = $rowEvent["event_html"];
 		$arrayResult['EVENT'] = $arrayEvent;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
@@ -40,6 +41,16 @@ if($lib->checkCompleteArgument(['menu_component','id_task'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

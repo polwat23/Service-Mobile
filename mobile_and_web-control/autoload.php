@@ -57,6 +57,20 @@ $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
+if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
+	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
+	$lib->sendLineNotify($message_error);
+	http_response_code(500);
+	exit();
+}
+if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
+	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
+	$lib->sendLineNotify($message_error);
+	$func->MaintenanceMenu("System");
+	http_response_code(500);
+	exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
 	// Complete Argument
@@ -132,12 +146,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 										echo json_encode($arrayResult);
 										exit();
 									}else{
-										$arrayResult['RESPONSE_CODE'] = "WS0014";
-										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-										$arrayResult['RESULT'] = FALSE;
-										http_response_code(401);
-										echo json_encode($arrayResult);
-										exit();
+										$rowLogin = $func->checkLogin($payload["id_token"]);
+										if(!$rowLogin["RETURN"]){
+											if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
+												$func->revoke_alltoken($payload["id_token"],'-9',true);
+											}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
+												$func->revoke_alltoken($payload["id_token"],'-8',true);
+											}else if($rowLogin["IS_LOGIN"] == '-7'){
+												$func->revoke_alltoken($payload["id_token"],'-7',true);
+											}else if($rowLogin["IS_LOGIN"] == '-5'){
+												$func->revoke_alltoken($payload["id_token"],'-6',true);
+											}
+											$arrayResult['RESPONSE_CODE'] = "WS0010";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
+										}else{
+											$arrayResult['RESPONSE_CODE'] = "WS0032";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
+										}
 									}
 								}
 							}
@@ -150,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							exit();
 						}
 					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0032";
+						$arrayResult['RESPONSE_CODE'] = "WS0014";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);

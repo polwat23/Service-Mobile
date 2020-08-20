@@ -13,6 +13,7 @@ if($lib->checkCompleteArgument(['unique_id','title_menu'],$dataComing)){
 			$arrCoreSubMenu = array();
 			$arrGroupCoreSubMenu = array();
 			$arrGroupCoreSubMenu["TITLE"] = $rowCoreSubMenu["coremenu_name"];
+			$arrGroupCoreSubMenu["ID_COREMENU"] = $rowCoreSubMenu["id_coremenu"];
 			$arrCoreSubMenu["ID_SUBMENU"] = $rowCoreSubMenu["id_submenu"];
 			$arrCoreSubMenu["ID_COREMENU"] = $rowCoreSubMenu["id_coremenu"];
 			$arrCoreSubMenu["MENU_NAME"] = $rowCoreSubMenu["menu_name"];

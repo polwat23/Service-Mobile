@@ -31,6 +31,12 @@ class insertLog {
 				$this->logEditAdminControl($log_struc);
 			}else if($type_log == 'lockaccount'){
 				$this->logLockAccount($log_struc);
+			}else if($type_log == 'errorusage'){
+				$this->logErrorUsage($log_struc);
+			}else if($type_log == 'editsms'){
+				$this->logEditSMS($log_struc);
+			}else if($type_log == 'editinfo'){
+				$this->logEditInfo($log_struc);
 			}
 		}
 		
@@ -43,24 +49,24 @@ class insertLog {
 		private function logBindAccount($log_struc,$is_catch){
 			if($log_struc[":bind_status"] == '-9'){
 				if($log_struc[":query_flag"] == '-9'){
-					$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status,
+					$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status,mobile_no,
 														response_code,response_message,coop_account_no,data_bind_error,query_error,query_flag) 
-														VALUES(:member_no,:id_userlogin,:bind_status,:response_code,:response_message,:coop_account_no
+														VALUES(:member_no,:id_userlogin,:bind_status,:mobile_no,:response_code,:response_message,:coop_account_no
 														,:data_bind_error,:query_error,:query_flag)");
 				}else{
 					if($is_catch){
-						$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status
+						$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status,mobile_no
 															,response_code,response_message,query_flag) 
-															VALUES(:member_no,:id_userlogin,:bind_status,:response_code,:response_message,:query_flag)");
+															VALUES(:member_no,:id_userlogin,:bind_status,:mobile_no,:response_code,:response_message,:query_flag)");
 					}else{
-						$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status
+						$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status,mobile_no
 															,response_code,response_message,coop_account_no,query_flag) 
-															VALUES(:member_no,:id_userlogin,:bind_status,:response_code,:response_message,:coop_account_no,:query_flag)");
+															VALUES(:member_no,:id_userlogin,:bind_status,:mobile_no,:response_code,:response_message,:coop_account_no,:query_flag)");
 					}
 				}
 			}else{
-				$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status,coop_account_no) 
-													VALUES(:member_no,:id_userlogin,:bind_status,:coop_account_no)");
+				$insertLog = $this->con->prepare("INSERT INTO logbindaccount(member_no,id_userlogin,bind_status,mobile_no,coop_account_no) 
+													VALUES(:member_no,:id_userlogin,:bind_status,:mobile_no,:coop_account_no)");
 			}
 			$insertLog->execute($log_struc);
 		}
@@ -135,6 +141,21 @@ class insertLog {
 		private function logLockAccount($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO loglockaccount(member_no,device_name,unique_id) 
 												VALUES(:member_no,:device_name,:unique_id)");
+			$insertLog->execute($log_struc);
+		}
+		private function logErrorUsage($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logerrorusageapplication(error_menu,error_code,error_desc,error_device) 
+												VALUES(:error_menu,:error_code,:error_desc,:error_device)");
+			$insertLog->execute($log_struc);
+		}
+		private function logEditSMS($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logeditsms(menu_name,username,use_list,details) 
+												VALUES(:menu_name,:username,:use_list,:details)");
+			$insertLog->execute($log_struc);
+		}
+		private function logEditInfo($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logchangeinfo(member_no,old_data,new_data,data_type,id_userlogin) 
+												VALUES(:member_no,:old_data,:new_data,:data_type,:id_userlogin)");
 			$insertLog->execute($log_struc);
 		}
 }

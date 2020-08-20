@@ -9,21 +9,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit');
 		$arrayResult['LIMIT_DURATION'] = $limit;
-		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
-		$date_now = date('Y-m-d');
+		if($lib->checkCompleteArgument(["date_start"],$dataComing)){
+			$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
+		}else{
+			$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
+		}
+		if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+			$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+		}else{
+			$date_now = date('Y-m-d');
+		}
 		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
 												LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
-												WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
+												WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status = 0 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
 		$arrAccount = array();
-		$account_no_format = $lib->formataccount($account_no,$func->getConstant('dep_format'));
+		$account_no_format = isset($account_no) && $account_no != "" ? $lib->formataccount($account_no,$func->getConstant('dep_format')) : null;
 		$arrAccount["DEPTACCOUNT_NO"] = $account_no_format;
-		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('!\s+!', ' ',preg_replace('/\"/','',$rowAccountLastSTM["DEPTACCOUNT_NAME"]));
+		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = isset($account_no_format) ? $lib->formataccount_hidden($account_no_format,$func->getConstant('hidden_dep')) : null;
+		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccountLastSTM["DEPTACCOUNT_NAME"]));
 		$arrAccount["BALANCE"] = number_format($rowAccountLastSTM["BALANCE"],2);
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'D m Y');
@@ -101,8 +109,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayGroupSTM[] = $arrSTM;
 		}
-		$arrayResult["HEADER"] = $arrAccount;
+		if($dataComing["fetch_type"] != 'more'){
+			$arrayResult["HEADER"] = $arrAccount;
+		}
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
@@ -114,6 +125,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

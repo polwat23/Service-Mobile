@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mps.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
 													mb.ADDRESS_SOI as ADDR_SOI,
@@ -30,9 +30,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MB.PROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MBD.POSTCODE AS ADDR_POSTCODE
+													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
+													LEFT JOIN MBUCFPOSITION mps ON mb.POSITION_CODE = mps.POSITION_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
@@ -68,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["CARD_PERSON"] = $lib->formatcitizen($rowMember["CARD_PERSON"]);
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
-			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"] ?? null;
+			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
@@ -91,6 +92,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
