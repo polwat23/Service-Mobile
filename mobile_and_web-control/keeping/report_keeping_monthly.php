@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(trim($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
+		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
