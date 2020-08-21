@@ -4,43 +4,37 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arraySlipGrp = array();
-		$fetchSlipCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'YYYY')) as COUNT_SLIP_YEAR,to_char(slip_date,'YYYY') as YEAR_SLIP
-												FROM slslippayin WHERE member_no = :member_no GROUP BY to_char(slip_date,'YYYY') ORDER BY YEAR_SLIP DESC");
-		$fetchSlipCount->execute([':member_no' => $member_no]);
-		while($rowslipcountyear = $fetchSlipCount->fetch(PDO::FETCH_ASSOC)){
-			$arraySlipYear = array();
-			$arraySlipYear["COUNT_SLIP_YEAR"] = $rowslipcountyear["COUNT_SLIP_YEAR"];
-			$arraySlipYear["YEAR_SLIP"] = $rowslipcountyear["YEAR_SLIP"] + 543;
-			$fetchSlipMonthCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'MM')) as COUNT_SLIP_MONTH,to_char(slip_date,'MM') as MONTH_SLIP
-														FROM slslippayin WHERE member_no = :member_no and 
-														to_char(slip_date,'YYYY') = :year_slip GROUP BY to_char(slip_date,'MM')");
-			$fetchSlipMonthCount->execute([
+		$limit_period = $func->getConstant('limit_kpmonth');
+		$arrayGroupPeriod = array();
+		$getPeriodKP = $conoracle->prepare("SELECT * from ((
+															SELECT recv_period from kpmastreceive where member_no = :member_no
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+		$getPeriodKP->execute([
 				':member_no' => $member_no,
-				':year_slip' => $rowslipcountyear["YEAR_SLIP"]
+				':limit_period' => $limit_period
+		]);
+		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
+			$arrKpmonth = array();
+			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
+			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
+			$getKPDetail = $conoracle->prepare("SELECT kpr.RECEIPT_DATE,kpr.RECEIPT_NO,NVL(sum_item.ITEM_PAYMENT,kpr.RECEIVE_AMT) as RECEIVE_AMT from kpmastreceive kpr,
+													(SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
+													FROM kpmastreceivedet kpd
+													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
+													where kpr.member_no = :member_no and kpr.recv_period = :recv_period and kpr.KEEPING_STATUS = 1");
+			$getKPDetail->execute([
+				':member_no' => $member_no,
+				':recv_period' => $rowPeriod["RECV_PERIOD"]
 			]);
-			while($rowslipcountmonth = $fetchSlipMonthCount->fetch(PDO::FETCH_ASSOC)){
-				$arraySlipMonth = array();
-				$arraySlipMonth["COUNT_SLIP_MONTH"] = $rowslipcountmonth["COUNT_SLIP_MONTH"];
-				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp($rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"],true);
-				$fetchSlipInMonth = $conoracle->prepare("SELECT slt.sliptype_desc,sl.payinslip_no
-														FROM slslippayin sl LEFT JOIN slucfsliptype slt ON sl.sliptype_code = slt.sliptype_code
-														WHERE member_no = :member_no and to_char(slip_date,'YYYYMM') = :slip_date");
-				$fetchSlipInMonth->execute([
-					':member_no' => $member_no,
-					':slip_date' => $rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"]
-				]);
-				while($rowslip = $fetchSlipInMonth->fetch(PDO::FETCH_ASSOC)){
-					$arraySlip = array();
-					$arraySlip["SLIP_TYPE"] = $rowslip["SLIPTYPE_DESC"];
-					$arraySlip["SLIP_NO"] = $rowslip["PAYINSLIP_NO"];
-					$arraySlipMonth["SLIP_LIST"][] = $arraySlip;
-				}
-				$arraySlipYear["MONTH_SLIP_LIST"][] = $arraySlipMonth;
-			}
-			$arraySlipGrp[] = $arraySlipYear;
+			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
+			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
+			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowKPDetali["RECEIPT_DATE"],'d m Y');
+			$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["RECEIVE_AMT"],2);
+			$arrayGroupPeriod[] = $arrKpmonth;
 		}
-		$arrayResult['SLIP_LIST'] = $arraySlipGrp;
+		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
@@ -55,18 +49,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$filename = basename(__FILE__, '.php');
 	$logStruc = [
 		":error_menu" => $filename,
-		":error_code" => "WS1016",
-		":error_desc" => "รีเซ็ต Pin ไม่ได้ "."\n".json_encode($dataComing),
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไม่สามารถรีเซ็ต PIN ได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateResetPin->queryString."\n"."Param => ". json_encode([
-		':member_no' => $payload["member_no"]
-	]);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
-	$arrayResult['RESPONSE_CODE'] = "WS1016";
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
 	echo json_encode($arrayResult);
 	exit();
 }
