@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["receipt_no"] = $rowKPHeader["RECEIPT_NO"];
+		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
@@ -265,8 +265,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
-			.........................................................
-			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
+			<p style="margin-left: 50px;">เพ็ญแข อุดมวัฒน์วงศ์ (ผู้จัดการ)</p></div>
 			';
 
 	$dompdf = new DOMPDF();
