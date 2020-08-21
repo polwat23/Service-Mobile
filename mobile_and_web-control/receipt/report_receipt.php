@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
-																		'1' as kpd.MONEY_RETURN_STATUS,
+																		'1' as MONEY_RETURN_STATUS,
 																		kpd.ADJUST_ITEMAMT,
 																		kpd.ADJUST_PRNAMT,
 																		kpd.ADJUST_INTAMT,
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
-																		'1' as kpd.MONEY_RETURN_STATUS,
+																		'1' as MONEY_RETURN_STATUS,
 																		kpd.ADJUST_ITEMAMT,
 																		kpd.ADJUST_PRNAMT,
 																		kpd.ADJUST_INTAMT,
