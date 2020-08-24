@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				exit();
 			}
 		}
-		if(isset($rowBeenPay["RECV_PERIOD"]) && $rowBeenPay["RECV_PERIOD"] != ""){
+		if((isset($rowBeenPay["RECV_PERIOD"]) && $rowBeenPay["RECV_PERIOD"] != "") || (empty($rowLastRecv["MAX_RECV"]) && $rowLastRecv["MAX_RECV"] == "")){
 			http_response_code(204);
 			exit();
 		}
