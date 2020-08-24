@@ -8,6 +8,18 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$header = array();
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+														FROM mbmembmaster mb LEFT JOIN 
+														mbucfprename mp ON mb.prename_code = mp.prename_code
+														LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
+														WHERE mb.member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$getPaymentDetail = $conoracle->prepare("SELECT 
 																	NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
 																	kut.keepitemtype_grp as TYPE_GROUP,
