@@ -83,7 +83,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เน€เธฅเธเธชเธฑเธเธเธฒ';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
@@ -95,10 +95,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เน€เธฅเธเธเธฑเธเธเธต';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เธเนเธฒเธข';
 			}
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
@@ -133,11 +133,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0044",
-				":error_desc" => "สร้าง PDF ไม่ได้ "."\n".json_encode($dataComing),
+				":error_desc" => "เธชเธฃเนเธฒเธ PDF เนเธกเนเนเธ”เน "."\n".json_encode($dataComing),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "สร้างไฟล์ PDF ไม่ได้ ".$filename."\n"."DATA => ".json_encode($dataComing);
+			$message_error = "เธชเธฃเนเธฒเธเนเธเธฅเน PDF เนเธกเนเนเธ”เน ".$filename."\n"."DATA => ".json_encode($dataComing);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -158,11 +158,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_desc" => "เธชเนเธ Argument เธกเธฒเนเธกเนเธเธฃเธ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$message_error = "เนเธเธฅเน ".$filename." เธชเนเธ Argument เธกเธฒเนเธกเนเธเธฃเธเธกเธฒเนเธเน "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -198,11 +198,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
 			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
-			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมุกดาหาร จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">30/1 ถนนชยางกูร ก. ตำบลมุกดาหาร</p>
-			<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองมุกดาหาร จังหวัดมุกดาหาร</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร : 042-611-454</p>
+			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">เนเธเน€เธชเธฃเนเธเธฃเธฑเธเน€เธเธดเธ</p>
+			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">เธชเธซเธเธฃเธ“เนเธญเธญเธกเธ—เธฃเธฑเธเธขเนเธเธฃเธนเธกเธธเธเธ”เธฒเธซเธฒเธฃ เธเธณเธเธฑเธ”</p>
+			<p style="margin-top: -27px;font-size: 18px;">30/1 เธ–เธเธเธเธขเธฒเธเธเธนเธฃ เธ. เธ•เธณเธเธฅเธกเธธเธเธ”เธฒเธซเธฒเธฃ</p>
+			<p style="margin-top: -25px;font-size: 18px;">เธญเธณเน€เธ เธญเน€เธกเธทเธญเธเธกเธธเธเธ”เธฒเธซเธฒเธฃ เธเธฑเธเธซเธงเธฑเธ”เธกเธธเธเธ”เธฒเธซเธฒเธฃ</p>
+			<p style="margin-top: -25px;font-size: 18px;">เนเธ—เธฃ : 042-611-454</p>
 			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.muktc.com</p>
 			</div>
 			</div>
@@ -210,21 +210,21 @@ function GenerateReport($dataReport,$header,$lib){
 			<table style="width: 100%;">
 			<tbody>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
+			<td style="width: 50px;font-size: 18px;">เน€เธฅเธเธชเธกเธฒเธเธดเธ :</td>
 			<td style="width: 350px;">'.$header["member_no"].'</td>
-			<td style="width: 50px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
+			<td style="width: 50px;font-size: 18px;">เน€เธฅเธเธ—เธตเนเนเธเน€เธชเธฃเนเธ :</td>
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">งวด :</td>
+			<td style="width: 50px;font-size: 18px;">เธเธงเธ” :</td>
 			<td style="width: 350px;">'.$header["recv_period"].'</td>
-			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
+			<td style="width: 50px;font-size: 18px;">เธงเธฑเธเธ—เธตเน :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
+			<td style="width: 50px;font-size: 18px;">เธเธทเนเธญ - เธชเธเธธเธฅ :</td>
 			<td style="width: 350px;">'.$header["fullname"].'</td>
-			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
+			<td style="width: 50px;font-size: 18px;">เธชเธฑเธเธเธฑเธ” :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
 			</tbody>
@@ -233,12 +233,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">งวดที่</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
-			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
-			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
+			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">เธฃเธฒเธขเธเธฒเธฃเธเธณเธฃเธฐ</div>
+			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">เธเธงเธ”เธ—เธตเน</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เน€เธเธดเธเธ•เนเธ</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">เธ”เธญเธเน€เธเธตเนเธข</div>
+			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">เธฃเธงเธกเน€เธเนเธเน€เธเธดเธ</div>
+			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">เธขเธญเธ”เธเธเน€เธซเธฅเธทเธญ</div>
 			</div>';
 			// Detail
 	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
@@ -300,13 +300,13 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
 			<div style="width: 110px;text-align: center;font-size: 18px;border-right : 0.5px solid black;padding-top: 0px;height:30px;margin-left: 580px">
-			รวมเงิน
+			เธฃเธงเธกเน€เธเธดเธ
 			</div>
 			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div style="width:500px;font-size: 18px;">เธซเธกเธฒเธขเน€เธซเธ•เธธ : เนเธเธฃเธฑเธเน€เธเธดเธเธเธฃเธฐเธเธณเน€เธ”เธทเธญเธเธเธฐเธชเธกเธเธนเธฃเธ“เนเธเนเธ•เนเธญเน€เธกเธทเนเธญเธ—เธฒเธเธชเธซเธเธฃเธ“เนเนเธ”เนเธฃเธฑเธเน€เธเธดเธเธ—เธตเนเน€เธฃเธตเธขเธเน€เธเนเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง<br>เธ•เธดเธ”เธ•เนเธญเธชเธซเธเธฃเธ“เน เนเธเธฃเธ”เธเธณ 1. เธเธฑเธ•เธฃเธเธฃเธฐเธเธณเธ•เธฑเธง 2. เนเธเน€เธชเธฃเนเธเธฃเธฑเธเน€เธเธดเธ 3. เธชเธฅเธดเธเน€เธเธดเธเน€เธ”เธทเธญเธเธกเธฒเธ”เนเธงเธขเธ—เธธเธเธเธฃเธฑเนเธ
 			</div>
 			<div style="width:200px;margin-left: 550px;display:flex;">
 			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
@@ -315,8 +315,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">เธเธนเนเธเธฑเธ”เธเธฒเธฃ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เน€เธเนเธฒเธซเธเนเธฒเธ—เธตเนเธฃเธฑเธเน€เธเธดเธ</div>
 			';
 
 	$dompdf = new DOMPDF();
