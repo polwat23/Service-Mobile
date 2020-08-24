@@ -169,6 +169,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				$log->writeLog('withdrawtrans',$arrayStruc);
 				$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"];
 				$lib->sendLineNotify($message_error);
+				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
