@@ -19,11 +19,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getStatusDoc->execute([':child_id' => $rowChild["CHILDCARD_ID"]]);
 			$rowStatus = $getStatusDoc->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowStatus["REQUEST_STATUS"]) && $rowStatus["REQUEST_STATUS"] != ""){
-				if($rowStatus["REQUEST_STATUS"] == '-1'){
-					$arrChild["REMARK"] = $rowStatus["CANCEL_REMARK"];
+				if($rowStatus["REQUEST_STATUS"] == '-9'){
+					$arrChild["CAN_REQUEST"] = FALSE;
+				}else{
+					if($rowStatus["REQUEST_STATUS"] == '-1'){
+						$arrChild["REMARK"] = $rowStatus["CANCEL_REMARK"];
+					}
+					$arrChild['REQUEST_STATUS'] = $rowStatus["REQUEST_STATUS"];
+					$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["REQUEST_STATUS"][0][$rowStatus["REQUEST_STATUS"]][0][$lang_locale];
 				}
-				$arrChild['REQUEST_STATUS'] = $rowStatus["REQUEST_STATUS"];
-				$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["REQUEST_STATUS"][0][$rowStatus["REQUEST_STATUS"]][0][$lang_locale];
 			}
 			$checkChildHaveThisYear = $conoracle->prepare("SELECT NVL(APPROVE_STATUS,8) as APPROVE_STATUS
 															FROM ASNREQSCHOLARSHIP WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and childcard_id = :childcard_id");

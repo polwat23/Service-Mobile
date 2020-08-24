@@ -4,7 +4,7 @@ ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
 header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Max-Age: 86400");
@@ -14,6 +14,11 @@ header("X-Frame-Options: sameorigin");
 header("X-XSS-Protection: 1; mode=block");
 header("X-Content-Type-Options: nosniff");
 header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
+
+if (strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') {
+	http_response_code(500);
+	exit;
+}
 
 foreach ($_SERVER as $header_key => $header_value){
 	if($header_key == "HTTP_AUTHORIZATION"){
