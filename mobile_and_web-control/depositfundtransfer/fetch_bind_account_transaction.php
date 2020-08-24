@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.prncbal
+					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.prncbal,dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.transonline_flag = 1");
 					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
@@ -43,8 +43,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					if(isset($rowDataAcc["DEPTTYPE_DESC"])){
 						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
 						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-						$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"];
-						$arrAccBind["BALANCE_FORMAT"] = number_format($rowDataAcc["PRNCBAL"],2);
+						if($rowDataAcc["SEQUEST_STATUS"] == '1'){
+							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAcc["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"];
+						}else{
+							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAccAll["MINPRNCBAL"];
+						}
+						$arrAccBind["BALANCE_FORMAT"] = number_format($arrAccBind["BALANCE"],2);
 						$arrGroupAccBind[] = $arrAccBind;
 					}
 				}
