@@ -44,7 +44,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
 		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
 		$getPaymentDetail = $conmssql->prepare("SELECT 
-																	ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC) AS TYPE_DESC,
+																	CASE kut.system_code 
+																	WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
+																	WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
+																	ELSE kut.keepitemtype_desc
+																	END as TYPE_DESC,
 																	KUT.KEEPITEMTYPE_GRP AS TYPE_GROUP,
 																	CASE KUT.KEEPITEMTYPE_GRP 
 																		WHEN 'DEP' THEN KPD.DESCRIPTION
@@ -58,6 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	FROM KPTEMPRECEIVEDET KPD LEFT JOIN KPUCFKEEPITEMTYPE KUT ON 
 																	KPD.KEEPITEMTYPE_CODE = KUT.KEEPITEMTYPE_CODE
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
@@ -74,7 +79,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
@@ -84,6 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
+			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
