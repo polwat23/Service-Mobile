@@ -22,7 +22,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
-																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																		CASE kut.system_code 
+																		WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+																		WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+																		ELSE kut.keepitemtype_desc
+																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
 																		kpd.MONEY_RETURN_STATUS,
 																		kpd.ADJUST_ITEMAMT,
@@ -40,6 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																		and kpd.seq_no = :seq_no
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
@@ -50,7 +55,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			]);
 		}else{
 			$getPaymentDetail = $conoracle->prepare("SELECT 
-																		NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) as TYPE_DESC,
+																		CASE kut.system_code 
+																		WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+																		WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+																		ELSE kut.keepitemtype_desc
+																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
 																		kpd.MONEY_RETURN_STATUS,
 																		kpd.ADJUST_ITEMAMT,
@@ -68,6 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
@@ -92,7 +102,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
@@ -107,6 +116,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
+			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
