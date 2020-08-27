@@ -45,6 +45,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
+			$transaction_no = $arrResponse->TRANSACTION_NO;
+			$etn_ref = $arrResponse->EXTERNAL_REF;
 			$fetchDataDeposit = $conmysql->prepare("SELECT bank_code,deptaccount_no_bank FROM gcbindaccount WHERE sigma_key = :sigma_key");
 			$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
 			$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
@@ -113,8 +115,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 							':deptaccount_no' => $coop_account_no,
 							':seq_no' => $rowSeqno["SEQ_NO"]
 						]);
-						$transaction_no = $arrResponse->TRANSACTION_NO;
-						$etn_ref = $arrResponse->EXTERNAL_REF;
 						$arrExecute = [
 							':ref_no' => $ref_no,
 							':from_account' => $rowDataDeposit["deptaccount_no_bank"],
