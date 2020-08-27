@@ -8,12 +8,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["contract_no"])){
 			$arrayGroupLoan = array();
 			$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
-			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,
+												NVL(lnm.principal_balance,0) as LOAN_BALANCE,
+												lnm.LAST_PERIODPAY as LAST_PERIOD,
+												lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
 												and lnm.contract_status > 0");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
-			$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+			$arrayGroupLoan["LOAN_BALANCE"] = number_format($rowWhocollu["LOAN_BALANCE"],2);
+			$arrayGroupLoan["LAST_PERIOD"] = $rowWhocollu["LAST_PERIOD"];
 			$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 			$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
 			$arrGrpAllLoan = array();
@@ -90,14 +94,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			echo json_encode($arrayResult);
 		}else{
 			$arrGroupAllLoan = array();
-			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,
+												lnm.LAST_PERIODPAY as LAST_PERIOD,
+												lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
 												and lnm.contract_status > 0
-                         						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC,lnm.principal_balance");
+                         						GROUP BY lnm.loancontract_no,lnm.LAST_PERIODPAY,lt.LOANTYPE_DESC,lnm.principal_balance");
 			$getWhocollu->execute([':member_no' => $member_no]);
 			while($rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC)){
 				$arrayGroupLoan = array();
-				$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+				$arrayGroupLoan["LOAN_BALANCE"] = number_format($rowWhocollu["PRNBAL"],2);
+				$arrayGroupLoan["LAST_PERIOD"] = $rowWhocollu["LAST_PERIOD"];
 				$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 				$arrayGroupLoan["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
 				$arrGrpAllLoan = array();
