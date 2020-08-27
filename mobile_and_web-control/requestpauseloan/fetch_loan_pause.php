@@ -6,13 +6,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayLoanPause = array();
 		$getLoanPause = $conoracle->prepare("SELECT A.MORATORIUM_DOCNO, A.LOANCONTRACT_NO,
-															(CASE WHEN A.REQUEST_DATE <= TO_DATE('27042020','DDMMYYYY') THEN 1 ELSE 2 END) AS REGIS_ROUND , 
 															A.REQUEST_STATUS
 															FROM LNREQMORATORIUM A LEFT JOIN LNCONTMASTER B ON A.LOANCONTRACT_NO = B.LOANCONTRACT_NO
 															WHERE 
 															B.CONTRACT_STATUS = 1 AND
 															A.REQUEST_STATUS IN (1, -1) AND
-															trunc(a.entry_date) > to_date('27042020','ddmmyyyy') AND
 															A.COOP_ID = '000000' AND A.MEMBER_NO = :member_no");
 		$getLoanPause->execute([':member_no' => $member_no]);
 		while($rowLoanPuase = $getLoanPause->fetch(PDO::FETCH_ASSOC)){
@@ -45,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if($rowLoanPuase["REQUEST_STATUS"] == '1'){
 				$arrayLoan["STATUS_LOAN"] = "อยู่ในสถานะ พักชำระเงินต้น";
 			}else{
-				$arrayLoan["STATUS_LOAN"] = "อยู่ในสถานะยกเลิกพักชำระเงินต้น มีผลในเดือน ".($rowLoanPuase["REGIS_ROUND"] == '1' ? "สิงหาคม" : "กันยายน");
+				$arrayLoan["STATUS_LOAN"] = "อยู่ในสถานะยกเลิกพักชำระเงินต้น";
 			}
 			$arrayLoan["REQUEST_STATUS"] = $rowLoanPuase["REQUEST_STATUS"];
 			$arrAllAccount[] = $arrayLoan;
