@@ -15,16 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 			$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-			if(mb_stripos($contract_no,'.') === FALSE){
-				$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-				if(mb_strlen($contract_no) == 10){
-					$arrayGroupLoan["CONTRACT_NO"] = $loan_format;
-				}else if(mb_strlen($contract_no) == 11){
-					$arrayGroupLoan["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-				}
-			}else{
-				$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
-			}
+			$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
 			$arrGrpAllLoan = array();
 			$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,lnc.REF_COLLNO,lnc.COLL_PERCENT,
 																lnc.DESCRIPTION
@@ -108,17 +99,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayGroupLoan = array();
 				$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
-				$contract_no = $rowWhocollu["LOANCONTRACT_NO"];
-				if(mb_stripos($contract_no,'.') === FALSE){
-					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-					if(mb_strlen($contract_no) == 10){
-						$arrayGroupLoan["CONTRACT_NO"] = $loan_format;
-					}else if(mb_strlen($contract_no) == 11){
-						$arrayGroupLoan["CONTRACT_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-					}
-				}else{
-					$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
-				}
+				$arrayGroupLoan["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
 				$arrGrpAllLoan = array();
 				$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,lnc.REF_COLLNO,lnc.COLL_PERCENT,
 																	lnc.DESCRIPTION
