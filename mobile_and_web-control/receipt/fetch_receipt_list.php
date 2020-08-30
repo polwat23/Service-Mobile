@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															SELECT recv_period from kpmastreceive where member_no = :member_no
+															SELECT kpslip_no,recv_period from kpmastreceive where member_no = :member_no
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
 				':member_no' => $member_no,
@@ -22,11 +22,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM kpmastreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no and kpd.recv_period = :recv_period) sum_item
-													where kpr.member_no = :member_no and kpr.recv_period = :recv_period and kpr.KEEPING_STATUS = 1");
+													where kpd.member_no = :member_no and kpd.kpslip_no = :kpslip_no) sum_item
+													where kpr.member_no = :member_no and kpr.kpslip_no = :kpslip_no and kpr.KEEPING_STATUS = 1");
 			$getKPDetail->execute([
 				':member_no' => $member_no,
-				':recv_period' => $rowPeriod["RECV_PERIOD"]
+				':kpslip_no' => $rowPeriod["KPSLIP_NO"]
 			]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];

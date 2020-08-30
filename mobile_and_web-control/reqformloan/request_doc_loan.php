@@ -92,6 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':citizen_img' => $citizenCopy,
 			':id_userlogin' => $payload["id_userlogin"]
 		])){
+			$arrayResult['APV_DOCNO'] = $reqloan_doc;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

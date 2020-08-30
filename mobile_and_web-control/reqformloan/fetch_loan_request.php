@@ -13,47 +13,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$fetchLoanIntRate = $conoracle->prepare("SELECT lnt.LOANTYPE_DESC,lnt.LOANTYPE_CODE,lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 																ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-																WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ");
+																WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 		$fetchLoanIntRate->execute();
 		while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
-			$fetchCredit = $conoracle->prepare("SELECT lc.maxloan_amt,lc.percentshare,lc.percentsalary,mb.salary_amount,(sh.sharestk_amt*10) as SHARE_AMT
-														FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb 
-														LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-														WHERE mb.member_no = :member_no and LT.LOANTYPE_CODE = :loantype_code
-														and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time
-														and (sh.sharestk_amt*10) BETWEEN lc.startshare_amt and lc.endshare_amt
-														and mb.salary_amount BETWEEN lc.startsalary_amt and lc.endsalary_amt");
-			$fetchCredit->execute([
-				':member_no' => $member_no,
-				':loantype_code' => $rowIntRate["LOANTYPE_CODE"]
+			$arrayDetailLoan = array();
+			$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
+														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+			$CheckIsReq->execute([
+				':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
+				':member_no' => $member_no
 			]);
-			$rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
-			if($rowCredit["MAXLOAN_AMT"] > 0){
-				$arrayDetailLoan = array();
-				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status <> '-9'");
-				$CheckIsReq->execute([
-					':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
-					':member_no' => $member_no
-				]);
-				if($CheckIsReq->rowCount() > 0){
-					$rowIsReq = $CheckIsReq->fetch(PDO::FETCH_ASSOC);
-					$arrayDetailLoan["IS_REQ"] = TRUE;
-					if($rowIsReq["req_status"] == '8'){
-						$arrayDetailLoan["REQ_STATUS"] = "รอลงรับ";
-					}else if($rowIsReq["req_status"] == '1'){
-						$arrayDetailLoan["REQ_STATUS"] = "อนุมัติ";
-					}else if($rowIsReq["req_status"] == '7'){
-						$arrayDetailLoan["REQ_STATUS"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
-					}
-				}else{
-					$arrayDetailLoan["IS_REQ"] = FALSE;
-				}
-				$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
-				$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];
-				$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"],2).' %';
-				$arrGrpLoan[] = $arrayDetailLoan;
+			if($CheckIsReq->rowCount() > 0){
+				$rowIsReq = $CheckIsReq->fetch(PDO::FETCH_ASSOC);
+				$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_FLAG_DESC"][0][$lang_locale];
+				$arrayDetailLoan["IS_REQ"] = FALSE;
+				$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
+			}else{
+				$arrayDetailLoan["IS_REQ"] = TRUE;
 			}
+			$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
+			$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];
+			$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"],2);
+			$arrGrpLoan[] = $arrayDetailLoan;
 		}
 		$arrayResult["LOAN_LIST"] = $arrGrpLoan;
 		$arrayResult['RESULT'] = TRUE;

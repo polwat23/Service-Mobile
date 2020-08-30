@@ -44,6 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
 			$arrayGenPDF = generatePDFSTM($dompdf,$arrayData,$lib,$passwordPDF);
+			$arrayResult['PATH'] = $arrayGenPDF;
 			if($arrayGenPDF["RESULT"]){
 				$arrayAttach[] = $arrayGenPDF["PATH"];
 			}
@@ -187,10 +188,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ ปตท. จำกัด
+					สหกรณ์ออมทรัพย์ครูสุรินทร์ จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					PTT Saving and Credit Cooperative., Limited
+					Surin Teacher Savings and Credit Cooperative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -293,7 +294,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
+	$pathfile = __DIR__.'/../../resource/pdf/statement';
+	if(!file_exists($pathfile)){
+		mkdir($pathfile, 0777, true);
+	}
+	$pathOutput = $pathfile."/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
 	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
 	$output = $dompdf->output();
