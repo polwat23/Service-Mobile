@@ -258,7 +258,7 @@ class functions {
 				$bulkInsert = array();
 				foreach($payload["MEMBER_NO"] as $member_no){
 					$bulkInsert[] = "('".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."',
-					'".$member_no."','".$payload["SEND_BY"]."',".($payload["ID_TEMPLATE"] ?? null).")";
+					'".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").")";
 					if(sizeof($bulkInsert) == 1000){
 						$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
 												VALUES".implode(',',$bulkInsert));

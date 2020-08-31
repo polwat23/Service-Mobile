@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 											$updateFlagStamp->execute($arrayExecute);
 										}
-										$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."',".($id_template ?? null).")";
+										$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 										if(sizeof($blukInsert) == 1000){
 											$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 											$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -186,7 +186,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
-												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."',".($id_template ?? null).")";
+												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 												if(sizeof($blukInsert) == 1000){
 													$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 													$arrPayloadHistory["bulkInsert"] = $blukInsert;
