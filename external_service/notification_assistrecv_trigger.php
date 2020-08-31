@@ -33,6 +33,7 @@ while($rowAss = $fetchDataAss->fetch(PDO::FETCH_ASSOC)){
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+		$arrPayloadNotify["SEND_BY"] = "system";
 		if($lib->sendNotify($arrPayloadNotify,"person")){
 			$func->insertHistory($arrPayloadNotify,'2');
 			$updateSyncFlag = $conoracle->prepare("UPDATE asnslippayout SET sync_notify_flag = '1' WHERE PAYOUTSLIP_NO = :PAYOUTSLIP_NO");

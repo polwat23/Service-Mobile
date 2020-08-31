@@ -49,7 +49,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 							if($lib->sendNotify($arrPayloadNotify,'person')){
-								$blukInsert[] = "('1','".$rowNoti["send_topic"]."','".$dest->MESSAGE."','".($pathImg ?? null)."','".$member_no."')";
+								$blukInsert[] = "('1','".$rowNoti["send_topic"]."','".$dest->MESSAGE."','".($pathImg ?? null)."','".$member_no."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
 								if(sizeof($blukInsert) == 1000){
 									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 									$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -124,7 +124,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
-												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."')";
+												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
 												if(sizeof($blukInsert) == 1000){
 													$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 													$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -236,7 +236,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 															$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 															$updateFlagStamp->execute($arrayExecute);
 														}
-														$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."')";
+														$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
 														if(sizeof($blukInsert) == 1000){
 															$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 															$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -333,7 +333,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
-												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."')";
+												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
 												if(sizeof($blukInsert) == 1000){
 													$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 													$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -476,6 +476,8 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = $rowNoti["create_by"];
+						$arrPayloadNotify["ID_TEMPLATE"] = $rowNoti["id_smstemplate"];
 						if($func->insertHistory($arrPayloadNotify,'1')){
 							$lib->sendNotify($arrPayloadNotify,'all');
 						}

@@ -98,6 +98,7 @@
 	"WS0081" : [{"th" : "สหกรณ์ได้ทำการตรวจสอบเอกสารขอทุนเรียบร้อยแล้ว สามารถติดตามประกาศผลการขอรับทุกได้ที่ ${URL_COOP}","en" : "The cooperative has check your document of request you can follow the result of request on ${URL_COOP}"}],
 	"WS0083" : [{"th" : "สหกรณ์ได้ลงรับใบคำขอของท่านแล้ว ทำให้ท่านไม่สามารถยกเลิกใบคำขอได้ หากต้องการยกเลิกให้ติดต่อสหกรณ์","en" : "The cooperative has accept your request which you cannot cancel request please contact cooperative"}],
 	"WS0084" : [{"th" : "ไม่สามารถยื่นกู้ได้เนื่องจากสิทธิ์การกู้ของท่านไม่เพียงพอ กรุณาตรวจสอบสิทธิ์การกู้ของท่านได้ที่เมนูสิทธิ์กู้โดยประมาณหรือติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot request loan because your loan rights amount not enough please check your rights in menu Loan Estimate or contact cooperative"}],
+	"WS0085" : [{"th" : "ท่านทำรายการเกินยอดสูงสุดต่อเดือนที่กำหนด ยอดทำรายการคงเหลือต่อเดือนคือ ${remain_amount_deposit_per_month} บาท","en" : "Money transactions amount per month over define, money transactions amount remain per month is ${remain_amount_deposit_per_month} Baht"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -204,7 +205,8 @@
 				"9" : [{"th" : "ต้องการเอกสารเพิ่มเติม","en" : "Officer want more your document"}],
 				"11" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
 				"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
-				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
+				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}],
+				"99" : [{"th" : "หมดเวลายื่นขอทุนสวัสดิการออนไลน์แล้ว","en" : "End of time for request scholarship online"}]
 			}]
 		}],
 		"REQ_LOAN_STATUS" : [{

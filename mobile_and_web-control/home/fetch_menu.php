@@ -288,7 +288,7 @@ if(!$anonymous){
 		}
 		$arrayAllMenu = array();
 		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-											WHERE menu_parent IN ('-1','-2') and (menu_channel = :channel OR menu_channel = 'both') ");
+											WHERE menu_parent IN ('-1','-2') and (menu_channel = :channel OR menu_channel = 'both')");
 		$fetch_menu->execute([
 			':channel' => $arrPayload["PAYLOAD"]["channel"]
 		]);

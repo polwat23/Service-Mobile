@@ -39,6 +39,7 @@ while($rowApv = $fetchApvDept->fetch(PDO::FETCH_ASSOC)){
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+		$arrPayloadNotify["SEND_BY"] = "system";
 		if($func->insertHistory($arrPayloadNotify,'2')){
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$updateSyncFlag = $conoracle->prepare("UPDATE dpdeptapprove SET sync_notify_flag = '1' WHERE apv_docno = :apv_docno");

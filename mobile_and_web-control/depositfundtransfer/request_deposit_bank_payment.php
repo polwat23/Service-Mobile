@@ -1,4 +1,5 @@
 <?php
+ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','fee_amt'],$dataComing)){
@@ -86,7 +87,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$ref_slipno = null;
 			$ref_no = time().$lib->randomText('all',3);
 			try {
-				$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+				$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl",array(
+					'keep_alive' => false,
+					 'connection_timeout' => 900
+				));
 				try {
 					$argumentWS = [
 						"as_wspass" => $config["WS_STRC_DB"],
@@ -157,6 +161,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrMessage["PATH_IMAGE"] = null;
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}

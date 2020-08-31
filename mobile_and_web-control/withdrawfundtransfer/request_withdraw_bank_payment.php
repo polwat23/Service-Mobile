@@ -232,6 +232,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = "system";
 						if($lib->sendNotify($arrPayloadNotify,"person")){
 							$func->insertHistory($arrPayloadNotify,'2');
 						}

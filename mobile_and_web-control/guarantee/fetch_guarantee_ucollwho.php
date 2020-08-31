@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
 											LEFT JOIN shsharemaster sh ON LCM.MEMBER_NO = sh.member_no
 											WHERE
-											LCM.CONTRACT_STATUS > 0
+											LCM.CONTRACT_STATUS > 0 and LCM.contract_status <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '01'
 											AND LCC.REF_COLLNO = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
