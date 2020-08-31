@@ -6,6 +6,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$showSplitSlip = $func->getConstant('show_split_slip_report');
 		$arrGroupDetail = array();
+		$getKpSlipNo = $conoracle->prepare("SELECT kpslip_no from kpmastreceive where member_no = :member_no and recv_period = :recv_period");
+		$getKpSlipNo->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
 		$getDetailKP = $conoracle->prepare("SELECT 
 													CASE kut.system_code 
 													WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
@@ -32,10 +38,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+													and kpd.kpslip_no = :kpslip
 													ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':kpslip' => $rowKp["KPSLIP_NO"]
 		]);
 		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();

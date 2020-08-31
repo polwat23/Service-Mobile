@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$MonthForCheck = date('m');
 		$DayForCheck = date('d');
-		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
-															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
+		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT,KPSLIP_NO
+															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT,KPSLIP_NO ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
 		$getLastReceive->execute([':member_no' => $member_no]);
 		$rowLastRecv = $getLastReceive->fetch(PDO::FETCH_ASSOC);
 		$checkHasBeenPay = $conoracle->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no and recv_period = :max_recv and keeping_status = 1");
@@ -64,10 +64,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																	and kpd.kpslip_no = :kpslip_no
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
-			':recv_period' => $rowLastRecv["MAX_RECV"]
+			':recv_period' => $rowLastRecv["MAX_RECV"],
+			':kpslip_no' => $rowLastRecv["KPSLIP_NO"]
 		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
