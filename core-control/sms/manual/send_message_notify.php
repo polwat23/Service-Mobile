@@ -57,7 +57,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 								$arrPayloadNotify["SEND_BY"] = $payload["username"];
 								$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 								if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-									$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."',".($id_template ?? null).")";
+									$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsert) == 1000){
 										$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 										$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -114,7 +114,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							$arrPayloadNotify["SEND_BY"] = $payload["username"];
 							$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 							if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-								$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."',".($id_template ?? null).")";
+								$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 								if(sizeof($blukInsert) == 1000){
 									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 									$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -136,6 +136,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
 						$func->insertHistory($arrPayloadHistory);
+						$arrayResult["DD"] = $blukInsert;
 						unset($blukInsert);
 						$blukInsert = array();
 					}
