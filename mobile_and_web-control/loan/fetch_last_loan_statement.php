@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LAST_PERIODPAY as LAST_PERIOD,lns.operate_date as LAST_OPERATE_DATE
 												from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
 												lnm.loancontract_no = lns.loancontract_no and lnm.coop_id = lns.coop_id LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-												WHERE lnm.member_no = :member_no and lnm.contract_status > 0 
+												WHERE lnm.member_no = :member_no and lnm.contract_status > 0 and lnm.contract_status <> 8
 												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
