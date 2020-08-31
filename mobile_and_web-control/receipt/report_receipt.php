@@ -18,6 +18,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$getKpSlipNo = $conoracle->prepare("SELECT kpslip_no from kpmastreceive where member_no = :member_no and recv_period = :recv_period");
+		$getKpSlipNo->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
@@ -46,12 +52,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		and kpd.seq_no = :seq_no
+																		and kpd.seq_no = :seq_no and kpd.kpslip_no = :kpslip
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
 				':recv_period' => $dataComing["recv_period"],
-				':seq_no' => $dataComing["seq_no"]
+				':seq_no' => $dataComing["seq_no"],
+				':kpslip' => $rowKp["KPSLIP_NO"]
 			]);
 		}else{
 			$getPaymentDetail = $conoracle->prepare("SELECT 
@@ -79,10 +86,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																		and kpd.kpslip_no = :kpslip
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"]
+				':recv_period' => $dataComing["recv_period"],
+				':kpslip' => $rowKp["KPSLIP_NO"]
 			]);
 		}
 		$arrGroupDetail = array();
@@ -261,7 +270,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
+				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -282,7 +291,7 @@ function GenerateReport($dataReport,$header,$lib){
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].'</div>
+				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>

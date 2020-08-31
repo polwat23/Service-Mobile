@@ -20,6 +20,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
+		$getKpSlipNo = $conoracle->prepare("SELECT kpslip_no from kptempreceive where member_no = :member_no and recv_period = :recv_period");
+		$getKpSlipNo->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
 		$getPaymentDetail = $conoracle->prepare("SELECT 
 																	CASE kut.system_code 
 																	WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
@@ -41,10 +47,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																	and kpd.kpslip_no = :kpslip
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':kpslip' => $rowKp["KPSLIP_NO"]
 		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
