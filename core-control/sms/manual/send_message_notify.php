@@ -136,7 +136,6 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
 						$func->insertHistory($arrPayloadHistory);
-						$arrayResult["DD"] = $blukInsert;
 						unset($blukInsert);
 						$blukInsert = array();
 					}
