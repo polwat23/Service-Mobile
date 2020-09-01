@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
 											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
 											WHERE
-											LCM.CONTRACT_STATUS > 0
+											LCM.CONTRACT_STATUS > 0 and LCM.CONTRACT_STATUS <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '01'
 											AND LCC.REF_COLLNO = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
