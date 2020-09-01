@@ -14,7 +14,8 @@ $config = json_decode($jsonConfig,true);
 
 $dateNow = date("YmdHi");
 
-$getNotifyWaitforSend = $conmysql->prepare("SELECT is_import,create_by,id_sendahead,send_topic,send_message,destination,destination_revoke,id_smsquery,id_smstemplate,send_platform,send_image
+$getNotifyWaitforSend = $conmysql->prepare("SELECT is_import,create_by,id_sendahead,send_topic,send_message,destination,CASE destination_revoke WHEN '' THEN NULL ELSE destination_revoke END as destination_revoke
+										,id_smsquery,id_smstemplate,send_platform,send_image
 										FROM smssendahead WHERE is_use = '1' and :datenow >= DATE_FORMAT(send_date,'%Y%m%d%H%i')");
 $getNotifyWaitforSend->execute([':datenow' => $dateNow]);
 while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
@@ -26,8 +27,15 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 			$destination = array();
 			$destinationFull = array();
 			$message_importData = json_decode($rowNoti["destination"]);
-			foreach($message_importData as $key => $target){
-				if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+			if(isset($rowNoti["destination_revoke"]) && $rowNoti["destination_revoke"] != ""){
+				foreach($message_importData as $key => $target){
+					if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+						$destination[] = strtolower($lib->mb_str_pad($target->DESTINATION));
+						$destinationFull[] = $target;
+					}
+				}
+			}else{
+				foreach($message_importData as $key => $target){
 					$destination[] = strtolower($lib->mb_str_pad($target->DESTINATION));
 					$destinationFull[] = $target;
 				}
@@ -49,11 +57,11 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 							if($lib->sendNotify($arrPayloadNotify,'person')){
-								$blukInsert[] = "('1','".$rowNoti["send_topic"]."','".$dest->MESSAGE."','".($pathImg ?? null)."','".$member_no."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+								$blukInsert[] = "('1','".$rowNoti["send_topic"]."','".$dest->MESSAGE."','".($pathImg ?? null)."','".$member_no."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 								if(sizeof($blukInsert) == 1000){
 									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 									$arrPayloadHistory["bulkInsert"] = $blukInsert;
-									$func->insertHistory($arrPayloadHistory);
+									$func->insertHistory($arrPayloadHistory,'1','1');
 									unset($blukInsert);
 									$blukInsert = array();
 								}
@@ -72,7 +80,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 			if(sizeof($blukInsert) > 0){
 				$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 				$arrPayloadHistory["bulkInsert"] = $blukInsert;
-				$func->insertHistory($arrPayloadHistory);
+				$func->insertHistory($arrPayloadHistory,'1','1');
 				unset($blukInsert);
 				$blukInsert = array();
 			}
@@ -124,11 +132,11 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
-												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 												if(sizeof($blukInsert) == 1000){
 													$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 													$arrPayloadHistory["bulkInsert"] = $blukInsert;
-													$func->insertHistory($arrPayloadHistory);
+													$func->insertHistory($arrPayloadHistory,'1','1');
 													unset($blukInsert);
 													$blukInsert = array();
 												}
@@ -166,7 +174,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							if(sizeof($blukInsert) > 0){
 								$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 								$arrPayloadHistory["bulkInsert"] = $blukInsert;
-								$func->insertHistory($arrPayloadHistory);
+								$func->insertHistory($arrPayloadHistory,'1','1');
 								unset($blukInsert);
 								$blukInsert = array();
 							}
@@ -236,11 +244,11 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 															$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 															$updateFlagStamp->execute($arrayExecute);
 														}
-														$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+														$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 														if(sizeof($blukInsert) == 1000){
 															$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 															$arrPayloadHistory["bulkInsert"] = $blukInsert;
-															$func->insertHistory($arrPayloadHistory);
+															$func->insertHistory($arrPayloadHistory,'1','1');
 															unset($blukInsert);
 															$blukInsert = array();
 														}
@@ -287,7 +295,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							if(sizeof($blukInsert) > 0){
 								$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 								$arrPayloadHistory["bulkInsert"] = $blukInsert;
-								$func->insertHistory($arrPayloadHistory);
+								$func->insertHistory($arrPayloadHistory,'1','1');
 								unset($blukInsert);
 								$blukInsert = array();
 							}
@@ -333,11 +341,11 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
-												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 												if(sizeof($blukInsert) == 1000){
 													$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 													$arrPayloadHistory["bulkInsert"] = $blukInsert;
-													$func->insertHistory($arrPayloadHistory);
+													$func->insertHistory($arrPayloadHistory,'1','1');
 													unset($blukInsert);
 													$blukInsert = array();
 												}
@@ -375,7 +383,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							if(sizeof($blukInsert) > 0){
 								$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 								$arrPayloadHistory["bulkInsert"] = $blukInsert;
-								$func->insertHistory($arrPayloadHistory);
+								$func->insertHistory($arrPayloadHistory,'1','1');
 								unset($blukInsert);
 								$blukInsert = array();
 							}
@@ -388,8 +396,14 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 					$blukInsertNot = array();
 					$destination = array();
 					$message_importData = explode(',',$rowNoti["destination"]);
-					foreach($message_importData as $key => $target){
-						if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+					if(isset($rowNoti["destination_revoke"]) && $rowNoti["destination_revoke"] != ""){
+						foreach($message_importData as $key => $target){
+							if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+								$destination[] = strtolower($lib->mb_str_pad($target));
+							}
+						}
+					}else{
+						foreach($message_importData as $key => $target){
 							$destination[] = strtolower($lib->mb_str_pad($target));
 						}
 					}
@@ -404,11 +418,11 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 							if($lib->sendNotify($arrPayloadNotify,'person')){
-								$blukInsert[] = "('1','".$rowNoti["send_topic"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."')";
+								$blukInsert[] = "('1','".$rowNoti["send_topic"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 								if(sizeof($blukInsert) == 1000){
 									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 									$arrPayloadHistory["bulkInsert"] = $blukInsert;
-									$func->insertHistory($arrPayloadHistory);
+									$func->insertHistory($arrPayloadHistory,'1','1');
 									unset($blukInsert);
 									$blukInsert = array();
 								}
@@ -425,7 +439,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 					if(sizeof($blukInsert) > 0){
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
-						$func->insertHistory($arrPayloadHistory);
+						$func->insertHistory($arrPayloadHistory,'1','1');
 						unset($blukInsert);
 						$blukInsert = array();
 					}
@@ -478,7 +492,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 						$arrPayloadNotify["SEND_BY"] = $rowNoti["create_by"];
 						$arrPayloadNotify["ID_TEMPLATE"] = $rowNoti["id_smstemplate"];
-						if($func->insertHistory($arrPayloadNotify,'1')){
+						if($func->insertHistory($arrPayloadNotify,'1','1')){
 							$lib->sendNotify($arrPayloadNotify,'all');
 						}
 					}else{
@@ -499,15 +513,30 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 			$arrDestGRP = array();
 			$arrDestSend = array();
 			$message_importData = json_decode($rowNoti["destination"]);
-			foreach($message_importData as $key => $target){
-				$destination_temp = array();
-				if(mb_strlen($target->DESTINATION) <= 8){
-					if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+			if(isset($rowNoti["destination_revoke"]) && $rowNoti["destination_revoke"] != ""){
+				foreach($message_importData as $key => $target){
+					$destination_temp = array();
+					if(mb_strlen($target->DESTINATION) <= 8){
+						if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+							$destination[] = strtolower($lib->mb_str_pad($target->DESTINATION));
+							$arrDestSend[] = $target;
+						}
+					}else if(mb_strlen($target->DESTINATION) == 10){
+						if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+							$destination_temp["MEMBER_NO"] = null;
+							$destination_temp["TEL"] = $target->DESTINATION;
+							$arrDestGRP[] = $destination_temp;
+							$arrDestSend[] = $target;
+						}
+					}
+				}
+			}else{
+				foreach($message_importData as $key => $target){
+					$destination_temp = array();
+					if(mb_strlen($target->DESTINATION) <= 8){
 						$destination[] = strtolower($lib->mb_str_pad($target->DESTINATION));
 						$arrDestSend[] = $target;
-					}
-				}else if(mb_strlen($target->DESTINATION) == 10){
-					if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+					}else if(mb_strlen($target->DESTINATION) == 10){
 						$destination_temp["MEMBER_NO"] = null;
 						$destination_temp["TEL"] = $target->DESTINATION;
 						$arrDestGRP[] = $destination_temp;
@@ -788,14 +817,27 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 					$arrDestGRP = array();
 					$bulkInsert = array();
 					$message_importData = explode(',',$rowNoti["destination"]);
-					foreach($message_importData as $key => $target){
-						$destination_temp = array();
-						if(mb_strlen($target) <= 8){
-							if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
-								$destination[] = strtolower($lib->mb_str_pad($target));
+					if(isset($rowNoti["destination_revoke"]) && $rowNoti["destination_revoke"] != ""){
+						foreach($message_importData as $key => $target){
+							$destination_temp = array();
+							if(mb_strlen($target) <= 8){
+								if(!in_array($key,explode(',',$rowNoti["destination_revoke"]))){
+									$destination[] = strtolower($lib->mb_str_pad($target));
+								}
+							}else if(mb_strlen($target) == 10){
+								if(!in_array($target,explode(',',$rowNoti["destination_revoke"]))){
+									$destination_temp["MEMBER_NO"] = null;
+									$destination_temp["TEL"] = $target;
+									$arrDestGRP[] = $destination_temp;
+								}
 							}
-						}else if(mb_strlen($target) == 10){
-							if(!in_array($target,explode(',',$rowNoti["destination_revoke"]))){
+						}
+					}else{
+						foreach($message_importData as $key => $target){
+							$destination_temp = array();
+							if(mb_strlen($target) <= 8){
+								$destination[] = strtolower($lib->mb_str_pad($target));
+							}else if(mb_strlen($target) == 10){
 								$destination_temp["MEMBER_NO"] = null;
 								$destination_temp["TEL"] = $target;
 								$arrDestGRP[] = $destination_temp;
