@@ -54,8 +54,10 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 								$arrMessage["BODY"] = $dest["MESSAGE"] ?? "-";
 								$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["SEND_BY"] = $payload["username"];
+								$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 								if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-									$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."')";
+									$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsert) == 1000){
 										$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 										$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -109,8 +111,10 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							$arrMessage["BODY"] = $message;
 							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["SEND_BY"] = $payload["username"];
+							$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 							if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-								$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."')";
+								$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 								if(sizeof($blukInsert) == 1000){
 									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 									$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -184,18 +188,20 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						if($func->insertHistory($arrPayloadNotify,'1')){
-							if($lib->sendNotify($arrPayloadNotify,'all')){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
+						$arrPayloadNotify["SEND_BY"] = $payload["username"];
+						$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+						if($lib->sendNotify($arrPayloadNotify,'all')){
+							if($func->insertHistory($arrPayloadNotify,'1')){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
 								$arrayResult['RESULT'] = TRUE;
 								echo json_encode($arrayResult);
 							}else{
-								$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
+								$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
 								$arrayResult['RESULT'] = FALSE;
 								echo json_encode($arrayResult);
 								exit();
 							}
 						}else{
-							$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
+							$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
 							echo json_encode($arrayResult);
 							exit();

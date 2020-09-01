@@ -36,7 +36,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y',true) : null;
 			$arrayReport["SEND_BY"] = $rowReport["send_by"] ?? null;
 			$arrayAll[] = $arrayReport;
-		}
+		
+
 		$arrayResult['LIST_REPORT'] = $arrayAll;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

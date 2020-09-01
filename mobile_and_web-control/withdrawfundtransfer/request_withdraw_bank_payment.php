@@ -209,7 +209,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					$arrLogTemp["QUERY"] = $insertTransactionLog;
 					$lib->addLogtoTxt($arrLogTemp,'log_withdraw_transaction_temp');
 				}
-				$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				foreach($arrToken["LIST_SEND"] as $dest){
 					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
@@ -225,6 +225,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = 'system';
 						if($func->insertHistory($arrPayloadNotify,'2')){
 							$lib->sendNotify($arrPayloadNotify,"person");
 						}
