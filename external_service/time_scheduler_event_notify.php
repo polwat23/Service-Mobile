@@ -66,9 +66,9 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 									$blukInsert = array();
 								}
 							}else{
-								$blukInsertNot[] = "('".$dest->MESSAGE."','".$member_no."','mobile_app',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+								$blukInsertNot[] = "('".$dest->MESSAGE."','".$member_no."','mobile_app',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 								if(sizeof($blukInsertNot) == 1000){
-									$func->logSMSWasNotSent($blukInsertNot);
+									$func->logSMSWasNotSent($blukInsertNot,false,'1');
 									unset($blukInsertNot);
 									$blukInsertNot = array();
 								}
@@ -85,7 +85,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 				$blukInsert = array();
 			}
 			if(sizeof($blukInsertNot) > 0){
-				$func->logSMSWasNotSent($blukInsertNot);
+				$func->logSMSWasNotSent($blukInsertNot,false,'1');
 				unset($blukInsertNot);
 				$blukInsertNot = array();
 			}
@@ -141,25 +141,25 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$blukInsert = array();
 												}
 											}else{
-												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 												if(sizeof($blukInsertNot) == 1000){
-													$func->logSMSWasNotSent($blukInsertNot);
+													$func->logSMSWasNotSent($blukInsertNot,false,'1');
 													unset($blukInsertNot);
 													$blukInsertNot = array();
 												}
 											}
 										}else{
-											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 											if(sizeof($blukInsertNot) == 1000){
-												$func->logSMSWasNotSent($blukInsertNot);
+												$func->logSMSWasNotSent($blukInsertNot,false,'1');
 												unset($blukInsertNot);
 												$blukInsertNot = array();
 											}
 										}
 									}else{
-										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 										if(sizeof($blukInsertNot) == 1000){
-											$func->logSMSWasNotSent($blukInsertNot);
+											$func->logSMSWasNotSent($blukInsertNot,false,'1');
 											unset($blukInsertNot);
 											$blukInsertNot = array();
 										}
@@ -167,7 +167,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}
 							}
 							if(sizeof($blukInsertNot) > 0){
-								$func->logSMSWasNotSent($blukInsertNot);
+								$func->logSMSWasNotSent($blukInsertNot,false,'1');
 								unset($blukInsertNot);
 								$blukInsertNot = array();
 							}
@@ -253,33 +253,33 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 															$blukInsert = array();
 														}
 													}else{
-														$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+														$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 														if(sizeof($blukInsertNot) == 1000){
-															$func->logSMSWasNotSent($blukInsertNot);
+															$func->logSMSWasNotSent($blukInsertNot,false,'1');
 															unset($blukInsertNot);
 															$blukInsertNot = array();
 														}
 													}
 												}else{
-													$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+													$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 													if(sizeof($blukInsertNot) == 1000){
-														$func->logSMSWasNotSent($blukInsertNot);
+														$func->logSMSWasNotSent($blukInsertNot,false,'1');
 														unset($blukInsertNot);
 														$blukInsertNot = array();
 													}
 												}
 											}else{
-												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 												if(sizeof($blukInsertNot) == 1000){
-													$func->logSMSWasNotSent($blukInsertNot);
+													$func->logSMSWasNotSent($blukInsertNot,false,'1');
 													unset($blukInsertNot);
 													$blukInsertNot = array();
 												}
 											}
 										}else{
-											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','mobile_app',null,null,'สมาชิกยังไม่ได้ใช้งานแอปพลิเคชั่น','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','mobile_app',null,null,'สมาชิกยังไม่ได้ใช้งานแอปพลิเคชั่น','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 											if(sizeof($blukInsertNot) == 1000){
-												$func->logSMSWasNotSent($blukInsertNot);
+												$func->logSMSWasNotSent($blukInsertNot,false,'1');
 												unset($blukInsertNot);
 												$blukInsertNot = array();
 											}
@@ -288,7 +288,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}
 							}
 							if(sizeof($blukInsertNot) > 0){
-								$func->logSMSWasNotSent($blukInsertNot);
+								$func->logSMSWasNotSent($blukInsertNot,false,'1');
 								unset($blukInsertNot);
 								$blukInsertNot = array();
 							}
@@ -350,25 +350,25 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$blukInsert = array();
 												}
 											}else{
-												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").".'1')";
 												if(sizeof($blukInsertNot) == 1000){
-													$func->logSMSWasNotSent($blukInsertNot);
+													$func->logSMSWasNotSent($blukInsertNot,false,'1');
 													unset($blukInsertNot);
 													$blukInsertNot = array();
 												}
 											}
 										}else{
-											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','mobile_app',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 											if(sizeof($blukInsertNot) == 1000){
-												$func->logSMSWasNotSent($blukInsertNot);
+												$func->logSMSWasNotSent($blukInsertNot,false,'1');
 												unset($blukInsertNot);
 												$blukInsertNot = array();
 											}
 										}
 									}else{
-										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 										if(sizeof($blukInsertNot) == 1000){
-											$func->logSMSWasNotSent($blukInsertNot);
+											$func->logSMSWasNotSent($blukInsertNot,false,'1');
 											unset($blukInsertNot);
 											$blukInsertNot = array();
 										}
@@ -376,7 +376,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}
 							}
 							if(sizeof($blukInsertNot) > 0){
-								$func->logSMSWasNotSent($blukInsertNot);
+								$func->logSMSWasNotSent($blukInsertNot,false,'1');
 								unset($blukInsertNot);
 								$blukInsertNot = array();
 							}
@@ -427,9 +427,9 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 									$blukInsert = array();
 								}
 							}else{
-								$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','mobile_app',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+								$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','mobile_app',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 								if(sizeof($blukInsertNot) == 1000){
-									$func->logSMSWasNotSent($blukInsertNot);
+									$func->logSMSWasNotSent($blukInsertNot,false,'1');
 									unset($blukInsertNot);
 									$blukInsertNot = array();
 								}
@@ -444,7 +444,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$blukInsert = array();
 					}
 					if(sizeof($blukInsertNot) > 0){
-						$func->logSMSWasNotSent($blukInsertNot);
+						$func->logSMSWasNotSent($blukInsertNot,false,'1');
 						unset($blukInsertNot);
 						$blukInsertNot = array();
 					}
@@ -460,18 +460,18 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								$arrAllToken[] = $dest["TOKEN"];
 							}else{
 								$bulkInsert[] = "('".$rowNoti["send_message"]."','".$dest["MEMBER_NO"]."',
-								'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+								'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 							}
 							if(sizeof($bulkInsert) == 1000){
-								$func->logSMSWasNotSent($bulkInsert);
+								$func->logSMSWasNotSent($bulkInsert,false,'1');
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}
 						}else{
 							$bulkInsert[] = "('".$rowNoti["send_message"]."','".$dest["MEMBER_NO"]."',
-							'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+							'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 							if(sizeof($bulkInsert) == 1000){
-								$func->logSMSWasNotSent($bulkInsert);
+								$func->logSMSWasNotSent($bulkInsert,false,'1');
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}
@@ -479,7 +479,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 					}
 					if(sizeof($arrAllToken) > 0){
 						if(sizeof($bulkInsert) > 0){
-							$func->logSMSWasNotSent($bulkInsert);
+							$func->logSMSWasNotSent($bulkInsert,false,'1');
 							unset($bulkInsert);
 							$bulkInsert = array();
 						}
@@ -492,12 +492,12 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 						$arrPayloadNotify["SEND_BY"] = $rowNoti["create_by"];
 						$arrPayloadNotify["ID_TEMPLATE"] = $rowNoti["id_smstemplate"];
-						if($func->insertHistory($arrPayloadNotify,'1','1')){
-							$lib->sendNotify($arrPayloadNotify,'all');
+						if($lib->sendNotify($arrPayloadNotify,'all')){
+							$func->insertHistory($arrPayloadNotify,'1','1');
 						}
 					}else{
 						if(sizeof($bulkInsert) > 0){
-							$func->logSMSWasNotSent($bulkInsert);
+							$func->logSMSWasNotSent($bulkInsert,false,'1');
 							unset($bulkInsert);
 							$bulkInsert = array();
 						}
@@ -569,9 +569,9 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 							$arrSend[] = $arrSendTemp;
 						}else{
 							$bulkInsert[] = "('".$message_body."','".$member_no."',
-									'sms','".$telMember."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+									'sms','".$telMember."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 							if(sizeof($bulkInsert) == 1000){
-								$func->logSMSWasNotSent($bulkInsert);
+								$func->logSMSWasNotSent($bulkInsert,false,'1');
 								unset($bulkInsert);
 							}
 						}
@@ -579,10 +579,10 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 				}
 			}
 			if(sizeof($arrGRPAll) > 0){
-				$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrSend,'system',true);
+				$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrSend,'system',true,false,'1');
 			}
 			if(sizeof($bulkInsert) > 0){
-				$func->logSMSWasNotSent($bulkInsert);
+				$func->logSMSWasNotSent($bulkInsert,false,'1');
 				unset($bulkInsert);
 				$bulkInsert = array();
 			}
@@ -625,18 +625,18 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 											$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
 										}else{
 											$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-													'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+													'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 											if(sizeof($bulkInsert) == 1000){
-												$func->logSMSWasNotSent($bulkInsert);
+												$func->logSMSWasNotSent($bulkInsert,false,'1');
 												unset($bulkInsert);
 												$bulkInsert = array();
 											}
 										}
 									}else{
 										$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-										'sms',null,null,'ไม่พบเบอร์โทรศัพท์','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+										'sms',null,null,'ไม่พบเบอร์โทรศัพท์','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 										if(sizeof($bulkInsert) == 1000){
-											$func->logSMSWasNotSent($bulkInsert);
+											$func->logSMSWasNotSent($bulkInsert,false,'1');
 											unset($bulkInsert);
 											$bulkInsert = array();
 										}
@@ -644,12 +644,12 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}
 							}
 							if(sizeof($bulkInsert) > 0){
-								$func->logSMSWasNotSent($bulkInsert);
+								$func->logSMSWasNotSent($bulkInsert,false,'1');
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}
 							if(sizeof($arrGRPAll) > 0){
-								$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true);
+								$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true,false,'1');
 							}
 						}else{
 							$query = $rowQuery['sms_query'];
@@ -715,18 +715,18 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 												$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
 											}else{
 												$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-														'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+														'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 												if(sizeof($bulkInsert) == 1000){
-													$func->logSMSWasNotSent($bulkInsert);
+													$func->logSMSWasNotSent($bulkInsert,false,'1');
 													unset($bulkInsert);
 													$bulkInsert = array();
 												}
 											}
 										}else{
 											$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-											'sms',null,null,'ไม่พบเบอร์โทรศัพท์','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+											'sms',null,null,'ไม่พบเบอร์โทรศัพท์','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 											if(sizeof($bulkInsert) == 1000){
-												$func->logSMSWasNotSent($bulkInsert);
+												$func->logSMSWasNotSent($bulkInsert,false,'1');
 												unset($bulkInsert);
 												$bulkInsert = array();
 											}
@@ -735,12 +735,12 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}
 							}
 							if(sizeof($bulkInsert) > 0){
-								$func->logSMSWasNotSent($bulkInsert);
+								$func->logSMSWasNotSent($bulkInsert,false,'1');
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}
 							if(sizeof($arrGRPAll) > 0){
-								$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true);
+								$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true,false,'1');
 							}
 						}
 					}
@@ -781,18 +781,18 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 											$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
 										}else{
 											$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-													'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+													'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 											if(sizeof($bulkInsert) == 1000){
-												$func->logSMSWasNotSent($bulkInsert);
+												$func->logSMSWasNotSent($bulkInsert,false,'1');
 												unset($bulkInsert);
 												$bulkInsert = array();
 											}
 										}
 									}else{
 										$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-										'sms',null,null,'ไม่พบเบอร์โทรศัพท์','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+										'sms',null,null,'ไม่พบเบอร์โทรศัพท์','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 										if(sizeof($bulkInsert) == 1000){
-											$func->logSMSWasNotSent($bulkInsert);
+											$func->logSMSWasNotSent($bulkInsert,false,'1');
 											unset($bulkInsert);
 											$bulkInsert = array();
 										}
@@ -800,12 +800,12 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}
 							}
 							if(sizeof($bulkInsert) > 0){
-								$func->logSMSWasNotSent($bulkInsert);
+								$func->logSMSWasNotSent($bulkInsert,false,'1');
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}
 							if(sizeof($arrGRPAll) > 0){
-								$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true);
+								$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true,false,'1');
 							}
 						}
 					}
@@ -859,19 +859,19 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								$arrGRPAll[$dest["MEMBER_NO"]] = $rowNoti["send_message"];
 							}else{
 								$bulkInsert[] = "('".$message_body."','".$dest["MEMBER_NO"]."',
-										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").")";
+										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
 								if(sizeof($bulkInsert) == 1000){
-									$func->logSMSWasNotSent($bulkInsert);
+									$func->logSMSWasNotSent($bulkInsert,false,'1');
 									unset($bulkInsert);
 								}
 							}
 						}
 					}
 					if(sizeof($arrGRPAll) > 0){
-						$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true);
+						$func->logSMSWasSent($rowNoti["id_smstemplate"],$arrGRPAll,$arrayMerge,'system',true,false,'1');
 					}
 					if(sizeof($bulkInsert) > 0){
-						$func->logSMSWasNotSent($bulkInsert);
+						$func->logSMSWasNotSent($bulkInsert,false,'1');
 						unset($bulkInsert);
 						$bulkInsert = array();
 					}
