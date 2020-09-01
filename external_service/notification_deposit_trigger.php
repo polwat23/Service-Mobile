@@ -38,6 +38,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+		$arrPayloadNotify["SEND_BY"] = 'system';
 		if($lib->sendNotify($arrPayloadNotify,"person")){
 			$func->insertHistory($arrPayloadNotify,'2');
 			$updateSyncFlag = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");

@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':id_userlogin' => $payload["id_userlogin"],
 				':ref_no_source' => $slip_no
 			]);
-			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+			$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				$dataMerge = array();
@@ -52,6 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrMessage["PATH_IMAGE"] = null;
 				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+				$arrPayloadNotify["SEND_BY"] = 'system';
 				if($func->insertHistory($arrPayloadNotify,'2')){
 					$lib->sendNotify($arrPayloadNotify,"person");
 				}
