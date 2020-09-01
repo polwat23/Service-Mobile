@@ -22,6 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 														WHEN 'LON' THEN kpd.loancontract_no
 													ELSE kpd.description END as PAY_ACCOUNT,
 													kpd.period,
+													kpd.seq_no,
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 													NVL(kpd.principal_payment,0) AS PRN_BALANCE,

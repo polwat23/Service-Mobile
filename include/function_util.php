@@ -252,27 +252,75 @@ class functions {
 				return null;
 			}
 		}
-		public function insertHistory($payload,$type_history='1') {
+		public function insertHistory($payload,$type_history='1',$is_sendahead = '0') {
 			$this->con->beginTransaction();
 			if($payload["TYPE_SEND_HISTORY"] == "onemessage"){
-				$bulkInsert = array();
-				foreach($payload["MEMBER_NO"] as $member_no){
-					$bulkInsert[] = "('".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").")";
-					if(sizeof($bulkInsert) == 1000){
-						$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
-												VALUES".implode(',',$bulkInsert));
+				if($is_sendahead == '1'){
+					$bulkInsert = array();
+					foreach($payload["MEMBER_NO"] as $member_no){
+						$bulkInsert[] = "('".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").",'".$is_sendahead."')";
+						if(sizeof($bulkInsert) == 1000){
+							$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
+													VALUES".implode(',',$bulkInsert));
+							if($insertHis->execute()){
+								unset($bulkInsert);
+								$bulkInsert = array();
+							}else{
+								$this->con->rollback();
+								return false;
+							}
+						}
+					}
+					if(sizeof($bulkInsert) > 0){
+						$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
+													VALUES".implode(',',$bulkInsert));
 						if($insertHis->execute()){
-							unset($bulkInsert);
-							$bulkInsert = array();
+							$this->con->commit();
+							return true;
 						}else{
 							$this->con->rollback();
 							return false;
 						}
+					}else{
+						$this->con->commit();
+						return true;
 					}
+				}else{
+					$bulkInsert = array();
+					foreach($payload["MEMBER_NO"] as $member_no){
+						$bulkInsert[] = "('".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").")";
+						if(sizeof($bulkInsert) == 1000){
+							$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
+													VALUES".implode(',',$bulkInsert));
+							if($insertHis->execute()){
+								unset($bulkInsert);
+								$bulkInsert = array();
+							}else{
+								$this->con->rollback();
+								return false;
+							}
+						}
+					}
+					if(sizeof($bulkInsert) > 0){
+						$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
+													VALUES".implode(',',$bulkInsert));
+						if($insertHis->execute()){
+							$this->con->commit();
+							return true;
+						}else{
+							$this->con->rollback();
+							return false;
+						}
+					}else{
+						$this->con->commit();
+						return true;
+					}
+
 				}
-				if(sizeof($bulkInsert) > 0){
-					$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
-												VALUES".implode(',',$bulkInsert));
+			}else if($payload["TYPE_SEND_HISTORY"] == "manymessage"){
+				if($is_sendahead == '1'){
+					$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
+													VALUES".implode(',',$payload["bulkInsert"]));
 					if($insertHis->execute()){
 						$this->con->commit();
 						return true;
@@ -281,18 +329,16 @@ class functions {
 						return false;
 					}
 				}else{
-					$this->con->commit();
-					return true;
-				}
-			}else if($payload["TYPE_SEND_HISTORY"] == "manymessage"){
-				$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
-												VALUES".implode(',',$payload["bulkInsert"]));
-				if($insertHis->execute()){
-					$this->con->commit();
-					return true;
-				}else{
-					$this->con->rollback();
-					return false;
+					$insertHis = $this->con->prepare("INSERT INTO gchistory(his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
+													VALUES".implode(',',$payload["bulkInsert"]));
+					if($insertHis->execute()){
+						$this->con->commit();
+						return true;
+					}else{
+						$this->con->rollback();
+						return false;
+					}
+
 				}
 			}else{
 				return true;
