@@ -493,82 +493,101 @@ class functions {
 			}
 			return $arrayMemberGRP;
 		}
-		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false) {
+		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false,$is_sendahead = '0') {
 			$this->con->beginTransaction();
 			$textcombine = array();
 			$textcombinenotsent = array();
-			if($trans_flag){
-				
-			}else{
-				if($multi_message){
-					foreach($destination as $dest){
-						$textcombine[] = "('".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
-						if(sizeof($textcombine) == 1000){
-							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																VALUES".implode(',',$textcombine));
-							if($insertToLogSMS->execute()){
-								unset($textcombine);
-								$textcombine = array();
-							}else{
-								$this->con->rollback();
-								break;
+			if($is_sendahead){
+				if($trans_flag){
+				}else{
+					if($multi_message){
+						foreach($destination as $dest){
+							$textcombine[] = "('".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
+							if(sizeof($textcombine) == 1000){
+								$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
+																	VALUES".implode(',',$textcombine));
+								if($insertToLogSMS->execute()){
+									unset($textcombine);
+									$textcombine = array();
+								}else{
+									$this->con->rollback();
+									break;
+								}
 							}
 						}
-					}
-					if(sizeof($textcombine) > 0){
-						$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																VALUES".implode(',',$textcombine));
-						if($insertToLogSMS->execute()){
+						if(sizeof($textcombine) > 0){
+							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
+																	VALUES".implode(',',$textcombine));
+							if($insertToLogSMS->execute()){
+								$this->con->commit();
+								return true;
+							}else{
+								$this->con->rollback();
+								return false;
+							}
+						}else{
 							$this->con->commit();
 							return true;
-						}else{
-							$this->con->rollback();
-							return false;
 						}
 					}else{
-						$this->con->commit();
-						return true;
-					}
-				}else{
-					foreach($destination as $dest){
-						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-							$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
-						}else{
-							$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
-						}
-						if(sizeof($textcombine) == 1000){
-							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																VALUES".implode(',',$textcombine));
-							if($insertToLogSMS->execute()){
-								unset($textcombine);
-								$textcombine = array();
+						foreach($destination as $dest){
+							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+								$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
 							}else{
-								$this->con->rollback();
-								return false;
+								$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
 							}
-						}
-						if(sizeof($textcombinenotsent) == 1000){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
-																	VALUES".implode(',',$textcombinenotsent));
-							if($insertToLogNotSentSMS->execute()){
-								unset($textcombinenotsent);
-								$textcombinenotsent = array();
-							}else{
-								$this->con->rollback();
-								return false;
+							if(sizeof($textcombine) == 1000){
+								$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
+																	VALUES".implode(',',$textcombine));
+								if($insertToLogSMS->execute()){
+									unset($textcombine);
+									$textcombine = array();
+								}else{
+									$this->con->rollback();
+									return false;
+								}
 							}
-						}
-					}
-					if(sizeof($textcombine) > 0){
-						$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																VALUES".implode(',',$textcombine));
-						if($insertToLogSMS->execute()){
-							if(sizeof($textcombinenotsent) > 0){
-								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
+							if(sizeof($textcombinenotsent) == 1000){
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate,is_sendahead)
 																		VALUES".implode(',',$textcombinenotsent));
 								if($insertToLogNotSentSMS->execute()){
+									unset($textcombinenotsent);
+									$textcombinenotsent = array();
+								}else{
+									$this->con->rollback();
+									return false;
+								}
+							}
+						}
+						if(sizeof($textcombine) > 0){
+							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
+																	VALUES".implode(',',$textcombine));
+							if($insertToLogSMS->execute()){
+								if(sizeof($textcombinenotsent) > 0){
+									$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate,is_sendahead)
+																			VALUES".implode(',',$textcombinenotsent));
+									if($insertToLogNotSentSMS->execute()){
+										$this->con->commit();
+										return true;
+									}else{
+										$this->con->rollback();
+										return false;
+									}
+								}else{
 									$this->con->commit();
 									return true;
+								}
+							}else{
+								$this->con->rollback();
+								return false;
+							}
+						}else{
+							if(sizeof($textcombinenotsent) > 0){
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate,is_sendahead)
+																			VALUES".implode(',',$textcombinenotsent));
+								if($insertToLogNotSentSMS->execute()){
+									$this->con->commit();
+										return true;
 								}else{
 									$this->con->rollback();
 									return false;
@@ -577,17 +596,34 @@ class functions {
 								$this->con->commit();
 								return true;
 							}
-						}else{
-							$this->con->rollback();
-							return false;
 						}
-					}else{
-						if(sizeof($textcombinenotsent) > 0){
-							$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
-																		VALUES".implode(',',$textcombinenotsent));
-							if($insertToLogNotSentSMS->execute()){
+					}
+				}
+			}else{
+				if($trans_flag){
+					
+				}else{
+					if($multi_message){
+						foreach($destination as $dest){
+							$textcombine[] = "('".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+							if(sizeof($textcombine) == 1000){
+								$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+																	VALUES".implode(',',$textcombine));
+								if($insertToLogSMS->execute()){
+									unset($textcombine);
+									$textcombine = array();
+								}else{
+									$this->con->rollback();
+									break;
+								}
+							}
+						}
+						if(sizeof($textcombine) > 0){
+							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+																	VALUES".implode(',',$textcombine));
+							if($insertToLogSMS->execute()){
 								$this->con->commit();
-									return true;
+								return true;
 							}else{
 								$this->con->rollback();
 								return false;
@@ -596,23 +632,107 @@ class functions {
 							$this->con->commit();
 							return true;
 						}
+					}else{
+						foreach($destination as $dest){
+							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+								$textcombine[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+							}else{
+								$textcombinenotsent[] = "('".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+							}
+							if(sizeof($textcombine) == 1000){
+								$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+																	VALUES".implode(',',$textcombine));
+								if($insertToLogSMS->execute()){
+									unset($textcombine);
+									$textcombine = array();
+								}else{
+									$this->con->rollback();
+									return false;
+								}
+							}
+							if(sizeof($textcombinenotsent) == 1000){
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
+																		VALUES".implode(',',$textcombinenotsent));
+								if($insertToLogNotSentSMS->execute()){
+									unset($textcombinenotsent);
+									$textcombinenotsent = array();
+								}else{
+									$this->con->rollback();
+									return false;
+								}
+							}
+						}
+						if(sizeof($textcombine) > 0){
+							$insertToLogSMS = $this->con->prepare("INSERT INTO smslogwassent(sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+																	VALUES".implode(',',$textcombine));
+							if($insertToLogSMS->execute()){
+								if(sizeof($textcombinenotsent) > 0){
+									$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
+																			VALUES".implode(',',$textcombinenotsent));
+									if($insertToLogNotSentSMS->execute()){
+										$this->con->commit();
+										return true;
+									}else{
+										$this->con->rollback();
+										return false;
+									}
+								}else{
+									$this->con->commit();
+									return true;
+								}
+							}else{
+								$this->con->rollback();
+								return false;
+							}
+						}else{
+							if(sizeof($textcombinenotsent) > 0){
+								$insertToLogNotSentSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
+																			VALUES".implode(',',$textcombinenotsent));
+								if($insertToLogNotSentSMS->execute()){
+									$this->con->commit();
+										return true;
+								}else{
+									$this->con->rollback();
+									return false;
+								}
+							}else{
+								$this->con->commit();
+								return true;
+							}
+						}
 					}
 				}
 			}
 		}
-		public function logSMSWasNotSent($bulkInsert,$multi_message=false) {
+		public function logSMSWasNotSent($bulkInsert,$multi_message=false,$is_sendahead = '0') {
 			$this->con->beginTransaction();
-			if($multi_message){
-				return true;
-			}else{
-				$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
-														VALUES".implode(',',$bulkInsert));
-				if($insertToLogSMS->execute()){
-					$this->con->commit();
+			if($is_sendahead == '1'){
+				if($multi_message){
 					return true;
 				}else{
-					$this->con->rollback();
-					return false;
+					$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead)
+															VALUES".implode(',',$bulkInsert));
+					if($insertToLogSMS->execute()){
+						$this->con->commit();
+						return true;
+					}else{
+						$this->con->rollback();
+						return false;
+					}
+				}
+			}else{
+				if($multi_message){
+					return true;
+				}else{
+					$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
+															VALUES".implode(',',$bulkInsert));
+					if($insertToLogSMS->execute()){
+						$this->con->commit();
+						return true;
+					}else{
+						$this->con->rollback();
+						return false;
+					}
 				}
 			}
 		}
