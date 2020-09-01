@@ -263,6 +263,7 @@ class library {
 		$mailFunction->SMTPSecure = 'ssl';
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
+		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->CharSet = 'UTF-8';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
