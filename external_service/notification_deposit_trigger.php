@@ -28,6 +28,7 @@ if($lib->checkCompleteArgument(['member_no','deptaccount_no','operate_date','dep
 		$arrMessage["PATH_IMAGE"] = null;
 		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+		$arrPayloadNotify["SEND_BY"] = "system";
 		if($lib->sendNotify($arrPayloadNotify,"person")){
 			$func->insertHistory($arrPayloadNotify,'2');
 			echo true;

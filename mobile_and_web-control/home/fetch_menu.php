@@ -312,8 +312,10 @@ if(!$anonymous){
 		}
 		$arrayAllMenu = array();
 		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-											WHERE menu_parent IN ('-1','-2')");
-		$fetch_menu->execute();
+											WHERE menu_parent IN ('-1','-2') and (menu_channel = :channel OR menu_channel = 'both')");
+		$fetch_menu->execute([
+			':channel' => $arrPayload["PAYLOAD"]["channel"]
+		]);
 		while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 			if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
