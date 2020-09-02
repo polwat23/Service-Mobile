@@ -214,6 +214,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = "system";
 						if($func->insertHistory($arrPayloadNotify,'2')){
 							$lib->sendNotify($arrPayloadNotify,"person");
 						}
