@@ -140,7 +140,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrLogTemp["QUERY"] = $insertTransactionLog;
 				$lib->addLogtoTxt($arrLogTemp,'log_deposit_transaction_temp');
 			}
-			/*$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+			$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				$dataMerge = array();
@@ -158,7 +158,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				if($func->insertHistory($arrPayloadNotify,'2')){
 					$lib->sendNotify($arrPayloadNotify,"person");
 				}
-			}*/
+			}
 			$arrayResult['EXTERNAL_REF'] = $etn_ref;
 			$arrayResult['TRANSACTION_NO'] = $ref_no;
 			$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
