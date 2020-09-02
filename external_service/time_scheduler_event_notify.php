@@ -101,7 +101,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 						$arrColumn = explode(',',$rowQuery["column_selected"]);
 						if($rowQuery["is_bind_param"] == '0'){
-							$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+							$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
 							$queryTarget->execute();
 							while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 								$arrGroupMessage = array();
@@ -129,7 +129,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													foreach($arrayRawExecute[1] as $execute){
 														$arrayExecute[$execute] = $rowTarget[$execute];
 													}
-													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+													$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
 												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
@@ -207,7 +207,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 								}else{
 									$target = $target;
 								}
-								$queryTarget = $conoracle->prepare($query);
+								$queryTarget = $conmssql->prepare($query);
 								$queryTarget->execute([':'.$condition[1] => $target]);
 								$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
 								if(isset($rowTarget[$rowQuery["target_field"]])){
@@ -241,7 +241,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 															foreach($arrayRawExecute[1] as $execute){
 																$arrayExecute[$execute] = $rowTarget[$execute];
 															}
-															$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+															$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 															$updateFlagStamp->execute($arrayExecute);
 														}
 														$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
@@ -310,7 +310,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 						$arrColumn = explode(',',$rowQuery["column_selected"]);
 						if($rowQuery["is_bind_param"] == '0'){
-							$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+							$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
 							$queryTarget->execute();
 							while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 								$arrGroupMessage = array();
@@ -338,7 +338,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													foreach($arrayRawExecute[1] as $execute){
 														$arrayExecute[$execute] = $rowTarget[$execute];
 													}
-													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+													$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
 												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$rowNoti["create_by"]."'".(isset($rowNoti["id_smstemplate"]) ? ",".$rowNoti["id_smstemplate"] : ",null").",'1')";
@@ -598,7 +598,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 						$arrColumn = explode(',',$rowQuery["column_selected"]);
 						if($rowQuery["is_bind_param"] == '0'){
-							$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+							$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
 							$queryTarget->execute();
 							while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 								$arrTarget = array();
@@ -618,7 +618,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 												foreach($arrayRawExecute[1] as $execute){
 													$arrayExecute[$execute] = $rowTarget[$execute];
 												}
-												$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+												$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 												$updateFlagStamp->execute($arrayExecute);
 											}
 											$arrayMerge[] = $arrayTel[0];
@@ -681,7 +681,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 									$destination = $target;
 								}
 								
-								$queryTarget = $conoracle->prepare($query);
+								$queryTarget = $conmssql->prepare($query);
 								$queryTarget->execute([':'.$condition[1] => $destination]);
 								$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
 								if(isset($rowTarget[$rowQuery["target_field"]])){
@@ -708,7 +708,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													foreach($arrayRawExecute[1] as $execute){
 														$arrayExecute[$execute] = $rowTarget[$execute];
 													}
-													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+													$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
 												$arrayMerge[] = $arrayTel[0];
@@ -754,7 +754,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 						$arrColumn = explode(',',$rowQuery["column_selected"]);
 						if($rowQuery["is_bind_param"] == '0'){
-							$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+							$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
 							$queryTarget->execute();
 							while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 								$arrTarget = array();
@@ -774,7 +774,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 												foreach($arrayRawExecute[1] as $execute){
 													$arrayExecute[$execute] = $rowTarget[$execute];
 												}
-												$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+												$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 												$updateFlagStamp->execute($arrayExecute);
 											}
 											$arrayMerge[] = $arrayTel[0];
