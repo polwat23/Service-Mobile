@@ -39,8 +39,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$insertIntoInfo = $conmysql->prepare("UPDATE gcconstantbackground SET image=:path_bg,update_by=:username,is_use = '1' WHERE id_background = :id_background");
 						if($insertIntoInfo->execute([
 							':path_bg' => $path_bg.'?'.$random_text,
-							'username' => $payload["username"],
-							'id_background' => $arrayGroup[0]["ID_BACKGROUND"]
+							':username' => $payload["username"],
+							':id_background' => $arrayGroup[0]["ID_BACKGROUND"]
 						])){
 							$arrayResult['RESULT'] = TRUE;
 							echo json_encode($arrayResult);
