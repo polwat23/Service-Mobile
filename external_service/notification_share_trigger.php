@@ -24,28 +24,30 @@ $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
-		$dataMerge = array();
-		$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
-		$dataMerge["SHARE_BALANCE"] = number_format($rowSTM["SHARE_BALANCE"],2);
-		$dataMerge["ITEMTYPE_DESC"] = $rowSTM["SHRITEMTYPE_DESC"];
-		$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
-		$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
-		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-		$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-		$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-		$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-		$arrMessage["BODY"] = $message_endpoint["BODY"];
-		$arrMessage["PATH_IMAGE"] = null;
-		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-		$arrPayloadNotify["SEND_BY"] = "system";
-		if($lib->sendNotify($arrPayloadNotify,"person")){
-			$func->insertHistory($arrPayloadNotify,'2');
-			$updateSyncFlag = $conmssql->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
-			$updateSyncFlag->execute([
-				':member_no' => $rowSTM["MEMBER_NO"],
-				':seq_no' => $rowSTM["SEQ_NO"]
-			]);
+		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+			$dataMerge = array();
+			$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
+			$dataMerge["SHARE_BALANCE"] = number_format($rowSTM["SHARE_BALANCE"],2);
+			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["SHRITEMTYPE_DESC"];
+			$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
+			$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = "system";
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
+				$updateSyncFlag = $conmssql->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
+				$updateSyncFlag->execute([
+					':member_no' => $rowSTM["MEMBER_NO"],
+					':seq_no' => $rowSTM["SEQ_NO"]
+				]);
+			}
 		}
 	}
 }

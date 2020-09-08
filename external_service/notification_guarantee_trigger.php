@@ -23,30 +23,32 @@ $fetchDataGuarantee->execute();
 while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowGuarantee["REF_COLLNO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
-		$dataMerge = array();
-		$dataMerge["LOANCONTRACT_NO"] = $rowGuarantee["LOANCONTRACT_NO"];
-		$dataMerge["AMOUNT"] = number_format($rowGuarantee["AMOUNT"],2);
-		$dataMerge["FULL_NAME"] = $rowGuarantee["FULL_NAME"];
-		$dataMerge["LOAN_TYPE"] = $rowGuarantee["LOAN_TYPE"];
-		$dataMerge["APPROVE_DATE"] = isset($rowGuarantee["STARTCONT_DATE"]) && $rowGuarantee["STARTCONT_DATE"] != '' ? 
-		$lib->convertdate($rowGuarantee["STARTCONT_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
-		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-		$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-		$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-		$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-		$arrMessage["BODY"] = $message_endpoint["BODY"];
-		$arrMessage["PATH_IMAGE"] = null;
-		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-		$arrPayloadNotify["SEND_BY"] = "system";
-		if($lib->sendNotify($arrPayloadNotify,"person")){
-			$func->insertHistory($arrPayloadNotify,'2');
-			$updateSyncFlag = $conmssql->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
-			$updateSyncFlag->execute([
-				':loancontract_no' => $rowGuarantee["LOANCONTRACT_NO"],
-				':seq_no' => $rowGuarantee["SEQ_NO"],
-				':ref_collno' => $rowGuarantee["REF_COLLNO"]
-			]);
+		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+			$dataMerge = array();
+			$dataMerge["LOANCONTRACT_NO"] = $rowGuarantee["LOANCONTRACT_NO"];
+			$dataMerge["AMOUNT"] = number_format($rowGuarantee["AMOUNT"],2);
+			$dataMerge["FULL_NAME"] = $rowGuarantee["FULL_NAME"];
+			$dataMerge["LOAN_TYPE"] = $rowGuarantee["LOAN_TYPE"];
+			$dataMerge["APPROVE_DATE"] = isset($rowGuarantee["STARTCONT_DATE"]) && $rowGuarantee["STARTCONT_DATE"] != '' ? 
+			$lib->convertdate($rowGuarantee["STARTCONT_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = "system";
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
+				$updateSyncFlag = $conmssql->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
+				$updateSyncFlag->execute([
+					':loancontract_no' => $rowGuarantee["LOANCONTRACT_NO"],
+					':seq_no' => $rowGuarantee["SEQ_NO"],
+					':ref_collno' => $rowGuarantee["REF_COLLNO"]
+				]);
+			}
 		}
 	}
 }
