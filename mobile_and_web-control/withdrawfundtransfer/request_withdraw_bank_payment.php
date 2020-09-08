@@ -171,20 +171,23 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
-				$dataMerge = array();
-				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-				$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-				$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
-				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-				$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-				$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-				$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-				$arrMessage["BODY"] = $message_endpoint["BODY"];
-				$arrMessage["PATH_IMAGE"] = null;
-				$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-				$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-				if($func->insertHistory($arrPayloadNotify,'2')){
-					$lib->sendNotify($arrPayloadNotify,"person");
+				if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+					$dataMerge = array();
+					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+					$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+					$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
+					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+					$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+					$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+					$arrMessage["BODY"] = $message_endpoint["BODY"];
+					$arrMessage["PATH_IMAGE"] = null;
+					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+					$arrPayloadNotify["SEND_BY"] = "system";
+					if($lib->sendNotify($arrPayloadNotify,"person")){
+						$func->insertHistory($arrPayloadNotify,'2');
+					}
 				}
 			}
 			$arrayResult['TRANSACTION_NO'] = $dataComing["tran_id"];

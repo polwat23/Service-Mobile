@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':deptaccount_no' => $from_account_no,
 				':seq_no' => $dataComing["trans_ref_code"]
 			]);
-			/*$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+			$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
@@ -74,11 +74,12 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$arrMessage["PATH_IMAGE"] = null;
 					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-					if($func->insertHistory($arrPayloadNotify,'2')){
-						$lib->sendNotify($arrPayloadNotify,"person");
+					$arrPayloadNotify["SEND_BY"] = "system";
+					if($lib->sendNotify($arrPayloadNotify,"person")){
+						$func->insertHistory($arrPayloadNotify,'2');
 					}
 				}
-			}*/
+			}
 			$arrayResult['TRANSACTION_NO'] = $ref_no;
 			$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 			$arrayResult['RESULT'] = TRUE;
