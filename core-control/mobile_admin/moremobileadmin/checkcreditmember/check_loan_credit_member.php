@@ -53,6 +53,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					include('../../../../mobile_and_web-control/credit/calculate_loan_normal_share_coll.php');
 				}else if($rowCanCal["loantype_code"] == '30'){
 					include('../../../../mobile_and_web-control/credit/calculate_loan_special_share_coll.php');
+				}else if($rowCanCal["loantype_code"] == '23'){
+					include('../../../../mobile_and_web-control/credit/calculate_loan_normal_person_coll.php');
 				}else{
 					include('../../../../mobile_and_web-control/credit/calculate_loan_etc.php');
 				}

@@ -17,23 +17,25 @@ $fetchReqResignList->execute();
 while($rowReqResign = $fetchReqResignList->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowReqResign["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
-		$dataMerge = array();
-		$dataMerge["RESIGN_DESC"] = $rowReqResign["RESIGNCAUSE_DESC"];
-		$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-		$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-		$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-		$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-		$arrMessage["BODY"] = $message_endpoint["BODY"];
-		$arrMessage["PATH_IMAGE"] = null;
-		$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-		$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-		$arrPayloadNotify["SEND_BY"] = "system";
-		if($lib->sendNotify($arrPayloadNotify,"person")){
-			$func->insertHistory($arrPayloadNotify,'2');
-			$updateSyncFlag = $conoracle->prepare("UPDATE mbreqresign SET sync_notify_flag = '1' WHERE RESIGNREQ_DOCNO = :RESIGNREQ_DOCNO");
-			$updateSyncFlag->execute([
-				':RESIGNREQ_DOCNO' => $rowReqResign["RESIGNREQ_DOCNO"]
-			]);
+		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+			$dataMerge = array();
+			$dataMerge["RESIGN_DESC"] = $rowReqResign["RESIGNCAUSE_DESC"];
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = "system";
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
+				$updateSyncFlag = $conoracle->prepare("UPDATE mbreqresign SET sync_notify_flag = '1' WHERE RESIGNREQ_DOCNO = :RESIGNREQ_DOCNO");
+				$updateSyncFlag->execute([
+					':RESIGNREQ_DOCNO' => $rowReqResign["RESIGNREQ_DOCNO"]
+				]);
+			}
 		}
 	}
 }
