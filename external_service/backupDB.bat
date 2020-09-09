@@ -1,4 +1,4 @@
-::@echo off
+@echo off
 
 
 del D:\EgatscMobile\Service-Egat\external_service\backupDB_egat.zip
@@ -11,8 +11,6 @@ del D:\EgatscMobile\Service-Egat\external_service\backupDB_egat.sql
 
 cd C:\Program Files (x86)\WinSCP
 c:
-winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming -rawsettings ProxyMethod=2 ProxyHost=proxy.egat.co.th ProxyPort=8080" "put D:\EgatscMobile\Service-Egat\external_service\backupDB_egat.zip" "exit"
+winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put D:\EgatscMobile\Service-Egat\external_service\backupDB_egat.zip" "exit"
 
 del D:\EgatscMobile\Service-Egat\external_service\backupDB_egat.zip
-
-pause
