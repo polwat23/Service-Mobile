@@ -14,12 +14,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$maxloan_amt = 0;
 			$oldBal = 0;
 			$loanRequest = TRUE;
-			if($dataComing["loantype_code"] == '10'){
-				include(__DIR__.'/../credit/calculate_loan_emer.php');
-			}else if($dataComing["loantype_code"] == '20'){
-				include(__DIR__.'/../credit/calculate_loan_normal_share_coll.php');
-			}else if($dataComing["loantype_code"] == '30'){
-				include(__DIR__.'/../credit/calculate_loan_special_share_coll.php');
+			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
+				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
 			}else{
 				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
@@ -50,8 +46,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-			$arrayResult["REQ_SALARY"] = TRUE;
-			$arrayResult["REQ_CITIZEN"] = TRUE;
+			$arrayResult["REQ_SALARY"] = FALSE;
+			$arrayResult["REQ_CITIZEN"] = FALSE;
+			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
+			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}

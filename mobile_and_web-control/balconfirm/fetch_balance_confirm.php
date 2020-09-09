@@ -41,17 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGrpAllLoan["SUM_ALL_ACC"] += $rowSumAllLoan["BALANCE"];
 			$arrGrpAllLoan["COUNT_ACC"]++;
 			$arraysumLoan["BALANCE"] = $rowSumAllLoan["BALANCE"];
-			$contract_no = preg_replace('/\//','',$rowSumAllLoan["LOANCONTRACT_NO"]);
-			if(mb_stripos($contract_no,'.') === FALSE){
-				$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-				if(mb_strlen($contract_no) == 10){
-					$arraysumLoan["SOURCE_NO"] = $loan_format;
-				}else if(mb_strlen($contract_no) == 11){
-					$arraysumLoan["SOURCE_NO"] = $loan_format.'-'.mb_substr($contract_no,10);
-				}
-			}else{
-				$arraysumLoan["SOURCE_NO"] = $contract_no;
-			}
+			$arraysumLoan["SOURCE_NO"] = preg_replace('/\//','',$rowSumAllLoan["LOANCONTRACT_NO"]);
 			$arraysumLoan["TYPE_ACCOUNT"] = $rowSumAllLoan["LOAN_TYPE"];
 			$arrGrpLoan['TYPE_ACCOUNT'] = $rowSumAllLoan["LOAN_TYPE"];
 			if(array_search($rowSumAllLoan["LOAN_TYPE"],array_column($arrGrpLoanAll,'TYPE_ACCOUNT')) === False){

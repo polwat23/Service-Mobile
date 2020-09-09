@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		$getAllReqDocno = $conmysql->prepare("SELECT COUNT(reqloan_doc) AS COUNT_WAITING,
 															(SELECT COUNT(reqloan_doc) AS COUNT_PROCESSING FROM gcreqloan WHERE req_status = '7') AS COUNT_PROCESSING,
-															(SELECT COUNT(reqloan_doc) AS COUNT_CANCEL FROM gcreqloan WHERE req_status = '-9') AS COUNT_CANCEL,
+															(SELECT COUNT(reqloan_doc) AS COUNT_CANCEL FROM gcreqloan WHERE req_status = '9') AS COUNT_CANCEL,
+															(SELECT COUNT(reqloan_doc) AS COUNT_DISAPPROVAL FROM gcreqloan WHERE req_status = '-9') AS COUNT_DISAPPROVAL,
 															(SELECT COUNT(reqloan_doc) AS COUNT_APPROVE FROM gcreqloan WHERE req_status = '1') AS COUNT_APPROVE
 															FROM gcreqloan WHERE req_status = '8'");
 		$getAllReqDocno->execute();

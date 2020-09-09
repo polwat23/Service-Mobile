@@ -9,7 +9,11 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 		if($dataComing["account_status"]=='1'){
 			$queryString = 'UPDATE gcmemberaccount SET account_status = prev_acc_status,prev_acc_status = :account_status,counter_wrongpass = 0
 								WHERE member_no = :member_no';
-			$list_name = "unlock account";
+			if(isset($dataComing["unlock_type"]) && $dataComing["unlock_type"] != ""){
+				$list_name =  $dataComing["unlock_type"]."/unlock account";
+			}else{
+				$list_name =  "unlock account";
+			}
 		}else{
 			$queryString = 'UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = :account_status,counter_wrongpass = 0
 								WHERE member_no = :member_no';
