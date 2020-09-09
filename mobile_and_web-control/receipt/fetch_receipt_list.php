@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
-		$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");
+		$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,KEEPING_STATUS 
+															from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");
 		$getPeriodKP->execute([
 				':member_no' => $member_no
 		]);
@@ -14,18 +15,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
-			$getKPDetail = $conmssql->prepare("SELECT KPR.RECEIPT_DATE,KPR.RECEIPT_NO,ISNULL(SUM_ITEM.ITEM_PAYMENT,KPR.RECEIVE_AMT) AS RECEIVE_AMT FROM KPMASTRECEIVE KPR,
-													(SELECT ISNULL(SUM(KPD.ITEM_PAYMENT * KUT.SIGN_FLAG),0) AS ITEM_PAYMENT 
+			$getKPDetail = $conmssql->prepare("SELECT ISNULL(SUM(KPD.ITEM_PAYMENT * KUT.SIGN_FLAG),0) AS ITEM_PAYMENT 
 													FROM KPMASTRECEIVEDET KPD
 													LEFT JOIN KPUCFKEEPITEMTYPE KUT ON 
 													KPD.KEEPITEMTYPE_CODE = KUT.KEEPITEMTYPE_CODE
-													where kpd.member_no = ? and kpd.recv_period = ?) sum_item
-													where kpr.member_no = ? and kpr.recv_period = ? and kpr.KEEPING_STATUS = 1");
-			$getKPDetail->execute([$member_no,$rowPeriod["RECV_PERIOD"],$member_no,$rowPeriod["RECV_PERIOD"]]);
+													where kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+			$getKPDetail->execute([
+				':member_no' => $member_no,
+				':recv_period' => $rowPeriod["RECV_PERIOD"]
+			]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
-			$arrKpmonth["SLIP_NO"] = $rowKPDetali["RECEIPT_NO"];
-			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowKPDetali["RECEIPT_DATE"],'d m Y');
-			$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["RECEIVE_AMT"],2);
+			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
+			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["RECEIPT_DATE"],'d m Y');
+			if(isset($rowPeriod["RECEIVE_AMT"]) && $rowPeriod["RECEIVE_AMT"] != ""){
+				$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);
+			}else{
+				$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["ITEM_PAYMENT"],2);
+			}
+			if($rowPeriod["KEEPING_STATUS"] == '-99' || $rowPeriod["KEEPING_STATUS"] == '-9'){
+				$arrKpmonth["IS_CANCEL"] = TRUE;
+			}else{
+				$arrKpmonth["IS_CANCEL"] = FALSE;
+			}
 			$arrayGroupPeriod[] = $arrKpmonth;
 		}
 		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
