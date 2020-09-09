@@ -104,7 +104,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				}
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
+				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
 				}else{
@@ -118,7 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
+			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ADJUST_ITEMAMT"];
 			}else{
@@ -130,7 +130,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE
+																kpd.OPERATE_DATE,
+																kpd.KEEPING_STATUS
 																FROM kpmastreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
@@ -138,6 +139,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
+		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = trim($rowKPHeader["RECEIPT_NO"]);
@@ -215,9 +217,13 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
-				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
-				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
+				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
+	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
+		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
+	}else{
+		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
+	}
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด</p>
 				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 2 อาคารศรีสวรินทิรา ชั้น 1 และ ชั้น 6 ถนนวังหลัง</p>
 				<p style="margin-top: -25px;font-size: 18px;">แขวงศิริราช เขตบางกอกน้อย กรุงเทพมหานคร 10700</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2444-7741-3, 0-2419-7543-5, 0-2419-8363-4</p>
