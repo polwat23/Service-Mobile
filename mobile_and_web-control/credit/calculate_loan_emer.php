@@ -35,7 +35,7 @@ if($rowMemb["MEMBGROUP_CONTROL"] != "82500000" && $rowMemb["MEMBTYPE_CODE"] <= '
 			if($rowMemb["MEMBTYPE_CODE"] == '05' || $rowMemb["MEMBTYPE_CODE"] == '10'){
 				$percentShare = 0.90;
 				$maxloan_amt = $rowMemb["SHARE_AMT"] * $percentShare;
-				$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น".($percentShare * 100)."% ของค่าหุ้นเนื่องจาก ประเภทสมาชิกเป็น ".$rowMemb["MEMBTYPE_CODE"];
+				$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น".($percentShare * 100)."% ของค่าหุ้นเนื่องจาก ประเภทสมาชิกเป็น ".$rowMemb["MEMBTYPE_CODE"];
 			}else{
 				$checkCountContract = $conoracle->prepare("SELECT * FROM (SELECT COUNT(lm.loancontract_no) as C_CON_NORMAL FROM lncontmaster lm 
 																				LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code
@@ -49,7 +49,7 @@ if($rowMemb["MEMBGROUP_CONTROL"] != "82500000" && $rowMemb["MEMBTYPE_CODE"] <= '
 				$rowCount = $checkCountContract->fetch(PDO::FETCH_ASSOC);
 				if(($rowCount["C_CON_NORMAL"] > 0 && $rowCount["C_CON_SPECIAL"] > 0) || $rowCount["C_CON_ADJ"] > 0){
 					$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 2;
-					$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 2 เท่าของเงินเดือนเนื่องจากมีเงินกู้สามัญ เงินกู้พิเศษหรือเงินกู้ปรับปรุงโครงสร้างหนี้";
+					$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 2 เท่าของเงินเดือนเนื่องจากมีเงินกู้สามัญ เงินกู้พิเศษหรือเงินกู้ปรับปรุงโครงสร้างหนี้";
 				}else{
 					$getCollSelfLoan = $conoracle->prepare("SELECT COUNT(*) as C_COLL_OWN,own_contract.last_periodpay as OWN_LAST_PERIODPAY,ref_coll.last_periodpay as COLL_LAST_PERIODPAY
 																			FROM(
@@ -72,14 +72,14 @@ if($rowMemb["MEMBGROUP_CONTROL"] != "82500000" && $rowMemb["MEMBTYPE_CODE"] <= '
 						$rowLoanSpecial = $getLoanSpecial->fetch(PDO::FETCH_ASSOC);
 						if($rowLoanSpecial["C_CONT"] > 0){
 							$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 1;
-							$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 1 เท่าของเงินเดือนเนื่องจากมีการแลกกู้แลกค้ำและมีเงินกู้พิเศษมากกว่า 1 สัญญา";
+							$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 1 เท่าของเงินเดือนเนื่องจากมีการแลกกู้แลกค้ำและมีเงินกู้พิเศษมากกว่า 1 สัญญา";
 						}else{
 							if($rowSelfLoan["OWN_LAST_PERIODPAY"] >= 4 && $rowSelfLoan["COLL_LAST_PERIODPAY"] >= 1){
 								$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 3;
-								$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 3 เท่าของเงินเดือนเนื่องจากท่านส่งงวดกู้สามัญมาแล้ว 4 งวดและผู้ค้ำของท่านส่งสัญญาค้ำมาแล้ว 1 งวด";
+								$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 3 เท่าของเงินเดือนเนื่องจากท่านส่งงวดกู้สามัญมาแล้ว 4 งวดและผู้ค้ำของท่านส่งสัญญาค้ำมาแล้ว 1 งวด";
 							}else{
 								$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 2;
-								$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 2 เท่าของเงินเดือนเนื่องจากมีการแลกกู้แลกค้ำ";
+								$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 2 เท่าของเงินเดือนเนื่องจากมีการแลกกู้แลกค้ำ";
 							}
 						}
 					}else{
@@ -95,7 +95,7 @@ if($rowMemb["MEMBGROUP_CONTROL"] != "82500000" && $rowMemb["MEMBTYPE_CODE"] <= '
 						$rowCollAmt = $checkCollAmt->fetch(PDO::FETCH_ASSOC);
 						if($rowLoanSpecial["C_CONT"] > 0 && $rowCollAmt["C_CONT"] >= 2){
 							$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 3;
-							$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 3 เท่าของเงินเดือนเนื่องจากสมาชิกมีเงินกู้พิเศษและค้ำประกันอย่างน้อย 2 สัญญา";
+							$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 3 เท่าของเงินเดือนเนื่องจากสมาชิกมีเงินกู้พิเศษและค้ำประกันอย่างน้อย 2 สัญญา";
 						}else{
 							$getContactTransfer = $conoracle->prepare("SELECT PRINCIPAL_BALANCE FROM lncontmaster WHERE contract_status = 11 and member_no = :member_no");
 							$getContactTransfer->execute([':member_no' => $member_no]);
@@ -104,14 +104,14 @@ if($rowMemb["MEMBGROUP_CONTROL"] != "82500000" && $rowMemb["MEMBTYPE_CODE"] <= '
 								$percentShare = 1.25;
 								if($rowContactTransfer["PRINCIPAL_BALANCE"] < ($rowMemb["SHARE_AMT"] * $percentShare)){
 									$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 1;
-									$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 1 เท่าของเงินเดือนเนื่องจากมีสัญญารับโอนมาและหนี้คงเหลือน้อยกว่า ".($percentShare * 100)."% ของหุ้น";
+									$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 1 เท่าของเงินเดือนเนื่องจากมีสัญญารับโอนมาและหนี้คงเหลือน้อยกว่า ".($percentShare * 100)."% ของหุ้น";
 								}else{
 									$canRequest = FALSE;
 									$maxloan_amt = 0;
 								}
 							}else{
 								$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * 3;
-								$rights_desc = "ได้ ".$maxloan_amt." บาท คิดเป็น 3 เท่าของเงินเดือน";
+								$rights_desc = "ได้ ".number_format($maxloan_amt,2)." บาท คิดเป็น 3 เท่าของเงินเดือน";
 							}
 						}
 					}

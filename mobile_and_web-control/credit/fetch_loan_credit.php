@@ -22,6 +22,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				include('calculate_loan_normal_share_coll.php');
 			}else if($rowCanCal["loantype_code"] == '30'){
 				include('calculate_loan_special_share_coll.php');
+			}else if($rowCanCal["loantype_code"] == '23'){
+				include('calculate_loan_normal_person_coll.php');
 			}else{
 				include('calculate_loan_etc.php');
 			}
