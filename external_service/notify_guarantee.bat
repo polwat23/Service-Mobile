@@ -1,3 +1,3 @@
 @echo off
 
-D:\php7.4\php.exe D:\Mobile\service-ptt\external_service\notification_guarantee_trigger.php
+C:\Mobile\php7.4\php.exe C:\Mobile\service-srn\external_service\notification_guarantee_trigger.php

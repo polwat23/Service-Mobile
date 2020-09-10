@@ -1,22 +1,22 @@
 @echo off
 
 
-del D:\Mobile\service-ptt\external_service\backupDB_ptt.zip
+del C:\Mobile\service-srn\external_service\backupDB_srn.zip
 
 cd C:\Program Files\MariaDB 10.4\bin
 
 C:
 
-mysqldump.exe -hlocalhost -P3306 -u root -p@PTT2020 mobile_ptt > D:\Mobile\service-ptt\external_service\backupDB_ptt.sql
+mysqldump.exe -hlocalhost -P3306 -u root -p@SRN2020 mobile_srn > C:\Mobile\service-srn\external_service\backupDB_srn.sql
 
-"C:\Program Files\7-Zip\7z.exe" a -r D:\Mobile\service-ptt\external_service\backupDB_ptt.zip D:\Mobile\service-ptt\external_service\backupDB_ptt.sql
+"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\service-srn\external_service\backupDB_srn.zip C:\Mobile\service-srn\external_service\backupDB_srn.sql
 
-del D:\Mobile\service-ptt\external_service\backupDB_ptt.sql
+del C:\Mobile\service-srn\external_service\backupDB_srn.sql
 
 cd C:\Program Files (x86)\WinSCP
 
 C:
 
-winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put D:\Mobile\service-ptt\external_service\backupDB_ptt.zip" "exit"
+winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put C:\Mobile\service-srn\external_service\backupDB_srn.zip" "exit"
 
-del D:\Mobile\service-ptt\external_service\backupDB_ptt.zip
+del C:\Mobile\service-srn\external_service\backupDB_srn.zip

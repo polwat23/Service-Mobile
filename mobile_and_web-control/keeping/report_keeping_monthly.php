@@ -198,14 +198,14 @@ function GenerateReport($dataReport,$header,$lib){
 			</tbody>
 			</table>
 			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
+			<div style="width: 100%; height: 325px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">งวดที่</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
-			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
+			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;padding-top: 1px;">รายการชำระ</div>
+			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 355px;padding-top: 1px;">งวดที่</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
+			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
 			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
 			</div>';
 				// Detail
@@ -213,11 +213,6 @@ function GenerateReport($dataReport,$header,$lib){
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
 			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
@@ -263,14 +258,14 @@ function GenerateReport($dataReport,$header,$lib){
 	}
 	$html .= '</div>';
 			// Footer
-	$html .= '<div style="display:flex;width: 100%;height: 40px" class="sub-table">
-			<div style="border-top: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;border-right : 0.5px solid black;padding-top: 0px;height:30px;margin-left: 580px">
+	$html .= '<div style="display:flex;width: 100%;height: 40px;" class="sub-table">
+			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
+			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;font-weight:bold">( '.$lib->baht_text($sumBalance).' )</div>
+			<div style="width: 110px;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
+			<div style="width: 110px;text-align: center;font-size: 18px;padding-top: 0px;height:30px;margin-left: 580px">
 			รวมเงิน
 			</div>
-			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
+			<div style="width: 120px;text-align: right;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;font-weight:bold">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
 			<div style="display:flex;">
