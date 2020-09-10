@@ -38,12 +38,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					$arrayResult['DIFF_OLD_CONTRACT'] = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
 					$arrayResult['LOANPERMIT_AMT'] = round($responseSoap->loanpermiss_amt,2);
 					if($dataComing["loantype_code"] == '02023'){
-						$arrayResult['REQUEST_AMT'] = round($responseSoap->maxreceive_amt + $arrayResult['DIFF_OLD_CONTRACT'],2);
+						$arrayResult['REQUEST_AMT'] = intval($responseSoap->maxreceive_amt + $arrayResult['DIFF_OLD_CONTRACT']);
 						if($arrayResult['REQUEST_AMT'] > $responseSoap->loanrequest_amt){
 							$arrayResult['REQUEST_AMT'] = $responseSoap->loanrequest_amt;
 						}
 					}else{
-						$arrayResult['REQUEST_AMT'] = round($responseSoap->loanpermiss_amt,2);
+						$arrayResult['REQUEST_AMT'] = intval($responseSoap->loanpermiss_amt);
 					}
 					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
 					$arrayResult['PERIOD'] = $responseSoap->period_payamt;
@@ -70,6 +70,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 							$arrayResult = array();
 							$arrayResult['RESPONSE_CODE'] = "WS0071";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['AA'] = $responseSoap_Credit->period_payment;
+							$arrayResult['DDDD'] = $responseSoap;
 							$arrayResult['RESULT'] = FALSE;
 							echo json_encode($arrayResult);
 							exit();

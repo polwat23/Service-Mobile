@@ -201,47 +201,63 @@ class library {
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}
+	private function concatpercent($string) {
+		$strLen = strlen($string);
+		if($strLen > 0){
+			$output .= "%";
+			for($i=0; $i < $strLen; $i++) {
+				$output .= $string{$i};
+				if($i % 2 != 0 && $i < $strLen - 1){
+					$output .= "%";
+				}
+			}
+		}
+		return $output;
+	 }
+	public function unicodeMessageEncode($string){
+		$string = strtoupper(mb_strtoupper(bin2hex(mb_convert_encoding($string, 'UTF-16BE', 'UTF-8'))));
+		return $this->concatpercent($string);
+	}
 	public function sendSMS($arrayDestination,$bulk=false) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($json,true);
 		$arrayGrpSms = array();
-		try{
-			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
-			try {
-				if($bulk){
-					foreach($arrayDestination as $dest){
-						$argumentWS = [
-							"Member_No" => $dest["member_no"],
-							"MobilePhone" => $dest["tel"],
-							"Message" => $dest["message"]
-						];
-						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-						$responseSoap = $resultWS->RqSendOTPResult;
-						$arraySms["MEMBER_NO"] = $dest["member_no"];
-						$arraySms["RESULT"] = $responseSoap;
-						$arrayGrpSms[] = $arraySms;
-					}
-					return $arrayGrpSms;
-				}else{
-					$argumentWS = [
-						"Member_No" => $arrayDestination["member_no"],
-						"MobilePhone" => $arrayDestination["tel"],
-						"Message" => $arrayDestination["message"]
-					];
-					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-					$responseSoap = $resultWS->RqSendOTPResult;
-					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
-					$arrayGrpSms["RESULT"] = $responseSoap;
-					return $arrayGrpSms;
-				}
-			}catch(SoapFault $e){
-				$arrayGrpSms["RESULT"] = FALSE;
-				return $arrayGrpSms;
+		if($bulk){
+			/*foreach($arrayDestination as $dest){
+				$argumentWS = [
+					"Member_No" => $dest["member_no"],
+					"MobilePhone" => $dest["tel"],
+					"Message" => $dest["message"]
+				];
+				$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+				$responseSoap = $resultWS->RqSendOTPResult;
+				$arraySms["MEMBER_NO"] = $dest["member_no"];
+				$arraySms["RESULT"] = $responseSoap;
+				$arrayGrpSms[] = $arraySms;
 			}
-		}catch(Throwable $e){
-			$arrayGrpSms["RESULT"] = FALSE;
-			return $arrayGrpSms;
-			return false;
+			return $arrayGrpSms;*/
+		}else{
+			$resp = "";
+			$fp = fsockopen($config["IP_SMS"], $config["PORT_SMS"], $errno, $errstr, 30);
+			if (!$fp) {
+				$resp = $errno;
+			} else {
+				$length = strlen($data);
+				$out = "POST ".$config["URL_CORE_SMS"]." HTTP/1.0\r\n";
+				$out .= "Host: ".$config["IP_SMS"]."\r\n";
+				$out .= "Content-type: application/x-www-form-urlencoded\r\n";
+				$out .= "Content-length: ".strlen($arrayDestination["cmd_sms"])."\r\n\r\n";
+				$out .= $data;
+				fputs($fp, $out);
+				while (!feof($fp)) {
+					$temp = fgets($fp, 1000);
+					$resp .= $temp;
+				}
+				fclose($fp);
+			}
+			return $resp;
+			//$arrayGrpSms["RESULT"] = TRUE;
+			//return $arrayGrpSms;
 		}
 	}
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
@@ -264,6 +280,7 @@ class library {
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
+		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
