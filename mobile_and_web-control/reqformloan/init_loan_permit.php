@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
 			$period_payment = $dataComing["request_amt"] / $dataComing["period"];
+			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$arrayResult['RESULT'] = TRUE;

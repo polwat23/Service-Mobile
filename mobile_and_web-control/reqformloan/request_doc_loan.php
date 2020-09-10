@@ -422,8 +422,8 @@ function GeneratePDFContract($data,$lib) {
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$data["requestdoc_no22"].'.pdf';
-	$pathfile_show = '/resource/pdf/request_loan/'.$data["requestdoc_no22"].'.pdf';
+	$pathfile = $pathfile.'/'.$data["requestdoc_no"].'.pdf';
+	$pathfile_show = '/resource/pdf/request_loan/'.$data["requestdoc_no"].'.pdf';
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){
