@@ -16,14 +16,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrCredit = array();
 			$maxloan_amt = 0;
 			$canRequest = FALSE;
-			if($rowCanCal["loantype_code"] == '10'){
-				include('calculate_loan_emer.php');
-			}else if($rowCanCal["loantype_code"] == '20'){
-				include('calculate_loan_normal_share_coll.php');
-			}else if($rowCanCal["loantype_code"] == '30'){
-				include('calculate_loan_special_share_coll.php');
-			}else if($rowCanCal["loantype_code"] == '23'){
-				include('calculate_loan_normal_person_coll.php');
+			if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
+				include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
 			}else{
 				include('calculate_loan_etc.php');
 			}
@@ -43,6 +37,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 				}
 			}
+			$arrCredit["COLL_ONE_PERSON"] = $collOnePerson ?? null;
+			$arrCredit["COLL_TWO_PERSON"] = $collTwoPerson ?? null;
 			$arrCredit["ALLOW_REQUEST"] = $canRequest;
 			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 			$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
