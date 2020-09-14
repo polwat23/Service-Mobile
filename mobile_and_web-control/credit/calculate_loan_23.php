@@ -7,6 +7,8 @@ $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $request_amt = 0;
+$collOnePerson = 0;
+$collTwoPerson = 0;
 $getMemb = $conoracle->prepare("SELECT sh.LAST_PERIOD,(sh.sharestk_amt*10) as SHARE_AMT,mb.SALARY_AMOUNT
 											FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 											WHERE mb.member_no = :member_no");
@@ -22,6 +24,38 @@ $fetchCredit->execute([
 ]);
 $rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
 $maxloan_amt = $rowMemb["SALARY_AMOUNT"] * $rowCredit["PERCENTSALARY"];
+if($maxloan_amt < 500000){
+	$shareShouldHave = $rowMemb["SHARE_AMT"] * 0.12;
+	if($shareShouldHave > $maxloan_amt){
+		$maxloan_amt = $shareShouldHave;
+	}
+}else if($maxloan_amt >= 500000 && $maxloan_amt <= 1000000){
+	$shareShouldHave = $rowMemb["SHARE_AMT"] * 0.17;
+	if($shareShouldHave > $maxloan_amt){
+		$maxloan_amt = $shareShouldHave;
+	}
+}else if($maxloan_amt > 1000000){
+	$shareShouldHave = $rowMemb["SHARE_AMT"] * 0.22;
+	if($shareShouldHave > $maxloan_amt){
+		$maxloan_amt = $shareShouldHave;
+	}
+}
+$arrCreditOnePerson[] = $rowMemb["SALARY_AMOUNT"] * 38;
+$arrCreditOnePerson[] = 600000 + $rowMemb["SHARE_AMT"];
+$creditOnePerson = min($arrCreditOnePerson);
+if($maxloan_amt > $creditOnePerson){
+	$collOnePerson = $creditOnePerson;
+}else{
+	$collOnePerson = $maxloan_amt;
+}
+$arrCreditTwoPerson[] = $rowMemb["SALARY_AMOUNT"] * 50;
+$arrCreditTwoPerson[] = 1200000 + $rowMemb["SHARE_AMT"];
+$creditTwoPerson = min($arrCreditTwoPerson);
+if($maxloan_amt > $creditTwoPerson){
+	$collTwoPerson = $creditTwoPerson;
+}else{
+	$collTwoPerson = $maxloan_amt;
+}
 if($maxloan_amt > $rowCredit["MAXLOAN_AMT"]){
 	$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
 }
