@@ -46,17 +46,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrCredit = array();
 				$maxloan_amt = 0;
 				$rights_desc = null;
+				$collOnePerson = null;
+				$collTwoPerson = null;
 				$canRequest = FALSE;
-				if($rowCanCal["loantype_code"] == '10'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_emer.php');
-				}else if($rowCanCal["loantype_code"] == '20'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_normal_share_coll.php');
-				}else if($rowCanCal["loantype_code"] == '30'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_special_share_coll.php');
-				}else if($rowCanCal["loantype_code"] == '23'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_normal_person_coll.php');
+				$arrCollShould = array();
+				if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
+					include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
 				}else{
-					include('../../../../mobile_and_web-control/credit/calculate_loan_etc.php');
+					include('calculate_loan_etc.php');
 				}
 				if($canRequest === TRUE){
 					$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
@@ -74,6 +71,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						}
 					}
 				}
+				if(isset($collOnePerson)){
+					$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำคนเดียว";
+					$arrSubCollPerson["CREDIT_AMT"] = $collOnePerson;
+					$arrCollShould[] = $arrSubCollPerson;
+				}
+				if(isset($collTwoPerson)){
+					$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำมากกว่า 1 คน";
+					$arrSubCollPerson["CREDIT_AMT"] = $collTwoPerson;
+					$arrCollShould[] = $arrSubCollPerson;
+				}
+				$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
 				$arrCredit["ALLOW_REQUEST"] = $canRequest;
 				$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 				$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
