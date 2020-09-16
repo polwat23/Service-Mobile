@@ -5,18 +5,25 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mg.gain_relation as gain_concern,mg.remark
-												FROM mbgainmaster mg
+		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mc.gain_concern as gain_concern,mg.remark
+												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
 												WHERE mg.member_no = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
+			$arrBenefit["FULL_NAME"] = $rowBenefit["GAIN_NAME"];
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
 			$arrBenefit["TYPE_PERCENT"] = 'text';
-			$arrBenefit["PERCENT_TEXT"] = isset($rowBenefit["REMARK"]) && $rowBenefit["REMARK"] != "" ? $rowBenefit["REMARK"] : "แบ่งให้เท่า ๆ กัน";
-			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
+			if(isset($rowBenefit["GAIN_SURNAME"])){
+				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
+				$arrBenefit["PERCENT_TEXT"] = isset($rowBenefit["GAIN_SURNAME"]) && $rowBenefit["GAIN_SURNAME"] != "" ? $rowBenefit["GAIN_SURNAME"] : "แบ่งให้เท่า ๆ กัน";
+			}else if(isset($rowBenefit["REMARK"])){
+				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
+				$arrBenefit["PERCENT_TEXT"] = isset($rowBenefit["REMARK"]) && $rowBenefit["REMARK"] != "" ? $rowBenefit["REMARK"] : "แบ่งให้เท่า ๆ กัน";
+			}else{
+				$arrBenefit["PERCENT_TEXT"] = isset($rowBenefit["GAIN_ADDR"]) && $rowBenefit["GAIN_ADDR"] != "" ? $rowBenefit["GAIN_ADDR"] : "แบ่งให้เท่า ๆ กัน";
+			}
+			$arrBenefit["PERCENT"] = filter_var($rowBenefit["GAIN_SURNAME"], FILTER_SANITIZE_NUMBER_INT);
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
