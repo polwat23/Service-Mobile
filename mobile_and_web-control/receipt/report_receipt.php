@@ -209,11 +209,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย</p>
-			<p style="margin-top: -25px;font-size: 18px;">ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 053-712585, 053-756203</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์เครดิตยูเนี่ยนไทยฮอนด้า จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">410 นิคมอุตสาหกรรมลาดกระบัง ถนนฉลองกรุง</p>
+			<p style="margin-top: -25px;font-size: 18px;">แขวงลำปลาทิว เขตลาดกระบัง กรุงเทพมหานคร 10520</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2326-1319</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -321,12 +320,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:200px;margin-left: 550px;display:flex;">
 			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
-			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-60px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new DOMPDF();
