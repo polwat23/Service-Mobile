@@ -7,8 +7,8 @@ $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $request_amt = 0;
-$collOnePerson = 0;
-$collTwoPerson = 0;
+$collOnePerson = null;
+$collTwoPerson = null;
 $getMemb = $conoracle->prepare("SELECT sh.LAST_PERIOD,(sh.sharestk_amt*10) as SHARE_AMT,mb.SALARY_AMOUNT
 											FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 											WHERE mb.member_no = :member_no");
@@ -58,5 +58,15 @@ if($maxloan_amt > $creditTwoPerson){
 }
 if($maxloan_amt > $rowCredit["MAXLOAN_AMT"]){
 	$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
+}
+if(isset($collOnePerson)){
+	$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำคนเดียว";
+	$arrSubCollPerson["CREDIT_AMT"] = $collOnePerson;
+	$arrCollShould[] = $arrSubCollPerson;
+}
+if(isset($collTwoPerson)){
+	$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำมากกว่า 1 คน";
+	$arrSubCollPerson["CREDIT_AMT"] = $collTwoPerson;
+	$arrCollShould[] = $arrSubCollPerson;
 }
 ?>
