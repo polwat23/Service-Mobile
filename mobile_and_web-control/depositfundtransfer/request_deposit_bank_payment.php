@@ -89,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			try {
 				$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl",array(
 					'keep_alive' => false,
-					 'connection_timeout' => 900
+					'connection_timeout' => 900
 				));
 				try {
 					$argumentWS = [

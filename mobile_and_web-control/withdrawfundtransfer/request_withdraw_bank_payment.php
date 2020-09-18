@@ -1,4 +1,5 @@
 <?php
+ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc',
@@ -69,7 +70,10 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
 		try{
-			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl",array(
+					'keep_alive' => false,
+					'connection_timeout' => 900
+			));
 			try {
 				$argumentWS = [
 					"as_wspass" => $config["WS_STRC_DB"],
