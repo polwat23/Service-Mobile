@@ -42,10 +42,26 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno = array();
 				$arrDocno["REQDOC_NO"] = $rowDocno["reqloan_doc"];
 				$arrDocno["MEMBER_NO"] = $rowDocno["member_no"];
+				
+					$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
+									mb.member_no,mb.MEMBGROUP_CODE 
+									FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+									WHERE mb.member_no = :member_no");
+				$fetchMember->execute([
+					':member_no' => $rowDocno["member_no"]
+				]);
+				
+				$arrDocno["FULLNAME"] = null;
+				$arrDocno["MEMBGROUP_CODE"] = null;
+				while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
+					$arrDocno["FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+					$arrDocno["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+				}
+			
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
 				$arrDocno["LOANTYPE_DESC"] = $arrayType[$rowDocno["loantype_code"]];
 				$arrDocno["REQUEST_AMT"] = number_format($rowDocno["request_amt"],2);
-				$arrDocno["PERIOD_PAYMENT"] = number_format($rowDocno["period_payment"],2);
+				//$arrDocno["PERIOD_PAYMENT"] = number_format($rowDocno["period_payment"],2);
 				$arrDocno["REQUEST_DATE"] = $lib->convertdate($rowDocno["request_date"],'d m Y',true);
 				if($rowDocno["req_status"] == '1'){
 					$arrDocno["APPROVE_DATE"] = $lib->convertdate($rowDocno["approve_date"],'d m Y',true);
@@ -82,10 +98,26 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno = array();
 				$arrDocno["REQDOC_NO"] = $rowDocno["reqloan_doc"];
 				$arrDocno["MEMBER_NO"] = $rowDocno["member_no"];
+				
+				$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
+									mb.member_no,mb.MEMBGROUP_CODE 
+									FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+									WHERE mb.member_no = :member_no");
+				$fetchMember->execute([
+					':member_no' => $rowDocno["member_no"]
+				]);
+				
+				$arrDocno["FULLNAME"] = null;
+				$arrDocno["MEMBGROUP_CODE"] = null;
+				while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
+					$arrDocno["FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+					$arrDocno["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+				}
+				
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
 				$arrDocno["LOANTYPE_DESC"] = $arrayType[$rowDocno["loantype_code"]];
 				$arrDocno["REQUEST_AMT"] = number_format($rowDocno["request_amt"],2);
-				$arrDocno["PERIOD_PAYMENT"] = number_format($rowDocno["period_payment"],2);
+				//$arrDocno["PERIOD_PAYMENT"] = number_format($rowDocno["period_payment"],2);
 				$arrDocno["REQUEST_DATE"] = $lib->convertdate($rowDocno["request_date"],'d m Y',true);
 				if($rowDocno["req_status"] == '1'){
 					$arrDocno["APPROVE_DATE"] = $lib->convertdate($rowDocno["approve_date"],'d m Y',true);
