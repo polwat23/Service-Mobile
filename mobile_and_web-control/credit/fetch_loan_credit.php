@@ -13,11 +13,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
 			$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
 			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
-			$collOnePerson = null;
-			$collTwoPerson = null;
 			$arrCredit = array();
 			$maxloan_amt = 0;
 			$arrCollShould = array();
+			$arrOtherInfo = array();
 			$canRequest = FALSE;
 			if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
 				include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
@@ -40,16 +39,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 				}
 			}
-			if(isset($collOnePerson)){
-				$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำคนเดียว";
-				$arrSubCollPerson["CREDIT_AMT"] = $collOnePerson;
-				$arrCollShould[] = $arrSubCollPerson;
-			}
-			if(isset($collTwoPerson)){
-				$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำมากกว่า 1 คน";
-				$arrSubCollPerson["CREDIT_AMT"] = $collTwoPerson;
-				$arrCollShould[] = $arrSubCollPerson;
-			}
+			
+			$arrCredit["OTHER_INFO"] = $arrOtherInfo;
 			$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
 			$arrCredit["ALLOW_REQUEST"] = $canRequest;
 			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
