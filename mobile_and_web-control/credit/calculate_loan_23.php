@@ -69,4 +69,6 @@ if(isset($collTwoPerson)){
 	$arrSubCollPerson["CREDIT_AMT"] = $collTwoPerson;
 	$arrCollShould[] = $arrSubCollPerson;
 }
+$arrSubOther["LABEL"] = "สิทธิการกู้ที่แสดงในระบบนี้เป็นเพียงสิทธิประมาณการเท่านั้น  มิใช่สิทธิกู้จริง  ทางสหกรณ์จะต้องดูรายละเอียดต่าง ๆ ประกอบในการให้กู้แต่ละประเภทนั้น  ๆ อีกครั้ง";
+$arrOtherInfo[] = $arrSubOther;
 ?>
