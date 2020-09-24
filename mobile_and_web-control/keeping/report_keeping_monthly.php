@@ -277,8 +277,8 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			<div style="font-size: 18px;margin-left: 650px;margin-top:-60px;">
 			.........................................................
-			<p style="margin-left: 65px;">(นายนัจรินทร์  อัมพรมหา)</p>
-			<p style="margin-left: 25px;margin-top:-10px;">ผู้จัดการ</p>
+			<p style="margin-left: 25px;">(นายนัจรินทร์  อัมพรมหา)</p>
+			<p style="margin-left: 65px;margin-top:-10px;">ผู้จัดการ</p>
 			</div>
 			';
 
