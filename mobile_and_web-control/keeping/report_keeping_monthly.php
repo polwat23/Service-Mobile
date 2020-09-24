@@ -51,6 +51,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
+				if(strpos($rowDetail["PAY_ACCOUNT"],"ค่าหุ้นจากสภ") !== FALSE){
+					$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+				}
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -65,7 +68,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if(strpos($rowDetail["PAY_ACCOUNT"],"ค่าหุ้นจากสภ") === FALSE){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}else{
+				$arrDetail["ITEM_BALANCE"] = number_format(0,2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
@@ -162,7 +169,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์เครดิตยูเนี่ยนไทยฮอนด้า จำกัด</p>
 				<p style="margin-top: -27px;font-size: 18px;">410 นิคมอุตสาหกรรมลาดกระบัง ถนนฉลองกรุง</p>
 				<p style="margin-top: -25px;font-size: 18px;">แขวงลำปลาทิว เขตลาดกระบัง กรุงเทพมหานคร 10520</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2326-1319</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 1504, 0-2326-1319</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -210,7 +217,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
-			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
+				<div>'.(strpos($dataReport[$i]["PAY_ACCOUNT"],"ค่าหุ้นจากสภ") === FALSE ? $dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"] : $dataReport[$i]["PAY_ACCOUNT"]).'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -231,7 +238,7 @@ function GenerateReport($dataReport,$header,$lib){
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
 			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
+				<div>'.(strpos($dataReport[$i]["PAY_ACCOUNT"],"ค่าหุ้นจากสภ") === FALSE ? $dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"] : $dataReport[$i]["PAY_ACCOUNT"]).'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -268,9 +275,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-20px;">
+			<div style="font-size: 18px;margin-left: 650px;margin-top:-60px;">
 			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
+			<p style="margin-left: 65px;">ผู้จัดการ</p>
+			<p style="margin-left: 25px;margin-top:-10px;">(นายนัจรินทร์  อัมพรมหา)</p>
+			</div>
 			';
 
 	$dompdf = new DOMPDF();
