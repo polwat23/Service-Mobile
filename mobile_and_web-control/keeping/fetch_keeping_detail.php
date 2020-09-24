@@ -74,6 +74,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
+				if(strpos($rowDetail["PAY_ACCOUNT"],"ค่าหุ้นจากสภ") !== FALSE){
+					$arrDetail["TYPE_DESC"] = $rowDetail["PAY_ACCOUNT"];
+				}
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -88,7 +91,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if(strpos($rowDetail["PAY_ACCOUNT"],"ค่าหุ้นจากสภ") === FALSE){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}else{
+				$arrDetail["ITEM_BALANCE"] = number_format(0,2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
