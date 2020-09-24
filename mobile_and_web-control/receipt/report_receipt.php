@@ -18,6 +18,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$getKpSlipNo = $conoracle->prepare("SELECT KPSLIP_NO,KEEPING_STATUS,RECEIPT_NO,OPERATE_DATE from kpmastreceive where member_no = :member_no and recv_period = :recv_period");
+		$getKpSlipNo->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
+		$header["keeping_status"] = $rowKp["KEEPING_STATUS"];
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
@@ -126,20 +133,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}
 			$arrGroupDetail[] = $arrDetail;
 		}
-		$getDetailKPHeader = $conoracle->prepare("SELECT 
-																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE
-																FROM kpmastreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
-		$getDetailKPHeader->execute([
-			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
-		]);
-		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$header["receipt_no"] = TRIM($rowKp["RECEIPT_NO"]);
+		$header["operate_date"] = $lib->convertdate($rowKp["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
@@ -214,9 +211,13 @@ function GenerateReport($dataReport,$header,$lib){
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
 			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
-			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
-			<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-			<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์เครดิตยูเนี่ยนไทยฮอนด้า จำกัด</p>
+			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
+	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
+		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
+	}else{
+		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
+	}
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์เครดิตยูเนี่ยนไทยฮอนด้า จำกัด</p>
 			<p style="margin-top: -27px;font-size: 18px;">410 นิคมอุตสาหกรรมลาดกระบัง ถนนฉลองกรุง</p>
 			<p style="margin-top: -25px;font-size: 18px;">แขวงลำปลาทิว เขตลาดกระบัง กรุงเทพมหานคร 10520</p>
 			<p style="margin-top: -25px;font-size: 18px;">โทร. 1504, 0-2326-1319</p>
