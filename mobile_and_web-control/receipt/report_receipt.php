@@ -328,8 +328,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 690px;margin-top:-60px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 650px;margin-top:0px;">(นายนัจรินทร์  อัมพรมหา)</div>
+			<div style="font-size: 18px;margin-left: 690px;margin-top:-60px;">(นายนัจรินทร์  อัมพรมหา)</div>
+			<div style="font-size: 18px;margin-left: 650px;margin-top:0px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new DOMPDF();
