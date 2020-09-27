@@ -203,10 +203,11 @@ class library {
 	}
 	private function concatpercent($string) {
 		$strLen = strlen($string);
+		$output = "";
 		if($strLen > 0){
 			$output .= "%";
 			for($i=0; $i < $strLen; $i++) {
-				$output .= $string{$i};
+				$output .= $string[$i];
 				if($i % 2 != 0 && $i < $strLen - 1){
 					$output .= "%";
 				}
@@ -237,29 +238,30 @@ class library {
 			}
 			return $arrayGrpSms;*/
 		}else{
-			$resp = "";
-			$fp = fsockopen($config["IP_SMS"], $config["PORT_SMS"], $errno, $errstr, 30);
-			if (!$fp) {
-				$resp = $errno;
-			} else {
-				$length = strlen($data);
-				$out = "POST ".$config["URL_CORE_SMS"]." HTTP/1.0\r\n";
-				$out .= "Host: ".$config["IP_SMS"]."\r\n";
-				$out .= "Content-type: application/x-www-form-urlencoded\r\n";
-				$out .= "Content-length: ".strlen($arrayDestination["cmd_sms"])."\r\n\r\n";
-				$out .= $data;
-				fputs($fp, $out);
-				while (!feof($fp)) {
-					$temp = fgets($fp, 1000);
-					$resp .= $temp;
-				}
-				fclose($fp);
+			$headers[] = 'Content-Type: text/xml';
+			$ch = curl_init();  
+
+			curl_setopt( $ch,CURLOPT_URL, $config["URL_CORE_SMS"] );                                                                  
+			curl_setopt( $ch,CURLOPT_POST, true );  
+			curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+			curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt( $ch,CURLOPT_POSTFIELDS, $arrayDestination["cmd_sms"]);                                                                  
+																													 
+			$result = curl_exec($ch);
+			$beautyXML = simplexml_load_string($result);
+			if($beautyXML->STATUS == "OK"){
+				$arrayResponse["SMID"] = $beautyXML->SMID;
+				$arrayResponse["RESULT"] = TRUE;
+			}else{
+				$arrayResponse["MESSAGE"] = $beautyXML->DETAIL ?? "Cannot connect to AIS Server";
+				$arrayResponse["RESULT"] = FALSE;
 			}
-			return $resp;
-			//$arrayGrpSms["RESULT"] = TRUE;
-			//return $arrayGrpSms;
+			return $arrayResponse;
 		}
 	}
+
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
@@ -316,6 +318,8 @@ class library {
 						$destination = $output_file.'/'.$filename;
 						$webP_destination = $output_file.'/'.$file_name.'.webp';
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$webP->convert($destination,$webP_destination,[]);
 							$arrPath = array();
@@ -336,6 +340,8 @@ class library {
 						$filename = $file_name.'.'.$ext_img;
 						$destination = $output_file.'/'.$filename;
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$arrPath = array();
 							$arrPath["normal_path"] = $filename;

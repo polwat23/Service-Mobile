@@ -97,7 +97,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						':id_userlogin' => $payload["id_userlogin"],
 						':ref_no_source' => $responseSaveLN->payinslip_no
 					]);
-					$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 					$dataMerge = array();
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
@@ -115,6 +115,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						$arrMessage["PATH_IMAGE"] = null;
 						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = "system";
 						if($lib->sendNotify($arrPayloadNotify,"person")){
 							$func->insertHistory($arrPayloadNotify,'2');
 							$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");

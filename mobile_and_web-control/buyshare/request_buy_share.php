@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 					]);
 					$arrayResult['TRANSACTION_NO'] = $ref_no;
 					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-					$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 					$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname
 														FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code

@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
+				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
 				}else{
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			if($rowDetail["MONEY_RETURN_STATUS"] == '-99'){
+			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);

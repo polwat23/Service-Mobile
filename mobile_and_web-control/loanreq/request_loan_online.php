@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','period_payment'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		try {
@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 							':member_no' => $payload["member_no"],
 							':loantype_code' => $dataComing["loantype_code"],
 							':request_amt' => $dataComing["request_amt"],
-							':period_payment' => round($responseSoap->period_payment,2),
+							':period_payment' => $dataComing["period_payment"],
 							':period' => $dataComing["period"],
 							':account_id' => $responseSoap->account_id,
 							':loan_permit' => $responseSoap->loanpermiss_amt,
@@ -76,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 						$dataMerge["LOANTYPE_DESC"] = $rowLoanDesc["LOANTYPE_DESC"];
 						$dataMerge["REQUEST_AMT"] = number_format($dataComing["request_amt"],2);
 						$dataMerge["PERIOD"] = $dataComing["period"];
-						$dataMerge["PERIOD_PAYMENT"] = number_format($responseSoap->period_payment,2);
+						$dataMerge["PERIOD_PAYMENT"] = number_format($dataComing["period_payment"],2);
 						$dataMerge["CLRAMT"] = number_format($diff_old_contract,2);
 						$dataMerge["RECEIVENET_AMT"] = number_format($dataComing["request_amt"] - $diff_old_contract,2);
 						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -110,7 +110,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code'],
 							':member_no' => $payload["member_no"],
 							':loantype_code' => $dataComing["loantype_code"],
 							':request_amt' => $dataComing["request_amt"],
-							':period_payment' => round($responseSoap->period_payment,2),
+							':period_payment' => $dataComing["period_payment"],
 							':period' => $dataComing["period"],
 							':account_id' => $responseSoap->account_id,
 							':loan_permit' => $responseSoap->loanpermiss_amt,

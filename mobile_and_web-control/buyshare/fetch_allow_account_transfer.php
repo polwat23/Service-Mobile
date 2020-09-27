@@ -42,6 +42,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*10,2);
 			$arrayShare["MEMBER_NO"] = $payload["member_no"];
 			if(sizeof($arrGroupAccAllow) > 0){
+				$getMembType = $conoracle->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
+				$getMembType->execute([':member_no' => $member_no]);
+				$rowMembType = $getMembType->fetch(PDO::FETCH_ASSOC);
+				if($rowMembType["MEMBCAT_CODE"] == '10'){
+					$memb_type = '01';
+				}else{
+					$memb_type = '02';
+				}
+				$getConstantShare = $conoracle->prepare("SELECT UNITSHARE_VALUE FROM SHSHARETYPE WHERE SHARETYPE_CODE = :memb_type");
+				$getConstantShare->execute([':memb_type' => $memb_type]);
+				$rowContShare = $getConstantShare->fetch(PDO::FETCH_ASSOC);
+				$arrayResult['STEP_MOD_AMT'] = $rowContShare["UNITSHARE_VALUE"];
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['SHARE'] = $arrayShare;
 				$arrayResult['RESULT'] = TRUE;
