@@ -25,6 +25,7 @@
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"URL_COOP" : "www.musaving.com",
 	"CROSSBANK_TAX_SUFFIX" : "099400016881100",
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",

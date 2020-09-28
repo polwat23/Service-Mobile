@@ -12,17 +12,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrTypeQR = array();
 			$arrTypeQR["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 			$arrTypeQR["TRANS_DESC"] = $rowTypeQR["trans_desc_qr"];
+			$arrTypeQR["OPERATE_DESC"] = $rowTypeQR["operation_desc_".$lang_locale];
 			$arrayGrpTrans[] = $arrTypeQR;
 			if($rowTypeQR["trans_code_qr"] == '01'){
 				$getAccountinTrans = $conoracle->prepare("SELECT DEPTACCOUNT_NO,DEPTACCOUNT_NAME,PRNCBAL FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status <> 1");
 				$getAccountinTrans->execute([':member_no' => $member_no]);
 				while($rowAccTrans = $getAccountinTrans->fetch(PDO::FETCH_ASSOC)){
 					$arrAccTrans = array();
-					$arrAccTrans["ACCOUNT_NO"] = $rowAccTrans["DEPTACCOUNT_NO"];
+					$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($rowAccTrans["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+					$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$func->getConstant('hidden_dep'));
 					$arrAccTrans["ACCOUNT_NAME"] = TRIM($rowAccTrans["DEPTACCOUNT_NAME"]);
 					$arrAccTrans["PRIN_BAL"] = $rowAccTrans["PRNCBAL"];
-					$arrAccTrans["TRANS_TYPE"] = $rowTypeQR["trans_code_qr"];
-					$arrAccTrans["OPERATE_DESC"] = $rowTypeQR["operation_desc_".$lang_locale];
+					$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 					$arrGrpAcc[] = $arrAccTrans;
 				}
 			}

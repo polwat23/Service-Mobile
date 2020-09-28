@@ -204,6 +204,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 							':response_message' => $responseSoap->msg_output
 						];
 						$log->writeLog('deposittrans',$arrayStruc);
+						$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$responseSoap->msg_output;
+						$lib->sendLineNotify($message_error);
 						$message_error = "มีรายการฝากมาจาก KBANK ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
 						" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$responseSoap->msg_output;
 						$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
@@ -268,6 +270,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':response_message' => $e->getMessage()
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
+					$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
+					$lib->sendLineNotify($message_error);
 					$message_error = "มีรายการฝากมาจาก KBANK ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
 					" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
 					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
