@@ -13,13 +13,37 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													FROM gcuserlogin 
 													WHERE
 														DATE_FORMAT(login_date, '%m') = MONTH 
+														and is_login = '1'  AND channel = 'web'
+													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGIN_WEB,
+												IFNULL((
+													SELECT COUNT(member_no) as C_MEM_LOGIN 
+													FROM gcuserlogin 
+													WHERE
+														DATE_FORMAT(login_date, '%m') = MONTH 
+														and is_login = '1'  AND channel = 'mobile_app'
+													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGIN_MOBILE,
+												IFNULL((
+													SELECT COUNT(member_no) as C_MEM_LOGIN 
+													FROM gcuserlogin 
+													WHERE
+														DATE_FORMAT(login_date, '%m') = MONTH 
 														and is_login = '1' 
 													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGIN,
 												IFNULL((
 													SELECT COUNT(member_no) as C_MEM_LOGOUT FROM gcuserlogin 
 													WHERE
 														DATE_FORMAT(login_date, '%m') = MONTH and is_login <> '1' 
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT
+													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT,
+												IFNULL((
+													SELECT COUNT(member_no) as C_MEM_LOGOUT FROM gcuserlogin 
+													WHERE
+														DATE_FORMAT(login_date, '%m') = MONTH and is_login <> '1'  AND channel = 'web'
+													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT_WEB,
+												IFNULL((
+													SELECT COUNT(member_no) as C_MEM_LOGOUT FROM gcuserlogin 
+													WHERE
+														DATE_FORMAT(login_date, '%m') = MONTH and is_login <> '1'  AND channel = 'mobile_app'
+													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT_MOBILE
 											FROM
 												gcuserlogin
 											WHERE
@@ -31,7 +55,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupRootUserlogin = array();
 			$arrGroupRootUserlogin["MONTH"] = $rowUserlogin["MONTH"];
 			$arrGroupRootUserlogin["C_MEM_LOGIN"] = $rowUserlogin["C_MEM_LOGIN"];
+			$arrGroupRootUserlogin["C_MEM_LOGIN_WEB"] = $rowUserlogin["C_MEM_LOGIN_WEB"];
+			$arrGroupRootUserlogin["C_MEM_LOGIN_MOBILE"] = $rowUserlogin["C_MEM_LOGIN_MOBILE"];
 			$arrGroupRootUserlogin["C_MEM_LOGOUT"] = $rowUserlogin["C_MEM_LOGOUT"];
+			$arrGroupRootUserlogin["C_MEM_LOGOUT_WEB"] = $rowUserlogin["C_MEM_LOGOUT_WEB"];
+			$arrGroupRootUserlogin["C_MEM_LOGOUT_MOBILE"] = $rowUserlogin["C_MEM_LOGOUT_MOBILE"];
 			$arrayGroup[] = $arrGroupRootUserlogin;
 		}
 					
