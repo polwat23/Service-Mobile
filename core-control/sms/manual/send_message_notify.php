@@ -181,7 +181,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							unset($bulkInsert);
 							$bulkInsert = array();
 						}
-						$arrPayloadNotify["TO"] = '/topics/member';
+						$arrPayloadNotify["TO"] = $config["SUBSCRIPT_ROOM_NOTIFY"];
 						$arrPayloadNotify["MEMBER_NO"] = $arrAllMember_no;
 						$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
 						$arrMessage["BODY"] = $dataComing["message_emoji_"];
