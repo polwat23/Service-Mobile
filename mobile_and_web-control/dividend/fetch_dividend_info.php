@@ -6,16 +6,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
-												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.LOCKPROC_FLAG = '1' 
-												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC) where rownum <= :limit_year");
+		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT cm.account_year AS DIV_YEAR FROM mbdivavgtrnpost mp LEFT JOIN cmaccountyear cm 
+														ON mp.DIVAVG_YEAR = cm.account_year WHERE TRIM(mp.MEMBER_NO) = :member_no and cm.SHOWDIVAVG_FLAG = '1' 
+														GROUP BY cm.account_year ORDER BY cm.account_year DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
 			':limit_year' => $limit_year
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$getDivMaster = $conoracle->prepare("SELECT div_amt,avg_amt FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
+			$getDivMaster = $conoracle->prepare("SELECT 
+								SUM(DIVIDEND_PAYMENT) AS DIV_AMT,
+								SUM(AVERAGE_PAYMENT) AS  AVG_AMT,
+								SUM(DIVIDEND_PAYMENT+AVERAGE_PAYMENT) AS SUMDIV
+							FROM 
+								mbdivavgtrnpost 
+							WHERE 
+								TRIM(MEMBER_NO) = :member_no
+								AND DIVAVG_YEAR = :div_year GROUP BY DIVAVG_YEAR");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -24,16 +32,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
-			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
+			$arrDividend["SUM_AMT"] = number_format($rowDiv["SUMDIV"],2);
 			$getMethpay = $conoracle->prepare("SELECT
-													yu.METHPAYTYPE_DESC as TYPE_DESC,
-													ym.CBT_AMT AS RECEIVE_AMT ,						
-													ym.BANK_ACCID AS BANK_ACCOUNT
-												FROM 
-													YRDIVMASTER ym,YRUCFMETHPAY yu
-												WHERE 
-													ym.MEMBER_NO = :member_no
-													AND ym.DIV_YEAR= :div_year and yu.METHPAYTYPE_CODE = 'CBT'");
+												(CASE WHEN md.DIVAVG_CODE = 'CSH' THEN 'เงินสด'
+														WHEN md.DIVAVG_CODE = 'TRS' THEN 'โอนซื้อหุ้น'
+														WHEN md.DIVAVG_CODE = 'TRN' THEN 'โอนเข้าเงินฝาก'
+														WHEN md.DIVAVG_CODE = 'CBT' THEN 'โอนเข้าธนาคาร'
+												ELSE '' END) AS TYPE_DESC,
+												md.TRANSPAY_AMT AS RECEIVE_AMT ,						
+												md.DIVAVG_ACCID AS BANK_ACCOUNT,
+												cmb.BANK_DESC as BANK_NAME,
+												cmbb.BRANCH_NAME,
+												md.DIVAVG_CODE
+											FROM 
+												mbdivavgtrnpost md LEFT JOIN cmucfbank cmb ON md.divavg_bank = cmb.bank_code	
+												LEFT JOIN cmucfbankbranch cmbb ON md.divavg_branch = cmbb.branch_id and
+												md.divavg_bank = cmbb.bank_code
+											WHERE  
+												md.divavg_code IN ('CSH','TRS','TRN','CBT') AND 
+												TRIM(md.MEMBER_NO) = :member_no
+												AND md.DIVAVG_YEAR= :div_year");
 			$getMethpay->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -41,21 +59,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
 				$arrayRecv = array();
 				$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
-				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+				if($rowMethpay["DIVAVG_CODE"] == 'CBT'){
+					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"].' '.$rowMethpay["BANK_NAME"].' '.$rowMethpay["BRANCH_NAME"];
+				}else{
+					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+				}
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			}
 			$getPaydiv = $conoracle->prepare("SELECT   
-													W01_AMT AS W01,
-													W02_AMT AS W02,
-													(LONPRN_AMT + LONINT_AMT) AS LON,
-													SDV_AMT AS SDV,
-													SQT_AMT AS SQT,
-													MRT_AMT AS MRT,
-													DEP_AMT AS DEP
-													FROM yrdivmaster
-														WHERE MEMBER_NO = :member_no
-														and DIV_YEAR = :div_year");
+												(CASE 
+														WHEN DIVAVG_CODE = 'TRP' THEN 'ชำระหนี้สหกรณ์'
+														WHEN DIVAVG_CODE = 'TRL' THEN 'กรมบังคับคดี'
+														WHEN DIVAVG_CODE = 'TRC' THEN 'ชำระฉุกเฉินเพื่อค่าครองชีพ'
+														WHEN DIVAVG_CODE = 'TWF' THEN 'หักเงินฝากสำรอง'
+												ELSE '' END) AS TYPE_DESC,       
+												TRANSPAY_AMT AS PAY_AMT
+												FROM MBDIVAVGTRNPOST 
+												WHERE ( TRIM(MEMBER_NO) = :member_no) AND
+												DIVAVG_CODE IN ('TRP','TRL','TRC','TWF')  
+												AND ( DIVAVG_YEAR = :div_year )
+												ORDER BY SEQ_NO");
 			$getPaydiv->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -63,19 +87,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayPayGroup = array();
 			$sumPay = 0;
 			
-			$rowPaydiv = $getPaydiv->fetch(PDO::FETCH_ASSOC);
-			foreach($rowPaydiv as $key => $value){
-				if($value > 0){
-					$fetchNameType = $conoracle->prepare("SELECT METHPAYTYPE_DESC as TYPE_DESC FROM yrucfmethpay WHERE METHPAYTYPE_CODE = :code");
-					$fetchNameType->execute([':code' => $key]);
-					$nametype = $fetchNameType->fetch(PDO::FETCH_ASSOC);
-
-					$arrPay = array();
-					$arrPay["TYPE_DESC"] = $nametype["TYPE_DESC"] ?? '';
-					$arrPay["PAY_AMT"] = number_format($value,2);
-					$sumPay += $value;
-					$arrayPayGroup[] = $arrPay;
-				}
+			while($rowPay = $getPaydiv->fetch(PDO::FETCH_ASSOC)){
+				$arrPay = array();
+				$arrPay["TYPE_DESC"] = $rowPay["TYPE_DESC"];
+				$arrPay["PAY_AMT"] = number_format($rowPay["PAY_AMT"],2);
+				$sumPay += $rowPay["PAY_AMT"];
+				$arrayPayGroup[] = $arrPay;
 			}
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);

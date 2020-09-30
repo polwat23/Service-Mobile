@@ -7,34 +7,101 @@ $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $request_amt = 0;
-$getMemb = $conoracle->prepare("SELECT mb.MEMBTYPE_CODE,mg.MEMBGROUP_CONTROL,(sh.sharestk_amt*10) as SHARE_AMT,mb.SALARY_AMOUNT
-											FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no 
-											LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
-											WHERE mb.member_no = :member_no");
-$getMemb->execute([':member_no' => $member_no]);
-$rowMemb = $getMemb->fetch(PDO::FETCH_ASSOC);
-$fetchCredit = $conoracle->prepare("SELECT lt.loantype_code as LOANTYPE_CODE,lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,lc.percentshare,lc.percentsalary
-											FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb
-											WHERE mb.member_no = :member_no and 
-											LT.LOANTYPE_CODE = :loantype_code
-											and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
-$fetchCredit->execute([
+$getcredit = $conoracle->prepare("SELECT * FROM (
+							SELECT
+								L.LOANTYPE_CODE
+								,LT.LOANTYPE_DESC
+								,(CASE  WHEN M.SALARY_AMOUNT IS NULL THEN 0 ELSE M.SALARY_AMOUNT END )*L.PERCENTSALARY +S.SHARESTK_AMT*SH.SHARE_VALUE*L.PERCENTSHARE  AS CREDIT_SHARE_AMT
+								,0 AS CREDIT_DIV_AMT
+								,L.MAXLOAN_AMT
+								,(CASE  WHEN M.SALARY_AMOUNT IS NULL THEN 0 ELSE M.SALARY_AMOUNT END )*L.PERCENTSALARY +S.SHARESTK_AMT*SH.SHARE_VALUE*L.PERCENTSHARE  AS CREDIT_AMT_
+								,S.SHARESTK_AMT
+								,M.SALARY_AMOUNT,LT.NOTMORESHARE_FLAG,NOTMORESHR_PERCENT					
+							FROM LNLOANTYPECUSTOM L LEFT JOIN MBMEMBMASTER M ON L.APPLTYPE_CODE =  M.APPLTYPE_CODE LEFT JOIN SHSHAREMASTER S 
+							ON M.MEMBER_NO = S.MEMBER_NO LEFT JOIN LNLOANTYPE LT ON L.LOANTYPE_CODE = LT.LOANTYPE_CODE
+							,SHSHARETYPE SH
+							WHERE TRIM(M.MEMBER_NO) = :member_no
+							AND LT.ACTIVE_FLAG = 1 AND LT.LOANRIGHT_TYPE >1  AND LT.LOANTYPE_CODE = :loantype_code
+							AND S.SHARESTK_AMT*SH.SHARE_VALUE >= L.STARTSHARE_AMT AND  S.SHARESTK_AMT*SH.SHARE_VALUE < L.ENDSHARE_AMT 
+							AND MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'), TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) >= L.STARTMEMBER_TIME 
+							AND MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'), TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) < L.ENDMEMBER_TIME  
+							AND MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'), TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) < L.ENDMEMBER_TIME  
+							AND MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'), TO_DATE(TO_CHAR(M.BIRTH_DATE, 'YYYYMM'),'YYYYMM'))  >= L.STARTAGE_TIME  
+
+							UNION ALL
+							
+							SELECT 
+								L.LOANTYPE_CODE
+								,LT.LOANTYPE_DESC
+								,NVL(S.SHARESTK_AMT*SH.SHARE_VALUE*(SELECT LC.COLL_PERCENT FROM LNLOANTYPECOLLUSE LC WHERE L.LOANTYPE_CODE=LC.LOANTYPE_CODE AND LC.LOANCOLLTYPE_CODE='01' )*L.SHARE_FLAG,0)  AS CREDIT_SHARE_AMT
+								,NVL((SELECT D.DIV_PAYMENT*DIVIDEND_FLAG FROM MBDIVAVGMAST D WHERE D.MEMBER_NO=M.MEMBER_NO  
+								AND  DIVAVG_YEAR = (SELECT MAX(ACCOUNT_YEAR) FROM CMACCOUNTYEAR WHERE ACCSYSCLS_STATUS=1 ) )*
+								(SELECT LC.COLL_PERCENT FROM LNLOANTYPECOLLUSE LC WHERE L.LOANTYPE_CODE=LC.LOANTYPE_CODE AND LC.LOANCOLLTYPE_CODE ='05' )*L.COLLMAST_FLAG,0)  AS CREDIT_DIV_AMT
+								,L.MAXLOAN_AMT
+								,0  AS CREDIT_AMT_
+								,S.SHARESTK_AMT
+								,M.SALARY_AMOUNT,LT.NOTMORESHARE_FLAG,NOTMORESHR_PERCENT
+							FROM LNLOANTYPERIGHT L  ,MBMEMBMASTER M ,SHSHAREMASTER S,SHSHARETYPE SH,LNLOANTYPE LT		   
+							WHERE TRIM(M.MEMBER_NO) = :member_no AND L.LOANTYPE_CODE = :loantype_code AND
+							 S.MEMBER_NO=M.MEMBER_NO AND LT.ACTIVE_FLAG = 1 AND L.LOANTYPE_CODE = LT.LOANTYPE_CODE AND LT.LOANRIGHT_TYPE =1 
+							) T			
+						ORDER BY LOANTYPE_CODE ASC");
+$getcredit->execute([
 	':member_no' => $member_no,
 	':loantype_code' => $loantype_code
 ]);
-$rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
-$salaryPercent = $rowMemb["SALARY_AMOUNT"] * $rowCredit["PERCENTSALARY"];
-if($rowCredit["PERCENTSHARE"] > 0){
-	$sharePercent = $rowMemb["SHARE_AMT"] * $rowCredit["PERCENTSHARE"];
-	if($salaryPercent < $sharePercent){
-		$maxloan_amt = $salaryPercent;
+while($rowCredit = $getcredit->fetch(PDO::FETCH_ASSOC)) {
+	$credit_amt = $rowCredit["CREDIT_AMT_"];
+	$loantype_code = $rowCredit["LOANTYPE_CODE"];
+	if($rowCredit["NOTMORESHARE_FLAG"] == 1){
+		$sharestk_amt = ($rowCredit["SHARESTK_AMT"]*10)*$rowCredit["NOTMORESHR_PERCENT"];
+		if($credit_amt > $sharestk_amt){
+			$credit_amt = $sharestk_amt;
+		}
 	}else{
-		$maxloan_amt = $sharePercent;
+		if($loantype_code=='ฉพ'){
+			$credit_amt = FLOOR($rowCredit["CREDIT_DIV_AMT"]/100)*100;
+		}else if($loantype_code=="สห"){
+			$credit_amt = $rowCredit["CREDIT_SHARE_AMT"];
+		}else if($loantype_code=="สม"){
+			$getSalary = $conoracle->prepare("SELECT PERCENTSALARY
+											FROM LNLOANTYPECUSTOM 
+											WHERE LOANTYPE_CODE = 'สม' 
+											AND APPLTYPE_CODE = '10' AND
+											(CASE WHEN (SELECT LAST_PERIOD FROM SHSHAREMASTER WHERE TRIM(MEMBER_NO) = :member_no) > 
+											(SELECT MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'),TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) AS T2 
+											FROM MBMEMBMASTER M WHERE TRIM(M.MEMBER_NO) = :member_no)
+											THEN (SELECT LAST_PERIOD FROM SHSHAREMASTER WHERE TRIM(MEMBER_NO) = :member_no) ELSE 
+											(SELECT MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'),TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) AS T2 FROM MBMEMBMASTER M 
+											WHERE TRIM(M.MEMBER_NO) = :member_no)
+											END ) BETWEEN STARTMEMBER_TIME AND ENDMEMBER_TIME");
+			$getSalary->execute([':member_no' => $member_no]);
+			$rowSalary = $getSalary->fetch(PDO::FETCH_ASSOC);
+			$credit_amt = $rowCredit["SALARY_AMOUNT"] * $rowSalary["PERCENTSALARY"];
+		}else if($loantype_code=="สค"){
+			$maxloan_amt = 200;
+			$getSalary = $conoracle->prepare("SELECT PERCENTSALARY,MAXLOAN_AMT
+											FROM LNLOANTYPECUSTOM 
+											WHERE LOANTYPE_CODE = 'สค' 
+											AND APPLTYPE_CODE = '10' AND
+											(CASE WHEN (SELECT LAST_PERIOD FROM SHSHAREMASTER WHERE TRIM(MEMBER_NO) = :member_no) > 
+											(SELECT MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'),TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) AS T2 
+											FROM MBMEMBMASTER M WHERE TRIM(M.MEMBER_NO) = :member_no)
+											THEN (SELECT LAST_PERIOD FROM SHSHAREMASTER WHERE TRIM(MEMBER_NO) = :member_no) ELSE 
+											(SELECT MONTHS_BETWEEN(TO_DATE(TO_CHAR(SYSDATE, 'YYYYMM'),'YYYYMM'),TO_DATE(TO_CHAR(M.MEMBER_DATE, 'YYYYMM'),'YYYYMM')) AS T2 
+											FROM MBMEMBMASTER M WHERE TRIM(M.MEMBER_NO) = :member_no)
+											END ) BETWEEN STARTMEMBER_TIME AND ENDMEMBER_TIME");
+			$getSalary->execute([':member_no' => $member_no]);
+			$rowSalary = $getSalary->fetch(PDO::FETCH_ASSOC);
+			$credit_amt = $rowCredit["SALARY_AMOUNT"] * $rowSalary["PERCENTSALARY"];
+			if($credit_amt > $rowSalary['MAXLOAN_AMT']){
+				$credit_amt  = $rowSalary['MAXLOAN_AMT'];
+			}
+		}
 	}
-}else{
-	$maxloan_amt = $salaryPercent;
-}
-if($maxloan_amt > $rowMemb["SHARE_AMT"]){
-	$maxloan_amt = $rowMemb["SHARE_AMT"];
+	if($credit_amt > $rowCredit["MAXLOAN_AMT"] && $loantype_code != "สค"){
+		$credit_amt = $rowCredit["MAXLOAN_AMT"];
+	}
+	$maxloan_amt = $credit_amt;
 }
 ?>

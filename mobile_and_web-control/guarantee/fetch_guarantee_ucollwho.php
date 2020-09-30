@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
-											LCM.MEMBER_NO AS MEMBER_NO,
+											TRIM(LCM.MEMBER_NO) AS MEMBER_NO,
 											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT,
 											NVL(LCM.principal_balance,0) as LOAN_BALANCE
 											FROM
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE
 											LCM.CONTRACT_STATUS > 0 and LCM.CONTRACT_STATUS <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '01'
-											AND LCC.REF_COLLNO = :member_no");
+											AND TRIM(LCC.REF_COLLNO) = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();

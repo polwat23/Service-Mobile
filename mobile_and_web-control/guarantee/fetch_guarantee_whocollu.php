@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 			$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
 			$arrGrpAllLoan = array();
-			$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,lnc.REF_COLLNO,lnc.COLL_PERCENT,
+			$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,TRIM(lnc.REF_COLLNO) as REF_COLLNO,lnc.COLL_PERCENT,
 																lnc.DESCRIPTION
 																FROM lncontcoll lnc LEFT JOIN lnucfloancolltype llc ON lnc.LOANCOLLTYPE_CODE = llc.LOANCOLLTYPE_CODE
 																WHERE lnc.coll_status = '1' and lnc.loancontract_no = :contract_no ORDER BY lnc.LOANCOLLTYPE_CODE ASC");
@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				if($rowColl["LOANCOLLTYPE_CODE"] == '01'){
 					$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 														FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
-														WHERE MMB.member_no = :member_no");
+														WHERE TRIM(MMB.member_no) = :member_no");
 					$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
 					$arrayAvarTar = $func->getPathpic($rowColl["REF_COLLNO"]);
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
 					$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 														FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
-														WHERE MMB.member_no = :member_no");
+														WHERE TRIM(MMB.member_no) = :member_no");
 					$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
 					$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
@@ -91,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$arrGroupAllLoan = array();
 			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
-												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
+												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE TRIM(lnm.member_no) = :member_no
 												and lnm.contract_status > 0 and lnm.contract_status <> 8
                          						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC,lnm.principal_balance");
 			$getWhocollu->execute([':member_no' => $member_no]);
@@ -101,7 +101,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 				$arrayGroupLoan["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
 				$arrGrpAllLoan = array();
-				$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,lnc.REF_COLLNO,lnc.COLL_PERCENT,
+				$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,TRIM(lnc.REF_COLLNO) as REF_COLLNO,lnc.COLL_PERCENT,
 																	lnc.DESCRIPTION
 																	FROM lncontcoll lnc LEFT JOIN lnucfloancolltype llc ON lnc.LOANCOLLTYPE_CODE = llc.LOANCOLLTYPE_CODE
 																	WHERE lnc.coll_status = '1' and lnc.loancontract_no = :contract_no ORDER BY lnc.LOANCOLLTYPE_CODE ASC");
@@ -114,7 +114,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					if($rowColl["LOANCOLLTYPE_CODE"] == '01'){
 						$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 															FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
-															WHERE MMB.member_no = :member_no");
+															WHERE TRIM(MMB.member_no) = :member_no");
 						$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
 						$arrayAvarTar = $func->getPathpic($rowColl["REF_COLLNO"]);
@@ -125,7 +125,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}else if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
 						$whocolluMember = $conoracle->prepare("SELECT MUP.PRENAME_DESC,MMB.MEMB_NAME,MMB.MEMB_SURNAME
 															FROM MBMEMBMASTER MMB LEFT JOIN MBUCFPRENAME MUP ON MMB.PRENAME_CODE = MUP.PRENAME_CODE
-															WHERE MMB.member_no = :member_no");
+															WHERE TRIM(MMB.member_no) = :member_no");
 						$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
 						$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);

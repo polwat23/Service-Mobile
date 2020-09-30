@@ -10,8 +10,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];
 		}
 		$arrayGroup = array();
-		$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
-												,mb.mem_telmobile as MEM_TELMOBILE,mb.addr_email as email FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+		$fetchUserNotRegis = $conoracle->prepare("SELECT TRIM(mb.member_no) as member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
+												,mb.mem_telmobile as MEM_TELMOBILE,mb.email_address as email FROM mbmembmaster mb 
+												LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 												WHERE mb.resign_status = '0'");
 		$fetchUserNotRegis->execute();
 		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
