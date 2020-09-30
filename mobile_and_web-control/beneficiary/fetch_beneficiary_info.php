@@ -5,9 +5,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mc.gain_concern,mg.remark
-												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
-												WHERE mg.member_no = :member_no");
+		$getBeneficiary = $conoracle->prepare("SELECT gain.GAIN_NAME,gain.GAIN_SURNAME,ucon.GAIN_CONCERN,pre.PRENAME_SHORT,gain.GAIN_ADDRESS as GAIN_ADDR,gain.REMARK
+												FROM MBGAINDETAIL gain LEFT JOIN mbucfprename pre ON gain.prename_code = pre.prename_code
+												LEFT JOIN mbucfgainconcern ucon ON gain.CONCERN_CODE = ucon.CONCERN_CODE
+												WHERE TRIM(gain.member_no) = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();

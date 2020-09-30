@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpLoanAll = array();
 		$getSumAllDept = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC ");
+											WHERE TRIM(dp.member_no) = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC ");
 		$getSumAllDept->execute([':member_no' => $member_no]);
 		while($rowSumAllDept = $getSumAllDept->fetch(PDO::FETCH_ASSOC)){
 			$arraysumDept = array();
@@ -27,13 +27,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGrpDept['SUM_BAL_IN_TYPE'] += $rowSumAllDept["BALANCE"];
 				$arrGrpDeptAll[] = $arrGrpDept;
 			}else{
-				($arrGrpDeptAll[array_search($rowSumAllDept["TYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arraysumDept;
-				($arrGrpDeptAll[array_search($rowSumAllDept["TYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllDept["BALANCE"];
+				($arrGrpDeptAll[array_search($rowSumAllDept["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arraysumDept;
+				($arrGrpDeptAll[array_search($rowSumAllDept["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllDept["BALANCE"];
 			}
 		}
 		$getSumAllLoan = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as BALANCE
 															FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-															WHERE ln.member_no = :member_no and ln.contract_status > 0");
+															WHERE TRIM(ln.member_no) = :member_no and ln.contract_status > 0");
 		$getSumAllLoan->execute([':member_no' => $member_no]);
 		while($rowSumAllLoan = $getSumAllLoan->fetch(PDO::FETCH_ASSOC)){
 			$arraysumLoan = array();
@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrGrpLoanAll[array_search($rowSumAllLoan["LOAN_TYPE"],array_column($arrGrpLoanAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllLoan["BALANCE"];
 			}
 		}
-		$getSumAllLoanShare = $conoracle->prepare("SELECT (sharestk_amt * 10) as SUM_SHARE FROM shsharemaster WHERE member_no = :member_no");
+		$getSumAllLoanShare = $conoracle->prepare("SELECT (sharestk_amt * 10) as SUM_SHARE FROM shsharemaster WHERE TRIM(member_no) = :member_no");
 		$getSumAllLoanShare->execute([':member_no' => $member_no]);
 		$rowSumAllShareBal = $getSumAllLoanShare->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SHARE_BALANCE'] = $rowSumAllShareBal["SUM_SHARE"];
