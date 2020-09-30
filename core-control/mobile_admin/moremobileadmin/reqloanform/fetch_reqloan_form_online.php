@@ -80,6 +80,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrDocno["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
 				}else if($rowDocno["req_status"] == '7'){
 					$arrDocno["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
+				}else{
+					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิก";
 				}
 				$arrGrp[] = $arrDocno;
 			}
@@ -136,6 +138,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrDocno["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
 				}else if($rowDocno["req_status"] == '7'){
 					$arrDocno["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
+				}else{
+					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิก";
 				}
 				$arrGrp[] = $arrDocno;
 			}
