@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$dateNow = date('d');
 		if($recv_now == trim($dataComing["recv_period"])){
 			if($dateNow >= $date_process){
-				$qureyKpDetail = "SELECT 
+				$queryKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											kpd.keepitemtype_code = kut.keepitemtype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$qureyKpDetail = "SELECT 
+				$queryKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}
 		}else{
 			if(trim($dataComing["recv_period"]) > $recv_now){
-				$qureyKpDetail = "SELECT 
+				$queryKpDetail = "SELECT 
 											kut.keepitemtype_desc as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											kpd.keepitemtype_code = kut.keepitemtype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$qureyKpDetail = "SELECT 
+				$queryKpDetail = "SELECT 
 										kut.keepitemtype_desc as TYPE_DESC,
 										kut.keepitemtype_grp as TYPE_GROUP,
 										case kut.keepitemtype_grp 
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}	
 		}
 		$arrGroupDetail = array();
-		$getDetailKP = $conoracle->prepare($qureyKpDetail);
+		$getDetailKP = $conoracle->prepare($queryKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -88,17 +88,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$contract_no = $rowDetail["PAY_ACCOUNT"];
-				if(mb_stripos($contract_no,'.') === FALSE){
-					$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-					if(mb_strlen($contract_no) == 10){
-						$arrDetail["PAY_ACCOUNT"] = $loan_format;
-					}else if(mb_strlen($contract_no) == 11){
-						$arrDetail["PAY_ACCOUNT"] = $loan_format.'-'.mb_substr($contract_no,10);
-					}
-				}else{
-					$arrDetail["PAY_ACCOUNT"] = $contract_no;
-				}
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);

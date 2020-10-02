@@ -19,24 +19,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+			$memberInfo = $conoracle->prepare("SELECT mp.prename_desc as PRENAME_SHORT,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
-													mb.CURRADDR_NO as ADDR_NO,
-													mb.CURRADDR_MOO as ADDR_MOO,
-													mb.CURRADDR_SOI as ADDR_SOI,
-													mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
-													mb.CURRADDR_ROAD as ADDR_ROAD,
+													mb.ADDRESS_NO as ADDR_NO,
+													mb.ADDRESS_MOO as ADDR_MOO,
+													mb.ADDRESS_SOI as ADDR_SOI,
+													mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
+													mb.ADDRESS_ROAD as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
-													MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
+													MB.PROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.CURRADDR_POSTCODE AS ADDR_POSTCODE
+													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);

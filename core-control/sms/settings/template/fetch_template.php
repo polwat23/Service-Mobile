@@ -6,8 +6,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		|| $func->check_permission_core($payload,'sms','reportsmssuccess')){
 		$arrTemplateGroup = array();
 		if(isset($dataComing["id_smstemplate"])){
-			$fetchTemplate = $conmysql->prepare("SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,
-												sq.column_selected,sq.target_field,sq.is_bind_param,sq.condition_target
+			$fetchTemplate = $conmysql->prepare("SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,sq.set_column,
+												sq.column_selected,sq.target_field,sq.is_bind_param,sq.condition_target,sq.is_stampflag,sq.stamp_table,sq.where_stamp
 												FROM smstemplate st LEFT JOIN smsquery sq ON st.id_smsquery = sq.id_smsquery
 												WHERE st.is_use = '1' and st.id_smstemplate = :id_smstemplate");
 			$fetchTemplate->execute([':id_smstemplate' => $dataComing["id_smstemplate"]]);
@@ -19,7 +19,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrTemplateGroup["SMS_QUERY"] = $rowTemplate["sms_query"];
 			$arrTemplateGroup["COLUMN_SELECTED"] = explode(',',$rowTemplate["column_selected"]);
 			$arrTemplateGroup["TARGET_FIELD"] = $rowTemplate["target_field"];
-			$arrTemplateGroup["CONDITION_TARGET"] = (explode('.',$rowTemplate["condition_target"]))[0];
+			$arrTemplateGroup["CONDITION_TARGET"] = $rowTemplate["condition_target"];
+			$arrTemplateGroup["IS_STAMPFLAG"] = $rowTemplate["is_stampflag"];
+			$arrTemplateGroup["STAMP_TABLE"] = $rowTemplate["stamp_table"];
+			$arrTemplateGroup["SET_COLUMN"] = $rowTemplate["set_column"];
+			$arrTemplateGroup["WHERE_STAMP"] = $rowTemplate["where_stamp"];
 			$arrTemplateGroup["BIND_PARAM"] = $rowTemplate["is_bind_param"];
 		}else{
 			$fetchTemplate = $conmysql->prepare("SELECT id_smstemplate,smstemplate_name,smstemplate_body
