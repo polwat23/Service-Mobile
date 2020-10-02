@@ -179,11 +179,11 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
-		"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
+		"ACC_SHOW_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถดูข้อมูลได้","en" : "This deposit type was closed see information from cooperative"}],
 		"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
 		"ACC_ONLINE_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมและดูข้อมูลได้","en" : "This deposit type was closed transaction online and see information from cooperative"}],
-		"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมภายในเท่านั้น","en" : "Only transaction inside"}],
-		"ALLOW_TRANS_OUTSIDE_FLAG_ON" : [{"th" : "สามารถทำธุรกรรมกับธนาคารได้","en" : "Can transaction with bank"}],
+		"ALLOW_ACC_SHOW_FLAG_ON" : [{"th" : "สำหรับดูข้อมูลได้เท่านั้น","en" : "Only see information"}],
+		"ALLOW_TRANS_FLAG_ON" : [{"th" : "สาหรับทำธุรกรรมเท่านั้น","en" : "Only transaction online"}],
 		"ALLOW_ONLINE_FLAG_ON" : [{"th" : "สามารถดูข้อมูลและทำธุรกรรมได้","en" : "See information and transaction online"}],
 		"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
 		"BUTTON_TEXT" : [{
