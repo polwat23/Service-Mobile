@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
 											MB.POSTCODE AS ADDR_POSTCODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											LEFT JOIN mbucfdistrict MBD ON mb.DISTRICT_CODE = MBD.district_code
+											LEFT JOIN mbucfdistrict MBD ON mb.DISTRICT_CODE = MBD.district_code AND mb.province_code = MBD.province_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE mb.resign_status = '0'".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and TRIM(mb.member_no) = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
