@@ -43,7 +43,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["SEND_BY"] = "system";
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
+				$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE TRIM(member_no) = :member_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]

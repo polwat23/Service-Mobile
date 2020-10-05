@@ -19,7 +19,7 @@ $fetchDataGuarantee = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_nam
 										LEFT JOIN mbmembmaster mb ON lcm.member_no = mb.member_no
 										LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 										WHERE lcm.startcont_date BETWEEN (SYSDATE - 2) and SYSDATE and lcc.sync_notify_flag = '0' 
-										and lcc.coll_status = '1' and lcm.contract_status = '1' and lcc.loancolltype_code = '01' ");
+										and lcc.coll_status = '1' and lcm.contract_status = '1' and lcc.loancolltype_code = '04' ");
 $fetchDataGuarantee->execute();
 while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowGuarantee["REF_COLLNO"]);
@@ -43,7 +43,7 @@ while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["SEND_BY"] = "system";
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conoracle->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
+				$updateSyncFlag = $conoracle->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and TRIM(ref_collno) = :ref_collno");
 				$updateSyncFlag->execute([
 					':loancontract_no' => $rowGuarantee["LOANCONTRACT_NO"],
 					':seq_no' => $rowGuarantee["SEQ_NO"],
