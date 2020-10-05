@@ -45,7 +45,9 @@ if($lib->checkCompleteArgument(['unique_id',
 														vision = :vision,
 														mission = :mission,
 														objective = :objective,
-														history = :history
+														history = :history,
+														playstore = :playstore,
+														appstore = :appstore
 													WHERE
 														id_webcoopprofile = :id_webcoopprofile
 													");
@@ -63,7 +65,9 @@ if($lib->checkCompleteArgument(['unique_id',
 				':mission' => $mission,
 				':objective' => $objective,
 				':history' => $history,
-				':id_webcoopprofile' =>  $dataComing["id_webcoopprofile"]
+				':id_webcoopprofile' =>  $dataComing["id_webcoopprofile"],
+				':playstore' =>  $dataComing["playstore"],
+				':appstore' =>  $dataComing["appstore"]
 			])){
 					$arrayResult['RESULT'] = True;
 					echo json_encode($arrayResult);

@@ -19,7 +19,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													mission,
 													update_date,
 													objective,
-													history
+													history,
+													playstore,
+													appstore
 												 FROM
 												 webcoopprofile
 												 
@@ -38,6 +40,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrCoopProfile["LINE_URL"] = $rowCoopProfile["line_url"];
 			$arrCoopProfile["EMAIL"] = $rowCoopProfile["email"];
 			$arrCoopProfile["VISION"] = $rowCoopProfile["vision"];
+			$arrCoopProfile["PLAYSTORE"] = $rowCoopProfile["playstore"];
+			$arrCoopProfile["APPSTORE"] = $rowCoopProfile["appstore"];
 			$arrCoopProfile["HISTORY"] = $rowCoopProfile["history"];
 			$arrCoopProfile["UPDATE_DATE"] = $rowCoopProfile["update_date"];
 		

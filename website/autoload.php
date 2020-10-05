@@ -46,6 +46,8 @@ $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
+	
+	
 	$payload = array();
 	// Complete Argument
 	

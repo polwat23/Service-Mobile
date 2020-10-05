@@ -15,10 +15,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													year,
 													img_path,
 													img_url,
-													type
+													type,
+													department
 												FROM
 													webcoopboardofdirectors
-												WHERE year = :year AND emp_type = '0'
+												WHERE year = :year AND emp_type ='1'
 												ORDER BY
 													 position1	 
 											");
@@ -36,6 +37,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrBoardCoop["IMG_PATH"] = $rowBoadCoop["img_path"];
 			$arrBoardCoop["IMG_URL"] = $rowBoadCoop["img_url"];
 			$arrBoardCoop["TYPE"] = $rowBoadCoop["type"];
+			$arrBoardCoop["DEPARTMENT"] = $rowBoadCoop["department"];
 			$arrayGroup[] = $arrBoardCoop;
 			$arrayType = $rowBoadCoop["type"];
 		}
@@ -44,7 +46,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												year
 											FROM
 													webcoopboardofdirectors
-											WHERE emp_type = '0'
+											WHERE  emp_type ='1'
 											ORDER BY
 													year	
 											DESC	

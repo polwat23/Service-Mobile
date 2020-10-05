@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 			$createImage = $lib->base64_to_img($dataComing["img_head_news"],$file_name,$destination,null);
 			if($createImage == 'oversize'){
-				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
+				$arrayResult['RESPONSE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$pathImgHeadNews = "resource/gallery_web_coop/news/".$createImage["normal_path"];
 					$urlImgHeadNews = $config["URL_SERVICE"]."resource/gallery_web_coop/news/".$createImage["normal_path"];
 				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
+					$arrayResult['RESPONSE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
 					exit();
@@ -109,7 +109,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								$path_file["name"] = $file_name;
 								$groupFile[]=$path_file;
 							}else{
-								$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
+								$arrayResult['RESPONSE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 								$arrayResult['RESULT'] = FALSE;
 								echo json_encode($arrayResult);
 								exit();

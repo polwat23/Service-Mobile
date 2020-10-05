@@ -6,43 +6,37 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$arrayGroupFile = array();
 		$img_head_web_news = array();
-		$fetchGalleryWebCoop = $conmysql->prepare("SELECT
-													id_gallery,
-													gallery_name,
-													img_gallery_url,
-													img_gallery_path
-												 FROM
-													webcoopgallary
-												 WHERE
-													gallery_name = 'banner'");
-		$fetchGalleryWebCoop->execute();
-		$rowNewsWebCoop = $fetchGalleryWebCoop->fetch(PDO::FETCH_ASSOC);
+		
 			
 		$fetchImgBanner = $conmysql->prepare("SELECT
-													id_webcoopfile,
-													file_patch,
-													file_url
+													banner_id,
+													news_id,
+													img_path,
+													img_url,
+													type,
+													update_date
 												FROM
-													webcoopfiles
-												WHERE
-													id_gallery  = :id_gallery ");
-		$fetchImgBanner->execute([
-				':id_gallery' => $rowNewsWebCoop["id_gallery"]
-		]);
+													webcoopbanner
+												ORDER BY
+													update_date");
+		$fetchImgBanner->execute();
 		$arrayGroupFile=[];		
 		while($rowFile = $fetchImgBanner->fetch(PDO::FETCH_ASSOC)){
-				$arrNewsFile["index"] = $rowFile["id_webcoopfile"];
-				$arrNewsFile["original"]=$rowFile["file_url"];
-				$arrNewsFile["thumbnail"]=$rowFile["file_url"];
+				$arrNewsFile["ID"] = $rowFile["banner_id"];
+				$arrNewsFile["NEWS_ID"] = $rowFile["news_id"];
+				$arrNewsFile["TYPE"] = $rowFile["type"];
+				$arrNewsFile["original"]=$rowFile["img_url"];
+				$arrNewsFile["thumbnail"]=$rowFile["img_url"];
+				$arrNewsFile["IMG_PATH"]= $rowFile["img_path"];
+			
 				$arrayGroupFile[]=$arrNewsFile;
 		}
 			
-		$arrBannerWebCoop["GALLERY_ID"] = $rowNewsWebCoop["id_gallery"];
-		$arrBannerWebCoop["GALLERY_NAME"] =  $rowNewsWebCoop["gallery_name"];
-		$arrBannerWebCoop["IMG"] = $arrayGroupFile;
-		$arrayGroup = $arrBannerWebCoop;
 		
-		$arrayResult["ACTIVITY_DATA"] = $arrayGroup;
+		$arrayResult["ACTIVITY_DATA"] = $arrayGroupFile;
+		$arrayResult["IMG"] = $arrayGroupFile;
+		
+		
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
