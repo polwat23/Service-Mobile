@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	}else{
 		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											WHERE mb.member_no = :member_no");
+											WHERE TRIM(mb.member_no) = :member_no");
 		$checkValid->execute([
 			':member_no' => $member_no
 		]);
