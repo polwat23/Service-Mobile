@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mb.position_desc,mt.membtype_desc,
 													mb.MEMB_ADDR as ADDR_NO,
 													mb.ADDR_GROUP as ADDR_MOO,
 													mb.SOI as ADDR_SOI,
@@ -30,15 +30,35 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MB.PROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.POSTCODE AS ADDR_POSTCODE
+													MB.POSTCODE AS ADDR_POSTCODE,
+													mb.MEMBGROUP_CODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE TRIM(mb.member_no) = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			$sqlGetMembGrp = $conoracle->prepare("SELECT (B.MEMBGROUP_DESC || ' / ' || A.MEMBGROUP_DESC ) AS MEMBGROUP_CODE_STR 
+												FROM MBUCFMEMBGROUP A LEFT JOIN MBUCFMEMBGROUP B ON A.MEMBGROUP_CONTROL = B.MEMBGROUP_CODE 
+												WHERE A.MEMBGROUP_CODE = :MEMBGRP");
+			$sqlGetMembGrp->execute([':MEMBGRP' => $rowMember["MEMBGROUP_CODE"]]);
+			$rowMembGrp = $sqlGetMembGrp->fetch(PDO::FETCH_ASSOC);
+			$getRecvAcc = $conoracle->prepare("SELECT
+													cmt.MONEYTYPE_DESC as DIVPAYTYPE_DESC,
+													cmt.MONEYTYPE_CODE as DIVPAYTYPE_CODE,
+													mx.DIVIDEND_ACCID as BANK_ACCID,
+													cb.BANK_DESC,
+													cmbb.BRANCH_NAME
+												FROM 
+													MBMEMBMASTER MB LEFT JOIN mbmembexpense mx on mb.member_no = mx.member_no
+													LEFT JOIN cmucfbank cb ON mx.DIVIDEND_BANK = cb.bank_code LEFT JOIN cmucfbankbranch cmbb ON 
+													mx.DIVIDEND_BRANCH = cmbb.branch_id and
+													mx.DIVIDEND_BANK = cmbb.bank_code
+													LEFT JOIN cmucfmoneytype cmt ON mx.DIVIDEND_CODE = cmt.MONEYTYPE_CODE
+												WHERE TRIM(MB.MEMBER_NO) = :member_no");
+			$getRecvAcc->execute([':member_no' => $member_no]);
+			$rowRecvAcc = $getRecvAcc->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
@@ -69,9 +89,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
-			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
+			$arrayResult["MEMBERGROUP_DESC"] = $rowMembGrp["MEMBGROUP_CODE_STR"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["RECEIVE_DIV"] = $rowRecvAcc["DIVPAYTYPE_CODE"] == 'TRN' ? 'บัญชีสหกรณ์ : '.$lib->formataccount($rowRecvAcc["BANK_ACCID"],$func->getConstant('dep_format'))
+			: $rowRecvAcc["DIVPAYTYPE_DESC"].' '.$rowRecvAcc["BANK_DESC"].' '.$rowRecvAcc["BRANCH_NAME"].' '.$rowRecvAcc["BANK_ACCID"];
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
