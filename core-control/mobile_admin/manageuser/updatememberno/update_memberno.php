@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','member_no','new_member_no'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','updatememberno')){
+	if($func->check_permission_core($payload,'mobileadmin','editmemberno')){
 		$conmysql->beginTransaction();
 		$arrayExecute = array();
 		if(isset($dataComing["new_member_no"]) && $dataComing["new_member_no"] != ''){
