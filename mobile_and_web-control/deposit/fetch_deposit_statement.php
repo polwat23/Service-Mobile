@@ -21,9 +21,20 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
-			$arrayResult['RESPONSE_CODE'] = "WS9001";
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS9999",
+				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
+			$lib->sendLineNotify($message_error);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
+			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
@@ -59,9 +70,19 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$arrDataAPISTM["CoopAccountNo"] = $account_no;
 		$arrDataAPISTM["FromDate"] = date('c',strtotime($date_before));
 		$arrDataAPISTM["ToDate"] = date('c',strtotime($date_now));
-		$arrResponseAPISTM = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryBalance",$arrDataAPISTM,$arrHeaderAPISTM);
+		$arrResponseAPISTM = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryBalance",$arrDataAPISTM,$arrHeaderAPISTM);
 		if(!$arrResponseAPISTM["RESULT"]){
-			$arrayResult['RESPONSE_CODE'] = "WS9001";
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS9999",
+				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryBalance",
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryBalance";
+			$lib->sendLineNotify($message_error);
+			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

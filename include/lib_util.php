@@ -264,6 +264,7 @@ class library {
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
+		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
@@ -299,6 +300,8 @@ class library {
 						$destination = $output_file.'/'.$filename;
 						$webP_destination = $output_file.'/'.$file_name.'.webp';
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$webP->convert($destination,$webP_destination,[]);
 							$arrPath = array();
@@ -319,6 +322,8 @@ class library {
 						$filename = $file_name.'.'.$ext_img;
 						$destination = $output_file.'/'.$filename;
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$arrPath = array();
 							$arrPath["normal_path"] = $filename;
@@ -492,6 +497,26 @@ class library {
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
 		curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 300);
+		$result = curl_exec($ch);
+		if($result){
+			curl_close($ch);
+			return $result;
+		}else{
+			$arrayErr = array();
+			$arrayErr["RESPONSE_MESSAGE"] = curl_error($ch);
+			$arrayErr["RESULT"] = FALSE;
+			curl_close ($ch);
+			return $arrayErr;
+		}
+	}
+	public function posting_dataAPI($url,$payload,$header=[]) {
+		$ch = curl_init( $url );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);

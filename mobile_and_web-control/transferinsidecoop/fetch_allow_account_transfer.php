@@ -18,8 +18,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
-			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 			if(!$arrResponseAPI["RESULT"]){
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS9999",
+					":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
+				$lib->sendLineNotify($message_error);
+				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_CODE'] = "WS9999";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -38,6 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAccAllow["DEPT_TYPE"] = $accData->accountDesc;
 						$arrAccAllow["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
 						$arrAccAllow["BALANCE_FORMAT"] = $accData->availableBalance;
+						$arrAccAllow["BALANCE_DEST"] = preg_replace('/,/', '', $accData->accountBalance);
 						$arrAccAllow["CAN_DEPOSIT"] = $accData->creditFlag == '1' ? '0' : '1';
 						$arrAccAllow["CAN_WITHDRAW"] = $accData->debitFlag == '1' ? '0' : '1';
 						$arrGroupAccAllow[] = $arrAccAllow;

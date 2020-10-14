@@ -17,8 +17,19 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$arrDataAPI["ToCoopAccountNo"] = $to_deptaccount_no;
 		$arrDataAPI["TransferAmount"] = $dataComing["amt_transfer"];
 		$arrDataAPI["UserRequestDate"] = date('c');
-		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/CheckTransferFee",$arrDataAPI,$arrHeaderAPI);
+		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/CheckTransferFee",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS9999",
+				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckTransferFee",
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckTransferFee";
+			$lib->sendLineNotify($message_error);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

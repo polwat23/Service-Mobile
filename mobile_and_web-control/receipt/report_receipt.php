@@ -121,7 +121,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
+																kpd.RECEIPT_DATE as OPERATE_DATE,
 																kpd.KEEPING_STATUS
 																FROM kpmastreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
@@ -328,7 +328,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-40px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new DOMPDF();
