@@ -7,7 +7,7 @@ $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$fetchMail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
 		$fetchMail->execute([':member_no' => $payload["member_no"]]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);

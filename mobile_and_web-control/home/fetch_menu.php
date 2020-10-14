@@ -3,7 +3,7 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+	$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 	$user_type = $payload["user_type"];
 	$permission = array();
 	$arrayResult = array();
@@ -229,7 +229,7 @@ if(!$anonymous){
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
-			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
+			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE TRIM(member_no) = :member_no");
 			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
@@ -254,7 +254,7 @@ if(!$anonymous){
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep ?? [];
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan ?? [];
 				}
-				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
+				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE TRIM(member_no) = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];

@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrGroupCredit = array();
 		$arrCanCal = array();
 		$arrCanReq = array();
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if($canRequest === TRUE){
 				$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
 				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+															FROM gcreqloan WHERE loantype_code = :loantype_code and TRIM(member_no) = :member_no and req_status NOT IN('-9','9')");
 				$CheckIsReq->execute([
 					':loantype_code' => $rowCanCal["loantype_code"],
 					':member_no' => $member_no
