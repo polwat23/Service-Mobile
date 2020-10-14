@@ -21,13 +21,14 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 					break;
 			}
 		}
-		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status FROM gchistory 
+		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status,his_path_image FROM gchistory 
 											WHERE member_no = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
 		$getHistory->execute($executeData);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();
 			$arrHistory["TITLE"] = $rowHistory["his_title"];
 			$arrHistory["DETAIL"] = $rowHistory["his_detail"];
+			$arrHistory["IMG"] = $rowHistory["his_path_image"];
 			$arrHistory["READ_STATUS"] = $rowHistory["his_read_status"];
 			$arrHistory["ID_HISTORY"] = $rowHistory["id_history"];
 			$arrHistory["RECEIVE_DATE"] = $lib->convertdate($rowHistory["receive_date"],'D m Y',true);
@@ -49,11 +50,11 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
+		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
+	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
