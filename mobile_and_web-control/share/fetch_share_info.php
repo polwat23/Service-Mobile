@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,sharebegin_amt
 													FROM shsharemaster WHERE TRIM(member_no) = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);

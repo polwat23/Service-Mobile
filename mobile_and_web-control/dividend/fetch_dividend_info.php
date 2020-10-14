@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DividendInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT cm.account_year AS DIV_YEAR FROM mbdivavgtrnpost mp LEFT JOIN cmaccountyear cm 

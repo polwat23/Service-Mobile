@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM)$payload["member_no"]);
 		$arrAllLoan = array();
 		$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE TRIM(member_no) = :member_no");
 		$getSumAllContract->execute([':member_no' => $member_no]);
