@@ -30,13 +30,14 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getAccount = $conoracle->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
+		$getAccount = $conoracle->prepare("SELECT prncbal as BALANCE,SEQUEST_AMOUNT AS SEQUEST_AMOUNT FROM dpdeptmaster
 											WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
 		$getAccount->execute([
 			':account_no' => $account_no
 		]);
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
+		$arrayHeaderAcc["SEQUEST_AMOUNT"] = number_format($rowAccount["SEQUEST_AMOUNT"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
 		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
