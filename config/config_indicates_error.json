@@ -103,6 +103,7 @@
 	"WS1030" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนแปลงสถานะการพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1030","en" : "Something was wronged that cannot change status moratorium please contact cooperative #WS1030"}],
 	"WS1031" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถดึงข้อมูลเงินฝากได้ กรุณาติดต่อสหกรณ์ #WS1031","en" : "Something was wronged that cannot fetch information of deposits please contact cooperative #WS1031"}],
 	"WS9001" : [{"th" : "เกิดข้อผิดพลาดบางประการ กรุณาลองใหม่อีกครั้ง #WS9001","en" : "Something wrong please try again #WS9001"}],
+	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการ กรุณาลองใหม่อีกครั้ง #WS9999","en" : "Something wrong please try again #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],

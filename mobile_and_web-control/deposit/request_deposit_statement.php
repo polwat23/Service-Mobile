@@ -18,26 +18,24 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
-																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
-																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
-																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')");
-			$fetchDataSTM->execute([
-				':account_no' => $account_no,
-				':datebefore' => $date_between[0],
-				':dateafter' => $date_between[1]
-			]);
 			$arraySTMGrp = array();
-			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-				$arraySTM = array();
-				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
-				$arraySTM["DEPTITEMTYPE_DESC"] = $rowDataSTM["DEPTITEMTYPE_DESC"];
-				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
-				$arraySTM["DEPTSLIP_NO"] = $rowDataSTM["DEPTSLIP_NO"];
-				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
-				$arraySTM["TRAN_AMOUNT"] = $rowDataSTM["TRAN_AMOUNT"];
-				$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
-				$arraySTMGrp[] = $arraySTM;
+			$arrHeaderAPISTM[] = 'Req-trans : '.date('YmdHis');
+			$arrDataAPISTM["MemberID"] = substr($member_no,-6);
+			$arrDataAPISTM["CoopAccountNo"] = $account_no;
+			$arrDataAPISTM["FromDate"] = date('c',strtotime($date_between[0]));
+			$arrDataAPISTM["ToDate"] = date('c',strtotime($date_between[1]));
+			$arrResponseAPISTM = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryBalance",$arrDataAPISTM,$arrHeaderAPISTM);
+			$arrResponseAPISTM = json_decode($arrResponseAPISTM);
+			if($arrResponseAPISTM->responseCode == "200"){
+				foreach($arrResponseAPISTM->inquieryBalanceDetail as $accData){
+					$arraySTM = array();
+					$arraySTM["TYPE_TRAN"] = $accData->trxDesc;
+					$arraySTM["SIGN_FLAG"] = $accData->trxOperate == '+' ? "1" : "-1";
+					$arraySTM["OPERATE_DATE"] = $lib->convertdate($accData->trxDate,'D m Y');
+					$arraySTM["TRAN_AMOUNT"] = str_replace('-','',$accData->totalAmount);
+					$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
+					$arraySTMGrp[] = $arraySTM;
+				}
 			}
 			$arrayData["STATEMENT"] = $arraySTMGrp;
 			$arrayData["MEMBER_NO"] = $payload["member_no"];

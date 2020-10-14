@@ -50,8 +50,19 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$arrDataAPI["TransferAmount"] = $dataComing["amt_transfer"];
 		$arrDataAPI["UserRequestDate"] = $dateOperC;
 		$arrDataAPI["BankCode"] = $dataComing["bank_code"];
-		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee",$arrDataAPI,$arrHeaderAPI);
+		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS9999",
+				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee",
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee";
+			$lib->sendLineNotify($message_error);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -167,6 +178,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

@@ -41,8 +41,19 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrDataAPI["WithdrawAmount"] = $amt_transfer;
 		$arrDataAPI["UserRequestDate"] = $dateOperC;
 		$arrDataAPI["Note"] = "Withdraw Bank";
-		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/WithdrawFromCoopAccount",$arrDataAPI,$arrHeaderAPI);
+		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/WithdrawFromCoopAccount",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS9999",
+				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/WithdrawFromCoopAccount",
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/WithdrawFromCoopAccount";
+			$lib->sendLineNotify($message_error);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -100,7 +111,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			]);
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["TrxId"] = $ref_slipno;
-			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/ReverseWithDraw",$arrDataAPI,$arrHeaderAPI);
+			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/ReverseWithDraw",$arrDataAPI,$arrHeaderAPI);
 			$arrayResult['RESPONSE_CODE'] = "WS0030";
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
@@ -125,8 +136,19 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$arrDataAPI["TrxId"] = $ref_slipno;
 			$arrDataAPI["BankTransferRefCode"] = $dataComing["tran_id"];
 			$arrDataAPI["BankTransferRefDate"] = $dateOperC;
-			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/SaveWithdrawRefCodeFromBankAccount",$arrDataAPI,$arrHeaderAPI);
+			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/SaveWithdrawRefCodeFromBankAccount",$arrDataAPI,$arrHeaderAPI);
 			if(!$arrResponseAPI["RESULT"]){
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS9999",
+					":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/SaveWithdrawRefCodeFromBankAccount",
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/SaveWithdrawRefCodeFromBankAccount";
+				$lib->sendLineNotify($message_error);
+				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_CODE'] = "WS9999";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -250,6 +272,16 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

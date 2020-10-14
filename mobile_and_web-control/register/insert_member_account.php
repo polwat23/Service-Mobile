@@ -55,20 +55,20 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrDataAPI["CitizenID"] = $dataComing["card_person"];
 		$arrDataAPI["CoopAccountNo"] = $dataComing["deptaccount_no"];
 		$arrDataAPI["UserRequestDate"] = date('c');
-		$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."MemberProfile/SaveMember",$arrDataAPI,$arrHeaderAPI);
+		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."MemberProfile/SaveMember",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
-				":error_code" => "WS1031",
-				":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI),
+				":error_code" => "WS9999",
+				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."MemberProfile/SaveMember",
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI);
+			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."MemberProfile/SaveMember";
 			$lib->sendLineNotify($message_error);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = "WS1031";
+			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);

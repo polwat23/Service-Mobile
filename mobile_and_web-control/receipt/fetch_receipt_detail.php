@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$showSplitSlip = $func->getConstant('show_split_slip_report');
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare("SELECT 
-													CASE kut.system_code 
+													CASE kut.keepitemtype_code 
 													WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
 													WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 													ELSE kut.keepitemtype_desc

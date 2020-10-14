@@ -14,17 +14,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBeenAllow = array();
 				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 				$arrDataAPI["MemberID"] = substr($member_no,-6);
-				$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+				$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 				if(!$arrResponseAPI["RESULT"]){
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
 						":error_menu" => $filename,
 						":error_code" => "WS1031",
-						":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI),
+						":error_desc" => "ติดต่อ Server เงินฝาก Egat ไม่ได้ ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไฟล์ ".$filename." ติดต่อ Server เงินฝาก Egat ไม่ได้ "."\n".json_encode($arrResponseAPI);
+					$message_error = "ไฟล์ ".$filename."ติดต่อ Server เงินฝาก Egat ไม่ได้ ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
 					$lib->sendLineNotify($message_error);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_CODE'] = "WS1031";
