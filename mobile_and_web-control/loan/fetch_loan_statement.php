@@ -55,8 +55,8 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM = array();
 			if($rowStm["LOANITEMTYPE_CODE"] == 'LPM'){
 				if($i == 0){
-					$getRecvPeriod = $conoracle->prepare("SELECT RECV_PERIOD,RECEIVE_AMT FROM kpmastreceive WHERE receipt_no = '".$rowStm["REF_DOCNO"]."'");
-					$getRecvPeriod->execute();
+					$getRecvPeriod = $conoracle->prepare("SELECT RECV_PERIOD,RECEIVE_AMT FROM kpmastreceive WHERE receipt_no = :ref_docno");
+					$getRecvPeriod->execute([':ref_docno' => $rowStm["REF_DOCNO"]]);
 					$rowRecvPeriod = $getRecvPeriod->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowRecvPeriod["RECV_PERIOD"]) && $rowRecvPeriod["RECV_PERIOD"] != ""){
 						$arrSendKP = array();
