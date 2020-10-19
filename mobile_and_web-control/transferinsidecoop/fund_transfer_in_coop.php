@@ -116,7 +116,11 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			}
 			$log->writeLog('transferinside',$arrayStruc);
 			$arrayResult["RESPONSE_CODE"] = 'WS0064';
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			if(strpos($e->getMessage(),'จำนวนเงินฝากขั้นต่ำ') === FALSE){
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = preg_replace('/[\/"]/', '', $e->getMessage());
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

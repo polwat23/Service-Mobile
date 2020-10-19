@@ -6,7 +6,17 @@ use Endroid\QrCode\QrCode;
 if($lib->checkCompleteArgument(['menu_component','trans_code','account_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GenerateQR')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$dataComing["trans_code"].$dataComing["account_no"]."\r\n".str_replace('.','',$dataComing["amt_transfer"]);
+		$amt_transferArr = explode('.',$dataComing["amt_transfer"]);
+		if(isset($amt_transferArr[1])){
+			if(strlen($amt_transferArr[1]) == 1){
+				$amt_transfer = $dataComing["amt_transfer"].'0';
+			}else{
+				$amt_transfer = $dataComing["amt_transfer"];
+			}
+		}else{
+			$amt_transfer = $dataComing["amt_transfer"].'.00';
+		}
+		$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$dataComing["trans_code"].preg_replace('/-/', '', $dataComing["account_no"])."\r\n".str_replace('.','',$amt_transfer);
 		$qrCode = new QrCode($stringQRGenerate);
 		header('Content-Type: '.$qrCode->getContentType());
 		$qrCode->writeString();
