@@ -44,6 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
 			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
+			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOAN_BALANCE"],2);
 			$checkLoanCollAmt = $conoracle->prepare("SELECT COUNT(REF_COLLNO) as C_REF,COLL_PERCENT FROM lncontcoll 
 																		WHERE loancontract_no = :loancontract_no and loancolltype_code = '01' and REF_COLLNO = :ref_collno GROUP BY COLL_PERCENT");
 			$checkLoanCollAmt->execute([
