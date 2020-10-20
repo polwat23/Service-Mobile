@@ -319,7 +319,7 @@ function GenerateReport($dataReport,$header,$lib){
 		mkdir($pathfile, 0777, true);
 	}
 	$pathfile = $pathfile.'/'.$header["member_no"].$header["receipt_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["member_no"].$header["receipt_no"].'.pdf?v='.time();
+	$pathfile_show = '/resource/pdf/keeping_monthly/'.urlencode($header["member_no"]).$header["receipt_no"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

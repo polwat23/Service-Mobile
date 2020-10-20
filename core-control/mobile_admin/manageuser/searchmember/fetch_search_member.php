@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			echo json_encode($arrayResult);
 			exit();
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.email_address as email,
+		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.email_address as email,mb.card_person,
 											mb.mem_telmobile as MEM_TELMOBILE,
 											TRIM(mb.member_no) as MEMBER_NO,
 											mb.MEMB_ADDR as ADDR_NO,
@@ -77,6 +77,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
+			$arrayGroup["CARD_PERSON"] = $rowMember["CARD_PERSON"];
 			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
 			$arrayGroupAll[] = $arrayGroup;
 		}
