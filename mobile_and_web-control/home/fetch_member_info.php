@@ -35,6 +35,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+													and mb.PROVINCE_CODE = MBD.PROVINCE_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE TRIM(mb.member_no) = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);

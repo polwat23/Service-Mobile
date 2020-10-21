@@ -37,6 +37,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 				}
 			}
+			
+			$arrCollShould = array();
+			$arrSubCollPerson["LABEL"] = "สิทธิกู้สูงสุด";
+			$arrSubCollPerson["CREDIT_AMT"] = $maxloan_amt;
+			$arrCollShould[] = $arrSubCollPerson;
+			$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
 			$arrCredit["ALLOW_REQUEST"] = $canRequest;
 			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 			$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
