@@ -4,28 +4,37 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'InsureInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchinSureInfo = $conoracle->prepare("SELECT ist.INSURETYPE_DESC,mp.PRENAME_DESC,ism.INSMEM_NAME,ism.INSMEM_SURNAME,
-												ism.INSSTART_DATE,ism.PREMIUM_PAYAMT,ism.INSURANCE_NO,inc.COMPANY_NAME,ism.PREMIUM_AMT,ism.BOUNTY_AMT
-												FROM insinsuremaster ism LEFT JOIN insinsuretype ist ON ism.insuretype_code = ist.insuretype_code
-												LEFT JOIN mbucfprename mp ON ism.PRENAME_CODE = mp.PRENAME_CODE
-												LEFT JOIN insucfcompany inc ON ist.COMPANY_CODE = inc.COMPANY_CODE
-												WHERE ism.insurance_status = '1' and ism.member_no = :member_no");
+		$sum_insure_amt = 0;
+		$fetchinSureInfo = $conoracle->prepare("SELECT ium.INSMEMB_DESC,ism.MARRIGE_NAME,ism.INSCOST_BLANCE,ism.INSGROUP_DATE,ism.STARTSAFE_DATE,ism.ENDSAFE_DATE,
+												ism.INSPEROD_PAYMENT,ist.INSCOMPANY_NAME as COMPANY_NAME,ist.INSTYPE_DESC,ilc.MEDICAL_AMT
+												FROM insgroupmaster ism LEFT JOIN insurencetype ist ON ism.INSTYPE_CODE = ist.INSTYPE_CODE
+												LEFT JOIN insucfmembtype ium ON ism.INSMEMB_TYPE = ium.INSMEMB_TYPE
+												LEFT JOIN inslevelcost ilc ON ism.INSTYPE_CODE = ilc.INSTYPE_CODE and ism.LEVEL_CODE = ilc.LEVEL_CODE
+												WHERE ism.member_no = :member_no ORDER BY ism.INSTYPE_CODE ASC");
 		$fetchinSureInfo->execute([
 			':member_no' => $member_no
 		]);
 		$arrGroupAllIns = array();
 		while($rowInsure = $fetchinSureInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayInsure = array();
-			$arrayInsure["PAYMENT"] = number_format($rowInsure["PREMIUM_PAYAMT"],2);
-			$arrayInsure["PREMIUM_AMT"] = number_format($rowInsure["PREMIUM_AMT"],2);
-			$arrayInsure["BOUNTY_AMT"] = number_format($rowInsure["BOUNTY_AMT"],2);
-			$arrayInsure["INSURE_DATE"] = $lib->convertdate($rowInsure["INSSTART_DATE"],'D m Y');
-			$arrayInsure["INSURE_TYPE"] = $rowInsure["INSURETYPE_DESC"];
-			$arrayInsure["INSURE_NO"] = $rowInsure["INSURANCE_NO"];
+			$arrayInsure["PAYMENT"] = number_format($rowInsure["INSPEROD_PAYMENT"],2);
+			$arrayInsure["PREMIUM_AMT"] = number_format($rowInsure["INSPEROD_PAYMENT"],2);
+			if(isset($rowInsure["MEDICAL_AMT"])){
+				$arrayInsure["MEDICAL_AMT"] = number_format($rowInsure["MEDICAL_AMT"],2);
+			}
+			$arrayInsure["INSURE_DATE"] = $lib->convertdate($rowInsure["INSGROUP_DATE"],'D m Y');
+			if(isset($rowInsure["ENDSAFE_DATE"])){
+				$arrayInsure["STARTSAFE_DATE"] = $lib->convertdate($rowInsure["STARTSAFE_DATE"],'D m Y');
+				$arrayInsure["ENDSAFE_DATE"] = $lib->convertdate($rowInsure["ENDSAFE_DATE"],'D m Y');
+			}
+			$arrayInsure["INSURE_TYPE"] = $rowInsure["INSTYPE_DESC"];
 			$arrayInsure["COMPANY_NAME"] = $rowInsure["COMPANY_NAME"];
-			$arrayInsure["FULL_NAME"] = $rowInsure["PRENAME_DESC"].$rowInsure["INSMEM_NAME"].' '.$rowInsure["INSMEM_SURNAME"];
+			$arrayInsure["FULL_NAME"] = $rowInsure["MARRIGE_NAME"];
+			$arrayInsure["IS_STM"] = FALSE;
+			$sum_insure_amt += $rowInsure["INSPEROD_PAYMENT"];
 			$arrGroupAllIns[] = $arrayInsure;
 		}
+		$arrayResult['SUM_INSURE_AMT'] = number_format($sum_insure_amt,2);
 		$arrayResult['INSURE'] = $arrGroupAllIns;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

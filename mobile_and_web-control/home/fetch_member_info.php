@@ -23,6 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,TRIM(mg.membgroup_code) as membgroup_code,
 													mb.MEMB_ADDR as ADDR_NO, mb.SOI as ADDR_SOI,mb.MOOBAN as ADDR_MOO,mb.ROAD AS ADDR_ROAD,
 													mb.PROVINCE_CODE,
+													mb.MEMBADDR_FULL,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
@@ -67,7 +68,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
-			$arrayResult["FULL_ADDRESS_CURR"] = $address;
+			$arrayResult["FULL_ADDRESS_CURR"] = isset($rowMember["MEMBADDR_FULL"]) && $rowMember["MEMBADDR_FULL"] != "" ? $rowMember["MEMBADDR_FULL"] : $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["IGNORE_INFO"] = ["CARD_PERSON","MEMBERGROUP_DESC","BIRTH_DATE","POSITION_DESC"];
 			$arrayResult["RECEIVE_MONEY_FROM"] = $rowMember["MEMBGROUP_DESC"]." (".$rowMember["MEMBGROUP_CODE"].")";
