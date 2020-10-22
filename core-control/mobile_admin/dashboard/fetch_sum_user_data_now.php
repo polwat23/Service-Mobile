@@ -6,12 +6,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupMonth = array();
 		
 		//web
-		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(member_no) as SUM_LOGIN_WEB FROM gcmemberaccount where pin IS NULL and member_no NOT IN('dev@mode','salemode','etnmode1','etnmode2','etnmode3','etnmode4')");
+		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(member_no) as SUM_LOGIN_WEB FROM gcmemberaccount where pin IS NULL and member_no NOT IN('dev@mode','salemode','etnmode1','etnmode2','etnmode3','etnmode4') and account_status IN('1','-8','-9')");
 		$fetchUserloginWeb->execute();
 	    $rowUserloginWeb = $fetchUserloginWeb->fetch(PDO::FETCH_ASSOC);
 		
 		//mobile_app
-		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(member_no) as SUM_LOGIN_MOBILE FROM gcmemberaccount where pin IS NOT NULL and member_no NOT IN('dev@mode','salemode','etnmode1','etnmode2','etnmode3','etnmode4')");
+		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(member_no) as SUM_LOGIN_MOBILE FROM gcmemberaccount where pin IS NOT NULL and member_no NOT IN('dev@mode','salemode','etnmode1','etnmode2','etnmode3','etnmode4') and account_status IN('1','-8','-9')");
 		$fetchUserloginMobile->execute();
 	    $rowUserloginMobile = $fetchUserloginMobile->fetch(PDO::FETCH_ASSOC);
 		
