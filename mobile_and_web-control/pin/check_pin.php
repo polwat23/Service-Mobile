@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
-	$checkPin = $conmysql->prepare("SELECT member_no,pin FROM gcmemberaccount WHERE member_no = :member_no");
+	$checkPin = $conmysql->prepare("SELECT member_no,pin FROM gcmemberaccount WHERE trim(member_no) = :member_no");
 	$checkPin->execute([
 		':member_no' => $payload["member_no"]
 	]);

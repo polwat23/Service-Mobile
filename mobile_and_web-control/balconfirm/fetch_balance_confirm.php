@@ -10,8 +10,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpLoanAll = array();
 		$getSumAllDept = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC ");
-		$getSumAllDept->execute([':member_no' => $member_no]);
+											WHERE dp.member_no = :member_no and dp.branch_id = :branch_id and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC ");
+		$getSumAllDept->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		while($rowSumAllDept = $getSumAllDept->fetch(PDO::FETCH_ASSOC)){
 			$arraysumDept = array();
 			$arrGrpDept = array();
@@ -33,8 +36,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$getSumAllLoan = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as BALANCE
 															FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-															WHERE ln.member_no = :member_no and ln.contract_status > 0");
-		$getSumAllLoan->execute([':member_no' => $member_no]);
+															WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.branch_id = :branch_id");
+		$getSumAllLoan->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		while($rowSumAllLoan = $getSumAllLoan->fetch(PDO::FETCH_ASSOC)){
 			$arraysumLoan = array();
 			$arrGrpLoan = array();
@@ -53,8 +59,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrGrpLoanAll[array_search($rowSumAllLoan["LOAN_TYPE"],array_column($arrGrpLoanAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllLoan["BALANCE"];
 			}
 		}
-		$getSumAllLoanShare = $conoracle->prepare("SELECT (sharestk_amt * 10) as SUM_SHARE FROM shsharemaster WHERE member_no = :member_no");
-		$getSumAllLoanShare->execute([':member_no' => $member_no]);
+		$getSumAllLoanShare = $conoracle->prepare("SELECT (sharestk_amt * 10) as SUM_SHARE FROM shsharemaster WHERE member_no = :member_no and branch_id = :branch_id");
+		$getSumAllLoanShare->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		$rowSumAllShareBal = $getSumAllLoanShare->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SHARE_BALANCE'] = $rowSumAllShareBal["SUM_SHARE"];
 		$arrGrpAllDept['INFO'] = $arrGrpDeptAll;

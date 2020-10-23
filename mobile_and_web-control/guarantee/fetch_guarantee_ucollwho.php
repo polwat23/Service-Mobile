@@ -21,9 +21,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
 											WHERE
 											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
-											AND LCC.LOANCOLLTYPE_CODE = '01'
-											AND LCC.REF_COLLNO = :member_no");
-		$getUcollwho->execute([':member_no' => $member_no]);
+											AND LCC.LOANCOLLTYPE_CODE = '04'
+											AND LCC.REF_COLLNO = :member_no
+											and lcc.branch_id = :branch_id");
+		$getUcollwho->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];

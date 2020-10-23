@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 			if($createAvatar){
 				$path_avatar = '/resource/avatar/'.$member_no.'/'.$createAvatar["normal_path"];
 				$insertIntoInfo = $conmysql->prepare("UPDATE gcmemberaccount SET path_avatar = :path_avatar,upload_from_channel = :channel,upload_date = NOW()
-														WHERE member_no = :member_no");
+														WHERE trim(member_no) = :member_no");
 				if($insertIntoInfo->execute([
 					':path_avatar' => $path_avatar,
 					':channel' => $dataComing["channel"],

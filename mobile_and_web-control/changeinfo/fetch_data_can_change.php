@@ -12,13 +12,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayConst[$rowConst["const_code"]] = $rowConst["is_change"];
 		}
 		if($arrayConst["email"] == '1'){
-			$getEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
+			$getEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE trim(member_no) = :member_no");
 			$getEmail->execute([':member_no' => $payload["member_no"]]);
 			$rowEmail = $getEmail->fetch(PDO::FETCH_ASSOC);
 			$arrayDataGrp["EMAIL"] = $rowEmail["email"];
 		}
 		if($arrayConst["tel"] == '1'){
-			$getPhone = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+			$getPhone = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE trim(member_no) = :member_no");
 			$getPhone->execute([':member_no' => $payload["member_no"]]);
 			$rowPhone = $getPhone->fetch(PDO::FETCH_ASSOC);
 			$arrayDataGrp["PHONE_NUMBER"] = $rowPhone["phone_number"];

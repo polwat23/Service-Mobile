@@ -7,11 +7,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
-															from kpmastreceive where member_no = :member_no
+															SELECT RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
+															from kpmastreceive where member_no = :member_no and branch_id = :branch_id
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
 				':member_no' => $member_no,
+				':branch_id' => $payload["branch_id"],
 				':limit_period' => $limit_period
 		]);
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
@@ -22,10 +23,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM kpmastreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no and kpd.kpslip_no = :kpslip_no");
+													where kpd.member_no = :member_no and kpd.recv_period = :recv_period and kpd.branch_id = :branch_id");
 			$getKPDetail->execute([
 				':member_no' => $member_no,
-				':kpslip_no' => $rowPeriod["KPSLIP_NO"]
+				':recv_period' => $rowPeriod["RECV_PERIOD"],
+				':branch_id' => $payload["branch_id"]
 			]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
