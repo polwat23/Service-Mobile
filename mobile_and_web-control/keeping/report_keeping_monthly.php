@@ -13,9 +13,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
-												WHERE mb.member_no = :member_no");
+												WHERE mb.member_no = :member_no and mb.branch_id = :branch_id and mb.member_status = '1'");
 		$fetchName->execute([
-			':member_no' => $member_no
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
@@ -41,10 +42,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																	and kpd.branch_id = :branch_id
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':branch_id' => $payload["branch_id"]
 		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
@@ -74,10 +77,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE
 																FROM kptempreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+																WHERE kpd.member_no = :member_no and branch_id = :branch_id and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':branch_id' => $payload["branch_id"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
@@ -159,11 +163,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-712585, 053-756203</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยศรีนครินทรวิโรฒ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">114 มหาวิทยาลัยศรีนครินทรวิโรฒ (ประสานมิตร) ซ.สุขุมวิท 23 ถ.สุขุมวิท </p>
+				<p style="margin-top: -25px;font-size: 18px;">แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพมหานคร 10110</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2259-1474, 0-2258-0227</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.swutcc.co.th</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -269,12 +273,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-20px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
-			.........................................................
-			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-40px;">
+			<p style="margin-left: 50px;">ผู้จัดการ/เหรัญญิก</p></div>
 			';
 
 	$dompdf = new DOMPDF();

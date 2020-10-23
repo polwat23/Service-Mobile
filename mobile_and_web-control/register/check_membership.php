@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		exit();
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
+	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE trim(member_no) = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
 		$arrayResult['RESPONSE_CODE'] = "WS0020";
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	}else{
 		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											WHERE mb.member_no = :member_no");
+											WHERE mb.member_no = :member_no and mb.member_status = '1'");
 		$checkValid->execute([
 			':member_no' => $member_no
 		]);

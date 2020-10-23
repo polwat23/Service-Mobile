@@ -13,9 +13,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
-												WHERE mb.member_no = :member_no");
+												WHERE mb.member_no = :member_no and mb.member_status = '1' and mb.branch_id = :branch_id");
 		$fetchName->execute([
-			':member_no' => $member_no
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
@@ -28,10 +29,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		ELSE kut.keepitemtype_desc
 																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
-																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ADJUST_ITEMAMT,
-																		kpd.ADJUST_PRNAMT,
-																		kpd.ADJUST_INTAMT,
 																		case kut.keepitemtype_grp 
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
@@ -46,12 +43,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		and kpd.seq_no = :seq_no
+																		and kpd.seq_no = :seq_no and kpd.branch_id = :branch_id
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
 				':recv_period' => $dataComing["recv_period"],
-				':seq_no' => $dataComing["seq_no"]
+				':seq_no' => $dataComing["seq_no"],
+				':branch_id' => $payload["branch_id"]
 			]);
 		}else{
 			$getPaymentDetail = $conoracle->prepare("SELECT 
@@ -61,10 +59,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		ELSE kut.keepitemtype_desc
 																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
-																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ADJUST_ITEMAMT,
-																		kpd.ADJUST_PRNAMT,
-																		kpd.ADJUST_INTAMT,
 																		case kut.keepitemtype_grp 
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
@@ -79,10 +73,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																		and kpd.branch_id = :branch_id
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"]
+				':recv_period' => $dataComing["recv_period"],
+				':branch_id' => $payload["branch_id"]
 			]);
 		}
 		$arrGroupDetail = array();
@@ -95,13 +91,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
-					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
-					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
-				}else{
-					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
-					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
-				}
+				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
+				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
@@ -109,13 +100,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
-				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
-				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ADJUST_ITEMAMT"];
-			}else{
-				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
-				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
-			}
+			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
@@ -124,10 +110,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																kpd.OPERATE_DATE,
 																kpd.KEEPING_STATUS
 																FROM kpmastreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period and kpd.branch_id = :branch_id");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':branch_id' => $payload["branch_id"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
@@ -215,11 +202,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย</p>
-			<p style="margin-top: -25px;font-size: 18px;">ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 053-712585, 053-756203</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยศรีนครินทรวิโรฒ จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">114 มหาวิทยาลัยศรีนครินทรวิโรฒ (ประสานมิตร) ซ.สุขุมวิท 23 ถ.สุขุมวิท </p>
+			<p style="margin-top: -25px;font-size: 18px;">แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพมหานคร 10110</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2259-1474, 0-2258-0227</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.swutcc.co.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -324,15 +311,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
-			</div>
-			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-30px;">ผู้จัดการ/เหรัญญิก</div>
 			';
 
 	$dompdf = new DOMPDF();

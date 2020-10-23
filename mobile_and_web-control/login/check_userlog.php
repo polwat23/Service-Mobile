@@ -2,11 +2,11 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
-	$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+	$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no and member_status = '1'");
 	$checkResign->execute([':member_no' => $payload["member_no"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 	if($rowResign["RESIGN_STATUS"] == '1'){
-		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
+		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE trim(member_no) = :member_no");
 		$updateStatus->execute([':member_no' => $payload["member_no"]]);
 		$arrayResult['RESPONSE_CODE'] = "WS0051";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		echo json_encode($arrayResult);
 		exit();
 	}
-	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE trim(member_no) = :member_no and account_status IN('1','-9')");
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 	$rowPinNull = $checkPinNull->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowPinNull["pin"])){
@@ -128,7 +128,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			exit();
 		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
-		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
+		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE trim(member_no) = :member_no");
 		if($updatePin->execute([
 			':pin' => $pin,
 			':member_no' => $payload["member_no"]

@@ -5,8 +5,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,sharebegin_amt
-													FROM shsharemaster WHERE member_no = :member_no");
-		$getSharemasterinfo->execute([':member_no' => $member_no]);
+													FROM shsharemaster WHERE member_no = :member_no and branch_id = :branch_id");
+		$getSharemasterinfo->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
@@ -26,12 +29,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$date_now = date('Y-m-d');
 			}
 			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
-														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period,stm.ref_slipno
+														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
-														WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.ENTRY_DATE
+														WHERE stm.member_no = :member_no and stm.branch_id = :branch_id and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.ENTRY_DATE
 														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no DESC");
 			$getShareStatement->execute([
 				':member_no' => $member_no,
+				':branch_id' => $payload["branch_id"],
 				':datebefore' => $date_before,
 				':datenow' => $date_now
 			]);
@@ -42,7 +46,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SUM_SHARE_AMT"],2);
 				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
 				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
-				$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
 				$arrGroupStm[] = $arrayStm;
 			}
 			$arrayResult['STATEMENT'] = $arrGroupStm;

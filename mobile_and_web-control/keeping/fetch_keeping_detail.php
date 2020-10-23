@@ -9,13 +9,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$MonthForCheck = date('m');
 		$DayForCheck = date('d');
 		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
-															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
-		$getLastReceive->execute([':member_no' => $member_no]);
+															FROM kptempreceive WHERE member_no = :member_no and branch_id = :branch_id GROUP BY RECEIPT_NO,RECEIVE_AMT 
+															ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
+		$getLastReceive->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		$rowLastRecv = $getLastReceive->fetch(PDO::FETCH_ASSOC);
-		$checkHasBeenPay = $conoracle->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no and recv_period = :max_recv and keeping_status = 1");
+		$checkHasBeenPay = $conoracle->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no 
+												and recv_period = :max_recv and branch_id = :branch_id and keeping_status = 1");
 		$checkHasBeenPay->execute([
 			':member_no' => $member_no,
-			':max_recv' => $rowLastRecv["MAX_RECV"]
+			':max_recv' => $rowLastRecv["MAX_RECV"],
+			':branch_id' => $payload["branch_id"]
 		]);
 		$rowBeenPay = $checkHasBeenPay->fetch(PDO::FETCH_ASSOC);
 		$max_recv = (int) substr($rowLastRecv["MAX_RECV"],4);
@@ -64,10 +70,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																	and kpd.branch_id = :branch_id
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
-			':recv_period' => $rowLastRecv["MAX_RECV"]
+			':recv_period' => $rowLastRecv["MAX_RECV"],
+			':branch_id' => $payload["branch_id"]
 		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){

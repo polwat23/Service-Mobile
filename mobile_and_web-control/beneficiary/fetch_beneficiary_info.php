@@ -5,10 +5,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mg.gain_relation as gain_concern,mg.remark
-												FROM mbgainmaster mg
-												WHERE mg.member_no = :member_no");
-		$getBeneficiary->execute([':member_no' => $member_no]);
+		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mc.gain_concern as gain_concern,
+												mp.PRENAME_DESC as PRENAME_SHORT,mg.gain_address,mgm.condition as REMARK
+												FROM mbgainmaster mgm LEFT JOIN mbgaindetail mg ON mgm.member_no = mg.member_no
+												LEFT JOIN mbucfgainconcern mc ON mg.CONCERN_CODE = mc.CONCERN_CODE
+												LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
+												WHERE mg.member_no = :member_no and mg.branch_id = :branch_id and mg.gain_status = '1' ORDER BY mg.seq_no ASC");
+		$getBeneficiary->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
 			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];

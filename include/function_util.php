@@ -33,7 +33,7 @@ class functions {
 		}
 		public function checkAccStatus($member_no) {
 			$checkStatus = $this->con->prepare("SELECT account_status FROM gcmemberaccount 
-												WHERE member_no = :member_no");
+												WHERE trim(member_no) = :member_no");
 			$checkStatus->execute([
 				':member_no' => $member_no
 			]);
@@ -60,13 +60,13 @@ class functions {
 		public function logoutAll($id_token,$member_no,$type_login) {
 			$arrMember = array();
 			if(isset($id_token)){
-				$getMemberlogin = $this->con->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and id_token <> :id_token and is_login = '1'");
+				$getMemberlogin = $this->con->prepare("SELECT id_token FROM gcuserlogin WHERE trim(member_no) = :member_no and id_token <> :id_token and is_login = '1'");
 				$getMemberlogin->execute([
 					':member_no' => $member_no,
 					':id_token' => $id_token
 				]);
 			}else{
-				$getMemberlogin = $this->con->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and is_login = '1'");
+				$getMemberlogin = $this->con->prepare("SELECT id_token FROM gcuserlogin WHERE trim(member_no) = :member_no and is_login = '1'");
 				$getMemberlogin->execute([
 					':member_no' => $member_no
 				]);
@@ -75,7 +75,7 @@ class functions {
 				$arrMember[] = $rowMember["id_token"];
 			}
 			$logout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() 
-									WHERE member_no = :member_no and id_token <> :id_token and is_login = '1'");
+									WHERE trim(member_no) = :member_no and id_token <> :id_token and is_login = '1'");
 			if($logout->execute([
 				':type_login' => $type_login,
 				':member_no' => $member_no,
@@ -222,7 +222,7 @@ class functions {
 			}
 		}
 		public function getPathpic($member_no){
-			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE member_no = :member_no and path_avatar IS NOT NULL");
+			$getAvatar = $this->con->prepare("SELECT path_avatar FROM gcmemberaccount WHERE trim(member_no) = :member_no and path_avatar IS NOT NULL");
 			$getAvatar->execute([':member_no' => $member_no]);
 			if($getAvatar->rowCount() > 0){
 				$rowPathpic = $getAvatar->fetch(\PDO::FETCH_ASSOC);
@@ -398,10 +398,10 @@ class functions {
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,trim(member_no) FROM gcmemberaccount WHERE trim(member_no) IN('".implode("','",$member_no)."')");
 						$fetchFCMToken->execute();
 					}else{
-						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,trim(member_no) FROM gcmemberaccount WHERE trim(member_no) = :member_no");
 						$fetchFCMToken->execute([':member_no' => $member_no]);
 					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
@@ -417,7 +417,7 @@ class functions {
 					}
 				}
 			}else{
-				$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
+				$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,trim(member_no) FROM gcmemberaccount");
 				$fetchFCMToken->execute();
 				while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
@@ -439,7 +439,7 @@ class functions {
 			$arrayMemberGRP = array();
 			if($type_target == 'person'){
 				if($trans_flag){
-					$fetchMemberAllow = $this->con->prepare("SELECT smscsp_member FROM smsconstantperson WHERE is_use = '1' and smscsp_member IN('".implode("','",$member_no)."') ");
+					$fetchMemberAllow = $this->con->prepare("SELECT trim(member_no) FROM smsconstantperson WHERE is_use = '1' and smscsp_member IN('".implode("','",$member_no)."') ");
 					$fetchMemberAllow->execute();
 					while($rowMember = $fetchMemberAllow->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
