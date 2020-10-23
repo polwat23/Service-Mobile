@@ -15,10 +15,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT_EMAIL'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$getOldEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE trim(member_no) = :member_no");
+				$getOldEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
 				$getOldEmail->execute([':member_no' => $payload["member_no"]]);
 				$rowEmail = $getOldEmail->fetch(PDO::FETCH_ASSOC);
-				$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE trim(member_no) = :member_no");
+				$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
 				if($updateEmail->execute([
 					':email' => $dataComing["email"],
 					':member_no' => $payload["member_no"]
@@ -58,10 +58,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
-				$getOldTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE trim(member_no) = :member_no");
+				$getOldTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
 				$getOldTel->execute([':member_no' => $payload["member_no"]]);
 				$rowTel = $getOldTel->fetch(PDO::FETCH_ASSOC);
-				$updateTel = $conmysql->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE trim(member_no) = :member_no");
+				$updateTel = $conmysql->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE member_no = :member_no");
 				if($updateTel->execute([
 					':phone_number' => $dataComing["tel"],
 					':member_no' => $payload["member_no"]

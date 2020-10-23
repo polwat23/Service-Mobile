@@ -3,7 +3,7 @@ $anonymous = '';
 require_once('../autoload.php');
 
 if(!$anonymous){
-	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+	$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 	$user_type = $payload["user_type"];
 	$permission = array();
 	$arrayResult = array();
