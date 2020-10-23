@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth');
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$MonthForCheck = date('m');

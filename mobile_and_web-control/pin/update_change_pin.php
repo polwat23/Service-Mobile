@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			exit();
 		}
 		
-		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE trim(member_no) = :member_no");
+		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
 			':pin' => password_hash($dataComing["pin"], PASSWORD_DEFAULT),
 			':member_no' => $payload["member_no"]

@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['fcm_token'],$dataComing)){
-	$updateNewToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE trim(member_no) = :member_no");
+	$updateNewToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
 	$updateNewToken->execute([
 		':fcm_token' => $dataComing["fcm_token"],
 		':member_no' => $payload["member_no"]

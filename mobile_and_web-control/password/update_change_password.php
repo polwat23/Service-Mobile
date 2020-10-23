@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		$conmysql->beginTransaction();
 		$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1',temppass_is_md5 = '0'
-												WHERE trim(member_no) = :member_no");
+												WHERE member_no = :member_no");
 		if($changePassword->execute([
 			':password' => $password,
 			':member_no' => $payload["member_no"]

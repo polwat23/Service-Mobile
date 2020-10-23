@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageNotification')){
 		$fetchSettingNotify = $conmysql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email
-													FROM gcmemberaccount WHERE trim(member_no) = :member_no");
+													FROM gcmemberaccount WHERE member_no = :member_no");
 		$fetchSettingNotify->execute([':member_no' => $payload["member_no"]]);
 		if($fetchSettingNotify->rowCount() > 0){
 			$rowSetting = $fetchSettingNotify->fetch(PDO::FETCH_ASSOC);

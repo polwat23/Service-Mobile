@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 			}
 		}
 		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status FROM gchistory 
-											WHERE trim(member_no) = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
+											WHERE member_no = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
 		$getHistory->execute($executeData);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();

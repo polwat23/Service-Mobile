@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrGroupBNF = array();
 		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mc.gain_concern as gain_concern,
 												mp.PRENAME_DESC as PRENAME_SHORT,mg.gain_address,mgm.condition as REMARK

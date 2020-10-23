@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
 		$getBadge = $conmysql->prepare("SELECT IFNULL(COUNT(id_history),0) as badge,his_type FROM gchistory 
-										WHERE trim(member_no) = :member_no AND his_read_status = '0'
+										WHERE member_no = :member_no AND his_read_status = '0'
 										GROUP BY his_type");
 		$getBadge->execute([
 			':member_no' => $payload["member_no"]
