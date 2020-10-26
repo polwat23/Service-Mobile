@@ -31,7 +31,7 @@ Link : [Package Installer](https://mobilecloud.coopsiam.com/installer/)
 
 ##### 2. Git clone ดึงไฟล์ทั้งหมดลงมาจาก Gitlab แยกตาม Branch สหกรณ์
     cd to destination folder
-    git clone -b <branch> https://gitlab.com/dev_gensoft/service-mobile.git .
+    git clone -b <branch> --single-branch https://gitlab.com/dev_gensoft/service-mobile.git .
 
 ##### 3. Git add staged นำไฟล์เข้าสู่สถานะรอบันทึก (ต้อง cd เข้า Folder destination ก่อน)
     git add *
