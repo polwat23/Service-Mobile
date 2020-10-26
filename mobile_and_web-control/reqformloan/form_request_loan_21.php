@@ -34,7 +34,7 @@ function GeneratePDFContract($data,$lib) {
 			   </div>
 			   <div style="position: absolute; right: 15px; top: 140px; width:100%">
 					<p style="font-size: 20px; text-align:right; ">
-					   เขียนที่ Surin Saving (Mobile Application)
+					   เขียนที่ CRH Saving (Mobile Application)
 					</p>
 			   </div>
 			   <div style="position: absolute; right: 15px; top: 176px; width:100%;">
@@ -65,22 +65,22 @@ function GeneratePDFContract($data,$lib) {
 		  </div>
 		  <div style="position: absolute; left: 61px; top: 210px; width:100%">
 			<p style="font-size: 20px; text-align:left">
-			   คณะกรรมการดําเนินการสหกรณ์ออมทรัพย์ครูสุรินทร์ จํากัด
+			   คณะกรรมการดําเนินการสหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด
 			</p>
 		  </div>
 		  <div style="position: absolute; left: 20px; top: 258px; right:0px; width:660px; font-size: 20px; ">
 			  <p style="text-indent:50px;  text-align:left;">
 			  ข้าพเจ้า.......................................................................... สมาชิกเลขทะเบียนที่...................................... รับราชการหรือ
-			  ทํางานประจําในตําแหน่ง........................................................โรงเรียนหรือที่ทําการ.......................................................................
-			  อำเภอ.........................................จังหวัดสุรินทร์ ได้รับเงินได้รายเดือน ๆ ละ...................................................บาท  มีหุ้นอยู่ใน สหกรณ์ออมทรัพย์ครูสุรินทร์ จํากัด
-			  ณ วันที่ 31 ธันวาคม พ.ศ.................เป็นเงิน.........................................บาท  ขอเสนอ คําขอกู้เงินเพื่อเหตุฉุกเฉินดังต่อไปนี้
+			  ทํางานประจําในตําแหน่ง........................................................ที่ทําการ.................................................................................
+			  อำเภอ.........................................จังหวัดเชียงราย ได้รับเงินได้รายเดือน ๆ ละ...................................................บาท  มีหุ้นอยู่ใน สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด เป็นเงิน.........................................บาท  
+			  ขอเสนอ คําขอกู้เงินฉุกเฉินดังต่อไปนี้
 			  </p>
 			  <p style="text-indent:50px; margin:0px; margin-top:-20px;  text-align:left;">
 				ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์จํานวน........................................บาท (....................................................................)
 				โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)......................................................................................
 			  </p>
 			  <p style="text-indent:50px; margin:0px; text-align:left;">
-				ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งชําระเงินดอกเบี้ยเป็นรายเดือน และส่งคืนเงินกู้เพื่อเหตุฉุกเฉินเต็มจํานวน พร้อมดอกเบี้ยเดือนสุดท้ายให้เสร็จสิ้นภายใน 12 เดือน
+				ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งชําระเงินดอกเบี้ยเป็นรายเดือน
 			  </p>
 			  <p style="text-indent:55px; margin:0px; text-align:left;">
 			  ข้อ 3. เมื่อข้าพเจ้าได้รับเงินแล้ว ข้าพเจ้ายอมรับผูกพันตามข้อบังคับของสหกรณ์ ดังนี้
@@ -90,18 +90,18 @@ function GeneratePDFContract($data,$lib) {
 			  </p>
 			  <div style="width:670px ">
 				  <p style="text-indent:93px; margin:0px;">
-				  3.2 ยอมให้ถือว่าในกรณีใด ๆ ดังกล่าวในข้อบังคับข้อ 17 ให้เงินกู้ที่ขอกู้ไปจากสหกรณ์เป็นอันถึงกําหนดส่งคืน โดยสิ้นเชิงพร้อมด้วยดอกเบี้ยในทันที โดยมิพักคํานึงถึงกําหนดเวลาที่ตกลงไว้
+				  3.2 ยอมให้ถือว่าในกรณีใด ๆ ดังกล่าวในข้อบังคับข้อ ? ให้เงินกู้ที่ขอกู้ไปจากสหกรณ์เป็นอันถึงกําหนดส่งคืน โดยสิ้นเชิงพร้อมด้วยดอกเบี้ยในทันที โดยมิพักคํานึงถึงกําหนดเวลาที่ตกลงไว้
 				</p>
 			  </div>
 			 
 			  <p style="text-indent:97px; margin:0px;">
-				3.3. ถ้าประสงค์จะลาออกหรือย้ายจากราชการ หรืองานประจําตามข้อบังคับข้อ 41 และข้อ 43 จะแจ้งเป็น 
+				3.3. ถ้าประสงค์จะลาออกหรือย้ายจากราชการ หรืองานประจําตามข้อบังคับข้อ ? และข้อ ? จะแจ้งเป็น 
 			  </p>
 			  <p style=" margin:0px; text-align:justify">
 				 หนังสือให้สหกรณ์ทราบ และจัดการชําระหนี้ซึ่งมีอยู่ตามสหกรณ์ให้เสร็จสิ้นเสียก่อน ถ้าข้าพเจ้าไม่จัดการหนี้ให้เสร็จสิ้น ตามที่กล่าวข้างต้น เมื่อข้าพเจ้าได้ลงชื่อรับเงินเดือน ค่าจ้าง เงินสะสม เงินบําเหน็จบํานาญ เงินทุนเลี้ยงชีพ หรือเงินอื่นใด ในหลักฐานที่ทางราชการหน่วยงานเจ้าของสังกัดจะจ่ายเงินให้แก่ข้าพเจ้า ข้าพเจ้ายินยอมให้เจ้าหน้าที่ผู้จ่ายเงินดังกล่าวหักเงิน ชําระหนี้ พร้อมด้วยดอกเบี้ยส่งชําระหนี้ต่อสหกรณ์ให้เสร็จสิ้นเสียก่อนได้
 			  </p>
 			  <p style="text-indent:50px; margin:0px;  text-align:left;">
-				ข้อ 4. หากมีการบังคับใดๆ ก็ตาม ข้าพเจ้ายินยอมให้สหกรณ์โอนหุ้นของข้าพเจ้าชําระหนี้สหกรณ์ก่อน และหากมีการ ฟ้องร้องคดีต่อศาลยุติธรรม ข้าพเจ้ายินยอมให้มีการฟ้องร้อง ณ ศาลจังหวัดสุรินทร์
+				ข้อ 4. หากมีการบังคับใดๆ ก็ตาม ข้าพเจ้ายินยอมให้สหกรณ์โอนหุ้นของข้าพเจ้าชําระหนี้สหกรณ์ก่อน และหากมีการ ฟ้องร้องคดีต่อศาลยุติธรรม ข้าพเจ้ายินยอมให้มีการฟ้องร้อง ณ ศาลจังหวัดเชียงราย
 			  </p>
 			  <p style="text-indent:50px; margin:0px;  text-align:left;">
 				 หนังสือนี้ ข้าพเจ้าอ่านและเข้าใจทั้งหมดแล้ว
@@ -132,7 +132,7 @@ function GeneratePDFContract($data,$lib) {
 		  </div>
 
 		  
-		  <div style="position: absolute; left: 440px; top: 301px; width:210px; text-align:center;font-weight:bold; ">
+		  <div style="position: absolute; left: 380px; top: 301px; width:210px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			  '.$data["pos_group"].'
 			</div>  
@@ -150,43 +150,37 @@ function GeneratePDFContract($data,$lib) {
 			</div>  
 		  </div>
 
-		  <div style="position: absolute; left: 335px; top: 361px; width:56px; text-align:center;font-weight:bold;  ">
-			<div style="font-size: 20px; ">
-			  '.(date('Y') + 542).'
-			</div>  
-		  </div>
-
-		  <div style="position: absolute; right: 154px; top: 361px; width:136px; text-align:center;font-weight:bold;">
+		  <div style="position: absolute; right: 270px; top: 361px; width:136px; text-align:center;font-weight:bold;">
 			<div style="font-size: 20px; ">
 			  '.$data["share_bf"].'
 			</div>  
 		  </div>
 
-		  <div style="position: absolute; left: 289px; top: 416px; width:130px; text-align:center;font-weight:bold; ">
+		  <div style="position: absolute; left: 289px; top: 386px; width:130px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			  '.number_format($data["request_amt"],2).'
 			</div>  
 		  </div>
 
-		  <div style="position: absolute; right: 30px; top: 416px; width:220px; text-align:center;font-weight:bold;">
+		  <div style="position: absolute; right: 30px; top: 386px; width:220px; text-align:center;font-weight:bold;">
 			<div style="font-size: 20px; ">
 			'.$lib->baht_text($data["request_amt"]).'
 			</div>  
 		  </div>
 
-		  <div style="position: absolute; right: 30px; top: 446px; width:280px; text-align:center;font-weight:bold;">
+		  <div style="position: absolute; right: 30px; top: 416px; width:280px; text-align:center;font-weight:bold;">
 			<div style="font-size: 20px; ">
 			เพื่อเหตุฉุกเฉิน
 			</div>  
 		  </div>
 
-		  <div style="position: absolute; left: 250px; bottom: 38px; width:195px; text-align:center;font-weight:bold; ">
+		  <div style="position: absolute; left: 250px; bottom: 98px; width:195px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			 '.$data["name"].'
 			</div>  
 		  </div>
 		  
-		  <div style="position: absolute; left: 250px; bottom: 13px; width:195px; text-align:center;font-weight:bold; ">
+		  <div style="position: absolute; left: 250px; bottom: 72px; width:195px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			 '.$data["full_name"].'
 			</div>  

@@ -5,10 +5,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
-			$period_payment = $dataComing["request_amt"] / $dataComing["period"];
+			$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+													ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
+													WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
+			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
+			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
+			$period_payment = round($dataComing["request_amt"] * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($dataComing["period"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
 			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
-			//$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
@@ -33,26 +38,39 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}
 			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
-															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
+															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt <= lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
 			$getMaxPeriod->execute([
 				':request_amt' => $maxloan_amt,
 				':loantype_code' => $dataComing["loantype_code"]
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
-			$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
-			$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
-			$arrayResult["RECEIVE_NET"] = $receive_net;
-			$arrayResult["REQUEST_AMT"] = $request_amt;
-			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
-			//$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-			$arrayResult["REQ_SALARY"] = FALSE;
-			$arrayResult["REQ_CITIZEN"] = FALSE;
-			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			if(isset($rowMaxPeriod["MAX_PERIOD"])){
+				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
+														WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
+				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
+				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
+				$period_payment = round($maxloan_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
+				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
+				$arrayResult["REQUEST_AMT"] = $request_amt;
+				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
+				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
+				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
+				$arrayResult["REQ_SALARY"] = FALSE;
+				$arrayResult["REQ_CITIZEN"] = FALSE;
+				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
+				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0088";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
