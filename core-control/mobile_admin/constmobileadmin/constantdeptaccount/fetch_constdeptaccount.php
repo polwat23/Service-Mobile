@@ -37,12 +37,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
 			$arrayDepttype = array();
 			if(array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE')) === False){
-				$arrayDepttype["ALLOW_DEPOSIT_INSIDE"] = 0;
-				$arrayDepttype["ALLOW_WITHDRAW_INSIDE"] = 0;
-				$arrayDepttype["ALLOW_DEPOSIT_OUTSIDE"] = 0;
-				$arrayDepttype["ALLOW_WITHDRAW_OUTSIDE"] = 0;
-				$arrayDepttype["ALLOW_BUY_SHARE"] = 0;
-				$arrayDepttype["ALLOW_PAY_LOAN"] = 0;
+				$arrayDepttype["ALLOW_DEPOSIT_INSIDE"] = '0';
+				$arrayDepttype["ALLOW_WITHDRAW_INSIDE"] = '0';
+				$arrayDepttype["ALLOW_DEPOSIT_OUTSIDE"] = '0';
+				$arrayDepttype["ALLOW_WITHDRAW_OUTSIDE"] = '0';
+				$arrayDepttype["ALLOW_BUY_SHARE"] = '0';
+				$arrayDepttype["ALLOW_PAY_LOAN"] = '0';
 				$arrayDepttype["MEMBER_TYPE_CODE"] = 'AL';
 			}else{
 				$arrayDepttype["ALLOW_DEPOSIT_INSIDE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_DEPOSIT_INSIDE"];

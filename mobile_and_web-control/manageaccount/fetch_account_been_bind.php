@@ -12,51 +12,81 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchAccountBeenBind->execute([
 			':member_no' => $payload["member_no"]
 		]);
-		if($fetchAccountBeenBind->rowCount() > 0){
-			$arrBindAccount = array();
-			while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
-				$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
-				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccountBind["deptaccount_no_coop"]]);
-				if($fetchAccountBeenAllow->rowCount() > 0){
-					$getDetailAcc = $conoracle->prepare("SELECT deptaccount_name FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and deptclose_status = 0");
-					$getDetailAcc->execute([':deptaccount_no' => $rowAccountBind["deptaccount_no_coop"]]);
-					$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
-					if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
-						$arrAccount = array();
-						$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
-						$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);
-						if(isset($rowAccountBind["type_palette"])){
-							if($rowAccountBind["type_palette"] == '2'){
-								$arrAccount["BANNER_COLOR"] = $rowAccountBind["color_deg"]."|".$rowAccountBind["color_main"].",".$rowAccountBind["color_secon"];
-							}else{
-								$arrAccount["BANNER_COLOR"] = "90|".$rowAccountBind["color_main"].",".$rowAccountBind["color_main"];
-							}
-							$arrAccount["BANNER_TEXT_COLOR"] = $rowAccountBind["color_text"];
+		$arrBindAccount = array();
+		while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
+			$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
+			$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccountBind["deptaccount_no_coop"]]);
+			if($fetchAccountBeenAllow->rowCount() > 0){
+				$getDetailAcc = $conoracle->prepare("SELECT deptaccount_name FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and deptclose_status = 0");
+				$getDetailAcc->execute([':deptaccount_no' => $rowAccountBind["deptaccount_no_coop"]]);
+				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
+					$arrAccount = array();
+					$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
+					$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);
+					if(isset($rowAccountBind["type_palette"])){
+						if($rowAccountBind["type_palette"] == '2'){
+							$arrAccount["BANNER_COLOR"] = $rowAccountBind["color_deg"]."|".$rowAccountBind["color_main"].",".$rowAccountBind["color_secon"];
 						}else{
-							$arrAccount["BANNER_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
-							$arrAccount["BANNER_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
+							$arrAccount["BANNER_COLOR"] = "90|".$rowAccountBind["color_main"].",".$rowAccountBind["color_main"];
 						}
-						$arrAccount["ICON_BANK"] = $config['URL_SERVICE'].$rowAccountBind["bank_logo_path"];
-						$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
-						$arrAccount["ICON_BANK_WEBP"] = $config['URL_SERVICE'].$explodePathBankLOGO[0].'.webp';
-						$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
-						$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
-						$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
-						$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
-						$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
-						$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
-						$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];
-						$arrBindAccount[] = $arrAccount;
+						$arrAccount["BANNER_TEXT_COLOR"] = $rowAccountBind["color_text"];
+					}else{
+						$arrAccount["BANNER_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
+						$arrAccount["BANNER_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];
 					}
+					$arrAccount["ICON_BANK"] = $config['URL_SERVICE'].$rowAccountBind["bank_logo_path"];
+					$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
+					$arrAccount["ICON_BANK_WEBP"] = $config['URL_SERVICE'].$explodePathBankLOGO[0].'.webp';
+					$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
+					$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
+					$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
+					$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
+					$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
+					$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
+					$arrAccount["BIND_STATUS_DESC"] = $configError["BIND_ACCOUNT_DESC"][0][$rowAccountBind["bindaccount_status"]][0][$lang_locale] ?? null;
+					$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];
+					$arrBindAccount[] = $arrAccount;
 				}
 			}
-			$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
 		}
+		$arrayBankGrp = array();
+		$getBankAllow = $conmysql->prepare("SELECT bank_code,bank_name,bank_short_name,bank_short_ename,bank_logo_path
+											FROM csbankdisplay");
+		$getBankAllow->execute();
+		while($rowAllow = $getBankAllow->fetch(PDO::FETCH_ASSOC)){
+			$arrayBank = array();
+			$arrayBank["IS_BIND"] = FALSE;
+			$checkRegis = $conmysql->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank,bank_account_name,bank_account_name_en FROM gcbindaccount 
+											WHERE bank_code = :bank_code and member_no = :member_no and bindaccount_status IN('0','1')");
+			$checkRegis->execute([
+				':bank_code' => $rowAllow["bank_code"],
+				':member_no' => $payload["member_no"]
+			]);
+			if($checkRegis->rowCount() > 0){
+				$rowRegis = $checkRegis->fetch(PDO::FETCH_ASSOC);
+				$arrayBank["IS_BIND"] = TRUE;
+				$arrayBank["COOP_ACCOUNT_NO"] = $rowRegis["deptaccount_no_coop"];
+				$arrayBank["BANK_ACCOUNT_NO"] = $rowRegis["deptaccount_no_bank"];
+				if($lang_locale == 'th'){
+					$arrayBank["BANK_ACCOUNT_NAME"] = $rowRegis["bank_account_name"];
+				}else{
+					$arrayBank["BANK_ACCOUNT_NAME"] = $rowRegis["bank_account_name_en"];
+				}
+			}
+			$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
+			$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
+			$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
+			$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
+			$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
+			$arrPic = explode('.',$rowAllow["bank_logo_path"]);
+			$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
+			$arrayBankGrp[] = $arrayBank;
+		}
+		$arrayResult['BANK_LIST'] = $arrayBankGrp;
+		$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

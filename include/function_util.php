@@ -493,6 +493,23 @@ class functions {
 			}
 			return $arrayMemberGRP;
 		}
+		public function getMailAddress($member_no=null){
+			$arrayMemberGRP = array();
+			if(is_array($member_no) && sizeof($member_no) > 0){
+				$fetchDataOra = $this->conora->prepare("SELECT EMAIL,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+				$fetchDataOra->execute();
+			}else{
+				$fetchDataOra = $this->conora->prepare("SELECT EMAIL,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+				$fetchDataOra->execute([':member_no' => $member_no]);
+			}
+			while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
+				$arrayMT = array();
+				$arrayMT["EMAIL"] = $rowDataOra["EMAIL"];
+				$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+				$arrayMemberGRP[] = $arrayMT;
+			}
+			return $arrayMemberGRP;
+		}
 		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$multi_message=false,$trans_flag=false,$is_sendahead = '0') {
 			$this->con->beginTransaction();
 			$textcombine = array();
@@ -704,14 +721,19 @@ class functions {
 				}
 			}
 		}
-		public function logSMSWasNotSent($bulkInsert,$multi_message=false,$is_sendahead = '0') {
+		public function logSMSWasNotSent($bulkInsert,$multi_message=false,$is_sendahead = '0',$his_img=false) {
 			$this->con->beginTransaction();
 			if($is_sendahead == '1'){
 				if($multi_message){
 					return true;
 				}else{
-					$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead)
+					if($his_img){
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead,his_path_image)
 															VALUES".implode(',',$bulkInsert));
+					}else{
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead)
+															VALUES".implode(',',$bulkInsert));
+					}
 					if($insertToLogSMS->execute()){
 						$this->con->commit();
 						return true;
@@ -724,8 +746,13 @@ class functions {
 				if($multi_message){
 					return true;
 				}else{
-					$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
-															VALUES".implode(',',$bulkInsert));
+					if($his_img){
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,his_path_image)
+																VALUES".implode(',',$bulkInsert));
+					}else{
+						$insertToLogSMS = $this->con->prepare("INSERT INTO smswasnotsent(topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
+																VALUES".implode(',',$bulkInsert));
+					}
 					if($insertToLogSMS->execute()){
 						$this->con->commit();
 						return true;
@@ -734,6 +761,15 @@ class functions {
 						return false;
 					}
 				}
+			}
+		}
+		public function logSendMail($blukInsert){
+			$insertMail = $this->con->prepare("INSERT INTO smslogmailsend(mail_title, mail_text,mail_address,send_status,send_by,id_smstemplate,is_sendahead,error_message,member_no)
+												VALUES".implode(",",$blukInsert));
+			if($insertMail->execute()){
+				return true;
+			}else{
+				return false;
 			}
 		}
 		public function MaintenanceMenu($menu_component) {

@@ -258,6 +258,7 @@ class library {
 				$arrayResponse["MESSAGE"] = $beautyXML->DETAIL ?? "Cannot connect to AIS Server";
 				$arrayResponse["RESULT"] = FALSE;
 			}
+			$arrayResponse["RESULT"] = TRUE;
 			return $arrayResponse;
 		}
 	}
@@ -296,9 +297,13 @@ class library {
 		if(!$mailFunction->send()){
 			$arrRes["RESULT"] = FALSE;
 			$arrRes["MESSAGE_ERROR"] = $mailFunction->ErrorInfo;
+			$mailFunction->clearAddresses();
+			$mailFunction->smtpClose();
 			return $arrRes;
 		}else{
 			$arrRes["RESULT"] = TRUE;
+			$mailFunction->clearAddresses();
+			$mailFunction->smtpClose();
 			return $arrRes;
 		}
 	}

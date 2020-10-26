@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','reportsmssuccess')){
+	if($func->check_permission_core($payload,'sms','reportsmstransuccess')){
 		$arrayExecute = array();
 		$arrayAll = array();
 		if(isset($dataComing["id_template"]) && $dataComing["id_template"] != ''){
@@ -20,15 +20,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["end_date"]) && $dataComing["end_date"] != ''){
 			$arrayExecute["end_date"] = $dataComing["end_date"];
 		}
-		if(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != ''){
-			$arrayExecute["is_sendahead"] = $dataComing["is_sendahead"];
-		}
-		$fetchReport = $conmysql->prepare("SELECT sms_message,member_no,tel_mobile,send_date,send_by
-											FROM smslogwassent WHERE 1=1
+		$fetchReport = $conmysql->prepare("SELECT sms_message,member_no,tel_mobile,send_date,send_by,id_smssent
+											FROM smstranwassent WHERE 1=1
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."
 											".(isset($dataComing["send_by"]) && $dataComing["send_by"] != '' ? "and send_by = :send_by" : null)."
-											".(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != '' ? "and is_sendahead = :is_sendahead" : null)."
 											".(isset($dataComing["start_date"]) && $dataComing["start_date"] != '' ? "and date_format(send_date,'%Y-%m-%d') >= :start_date" : null)."
 											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and date_format(send_date,'%Y-%m-%d') <= :end_date" : null)." ORDER BY send_date DESC");
 		$fetchReport->execute($arrayExecute);
@@ -39,6 +35,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayReport["TEL_MOBILE"] = $lib->formatphone($rowReport["tel_mobile"],'-');
 			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y',true) : null;
 			$arrayReport["SEND_BY"] = $rowReport["send_by"] ?? null;
+			$arrayReport["ID_SMSSENT"] = $rowReport["id_smssent"];
 			$arrayAll[] = $arrayReport;
 		}
 		$arrayResult['LIST_REPORT'] = $arrayAll;

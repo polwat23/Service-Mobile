@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
-		$check_account = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
+		$check_account = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
 											and bindaccount_status IN('0','1')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
@@ -14,8 +14,11 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			':member_no' => $payload["member_no"]
 		]);
 		if($check_account->rowCount() > 0){
+			$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
-			$arrPayloadverify['exp'] = time() + 60;
+			$arrPayloadverify['member_no'] = $payload["member_no"];
+			$arrPayloadverify['exp'] = time() + 300;
+			$arrPayloadverify['citizen_id'] = $rowAcc["citizen_id"];
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
 			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData = array();

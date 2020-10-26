@@ -3,9 +3,10 @@ require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','processsmsservicefee')){
+		$conoracle->beginTransaction();
 		$arrayGroup = array();
 		$MonthNow = date("Ym");
-		$dateNow = date('d/m/y');
+		$dateNow = date('d/m/Y');
 		$arrSMSCont = array();
 		$getSMSConstant = $conmysql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 		$getSMSConstant->execute();
@@ -33,12 +34,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$getSeqNo->execute([':deptaccount_no' => $rowSmsTranWassent["deptaccount_no"]]);
 			$rowSeqNo = $getSeqNo->fetch(PDO::FETCH_ASSOC);
 			$lastSeqNo = $rowSeqNo["MAX_SEQNO"] + 1;
-			$bulkInsert[] = "INTO dpdepttran (coop_id,deptaccount_no,seq_no,system_code,tran_date,tran_status,member_no,deptitem_amt,ref_coopid) VALUES('".$config["COOP_ID"]."','".$rowSmsTranWassent["deptaccount_no"]."',".$lastSeqNo.",'SMS','".$dateNow."',0,'".$rowSmsTranWassent["member_no"]."',".$fee_amt.",'".$config["COOP_ID"]."')";
+			$bulkInsert[] = "INTO dpdepttran (coop_id,deptaccount_no,seq_no,system_code,tran_date,tran_status,member_no,deptitem_amt,ref_coopid) 
+			VALUES('".$config["COOP_ID"]."','".$rowSmsTranWassent["deptaccount_no"]."',".$lastSeqNo.",'SMS',TO_DATE('".$dateNow."','DD-MM-YYYY'),0,'".$rowSmsTranWassent["member_no"]."',".$fee_amt.",'".$config["COOP_ID"]."')";
 			if(sizeof($bulkInsert) == 1000){
 				$insertDeptTran = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)."
 													SELECT * FROM dual");
 				if($insertDeptTran->execute()){
 				}else{
+					$conoracle->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถผ่านรายการลง dpdepttran ได้กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
@@ -53,12 +56,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													SELECT * FROM dual");
 			if($insertDeptTran->execute()){
 			}else{
+				$conoracle->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถผ่านรายการลง dpdepttran ได้กรุณาติดต่อผู้พัฒนา";
+					$arrayResult['DDD'] = $insertDeptTran;
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
 			}
 		}
+		$conoracle->commit();
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

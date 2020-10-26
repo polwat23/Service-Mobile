@@ -24,6 +24,16 @@ if($lib->checkCompleteArgument(['unique_id','id_format_req_welfare','input_type'
 			':input_format' => $dataComing["input_format"] ? json_encode($dataComing["input_format"], JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT ) : null,
 			':is_required' => $dataComing["is_required"]
 		])){
+			
+			$arrayStruc = [
+				':menu_name' => "manageassistance",
+				':username' => $payload["username"],
+				':use_list' => "update assistform",
+				':details' => "id_format_req_welfare : ".$dataComing["id_format_req_welfare"].":input_type=>".$dataComing["input_type"].":input_length_spc_=>".$dataComing["input_length_spc_"].":input_name=>".$dataComing["input_name"].":label_text=>".$dataComing["label_text"].":placeholder=>".$dataComing["placeholder"].
+				":default_value=>".$dataComing["default_value"].":input_format=>".($dataComing["input_format"] ? json_encode($dataComing["input_format"], JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT ) : "null").":is_required=>".$dataComing["is_required"]
+			];
+			
+			$log->writeLog('manageapplication',$arrayStruc);
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["INPUT_LENGTH"] = $dataComing["input_length_spc_"];
 		}else{

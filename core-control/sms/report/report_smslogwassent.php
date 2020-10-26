@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','reportsmsnotsuccess')){
+	if($func->check_permission_core($payload,'sms','reportsmssuccess')){
 		$arrayExecute = array();
 		$arrayAll = array();
 		if(isset($dataComing["id_template"]) && $dataComing["id_template"] != ''){
@@ -23,8 +23,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != ''){
 			$arrayExecute["is_sendahead"] = $dataComing["is_sendahead"];
 		}
-		$fetchReport = $conmysql->prepare("SELECT topic,message,member_no,tel_mobile,send_date,send_by,cause_notsent,is_sendahead,id_smsnotsent,send_platform,his_path_image
-											FROM smswasnotsent WHERE 1=1
+		$fetchReport = $conmysql->prepare("SELECT id_logsent,sms_message,member_no,tel_mobile,send_date,send_by,is_sendahead
+											FROM smslogwassent WHERE 1=1
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."
 											".(isset($dataComing["send_by"]) && $dataComing["send_by"] != '' ? "and send_by = :send_by" : null)."
@@ -34,17 +34,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchReport->execute($arrayExecute);
 		while($rowReport = $fetchReport->fetch(PDO::FETCH_ASSOC)){
 			$arrayReport = array();
-			$arrayReport["SMS_MESSAGE"] = $rowReport["message"] ?? null;
+			$arrayReport["ID_LOGSENT"] = $rowReport["id_logsent"];
+			$arrayReport["SMS_MESSAGE"] = $rowReport["sms_message"] ?? null;
 			$arrayReport["MEMBER_NO"] = $rowReport["member_no"] ?? null;
 			$arrayReport["TEL_MOBILE"] = $lib->formatphone($rowReport["tel_mobile"],'-');
 			$arrayReport["SEND_DATE"] = isset($rowReport["send_date"]) ? $lib->convertdate($rowReport["send_date"],'d m Y',true) : null;
 			$arrayReport["SEND_BY"] = $rowReport["send_by"] ?? null;
-			$arrayReport["CAUSE_NOTSENT"] = $rowReport["cause_notsent"] ?? null;
 			$arrayReport["IS_SENDAHEAD"] = $rowReport["is_sendahead"];
-			$arrayReport["TOPIC"] = $rowReport["topic"];
-			$arrayReport["ID_SMSNOTSENT"] = $rowReport["id_smsnotsent"];
-			$arrayReport["SEND_PLATFORM"] = $rowReport["send_platform"];
-			$arrayReport["HIS_PATH_IMAGE"] = $rowReport["his_path_image"];
 			$arrayAll[] = $arrayReport;
 		}
 		$arrayResult['LIST_REPORT'] = $arrayAll;

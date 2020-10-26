@@ -167,7 +167,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$arrPayloadNew['user_type'] = $rowPassword['user_type'];
 					$arrPayloadNew['id_token'] = $id_token;
 					$arrPayloadNew['member_no'] = $member_no;
-					$arrPayloadNew['exp'] = time() + 900;
+					$arrPayloadNew['exp'] = time() + 21600;
 					$arrPayloadNew['refresh_amount'] = 0;
 					$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 					if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
@@ -210,7 +210,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrayResult['MEMBER_NO'] = $member_no;
 						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && ($rowPassword['user_type'] == '0' || 
 						$rowPassword['user_type'] == '1') && $member_no != "etnmode1" && $member_no != "etnmode2" && $member_no != "dev@mode" && $member_no != "etnmode3" && $member_no != "etnmode4" 
-						&& $member_no != "etnmode5" && $member_no != "etnmode6" && $member_no != "etnmode7" && $member_no != "etnmode8" && $member_no != "etnmode9"){
+						&& $member_no != "etnmode5" && $member_no != "etnmode6" && $member_no != "etnmode7" && $member_no != "etnmode8" && 
+						$member_no != "etnmode9" && (empty($dataComing["auto_login"]) || $dataComing["auto_login"] === FALSE)){
 							$arrayResult['IS_OTP'] = TRUE;
 						}
 						$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
