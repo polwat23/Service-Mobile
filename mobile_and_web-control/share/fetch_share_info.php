@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
 														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
-														WHERE stm.member_no = :member_no and stm.branch_id = :branch_id and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.ENTRY_DATE
+														WHERE stm.member_no = :member_no and stm.branch_id = :branch_id and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.operate_date
 														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no DESC");
 			$getShareStatement->execute([
 				':member_no' => $member_no,

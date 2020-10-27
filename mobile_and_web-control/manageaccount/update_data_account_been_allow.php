@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'
 				exit();
 			}
 		}
-		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status WHERE deptaccount_no = :deptaccount_no");
+		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status WHERE deptaccount_no = :deptaccount_no AND is_use <> '-9'");
 		if($updateAccountBeenAllow->execute([
 			':allow_status' => $dataComing["allow_status"],
 			':deptaccount_no' => $dataComing["deptaccount_no"]
