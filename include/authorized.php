@@ -73,7 +73,7 @@ class Authorization {
 			$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
 			if($rowToken["rt_is_revoke"] === '0'){
 				if(empty($rowToken["rt_expire_date"]) || ($rowToken["rt_expire_date"] > date('Y-m-d'))){
-					$payload["exp"] = time() + 900;
+					$payload["exp"] = time() + intval($rowLimit['constant_value']);
 					$payload["refresh_amount"] = $payload["refresh_amount"] + 1;
 					$new_access_token = $jwt_token->customPayload($payload, $secret_key);
 					$updateNewAT = $con->prepare("UPDATE gctoken SET access_token = :new_access_token,at_update_date = NOW()
