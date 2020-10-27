@@ -19,10 +19,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$getKpSlipNo = $conoracle->prepare("SELECT KEEPING_STATUS,RECEIPT_NO,OPERATE_DATE from kpmastreceive 
-											where TRIM(member_no) = :member_no and recv_period = :recv_period");
+											where TRIM(member_no) = :member_no and recv_period = :recv_period
+											and TRIM(ref_membno) = :ref_membno");
 		$getKpSlipNo->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':ref_membno' => TRIM($dataComing["ref_memberno"]) ?? $member_no
 		]);
 		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
@@ -49,14 +51,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-																		WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
+																		WHERE TRIM(kpd.member_no) = :member_no and TRIM(kpd.recv_period) = :recv_period
 																		and kpd.seq_no = :seq_no and TRIM(kpd.ref_membno) = :ref_membno
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"],
+				':recv_period' => TRIM($dataComing["recv_period"]),
 				':seq_no' => $dataComing["seq_no"],
-				':ref_membno' => $dataComing["ref_memberno"] ?? $member_no
+				':ref_membno' => TRIM($dataComing["ref_memberno"]) ?? $member_no
 			]);
 		}else{
 			$getPaymentDetail = $conoracle->prepare("SELECT 
@@ -79,13 +81,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-																		WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
+																		WHERE TRIM(kpd.member_no) = :member_no and TRIM(kpd.recv_period) = :recv_period
 																		and TRIM(kpd.ref_membno) = :ref_membno
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"],
-				':ref_membno' => $dataComing["ref_memberno"] ?? $member_no
+				':recv_period' => TRIM($dataComing["recv_period"]),
+				':ref_membno' => TRIM($dataComing["ref_memberno"]) ?? $member_no
 			]);
 		}
 		$arrGroupDetail = array();
