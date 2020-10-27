@@ -23,7 +23,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
 		$arrContract = array();
 		$arrContract["CONTRACT_NO"] = $contract_no;
-		$arrContract["LOAN_BALANCE"] = number_format($rowLoanLastSTM["LOAN_BALANCE"],2);
+		$arrContract["LOAN_BALANCE"] = mb_substr($rowLoanLastSTM["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowLoanLastSTM["LOANCONTRACT_NO"],4,1) <= '9' ?
+		"******" : number_format($rowLoanLastSTM["LOAN_BALANCE"]);
 		$arrContract["APPROVE_AMT"] = number_format($rowLoanLastSTM["APPROVE_AMT"],2);
 		$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowLoanLastSTM["LAST_OPERATE_DATE"],'y-n-d');
 		$arrContract["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowLoanLastSTM["LAST_OPERATE_DATE"],'D m Y');

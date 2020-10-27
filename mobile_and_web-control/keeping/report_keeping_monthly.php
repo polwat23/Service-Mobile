@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	ELSE kpd.description END as PAY_ACCOUNT,
 																	kpd.period,
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																	NVL(kpd.principal_balance,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
 																	NVL(kpd.interest_payment,0) AS INT_BALANCE
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
@@ -41,10 +41,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																	WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
+																	and TRIM(kpd.ref_membno) = :ref_member_no
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':ref_member_no' => TRIM($dataComing["ref_memberno"]) ?? $member_no
 		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
@@ -74,10 +76,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE
 																FROM kptempreceive kpd
-																WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period");
+																WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
+																and TRIM(kpd.ref_membno) = :ref_member_no");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':ref_member_no' => TRIM($dataComing["ref_memberno"]) ?? $member_no
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));

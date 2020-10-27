@@ -15,6 +15,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
 			$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 			$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
+			$arrayGroupLoan["LOAN_BALANCE"] = mb_substr($rowWhocollu["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowWhocollu["LOANCONTRACT_NO"],4,1) <= '9' ?
+			"******" : number_format($rowWhocollu["PRNBAL"]);
 			$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
 			$arrGrpAllLoan = array();
 			$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,TRIM(lnc.REF_COLLNO) as REF_COLLNO,lnc.COLL_PERCENT,
@@ -100,6 +102,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 				$arrayGroupLoan["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
+				$arrayGroupLoan["LOAN_BALANCE"] = mb_substr($rowWhocollu["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowWhocollu["LOANCONTRACT_NO"],4,1) <= '9' ?
+				"******" : number_format($rowWhocollu["PRNBAL"]);
 				$arrGrpAllLoan = array();
 				$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,TRIM(lnc.REF_COLLNO) as REF_COLLNO,lnc.COLL_PERCENT,
 																	lnc.DESCRIPTION
