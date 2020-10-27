@@ -5,10 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrAllLoan = array();
-		$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE TRIM(member_no) = :member_no");
-		$getSumAllContract->execute([':member_no' => $member_no]);
-		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
-		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
+		$flag_hidden_amt = false;
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,
 											ln.LAST_PERIODPAY as LAST_PERIOD,
@@ -21,7 +18,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 			$arrContract = array();
 			$arrContract["CONTRACT_NO"] = $contract_no;
-			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+			$arrContract["LOAN_BALANCE"] = mb_substr($rowContract["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowContract["LOANCONTRACT_NO"],4,1) <= '9' ?
+			"******" : number_format($rowContract["LOAN_BALANCE"]);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
 			$arrContract["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'D m Y');
@@ -35,6 +33,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				($arrAllLoan[array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN'))]["CONTRACT"])[] = $arrContract;
 			}
+			if(mb_substr($rowContract["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowContract["LOANCONTRACT_NO"],4,1) <= '9'){
+				$flag_hidden_amt = TRUE;
+			}
+		}
+		if($flag_hidden_amt){
+			$arrayResult['SUM_LOANBALANCE'] = "******";
+		}else{
+			$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE TRIM(member_no) = :member_no");
+			$getSumAllContract->execute([':member_no' => $member_no]);
+			$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
+			$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
 		}
 		$arrayResult['DETAIL_LOAN'] = $arrAllLoan;
 		$arrayResult['RESULT'] = TRUE;

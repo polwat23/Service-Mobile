@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															SELECT RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
+															SELECT RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,REF_MEMBNO
 															from kpmastreceive where TRIM(member_no) = :member_no
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
@@ -29,6 +29,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
+			$arrKpmonth["REF_MEMBERNO"] = $rowPeriod["REF_MEMBNO"];
 			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["RECEIPT_DATE"],'d m Y');
 			if(isset($rowPeriod["RECEIVE_AMT"]) && $rowPeriod["RECEIVE_AMT"] != ""){
 				$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);

@@ -41,59 +41,140 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			http_response_code(204);
 			exit();
 		}
+		$getCountKP = $conoracle->prepare("SELECT COUNT(RECEIPT_NO) as C_KP
+											FROM kptempreceive WHERE TRIM(member_no) = :member_no and recv_period = :max_recv ");
+		$getCountKP->execute([
+			':member_no' => $member_no,
+			':max_recv' => $rowLastRecv["MAX_RECV"]
+		]);
+		$rowCountKP = $getCountKP->fetch(PDO::FETCH_ASSOC);
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
+		$arrayResult["REF_MEMBERNO"] = $member_no;
 		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
-		$getPaymentDetail = $conoracle->prepare("SELECT 
-																	CASE kut.system_code 
-																	WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
-																	WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
-																	ELSE kut.keepitemtype_desc
-																	END as TYPE_DESC,
-																	kut.keepitemtype_grp as TYPE_GROUP,
-																	case kut.keepitemtype_grp 
-																		WHEN 'DEP' THEN kpd.description
-																		WHEN 'LON' THEN kpd.loancontract_no
-																	ELSE kpd.description END as PAY_ACCOUNT,
-																	kpd.period,
-																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	NVL(kpd.interest_payment,0) AS INT_BALANCE
-																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																	kpd.keepitemtype_code = kut.keepitemtype_code
-																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-																	WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
-																	and TRIM(kpd.ref_membno) = :member_no
-																	ORDER BY kut.SORT_IN_RECEIVE ASC");
-		$getPaymentDetail->execute([
-			':member_no' => $member_no,
-			':recv_period' => $rowLastRecv["MAX_RECV"]
-		]);
-		$arrGroupDetail = array();
-		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
-			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
-			if($rowDetail["TYPE_GROUP"] == 'SHR'){
-				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
-				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
-				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
-			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
-			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
-				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+		if($rowCountKP["C_KP"] > 1){
+			$getHeaderReceive = $conoracle->prepare("SELECT REF_MEMBNO,RECEIPT_NO,RECEIVE_AMT
+																FROM kptempreceive WHERE TRIM(member_no) = :member_no and recv_period = :max_recv 
+																GROUP BY RECEIPT_NO,RECEIVE_AMT,REF_MEMBNO
+																ORDER BY RECEIPT_NO ASC");
+			$getHeaderReceive->execute([
+				':member_no' => $member_no,
+				':max_recv' => $rowLastRecv["MAX_RECV"]
+			]);
+			while($rowHeaderRecv = $getHeaderReceive->fetch(PDO::FETCH_ASSOC)){
+				$arrHeader = array();
+				$arrHeader["RECEIVE_AMT"] = number_format($rowHeaderRecv["RECEIVE_AMT"],2);
+				$arrHeader["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
+				$arrHeader["REF_MEMBERNO"] = $rowHeaderRecv["REF_MEMBNO"];
+				$arrHeader["SLIP_NO"] = TRIM($rowHeaderRecv["RECEIPT_NO"]);
+				$arrHeader["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
+				$getPaymentDetail = $conoracle->prepare("SELECT 
+																			CASE kut.system_code 
+																			WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+																			WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+																			ELSE kut.keepitemtype_desc
+																			END as TYPE_DESC,
+																			kut.keepitemtype_grp as TYPE_GROUP,
+																			case kut.keepitemtype_grp 
+																				WHEN 'DEP' THEN kpd.description
+																				WHEN 'LON' THEN kpd.loancontract_no
+																			ELSE kpd.description END as PAY_ACCOUNT,
+																			kpd.period,
+																			NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																			NVL(kpd.principal_balance,0) AS ITEM_BALANCE,
+																			NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																			NVL(kpd.interest_payment,0) AS INT_BALANCE
+																			FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+																			kpd.keepitemtype_code = kut.keepitemtype_code
+																			LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																			LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																			WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
+																			and TRIM(kpd.ref_membno) = :ref_member_no
+																			ORDER BY kut.SORT_IN_RECEIVE ASC");
+				$getPaymentDetail->execute([
+					':member_no' => $member_no,
+					':recv_period' => $rowLastRecv["MAX_RECV"],
+					':ref_member_no' => TRIM($rowHeaderRecv["REF_MEMBNO"])
+				]);
+				$arrGroupDetail = array();
+				while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
+					$arrDetail = array();
+					$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+					if($rowDetail["TYPE_GROUP"] == 'SHR'){
+						$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+					}else if($rowDetail["TYPE_GROUP"] == 'LON'){
+						$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+						$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
+						$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+						$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
+						$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
+					}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
+						$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+						$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
+					}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+						$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+						$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+					}
+					$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+					$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+					$arrGroupDetail[] = $arrDetail;
+				}
+				$arrHeader['DETAIL'] = $arrGroupDetail;
+				$arrayResult['DETAIL_MULTI'][] = $arrHeader;
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
-			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
-			$arrGroupDetail[] = $arrDetail;
+		}else{
+			$getPaymentDetail = $conoracle->prepare("SELECT 
+																		CASE kut.system_code 
+																		WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+																		WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+																		ELSE kut.keepitemtype_desc
+																		END as TYPE_DESC,
+																		kut.keepitemtype_grp as TYPE_GROUP,
+																		case kut.keepitemtype_grp 
+																			WHEN 'DEP' THEN kpd.description
+																			WHEN 'LON' THEN kpd.loancontract_no
+																		ELSE kpd.description END as PAY_ACCOUNT,
+																		kpd.period,
+																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		NVL(kpd.principal_balance,0) AS ITEM_BALANCE,
+																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		NVL(kpd.interest_payment,0) AS INT_BALANCE
+																		FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+																		kpd.keepitemtype_code = kut.keepitemtype_code
+																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																		WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
+																		and TRIM(kpd.ref_membno) = :ref_member_no
+																		ORDER BY kut.SORT_IN_RECEIVE ASC");
+			$getPaymentDetail->execute([
+				':member_no' => $member_no,
+				':recv_period' => $rowLastRecv["MAX_RECV"],
+				':ref_member_no' => $member_no
+			]);
+			$arrGroupDetail = array();
+			while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
+				$arrDetail = array();
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+				if($rowDetail["TYPE_GROUP"] == 'SHR'){
+					$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+				}else if($rowDetail["TYPE_GROUP"] == 'LON'){
+					$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+					$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
+					$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
+					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
+				}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
+					$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+					$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
+				}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+					$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+					$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+				}
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+				$arrGroupDetail[] = $arrDetail;
+			}
 		}
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
