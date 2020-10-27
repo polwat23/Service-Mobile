@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"],
-			':ref_member_no' => TRIM($dataComing["ref_memberno"]) ?? $member_no
+			':ref_member_no' => $dataComing["ref_memberno"] ? TRIM($dataComing["ref_memberno"]) : $member_no
 		]);
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
@@ -81,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"],
-			':ref_member_no' => TRIM($dataComing["ref_memberno"]) ?? $member_no
+			':ref_member_no' => $dataComing["ref_memberno"] ? TRIM($dataComing["ref_memberno"]) : $member_no
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
