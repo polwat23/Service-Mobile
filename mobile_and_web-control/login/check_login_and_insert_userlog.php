@@ -121,7 +121,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['user_type'] = $rowPassword['user_type'];
 						$arrPayloadNew['id_token'] = $id_token;
 						$arrPayloadNew['member_no'] = $member_no;
-						$arrPayloadNew['exp'] = time() + 900;
+						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 						if($dataComing["channel"] == 'mobile_app'){
