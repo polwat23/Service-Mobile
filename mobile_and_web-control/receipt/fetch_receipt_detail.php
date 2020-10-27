@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => TRIM($dataComing["recv_period"]),
-			':ref_memb_no' => TRIM($dataComing["ref_memberno"]) ?? $member_no
+			':ref_memb_no' => $dataComing["ref_memberno"] ? TRIM($dataComing["ref_memberno"]) : $member_no
 		]);
 		
 		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){

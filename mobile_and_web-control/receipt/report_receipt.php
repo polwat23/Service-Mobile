@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getKpSlipNo->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"],
-			':ref_membno' => TRIM($dataComing["ref_memberno"]) ?? $member_no
+			':ref_membno' => $dataComing["ref_memberno"] ? TRIM($dataComing["ref_memberno"]) : $member_no
 		]);
 		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				':member_no' => $member_no,
 				':recv_period' => TRIM($dataComing["recv_period"]),
 				':seq_no' => $dataComing["seq_no"],
-				':ref_membno' => TRIM($dataComing["ref_memberno"]) ?? $member_no
+				':ref_membno' => $dataComing["ref_memberno"] ? TRIM($dataComing["ref_memberno"]) : $member_no
 			]);
 		}else{
 			$getPaymentDetail = $conoracle->prepare("SELECT 
@@ -87,7 +87,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
 				':recv_period' => TRIM($dataComing["recv_period"]),
-				':ref_membno' => TRIM($dataComing["ref_memberno"]) ?? $member_no
+				':ref_membno' => $dataComing["ref_memberno"] ? TRIM($dataComing["ref_memberno"]) : $member_no
 			]);
 		}
 		$arrGroupDetail = array();
