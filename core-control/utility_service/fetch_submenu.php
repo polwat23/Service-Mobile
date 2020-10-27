@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 											ON css.id_coremenu = cm.id_coremenu
 											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' ORDER BY css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
-			while($rowMenu = $fetchMenu->fetch()){
+			while($rowMenu = $fetchMenu->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupRootMenu = array();
 				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["menu_name"];
 				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 				$fetchSubMenu->execute([
 					':id_submenu' => $rowMenu["id_submenu"]
 				]);
-				while($rowSubMenu = $fetchSubMenu->fetch()){
+				while($rowSubMenu = $fetchSubMenu->fetch(PDO::FETCH_ASSOC)){
 					if(isset($rowSubMenu["menu_name"])){
 						$arrayGroupSubMenu = array();
 						$arrayGroupSubMenu["SUB_MENU_NAME"] = $rowSubMenu["menu_name"];
@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 											ON css.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
 											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status = '1' ORDER BY css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
-			while($rowMenu = $fetchMenu->fetch()){
+			while($rowMenu = $fetchMenu->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupRootMenu = array();
 				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["menu_name"];
 				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 					':id_submenu' => $rowMenu["id_submenu"],
 					':username' => $payload["username"]
 				]);
-				while($rowSubMenu = $fetchSubMenu->fetch()){
+				while($rowSubMenu = $fetchSubMenu->fetch(PDO::FETCH_ASSOC)){
 					if(isset($rowSubMenu["menu_name"])){
 						$arrayGroupSubMenu = array();
 						$arrayGroupSubMenu["SUB_MENU_NAME"] = $rowSubMenu["menu_name"];

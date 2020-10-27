@@ -38,37 +38,13 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
-		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
-		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
-		$arrSlipTrans = array();
-		$arrSlipStm = array();
-		while($rowslipTrans = $fetchSlipTrans->fetch(PDO::FETCH_ASSOC)){
-			$arrSlipTrans[] = $rowslipTrans["coop_slip_no"];
-		}
-		if(sizeof($arrSlipTrans) > 0){
-			$fetchStmSeqDept = $conoracle->prepare("SELECT dpstm_no FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
-			$fetchStmSeqDept->execute([':deptacc_no' => $account_no]);
-			while($rowstmseq = $fetchStmSeqDept->fetch(PDO::FETCH_ASSOC)){
-				$arrSlipStm[] = $rowstmseq["DPSTM_NO"];
-			}
-		}
-		if(sizeof($arrSlipStm) > 0){
-			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
-												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
-												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
-												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
-		}else{
-			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
-												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
-												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-												WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
-												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
-		}
+		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
+											dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+											FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
+											ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
+											WHERE dsm.deptaccount_no = :account_no and to_char(dsm.OPERATE_DATE,'YYYY-MM-DD')
+											BETWEEN :datebefore and :datenow ".$old_seq_no." 
+											ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,
@@ -102,6 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
@@ -113,6 +90,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

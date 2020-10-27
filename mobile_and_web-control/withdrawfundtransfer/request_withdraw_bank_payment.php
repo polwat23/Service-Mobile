@@ -67,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		$arrayGroup["system_cd"] = "02";
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
-		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+		/*$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 		try{
 			try {
 				$argumentWS = [
@@ -320,6 +320,51 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			echo json_encode($arrayResult);
 			exit();
 		}
+		$transaction_no = time();//$arrResponse->TRANSACTION_NO;
+		$etn_ref = time();//$arrResponse->EXTERNAL_REF;
+		$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
+													,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+													ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source)
+													VALUES(:ref_no,'DTB',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
+													:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source)");
+		$insertTransactionLog->execute([
+			':ref_no' => $ref_no,
+			':from_account' => $rowDataDeposit["deptaccount_no_bank"],
+			':destination' => $coop_account_no,
+			':amount' => $dataComing["amt_transfer"],
+			':fee_amt' => $dataComing["fee_amt"],
+			':amount_receive' => $amt_transfer,
+			':operate_date' => $dateOper,
+			':member_no' => $payload["member_no"],
+			':ref_no1' => $coop_account_no,
+			':slip_no' => $ref_slipno,
+			':etn_ref' => $etn_ref,
+			':id_userlogin' => $payload["id_userlogin"],
+			':ref_no_source' => $transaction_no
+		]);
+		$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
+		$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+		foreach($arrToken["LIST_SEND"] as $dest){
+			$dataMerge = array();
+			$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+			$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+			$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
+			}
+		}*/
+		$arrayResult['EXTERNAL_REF'] = $etn_ref;
+		$arrayResult['TRANSACTION_NO'] = $ref_no;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

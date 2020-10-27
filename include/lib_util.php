@@ -20,59 +20,63 @@ class library {
 		return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
 	}
 	public function convertdate($date,$format="D m Y",$is_time=false){
-		$date = preg_replace('|/|','-',$date);
-		$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-		$thaishort = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-		$arrSeparate = [" ","-","/"];
-		if($is_time){
-			$dateConvert = date("Y-m-d-H-i-s",strtotime($date));
-		}else{
-			$dateConvert = date("Y-m-d",strtotime($date));
-		}
-		$separate;
-		foreach($arrSeparate as $sep_value) {
-			if(strpos($format, $sep_value)){
-				$separate = $sep_value;
-				break;
-			}
-		}
-		$datearray = explode('-',$dateConvert);
-		$formatArray = explode($separate,$format);
-		$dateConverted;
-		foreach($formatArray as $key_format => $value_format) {
-			if($key_format == 0){
-				switch($value_format){
-					case "D" :
-					case "d" : $dateConverted = $datearray[2];
-						break;
-					case "Y" : $dateConverted = ($datearray[0]+543);
-						break;
-					case "y" : $dateConverted = $datearray[0];
-						break;				
-				}
+		if(isset($date)){
+			$date = preg_replace('|/|','-',$date);
+			$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+			$thaishort = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+			$arrSeparate = [" ","-","/"];
+			if($is_time){
+				$dateConvert = date("Y-m-d-H-i-s",strtotime($date));
 			}else{
-				switch($value_format){
-					case "D" :
-					case "d" : $dateConverted .= $separate.$datearray[2];
-						break;
-					case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
-						break;
-					case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
-						break;
-					case "N" :
-					case "n" : $dateConverted .= $separate.$datearray[1];
-						break;
-					case "Y" : $dateConverted .= $separate.($datearray[0]+543);
-						break;
-					case "y" : $dateConverted .= $separate.($datearray[0]);
-						break;
+				$dateConvert = date("Y-m-d",strtotime($date));
+			}
+			$separate;
+			foreach($arrSeparate as $sep_value) {
+				if(strpos($format, $sep_value)){
+					$separate = $sep_value;
+					break;
 				}
 			}
+			$datearray = explode('-',$dateConvert);
+			$formatArray = explode($separate,$format);
+			$dateConverted;
+			foreach($formatArray as $key_format => $value_format) {
+				if($key_format == 0){
+					switch($value_format){
+						case "D" :
+						case "d" : $dateConverted = $datearray[2];
+							break;
+						case "Y" : $dateConverted = ($datearray[0]+543);
+							break;
+						case "y" : $dateConverted = $datearray[0];
+							break;				
+					}
+				}else{
+					switch($value_format){
+						case "D" :
+						case "d" : $dateConverted .= $separate.$datearray[2];
+							break;
+						case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
+							break;
+						case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
+							break;
+						case "N" :
+						case "n" : $dateConverted .= $separate.$datearray[1];
+							break;
+						case "Y" : $dateConverted .= $separate.($datearray[0]+543);
+							break;
+						case "y" : $dateConverted .= $separate.($datearray[0]);
+							break;
+					}
+				}
+			}
+			if($is_time){
+				$dateConverted .= ' '.$datearray[3].':'.$datearray[4].(isset($datearray[5]) && $datearray[5] > 0 ? ':'.$datearray[5] : null).' น.';
+			}
+			return $dateConverted;
+		}else{
+			return '-';
 		}
-		if($is_time){
-			$dateConverted .= ' เวลา '.$datearray[3].':'.$datearray[4].(isset($datearray[5]) && $datearray[5] > 0 ? ':'.$datearray[5] : null).' น.';
-		}
-		return $dateConverted;
 	}
 	public function count_duration($date,$format="ym"){
 		$date = preg_replace('|/|','-',$date);
@@ -103,7 +107,7 @@ class library {
 		if(isset($phone)){
 			$str1 = substr($phone,0,3);
 			$str2 = substr($phone,3,3);
-			$str3 = substr($phone,6,4);
+			$str3 = substr($phone,6);
 			return $str1.$separate.$str2.$separate.$str3;
 		}else{
 			return '-';
@@ -197,7 +201,69 @@ class library {
 		$arrayText["BODY"] = $template_body;
 		return $arrayText;
 	}
-	public function sendMail($email,$subject,$body,$mailFunction) {
+	private function concatpercent($string) {
+		$strLen = strlen($string);
+		$output = "";
+		if($strLen > 0){
+			$output .= "%";
+			for($i=0; $i < $strLen; $i++) {
+				$output .= $string[$i];
+				if($i % 2 != 0 && $i < $strLen - 1){
+					$output .= "%";
+				}
+			}
+		}
+		return $output;
+	 }
+	public function unicodeMessageEncode($string){
+		$string = strtoupper(mb_strtoupper(bin2hex(mb_convert_encoding($string, 'UTF-16BE', 'UTF-8'))));
+		return $this->concatpercent($string);
+	}
+	public function sendSMS($arrayDestination,$bulk=false) {
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$config = json_decode($json,true);
+		$arrayGrpSms = array();
+		if($bulk){
+			/*foreach($arrayDestination as $dest){
+				$argumentWS = [
+					"Member_No" => $dest["member_no"],
+					"MobilePhone" => $dest["tel"],
+					"Message" => $dest["message"]
+				];
+				$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
+				$responseSoap = $resultWS->RqSendOTPResult;
+				$arraySms["MEMBER_NO"] = $dest["member_no"];
+				$arraySms["RESULT"] = $responseSoap;
+				$arrayGrpSms[] = $arraySms;
+			}
+			return $arrayGrpSms;*/
+		}else{
+			$headers[] = 'Content-Type: text/xml';
+			$ch = curl_init();  
+
+			curl_setopt( $ch,CURLOPT_URL, $config["URL_CORE_SMS"] );                                                                  
+			curl_setopt( $ch,CURLOPT_POST, true );  
+			curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+			curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt( $ch,CURLOPT_POSTFIELDS, $arrayDestination["cmd_sms"]);                                                                  
+																													 
+			$result = curl_exec($ch);
+			$beautyXML = simplexml_load_string($result);
+			if($beautyXML->STATUS == "OK"){
+				$arrayResponse["SMID"] = $beautyXML->SMID;
+				$arrayResponse["RESULT"] = TRUE;
+			}else{
+				$arrayResponse["MESSAGE"] = $beautyXML->DETAIL ?? "Cannot connect to AIS Server";
+				$arrayResponse["RESULT"] = FALSE;
+			}
+			$arrayResponse["RESULT"] = TRUE;
+			return $arrayResponse;
+		}
+	}
+
+	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$mailFunction->SMTPDebug = 0;
@@ -211,27 +277,38 @@ class library {
 		];
 		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
 		$mailFunction->SMTPAuth = true;
-		$mailFunction->Username = 'noreply@gensoft.co.th';
-		$mailFunction->Password = 'h>-^yM3cPd3&';
+		$mailFunction->Username = $json_data["MAIL"];
+		$mailFunction->Password = $json_data["PASS_MAIL"];
 		$mailFunction->SMTPSecure = 'ssl';
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
-		$mailFunction->setFrom('noreply@gensoft.co.th', $json_data["NAME_APP"]);
+		$mailFunction->Encoding = 'quoted-printable';
+		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
 		$mailFunction->Body = $body;
+		if(sizeof($attachment_path) > 0){
+			foreach($attachment_path as $attch_path){
+				$mailFunction->addAttachment($attch_path);
+			}
+		}
 		if(!$mailFunction->send()){
-			$text = '#Mail Error : '.date("Y-m-d H:i:s").' > Send to : '.$email.' # '.$mailFunction->ErrorInfo;
-			file_put_contents(__DIR__.'/../log/email_error.txt', $text . PHP_EOL, FILE_APPEND);
-			return false;
+			$arrRes["RESULT"] = FALSE;
+			$arrRes["MESSAGE_ERROR"] = $mailFunction->ErrorInfo;
+			$mailFunction->clearAddresses();
+			$mailFunction->smtpClose();
+			return $arrRes;
 		}else{
-			return true;
+			$arrRes["RESULT"] = TRUE;
+			$mailFunction->clearAddresses();
+			$mailFunction->smtpClose();
+			return $arrRes;
 		}
 	}
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
-		if(self::getBase64ImageSize($encode_string) < 1500){
+		if(self::getBase64ImageSize($encode_string) < 10000){
 			$data_Img = explode(',',$encode_string);
 			if(isset($data_Img[1])){
 				$dataImg = base64_decode($data_Img[1]);
@@ -246,6 +323,8 @@ class library {
 						$destination = $output_file.'/'.$filename;
 						$webP_destination = $output_file.'/'.$file_name.'.webp';
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$webP->convert($destination,$webP_destination,[]);
 							$arrPath = array();
@@ -266,6 +345,8 @@ class library {
 						$filename = $file_name.'.'.$ext_img;
 						$destination = $output_file.'/'.$filename;
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$arrPath = array();
 							$arrPath["normal_path"] = $filename;
@@ -283,6 +364,19 @@ class library {
 			}
 		}else{
 			return 'oversize';
+		}
+	}
+	public function base64_to_pdf($encode_string,$file_name,$output_file) {
+		$data_Img = explode(',',$encode_string);
+		if(isset($data_Img[1])){
+			$dataPdf = base64_decode($data_Img[1]);
+			$destination = $output_file.'/'.$file_name.'.pdf';
+			if(file_put_contents($destination,$dataPdf)){
+				$arrPath["normal_path"] = $file_name.'.pdf';
+				return $arrPath;
+			}else{
+				return false;
+			}
 		}
 	}
 	private function getBase64ImageSize($base64Image){
@@ -338,6 +432,10 @@ class library {
 					"body" => $payload["PAYLOAD"]["BODY"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
+				],
+				"data" => [
+					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
 				]
 			];
 		}else if($type_send == 'all'){
@@ -349,6 +447,10 @@ class library {
 					"body" => $payload["PAYLOAD"]["BODY"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
+				],
+				"data" => [
+					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
 				]
 			];
 		}
@@ -368,23 +470,19 @@ class library {
 																												 
 		$result = curl_exec($ch);
 		
-		if(isset($result)){
+		if(isset($result) && $result !== FALSE){
 			$resultNoti = json_decode($result);
 			curl_close ($ch);
 			if(isset($resultNoti)){
-				if($resultNoti->success){
+				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
-					$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
-					file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}
@@ -414,10 +512,10 @@ class library {
 		}
 		return $days;
 	}
-	public function posting_data($url,$payload) {
+	public function posting_data($url,$payload,$header=[]) {
 		$ch = curl_init( $url );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'));
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -505,6 +603,92 @@ class library {
 	}
 	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
+	}
+	public function sendLineNotify($message){
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$json_data = json_decode($json,true);
+		$token = $json_data["LINE_NOTIFY"];
+		$headers = array();
+		$headers[] = 'content-type: application/x-www-form-urlencoded';
+		$headers[] = 'Authorization: Bearer '.$token;
+		$ch = curl_init();
+
+		curl_setopt( $ch,CURLOPT_URL, "https://notify-api.line.me/api/notify" );                                                                  
+		curl_setopt( $ch,CURLOPT_POST, true );  
+		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch,CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
+																													 
+		curl_exec($ch);
+	}
+	public function truncateDecimal($amt,$precision){
+		$step = pow(10,$precision);
+		$value = intval($step * $amt);
+		return $value / $step;
+	}
+	public function roundDecimal($amt,$round_type){
+		$amtRound = $this->truncateDecimal($amt,2);
+		$amtRaw = $this->truncateDecimal($amtRound,0);
+		$fraction = floatval($amtRound - $amtRaw);
+		$fractionRaw = $this->truncateDecimal($fraction,1);
+		$fracVal = floatval($fraction - $fractionRaw);
+		$roundFrac = 0.00;
+		switch ($round_type){
+			case 1:
+				//ปัดที่ละสลึง
+				if ($fraction > 0.00 && $fraction <= 0.25) { $roundFrac = 0.25; }
+				if ($fraction > 0.25 && $fraction <= 0.50) { $roundFrac = 0.50; }
+				if ($fraction > 0.25 && $fraction <= 0.75) { $roundFrac = 0.75; }
+				if ($fraction > 0.75 && $fraction <= 0.99) { $roundFrac = 1.00; }
+				break;
+			case 2:
+				//ปัดที่ละ 5 สตางค์
+				if ($fracVal == 0.00) { return $amt; }
+				if ($fracVal == 0.05) { return $amt; }
+				if ($fracVal >= 0.01 && $fracVal <= 0.04) { $fracVal = 0.05; }
+				if ($fracVal >= 0.06 && $fracVal <= 0.09) { $fracVal = 0.10; }
+				$roundFrac = floatval($fractionRaw) + $fracVal;
+
+				break;
+			case 3:
+				//ปัดที่ละ 10 สตางค์
+
+				if ($fracVal == 0.00)
+				{
+					return $amt;
+				}
+				else
+				{
+					$fracVal = 0.10;
+				}
+				$roundFrac = floatval($fractionRaw) + $fracVal;
+
+				break;
+
+			case 4:
+				//ปัดเต็มบาท
+
+				if ($fraction > 0.49)
+				{
+					$roundFrac = 1.00;
+				}
+				else
+				{
+					$roundFrac = 0.00;
+				}
+
+				break;
+			case 99:
+				$roundFrac = $fraction;
+				break;
+
+			default:
+				$roundFrac = $fraction;
+				break;
+		}
+		return $amtRaw + floatval($roundFrac);
 	}
 }
 ?>

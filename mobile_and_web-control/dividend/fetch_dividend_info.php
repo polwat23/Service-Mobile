@@ -15,6 +15,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
+			$getSlipDate = $conoracle->prepare("SELECT slip_date FROM yrslippayout WHERE member_no = :member_no and div_year = :div_year");
+			$getSlipDate->execute([
+				':member_no' => $member_no,
+				':div_year' => $rowYear["DIV_YEAR"]
+			]);
+			$rowSlipDate = $getSlipDate->fetch(PDO::FETCH_ASSOC);
 			$getDivMaster = $conoracle->prepare("SELECT div_amt,avg_amt FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
@@ -22,6 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
+			$arrDividend["SLIP_DATE"] = $lib->convertdate($rowSlipDate["SLIP_DATE"],'d m Y');
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
@@ -30,26 +37,36 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													CM.BANK_DESC AS BANK,
 													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
 													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
-													NVL(CM.ACCOUNT_FORMAT,'xxx-xx-xxxxx') as ACCOUNT_FORMAT
+													YM.METHPAYTYPE_CODE
 												FROM 
 													YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
 													YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
 													LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
-												WHERE YM.paytype_code = 'ALL' AND 
+												WHERE
 													YM.MEMBER_NO = :member_no
+													AND YM.METHPAYTYPE_CODE <> 'LON'
 													AND YM.DIV_YEAR = :div_year");
 			$getMethpay->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
-			$rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC);
-			$arrDividend["ACCOUNT_RECEIVE"] = isset($rowMethpay["BANK_ACCOUNT"]) ? $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$rowMethpay["ACCOUNT_FORMAT"]) : null;
-			$arrDividend["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"] ?? null;
-			$arrDividend["BANK"] = $rowMethpay["BANK"]  ?? null;
-			$arrDividend["RECEIVE_AMT"] = isset($rowMethpay["RECEIVE_AMT"]) ? number_format($rowMethpay["RECEIVE_AMT"],2) : null;
+			while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
+				$arrayRecv = array();
+				if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
+					if(isset($rowMethpay["BANK"])){
+						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+					}else{
+						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+					}
+				}
+				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+				$arrayRecv["BANK"] = $rowMethpay["BANK"];
+				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
+				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+			}
 			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
-											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.paytype_code <> 'ALL' ");
+											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code = 'LON'");
 			$getPaydiv->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -79,6 +96,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

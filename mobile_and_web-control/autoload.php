@@ -15,6 +15,11 @@ header("X-XSS-Protection: 1; mode=block");
 header("X-Content-Type-Options: nosniff");
 header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 
+if (strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') {
+	http_response_code(500);
+	exit;
+}
+
 foreach ($_SERVER as $header_key => $header_value){
 	if($header_key == "HTTP_AUTHORIZATION"){
 		$headers["Authorization"] = $header_value;
@@ -26,6 +31,7 @@ foreach ($_SERVER as $header_key => $header_value){
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
+require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
@@ -55,6 +61,20 @@ $configError = json_decode($jsonConfigError,true);
 $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
+
+if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
+	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
+	$lib->sendLineNotify($message_error);
+	http_response_code(500);
+	exit();
+}
+if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
+	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
+	$lib->sendLineNotify($message_error);
+	$func->MaintenanceMenu("System");
+	http_response_code(500);
+	exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
@@ -119,35 +139,56 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 					}else if($errorCode === 4){
 						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
 							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-							if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
-							&& $dataComing["menu_component"] != 'Landing' && $payload["user_type"] != '9'){
-								$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
-								if($is_refreshToken_arr){
-									$arrayResult['RESPONSE_CODE'] = "WS0046";
-									$arrayResult['RESPONSE_MESSAGE'] = "";
-									$arrayResult['RESULT'] = FALSE;
-									http_response_code(401);
-									echo json_encode($arrayResult);
-									exit();
-								}else{
-									$arrayResult['RESPONSE_CODE'] = "WS0014";
-									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-									$arrayResult['RESULT'] = FALSE;
-									http_response_code(401);
-									echo json_encode($arrayResult);
-									exit();
+							if(!$skip_autoload){
+								if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
+								&& $dataComing["menu_component"] != 'Landing' && $dataComing["menu_component"] != 'Event'  && $dataComing["menu_component"] != 'UpdateFCMToken' && $payload["user_type"] != '9'){
+									$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
+									if($is_refreshToken_arr){
+										$arrayResult['RESPONSE_CODE'] = "WS0046";
+										$arrayResult['RESPONSE_MESSAGE'] = "";
+										$arrayResult['RESULT'] = FALSE;
+										http_response_code(401);
+										echo json_encode($arrayResult);
+										exit();
+									}else{
+										$rowLogin = $func->checkLogin($payload["id_token"]);
+										if(!$rowLogin["RETURN"]){
+											if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
+												$func->revoke_alltoken($payload["id_token"],'-9',true);
+											}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
+												$func->revoke_alltoken($payload["id_token"],'-8',true);
+											}else if($rowLogin["IS_LOGIN"] == '-7'){
+												$func->revoke_alltoken($payload["id_token"],'-7',true);
+											}else if($rowLogin["IS_LOGIN"] == '-5'){
+												$func->revoke_alltoken($payload["id_token"],'-6',true);
+											}
+											$arrayResult['RESPONSE_CODE'] = "WS0010";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
+										}else{
+											$arrayResult['RESPONSE_CODE'] = "WS0032";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											echo json_encode($arrayResult);
+											exit();
+										}
+									}
 								}
 							}
 						}else{
-							$arrayResult['RESPONSE_CODE'] = "WS0014";
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESPONSE_CODE'] = "WS0053";
+							$arrayResult['RESPONSE_MESSAGE'] = str_replace('${TIMEOUT}',intval($func->getConstant("limit_session_timeout"))/60,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							echo json_encode($arrayResult);
 							exit();
 						}
 					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0032";
+						$arrayResult['RESPONSE_CODE'] = "WS0014";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);

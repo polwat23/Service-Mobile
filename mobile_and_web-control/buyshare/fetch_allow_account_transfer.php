@@ -8,19 +8,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_buy_share = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
+			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt as prncbal,dpm.depttype_code
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													and dpm.membcat_code = dpt.membcat_code
-													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
+													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.acccont_type = '01' and dpm.deptclose_status = 0
+													ORDER BY dpm.deptaccount_no ASC");
 			$getDataBalAcc->execute();
 			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccAllow = array();
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png')){
+					$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrAccAllow["DEPT_TYPE_IMG"] = null;
+				}
 				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
@@ -37,6 +42,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*10,2);
 			$arrayShare["MEMBER_NO"] = $payload["member_no"];
 			if(sizeof($arrGroupAccAllow) > 0){
+				$getMembType = $conoracle->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
+				$getMembType->execute([':member_no' => $member_no]);
+				$rowMembType = $getMembType->fetch(PDO::FETCH_ASSOC);
+				if($rowMembType["MEMBCAT_CODE"] == '10'){
+					$memb_type = '01';
+				}else{
+					$memb_type = '02';
+				}
+				$getConstantShare = $conoracle->prepare("SELECT UNITSHARE_VALUE FROM SHSHARETYPE WHERE SHARETYPE_CODE = :memb_type");
+				$getConstantShare->execute([':memb_type' => $memb_type]);
+				$rowContShare = $getConstantShare->fetch(PDO::FETCH_ASSOC);
+				$arrayResult['STEP_MOD_AMT'] = $rowContShare["UNITSHARE_VALUE"];
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['SHARE'] = $arrayShare;
 				$arrayResult['RESULT'] = TRUE;
@@ -64,6 +81,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
