@@ -68,7 +68,7 @@
 	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบ กรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please check email again"}],
 	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องจากท่านพ้นสภาพการเป็นสมาชิกแล้ว","en" : "Cannot use application because membership has terminated"}],
 	"WS0052" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีสหกรณ์ได้ ท่านต้องยกเลิกผูกบัญชีฝั่งธนาคารก่อน","en" : "Cannot unbind cooperative account, you need to unbind bank account"}],
-	"WS0053" : [{"th" : "เซสชั่นหมดอายุ เวลาการใช้งานถูกจำกัดไว้ที่ 15 นาทีเพื่อความปลอดภัย กรุณาเข้าใช้งานใหม่อีกครั้ง","en" : "Session expired time limit for using is 15 minutes for secure, please access again"}],
+	"WS0053" : [{"th" : "เซสชั่นหมดอายุ เวลาการใช้งานถูกจำกัดไว้ที่ ${TIMEOUT} นาทีเพื่อความปลอดภัย กรุณาเข้าใช้งานใหม่อีกครั้ง","en" : "Session expired time limit for using is 15 minutes for secure, please access again"}],
 	"WS0054" : [{"th" : "บัญชีเงินฝากที่ระบุได้ปิดบัญชีไปแล้วหรือสหกรณ์ไม่อนุญาตให้รับโอนได้ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Deposit account that specify was closed or cooperative is not allow to receive money if you have any question, you can contact cooperative"}],
 	"WS0055" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถขอทุนสวัสดิการได้ในขณะนี้ กรุณาติดต่อสหกรณ์หรือลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot request welfare in this moment please contact cooperative or try again in 3 Hrs."}],
 	"WS0056" : [{"th" : "ท่านทำรายการต่ำกว่ายอดที่กำหนด ยอดทำรายการขั้นต่ำ ${min_amount_deposit} บาท กรุณาลองใหม่อีกครั้ง","en" : "Money transactions amount lower than define, minimum money transactions amount is ${min_amount_deposit} Baht please try again"}],
