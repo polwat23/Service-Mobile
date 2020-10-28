@@ -21,5 +21,6 @@
 	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x",
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
-	"PASS_MAIL" : "h>-^yM3cPd3&"
+	"PASS_MAIL" : "h>-^yM3cPd3&",
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member"
 }
