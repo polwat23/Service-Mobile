@@ -23,6 +23,7 @@
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"URL_COOP" : "www.muktc.com",
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",

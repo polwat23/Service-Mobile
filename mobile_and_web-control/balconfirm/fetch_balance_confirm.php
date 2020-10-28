@@ -27,8 +27,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGrpDept['SUM_BAL_IN_TYPE'] += $rowSumAllDept["BALANCE"];
 				$arrGrpDeptAll[] = $arrGrpDept;
 			}else{
-				($arrGrpDeptAll[array_search($rowSumAllDept["TYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arraysumDept;
-				($arrGrpDeptAll[array_search($rowSumAllDept["TYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllDept["BALANCE"];
+				($arrGrpDeptAll[array_search($rowSumAllDept["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arraysumDept;
+				($arrGrpDeptAll[array_search($rowSumAllDept["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllDept["BALANCE"];
 			}
 		}
 		$getSumAllLoan = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as BALANCE
