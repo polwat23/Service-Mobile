@@ -18,5 +18,6 @@
 	"DEFAULT_BANNER_COLOR_MAIN" : "#8e9eab",
 	"DEFAULT_BANNER_COLOR_SECON" : "#eef2f3",
 	"DEFAULT_BANNER_COLOR_TEXT" : "#000000",
-	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x"
+	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x",
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member"
 }

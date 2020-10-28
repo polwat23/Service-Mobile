@@ -4,9 +4,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin',null)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login FROM gcuserlogin WHERE is_login = '1'");
-		$fetchUserlogin->execute();
-	    $rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC);
+		
+		//web
+		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login_web FROM gcuserlogin WHERE is_login = '1' AND channel = 'web'");
+		$fetchUserloginWeb->execute();
+	    $rowUserloginWeb = $fetchUserloginWeb->fetch(PDO::FETCH_ASSOC);
+		
+		//mobile_app
+		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login_mobile FROM gcuserlogin WHERE is_login = '1' AND channel = 'mobile_app'");
+		$fetchUserloginMobile->execute();
+	    $rowUserloginMobile = $fetchUserloginMobile->fetch(PDO::FETCH_ASSOC);
 		
 		$fetchUserNotRegis = $conoracle->prepare("SELECT COUNT(member_no) AS C_USERNOTREGIS FROM mbmembmaster WHERE resign_status = '0' ");
 		$fetchUserNotRegis->execute();
@@ -17,7 +24,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$rowUserRegis = $fetchUserRegis->fetch(PDO::FETCH_ASSOC);
 		
 		$arrGroupRootUserlogin = array();
-		$arrGroupRootUserlogin["USER_LOGIN_TODAY"] = number_format($rowUserlogin["c_user_login"],0);
+		$arrGroupRootUserlogin["USER_LOGIN_TODAY"] = number_format($rowUserloginWeb["c_user_login_web"] + $rowUserloginMobile["c_user_login_mobile"],0);
+		$arrGroupRootUserlogin["USER_LOGIN_TODAY_WEB"] = number_format($rowUserloginWeb["c_user_login_web"],0);
+		$arrGroupRootUserlogin["USER_LOGIN_TODAY_MOBILE"] = number_format($rowUserloginMobile["c_user_login_mobile"],0);
 		$arrGroupRootUserlogin["USER_NOT_REGISTER"] = number_format($rowUserNotRegis["C_USERNOTREGIS"] - $rowUserRegis["c_userregit"],0);
 		$arrGroupRootUserlogin["USER_REGISTER"] = number_format($rowUserRegis["c_userregit"],0);
 
