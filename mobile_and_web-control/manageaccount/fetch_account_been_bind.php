@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
-													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
+													gpl.color_secon,csb.bank_short_name,csb.bank_short_ename,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
 													gba.bank_account_name,gba.bank_account_name_en
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 													LEFT JOIN gcpalettecolor gpl ON csb.id_palette = gpl.id_palette and gpl.is_use = '1'
@@ -39,6 +39,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
 					$arrAccount["ICON_BANK_WEBP"] = $config['URL_SERVICE'].$explodePathBankLOGO[0].'.webp';
 					$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
+					$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
 					$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
 					$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 					$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
