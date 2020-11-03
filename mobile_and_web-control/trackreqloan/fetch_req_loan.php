@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["request_amt"];
-				//$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
+				$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				$arrayReq["PERIOD"] = $rowReqLoan["period"];
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["request_amt"];
-				//$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
+				$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				$arrayReq["PERIOD"] = $rowReqLoan["period"];
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
