@@ -138,7 +138,7 @@ function GeneratePDFContract($data,$lib) {
 			</div>  
 		  </div>
 
-		  <div style="position: absolute; left: 30px; top: 331px; width:120px; text-align:center;font-weight:bold;">
+		  <div style="position: absolute; left: 40px; top: 331px; width:120px; text-align:center;font-weight:bold;">
 			<div style="font-size: 20px; ">
 			  '.$data["district_desc"].'
 			</div>  

@@ -9,6 +9,25 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$count_trans = 0;
 		$dateTrans = date('c');
 		$penalty_amt = 0;
+		$checkStatusAcc = $conoracle->prepare("SELECT DPM.DEPTCLOSE_STATUS,DPT.DEPTGROUP_CODE FROM DPDEPTMASTER DPM 
+													LEFT JOIN DPDEPTTYPE DPT ON DPM.DEPTTYPE_CODE = DPT.DEPTTYPE_CODE
+													WHERE DPM.DEPTACCOUNT_NO = :account_no");
+		$checkStatusAcc->execute([':account_no' => $deptaccount_no]);
+		$rowStatusAcc = $checkStatusAcc->fetch(PDO::FETCH_ASSOC);
+		if($rowStatusAcc["DEPTCLOSE_STATUS"] != '0'){
+			$arrayResult['RESPONSE_CODE'] = "WS0089";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		if($rowStatusAcc["DEPTGROUP_CODE"] == '01'){
+			$arrayResult['RESPONSE_CODE'] = "WS0090";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$getTypeAcc = $conoracle->prepare("SELECT DEPTTYPE_CODE FROM dpdeptmaster WHERE deptaccount_no = :acc_no");
 		$getTypeAcc->execute([':acc_no' => $deptaccount_no]);
 		$rowType = $getTypeAcc->fetch(PDO::FETCH_ASSOC);

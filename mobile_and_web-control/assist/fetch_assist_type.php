@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGrpYear = array();
 		$yearAss = 0;
 		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year as ASSIST_YEAR,sum(ASSIST_AMT) as ASS_RECEIVED FROM assreqmaster 
-												WHERE member_no = :member_no GROUP BY assist_year ORDER BY assist_year DESC");
+												WHERE member_no = :member_no and req_status = 1 GROUP BY assist_year ORDER BY assist_year DESC");
 		$fetchAssGrpYear->execute([':member_no' => $member_no]);
 		while($rowAssYear = $fetchAssGrpYear->fetch(PDO::FETCH_ASSOC)){
 			$arrayYear = array();

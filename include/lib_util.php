@@ -582,7 +582,7 @@ class library {
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 	public function sendLineNotify($message){
-		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		/*$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$token = $json_data["LINE_NOTIFY"];
 		$headers = array();
@@ -598,7 +598,7 @@ class library {
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
 																													 
-		curl_exec($ch);
+		curl_exec($ch);*/
 	}
 	public function truncateDecimal($amt,$precision){
 		$step = pow(10,$precision);

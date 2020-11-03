@@ -16,7 +16,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayDept[] = $rowAccAllow["deptaccount_no"];
 			}
-			$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal
+			$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
+											dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal,dpm.CHECKPEND_AMT
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no
 											ORDER BY dpm.deptaccount_no");
@@ -43,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
 					$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
 					if($rowDataAccAll["SEQUEST_STATUS"] == '1'){
-						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"];
+						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"] - $rowDataAccAll["CHECKPEND_AMT"];
 					}else{
 						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["MINPRNCBAL"];
 					}
