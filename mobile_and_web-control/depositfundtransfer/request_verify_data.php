@@ -16,17 +16,32 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																						DPM.MEMBER_NO = :member_no");
 			$getSumTransactionInMonth->execute([':member_no' => $member_no]);
 			$rowSumTran = $getSumTransactionInMonth->fetch(PDO::FETCH_ASSOC);
-			$checkLimitDeptPerMonth = $conoracle->prepare("SELECT LIMITDEPTPERSON_AMT FROM DPDEPTCONSTANT WHERE COOP_ID = '001001'");
-			$checkLimitDeptPerMonth->execute();
-			$rowLimitDept = $checkLimitDeptPerMonth->fetch(PDO::FETCH_ASSOC);
 			$amt_transfer = $dataComing["amt_transfer"] + $rowSumTran["NETAMT"];
-			if($amt_transfer >= $rowLimitDept["LIMITDEPTPERSON_AMT"]){
-				$remain_amount_deposit_per_month = intval($rowLimitDept["LIMITDEPTPERSON_AMT"]) - $rowSumTran["NETAMT"];
-				$arrayResult['RESPONSE_CODE'] = "WS0085";
-				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+			$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
+			$getMemberType->execute([':member_no' => $member_no]);
+			$rowmbType = $getMemberType->fetch(PDO::FETCH_ASSOC);
+			if($rowmbType["MEMBER_TYPE"] == '1'){
+				$checkLimitDeptPerMonth = $conoracle->prepare("SELECT LIMITDEPTPERSON_AMT FROM DPDEPTCONSTANT WHERE COOP_ID = '001001'");
+				$checkLimitDeptPerMonth->execute();
+				$rowLimitDept = $checkLimitDeptPerMonth->fetch(PDO::FETCH_ASSOC);
+				if($amt_transfer >= $rowLimitDept["LIMITDEPTPERSON_AMT"]){
+					$remain_amount_deposit_per_month = intval($rowLimitDept["LIMITDEPTPERSON_AMT"]) - $rowSumTran["NETAMT"];
+					$arrayResult['RESPONSE_CODE'] = "WS0085";
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}else{
+				$limit_dept = $func->getConstant("limit_deposit_asso");
+				if($amt_transfer >= $limit_dept){
+					$remain_amount_deposit_per_month = intval($limit_dept) - $rowSumTran["NETAMT"];
+					$arrayResult['RESPONSE_CODE'] = "WS0085";
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+					$arrayResult['RESULT'] = FALSE;
+					echo json_encode($arrayResult);
+					exit();
+				}
 			}
 			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
 														FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
