@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													ELSE kpd.description END as PAY_ACCOUNT,
 													kpd.period,
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+													NVL(kpd.PRINCIPAL_BALANCE,kpd.ITEM_BALANCE) AS ITEM_BALANCE,
 													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
 													NVL(kpd.interest_payment,0) AS INT_BALANCE
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-													and kpd.branch_id = :branch_id
+													and kpd.branch_id = :branch_id and kut.keepitemtype_grp <> 'DEP'
 													ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
