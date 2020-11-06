@@ -31,8 +31,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				]);
 				$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 				$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
-				$arrDividend["DIV_PERCENT"] = $rowYear["DIVPERCENT_RATE"];
-				$arrDividend["AVG_PERCENT"] = $rowYear["AVGPERCENT_RATE"];
+				$arrDividend["DIV_PERCENT"] = $rowYear["DIVPERCENT_RATE"].' %';
+				$arrDividend["AVG_PERCENT"] = $rowYear["AVGPERCENT_RATE"].' %';
 				$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 				$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 				$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);				
