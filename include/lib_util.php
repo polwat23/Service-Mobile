@@ -256,15 +256,20 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
+		$email_explode = explode("@", $email);
+		if(in_array(end($email_explode), array("yahoo.com", "yahoo.co.th"))){
+			$mailFunction->Host = 'cloud2.gensoft.co.th';
+		}else {
+			$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
+		}
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
 		$mailFunction->SMTPSecure = 'ssl';
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
-		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->CharSet = 'UTF-8';
+		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
