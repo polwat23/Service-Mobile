@@ -7,11 +7,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDeptAllowed = array();
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
-		$getDeptTypeAllow = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster
-												WHERE member_no = :member_no GROUP BY depttype_code");
-		$getDeptTypeAllow->execute([':member_no' => $member_no]);
+		
+		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
+												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'");
+		$getDeptTypeAllow->execute();
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
-			$arrDeptAllowed[] = $rowDeptAllow["DEPTTYPE_CODE"];
+			$arrDeptAllowed[] = "'".$rowDeptAllow["dept_type_code"]."'";
 		}
 		$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 		$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
