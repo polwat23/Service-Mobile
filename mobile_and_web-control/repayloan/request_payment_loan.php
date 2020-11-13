@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$arrayGroup["member_no"] = $member_no;
 				$arrayGroup["operate_date"] = $dateOperC;
 				$arrayGroup["slip_date"] = $dateOperC;
-				$arrayGroup["entry_id"] = "mobile_app";
+				$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 				$argumentWS = [
 					"as_wspass" => $config["WS_STRC_DB"],
 					"astr_lninitloans" => $arrayGroup
@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$arrayGroupSaveLn["bfperiod_payment"] = $responseInitLn->bfperiod_payment;
 				$arrayGroupSaveLn["operate_date"] = date('c');
 				$arrayGroupSaveLn["slip_date"] = date('c');
-				$arrayGroupSaveLn["entry_id"] = "mobile_app";
+				$arrayGroupSaveLn["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 				$arrayGroupSaveDP = array();
 				$arrayGroupSaveDP["coop_id"] = $coop_id;
 				$arrayGroupSaveDP["member_no"] = $member_no;
@@ -108,23 +108,25 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 					foreach($arrToken["LIST_SEND"] as $dest){
-						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-						$arrMessage["BODY"] = $message_endpoint["BODY"];
-						$arrMessage["PATH_IMAGE"] = null;
-						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						$arrPayloadNotify["SEND_BY"] = "system";
-						if($lib->sendNotify($arrPayloadNotify,"person")){
-							$func->insertHistory($arrPayloadNotify,'2');
-							$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
-							$updateSyncNoti->execute([
-								':deptaccount_no' => $responseSaveLN->deptaccount_no,
-								':seq_no' => $rowSeqno["SEQ_NO"]
-							]);
-							$updateSyncNoti = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
-							$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->payinslip_no]);
+						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							$arrPayloadNotify["SEND_BY"] = "system";
+							if($lib->sendNotify($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
+								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+								$updateSyncNoti->execute([
+									':deptaccount_no' => $responseSaveLN->deptaccount_no,
+									':seq_no' => $rowSeqno["SEQ_NO"]
+								]);
+								$updateSyncNoti = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
+								$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->payinslip_no]);
+							}
 						}
 					}
 					$arrayResult['RESULT'] = TRUE;

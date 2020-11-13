@@ -19,14 +19,41 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.mem_telmobile
+												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.mem_telmobile,
+												mb.ADDRESS_NO as ADDR_NO,mb.ADDRESS_MOO as ADDR_MOO,mb.ADDRESS_ROAD as ADDR_ROAD,
+												mb.ADDRESS_SOI as ADDR_SOI,mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
+												mbt.TAMBOL_DESC,mbd.DISTRICT_DESC,mbp.PROVINCE_DESC,mb.POSTCODE as ADDR_POSTCODE,mb.PROVINCE_CODE
 												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN MBUCFPOSITION mpos ON mb.position_code = mpos.position_code
 												LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 												LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+												LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+												LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+												LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 												WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			$address = $rowMember["ADDR_NO"];
+			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง '.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต '.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}else{
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}
+			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$memberAddress = $conoracle->prepare("SELECT 
 													ma.ADDRESS_CODE AS ADDRESS_CODE,
 													ma.ADDRESS_NO AS ADDR_NO, 
@@ -39,8 +66,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
 													ma.PROVINCE_CODE AS PROVINCE_CODE,
 													ma.POSTCODE AS ADDR_POSTCODE
-													FROM mbmembmaster mb 
-													LEFT JOIN MBMEMBADDRESS ma ON mb.MEMBER_NO = ma.MEMBER_NO
+													FROM MBMEMBADDRESS ma LEFT JOIN mbmembmaster mb ON mb.MEMBER_NO = ma.MEMBER_NO
 													LEFT JOIN MBUCFTAMBOL MBT ON ma.TAMBOL_CODE = MBT.TAMBOL_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON ma.DISTRICT_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON ma.PROVINCE_CODE = MBP.PROVINCE_CODE

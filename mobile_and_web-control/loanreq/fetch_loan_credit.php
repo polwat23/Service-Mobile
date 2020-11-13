@@ -145,7 +145,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					];
 					$log->writeLog('errorusage',$logStruc);
 					$arrayResult['RESPONSE_CODE'] = "WS0058";
-					if($responseSoap->msg_status == "013" || $responseSoap->msg_status == "099"){
+					if($responseSoap->msg_status == "013" || $responseSoap->msg_status == "099" || $responseSoap->msg_status == "011"){
 						$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					}else{
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
-	$reference = $lib->randomText('all',6);
+	$reference = strtoupper($lib->randomText('string',4));
 	$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '5';
 	$expire_date = date('Y-m-d H:i:s',strtotime('+'.$duration_expire.' minutes'));
 	$arrTarget["RANDOM_NUMBER"] = $otp_password;

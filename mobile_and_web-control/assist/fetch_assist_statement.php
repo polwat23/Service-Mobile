@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 			$arrGroupAssStm["EXPENSE_ACCID"] = $rowAccountRCV["EXPENSE_ACCID"];
 			$arrGroupAssStm["ACCOUNT_RECEIVE"] = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
 		}else{
-			$arrGroupAssStm["BANK_NAME"] = "สหกรณ์ออมทรัพย์กรมป่าไม้";
+			$arrGroupAssStm["BANK_NAME"] = ($rowAccountRCV["MONEYTYPE_CODE"] == 'TRN' ? "โอนภายใน " : "")."สหกรณ์ออมทรัพย์กรมป่าไม้";
 			$arrGroupAssStm["EXPENSE_ACCID"] = $rowAccountRCV["DEPTACCOUNT_NO"];
 			$arrGroupAssStm["ACCOUNT_RECEIVE"] = $lib->formataccount($rowAccountRCV["DEPTACCOUNT_NO"],$func->getConstant("dep_format"));
 		}

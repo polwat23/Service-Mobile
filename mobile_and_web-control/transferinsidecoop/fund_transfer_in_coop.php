@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["dest_deptaccount_no"] = $to_account_no;
 			$arrayGroup["dest_slipitemtype_code"] = "DTX";
 			$arrayGroup["dest_stmitemtype_code"] = "WTX";
-			$arrayGroup["entry_id"] = "mobile";
+			$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
 			$arrayGroup["feeinclude_status"] = $penalty_include;
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
@@ -111,18 +111,20 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 					foreach($arrToken["LIST_SEND"] as $dest){
-						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-						$arrMessage["BODY"] = $message_endpoint["BODY"];
-						$arrMessage["PATH_IMAGE"] = null;
-						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-						$arrPayloadNotify["SEND_BY"] = "system";
-						if($lib->sendNotify($arrPayloadNotify,"person")){
-							$func->insertHistory($arrPayloadNotify,'2');
-							$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
-							$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
+						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							$arrPayloadNotify["SEND_BY"] = "system";
+							if($lib->sendNotify($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
+								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+								$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
+							}
 						}
 					}
 					$arrayResult['RESULT'] = TRUE;

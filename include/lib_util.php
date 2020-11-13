@@ -262,7 +262,6 @@ class library {
 			return $arrayResponse;
 		}
 	}
-
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
@@ -275,7 +274,12 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
+		$email_explode = explode("@", $email);
+		if(in_array(end($email_explode), array("yahoo.com", "yahoo.co.th"))){
+			$mailFunction->Host = 'cloud2.gensoft.co.th';
+		}else {
+			$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
+		}
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -297,16 +301,13 @@ class library {
 		if(!$mailFunction->send()){
 			$arrRes["RESULT"] = FALSE;
 			$arrRes["MESSAGE_ERROR"] = $mailFunction->ErrorInfo;
-			$mailFunction->clearAddresses();
-			$mailFunction->smtpClose();
 			return $arrRes;
 		}else{
 			$arrRes["RESULT"] = TRUE;
-			$mailFunction->clearAddresses();
-			$mailFunction->smtpClose();
 			return $arrRes;
 		}
 	}
+
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
 		if(self::getBase64ImageSize($encode_string) < 10000){
 			$data_Img = explode(',',$encode_string);

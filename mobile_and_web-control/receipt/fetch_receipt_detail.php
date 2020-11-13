@@ -53,7 +53,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount(preg_replace("/[^0-9]/", "", $rowDetail["PAY_ACCOUNT"]),$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
@@ -65,6 +64,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+			}
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 			$arrGroupDetail[] = $arrDetail;

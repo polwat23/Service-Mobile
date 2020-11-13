@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 				$arrDataPre = array();
 				$getDataForPreview = $conoracle->prepare("SELECT MEMBER_NO
 														FROM kpkepnotenoughmoneytosms
-														WHERE member_no IN('".implode("','",$destination)."') and recv_period = (SELECT MAX(recv_period) FROM kpmastreceive)
+														WHERE member_no IN('".implode("','",$destination)."')
 														GROUP BY member_no");
 				$getDataForPreview->execute();
 				while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 		}else{
 			$getDataForPreview = $conoracle->prepare("SELECT MEMBER_NO
 													FROM kpkepnotenoughmoneytosms
-													WHERE mailpost_status = '0' and recv_period = (SELECT MAX(recv_period) FROM kpmastreceive) 
+													WHERE mailpost_status = '0' 
 													GROUP BY member_no");
 			$getDataForPreview->execute();
 			while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){

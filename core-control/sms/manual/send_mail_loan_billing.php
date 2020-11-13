@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 														FROM kpkepnotenoughmoneytosms kms
 														LEFT JOIN mbmembmaster mb ON kms.member_no = mb.member_no
 														LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-														WHERE kms.member_no IN('".implode("','",$destination)."') and kms.recv_period = (SELECT MAX(recv_period) FROM kpmastreceive)
+														WHERE kms.member_no IN('".implode("','",$destination)."')
 														GROUP BY kms.MEMBER_NO,mp.PRENAME_SHORT || mb.MEMB_NAME || ' ' || mb.MEMB_SURNAME,mb.BIRTH_DATE");
 				$getDataForPreview->execute();
 				while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 														kar.KPSLIP_NO,kms.RECV_PERIOD
 														FROM kpkepnotenoughmoneytosms kms LEFT JOIN kparrearreceive kar
 														ON kms.recv_period = kar.recv_period and kms.member_no = kar.member_no
-														WHERE kms.member_no = :member_no and kms.recv_period = (SELECT MAX(recv_period) FROM kpmastreceive)
+														WHERE kms.member_no = :member_no
 														GROUP BY kar.KPSLIP_NO,kms.RECV_PERIOD");
 						$getHeaderForPDF->execute([':member_no' => $rowDataPre["MEMBER_NO"]]);
 						while($rowHeader = $getHeaderForPDF->fetch(PDO::FETCH_ASSOC)){

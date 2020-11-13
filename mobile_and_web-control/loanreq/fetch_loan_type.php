@@ -34,6 +34,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayGrpLoan[] = $arrayLoan;
 			}
 		}
+		$getLoanConst = $conoracle->prepare("SELECT ROUNDPERIODPOS_AMT FROM lnloanconstant");
+		$getLoanConst->execute();
+		$rowLoanConst = $getLoanConst->fetch(PDO::FETCH_ASSOC);
+		$arrayResult['TYPE_DECIMAL'] = $rowLoanConst["ROUNDPERIODPOS_AMT"];
 		$arrayResult['LOAN_TYPE'] = $arrayGrpLoan;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

@@ -2,6 +2,9 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['sigma_key'],$payload)){
+	$jsonConfigAS = file_get_contents(__DIR__.'/../../config/config_alias.json');
+	$configAS = json_decode($jsonConfigAS,true);
+	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 	$getAccBankAllow = $conoracle->prepare("SELECT account_code FROM atmregister WHERE member_no = :member_no and expense_bank = '006' and mobile_flag = '1'");
 	$getAccBankAllow->execute([':member_no' => $member_no]);
 	$rowAccBank = $getAccBankAllow->fetch(PDO::FETCH_ASSOC);
