@@ -29,6 +29,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 														WHEN 'LON' THEN kpd.loancontract_no
 													ELSE kpd.description END as PAY_ACCOUNT,
 													kpd.period,
+													kpd.description,
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -47,7 +48,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);
 		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			if(isset($rowDetail["DESCRIPTION"])){
+				$arrDetail["TYPE_DESC"] = $rowDetail["DESCRIPTION"];
+			}else{
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			}
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
@@ -73,7 +78,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 			$arrGroupDetail[] = $arrDetail;
 		}

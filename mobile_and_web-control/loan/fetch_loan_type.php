@@ -8,6 +8,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE member_no = :member_no");
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
+		$getLoanBF = $conoracle->prepare("SELECT ACCUM_INTEREST FROM MBMEMBMASTER WHERE member_no = :member_no");
+		$getLoanBF->execute([':member_no' => $member_no]);
+		$rowLoanBF = $getLoanBF->fetch(PDO::FETCH_ASSOC);
+		$arrayResult['LOAN_RATE_AMT'] = number_format($rowLoanBF["ACCUM_INTEREST"],2);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
 		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,

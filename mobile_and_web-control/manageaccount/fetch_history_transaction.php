@@ -70,17 +70,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$rowNameLn = $fetchNameLoanDes->fetch(PDO::FETCH_ASSOC);
 					$arrayTrans["DESTINATION_NAME"] = $rowNameLn["LOANTYPE_DESC"];
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขสัญญา';
-					$contract_no = preg_replace('/\//','',$rowTrans["DESTINATION"]);
-					if(mb_stripos($contract_no,'.') === FALSE){
-						$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-						if(mb_strlen($contract_no) == 10){
-							$arrayTrans["DESTINATION"] = $loan_format;
-						}else if(mb_strlen($contract_no) == 11){
-							$arrayTrans["DESTINATION"] = $loan_format.'-'.mb_substr($contract_no,10);
-						}
-					}else{
-						$arrayTrans["DESTINATION"] = $contract_no;
-					}
+					$arrayTrans["DESTINATION"] = preg_replace('/\//','',$rowTrans["DESTINATION"]);
 				}else{
 					$fetchNameDes = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME
 																	FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code

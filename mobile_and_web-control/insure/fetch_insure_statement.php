@@ -1,25 +1,25 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
+if($lib->checkCompleteArgument(['menu_component','insure_no'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'InsureStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mc.gain_concern,mg.remark,mg.GAIN_PERCENT
-												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
-												WHERE mg.member_no = :member_no");
-		$getBeneficiary->execute([':member_no' => $member_no]);
-		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
-			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
-			$arrBenefit["TYPE_PERCENT"] = 'percent';
-			$arrBenefit["PERCENT_TEXT"] = $rowBenefit["GAIN_PERCENT"].'%';
-			$arrBenefit["PERCENT"] = filter_var($rowBenefit["GAIN_PERCENT"], FILTER_SANITIZE_NUMBER_INT);
-			$arrGroupBNF[] = $arrBenefit;
+		$fetchinSureSTM = $conoracle->prepare("SELECT int.INSITEMTYPE_DESC,ins.PREMIUM_PAYMENT,ins.OPERATE_DATE,ins.REF_SLIPNO
+												FROM insinsurestatement ins LEFT JOIN insucfinsitemtype int ON ins.INSITEMTYPE_CODE = int.INSITEMTYPE_CODE
+												WHERE ins.insurance_no = :insure_no ORDER BY ins.SEQ_NO DESC");
+		$fetchinSureSTM->execute([
+			':insure_no' => $dataComing["insure_no"]
+		]);
+		$arrGroupInsSTM = array();
+		while($rowInsure = $fetchinSureSTM->fetch(PDO::FETCH_ASSOC)){
+			$arrayInsure = array();
+			$arrayInsure["PAYMENT"] = number_format($rowInsure["PREMIUM_PAYMENT"],2);
+			$arrayInsure["INSURE_DATE"] = $lib->convertdate($rowInsure["OPERATE_DATE"],'D m Y');
+			$arrayInsure["INSURESTM_TYPE"] = $rowInsure["INSITEMTYPE_DESC"];
+			$arrayInsure["SLIP_NO"] = $rowInsure["REF_SLIPNO"];
+			$arrGroupInsSTM[] = $arrayInsure;
 		}
-		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
+		$arrayResult['INSURE_STM'] = $arrGroupInsSTM;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

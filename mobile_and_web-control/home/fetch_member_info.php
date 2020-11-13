@@ -40,6 +40,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			$getElection = $conoracle->prepare("SELECT MBE.MEMBGRPELEC_DESC FROM MBMEMBMASTER M LEFT JOIN MBUCFMEMBGRPELEC MBE
+												ON M.MEMBGRPELEC_CODE = MBE.MEMBGRPELEC_CODE WHERE m.member_no = :member_no");
+			$getElection->execute([':member_no' => $member_no]);
+			$rowElec = $getElection->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
@@ -72,6 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
+			$arrayResult["ELEC_GROUP"] = $rowElec["MEMBGRPELEC_DESC"];
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
