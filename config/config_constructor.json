@@ -6,7 +6,7 @@
 	"APP_ID" : "com.pjtsaving.mobile",
 	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/PJTCOOP-TEST/",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
-	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
+	"URL_CORE_SMS" : "https://member.smsmkt.com/SMSLink/SendMsg/index.php",
 	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=001001;coop_control=001001;",
 	"FIREBASE_API_KEY" : "AIzaSyDR2BMIyRHWHMGoM5TN0mWHUlJ8YIuinVM",
 	"FIREBASE_SERVER_KEY" : "AAAAvTWbtDk:APA91bFq3a7LkFndXLNegR3egGmoG33boZhj2sGYf8SHceD4S4X2TBTW7a8OAqT26zgKPT-dwwusLFIxVzFroMAE61X--36wslSsCptzGmiEPpxxoAVTAIVH-uOZ3St8UCdcpU9qRyjA",
@@ -24,6 +24,9 @@
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"URL_COOP" : "www.muktc.com",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
+	"UN_SMSAPI" : "pct-coopthai",
+	"PW_SMSAPI" : "Coop@343",
+	"SenderName" : "PKKTSC",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",
