@@ -204,44 +204,36 @@ class library {
 	public function sendSMS($arrayDestination,$bulk=false) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($json,true);
-		$arrayGrpSms = array();
-		try{
-			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
-			try {
-				if($bulk){
-					foreach($arrayDestination as $dest){
-						$argumentWS = [
-							"Member_No" => $dest["member_no"],
-							"MobilePhone" => $dest["tel"],
-							"Message" => $dest["message"]
-						];
-						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-						$responseSoap = $resultWS->RqSendOTPResult;
-						$arraySms["MEMBER_NO"] = $dest["member_no"];
-						$arraySms["RESULT"] = $responseSoap;
-						$arrayGrpSms[] = $arraySms;
-					}
-					return $arrayGrpSms;
-				}else{
-					$argumentWS = [
-						"Member_No" => $arrayDestination["member_no"],
-						"MobilePhone" => $arrayDestination["tel"],
-						"Message" => $arrayDestination["message"]
-					];
-					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-					$responseSoap = $resultWS->RqSendOTPResult;
-					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
-					$arrayGrpSms["RESULT"] = $responseSoap;
-					return $arrayGrpSms;
-				}
-			}catch(SoapFault $e){
+		$message = urlencode(iconv("UTF-8","TIS-620",$arrayDestination["message"]));
+		$ch = curl_init();
+		$data = "User=".$config["UN_SMSAPI"]."&Password=".$config["PW_SMSAPI"]."&Msnlist=".$arrayDestination["tel"]."&Msg=".$message."&Sender=".$config["SenderName"];
+		curl_setopt( $ch,CURLOPT_URL, $config["URL_CORE_SMS"] ); 
+		curl_setopt( $ch,CURLOPT_POST, true );
+		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch,CURLOPT_POSTFIELDS,$data);     
+
+		$result = curl_exec($ch);
+		$statusSend = explode(',',$result);
+		if(isset($result) && isset($statusSend[0])){
+			$statusArr = explode('=',$statusSend[0]);
+			if($statusArr[1] == '0'){
+				curl_close($ch);
+				$arrayGrpSms["MEMBER_NO"] = $arrayDestination["member_no"];
+				$arrayGrpSms["RESULT"] = TRUE;
+				return $arrayGrpSms;
+			}else{
+				curl_close($ch);
+				$arrayGrpSms["RESPONSE_MESSAGE"] = $result;
 				$arrayGrpSms["RESULT"] = FALSE;
 				return $arrayGrpSms;
 			}
-		}catch(Throwable $e){
+		}else{
+			curl_close($ch);
+			$arrayGrpSms["RESPONSE_MESSAGE"] = $result;
 			$arrayGrpSms["RESULT"] = FALSE;
 			return $arrayGrpSms;
-			return false;
 		}
 	}
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
