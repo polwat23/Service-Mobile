@@ -78,10 +78,14 @@ class library {
 			return '-';
 		}
 	}
-	public function count_duration($date,$format="ym"){
+	public function count_duration($date,$format="ym",$dateto=null){
 		$date = preg_replace('|/|','-',$date);
 		$dateconverted = new \DateTime($date);
-		$dateNow = new \DateTime(date('d-m-Y'));
+		if(isset($dateto)){
+			$dateNow = new \DateTime($dateto);
+		}else{
+			$dateNow = new \DateTime(date('d-m-Y'));
+		}
 		$date_duration = $dateNow->diff($dateconverted);
 		if($format == "ym"){
 			return  $date_duration->y ." ปี " .$date_duration->m." เดือน";
