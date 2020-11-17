@@ -281,7 +281,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 300px;text-align: left;font-size: 18px">
 			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 305px;">
@@ -305,7 +305,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>';
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 300px;text-align: left;font-size: 18px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 305px;">

@@ -32,6 +32,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		WHEN 'LON' THEN kpd.loancontract_no
 																	ELSE kpd.description END as PAY_ACCOUNT,
 																	kpd.period,
+																	kpd.calintfrom_date,
+																	kpd.calintto_date,
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -64,6 +66,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				}else{
 					$arrDetail["PAY_ACCOUNT"] = $contract_no;
 				}
+				$arrDetail["PERIOD_CAL_INT"] = $lib->count_duration($rowDetail["CALINTFROM_DATE"],'d',$rowDetail["CALINTTO_DATE"]);
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
@@ -203,8 +206,9 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">งวดที่</div>
+			<div style="width: 300px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
+			<div style="width: 80px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 305px;padding-top: 1px;">ด/บ วัน</div>
+			<div style="width: 80px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 385px;padding-top: 1px;">งวดที่</div>
 			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
 			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
 			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
@@ -215,15 +219,19 @@ function GenerateReport($dataReport,$header,$lib){
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
+			<div style="width: 300px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
+			<div style="width: 80px;border-right: 0.5px solid black;height: 250px;margin-left: 305px;">&nbsp;</div>
+			<div style="width: 80px;border-right: 0.5px solid black;height: 250px;margin-left: 385px;">&nbsp;</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 300px;text-align: left;font-size: 18px">
 			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 305px;">
+			<div>'.($dataReport[$i]["PERIOD_CAL_INT"] ?? null).'</div>
+			</div>
+			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 385px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
@@ -241,10 +249,13 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>';
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 300px;text-align: left;font-size: 18px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 305px;">
+			<div>'.($dataReport[$i]["PERIOD_CAL_INT"] ?? null).'</div>
+			</div>
+			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 385px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
