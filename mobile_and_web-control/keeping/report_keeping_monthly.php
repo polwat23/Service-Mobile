@@ -255,7 +255,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 305px;">
 			<div>'.($dataReport[$i]["PERIOD_CAL_INT"] ?? null).'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 385px;">
+			<div style="width: 80px;text-align: center;font-size: 18px;margin-left: 385px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
