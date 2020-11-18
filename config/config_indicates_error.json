@@ -96,6 +96,8 @@
 	"WS0079" : [{"th" : "หมดเวลาการยื่นขอทุนแล้ว","en" : "Out of time for request welfare"}],
 	"WS0080" : [{"th" : "มีการยื่นเอกสารที่สหกรณ์เรียบร้อยแล้ว","en" : "You have already submitted documents at the cooperative"}],
 	"WS0081" : [{"th" : "สหกรณ์ได้ทำการตรวจสอบเอกสารขอทุนเรียบร้อยแล้ว สามารถติดตามประกาศผลการขอรับทุกได้ที่ ${URL_COOP}","en" : "The cooperative has check your document of request you can follow the result of request on ${URL_COOP}"}],
+	"WS0094" : [{"th" : "ไม่พบข้อมูลเบอร์โทรศัพท์ของท่านในฐานข้อมูล กรุณาติดต่อสหกรณ์เพื่อระบุเบอร์โทรศัพท์","en" : "Not found information your phone number please contact cooperative for specify phone number"}],
+	"WS0095" : [{"th" : "เบอร์โทรศัพท์ของท่านไม่ตรงกับในระบบ กรุณาตรวจสอบเบอร์โทรศัพท์อีกครั้ง","en" : "Your phone number does not match system please check phone number again"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
