@@ -4,9 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
 		$arrGroupDevice = array();
-		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token,
-													(SELECT login_date FROM gcuserlogin WHERE is_login <> '1' and member_no = :member_no 
-													ORDER BY id_userlogin DESC LIMIT 1) as last_login_date
+		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
 													FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
 													GROUP BY unique_id ORDER BY id_userlogin DESC");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);
@@ -14,7 +12,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowSetting = $fetchSettingDevice->fetch(PDO::FETCH_ASSOC)){
 				$arrDevice = array();
 				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
-				$arrDevice["LAST_LOGIN_DATE"] = isset($rowSetting["last_login_date"]) ? $lib->convertdate($rowSetting["last_login_date"],'d m Y',true) : null;
 				$arrDevice["CHANNEL"] = $rowSetting["channel"];
 				if($rowSetting["unique_id"] == $dataComing["unique_id"]){
 					$arrDevice["THIS_DEVICE"] = true;

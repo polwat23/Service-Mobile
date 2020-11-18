@@ -31,8 +31,6 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		':email' => $email,
 		':channel' => $dataComing["channel"]
 	])){
-		$updateFlagApply = $conoracle->prepare("UPDATE mbmembmaster SET moblieapply_status = 1 WHERE member_no = :member_no");
-		$updateFlagApply->execute([':member_no' => $dataComing["member_no"]]);
 		$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
 		$arrayResult['PASSWORD'] = $dataComing["password"];
 		$arrayResult['RESULT'] = TRUE;

@@ -9,18 +9,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dp.membcat_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
+											WHERE dp.member_no = :member_no and dp.deptclose_status = 0 ORDER BY dp.deptaccount_no ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrayHeaderAcc = array();
-			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date 
-											FROM gcdeptalias WHERE deptaccount_no = :account_no");
+			if($dataComing["channel"] == 'web'){
+				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
+					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
+				}else{
+					$arrGroupAccount["COVER_IMG"] = null;
+				}
+			}
+			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE deptaccount_no = :account_no");
 			$fetchAlias->execute([
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 			]);
@@ -31,30 +37,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
 				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["path_alias_img"].'?v='.$rowAlias["update_date"];
 			}else{
-				$arrAccount["ALIAS_PATH_IMG_WEBP"] = null;
 				$arrAccount["ALIAS_PATH_IMG"] = null;
-			}
-			if($dataComing["channel"] == 'mobile_app'){
-				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowAccount["DEPTTYPE_CODE"].'.png')){
-					$arrGroupAccount["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowAccount["DEPTTYPE_CODE"].'.png?v='.date('Ym');
-				}else{
-					$arrGroupAccount["DEPT_TYPE_IMG"] = null;
-				}
-			}else{
-				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowAccount["DEPTTYPE_CODE"].'.png')){
-					$arrGroupAccount["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowAccount["DEPTTYPE_CODE"].'.png?v='.date('Ym');
-				}else{
-					$arrGroupAccount["DEPT_TYPE_IMG"] = null;
-				}
-				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg')){
-					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'_'.$rowAccount["MEMBCAT_CODE"].'.jpg?v='.date('Ym');
-				}else{
-					$arrGroupAccount["COVER_IMG"] = null;
-				}
+				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
+			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccount["DEPTACCOUNT_NAME"]));
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 			$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
@@ -67,6 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrAllAccount[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
 			}
 		}
+		
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

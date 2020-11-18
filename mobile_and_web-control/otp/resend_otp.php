@@ -47,7 +47,9 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
-			$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
+			$arrayDest["member_no"] = $member_no;
+			$arrayDest["tel"] = $arrayTel[0]["TEL"];
+			$arrayDest["message"] = $arrMessage["BODY"];
 			$arraySendSMS = $lib->sendSMS($arrayDest);
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
@@ -57,7 +59,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 				echo json_encode($arrayResult);
 			}else{
 				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
-						'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log','system',null)";
 				$func->logSMSWasNotSent($bulkInsert);
 				unset($bulkInsert);
 				$bulkInsert = array();

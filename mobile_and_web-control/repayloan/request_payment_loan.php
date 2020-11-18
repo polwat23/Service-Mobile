@@ -58,9 +58,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				];
 				$resultWS = $clientWS->__call("of_saveslip_payin_mobile", array($argumentWS));
 				$responseSaveLN = $resultWS->of_saveslip_payin_mobileResult;
+				$arrayResult['WWWW'] = $responseSaveLN;
 				if($responseSaveLN->msg_output == '0000'){
-					$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
-					$fetchSeqno->execute([':deptslip_no' => $responseSaveLN->deptslip_no]);
+					$fetchSeqno = $conoracle->prepare("SELECT MAX(SEQ_NO) as SEQ_NO FROM dpdeptstatement 
+													WHERE deptaccount_no = :deptaccount_no and deptitem_amt = :slip_amt
+													and to_char(operate_date,'YYYY-MM-DD') = :slip_date");
+					$fetchSeqno->execute([
+						':deptaccount_no' => $responseSaveLN->deptaccount_no,
+						':slip_amt' => $responseSaveLN->slip_amt,
+						':slip_date' => $lib->convertdate($responseSaveLN->slip_date,'y-n-d')
+					]);
 					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 														VALUES(:remark,:deptaccount_no,:seq_no)");
@@ -69,8 +76,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						':deptaccount_no' => $from_account_no,
 						':seq_no' => $rowSeqno["SEQ_NO"]
 					]);
-					$arrayResult['INTEREST_PAYMENT'] = number_format($responseSaveLN->interest_payment,2);
-					$arrayResult['PRIN_PAYMENT'] = number_format($responseSaveLN->principal_payment,2);
+					$arrayResult['INTEREST_PAYMENT'] = $responseSaveLN->interest_payment;
+					$arrayResult['PRIN_PAYMENT'] = $responseSaveLN->principal_payment;
+					$arrayResult['INTEREST_PAYMENT_FORMAT'] = number_format($responseSaveLN->interest_payment,2);
+					$arrayResult['PRIN_PAYMENT_FORMAT'] = number_format($responseSaveLN->principal_payment,2);
 					$arrayResult['TRANSACTION_NO'] = $ref_no;
 					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode

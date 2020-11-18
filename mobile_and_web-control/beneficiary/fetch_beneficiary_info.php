@@ -4,21 +4,25 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getBeneficiary = $conoracle->prepare("SELECT fm.base64_img,fmt.mimetypes,fm.data_type FROM fomimagemaster fm LEFT JOIN fomucfmimetype fmt ON fm.data_type = fmt.typefile
-												where fm.system_code = 'mbshr' and fm.column_name = 'member_no' 
-												and fm.column_data = :member_no and fm.img_type_code = '003' and rownum <= 1 ORDER BY fm.seq_no DESC");
+		$arrGroupBNF = array();
+		$getBeneficiary = $conoracle->prepare("SELECT mp.prename_desc,mg.gain_surname,mg.gain_name,mg.gain_address as GAIN_ADDR,mc.gain_concern
+												FROM mbgainmaster mg LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
+												LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
+												WHERE member_no = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);
-		$rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC);
-		$DataURLBase64 = isset($rowBenefit["BASE64_IMG"]) ? "data:".$rowBenefit["MIMETYPES"].";base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"])) : null;
-		if(isset($DataURLBase64) && $DataURLBase64 != ''){
-			$arrayResult['DATA_TYPE'] = $rowBenefit["DATA_TYPE"] ?? 'pdf';
-			$arrayResult['BENEFICIARY'] = $DataURLBase64;
-			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-		}else{
-			http_response_code(204);
-			exit();
+		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
+			$arrBenefit = array();
+			$arrBenefit["FULL_NAME"] = TRIM($rowBenefit["PRENAME_DESC"]).TRIM($rowBenefit["GAIN_NAME"])." ".TRIM($rowBenefit["GAIN_SURNAME"]);
+			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
+			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
+			//$arrBenefit["TYPE_PERCENT"] = 'text';
+			//$arrBenefit["PERCENT_TEXT"] = TRIM($rowBenefit["REMARK"]);
+			//$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
+			$arrGroupBNF[] = $arrBenefit;
 		}
+		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

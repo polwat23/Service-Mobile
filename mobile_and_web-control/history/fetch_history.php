@@ -21,13 +21,14 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 					break;
 			}
 		}
-		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status FROM gchistory 
-											WHERE member_no = :member_no and his_type = :his_type and his_del_status = '0' $extraQuery ORDER BY id_history DESC LIMIT 10");
+		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status,his_path_image FROM gchistory 
+											WHERE member_no = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
 		$getHistory->execute($executeData);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();
 			$arrHistory["TITLE"] = $rowHistory["his_title"];
 			$arrHistory["DETAIL"] = $rowHistory["his_detail"];
+			$arrHistory["IMG"] = $rowHistory["his_path_image"];
 			$arrHistory["READ_STATUS"] = $rowHistory["his_read_status"];
 			$arrHistory["ID_HISTORY"] = $rowHistory["id_history"];
 			$arrHistory["RECEIVE_DATE"] = $lib->convertdate($rowHistory["receive_date"],'D m Y',true);

@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTransection["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransection["from_account"],$func->getConstant('dep_format'));
 			$arrLogTransection["DESTINATION_TYPE"] = $rowLogTransection["destination_type"];
 			$arrLogTransection["DESTINATION"] = $rowLogTransection["destination"];
-			$arrLogTransection["DESTINATION_FORMAT"] = $rowLogTransection["destination_type"]=='1'?$lib->formataccount($rowLogTransection["destination"],$func->getConstant('dep_format')):$rowLogTransection["destination"];
+			$arrLogTransection["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransection["destination"],$func->getConstant('dep_format'));
 			$arrLogTransection["TRANSFER_MODE"] = $rowLogTransection["transfer_mode"];
 			$arrLogTransection["AMOUNT"] = $rowLogTransection["amount"];
 			$arrLogTransection["AMOUNT_FORMAT"] = number_format($rowLogTransection["amount"],2);

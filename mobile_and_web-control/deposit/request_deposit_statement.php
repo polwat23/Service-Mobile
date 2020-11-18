@@ -21,7 +21,8 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
 																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
 																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
-																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')");
+																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
+																		ORDER BY dps.SEQ_NO DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
 				':datebefore' => $date_between[0],
@@ -31,7 +32,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 				$arraySTM = array();
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
-				$arraySTM["DEPTITEMTYPE_DESC"] = $rowDataSTM["DEPTITEMTYPE_DESC"];
 				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
 				$arraySTM["DEPTSLIP_NO"] = $rowDataSTM["DEPTSLIP_NO"];
 				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
@@ -88,11 +88,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ ".json_encode($dataComing),
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ ".json_encode($dataComing);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -119,8 +119,6 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  * {
 			font-family: THSarabun;
 		  }
-
-
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -144,7 +142,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:#0C6DBF;
+			background-color:#1F522A;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -183,7 +181,6 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		}
 		  </style>
 		';
-
 	//head table
 	$html .='
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
@@ -191,10 +188,13 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด
+					สหกรณ์ออมทรัพย์กรมส่งเสริมการเกษตร จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Mahidol University Savings and Credit Co-Operative, Limited
+					Department of Agricultural Extension 
+			   </div>
+			   <div style=" position: fixed;top:45px; left: 60px;font-size:20px">
+			   Savings and Credit Cooperatives Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -258,7 +258,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 				<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>';
 			}
 		  $html .= '<td style="text-align:right">'.number_format($stm["PRNCBAL"],2).'</td>
-		  <td style="text-align:center">'.$stm["DEPTSLIP_NO"].'</td>
+		  <td style="text-align:center">'.($stm["DEPTSLIP_NO"] ?? "-").'</td>
 		</tr>
 	';
 	}
@@ -298,9 +298,8 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
-	$font = $dompdf->getFontMetrics()->get_font("THSarabun", "");
-	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}", $font, 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
+	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
+	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;

@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$argumentWS = [
 								"as_wspass" => $config["WS_STRC_DB"],
 								"as_account_no" => $deptaccount_no,
-								"as_itemtype_code" => "WTX",
+								"as_itemtype_code" => "WTB",
 								"adc_amt" => $dataComing["amt_transfer"],
 								"adtm_date" => date('c')
 				];
@@ -22,20 +22,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$rowWithdrawal = $getWithdrawal->fetch(PDO::FETCH_ASSOC);
 				$SumAmt_transfer = $amt_transfer + $dataComing["amt_transfer"];
 				if($SumAmt_transfer <= $rowWithdrawal["WITHDRAWABLE_AMT"]){
-					$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MOBILE_APP' and tran_status = 1");
-					$getLimitAllDay->execute();
-					$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
-					$getSumAllDay = $conoracle->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) AS SUM_AMT FROM DPDEPTSTATEMENT 
-														WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1'");
-					$getSumAllDay->execute();
-					$rowSumAllDay = $getSumAllDay->fetch(PDO::FETCH_ASSOC);
-					if(($rowSumAllDay["SUM_AMT"] + $SumAmt_transfer) > $rowLimitAllDay["TOTAL_LIMIT"]){
-						$arrayResult["RESPONSE_CODE"] = 'WS0043';
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
-					}
 					if($amt_transfer > 0){
 						$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 						$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];

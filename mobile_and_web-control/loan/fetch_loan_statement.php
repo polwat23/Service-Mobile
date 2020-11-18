@@ -41,8 +41,8 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance,lsm.REF_SLIPNO as SLIP_NO
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
-											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and to_char(lsm.OPERATE_DATE,'YYYY-MM-DD')
-											BETWEEN :datebefore and :datenow ".$old_seq_no." 
+											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
+											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
-			$arrSTM["SLIP_NO"] = $rowStm["SLIP_NO"];
+			$arrSTM["SLIP_NO"] = TRIM($rowStm["SLIP_NO"]);
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["PRN_PAYMENT"] = number_format($rowStm["PRN_PAYMENT"],2);
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);

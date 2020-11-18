@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($fetchAccountBeenAllow->rowCount() > 0){
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrAccBeenAllow = array();
-				$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code
+				$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code,dpm.transonline_flag
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
@@ -26,6 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
 					$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
+					//$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_SHOW_FLAG_OFF'][0][$lang_locale];
+					//$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_FLAG_ON'][0][$lang_locale];
+
 					$arrGroupAccAllow[] = $arrAccBeenAllow;
 				}
 			}

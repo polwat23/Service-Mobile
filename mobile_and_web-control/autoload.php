@@ -15,6 +15,11 @@ header("X-XSS-Protection: 1; mode=block");
 header("X-Content-Type-Options: nosniff");
 header("Content-Security-Policy: default-src https: data: 'unsafe-inline' 'unsafe-eval'");
 
+if (strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') {
+	http_response_code(500);
+	exit;
+}
+
 foreach ($_SERVER as $header_key => $header_value){
 	if($header_key == "HTTP_AUTHORIZATION"){
 		$headers["Authorization"] = $header_value;
@@ -176,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							}
 						}else{
 							$arrayResult['RESPONSE_CODE'] = "WS0053";
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESPONSE_MESSAGE'] = str_replace('${TIMEOUT}',intval($func->getConstant("limit_session_timeout"))/60,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							echo json_encode($arrayResult);

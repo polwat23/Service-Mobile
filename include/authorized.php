@@ -24,11 +24,15 @@ class Authorization {
 				$arrayReturn["VALIDATE"] = true;
 				return $arrayReturn;
 			}catch (ValidateException $e) {
+				$text = date("Y-m-d H:i:s").' > ['.$api_token.'] Error : '.$e->getMessage();
+				file_put_contents(__DIR__.'/../log/validate_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayReturn["ERROR_MESSAGE"] = $e->getMessage();
 				$arrayReturn["VALIDATE"] = false;
 				return $arrayReturn;
 			}
 		}else{
+			$text = date("Y-m-d H:i:s").' > Error : Not found API Token';
+			file_put_contents(__DIR__.'/../log/validate_error.txt', $text . PHP_EOL, FILE_APPEND);
 			$arrayReturn["ERROR_MESSAGE"] = "Not found token";
 			$arrayReturn["VALIDATE"] = false;
 			return $arrayReturn;
@@ -70,10 +74,15 @@ class Authorization {
 			':id_token' => $payload["id_token"]
 		]);
 		if($checkRT->rowCount() > 0){
+			$getLimit = $con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_session_timeout' and is_use = '1'");
+			$getLimit->execute();
+			
+			$rowLimit = $getLimit->fetch(\PDO::FETCH_ASSOC);
+
 			$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
 			if($rowToken["rt_is_revoke"] === '0'){
 				if(empty($rowToken["rt_expire_date"]) || ($rowToken["rt_expire_date"] > date('Y-m-d'))){
-					$payload["exp"] = time() + 900;
+					$payload["exp"] = time() + intval($rowLimit['constant_value']);
 					$payload["refresh_amount"] = $payload["refresh_amount"] + 1;
 					$new_access_token = $jwt_token->customPayload($payload, $secret_key);
 					$updateNewAT = $con->prepare("UPDATE gctoken SET access_token = :new_access_token,at_update_date = NOW()

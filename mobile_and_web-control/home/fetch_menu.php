@@ -50,13 +50,6 @@ if(!$anonymous){
 			$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
-		}else if($rowMenu["menu_component"] == "ShareInfo"){
-			$arrMenuSHR = array();
-			$fetchMenuSHR = $conoracle->prepare("SELECT (SHARESTK_AMT*10) as SHARE_BALANCE FROM shsharemaster WHERE member_no = :member_no");
-			$fetchMenuSHR->execute([':member_no' => $member_no]);
-			$rowMenuSHR = $fetchMenuSHR->fetch(PDO::FETCH_ASSOC);
-			$arrMenuSHR["SHARE_BALANCE"] = number_format($rowMenuSHR["SHARE_BALANCE"],2);
-			$arrayResult['MENU_SHARE'] = $arrMenuSHR;
 		}
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
@@ -123,24 +116,17 @@ if(!$anonymous){
 				}else{
 					$arrayResult['REFRESH_MENU'] = "MENU_TRANSACTION";
 				}
-			}else if($dataComing["menu_parent"] == '56'){
-				$arrayResult['REFRESH_MENU'] = "MENU_TRANSACTION_INSIDE";
-			}else if($dataComing["menu_parent"] == '57'){
-				$arrayResult['REFRESH_MENU'] = "MENU_TRANSACTION_OUTSIDE";
 			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
 			$arrMenuDep = array();
 			$arrMenuLoan = array();
-			$arrMenuSHR = array();
 			$arrayGroupMenu = array();
 			$arrayMenuTransaction = array();
-			$arrayMenuTransactionInside = array();
-			$arrayMenuTransactionOutside = array();
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
-												WHERE menu_permission IN (".implode(',',$permission).")
+												WHERE menu_permission IN (".implode(',',$permission).") 
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
@@ -184,10 +170,6 @@ if(!$anonymous){
 							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
 							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
-						}else if($rowMenu["menu_parent"] == '56'){
-							$arrayMenuTransactionInside[] = $arrMenu;
-						}else if($rowMenu["menu_parent"] == '57'){
-							$arrayMenuTransactionOutside[] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
 							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
@@ -203,12 +185,7 @@ if(!$anonymous){
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-						}else if($rowMenu["menu_component"] == "ShareInfo"){
-							$fetchMenuSHR = $conoracle->prepare("SELECT (SHARESTK_AMT*10) as SHARE_BALANCE FROM shsharemaster WHERE member_no = :member_no");
-							$fetchMenuSHR->execute([':member_no' => $member_no]);
-							$rowMenuSHR = $fetchMenuSHR->fetch(PDO::FETCH_ASSOC);
-							$arrMenuSHR["SHARE_BALANCE"] = number_format($rowMenuSHR["SHARE_BALANCE"],2);
-						}
+						}					
 					}
 				}else{
 					$arrMenu = array();
@@ -225,10 +202,6 @@ if(!$anonymous){
 						$arrayMenuSetting[] = $arrMenu;
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
-					}else if($rowMenu["menu_parent"] == '56'){
-						$arrayMenuTransactionInside[] = $arrMenu;
-					}else if($rowMenu["menu_parent"] == '57'){
-						$arrayMenuTransactionOutside[] = $arrMenu;
 					}
 					if($rowMenu["menu_component"] == "DepositInfo"){
 						$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
@@ -244,17 +217,13 @@ if(!$anonymous){
 						$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 						$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-					}else if($rowMenu["menu_component"] == "ShareInfo"){
-						$fetchMenuSHR = $conoracle->prepare("SELECT (SHARESTK_AMT*10) as SHARE_BALANCE FROM shsharemaster WHERE member_no = :member_no");
-						$fetchMenuSHR->execute([':member_no' => $member_no]);
-						$rowMenuSHR = $fetchMenuSHR->fetch(PDO::FETCH_ASSOC);
-						$arrMenuSHR["SHARE_BALANCE"] = number_format($rowMenuSHR["SHARE_BALANCE"],2);
 					}
 				}
 			}
 			if($dataComing["channel"] == 'mobile_app'){
 				$arrayGroupMenu["TEXT_HEADER"] = "ทั่วไป";
 				$arrayMenuTransaction["TEXT_HEADER"] = "ธุรกรรม";
+				$arrayMenuTransaction["ID_PARENT"] = "18";
 				$arrayGroupAllMenu[] = $arrayMenuTransaction;
 				$arrayGroupAllMenu[] = $arrayGroupMenu;
 				$arrayAllMenu = $arrayGroupAllMenu;
@@ -274,22 +243,16 @@ if(!$anonymous){
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
-					$arrayResult['MENU_TRANSACTION_INSIDE'] = $arrayMenuTransactionInside;
-					$arrayResult['MENU_TRANSACTION_OUTSIDE'] = $arrayMenuTransactionOutside;
 					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
-					$arrayResult['MENU_SHARE'] = $arrMenuSHR;
 				}else{
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
 					$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
-					$arrayResult['MENU_TRANSACTION_INSIDE'] = $arrayMenuTransactionInside;
-					$arrayResult['MENU_TRANSACTION_OUTSIDE'] = $arrayMenuTransactionOutside;
 					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
-					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
-					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
-					$arrayResult['MENU_SHARE'] = $arrMenuSHR;
+					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep ?? [];
+					$arrayResult['MENU_LOAN'] = $arrMenuLoan ?? [];
 				}
 				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
@@ -325,8 +288,10 @@ if(!$anonymous){
 		}
 		$arrayAllMenu = array();
 		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
-											WHERE menu_parent IN ('-1','-2')");
-		$fetch_menu->execute();
+											WHERE menu_parent IN ('-1','-2') and (menu_channel = :channel OR menu_channel = 'both')");
+		$fetch_menu->execute([
+			':channel' => $arrPayload["PAYLOAD"]["channel"]
+		]);
 		while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 			if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){

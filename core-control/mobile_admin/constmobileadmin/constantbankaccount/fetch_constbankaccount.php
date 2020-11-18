@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										color.color_text
 									FROM
 										csbankdisplay bank
-									LEFT JOIN gcpalettecolor color ON
+									INNER JOIN gcpalettecolor color ON
 										bank.id_palette = color.id_palette");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){

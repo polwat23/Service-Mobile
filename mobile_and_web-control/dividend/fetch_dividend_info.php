@@ -6,21 +6,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
-												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.LOCKPROC_FLAG = '1' 
-												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC) where rownum <= :limit_year");
+		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER  WHERE MEMBER_NO = :member_no
+												GROUP BY DIV_YEAR ORDER BY DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
 			':limit_year' => $limit_year
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$getSlipDate = $conoracle->prepare("SELECT slip_date FROM yrslippayout WHERE member_no = :member_no and div_year = :div_year");
-			$getSlipDate->execute([
-				':member_no' => $member_no,
-				':div_year' => $rowYear["DIV_YEAR"]
-			]);
-			$rowSlipDate = $getSlipDate->fetch(PDO::FETCH_ASSOC);
 			$getDivMaster = $conoracle->prepare("SELECT div_amt,avg_amt FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
@@ -28,7 +21,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
-			$arrDividend["SLIP_DATE"] = $lib->convertdate($rowSlipDate["SLIP_DATE"],'d m Y');
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);

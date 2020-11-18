@@ -4,43 +4,45 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arraySlipGrp = array();
-		$fetchSlipCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'YYYY')) as COUNT_SLIP_YEAR,to_char(slip_date,'YYYY') as YEAR_SLIP
-												FROM slslippayin WHERE member_no = :member_no GROUP BY to_char(slip_date,'YYYY') ORDER BY YEAR_SLIP DESC");
-		$fetchSlipCount->execute([':member_no' => $member_no]);
-		while($rowslipcountyear = $fetchSlipCount->fetch(PDO::FETCH_ASSOC)){
-			$arraySlipYear = array();
-			$arraySlipYear["COUNT_SLIP_YEAR"] = $rowslipcountyear["COUNT_SLIP_YEAR"];
-			$arraySlipYear["YEAR_SLIP"] = $rowslipcountyear["YEAR_SLIP"];
-			$fetchSlipMonthCount = $conoracle->prepare("SELECT COUNT(to_char(slip_date,'MM')) as COUNT_SLIP_MONTH,to_char(slip_date,'MM') as MONTH_SLIP
-														FROM slslippayin WHERE member_no = :member_no and 
-														to_char(slip_date,'YYYY') = :year_slip GROUP BY to_char(slip_date,'MM')");
-			$fetchSlipMonthCount->execute([
+		$limit_period = $func->getConstant('limit_kpmonth');
+		$arrayGroupPeriod = array();
+		$getPeriodKP = $conoracle->prepare("SELECT * from ((
+															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
+															from kpmastreceive where member_no = :member_no
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+		$getPeriodKP->execute([
 				':member_no' => $member_no,
-				':year_slip' => $rowslipcountyear["YEAR_SLIP"]
+				':limit_period' => $limit_period
+		]);
+		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
+			$arrKpmonth = array();
+			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
+			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
+			$getKPDetail = $conoracle->prepare("SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
+													FROM kpmastreceivedet kpd
+													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													where kpd.member_no = :member_no and kpd.kpslip_no = :kpslip_no");
+			$getKPDetail->execute([
+				':member_no' => $member_no,
+				':kpslip_no' => $rowPeriod["KPSLIP_NO"]
 			]);
-			while($rowslipcountmonth = $fetchSlipMonthCount->fetch(PDO::FETCH_ASSOC)){
-				$arraySlipMonth = array();
-				$arraySlipMonth["COUNT_SLIP_MONTH"] = $rowslipcountmonth["COUNT_SLIP_MONTH"];
-				$arraySlipMonth["MONTH_SLIP"] = $lib->convertperiodkp(($rowslipcountyear["YEAR_SLIP"] - 543).$rowslipcountmonth["MONTH_SLIP"],true);
-				$fetchSlipInMonth = $conoracle->prepare("SELECT slt.sliptype_desc,sl.payinslip_no
-														FROM slslippayin sl LEFT JOIN slucfsliptype slt ON sl.sliptype_code = slt.sliptype_code
-														WHERE member_no = :member_no and to_char(slip_date,'YYYYMM') = :slip_date");
-				$fetchSlipInMonth->execute([
-					':member_no' => $member_no,
-					':slip_date' => $rowslipcountyear["YEAR_SLIP"].$rowslipcountmonth["MONTH_SLIP"]
-				]);
-				while($rowslip = $fetchSlipInMonth->fetch(PDO::FETCH_ASSOC)){
-					$arraySlip = array();
-					$arraySlip["SLIP_TYPE"] = $rowslip["SLIPTYPE_DESC"];
-					$arraySlip["SLIP_NO"] = $rowslip["PAYINSLIP_NO"];
-					$arraySlipMonth["SLIP_LIST"][] = $arraySlip;
-				}
-				$arraySlipYear["MONTH_SLIP_LIST"][] = $arraySlipMonth;
+			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
+			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
+			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["RECEIPT_DATE"],'d m Y');
+			if(isset($rowPeriod["RECEIVE_AMT"]) && $rowPeriod["RECEIVE_AMT"] != ""){
+				$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);
+			}else{
+				$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["ITEM_PAYMENT"],2);
 			}
-			$arraySlipGrp[] = $arraySlipYear;
+			if($rowPeriod["KEEPING_STATUS"] == '-99' || $rowPeriod["KEEPING_STATUS"] == '-9'){
+				$arrKpmonth["IS_CANCEL"] = TRUE;
+			}else{
+				$arrKpmonth["IS_CANCEL"] = FALSE;
+			}
+			$arrayGroupPeriod[] = $arrKpmonth;
 		}
-		$arrayResult['SLIP_LIST'] = $arraySlipGrp;
+		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);
 	}else{

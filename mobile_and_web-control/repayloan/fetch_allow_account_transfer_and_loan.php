@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.dept_type_code = '01'");
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+													and dpm.membcat_code = dpt.membcat_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
 			$getDataBalAcc->execute();
 			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
@@ -84,16 +85,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		exit();
 	}
 }else{
-	$filename = basename(__FILE__, '.php');
-	$logStruc = [
-		":error_menu" => $filename,
-		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
-		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-	];
-	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
-	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

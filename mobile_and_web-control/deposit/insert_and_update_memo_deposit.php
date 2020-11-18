@@ -5,16 +5,6 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		if(($dataComing["memo_text_emoji_"] == "" || empty($dataComing["memo_text_emoji_"])) && ($dataComing["memo_icon_path"] == "" || empty($dataComing["memo_icon_path"]))){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS4004",
-				":error_desc" => "ส่ง Argument มาไม่ครบ ".json_encode($dataComing),
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ ".json_encode($dataComing);
-			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

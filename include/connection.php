@@ -38,7 +38,7 @@ class connection {
 						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = ".$json_data["DBORACLE_PORT"]."))
 						)
 						(CONNECT_DATA =
-						  (SERVICE_NAME = ".$json_data["DBORACLE_SERVICE"].")
+						  (".$json_data["DBORACLE_TYPESERVICE"]." = ".$json_data["DBORACLE_SERVICE"].")
 						)
 					  )";
 			$this->conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);

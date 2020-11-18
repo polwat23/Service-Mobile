@@ -4,9 +4,8 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','int_rate'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$checkCreditLoan = $conoracle->prepare("SELECT contcredit_no FROM lncontcredit WHERE loantype_code = :loantype_code and member_no = :member_no and credit_status = '1'");
+		$checkCreditLoan = $conoracle->prepare("SELECT contcredit_no FROM lncontcredit WHERE loangroup_code = '01' and member_no = :member_no and credit_status = 1");
 		$checkCreditLoan->execute([
-			':loantype_code' => $dataComing["loantype_code"],
 			':member_no' => $member_no
 		]);
 		$rowCreditLoan = $checkCreditLoan->fetch(PDO::FETCH_ASSOC);
@@ -31,6 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 				];
 				$resultWS = $clientWS->__call("of_initloanrequest_mobile_atm", array($argumentWS));
 				$responseSoap = $resultWS->atr_lnatm;
+				file_put_contents(__DIR__.'/../../log/dd.txt', json_encode($responseSoap) . PHP_EOL, FILE_APPEND);
 				if($responseSoap->msg_status == '000'){
 					$arrayResult['ACCOUNT_RECEIVE'] = $lib->formataccount($responseSoap->account_id,$func->getConstant('dep_format'));
 					$arrayResult['ACCOUNT_RECEIVE_HIDDEN'] = $lib->formataccount_hidden($arrayResult['ACCOUNT_RECEIVE'],$func->getConstant('hidden_dep'));

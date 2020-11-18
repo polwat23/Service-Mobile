@@ -90,6 +90,7 @@
 	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
+	"WS0075" : [{"th" : "ไม่สามาถซื้อหุ้นได้เนื่องจากเหตุผลบางประการ กรุณาติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot buy shares because something was wronged please contact cooperative for more information"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -179,5 +180,8 @@
 			[{"th" : "อนุมัติ","en" : "Approved"}],	
 		"-9" : 
 			[{"th" : "ไม่อุนมัติ","en" : "Reject"}]
-		}]
+	}],
+	"BUY_SHARES_ERR" : [{
+		"0001" : [{"th" : "ไม่สามารถซื้อหุ้นเกิน ${MAXHOLD_AMT} ได้","en" : "Cannot buy shares over ${MAXHOLD_AMT}"}]
+	}]
 }

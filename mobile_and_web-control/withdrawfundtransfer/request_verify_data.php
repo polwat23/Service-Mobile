@@ -3,16 +3,19 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
-		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
-													and transaction_type_code = 'WTX' and from_account = :from_account and destination_type = '1'
-													and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
-		$checkLimitBalance->execute([
-			':member_no' => $payload["member_no"],
-			':from_account' => $dataComing["deptaccount_no"]
-		]);
-		$rowBalLimit = $checkLimitBalance->fetch(PDO::FETCH_ASSOC);
+		$min_amount_deposit = $func->getConstant("min_amount_deposit");
+		$limit_withdraw_in_day = $func->getConstant("limit_withdraw_in_day");
+		if($dataComing["amt_transfer"] < (int) $min_amount_deposit){
+			$arrayResult['RESPONSE_CODE'] = "WS0056";
+			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+		$dateOperC = date('c');
+		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$limit_amt = 0;
-		$limit_withdraw = $func->getConstant("limit_withdraw");
+		$limit_withdraw = $func->getConstant("limit_amount_transaction");
 		$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
 											and member_no = :member_no and bindaccount_status = '1'");
 		$getDataUser->execute([
@@ -20,26 +23,36 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			':member_no' => $payload["member_no"]
 		]);
 		$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
-		$fetchLimitTransaction = $conmysql->prepare("SELECT limit_transaction_amt FROM gcuserallowacctransaction 
-														WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
+		$fetchLimitTransaction = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount 
+														WHERE member_no = :member_no");
 		$fetchLimitTransaction->execute([
-			':member_no' => $payload["member_no"],
-			':deptaccount_no' => $dataComing["deptaccount_no"]
+			':member_no' => $payload["member_no"]
 		]);
 		$rowLimitTransaction = $fetchLimitTransaction->fetch(PDO::FETCH_ASSOC);
-		if($limit_withdraw >= $rowLimitTransaction["limit_transaction_amt"]){
-			$limit_amt = (int)$rowLimitTransaction["limit_transaction_amt"];
+		if($limit_withdraw >= $rowLimitTransaction["limit_amount_transaction"]){
+			$limit_amt = (int)$rowLimitTransaction["limit_amount_transaction"];
 		}else{
 			$limit_amt = (int)$limit_withdraw;
 		}
-		$balance_request = $rowBalLimit["sum_amt"] + $dataComing["amt_transfer"];
-		/*if($balance_request > $limit_amt){
+		if($dataComing["amt_transfer"] > $limit_amt){
 			$arrayResult['RESPONSE_CODE'] = "WS0043";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
-		}*/
+		}
+		$getLimitPerDay = $conmysql->prepare("SELECT SUM(amount) AS all_amt_in_day FROM gctransaction WHERE result_transaction = '1' and trans_flag = '-1' and destination_type = '1'
+																and member_no = :member_no and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
+		$getLimitPerDay->execute([':member_no' => $payload["member_no"]]);
+		$rowLimitPerDay = $getLimitPerDay->fetch(PDO::FETCH_ASSOC);
+		$limitPerDay = $rowLimitPerDay["all_amt_in_day"] + $dataComing["amt_transfer"];
+		if($limitPerDay > $limit_withdraw_in_day){
+			$arrayResult['RESPONSE_CODE'] = "WS0043";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 		$arrSendData = array();
 		/*$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 		try {
@@ -68,8 +81,9 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			echo json_encode($arrayResult);
 			exit();
 		}*/
-		/*$arrVerifyToken['exp'] = time() + 60;
+		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+		$arrVerifyToken["operate_date"] =  $dateOperC;
 		$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
 		$arrVerifyToken['deptaccount_no'] = $dataComing["deptaccount_no"];
 		$arrVerifyToken['bank_account_no'] = preg_replace('/-/','',$dataComing["bank_account_no"]);
@@ -82,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
-				':operate_date' => date('Y-m-d H:i:s'),
+				':operate_date' => $dateOper,
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
@@ -95,34 +109,38 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			exit();
 		}
 		$arrResponse = json_decode($responseAPI);
-		if($arrResponse->RESULT){*/
+		if($arrResponse->RESULT){
 			$arrayResult['PENALTY_AMT']  = 0;
 			$arrayResult['FEE_AMT'] = 0;
-			$arrayResult['ACCOUNT_NAME'] = "ไอโซแคร์";//$arrResponse->ACCOUNT_NAME;
-			$arrayResult['ACCOUNT_NAME_EN'] = "ISOCARE";//$arrResponse->ACCOUNT_NAME_EN;
-			$arrayResult['REF_KBANK'] = time();//$arrResponse->REF_KBANK;
-			$arrayResult['CITIZEN_ID_ENC'] = "1500900200200";//$arrResponse->CITIZEN_ID_ENC;
-			$arrayResult['BANK_ACCOUNT_ENC'] = time();//$arrResponse->BANK_ACCOUNT_ENC;
-			$arrayResult['TRAN_ID'] = "TTTT";//$arrResponse->TRAN_ID;
+			$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
+			$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
+			$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
+			$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
+			$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
+			$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
-		/*}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0042";
+		}else{
+			$arrayResult['RESPONSE_CODE'] =  'WS0042';
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
-				':operate_date' => date('Y-m-d H:i:s'),
+				':operate_date' => $dateOper,
 				':amt_transfer' => $dataComing["amt_transfer"],
 				':deptaccount_no' => $dataComing["deptaccount_no"],
-				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_code' => $arrResponse->RESPONSE_CODE,
 				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('withdrawtrans',$arrayStruc);
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
-		}*/
+		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
