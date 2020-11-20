@@ -298,6 +298,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				if($updateDeptMaster->execute($arrUpdateMaster)){
 					// Start-Deposit
 					$getAccDataDest = $conoracle->prepare("SELECT DPT.ACCOUNT_ID,DPM.WITHDRAW_COUNT,DPM.PRNCBAL,
+															DPT.MINDEPT_AMT,DPT.LIMITDEPT_FLAG,DPT.LIMITDEPT_AMT,DPT.MAXBALANCE,DPT.MAXBALANCE_FLAG,
 															DPM.DEPTTYPE_CODE,DPT.DEPTGROUP_CODE,DPM.WITHDRAWABLE_AMT,
 															DPM.CHECKPEND_AMT,DPM.LASTCALINT_DATE
 															FROM DPDEPTMASTER DPM 
@@ -305,6 +306,123 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 															WHERE DPM.DEPTACCOUNT_NO = :account_no");
 					$getAccDataDest->execute([':account_no' => $to_account_no]);
 					$rowAccDataDest = $getAccDataDest->fetch(PDO::FETCH_ASSOC);
+					if($rowAccDataDest["LIMITDEPT_FLAG"] == '1' && $dataComing["amt_transfer"] >= $rowAccDataDest["LIMITDEPT_AMT"]){
+						$conoracle->rollback();
+						$arrayResult["RESPONSE_CODE"] = 'WS0093';
+						if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':operate_date' => $dateOper,
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '2',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => 'ยอดทำรายการมากกว่ายอดทำรายการสูงสุดต่อครั้ง '.$rowAccDataDest["LIMITDEPT_AMT"]
+							];
+						}else{
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '1',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => 'ยอดทำรายการมากกว่ายอดทำรายการสูงสุดต่อครั้ง '.$rowAccDataDest["LIMITDEPT_AMT"]
+							];
+						}
+						$log->writeLog('transferinside',$arrayStruc);
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
+					if($rowAccDataDest["MAXBALANCE_FLAG"] == '1' && $dataComing["amt_transfer"] + $rowAccDataDest["PRNCBAL"] > $rowAccDataDest["MAXBALANCE"]){
+						$conoracle->rollback();
+						$arrayResult["RESPONSE_CODE"] = 'WS0093';
+						if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':operate_date' => $dateOper,
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '2',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => 'ยอดคงเหลือหลังทำรายการฝากฝากกว่ายอดที่สหกรณ์กำหนด '.$rowAccDataDest["MAXBALANCE"]
+							];
+						}else{
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '1',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => 'ยอดคงเหลือหลังทำรายการฝากฝากกว่ายอดที่สหกรณ์กำหนด '.$rowAccDataDest["MAXBALANCE"]
+							];
+						}
+						$log->writeLog('transferinside',$arrayStruc);
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
+					if($dataComing["amt_transfer"] < $rowAccDataDest["MINDEPT_AMT"]){
+						$conoracle->rollback();
+						$arrayResult["RESPONSE_CODE"] = 'WS0056';
+						if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':operate_date' => $dateOper,
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '2',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => 'ทำรายการต่ำกว่ายอดฝากที่กำหนด ยอดขั้นต่ำคือ '.$rowAccDataDest["MINDEPT_AMT"]
+							];
+						}else{
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '1',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => 'ทำรายการต่ำกว่ายอดฝากที่กำหนด ยอดขั้นต่ำคือ '.$rowAccDataDest["MINDEPT_AMT"]
+							];
+						}
+						$log->writeLog('transferinside',$arrayStruc);
+						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}
 					$getDepPaytypeDest = $conoracle->prepare("SELECT group_itemtpe as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
 														FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
 					$getDepPaytypeDest->execute([':itemtype' => $itemtypeDepositDest]);
