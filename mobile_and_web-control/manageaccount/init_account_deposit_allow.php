@@ -7,11 +7,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDeptAllowed = array();
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
-		$getDeptTypeAllow = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster
-												WHERE member_no = :member_no GROUP BY depttype_code");
-		$getDeptTypeAllow->execute([':member_no' => $member_no]);
+		
+		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
+												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'");
+		$getDeptTypeAllow->execute();
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
-			$arrDeptAllowed[] = $rowDeptAllow["DEPTTYPE_CODE"];
+			$arrDeptAllowed[] = "'".$rowDeptAllow["dept_type_code"]."'";
 		}
 		$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 		$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
@@ -45,6 +46,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
 			$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
+			$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
+																	FROM gcconstantaccountdept
+																	WHERE dept_type_code = :depttype_code");
+			$getDeptTypeAllow->execute([
+				':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
+			]);
+			$rowDeptTypeAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+			if(($rowDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowDeptTypeAllow["allow_deposit_outside"] == '0') && 
+			$rowDeptTypeAllow["allow_withdraw_inside"] == '1'){
+				$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+			}else if($rowDeptTypeAllow["allow_withdraw_outside"] == '1' || $rowDeptTypeAllow["allow_deposit_outside"] == '1'){
+				$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_MENU'][0][$lang_locale];
+			}else{
+				$arrAccInCoop["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
+			}
+			if($rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
+				$arrAccInCoop["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
+			}
 			$arrAllowAccGroup[] = $arrAccInCoop;
 		}
 		$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;

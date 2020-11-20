@@ -103,7 +103,7 @@
 	"WS0089" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากบัญชีของท่านได้ถูกปิดบัญชีไปแล้ว","en" : "Cannot transaction because your account was closed"}],
 	"WS0090" : [{"th" : "ประเภทบัญชีเงินฝากของท่านไม่สามารถทำรายการโอนเงินภายในสหกรณ์ได้","en" : "This deposit type not allow to transfer inside cooperative"}],
 	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัติบัญชี จำนวนที่อายัติ ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
-	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เ เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
+	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
 	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
