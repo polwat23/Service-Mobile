@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$yearAss = $dataComing["ass_year"] - 543;
 		}
 		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO as ASSCONTRACT_NO,
-												asm.PAY_BALANCE as ASSIST_AMT,asm.APPROVE_DATE as PAY_DATE,asm.APPROVE_AMT
+												asm.PAY_BALANCE as ASSIST_AMT,asm.APPROVE_DATE,asm.APPROVE_AMT
 												FROM asscontmaster asm LEFT JOIN 
 												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE and 
 												asm.coop_id = ast.coop_id WHERE asm.member_no = :member_no 
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAss = array();
 			$arrAss["ASSIST_RECVAMT"] = number_format($rowAssType["ASSIST_AMT"],2);
 			$arrAss["APPROVE_AMT"] = number_format($rowAssType["APPROVE_AMT"],2);
-			$arrAss["PAY_DATE"] = $lib->convertdate($rowAssType["PAY_DATE"],'d m Y');
+			$arrAss["APPROVE_DATE"] = $lib->convertdate($rowAssType["APPROVE_DATE"],'d m Y');
 			$arrAss["ASSISTTYPE_CODE"] = $rowAssType["ASSISTTYPE_CODE"];
 			$arrAss["ASSISTTYPE_DESC"] = $rowAssType["ASSISTTYPE_DESC"];
 			$arrAss["ASSCONTRACT_NO"] = $rowAssType["ASSCONTRACT_NO"];

@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','coop_account_no'],$dataComing)
 				':id_userlogin' => $payload["id_userlogin"],
 				':bind_status' => '-9',
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $dataComing["bind_src_message"]["reason"].' / termSeq'.$dataComing["bind_src_message"]["term_seq"],
+				':response_message' => 'KTB / '.$dataComing["bind_src_message"]["reason"].' / termSeq'.$dataComing["bind_src_message"]["term_seq"],
 				':coop_account_no' => $coop_account_no,
 				':query_flag' => '1'
 			];

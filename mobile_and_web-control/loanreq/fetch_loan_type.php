@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowLoantype = $getLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();
 			$arrayLoan["LOANTYPE_CODE"] = $rowLoantype["loantype_code"];
-			$getLoanTypeData = $conoracle->prepare("SELECT ln.LOANTYPE_DESC,lnt.interest_rate,lp.max_period
+			$getLoanTypeData = $conoracle->prepare("SELECT ln.LOANTYPE_DESC,lnt.interest_rate,lp.max_period,ln.LOANGROUP_CODE
 													FROM lnloantype ln LEFT JOIN lncfloanintratedet lnt ON ln.inttabrate_code = lnt.loanintrate_code
 													and sysdate BETWEEN lnt.effective_date and lnt.expire_date
 													LEFT JOIN lnloantypeperiod lp ON ln.loantype_code = lp.loantype_code
@@ -23,15 +23,38 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowLoanData = $getLoanTypeData->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowLoanData["LOANTYPE_DESC"])){
-				$arrayLoan["LOANTYPE_DESC"] = $rowLoanData["LOANTYPE_DESC"];
-				$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
-				$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
-				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
-					$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["loantype_code"].'.png?v='.date('Ym');
+				if($rowLoanData["LOANGROUP_CODE"] == '01'){
+					$checkRightsLoan = $conoracle->prepare("SELECT LN.LOANTYPE_CODE FROM LNLOANTYPEIVRMOB LN 
+															LEFT JOIN MBMEMBMASTER MB ON LN.MEMBTYPE_CODE = MB.MEMBTYPE_CODE
+															AND LN.TERMINAL_TYPE = 'MOB' AND LN.USE_FLAG=1 
+															and MB.member_no = :member_no and LN.loantype_code = :loantype_code");
+					$checkRightsLoan->execute([
+						':member_no' => $member_no,
+						':loantype_code' => $rowLoantype["loantype_code"]
+					]);
+					$rowRights = $checkRightsLoan->fetch(PDO::FETCH_ASSOC);
+					if(isset($rowRights["LOANTYPE_CODE"]) && $rowRights["LOANTYPE_CODE"] != ""){
+						$arrayLoan["LOANTYPE_DESC"] = $rowLoanData["LOANTYPE_DESC"];
+						$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
+						$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
+						if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
+							$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["loantype_code"].'.png?v='.date('Ym');
+						}else{
+							$arrayLoan["LOAN_TYPE_IMG"] = null;
+						}
+						$arrayGrpLoan[] = $arrayLoan;
+					}
 				}else{
-					$arrayLoan["LOAN_TYPE_IMG"] = null;
+					$arrayLoan["LOANTYPE_DESC"] = $rowLoanData["LOANTYPE_DESC"];
+					$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
+					$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
+					if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
+						$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["loantype_code"].'.png?v='.date('Ym');
+					}else{
+						$arrayLoan["LOAN_TYPE_IMG"] = null;
+					}
+					$arrayGrpLoan[] = $arrayLoan;
 				}
-				$arrayGrpLoan[] = $arrayLoan;
 			}
 		}
 		$getLoanConst = $conoracle->prepare("SELECT ROUNDPERIODPOS_AMT FROM lnloanconstant");

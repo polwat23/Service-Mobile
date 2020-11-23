@@ -3,8 +3,15 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
+		$getLoanCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
+		$arrLoanAllow = array();
+		$getLoanCredit->execute();
+		while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
+			$arrLoanAllow[] = "'".$rowCreditAllow["loantype_code"]."'";
+		}
 		$fetchIntrate = $conoracle->prepare("select lir.interest_rate as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
-												ON lp.inttabrate_code = lir.loanintrate_code where to_char(sysdate,'YYYY-MM-DD') BETWEEN 
+												ON lp.inttabrate_code = lir.loanintrate_code where lp.loantype_code IN(".implode(',',$arrLoanAllow).") and
+												to_char(sysdate,'YYYY-MM-DD') BETWEEN 
 												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD') ORDER BY lp.LOANTYPE_CODE ASC");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();
