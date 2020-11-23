@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM kpmastreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no");
+													where kpd.member_no = :member_no and kpd.SEQ_ARRNO = '0'");
 			$getKPDetail->execute([
 				':member_no' => $member_no
 			]);
