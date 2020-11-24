@@ -18,16 +18,19 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			
 			$member_no = strtolower($lib->mb_str_pad($rowAllow["member_no"]));
 			$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
-										mb.member_no
+										mb.member_no,mb.MEMBGROUP_CODE,mg.MEMBGROUP_DESC
 										FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+										LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 										WHERE mb.resign_status = 0 and mb.member_no = :member_no");
 			$fetchMember->execute([
 				':member_no' => $member_no
 			]);
 			
 			while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
-				$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+				$arrayGroup["NAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 				$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
+				$arrayGroup["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+				$arrayGroup["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			}
 			$arrayGroupMemb[] = $arrayGroup;
 		}

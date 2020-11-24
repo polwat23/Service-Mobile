@@ -24,8 +24,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			exit();
 		}
 		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
-											mb.member_no
+											mb.member_no,mb.MEMBGROUP_CODE,mg.MEMBGROUP_DESC
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+											LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 											WHERE mb.resign_status = 0".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null))
@@ -33,8 +34,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
-			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+			$arrayGroup["NAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
+			$arrayGroup["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+			$arrayGroup["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			
 			$arrayGroup["CREATE_DATE"] = null;
 			$arrayGroup["UPDATE_DATE"] = null;
