@@ -44,8 +44,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["MEMBER_NO"] = $rowDocno["member_no"];
 				
 					$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
-									mb.member_no,mb.MEMBGROUP_CODE 
-									FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+									mb.member_no,mb.MEMBGROUP_CODE,mg.MEMBGROUP_DESC
+									FROM mbmembmaster mb
+									LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+									LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 									WHERE mb.member_no = :member_no");
 				$fetchMember->execute([
 					':member_no' => $rowDocno["member_no"]
@@ -56,6 +58,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 					$arrDocno["FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 					$arrDocno["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+					$arrDocno["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 				}
 			
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
@@ -102,8 +105,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["MEMBER_NO"] = $rowDocno["member_no"];
 				
 				$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
-									mb.member_no,mb.MEMBGROUP_CODE 
-									FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+									mb.member_no,mb.MEMBGROUP_CODE,mg.MEMBGROUP_DESC
+									FROM mbmembmaster mb
+									LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+									LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 									WHERE mb.member_no = :member_no");
 				$fetchMember->execute([
 					':member_no' => $rowDocno["member_no"]
@@ -114,6 +119,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 					$arrDocno["FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 					$arrDocno["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+					$arrDocno["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 				}
 				
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
