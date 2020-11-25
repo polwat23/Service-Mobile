@@ -9,13 +9,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$header = array();
-		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_CODE,(sh.sharestk_amt * 10) as SHARE_AMT
-											,mm.TOTALPAY_AMT
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
-												LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-												LEFT JOIN mumembmaster mm ON mb.member_no = mm.member_no
 												WHERE mb.member_no = :member_no and mb.member_status = '1' and mb.branch_id = :branch_id");
 		$fetchName->execute([
 			':member_no' => $member_no,
@@ -24,8 +21,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"];
-		$header["share_amt"] = $rowName["SHARE_AMT"];
-		$header["fund_amt"] = $rowName["TOTALPAY_AMT"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		CASE kut.system_code
@@ -94,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+				$arrDetail["TYPE_DESC"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
@@ -108,13 +103,18 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 													kpd.RECEIPT_NO,
-													kpd.OPERATE_DATE,
-													kpd.KEEPING_STATUS
+													kpd.RECEIPT_DATE,
+													CONCAT(to_char( kpd.RECEIPT_DATE,'dd/mm/'),to_char( kpd.RECEIPT_DATE,'yyyy')+543) as RECEIPT_DATE_FORMAT,
+													kpd.KEEPING_STATUS,
+													kpd.SHARESTK_VALUE,
+													kpd.MUTTOTAL_AMT 
 													FROM kpmastreceive kpd
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period 
 													and kpd.branch_id = :branch_id");
@@ -125,10 +125,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
+		$header["share_amt"] = $rowKPHeader["SHARESTK_VALUE"];
+		$header["fund_amt"] = $rowKPHeader["MUTTOTAL_AMT"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$header["operate_date"] = $rowKPHeader["RECEIPT_DATE_FORMAT"];
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
@@ -247,12 +249,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<table style="width:100%;  border-collapse: collapse; border:none ">
 				<tr>
 					<td style="text-align: center; vertical-align: middle;border-left:none;">
-						<img src='.$logo.' style="width:70px"/>
+						<img src='.$logo.' style="width:90px"/>
 					</td>
 					<td style="text-align: center; vertical-align: middle;border-left:none;">
 						<div class="text-head">สหกรณ์ออมทรัพย์</div>
 						<div class="text-head">มหาวิทยาลัยศรีนครินทรวิโรฒ จำกัด</div>
-						<div class="text-head">ใบเสร็จรับเงิน</div>
+						<div class="text-head">ใบรับเงิน</div>
 					</td>
 				</tr>
 			</table>
@@ -260,7 +262,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<tr>
 					<td style="width: 100%;border-left: none;">
 					  <div style="font-size:20px;">
-						 เลขที่  '.$header["receipt_no"].'
+						 เลขที่  A  '.$header["receipt_no"].'
 					  </div>
 					</td>
 					<td style="border-left: none;padding-right: 20px">
