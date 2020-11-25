@@ -6,10 +6,11 @@ if($lib->checkCompleteArgument(['unique_id','id_uploadfile'],$dataComing)){
 		$conmysql->beginTransaction();
 		
 		$update_news= $conmysql->prepare("UPDATE gcuploadfile 
-									SET file_name=:file_name,path_file=:path_file,type_upload=:type_upload,update_by=:update_by
+									SET file_name=:file_name,file_detail=:file_detail,path_file=:path_file,type_upload=:type_upload,update_by=:update_by
 									WHERE id_uploadfile = :id_uploadfile");
 			if($update_news->execute([
 				':file_name' =>  $dataComing["file_name"],
+				':file_detail' =>  $dataComing["file_detail"],
 				':path_file' => $dataComing["type_upload"]  == "upload" ? null : $dataComing["path_file"],
 				':type_upload' => $dataComing["type_upload"]  == "upload" ? "0" : "1",
 				':update_by' => $payload["username"],
