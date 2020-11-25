@@ -116,7 +116,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
@@ -323,11 +325,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
 			<div style="width:100px;margin-left: 600px;display:flex;">
-			<img src="../../resource/utility_icon/sig.png" width="100" height="50" style="margin-top:20px;"/>
-			<div style="font-size: 18px;margin-left: 150px;margin-top:10px;">ผู้จัดการ</div>
+			<img src="../../resource/utility_icon/manager.png" width="100" height="50" style="margin-top:0px;"/>
+			<div style="font-size: 18px;margin-left: 20px;margin-top:60px;">ผู้จัดการ</div>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 590px;margin-top:-10px;">(นายไอโซแคร์ ซิสเต็มส์)</div>
+			<div style="font-size: 18px;margin-left: 590px;margin-top:-25px;">(นางวรีย์พรรณ โหมดเทศ)</div>
 			';
 
 	$dompdf = new DOMPDF();

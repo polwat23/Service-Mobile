@@ -39,19 +39,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 				$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
 				$pay_period = preg_replace('/,/', '', number_format($responseSoap->period_payment,2));
-				$modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
-				$roundMod = fmod($pay_period,abs($modFactor));
-				if($modFactor > 0){
-					if($roundMod > 0){
-						$pay_period = $pay_period - $roundMod + abs($modFactor);
-					}
-				}else if($modFactor < 0){
-					if($roundMod > 0){
-						$pay_period = $pay_period - $roundMod;
-					}
-				}
 				if($pay_period > $dataComing["maxperiod_payment"]){
-					if(($pay_period - $dataComing["maxperiod_payment"]) > $rowPayRound["PAYROUND_FACTOR"]){
+					if(($dataComing["maxperiod_payment"] - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
 						$arrayResult = array();
 						$arrayResult['RESPONSE_CODE'] = "WS0071";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
