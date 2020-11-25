@@ -43,6 +43,21 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 											FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
 		$getDepPaytype->execute([':itemtype' => $itemtypeWithdraw]);
 		$rowDepPay = $getDepPaytype->fetch(PDO::FETCH_ASSOC);
+		$getAccDataDest = $conoracle->prepare("SELECT DPT.ACCOUNT_ID,DPM.WITHDRAW_COUNT,DPM.PRNCBAL,
+												DPT.MINDEPT_AMT,DPT.LIMITDEPT_FLAG,DPT.LIMITDEPT_AMT,DPT.MAXBALANCE,DPT.MAXBALANCE_FLAG,
+												DPM.DEPTTYPE_CODE,DPT.DEPTGROUP_CODE,DPM.WITHDRAWABLE_AMT,
+												DPM.CHECKPEND_AMT,DPM.LASTCALINT_DATE
+												FROM DPDEPTMASTER DPM 
+												LEFT JOIN DPDEPTTYPE DPT ON DPM.DEPTTYPE_CODE = DPT.DEPTTYPE_CODE
+												WHERE DPM.DEPTACCOUNT_NO = :account_no");
+		$getAccDataDest->execute([':account_no' => $to_account_no]);
+		$rowAccDataDest = $getAccDataDest->fetch(PDO::FETCH_ASSOC);
+		$getMapAccidSrc = $conoracle->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = 'DEP' AND SLIPITEMTYPE_CODE = 'DEP' AND SHRLONTYPE_CODE = :depttype_code");
+		$getMapAccidSrc->execute([':depttype_code' => $rowAccData["DEPTTYPE_CODE"]]);
+		$rowMapAccSrc = $getMapAccidSrc->fetch(PDO::FETCH_ASSOC);
+		$getMapAccidDest = $conoracle->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = 'DEP' AND SLIPITEMTYPE_CODE = 'DEP' AND SHRLONTYPE_CODE = :depttype_code");
+		$getMapAccidDest->execute([':depttype_code' => $rowAccDataDest["DEPTTYPE_CODE"]]);
+		$rowMapAccDest = $getMapAccidDest->fetch(PDO::FETCH_ASSOC);
 		if($rowAccData["SEQUEST_STATUS"] == '0' || $rowAccData["SEQUEST_STATUS"] == '1' || $rowAccData["SEQUEST_STATUS"] == '9'){
 			if($rowDepPay["GRP_ITEMTYPE"] == 'WID'){
 				if($rowAccData["MINPRNCBAL"] > $rowAccData["PRNCBAL"] - ($rowAccData["SEQUEST_AMOUNT"] + $rowAccData["CHECKPEND_AMT"] + $dataComing["amt_transfer"])){
@@ -103,7 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
 			':laststmno' => $lastStmSrcNo,
 			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($rowAccData["LASTCALINT_DATE"])),
-			':acc_id' => $rowAccData["ACCOUNT_ID"],
+			':acc_id' => $getMapAccidDest["ACCOUNT_ID"],
 			':penalty_amt' => $dataComing["penalty_amt"]
 		];
 		if($dataComing["penalty_amt"] > 0){
@@ -153,6 +168,9 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			if($insertStatement->execute($arrExecuteStm)){
 				// Start-Penalty-Cal
 				if($dataComing["penalty_amt"] > 0){
+					$getMapAccidFee = $conoracle->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = 'DEP' AND SLIPITEMTYPE_CODE = 'FEE' AND SHRLONTYPE_CODE = '00'");
+					$getMapAccidFee->execute();
+					$rowMapAccFee = $getMapAccidFee->fetch(PDO::FETCH_ASSOC);
 					$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$rowLastSlip["DOCUMENT_LENGTH"],'0');
 					$lastStmSrcNo += 1;
 					$arrExecutePenalty = [
@@ -170,7 +188,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
 						':laststmno' => $lastStmSrcNo,
 						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($rowAccData["LASTCALINT_DATE"])),
-						':acc_id' => $rowAccData["ACCOUNT_ID"],
+						':acc_id' => $rowMapAccFee["ACCOUNT_ID"],
 						':refer_deptslip_no' => $deptslip_no
 					];
 					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
@@ -297,15 +315,6 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 														WHERE deptaccount_no = :from_account_no");
 				if($updateDeptMaster->execute($arrUpdateMaster)){
 					// Start-Deposit
-					$getAccDataDest = $conoracle->prepare("SELECT DPT.ACCOUNT_ID,DPM.WITHDRAW_COUNT,DPM.PRNCBAL,
-															DPT.MINDEPT_AMT,DPT.LIMITDEPT_FLAG,DPT.LIMITDEPT_AMT,DPT.MAXBALANCE,DPT.MAXBALANCE_FLAG,
-															DPM.DEPTTYPE_CODE,DPT.DEPTGROUP_CODE,DPM.WITHDRAWABLE_AMT,
-															DPM.CHECKPEND_AMT,DPM.LASTCALINT_DATE
-															FROM DPDEPTMASTER DPM 
-															LEFT JOIN DPDEPTTYPE DPT ON DPM.DEPTTYPE_CODE = DPT.DEPTTYPE_CODE
-															WHERE DPM.DEPTACCOUNT_NO = :account_no");
-					$getAccDataDest->execute([':account_no' => $to_account_no]);
-					$rowAccDataDest = $getAccDataDest->fetch(PDO::FETCH_ASSOC);
 					if($rowAccDataDest["LIMITDEPT_FLAG"] == '1' && $dataComing["amt_transfer"] >= $rowAccDataDest["LIMITDEPT_AMT"]){
 						$conoracle->rollback();
 						$arrayResult["RESPONSE_CODE"] = 'WS0093';
@@ -447,7 +456,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
 						':laststmno' => $lastStmDestNo,
 						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($rowAccDataDest["LASTCALINT_DATE"])),
-						':acc_id' => $rowAccDataDest["ACCOUNT_ID"]
+						':acc_id' => $rowMapAccSrc["ACCOUNT_ID"]
 					];
 					$insertDpSlipDest = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 														deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
