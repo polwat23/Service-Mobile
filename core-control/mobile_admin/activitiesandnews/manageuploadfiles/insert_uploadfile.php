@@ -5,11 +5,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuploadfiles')){
 		$conmysql->beginTransaction();
 		
-		$insert_news = $conmysql->prepare("INSERT INTO gcuploadfile(file_name, path_file, type_upload, 
+		$insert_news = $conmysql->prepare("INSERT INTO gcuploadfile(file_name,file_detail, path_file, type_upload, 
 									 update_by, create_by) 
-							VALUES (:file_name,:path_file,:type_upload,:update_by,:create_by)");
+							VALUES (:file_name,:file_detail,:path_file,:type_upload,:update_by,:create_by)");
 			if($insert_news->execute([
 				':file_name' =>  $dataComing["file_name"],
+				':file_detail' =>  $dataComing["file_detail"],
 				':path_file' => $dataComing["type_upload"]  == "upload" ? null : $dataComing["path_file"],
 				':type_upload' => $dataComing["type_upload"]  == "upload" ? "0" : "1",
 				':update_by' => $payload["username"],
