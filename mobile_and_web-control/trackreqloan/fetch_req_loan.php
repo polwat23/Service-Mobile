@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
+															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
 															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
 			$fetchReqLoan->execute([
 				':member_no' => $payload["member_no"],
@@ -32,12 +32,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
+				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
+															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
@@ -60,6 +61,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
+				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
 			}

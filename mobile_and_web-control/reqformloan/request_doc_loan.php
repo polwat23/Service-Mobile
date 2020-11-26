@@ -73,8 +73,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				}
 			}
 		}
+		
+		$fetchPrefix = $conoracle->prepare("SELECT prefix FROM lnloantype where loantype_code = :loantype_code");
+		$fetchPrefix->execute([
+			':loantype_code' => $dataComing["loantype_code"]
+		]);
+		$rowPrefix = $fetchPrefix->fetch(PDO::FETCH_ASSOC);
+		
 		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
-												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
+												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,mb.membgroup_code 
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
@@ -88,9 +95,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 		$conmysql->beginTransaction();
 		$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url)
+																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank)
 																VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url)");
+																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank)");
 		if($InsertFormOnline->execute([
 			':reqloan_doc' => $reqloan_doc,
 			':member_no' => $payload["member_no"],
@@ -104,15 +111,18 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':salary_img' => $slipSalary,
 			':citizen_img' => $citizenCopy,
 			':id_userlogin' => $payload["id_userlogin"],
-			':contractdoc_url' => $pathFile
+			':contractdoc_url' => $pathFile,
+			':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? null,
 		])){
 			$arrData = array();
 			$arrData["requestdoc_no"] = $reqloan_doc;
+			$arrData["loan_prefix"] = $rowPrefix["PREFIX"];
 			$arrData["full_name"] = $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["name"] = $rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["member_no"] = $payload["member_no"];
 			$arrData["position"] = $rowData["POSITION_DESC"];
 			$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
+			$arrData["pos_group_code"] = $rowData["MEMBGROUP_CODE"];
 			$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
 			$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 			$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
@@ -170,7 +180,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':salary_img' => $slipSalary,
 					':citizen_img' => $citizenCopy,
 					':id_userlogin' => $payload["id_userlogin"],
-					':contractdoc_url' => $pathFile
+					':contractdoc_url' => $pathFile,
+					':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? "-",
 				]),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
@@ -188,7 +199,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				':salary_img' => $slipSalary,
 				':citizen_img' => $citizenCopy,
 				':id_userlogin' => $payload["id_userlogin"],
-				':contractdoc_url' => $pathFile
+				':contractdoc_url' => $pathFile,
+				':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? "-",
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1036";
