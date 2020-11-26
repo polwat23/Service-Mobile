@@ -46,11 +46,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
 			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 			//$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+			$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/SRN/termanduse.html";
 			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 			$arrayResult["REQ_SALARY"] = FALSE;
 			$arrayResult["REQ_CITIZEN"] = FALSE;
+			$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
 			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+			$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
+			$arrayResult["BANK_ACCOUNT_REMARK"] = null;
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}
