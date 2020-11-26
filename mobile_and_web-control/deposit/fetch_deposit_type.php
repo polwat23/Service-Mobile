@@ -45,6 +45,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($arrAccount["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 					$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 					$arrAccount["BALANCE"] = $accData->accountBalance;
+					if(isset($accData->rcvintrAccountNo) && $accData->rcvintrAccountNo != ""){
+						$arrAccount['RECV_INT_ACCOUNT_NO'] = $accData->rcvintrAccountNo;
+					}
 					if($dataComing["channel"] == 'mobile_app'){
 						$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
 						$fetchAlias->execute([

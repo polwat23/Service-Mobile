@@ -610,20 +610,20 @@ class library {
 	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
-	public function sendLineNotify($message){
+	public function sendLineNotify($message,$lineToken=null){
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		$token = $json_data["LINE_NOTIFY"];
+		$token = $lineToken ?? $json_data["LINE_NOTIFY"];
 		$headers = array();
 		$headers[] = 'content-type: application/x-www-form-urlencoded';
 		$headers[] = 'Authorization: Bearer '.$token;
 		$ch = curl_init();
 
 		curl_setopt( $ch,CURLOPT_URL, "https://notify-api.line.me/api/notify" );                                                                  
-		curl_setopt( $ch,CURLOPT_POST, true );  
-		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $ch,CURLOPT_POST, true );
 		curl_setopt( $ch,CURLOPT_PROXY, 'http://proxy.egat.co.th');
 		curl_setopt( $ch,CURLOPT_PROXYPORT, '8080');
+		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);

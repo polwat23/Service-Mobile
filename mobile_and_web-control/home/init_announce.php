@@ -49,6 +49,8 @@ while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 		$arrAnn["ACCEPT_TEXT"] = $rowAnn["accept_text"];
 		$arrAnn["CANCEL_TEXT"] = $rowAnn["cancel_text"];
 		$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
+		$arrAnn["ALLOW_NAVIGATION"] = TRUE;
+		$arrAnn["ALLOW_TARGET"] = TRUE;
 		$arrGroupAnn[] = $arrAnn;
 	}
 }

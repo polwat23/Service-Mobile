@@ -1,38 +1,50 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','citizen_id_enc',
-'dept_account_enc','tran_id','sigma_key','coop_account_no','penalty_amt','fee_amt'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','penalty_amt','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchDataDeposit = $conmysql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.link_withdraw_coopdirect,csb.bank_short_ename
+												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+												WHERE gba.sigma_key = :sigma_key");
+		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
+		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 		$time = time();
 		$arrSendData = array();
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		$ref_no = time().$lib->randomText('all',3);
 		$penalty_include = $func->getConstant("include_penalty");
 		if($penalty_include == '0'){
 			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["penalty_amt"] - $dataComing["fee_amt"];
 		}else{
 			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		}
-		$arrVerifyToken['exp'] = time() + 300;
-		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
-		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-		$arrVerifyToken['amt_transfer'] = $amt_transfer;
-		$arrVerifyToken['coop_account_no'] = $coop_account_no;
-		$arrVerifyToken['operate_date'] = $dateOperC;
-		$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
-		$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
-		$arrVerifyToken['citizen_id_enc'] = $dataComing["citizen_id_enc"];
-		$arrVerifyToken['dept_account_enc'] = $dataComing["dept_account_enc"];
+		if($rowDataDeposit["bank_code"] == '004'){
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
+			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+			$arrVerifyToken['amt_transfer'] = $amt_transfer;
+			$arrVerifyToken['coop_account_no'] = $coop_account_no;
+			$arrVerifyToken['operate_date'] = $dateOperC;
+			$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
+			$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
+			$arrVerifyToken['citizen_id_enc'] = $dataComing["citizen_id_enc"];
+			$arrVerifyToken['dept_account_enc'] = $dataComing["dept_account_enc"];
+		}else if($rowDataDeposit["bank_code"] == '006'){
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
+			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+			$arrVerifyToken['amt_transfer'] = $amt_transfer;
+			$arrVerifyToken['bank_account'] = $dataComing["BANK_ACCOUNT_NO"];
+			$arrVerifyToken['tran_date'] = $dateOperC;
+			$arrVerifyToken['citizen_id'] = $dataComing["CITIZEN_ID"];
+		}
 		$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
 		// Withdraw Inside --------------------------------------
-		$fetchDataDeposit = $conmysql->prepare("SELECT bank_code,deptaccount_no_bank FROM gcbindaccount WHERE sigma_key = :sigma_key");
-		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
-		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$ref_slipno = null;
 		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 		$arrDataAPI["MemberID"] = substr($member_no,-6);
@@ -86,15 +98,16 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 		}
 		$ref_slipno = $arrResponseAPI->trxID;
 		// -----------------------------------------------
-		$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/withdrawdeposit_kbank',$arrSendData);
+		$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataDeposit["link_withdraw_coopdirect"],$arrSendData);
 		if(!$responseAPI["RESULT"]){
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 														,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 														ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-														VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
+														VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 														,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
 			$insertTransactionLog->execute([
-				':ref_no' => $dataComing["tran_id"],
+				':ref_no' => $ref_no,
+				':itemtype' => $rowDataDeposit["itemtype_wtd"],
 				':from_account' => $coop_account_no,
 				':destination' => $rowDataDeposit["deptaccount_no_bank"],
 				':amount' => $dataComing["amt_transfer"],
@@ -106,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				':ref_no1' => $coop_account_no,
 				':slip_no' => $ref_slipno,
 				':id_userlogin' => $payload["id_userlogin"],
-				':ref_no_source' => $dataComing["kbank_ref_no"],
+				':ref_no_source' => $dataComing["kbank_ref_no"] ?? null,
 				':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 			]);
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
@@ -162,8 +175,16 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				':deptaccount_no' => $coop_account_no,
 				':seq_no' => $ref_slipno
 			]);
+			if($rowDataDeposit["bank_code"] == '004'){
+				$refno_source = $dataComing["kbank_ref_no"];
+				$etn_refno = $dataComing["tran_id"];
+			}else if($rowDataDeposit["bank_code"] == '006'){
+				$refno_source = $arrResponse->KTB_REF;
+				$etn_refno = $arrResponse->TRANSACTION_NO;
+			}
 			$arrExecute = [
-				':ref_no' => $dataComing["tran_id"],
+				':ref_no' => $ref_no,
+				':itemtype' => $rowDataDeposit["itemtype_wtd"],
 				':from_account' => $coop_account_no,
 				':destination' => $rowDataDeposit["deptaccount_no_bank"],
 				':amount' => $dataComing["amt_transfer"],
@@ -174,15 +195,16 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				':member_no' => $payload["member_no"],
 				':ref_no1' => $coop_account_no,
 				':slip_no' => $ref_slipno,
+				':etn_refno' => $etn_refno,
 				':id_userlogin' => $payload["id_userlogin"],
-				':ref_no_source' => $dataComing["kbank_ref_no"],
+				':ref_no_source' => $refno_source,
 				':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 			];
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 														,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-														ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-														VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
-														:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
+														ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
+														VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
+														:slip_no,:etn_refno,:id_userlogin,:ref_no_source,:bank_code)");
 			if($insertTransactionLog->execute($arrExecute)){
 			}else{
 				$arrLogTemp = array();
@@ -212,7 +234,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 					}
 				}
 			}
-			$arrayResult['TRANSACTION_NO'] = $dataComing["tran_id"];
+			$arrayResult['TRANSACTION_NO'] = $ref_no;
 			$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
@@ -220,10 +242,11 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 														,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 														ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-														VALUES(:ref_no,'WTB',:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
+														VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
 														,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
 			$insertTransactionLog->execute([
-				':ref_no' => $dataComing["tran_id"],
+				':ref_no' => $ref_no,
+				':itemtype' => $rowDataDeposit["itemtype_wtd"],
 				':from_account' => $coop_account_no,
 				':destination' => $rowDataDeposit["deptaccount_no_bank"],
 				':amount' => $dataComing["amt_transfer"],
@@ -235,7 +258,7 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				':ref_no1' => $coop_account_no,
 				':slip_no' => $ref_slipno,
 				':id_userlogin' => $payload["id_userlogin"],
-				':ref_no_source' => $dataComing["kbank_ref_no"],
+				':ref_no_source' => $dataComing["kbank_ref_no"] ?? null,
 				':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 			]);
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
@@ -254,8 +277,8 @@ if($lib->checkCompleteArgument(['menu_component','kbank_ref_no','amt_transfer','
 				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('withdrawtrans',$arrayStruc);
-			if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
-				$arrayResult['RESPONSE_MESSAGE'] = $configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+			if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}

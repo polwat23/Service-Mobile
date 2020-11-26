@@ -2,32 +2,23 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
-		$getBadge = $conmysql->prepare("SELECT IFNULL(COUNT(id_history),0) as badge,his_type FROM gchistory 
-										WHERE member_no = :member_no AND his_read_status = '0' and his_del_status = '0' 
-										GROUP BY his_type");
-		$getBadge->execute([
-			':member_no' => $payload["member_no"]
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchDataMember = $conoracle->prepare("SELECT TRIM(card_person) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember->execute([
+			':member_no' => $member_no
 		]);
-		if($getBadge->rowCount() > 0){
-			while($badgeData = $getBadge->fetch(PDO::FETCH_ASSOC)){
-				$arrayResult['BADGE_'.$badgeData["his_type"]] = isset($badgeData["badge"]) ? $badgeData["badge"] : 0;
-			}
-			if(isset($arrayResult['BADGE_1'])){
-				$arrayResult['BADGE_1'] = $arrayResult['BADGE_1'];
-			}else{
-				$arrayResult['BADGE_1'] = 0;
-			}
-			if(isset($arrayResult['BADGE_2'])){
-				$arrayResult['BADGE_2'] = $arrayResult['BADGE_2'];
-			}else{
-				$arrayResult['BADGE_2'] = 0;
-			}
-			$arrayResult['BADGE_SUMMARY'] = $arrayResult['BADGE_1'] + $arrayResult['BADGE_2'];
+		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowDataMember["CARD_PERSON"])){
+			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
-			http_response_code(204);
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
 			exit();
 		}
 	}else{

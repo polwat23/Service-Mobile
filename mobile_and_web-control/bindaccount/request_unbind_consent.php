@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_unbind_espa_id',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/kbank/request_unbind_espa_id',$arrSendData);
 				if(!$responseAPI["RESULT"]){
 					$conmysql->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS0029";
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 						':query_flag' => '1'
 					];
 					$log->writeLog('unbindaccount',$arrayStruc);
-					$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+					$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/kbank/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 					$lib->sendLineNotify($message_error);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

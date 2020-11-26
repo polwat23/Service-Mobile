@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		and kpd.seq_no = :seq_no
+																		and kpd.seq_no = :seq_no and kpd.SEQ_ARRNO = '0'
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
@@ -79,6 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+																		and kpd.SEQ_ARRNO = '0'
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,

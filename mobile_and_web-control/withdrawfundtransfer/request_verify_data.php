@@ -1,9 +1,14 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer','bank_code'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchDataDeposit = $conmysql->prepare("SELECT csb.itemtype_wtd,csb.link_inquiry_coopdirect,gba.bank_code,csb.bank_short_ename
+												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+												WHERE gba.sigma_key = :sigma_key");
+		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
+		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
@@ -49,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$arrDataAPI["FromCoopAccountNo"] = $dataComing["deptaccount_no"];
 		$arrDataAPI["TransferAmount"] = $dataComing["amt_transfer"];
 		$arrDataAPI["UserRequestDate"] = $dateOperC;
-		$arrDataAPI["BankCode"] = $dataComing["bank_code"];
+		$arrDataAPI["BankCode"] = $rowDataDeposit["bank_code"];
 		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee",$arrDataAPI,$arrHeaderAPI);
 		if(!$arrResponseAPI["RESULT"]){
 			$filename = basename(__FILE__, '.php');
@@ -71,17 +76,31 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		}
 		$arrResponseAPI = json_decode($arrResponseAPI);
 		if($arrResponseAPI->responseCode == "200"){
-			$arrSendData = array();
-			$arrVerifyToken['exp'] = time() + 300;
-			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-			$arrVerifyToken["operate_date"] = $dateOperC;
-			$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
-			$arrVerifyToken['deptaccount_no'] = $dataComing["deptaccount_no"];
-			$arrVerifyToken['bank_account_no'] = $dataComing["bank_account_no"];
-			$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
-			$arrSendData["verify_token"] = $verify_token;
-			$arrSendData["app_id"] = $config["APP_ID"];
-			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/verifydata_kbank',$arrSendData);
+			if($rowDataDeposit["bank_code"] == '006'){
+				$arrSendData = array();
+				$arrVerifyToken = array();
+				$arrVerifyToken['exp'] = time() + 300;
+				$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
+				$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+				$arrVerifyToken['tran_date'] = $dateOper;
+				$arrVerifyToken['bank_account'] = $dataComing["bank_account_no"];
+				$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
+				$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
+				$arrSendData["verify_token"] = $verify_token;
+				$arrSendData["app_id"] = $config["APP_ID"];
+			}else if($rowDataDeposit["bank_code"] == '004'){
+				$arrSendData = array();
+				$arrVerifyToken['exp'] = time() + 300;
+				$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+				$arrVerifyToken["operate_date"] = $dateOperC;
+				$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
+				$arrVerifyToken['deptaccount_no'] = $dataComing["deptaccount_no"];
+				$arrVerifyToken['bank_account_no'] = $dataComing["bank_account_no"];
+				$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
+				$arrSendData["verify_token"] = $verify_token;
+				$arrSendData["app_id"] = $config["APP_ID"];
+			}
+			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataDeposit["link_inquiry_coopdirect"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0028";
 				$arrayStruc = [
@@ -108,13 +127,21 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
 					$arrayResult['CAUTION'] = $arrayCaution;
 				}
-				$arrayResult['FEE_AMT'] = 0;
-				$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
-				$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
-				$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
-				$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
-				$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
-				$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
+				if($rowDataDeposit["bank_code"] == '006'){
+					$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
+					$arrayResult['CITIZEN_ID'] = $rowDataUser["citizen_id"];
+					$arrayResult['BANK_ACCOUNT_NO'] = $dataComing["bank_account_no"];
+					$arrayResult['FEE_AMT'] = $amt_transfer;
+					$arrayResult['FEE_AMT_FORMAT'] = number_format($amt_transfer,2);
+				}else if($rowDataDeposit["bank_code"] == '004'){
+					$arrayResult['FEE_AMT'] = 0;
+					$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
+					$arrayResult['ACCOUNT_NAME_EN'] = $arrResponse->ACCOUNT_NAME_EN;
+					$arrayResult['REF_KBANK'] = $arrResponse->REF_KBANK;
+					$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
+					$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
+					$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
+				}
 				$arrayResult['RESULT'] = TRUE;
 				echo json_encode($arrayResult);
 			}else{
@@ -129,8 +156,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					':response_message' => $arrResponse->RESPONSE_MESSAGE
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
-				if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
-					$arrayResult['RESPONSE_MESSAGE'] = $configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+				if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				}
