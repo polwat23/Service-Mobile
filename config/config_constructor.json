@@ -5,9 +5,9 @@
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.pttsaving.mobile",
 	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/PTTCOOP-TEST/",
-	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
+	"URL_CORE_COOP" : "http://10.220.6.31/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
-	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=001001;coop_control=001001;",
+	"WS_STRC_DB" : "Data Source=10.220.6.31/gcoop;Persist Security Info=True;User ID=iscotest;Password=iscotest;Unicode=True;coop_id=011001;coop_control=011001;",
 	"FIREBASE_API_KEY" : "AIzaSyDJ-s4dBMl7tpQBQLWL7Sy4yOy77P_-RT4",
 	"FIREBASE_SERVER_KEY" : "AAAAItpAWjM:APA91bHGxzn8wttphMFI31__F2fR0XgFGR4o4vqd5ZiwuIMsB4a-Zg803I7b98mUj5nBvTG1etFXL-XxLJJ44Cekjr9294Aw6utu7uGhAtyHv7723qmdMCqKEz9RB59DaRERbWFDFAV1",
 	"SECRET_KEY_JWT" : "PTT!/-Gcoop+Connect^011001*!&",
@@ -22,5 +22,6 @@
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
+	"CROSSBANK_TAX_SUFFIX" : "099400016881100",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member"
 }
