@@ -5,10 +5,28 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
+			$oldBal = 0;
+			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
+				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
+			}else{
+				include(__DIR__.'/../credit/calculate_loan_etc.php');
+			}
 			$period_payment = $dataComing["request_amt"] / $dataComing["period"];
-			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
+			$receive_net = $dataComing["request_amt"] - $oldBal;
+			if($receive_net < 0){
+				$arrayResult['RESPONSE_CODE'] = "WS0086";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}else{
+				$arrayResult["RECEIVE_NET"] = $receive_net;
+			}
+			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
-			//$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+			if($dataComing["loantype_code"] != '23'){
+				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}else{
@@ -43,10 +61,13 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 			$arrayResult["RECEIVE_NET"] = $receive_net;
 			$arrayResult["REQUEST_AMT"] = $request_amt;
+			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
 			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
 			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
-			//$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/SRN/termanduse.html";
+			if($dataComing["loantype_code"] != '23'){
+				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+			}
+			$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 			$arrayResult["REQ_SALARY"] = FALSE;
 			$arrayResult["REQ_CITIZEN"] = FALSE;
