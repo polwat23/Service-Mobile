@@ -37,7 +37,7 @@ if($rowDataCalInt["LOANPAYMENT_TYPE"] == '1'){
 	$daydiff = $lib->count_duration($rowDataCalInt["LASTCALINT_DATE"],'d');
 	$interest = (($rowDataCalInt["PRINCIPAL_BALANCE"] * ($rowDataCalInt["INT_CONTINTRATE"] / 100)) * $daydiff) / 365;
 }
-$dayremainEnd = $lib->count_duration('24/12/'.date('Y'),'d');
+$dayremainEnd = $lib->count_duration('31/12/'.date('Y'),'d');
 if($dayremainEnd < 30){
 	$dayremainEnd = 0;
 }else{
