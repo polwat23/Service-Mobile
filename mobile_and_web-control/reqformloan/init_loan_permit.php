@@ -49,6 +49,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			if($request_amt < $oldBal){
 				$request_amt = $oldBal;
 			}
+			
 			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
 															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
@@ -63,7 +64,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["REQUEST_AMT"] = $request_amt;
 			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
 			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
+			$arrayResult["MAX_PERIOD"] = (string)$dayremainEnd;
+			$arrayResult["DISABLE_PERIOD"] = TRUE;
 			if($dataComing["loantype_code"] != '23'){
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			}
@@ -76,6 +78,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
 			$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
 			$arrayResult["BANK_ACCOUNT_REMARK"] = null;
+			if($dayremainEnd == 0){
+				$arrayResult["NOTE_DESC"] = "เงินต้นและดอกเบี้ยของท่าน ณ วันที่กู้จะถูกหักรวมกับยอดปันผล-เฉลี่ยคืนที่ท่านจะได้รับ";
+				$arrayResult["NOTE_DESC_COLOR"] = "red";
+			}
 			$arrayResult['RESULT'] = TRUE;
 			echo json_encode($arrayResult);
 		}

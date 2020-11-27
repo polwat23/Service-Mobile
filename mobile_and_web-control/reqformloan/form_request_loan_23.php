@@ -99,14 +99,16 @@ function GeneratePDFContract($data,$lib) {
 			   คณะกรรมการดําเนินการสหกรณ์ออมทรัพย์ครูสุรินทร์ จํากัด
 			</p>
 		  </div>
-		  <div style="position: absolute; left: 20px; top: 258px; right:0px; width:660px; font-size: 20px; ">
+		    <div style="position: absolute; left: 20px; top: 258px; right:0px; width:660px; font-size: 20px; ">
 			  <p style="text-indent:50px;  text-align:left;">
-			  ข้าพเจ้า<span class="text-input">'.$space.$data["full_name"].$space.'</span> สมาชิกเลขทะเบียนที่<span class="text-input">'.$space.$data["member_no"].$space.'</span> รับราชการหรือทํางานประจําในตําแหน่ง<span class="text-input">'.$space.$data["position"].$space.'</span>โรงเรียนหรือที่ทําการ<span class="text-input">'.$space.$data["pos_group"].' '.$data["pos_group_code"].$space.'</span>
-			  อำเภอ<span class="text-input">'.$space.$data["district_desc"].$space.'</span>จังหวัดสุรินทร์ ได้รับเงินได้รายเดือน ๆ ละ<span class="text-input">'.$space.$data["salary_amount"].$space.'</span>บาท  มีหุ้นอยู่ใน สหกรณ์ออมทรัพย์ครูสุรินทร์ จํากัด
-			  ณ วันที่ 31 ธันวาคม พ.ศ<span class="text-input">'.$space.(date('Y') + 542).$space.'</span>เป็นเงิน<span class="text-input">'.$space.$data["share_bf"].$space.'</span>บาท  ขอเสนอ คําขอกู้เงินเพื่อเหตุฉุกเฉินดังต่อไปนี้
+			  ข้าพเจ้า.......................................................................... สมาชิกเลขทะเบียนที่...................................... รับราชการหรือ
+			  ทํางานประจําในตําแหน่ง........................................................โรงเรียนหรือที่ทําการ.......................................................................
+			  อำเภอ.........................................จังหวัดสุรินทร์ ได้รับเงินได้รายเดือน ๆ ละ...................................................บาท  มีหุ้นอยู่ใน สหกรณ์ออมทรัพย์ครูสุรินทร์ จํากัด
+			  ณ วันที่ 31 ธันวาคม พ.ศ.................เป็นเงิน.........................................บาท  ขอเสนอ คําขอกู้เงินเพื่อเหตุฉุกเฉินดังต่อไปนี้
 			  </p>
 			  <p style="text-indent:50px; margin:0px; margin-top:-20px;  text-align:left;">
-				ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์จํานวน<span class="text-input">'.$space.number_format($data["request_amt"],2).$space.'</span>บาท (<span class="text-input">'.$space.$lib->baht_text($data["request_amt"]).$space.'</span>) โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)<span class="text-input">'.$space.'เพื่อเหตุฉุกเฉิน'.$space.'</span>
+				ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์จํานวน........................................บาท (....................................................................)
+				โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)......................................................................................
 			  </p>
 			  <p style="text-indent:50px; margin:0px; text-align:left;">
 				ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งชําระเงินดอกเบี้ยเป็นรายเดือน และส่งคืนเงินกู้เพื่อเหตุฉุกเฉินเต็มจํานวน พร้อมดอกเบี้ยเดือนสุดท้ายให้เสร็จสิ้นภายใน 12 เดือน
@@ -135,16 +137,95 @@ function GeneratePDFContract($data,$lib) {
 			  <p style="text-indent:50px; margin:0px;  text-align:left;">
 				 หนังสือนี้ ข้าพเจ้าอ่านและเข้าใจทั้งหมดแล้ว
 			  </p>
-			  <p style="margin-top:40px;  text-align:center;">
-				 ลงชื่อ<span class="text-input">'.$space.$data["name"].$space.'</span>ผู้กู้ / ผู้รับเงิน
+			  <p style="text-indent:50px; margin-top:40px;  text-align:center;">
+				 ลงชื่อ...........................................................ผู้กู้ / ผู้รับเงิน
 			  </p>
-			  <p style="margin-top:-20px; text-align:center;">
-			  (<span class="text-input">'.$space.$data["full_name"].$space.'</span>)
+			  <p style="text-indent:232px;  margin-top:-20px; text-align:left;">
+			  (...........................................................)
 		   </p>
+		  </div>
+		  <div style="position: absolute; left: 103px; top: 271px; width:243px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px; ">
+			  '.$data["full_name"].'
+			</div>
+		  </div>
+
+		  <div style="position: absolute; right: 105px; top: 271px; width:127px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px; ">
+			  '.$data["member_no"].'
+			</div>
+		  </div>
+
+		  <div style="position: absolute; left: 137px; top: 301px; width:140px; text-align:center;font-weight:bold;  ">
+			<div style="font-size: 20px; ">
+			  '.$data["position"].'
+			</div>  
+		  </div>
+
+		  
+		  <div style="position: absolute; left: 440px; top: 301px; width:210px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px;white-space: nowrap ">
+			  '.$data["pos_group_code"].' '.$data["pos_group"].'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; left: 30px; top: 331px; width:120px; text-align:center;font-weight:bold;">
+			<div style="font-size: 20px; ">
+			  '.$data["district_desc"].'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; right: 135px; top: 331px; width:165px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px; ">
+			 '.$data["salary_amount"].'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; left: 335px; top: 361px; width:56px; text-align:center;font-weight:bold;  ">
+			<div style="font-size: 20px; ">
+			  '.(date('Y') + 542).'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; right: 154px; top: 361px; width:136px; text-align:center;font-weight:bold;">
+			<div style="font-size: 20px; ">
+			  '.$data["share_bf"].'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; left: 289px; top: 416px; width:130px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px; ">
+			  '.number_format($data["request_amt"],2).'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; right: 30px; top: 416px; width:220px; text-align:center;font-weight:bold;">
+			<div style="font-size: 20px; ">
+			'.$lib->baht_text($data["request_amt"]).'
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; right: 30px; top: 446px; width:280px; text-align:center;font-weight:bold;">
+			<div style="font-size: 20px; ">
+			เพื่อเหตุฉุกเฉิน
+			</div>  
+		  </div>
+
+		  <div style="position: absolute; left: 250px; bottom: 38px; width:195px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px; ">
+			 '.$data["name"].'
+			</div>  
+		  </div>
+		  
+		  <div style="position: absolute; left: 250px; bottom: 13px; width:195px; text-align:center;font-weight:bold; ">
+			<div style="font-size: 20px; ">
+			 '.$data["full_name"].'
+			</div>  
 		  </div>
 		  </tbody>
 		  </table>
 		  </div>
+
 	';
 	$dompdf = new DOMPDF();
 	$dompdf->set_paper('A4');
