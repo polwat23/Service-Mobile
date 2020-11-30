@@ -22,6 +22,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													ON login.id_userlogin = wd.id_userlogin
 													ORDER BY 	wd.transaction_date DESC ");
 		$fetchLogWithdrawError->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogWithdrawError = $fetchLogWithdrawError->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogWithdrawError = array();
 			$arrGroupLogWithdrawError["ID_WITHDRAW_TRAN_BANK_ERROR"] = $rowLogWithdrawError["id_withdrawtransbankerr"];
@@ -36,7 +37,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupLogWithdrawError["FEE_AMT"] = $rowLogWithdrawError["fee_amt"];
 			$arrGroupLogWithdrawError["FEE_AMT_FORMAT"] =  number_format($rowLogWithdrawError["fee_amt"],2);
 			$arrGroupLogWithdrawError["DEPTACCOUNT_NO"] = $rowLogWithdrawError["deptaccount_no"];
-			$arrGroupLogWithdrawError["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogWithdrawError["deptaccount_no"],$func->getConstant('dep_format'));
+			$arrGroupLogWithdrawError["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogWithdrawError["deptaccount_no"],$formatDept);
 			$arrGroupLogWithdrawError["RESPONSE_CODE"] = $rowLogWithdrawError["response_code"];
 			$arrGroupLogWithdrawError["RESPONSE_MESSAGE"] = $rowLogWithdrawError["response_message"];
 			

@@ -24,6 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																				ORDER BY   tran.transaction_date DESC
 																			 ");
 		$fetchTranfertError->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogTranferError = $fetchTranfertError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTranfertError = array();
 			$arrLogTranfertError["ID_TRANFER"] = $rowLogTranferError["id_transferinsidecoop"];
@@ -37,9 +38,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 			$arrLogTranfertError["TRANSFER_FLAG"] = $rowLogTranferError["transfer_flag"];
 			$arrLogTranfertError["DESTINATION"] = $rowLogTranferError["destination"];
-			$arrLogTranfertError["DESTINATION_NO_FORMAT"]= $lib->formataccount($rowLogTranferError["destination"],$func->getConstant('dep_format'));
+			$arrLogTranfertError["DESTINATION_NO_FORMAT"]= $lib->formataccount($rowLogTranferError["destination"],$formatDept);
 			$arrLogTranfertError["DEPTACCOUNT_NO"] = $rowLogTranferError["deptaccount_no"];
-			$arrLogTranfertError["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogTranferError["deptaccount_no"],$func->getConstant('dep_format'));
+			$arrLogTranfertError["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogTranferError["deptaccount_no"],$formatDept);
 			$arrLogTranfertError["RESPONSE_CODE"] = $rowLogTranferError["response_code"];
 			$arrLogTranfertError["RESPONSE_MESSAGE"] = $rowLogTranferError["response_message"];
 			
