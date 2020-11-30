@@ -18,13 +18,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															INNER JOIN gcconstantaccountdept cont ON
 																alow.id_accountconstant = cont.id_accountconstant");
 		$fetLogAllowAccountTransation->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogAllowAccountTransation = $fetLogAllowAccountTransation->fetch(PDO::FETCH_ASSOC)){
 			$arrLogAllowTransation = array();
 			$arrLogAllowTransation["ID_USERALLOWACCTRAN"] = $rowLogAllowAccountTransation["id_userallowacctran"];
 			$arrLogAllowTransation["CREATE_DATE"] = $lib->convertdate( $rowLogAllowAccountTransation["create_date"],'d m Y',true); 
 			$arrLogAllowTransation["MEMBER_NO"] = $rowLogAllowAccountTransation["member_no"];
 			$arrLogAllowTransation["DEPTACCOUNT_NO"] = $rowLogAllowAccountTransation["deptaccount_no"];
-			$arrLogAllowTransation["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogAllowAccountTransation["deptaccount_no"],$func->getConstant('dep_format'));
+			$arrLogAllowTransation["DEPTACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogAllowAccountTransation["deptaccount_no"],$formatDept);
 			$arrLogAllowTransation["DESTINATION_TYPE"] = $rowLogAllowAccountTransation["destination_type"];
 			$arrLogAllowTransation["LIMIT_AMT"] = $rowLogAllowAccountTransation["limit_transaction_amt"];
 			$arrLogAllowTransation["LIMIT_AMT_FORMAT"] = number_format($rowLogAllowAccountTransation["limit_transaction_amt"],2);

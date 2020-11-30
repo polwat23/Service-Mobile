@@ -28,6 +28,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													  AND transfer_mode ='9'
 												ORDER BY trans.operate_date DESC");
 		$fetLogDepositOnline->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogDepositOnline = $fetLogDepositOnline->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositOnline = array();
 			$arrLogDepositOnline["REF_NO"] = $rowLogDepositOnline["ref_no"];
@@ -36,10 +37,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogDepositOnline["DEVICE_NAME"] = $rowLogDepositOnline["device_name"];
 			$arrLogDepositOnline["TRANSACTION_TYPE_CODE"] = $rowLogDepositOnline["transaction_type_code"];
 			$arrLogDepositOnline["FROM_ACCOUNT"] = $rowLogDepositOnline["from_account"];
-			$arrLogDepositOnline["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogDepositOnline["from_account"],$func->getConstant('dep_format'));
+			$arrLogDepositOnline["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogDepositOnline["from_account"],$formatDept);
 			$arrLogDepositOnline["DESTINATION_TYPE"] = $rowLogDepositOnline["destination_type"];
 			$arrLogDepositOnline["DESTINATION"] = $rowLogDepositOnline["destination"];
-			$arrLogDepositOnline["DESTINATION_FORMAT"]= $lib->formataccount($rowLogDepositOnline["destination"],$func->getConstant('dep_format'));
+			$arrLogDepositOnline["DESTINATION_FORMAT"]= $lib->formataccount($rowLogDepositOnline["destination"],$formatDept);
 			$arrLogDepositOnline["TRANSFER_MODE"] = $rowLogDepositOnline["transfer_mode"];
 			$arrLogDepositOnline["AMOUNT"] = $rowLogDepositOnline["amount"];
 			$arrLogDepositOnline["AMOUNT_FORMAT"] = number_format($rowLogDepositOnline["amount"],2);

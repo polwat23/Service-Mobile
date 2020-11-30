@@ -126,17 +126,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchFormatAccBank->execute();
 		$rowFormatAcc = $fetchFormatAccBank->fetch();
 		$summary = 0;
+		$formatDept = $func->getConstant('dep_format');
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrayRecon = array();
 			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["transaction_type_code"];
 			if($rowRecon["trans_flag"] == '1'){
 				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$rowFormatAcc["bank_format_account"]);
 			}else{
-				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$func->getConstant('dep_format'));
+				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$formatDept);
 			}
 			$arrayRecon["FROM_ACCOUNT"] = $rowRecon["from_account"];
 			if($rowRecon["trans_flag"] == '1'){
-				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$func->getConstant('dep_format'));
+				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$formatDept);
 			}else{
 				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$rowFormatAcc["bank_format_account"]);
 			}

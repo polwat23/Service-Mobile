@@ -27,6 +27,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												WHERE trans.transfer_mode !='9'
 												ORDER BY trans.operate_date DESC");
 		$fetLogTranfer->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogTransfer = $fetLogTranfer->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTransfer = array();
 			$arrLogTransfer["REF_NO"] = $rowLogTransfer["ref_no"];
@@ -35,10 +36,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTransfer["DEVICE_NAME"] = $rowLogTransfer["device_name"];
 			$arrLogTransfer["TRANSACTION_TYPE_CODE"] = $rowLogTransfer["transaction_type_code"];
 			$arrLogTransfer["FROM_ACCOUNT"] = $rowLogTransfer["from_account"];
-			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransfer["from_account"],$func->getConstant('dep_format'));
+			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransfer["from_account"],$formatDept);
 			$arrLogTransfer["DESTINATION_TYPE"] = $rowLogTransfer["destination_type"];
 			$arrLogTransfer["DESTINATION"] = $rowLogTransfer["destination"];
-			$arrLogTransfer["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransfer["destination"],$func->getConstant('dep_format'));
+			$arrLogTransfer["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransfer["destination"],$formatDept);
 			$arrLogTransfer["TRANSFER_MODE"] = $rowLogTransfer["transfer_mode"];
 			$arrLogTransfer["AMOUNT"] = $rowLogTransfer["amount"];
 			$arrLogTransfer["AMOUNT_FORMAT"] = number_format($rowLogTransfer["amount"],2);

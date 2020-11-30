@@ -112,12 +112,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchReconcile->execute($arrayExecute);
 
 		$summary = 0;
+		$formatDept = $func->getConstant('dep_format');
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrayRecon = array();
 			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["transaction_type_code"];
-			$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$func->getConstant('dep_format'));
+			$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$formatDept);
 			$arrayRecon["FROM_ACCOUNT"] = $rowRecon["from_account"];
-			$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$func->getConstant('dep_format'));
+			$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$formatDept);
 			$arrayRecon["REF_NO"] = $rowRecon["ref_no"];
 			$arrayRecon["DESTINATION"] = $rowRecon["destination"];
 			$arrayRecon["TRANS_FLAG"] = $rowRecon["trans_flag"];
