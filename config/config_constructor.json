@@ -20,6 +20,7 @@
 	"DEFAULT_BANNER_COLOR_TEXT" : "#000000",
 	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x",
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
+	"LINE_NOTIFY_DEPOSIT" : "LnyMuVZWLM53IZ155yJ82moN6IEkJDOZhGiFH4hVA2u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member"

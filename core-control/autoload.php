@@ -20,7 +20,11 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}
 }
-
+if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
+   ob_start("ob_gzhandler");
+}else{
+   ob_start();
+}
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');

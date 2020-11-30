@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																					loguseapplication l
 																				INNER JOIN gcuserlogin g ON
 																					g.id_userlogin = l.id_userlogin
+																				WHERE l.access_date BETWEEN NOW() - INTERVAL 3 MONTH and NOW()
 																					ORDER BY g.login_date DESC");
 		$fetchApplicationUseLog->execute();
 		while($rowAppUseLog = $fetchApplicationUseLog->fetch(PDO::FETCH_ASSOC)){

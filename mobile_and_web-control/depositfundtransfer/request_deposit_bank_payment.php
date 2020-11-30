@@ -34,10 +34,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		if(!$responseAPI["RESULT"]){
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 														,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,id_userlogin,bank_code)
-														VALUES(:ref_no,'DTB',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',
+														VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',
 														NOW(),:member_no,:ref_no1,:id_userlogin,:bank_code)");
 			$insertTransactionLog->execute([
 				':ref_no' => $ref_no,
+				':itemtype' => $rowDataDeposit["itemtype_dep"],
 				':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 				':destination' => $coop_account_no,
 				':amount' => $dataComing["amt_transfer"],
@@ -67,11 +68,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
-			$transaction_no = $arrResponse->TRANSACTION_NO;
-			$etn_ref = $arrResponse->EXTERNAL_REF;
-			$fetchDataDeposit = $conmysql->prepare("SELECT bank_code,deptaccount_no_bank FROM gcbindaccount WHERE sigma_key = :sigma_key");
-			$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
-			$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
+			if($rowDataDeposit["bank_code"] == '004'){
+				$refno_source = $arrResponse->EXTERNAL_REF;
+				$etn_refno = $arrResponse->TRANSACTION_NO;
+			}else if($rowDataDeposit["bank_code"] == '006'){
+				$refno_source = $arrResponse->KTB_REF;
+				$etn_refno = $arrResponse->TRANSACTION_NO;
+			}
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
 			$arrDataAPI["ToCoopAccountNo"] = $coop_account_no;
@@ -83,10 +86,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/DepositFromBankAccount",$arrDataAPI,$arrHeaderAPI);
 			if(!$arrResponseAPI["RESULT"]){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,'DTB',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,
+															coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
+															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',
+															:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:etn_refno,:id_userlogin,:ref_no_source,:bank_code)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
+					':itemtype' => $rowDataDeposit["itemtype_dep"],
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
 					':amount' => $dataComing["amt_transfer"],
@@ -96,8 +102,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
+					':etn_refno' => $etn_refno,
 					':id_userlogin' => $payload["id_userlogin"],
-					':ref_no_source' => $transaction_no,
+					':ref_no_source' => $refno_source,
 					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 				]);
 				$arrayStruc = [
@@ -110,9 +117,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':response_message' => "Server cannot connect"
 				];
 				$log->writeLog('deposittrans',$arrayStruc);
-				$message_error = "มีรายการฝากมาจาก KBANK ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
-				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ Server cannot connect";
+				$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ติดต่อ Service เงินฝากไม่ได้";
 				$lib->sendLineNotify($message_error);
+				$message_error = "มีรายการฝากมาจาก KBANK ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$etn_refno.
+				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ Server cannot connect";
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
@@ -136,7 +145,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						}
 					}
 				}
-				$arrayResult['EXTERNAL_REF'] = $etn_ref;
+				$arrayResult['EXTERNAL_REF'] = $etn_refno;
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
@@ -147,10 +156,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$ResponseAPI = json_decode($arrResponseAPI);
 			if($ResponseAPI->responseCode != "200"){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,'DTB',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,
+															coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
+															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',
+															:operate_date,'-9',NOW(),:member_no,:ref_no1,:slip_no,:etn_refno,:id_userlogin,:ref_no_source,:bank_code)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
+					':itemtype' => $rowDataDeposit["itemtype_dep"],
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
 					':amount' => $dataComing["amt_transfer"],
@@ -160,8 +172,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
+					':etn_refno' => $etn_refno,
 					':id_userlogin' => $payload["id_userlogin"],
-					':ref_no_source' => $transaction_no,
+					':ref_no_source' => $refno_source,
 					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 				]);
 				$arrayStruc = [
@@ -174,9 +187,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':response_message' => $ResponseAPI->responseMessage
 				];
 				$log->writeLog('deposittrans',$arrayStruc);
-				$message_error = "มีรายการฝากมาจาก KBANK ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
-				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ ".json_encode($arrResponseAPI);
+				$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$ResponseAPI->responseMessage;
 				$lib->sendLineNotify($message_error);
+				$message_error = "มีรายการฝากมาจาก KBANK ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$etn_refno.
+				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ ".$ResponseAPI->responseMessage;
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				foreach($arrToken["LIST_SEND"] as $dest){
@@ -217,10 +232,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':deptaccount_no' => $coop_account_no,
 				':seq_no' => $ref_slipno
 			]);
-			$transaction_no = $arrResponse->TRANSACTION_NO;
-			$etn_ref = $arrResponse->EXTERNAL_REF;
 			$arrExecute = [
 				':ref_no' => $ref_no,
+				':itemtype' => $rowDataDeposit["itemtype_dep"],
 				':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 				':destination' => $coop_account_no,
 				':amount' => $dataComing["amt_transfer"],
@@ -230,15 +244,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':member_no' => $payload["member_no"],
 				':ref_no1' => $coop_account_no,
 				':slip_no' => $ref_slipno,
-				':etn_ref' => $etn_ref,
+				':etn_ref' => $etn_refno,
 				':id_userlogin' => $payload["id_userlogin"],
-				':ref_no_source' => $transaction_no,
+				':ref_no_source' => $refno_source,
 				':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
 			];
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 														,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 														ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-														VALUES(:ref_no,'DTB',:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
+														VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
 														:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
 			if($insertTransactionLog->execute($arrExecute)){
 			}else{
@@ -267,7 +281,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					}
 				}
 			}
-			$arrayResult['EXTERNAL_REF'] = $etn_ref;
+			$arrayResult['EXTERNAL_REF'] = $etn_refno;
 			$arrayResult['TRANSACTION_NO'] = $ref_no;
 			$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 			$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
@@ -283,7 +297,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':operate_date' => $dateOper,
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
-				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_code' => $arrResponse->RESPONSE_CODE,
 				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
