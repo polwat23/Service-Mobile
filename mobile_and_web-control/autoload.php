@@ -70,14 +70,14 @@ if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
 	$lib->sendLineNotify($message_error);
 	http_response_code(500);
-	exit();
+	
 }
 if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
 	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
 	$lib->sendLineNotify($message_error);
 	$func->MaintenanceMenu("System");
 	http_response_code(500);
-	exit();
+	
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
@@ -100,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(400);
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../include/exit_footer.php');
+						
 					}
 					$rowLogin = $func->checkLogin($payload["id_token"]);
 					if(!$rowLogin["RETURN"]){
@@ -118,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../include/exit_footer.php');
+						
 					}
 					$rowStatus = $func->checkAccStatus($payload["member_no"]);
 					if(!$rowStatus){
@@ -128,8 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT-88'][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../include/exit_footer.php');
+						
 					}
 				}catch (ValidateException $e) {
 					$errorCode = $e->getCode();
@@ -138,8 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../include/exit_footer.php');
+						
 					}else if($errorCode === 4){
 						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
 							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
@@ -152,8 +152,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 										$arrayResult['RESPONSE_MESSAGE'] = "";
 										$arrayResult['RESULT'] = FALSE;
 										http_response_code(401);
-										echo json_encode($arrayResult);
-										exit();
+										require_once('../include/exit_footer.php');
+										
 									}else{
 										$rowLogin = $func->checkLogin($payload["id_token"]);
 										if(!$rowLogin["RETURN"]){
@@ -170,15 +170,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
 											$arrayResult['RESULT'] = FALSE;
 											http_response_code(401);
-											echo json_encode($arrayResult);
-											exit();
+											require_once('../include/exit_footer.php');
+											
 										}else{
 											$arrayResult['RESPONSE_CODE'] = "WS0032";
 											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 											$arrayResult['RESULT'] = FALSE;
 											http_response_code(401);
-											echo json_encode($arrayResult);
-											exit();
+											require_once('../include/exit_footer.php');
+											
 										}
 									}
 								}
@@ -188,16 +188,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../include/exit_footer.php');
+							
 						}
 					}else{
 						$arrayResult['RESPONSE_CODE'] = "WS0014";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						http_response_code(401);
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../include/exit_footer.php');
+						
 					}
 				}
 			}else{
@@ -205,16 +205,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../include/exit_footer.php');
+				
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../include/exit_footer.php');
+			
 		}
 	}else{
 		$anonymous = true;
@@ -222,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 }else{
 	$arrayResult['RESULT'] = TRUE;
 	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../include/exit_footer.php');
+	
 }
 ?>

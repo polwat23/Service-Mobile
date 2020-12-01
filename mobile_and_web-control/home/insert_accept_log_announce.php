@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			':id_userlogin' => $payload["id_userlogin"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -30,8 +30,8 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$insertResponseAnn = $conmysql->prepare("INSERT INTO logacceptannounce(member_no,id_announce,id_userlogin)
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			':id_userlogin' => $payload["id_userlogin"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -59,8 +59,8 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}
 }else{
@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

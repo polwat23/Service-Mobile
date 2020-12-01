@@ -68,39 +68,33 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(400);
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../include/exit_footer.php');
 				}
 			}catch (ValidateException $e) {
 				$errorCode = $e->getCode();
 				if($errorCode === 3){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../include/exit_footer.php');
 				}else if($errorCode === 4){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../include/exit_footer.php');
 				}else{
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../include/exit_footer.php');
 				}
 			}
 		}else{
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../include/exit_footer.php');
 		}
 	}
 }else{
 	$arrayResult['RESULT'] = TRUE;
 	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../include/exit_footer.php');
 }
 ?>

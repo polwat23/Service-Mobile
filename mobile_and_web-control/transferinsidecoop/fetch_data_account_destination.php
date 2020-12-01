@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			$arrayResult['RESPONSE_CODE'] = "WS0045";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrarDataAcc = array();
 		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
@@ -30,8 +30,8 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrResponseAPI = json_decode($arrResponseAPI);
 		if($arrResponseAPI->responseCode == "200"){
@@ -48,27 +48,27 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 							$arrarDataAcc["DEPT_TYPE"] = $accData->accountDesc;
 							$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../include/exit_footer.php');
 						}else{
 							$arrayResult['RESPONSE_CODE'] = "WS0026";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 					}else{
 						$arrayResult['RESPONSE_CODE'] = "WS0054";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0025";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}
 		}else{
@@ -79,16 +79,16 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
