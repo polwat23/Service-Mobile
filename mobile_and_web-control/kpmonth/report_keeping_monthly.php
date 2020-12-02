@@ -171,7 +171,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -186,16 +186,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -212,8 +212,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 
 function GenerateReport($dataReport,$header,$lib){
@@ -245,7 +245,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
 				<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย</p>
 				<p style="margin-top: -25px;font-size: 18px;">ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-712585, 053-756203</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. ฝ่ายบริหารทั่วไป 086-451-9488, ฝ่ายสินเชื่อ  086-451-9187</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
 				</div>
 			</div>
