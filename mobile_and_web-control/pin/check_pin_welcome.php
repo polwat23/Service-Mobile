@@ -13,9 +13,9 @@ if(isset($rowPin["pin"])){
 	}else{
 		$arrayResult['RESULT'] = 1;
 	}
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 }else{
 	$arrayResult['RESULT'] = 0;
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 }
 ?>
