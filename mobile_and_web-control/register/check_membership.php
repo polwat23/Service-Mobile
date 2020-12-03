@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}else{
 		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
@@ -42,14 +42,14 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 			if($rowMember["CARD_PERSON"] != $dataComing["id_card"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0060";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}
 }else{
@@ -80,6 +80,6 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

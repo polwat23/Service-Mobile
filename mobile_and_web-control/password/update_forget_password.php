@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT account_status,email FROM gcmemberaccount 
@@ -32,21 +32,21 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		if(empty($rowChkMemb["email"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0049";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		if(strtolower($dataComing["email"]) != strtolower($rowChkMemb["email"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0050";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
 		$getNameMember->execute([':member_no' => $member_no]);
@@ -87,7 +87,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}
 			}else{
 				$filename = basename(__FILE__, '.php');
@@ -103,7 +103,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 		}else{
 			$conmysql->rollback();
@@ -124,14 +124,14 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -149,6 +149,6 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

@@ -24,14 +24,14 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -49,6 +49,6 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

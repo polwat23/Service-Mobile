@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -44,6 +44,6 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

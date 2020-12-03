@@ -22,22 +22,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($keep_forward == '1'){
 			if($MonthForCheck < $max_recv){
 				http_response_code(204);
-				exit();
+				
 			}else{
 				if($DayForCheck < $dateshow_kpmonth){
 					http_response_code(204);
-					exit();
+					
 				}
 			}
 		}else{
 			if($DayForCheck < $dateshow_kpmonth){
 				http_response_code(204);
-				exit();
+				
 			}
 		}
 		if((isset($rowBeenPay["RECV_PERIOD"]) && $rowBeenPay["RECV_PERIOD"] != "") || (empty($rowLastRecv["MAX_RECV"]) && $rowLastRecv["MAX_RECV"] == "")){
 			http_response_code(204);
-			exit();
+			
 		}
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
@@ -109,7 +109,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -127,6 +127,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

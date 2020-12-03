@@ -25,6 +25,6 @@ if($lib->checkCompleteArgument(['fcm_token'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>
