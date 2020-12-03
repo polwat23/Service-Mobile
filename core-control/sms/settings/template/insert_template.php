@@ -24,8 +24,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
 					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_stampflag,stamp_table,where_stamp,set_column,is_bind_param,create_by)
@@ -45,8 +44,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}
 			}else{
@@ -64,8 +62,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
 					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
@@ -82,8 +79,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}
 			}
@@ -98,24 +94,21 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 		])){
 			$conmysql->commit();
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../../include/exit_footer.php');
 		}else{
 			$conmysql->rollback();
 			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

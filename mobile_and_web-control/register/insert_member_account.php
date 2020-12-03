@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
 		$arrayResult['PASSWORD'] = $dataComing["password"];
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$filename = basename(__FILE__, '.php');
 		$logStruc = [
@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrayResult['RESPONSE_CODE'] = "WS1018";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

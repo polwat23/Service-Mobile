@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 			$arrayResult['RESPONSE_CODE'] = "WS0008";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}else{
 			if($createAvatar){
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 					$arrayResult['PATH_AVATAR'] = $config["URL_SERVICE"].$path_avatar;
 					$arrayResult['PATH_AVATAR_WEBP'] = $config["URL_SERVICE"].'/resource/avatar/'.$member_no.'/'.$createAvatar["webP_path"];
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
@@ -50,14 +50,14 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 					$arrayResult['RESPONSE_CODE'] = "WS1008";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 					exit();
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0007";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 		}
@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -84,7 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
@@ -31,21 +31,21 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		if(empty($rowChkMemb["email"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0049";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		if(strtolower($dataComing["email"]) != strtolower($rowChkMemb["email"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0050";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 				$conmysql->commit();
 				if($func->logoutAll(null,$member_no,'-9')){
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 					$arrayResult['RESPONSE_CODE'] = "WS1014";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 					exit();
 				}
 			}else{
@@ -102,7 +102,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 				$arrayResult['RESPONSE_CODE'] = "WS0019";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 		}else{
@@ -123,14 +123,14 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			$arrayResult['RESPONSE_CODE'] = "WS1014";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -148,7 +148,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

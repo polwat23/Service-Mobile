@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0069";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 		}else{
@@ -43,12 +43,12 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
@@ -68,7 +68,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(401);
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 			$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
@@ -79,12 +79,12 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			];
 			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0011";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
@@ -92,7 +92,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		$pin_split = str_split($dataComing["pin"]);
@@ -104,7 +104,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0057";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 			if($key < strlen($dataComing["pin"]) - 1){
@@ -124,7 +124,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
@@ -145,7 +145,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(401);
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 			$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
@@ -156,7 +156,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			];
 			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -174,7 +174,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1009";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}
@@ -193,7 +193,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>
