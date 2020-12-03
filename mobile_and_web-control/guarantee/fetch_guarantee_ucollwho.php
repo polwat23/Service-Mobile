@@ -11,15 +11,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
-											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT,
-											NVL(LCM.principal_balance,0) as LOAN_BALANCE
+											NVL(LCM.principal_balance,0) as LOAN_BALANCE,
+											LCM.LAST_PERIODPAY as LAST_PERIOD,
+											LCM.period_payamt as PERIOD
 											FROM
 											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
 											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
 											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
 											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
 											WHERE
-											LCM.CONTRACT_STATUS > 0 and LCM.CONTRACT_STATUS <> 8
+											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '01'
 											AND LCC.REF_COLLNO = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
@@ -32,20 +33,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
 			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
 			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOAN_BALANCE"],2);
-			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
+			$arrayColl["LAST_PERIOD"] = $rowUcollwho["LAST_PERIOD"].' / '.$rowUcollwho["PERIOD"];
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
 		}
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -62,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

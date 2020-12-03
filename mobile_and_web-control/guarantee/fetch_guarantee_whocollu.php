@@ -8,12 +8,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["contract_no"])){
 			$arrayGroupLoan = array();
 			$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
-			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,
+												lnm.LAST_PERIODPAY as LAST_PERIOD,
+												lnm.period_payamt as PERIOD,
+												lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
 												and lnm.contract_status > 0 and lnm.contract_status <> 8");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
 			$rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC);
-			$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+			$arrayGroupLoan["LOAN_BALANCE"] = number_format($rowWhocollu["PRNBAL"],2);
+			$arrayGroupLoan["LAST_PERIOD"] = $rowWhocollu["LAST_PERIOD"].' / '.$rowWhocollu["PERIOD"];
 			$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 			$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
 			$arrGrpAllLoan = array();
@@ -44,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														WHERE MMB.member_no = :member_no");
 					$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
-					$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+					$arrGroupAllMember["SHARE_COLL_AMT"] = null;
 					$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
@@ -87,17 +91,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGroupLoan["GUARANTEE"] = $arrGrpAllLoan;
 			$arrayResult['CONTRACT_COLL'][] = $arrayGroupLoan;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrGroupAllLoan = array();
-			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,
+												lnm.LAST_PERIODPAY as LAST_PERIOD,
+												lnm.period_payamt as PERIOD,
+												lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.member_no = :member_no
 												and lnm.contract_status > 0 and lnm.contract_status <> 8
-                         						GROUP BY lnm.loancontract_no,NVL(lnm.loanapprove_amt,0),lt.LOANTYPE_DESC,lnm.principal_balance");
+                         						GROUP BY lnm.loancontract_no,lnm.LAST_PERIODPAY,lt.LOANTYPE_DESC,lnm.principal_balance,lnm.period_payamt");
 			$getWhocollu->execute([':member_no' => $member_no]);
 			while($rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC)){
 				$arrayGroupLoan = array();
-				$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
+				$arrayGroupLoan["LOAN_BALANCE"] = number_format($rowWhocollu["PRNBAL"],2);
+				$arrayGroupLoan["LAST_PERIOD"] = $rowWhocollu["LAST_PERIOD"].' / '.$rowWhocollu["PERIOD"];
 				$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 				$arrayGroupLoan["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];
 				$arrGrpAllLoan = array();
@@ -128,7 +136,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 															WHERE MMB.member_no = :member_no");
 						$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
-						$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+						$arrGroupAllMember["SHARE_COLL_AMT"] = null;
 						$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 						$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 					}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
@@ -173,15 +181,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayResult['CONTRACT_COLL'] = $arrGroupAllLoan;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -198,7 +206,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
