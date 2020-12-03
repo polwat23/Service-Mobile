@@ -15,7 +15,8 @@ $getStmItemTypeAllow->execute();
 while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
 	$arrayStmItem[] = "'".$rowStmItemType["dept_itemtype_code"]."'";
 }
-
+$formatDept = $func->getConstant('hidden_dep');
+$templateMessage = $func->getTemplateSystem('DepositInfo',1);
 $fetchDataSTM = $conmssql->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,dm.MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO
 									FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
 									LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no and dsm.coop_id = dm.coop_id
@@ -23,11 +24,10 @@ $fetchDataSTM = $conmssql->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DE
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
-	$templateMessage = $func->getTemplateSystem('DepositInfo',1);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
 			$dataMerge = array();
-			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
 			$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 			$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
