@@ -25,5 +25,5 @@ require_once('../autoload.php');
 	}
 	$arrayResult["UPLOADEDFILE"] = $arrayGroup;
 	$arrayResult['RESULT'] = TRUE;
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 ?>
