@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					echo json_encode($arrayResult);
-					exit();
+					
 				}
 			}catch(SoapFault $e){
 				$filename = basename(__FILE__, '.php');
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
-				exit();
+				
 			}
 		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -96,6 +96,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
-	exit();
+	
 }
 ?>
