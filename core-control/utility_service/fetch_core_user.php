@@ -10,10 +10,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	}
 	$arrayResult['USERNAME'] = $arrayGroupAll;
 	$arrayResult['RESULT'] = TRUE;
-	require_once('../../../../include/exit_footer.php');
+	require_once('../../include/exit_footer.php');
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../../../include/exit_footer.php');
+	require_once('../../include/exit_footer.php');
 }
 ?>
