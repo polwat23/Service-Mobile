@@ -17,8 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												FROM
 													logdepttransbankerror db
 												INNER JOIN gcuserlogin log
-												ON log.id_userlogin = db.id_userlogin
-												ORDER BY 	db.transaction_date DESC ");
+												ON log.id_userlogin = db.id_userlogin");
 		$fetchTranfertError->execute();
 		while($rowLogTranferError = $fetchTranfertError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTranfertError = array();
@@ -37,17 +36,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["LOG_TRANFER_ERROR_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>
