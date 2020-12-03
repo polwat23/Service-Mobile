@@ -70,7 +70,17 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$rowNameLn = $fetchNameLoanDes->fetch(PDO::FETCH_ASSOC);
 					$arrayTrans["DESTINATION_NAME"] = $rowNameLn["LOANTYPE_DESC"];
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขสัญญา';
-					$arrayTrans["DESTINATION"] = preg_replace('/\//','',$rowTrans["DESTINATION"]);
+					$contract_no = preg_replace('/\//','',$rowTrans["DESTINATION"]);
+					if(mb_stripos($contract_no,'.') === FALSE){
+						$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
+						if(mb_strlen($contract_no) == 10){
+							$arrayTrans["DESTINATION"] = $loan_format;
+						}else if(mb_strlen($contract_no) == 11){
+							$arrayTrans["DESTINATION"] = $loan_format.'-'.mb_substr($contract_no,10);
+						}
+					}else{
+						$arrayTrans["DESTINATION"] = $contract_no;
+					}
 				}else{
 					$fetchNameDes = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME
 																	FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
@@ -94,14 +104,14 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 		}
 		$arrayResult['TRANSACTION_LIST'] = $arrayTransaction;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -118,7 +128,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

@@ -37,6 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		]);
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
+		//$arrayHeaderAcc["SEQUEST_AMOUNT"] = number_format(0,2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
 		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
@@ -104,14 +105,14 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -128,7 +129,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

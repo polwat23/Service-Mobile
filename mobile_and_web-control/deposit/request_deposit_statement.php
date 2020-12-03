@@ -45,7 +45,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
 			$arrayGenPDF = generatePDFSTM($dompdf,$arrayData,$lib,$passwordPDF);
-			$arrayResult['PATH'] = $arrayGenPDF;
 			if($arrayGenPDF["RESULT"]){
 				$arrayAttach[] = $arrayGenPDF["PATH"];
 			}
@@ -60,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				unlink($path);
 			}
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -73,16 +72,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$arrayResult['RESPONSE_CODE'] = "WS0019";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -99,8 +98,8 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
@@ -189,10 +188,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์กรมวิชาการเกษตร
+					สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Department of agriculture savings and credit cooperative ltd.
+					Chiangrai Public Health Saving And Credit Co-operative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -295,11 +294,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathfile = __DIR__.'/../../resource/pdf/statement';
-	if(!file_exists($pathfile)){
-		mkdir($pathfile, 0777, true);
-	}
-	$pathOutput = $pathfile."/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
+	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
 	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
 	$output = $dompdf->output();

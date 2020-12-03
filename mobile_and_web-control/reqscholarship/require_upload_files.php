@@ -4,13 +4,13 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ScholarshipRequest')){
 		$arrFileUploaded = array();
-		$arrUploadFiles = array();
 		$checkFileUpload = $conoracle->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
-															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status <> 8 order by seq_no");
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status = 1 order by seq_no");
 		$checkFileUpload->execute([':child_id' => $dataComing["childcard_id"]]);
 		while($rowFileUpload = $checkFileUpload->fetch(PDO::FETCH_ASSOC)){
 			$arrFileUploaded[] = $rowFileUpload;
 		}
+		$arrUploadFiles = array();
 		$arrayFileManda = [
 			(object) [
 				'seq_no' => 1,
@@ -68,7 +68,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				$arrayUpload["IS_UPLOADED"] = 0;
 				$arrUploadFiles[] = $arrayUpload;
 			}else{
-				$arrayUpload = array();
+					$arrayUpload = array();
 				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$rowUploadFile["SEQ_NO"];
 				$arrayUpload["UPLOAD_SEQ"] = $rowUploadFile["SEQ_NO"];
 				$arrayUpload["UPLOAD_LABEL"] = $rowUploadFile["DOCUMENT_DESC"];
@@ -77,30 +77,16 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				$arrUploadFiles[] = $arrayUpload;
 			}
 		}
-		$getFileUploadWaitforSend = $conoracle->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
-																		WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status = 8 order by seq_no");
-		$getFileUploadWaitforSend->execute([':child_id' => $dataComing["childcard_id"]]);
-		while($rowFileWait = $getFileUploadWaitforSend->fetch(PDO::FETCH_ASSOC)){
-			if(array_search($rowFileWait["SEQ_NO"],array_column($arrUploadFiles,'UPLOAD_SEQ')) === False){
-				$arrayUpload = array();
-				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$rowFileWait["SEQ_NO"];
-				$arrayUpload["UPLOAD_SEQ"] = $rowFileWait["SEQ_NO"];
-				$arrayUpload["UPLOAD_LABEL"] = $rowFileWait["DOCUMENT_DESC"];
-				$arrayUpload["IS_MANDATORY"] = 1;
-				$arrayUpload["IS_UPLOADED"] = 0;
-				$arrUploadFiles[] = $arrayUpload;
-			}
-		}
 		$arrayResult['LIST_UPLOAD'] = $arrUploadFiles;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -117,7 +103,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

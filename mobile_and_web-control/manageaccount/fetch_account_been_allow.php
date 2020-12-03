@@ -20,6 +20,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
+					if($rowDetailAcc["TRANSONLINE_FLAG"] == '0'){
+						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_JOIN_FLAG_OFF'][0][$lang_locale];
+					}
 					$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
 																			FROM gcconstantaccountdept
 																			WHERE dept_type_code = :depttype_code");
@@ -59,18 +62,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			http_response_code(204);
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -87,7 +90,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
