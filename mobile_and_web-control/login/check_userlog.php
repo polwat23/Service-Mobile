@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
 		if($dataComing["is_root"] == "1"){
@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 		}else{
 			$updateBlacklist = $conmysql->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
@@ -44,12 +44,12 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(401);
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 			$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 			$arrayStruc = [
@@ -85,7 +85,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}else{
 		if(strtolower($lib->mb_str_pad($dataComing["pin"])) == $payload["member_no"]){
@@ -93,7 +93,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		$pin_split = str_split($dataComing["pin"]);
 		$countSeqNumber = 1;
@@ -105,7 +105,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 			if($key < strlen($dataComing["pin"]) - 1){
 				if($value == ($dataComing["pin"][$key + 1] - 1)){
@@ -125,7 +125,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
@@ -146,7 +146,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(401);
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 			$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 			$arrayStruc = [
@@ -175,7 +175,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}
 }else{
@@ -194,6 +194,6 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

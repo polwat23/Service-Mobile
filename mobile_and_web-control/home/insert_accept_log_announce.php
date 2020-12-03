@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}else{
 		$insertResponseAnn = $conmysql->prepare("INSERT INTO logacceptannounce(member_no,id_announce,id_userlogin)
@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}
 }else{
@@ -79,6 +79,6 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

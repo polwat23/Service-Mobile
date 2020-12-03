@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}else{
 			if($createAvatar){
 				$path_avatar = '/resource/avatar/'.$member_no.'/'.$createAvatar["normal_path"];
@@ -51,14 +51,14 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0007";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				exit();
+				
 			}
 		}
 	}else{
@@ -67,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -85,6 +85,6 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -74,6 +74,6 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>

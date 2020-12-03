@@ -19,26 +19,26 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}else if($rowReqStatus["REQUEST_STATUS"] == 11){
 					$arrayResult['CAN_CLEAR'] = TRUE;
 					$arrayResult['RESPONSE_CODE'] = "WS0077";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}else if($rowReqStatus["REQUEST_STATUS"] == -1){
 					$arrayResult['RESPONSE_CODE'] = "WS0078";
 					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${REMARK}',($rowReqStatus["CANCEL_REMARK"] ?? "เหตุผลบางประการ"),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0079";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}
 			}else{
 				$delOldSchShip = $conoracle->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status = 8");
@@ -112,7 +112,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 										$arrayResult['RESULT'] = FALSE;
 										require_once('../../include/exit_footer.php');
-										exit();
+										
 									}
 								}
 							}
@@ -162,7 +162,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 									$arrayResult['RESULT'] = FALSE;
 									require_once('../../include/exit_footer.php');
-									exit();
+									
 								}
 							}
 						}
@@ -197,7 +197,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-					exit();
+					
 				}
 			}
 		}else{
@@ -205,7 +205,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -213,7 +213,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -231,6 +231,6 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	exit();
+	
 }
 ?>
