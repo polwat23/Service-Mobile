@@ -4,8 +4,30 @@ namespace Connection;
 
 class connection {
 	public $conmysql;
+	public $conoldmysql;
 	public $conoracle;
 	
+	public function connecttooldmysql() {
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
+		$json_data = json_decode($json,true);
+		$dbhost = $json_data["DBMOBILE_HOST_OLD"];
+		$dbuser = $json_data["DBMOBILE_USERNAME_OLD"];
+		$dbpass = $json_data["DBMOBILE_PASSWORD_OLD"];
+		$dbname = $json_data["DBMOBILE_DATABASENAME_OLD"];
+		try{
+			$this->conoldmysql = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+			$this->conoldmysql->exec("set names utf8mb4");
+			return $this->conoldmysql;
+		}catch(\Throwable $e){
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To MySQL Old Server";
+			return $arrayError;
+			http_response_code(200);
+			exit();
+		}
+	}
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);
