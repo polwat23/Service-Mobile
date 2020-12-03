@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 			':id_bindaccount' => $dataComing["id_bindaccount"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 			$arrayResult['RESPONSE_CODE'] = "WS1025";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','bind_status']
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

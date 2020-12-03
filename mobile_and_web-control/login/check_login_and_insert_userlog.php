@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrayResult['RESPONSE_CODE'] = "WS0069";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 			if($dataComing["is_root"] == "1"){
@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$arrayResult['RESPONSE_CODE'] = "WS0069";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 					exit();
 				}
 			}
@@ -57,14 +57,14 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		if($rowPassword['account_status'] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}else if($rowPassword['account_status'] == '-9'){
 			if($rowPassword["temppass_is_md5"] == '1'){
@@ -162,7 +162,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								':member_no' => $member_no
 							]);
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();
 							$filename = basename(__FILE__, '.php');
@@ -181,7 +181,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							$arrayResult['RESPONSE_CODE'] = "WS1001";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
+							require_once('../../include/exit_footer.php');
 							exit();
 						}
 					}else{
@@ -206,7 +206,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrayResult['RESPONSE_CODE'] = "WS1001";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
+						require_once('../../include/exit_footer.php');
 						exit();
 					}
 				}else{
@@ -230,7 +230,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$arrayResult['RESPONSE_CODE'] = "WS1001";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 					exit();
 				}
 			}catch (PDOExecption $e) {
@@ -248,7 +248,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrayResult['RESPONSE_CODE'] = "WS1001";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 		}else{
@@ -269,21 +269,21 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrayResult['RESPONSE_CODE'] = "WS0048";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 			$arrayResult['COUNTER_CAUTION'] = 5 - $rowCounter["counter_wrongpass"];
 			$arrayResult['RESPONSE_CODE'] = "WS0002";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -301,7 +301,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

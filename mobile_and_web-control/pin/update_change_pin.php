@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		$pin_split = str_split($dataComing["pin"]);
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0057";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 			if($key < strlen($dataComing["pin"]) - 1){
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 		
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1015";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -95,7 +95,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

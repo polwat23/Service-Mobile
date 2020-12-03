@@ -13,20 +13,17 @@ if($lib->checkCompleteArgument(['unique_id','arr_id_blacklist'],$dataComing)){
 			$arrayResult['data'] = $dataComing["arr_id_blacklist"];
 			$arrayResult['sql'] = "UPDATE gcdeviceblacklist SET is_blacklist = 0
 											WHERE id_blacklist IN(".implode(',',$dataComing["arr_id_blacklist"]).")";
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
-		echo json_encode($arrayResult);	
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

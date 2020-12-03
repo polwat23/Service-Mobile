@@ -18,19 +18,19 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 		}
 		if($validpassword){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>

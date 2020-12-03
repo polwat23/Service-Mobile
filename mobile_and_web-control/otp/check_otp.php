@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 	$callfile_now = strtotime(date('Y-m-d H:i:s'));
@@ -33,24 +33,24 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0016";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}else if($rowOTP["otp_status"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0015";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}else if($rowOTP["otp_status"] == '0'){
 				$updateUseOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '1' WHERE refno_otp = :ref_no");
 				$updateUseOTP->execute([':ref_no' => $dataComing["ref_no"]]);
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0033";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 				exit();
 			}
 		}else{
@@ -59,14 +59,14 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0013";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0012";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 		exit();
 	}
 }else{
@@ -84,7 +84,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 	exit();
 }
 ?>
