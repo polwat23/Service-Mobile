@@ -188,10 +188,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด
+					สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Chiangrai Public Health Saving And Credit Co-operative Limited
+					Tak Teacher Saving and Credit cooperative LTD
 			   </div>
 			   </div>
 				<div class="frame-info-user">
