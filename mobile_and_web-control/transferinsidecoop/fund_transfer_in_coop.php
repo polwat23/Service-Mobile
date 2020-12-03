@@ -107,7 +107,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -115,7 +115,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
-		exit();
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -133,6 +133,6 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
-	exit();
+	
 }
 ?>

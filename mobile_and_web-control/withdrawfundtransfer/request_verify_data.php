@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 		$getLimitPerDay = $conmysql->prepare("SELECT SUM(amount) AS all_amt_in_day FROM gctransaction WHERE result_transaction = '1' and trans_flag = '-1' and destination_type = '1'
 																and member_no = :member_no and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 		$arrSendData = array();
 		/*$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
@@ -79,7 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}*/
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
@@ -139,7 +139,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			}
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
-			exit();
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -147,7 +147,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		echo json_encode($arrayResult);
-		exit();
+		
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
@@ -155,6 +155,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	echo json_encode($arrayResult);
-	exit();
+	
 }
 ?>
