@@ -9,8 +9,8 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$pin_split = str_split($dataComing["pin"]);
 		$countSeqNumber = 1;
@@ -21,8 +21,8 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0057";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			if($key < strlen($dataComing["pin"]) - 1){
 				if($value == ($dataComing["pin"][$key + 1] - 1)){
@@ -41,8 +41,8 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -69,16 +69,16 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1015";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -95,7 +95,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

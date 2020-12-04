@@ -20,13 +20,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
-											mb.member_no,mb.MEMBGROUP_CODE,mg.MEMBGROUP_DESC
+											mb.member_no
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 											WHERE mb.resign_status = 0".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null))
@@ -34,10 +32,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
-			$arrayGroup["NAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
-			$arrayGroup["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
-			$arrayGroup["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			
 			$arrayGroup["CREATE_DATE"] = null;
 			$arrayGroup["UPDATE_DATE"] = null;
@@ -62,17 +58,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["USER_ACCOUNT"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

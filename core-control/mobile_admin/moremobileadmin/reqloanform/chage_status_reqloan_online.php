@@ -11,12 +11,10 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถอนุมัติใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}
 		}else if($dataComing["req_status"] == '7'){
 			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '7',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
@@ -26,12 +24,10 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถเปลี่ยนสถานะใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}
 		}else if($dataComing["req_status"] == '-9'){
 			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '-9',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
@@ -41,12 +37,10 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถยกเลิกใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}
 		}
 		$getDataReqDoc = $conmysql->prepare("SELECT member_no FROM gcreqloan WHERE reqloan_doc = :reqloan_doc");
@@ -72,16 +66,15 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				$lib->sendNotify($arrPayloadNotify,"person");
 			}
 		}
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
