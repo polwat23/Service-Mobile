@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$maxloan_amt = 0;
 			$oldBal = 0;
@@ -24,8 +24,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0084";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			$request_amt = $dataComing["request_amt"] ?? $maxloan_amt;
 			if($request_amt < $oldBal){
@@ -52,15 +52,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

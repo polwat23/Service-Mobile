@@ -21,8 +21,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_member_no'],$dataCo
 			$conmysql->rollback();
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเลขสมาชิกได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 		// 2 update gcuserlogin
 		$update_gcuserlogin = $conmysql->prepare("UPDATE gcuserlogin 
@@ -33,8 +32,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_member_no'],$dataCo
 			$conmysql->rollback();
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเลขสมาชิกได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 		// 3 update gcdeviceblacklist
 		$update_gcdeviceblacklist = $conmysql->prepare("UPDATE gcdeviceblacklist 
@@ -45,8 +43,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_member_no'],$dataCo
 			$conmysql->rollback();
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเลขสมาชิกได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 		// 4 update gchistory
 		$update_gchistory = $conmysql->prepare("UPDATE gchistory 
@@ -57,8 +54,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_member_no'],$dataCo
 			$conmysql->rollback();
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเลขสมาชิกได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 		
 		//log
@@ -72,17 +68,15 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_member_no'],$dataCo
 		
 		$arrayResult["RESULT"] = TRUE;
 		$conmysql->commit();
-		echo json_encode($arrayResult);	
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
