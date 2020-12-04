@@ -15,16 +15,14 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				if($createImage == 'oversize'){
 					$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../include/exit_footer.php');
 				}else{
 					if($createImage){
 						$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
 					}else{
 						$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../include/exit_footer.php');
 					}
 				}
 			}
@@ -90,7 +88,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$blukInsertNot = array();
 				}
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../include/exit_footer.php');
 			}else{
 				if($dataComing["type_send"] == "person"){
 					$blukInsert = array();
@@ -145,7 +143,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$blukInsertNot = array();
 					}
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$bulkInsert = array();
 					$arrToken = $func->getFCMToken('all');
@@ -193,18 +191,16 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						if($lib->sendNotify($arrPayloadNotify,'all')){
 							if($func->insertHistory($arrPayloadNotify,'1')){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
 								$arrayResult['RESULT'] = TRUE;
-								echo json_encode($arrayResult);
+								require_once('../../../include/exit_footer.php');
 							}else{
 								$arrayResult['RESPONSE'] = "ไม่สามารถส่งข้อความได้เนื่องจากไม่สามารถบันทึกประวัติการส่งแจ้งเตือนได้";
 								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
+								require_once('../../../include/exit_footer.php');
 							}
 						}else{
 							$arrayResult['RESPONSE'] = "ส่งข้อความล้มเหลว กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../include/exit_footer.php');
 						}
 					}else{
 						if(sizeof($bulkInsert) > 0){
@@ -214,8 +210,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						}
 						$arrayResult['RESPONSE'] = "ไม่พบบัญชีที่สามารถส่งได้กรุณาลองใหม่อีกครั้ง";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../include/exit_footer.php');
 					}
 				}
 			}
@@ -284,7 +279,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$bulkInsert = array();
 				}
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../include/exit_footer.php');
 			}else{
 				if($dataComing["type_send"] == "person"){
 					$arrGRPAll = array();
@@ -336,30 +331,26 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$bulkInsert = array();
 					}
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$arrayResult['RESPONSE'] = "ยังไม่รองรับรูปแบบการส่งนี้";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../include/exit_footer.php');
 				}
 			}
 		}else{
 			$arrayResult['RESPONSE'] = "ยังไม่รองรับรูปแบบการส่งนี้";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>

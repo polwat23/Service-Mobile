@@ -16,16 +16,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if($createImage == 'oversize'){
 						$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../include/exit_footer.php');
 					}else{
 						if($createImage){
 							$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
 						}else{
 							$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../include/exit_footer.php');
 						}
 					}
 				}
@@ -64,7 +62,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$query = $rowQuery['sms_query'];
 					if(stripos($query,'WHERE') === FALSE){
@@ -149,13 +147,12 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
 			}
 		}else{
 			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
@@ -194,7 +191,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$query = $rowQuery['sms_query'];
 					if(stripos($query,'WHERE') === FALSE){
@@ -272,25 +269,22 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>
