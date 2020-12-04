@@ -11,8 +11,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 					$arrayResult['RESPONSE_CODE'] = "WS0074";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
@@ -39,31 +39,20 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 				$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
 				$pay_period = preg_replace('/,/', '', number_format($responseSoap->period_payment,2));
-				$modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
-				$roundMod = fmod($pay_period,abs($modFactor));
-				if($modFactor > 0){
-					if($roundMod > 0){
-						$pay_period = $pay_period - $roundMod + abs($modFactor);
-					}
-				}else if($modFactor < 0){
-					if($roundMod > 0){
-						$pay_period = $pay_period - $roundMod;
-					}
-				}
 				if($pay_period > $dataComing["maxperiod_payment"]){
-					if(($pay_period - $dataComing["maxperiod_payment"]) > $rowPayRound["PAYROUND_FACTOR"]){
+					if(($dataComing["maxperiod_payment"] - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
 						$arrayResult = array();
 						$arrayResult['RESPONSE_CODE'] = "WS0071";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}
 				$arrayResult['RECEIVE_AMT'] = $request_net;
 				$arrayResult['PERIOD_PAYMENT'] = $pay_period ?? 0;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}catch(SoapFault $e){
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
@@ -76,8 +65,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 				$arrayResult['RESPONSE_CODE'] = "WS0062";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
@@ -94,16 +83,16 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 			$arrayResult['RESPONSE_CODE'] = "WS0062";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -120,7 +109,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

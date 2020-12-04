@@ -44,8 +44,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$conoracle->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถผ่านรายการลง dpdepttran ได้กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../include/exit_footer.php');
+					
 				}
 				unset($bulkInsert);
 				$bulkInsert = array();
@@ -60,23 +60,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayResult['RESPONSE'] = "ไม่สามารถผ่านรายการลง dpdepttran ได้กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['DDD'] = $insertDeptTran;
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
+				
 			}
 		}
 		$conoracle->commit();
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

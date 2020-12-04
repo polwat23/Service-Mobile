@@ -14,13 +14,13 @@ if($lib->checkCompleteArgument(['unique_id','id_constant','value_constant'],$dat
 			}else{
 				$arrayResult["RESULT"] = FALSE;
 			}
-			echo json_encode($arrayResult);
+			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "4003";
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเป็นค่าว่างได้";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "4003";
@@ -28,8 +28,8 @@ if($lib->checkCompleteArgument(['unique_id','id_constant','value_constant'],$dat
 		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "4004";
@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['unique_id','id_constant','value_constant'],$dat
 	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

@@ -56,8 +56,8 @@ if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isse
 				$arrayResult['RESPONSE'] = "Empty user for send notify";
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(203);
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}
 	}
@@ -66,7 +66,7 @@ if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isse
 	$arrayResult['RESPONSE'] = "Not complete parameter";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

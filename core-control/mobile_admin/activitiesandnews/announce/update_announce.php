@@ -14,8 +14,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg = $config["URL_SERVICE"]."resource/announce/".$createImage["normal_path"];
@@ -73,23 +73,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["announce_html"] = $dataComing["announce_html"];
-			echo json_encode($arrayResult);
+			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขประกาศได้ กรุณาติดต่อผู้พัฒนา ";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

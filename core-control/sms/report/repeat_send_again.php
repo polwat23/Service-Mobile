@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$bulkInsert = array();
 		}
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else if($dataComing["menu_component"] == 'reportsmsnotsuccess'){
 		$getMessageLog = $conmysql->prepare("SELECT topic,message,member_no,send_platform,tel_mobile,send_date,send_by,id_smstemplate
 											FROM smswasnotsent WHERE id_smsnotsent = :id_smsnotsent");
@@ -100,7 +100,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				$bulkInsert = array();
 			}
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../include/exit_footer.php');
 		}else{
 			$blukInsert = array();
 			$blukInsertNot = array();
@@ -149,7 +149,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				$blukInsertNot = array();
 			}
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../include/exit_footer.php');
 		}
 	}else if($dataComing["menu_component"] == 'reportnotifysuccess'){
 		$getMessageLog = $conmysql->prepare("SELECT his_title,his_detail,member_no,his_path_image,id_smstemplate,send_by,his_type
@@ -203,7 +203,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$blukInsertNot = array();
 		}
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else if($dataComing["menu_component"] == 'reportsmstranwassent'){
 		$getMessageLog = $conmysql->prepare("SELECT sms_message,member_no,tel_mobile,send_date,send_by,id_smstemplate
 											FROM smstranwassent WHERE id_smssent = :id_smssent");
@@ -252,12 +252,12 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$bulkInsert = array();
 		}
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

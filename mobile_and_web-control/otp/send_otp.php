@@ -16,8 +16,8 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 				$conmysql->commit();
 				$arrayResult['REFERENCE_OTP'] = $reference;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
 						'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
@@ -63,8 +63,8 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0018";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$conmysql->rollback();
@@ -87,15 +87,15 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1011";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0017";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -112,7 +112,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

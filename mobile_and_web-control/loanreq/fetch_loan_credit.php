@@ -14,8 +14,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 			$arrayResult['RESPONSE_CODE'] = "WS0073";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		try {
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
@@ -36,14 +36,14 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					$arrayResult['ACCOUNT_RECEIVE_HIDDEN'] = $lib->formataccount_hidden($arrayResult['ACCOUNT_RECEIVE'],$func->getConstant('hidden_dep'));
 					$arrayResult['CONTRACT_CLR'] = $responseSoap->contclr_no;
 					$arrayResult['DIFF_OLD_CONTRACT'] = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
-					$arrayResult['LOANPERMIT_AMT'] = round($responseSoap->loanpermiss_amt,2);
+					$arrayResult['LOANPERMIT_AMT'] = $responseSoap->loanpermiss_amt;
 					if($dataComing["loantype_code"] == '02023'){
-						$arrayResult['REQUEST_AMT'] = intval(($responseSoap->maxreceive_amt > 30000 ? 30000 : $responseSoap->maxreceive_amt) + $arrayResult['DIFF_OLD_CONTRACT']);
+						$arrayResult['REQUEST_AMT'] = ($responseSoap->maxreceive_amt > 30000 ? 30000 : $responseSoap->maxreceive_amt) + $arrayResult['DIFF_OLD_CONTRACT'];
 						if($arrayResult['REQUEST_AMT'] > $responseSoap->loanrequest_amt){
 							$arrayResult['REQUEST_AMT'] = $responseSoap->loanrequest_amt;
 						}
 					}else{
-						$arrayResult['REQUEST_AMT'] = intval($responseSoap->loanpermiss_amt);
+						$arrayResult['REQUEST_AMT'] = $responseSoap->loanpermiss_amt;
 					}
 					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
 					$arrayResult['PERIOD'] = $responseSoap->period_payamt;
@@ -70,25 +70,14 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 						$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
 						$pay_period = preg_replace('/,/', '', number_format($responseSoap_Credit->period_payment,2));
-						$modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
-						$roundMod = fmod($pay_period,abs($modFactor));
-						if($modFactor > 0){
-							if($roundMod > 0){
-								$pay_period = $pay_period - $roundMod + abs($modFactor);
-							}
-						}else if($modFactor < 0){
-							if($roundMod > 0){
-								$pay_period = $pay_period - $roundMod;
-							}
-						}
 						if($pay_period > $responseSoap->maxperiod_payment){
-							if(($pay_period - $responseSoap->maxperiod_payment) > $rowPayRound["PAYROUND_FACTOR"]){
+							if(($responseSoap->maxperiod_payment - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
 								$arrayResult = array();
 								$arrayResult['RESPONSE_CODE'] = "WS0071";
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
+								require_once('../../include/exit_footer.php');
+								
 							}
 						}
 						if($responseSoap->maxperiod_payment == 0){
@@ -96,8 +85,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 							$arrayResult['RESPONSE_CODE'] = "WS0072";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 						$arrayResult['ROUNDPAY'] = $responseSoap->roundpay_factor;
 						$arrayResult['MAXPERIOD_PAYMENT'] = $responseSoap->maxperiod_payment ?? 0;
@@ -106,20 +95,20 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['DISABLE_AMOUNT'] = FALSE;
 						$arrayResult['DISABLE_PERIOD'] = FALSE;
 						if($dataComing["loantype_code"] == '02023'){
-							$arrayResult['RECEIVE_AMT'] = round($arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'],2);
+							$arrayResult['RECEIVE_AMT'] = $arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'];
 						}else{
-							$arrayResult['RECEIVE_AMT'] = round($responseSoap->loanpermiss_amt - $arrayResult['DIFF_OLD_CONTRACT'],2);
+							$arrayResult['RECEIVE_AMT'] = $responseSoap->loanpermiss_amt - $arrayResult['DIFF_OLD_CONTRACT'];
 						}
 						if($arrayResult['RECEIVE_AMT'] < 0){
 							$arrayResult = array();
 							$arrayResult['RESPONSE_CODE'] = "WS0086";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
+						require_once('../../include/exit_footer.php');
 					}catch(SoapFault $e){
 						$filename = basename(__FILE__, '.php');
 						$logStruc = [
@@ -132,8 +121,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['RESPONSE_CODE'] = "WS0062";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}else{
 					$filename = basename(__FILE__, '.php');
@@ -151,8 +140,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					}
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}catch(SoapFault $e){
 				$filename = basename(__FILE__, '.php');
@@ -166,8 +155,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 				$arrayResult['RESPONSE_CODE'] = "WS0058";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
@@ -184,16 +173,16 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 			$arrayResult['RESPONSE_CODE'] = "WS0058";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -210,7 +199,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

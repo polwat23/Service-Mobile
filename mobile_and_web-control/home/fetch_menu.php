@@ -59,8 +59,8 @@ if(!$anonymous){
 			$arrayResult['MENU_SHARE'] = $arrMenuSHR;
 		}
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}else{
 		if(isset($dataComing["menu_parent"])){
 			if($user_type == '5' || $user_type == '9'){
@@ -129,7 +129,7 @@ if(!$anonymous){
 				$arrayResult['REFRESH_MENU'] = "MENU_TRANSACTION_OUTSIDE";
 			}
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrMenuDep = array();
 			$arrMenuLoan = array();
@@ -298,10 +298,10 @@ if(!$anonymous){
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				http_response_code(204);
-				exit();
+				
 			}
 		}
 	}
@@ -321,8 +321,8 @@ if(!$anonymous){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrayAllMenu = array();
 		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
@@ -358,10 +358,10 @@ if(!$anonymous){
 		if(isset($arrayAllMenu)){
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			http_response_code(204);
-			exit();
+			
 		}
 	}else{
 		$filename = basename(__FILE__, '.php');
@@ -378,8 +378,8 @@ if(!$anonymous){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(400);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }
 ?>

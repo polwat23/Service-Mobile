@@ -20,16 +20,16 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImgHeadNews = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
 				}else{
 					//$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					//$arrayResult['RESULT'] = FALSE;
-					//echo json_encode($arrayResult);
-					//exit();
+					//require_once('../../../../include/exit_footer.php');
+					//
 					$pathImgHeadNews= $dataComing["img_head_news"];
 				}
 			}
@@ -45,8 +45,8 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg1 = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
@@ -55,8 +55,8 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 					//$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					//$arrayResult['RESULT'] = FALSE;
 					
-					//echo json_encode($arrayResult);
-					//exit();
+					//require_once('../../../../include/exit_footer.php');
+					//
 					$pathImg1 = $dataComing["img1"];
 				}
 			}
@@ -71,16 +71,16 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg2 = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
 				}else{
 					//$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					//$arrayResult['RESULT'] = FALSE;
-					//echo json_encode($arrayResult);
-					//exit();
+					//require_once('../../../../include/exit_footer.php');
+					//
 					$pathImg2 = $dataComing["img2"];
 				}
 			}
@@ -95,16 +95,16 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg3 = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
 				}else{
 					//$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					//$arrayResult['RESULT'] = FALSE;
-					//echo json_encode($arrayResult);
-					//exit();
+					//require_once('../../../../include/exit_footer.php');
+					//
 					$pathImg3 = $dataComing["img3"];
 				}
 			}
@@ -120,16 +120,16 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg4 = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
 				}else{
 					//$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					//$arrayResult['RESULT'] = FALSE;
-					//echo json_encode($arrayResult);
-					//exit();
+					//require_once('../../../../include/exit_footer.php');
+					//
 					$pathImg4 = $dataComing["img4"];
 				}
 			}
@@ -145,16 +145,16 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg5 = $config["URL_SERVICE"]."resource/gallery/".$createImage["normal_path"];
 				}else{
 					//$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					//$arrayResult['RESULT'] = FALSE;
-					//echo json_encode($arrayResult);
-					//exit();
+					//require_once('../../../../include/exit_footer.php');
+					//
 					$pathImg5 = $dataComing["img5"];
 				}
 			}
@@ -229,14 +229,14 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 						])){
 							$conmysql->commit();
 							$arrayResult["RESULT"] = TRUE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
+							
 						}else{
 							$conmysql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
+							
 						}
 			
 						$conmysql->rollback();
@@ -245,14 +245,14 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 							':path_file' => $pathFile ?? null
 						];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}
 				}else if($dataComing["is_delete_file"] == "1"){
 					//update file sql
@@ -265,41 +265,41 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 					])){
 						$conmysql->commit();
 						$arrayResult["RESULT"] = TRUE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถลบไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}
 				}else{
 					$conmysql->commit();
 					$arrayResult["RESULT"] = TRUE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
+					
 				}
 				//end เพิ่มไฟล์เเนบ
 
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 			
 	
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

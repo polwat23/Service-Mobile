@@ -123,12 +123,12 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 					$func->logSendMail($bulkInsertSent);
 				}
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
+				
 			}else{
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
+				
 			}
 		}else{
 			$destination = array();
@@ -253,20 +253,20 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 				$func->logSendMail($bulkInsertSent);
 			}
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 function generateBillLoan($dataReport,$header,$lib,$filename){
 	$sumBalance = 0;

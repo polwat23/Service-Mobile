@@ -31,16 +31,16 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}else{
 				if($createImage){
 					$pathImg = "resource/image_wait_to_be_sent/".$createImage["normal_path"];
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
+					
 				}
 			}
 		}
@@ -59,12 +59,12 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 				':send_image' => $pathImg ?? null
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}else{
 			if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != "" && sizeof($dataComing["message_importData"]) > 0){
@@ -83,12 +83,12 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 					':send_image' => $pathImg ?? null
 				])){
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../../include/exit_footer.php');
 				}else{
 					$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
+					
 				}
 			}else{
 				if(isset($id_smsquery)){
@@ -108,12 +108,12 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 						':send_image' => $pathImg ?? null
 					])){
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
+						require_once('../../../../include/exit_footer.php');
 					}else{
 						$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}
 
 				}else{
@@ -132,12 +132,12 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 						':send_image' => $pathImg ?? null
 					])){
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
+						require_once('../../../../include/exit_footer.php');
 					}else{
 						$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}
 				}
 			}
@@ -145,13 +145,13 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

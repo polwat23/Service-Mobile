@@ -12,33 +12,33 @@ if($lib->checkCompleteArgument(['unique_id','id_smstemplate'],$dataComing)){
 		if($fetchCheckTemplate->fetch()){
 				$arrayResult['RESPONSE'] = "ไม่สามารถลบเทมเพลตได้ เนื่องจากมีการใช้งานอยู่";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 		}else{
 			$unuseTemplate = $conmysql->prepare("UPDATE smstemplate SET is_use = '-9' WHERE id_smstemplate = :id_smstemplate");
 			if($unuseTemplate->execute([
 				':id_smstemplate' => $dataComing["id_smstemplate"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถลบเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}
 		
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>
