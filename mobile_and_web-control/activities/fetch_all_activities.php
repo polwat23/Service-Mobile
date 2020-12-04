@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										date_format(event_start_time,'%H:%i') as event_start_time,
 										date_format(event_end_time,'%H:%i') as event_end_time,
 										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html
-										FROM gctaskevent ORDER BY start_date DESC");
+										FROM gctaskevent WHERE is_use = '1' ORDER BY start_date DESC");
 		$fetchEvent->execute();
 		while($rowEvent = $fetchEvent->fetch(PDO::FETCH_ASSOC)){
 			$arrayEvent = array();
@@ -32,14 +32,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult['EVENT'] = $arrayGroupNews;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

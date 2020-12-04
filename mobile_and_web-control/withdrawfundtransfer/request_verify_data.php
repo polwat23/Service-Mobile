@@ -9,8 +9,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
 			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
@@ -38,8 +38,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_CODE'] = "WS0043";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$getLimitPerDay = $conmysql->prepare("SELECT SUM(amount) AS all_amt_in_day FROM gctransaction WHERE result_transaction = '1' and trans_flag = '-1' and destination_type = '1'
 																and member_no = :member_no and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
@@ -50,8 +50,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESPONSE_CODE'] = "WS0043";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrSendData = array();
 		/*$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
@@ -78,8 +78,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}*/
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
@@ -107,8 +107,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
@@ -121,7 +121,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
 			$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] =  'WS0042';
 			$arrayStruc = [
@@ -140,16 +140,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -166,7 +166,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

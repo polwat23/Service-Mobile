@@ -28,12 +28,12 @@ if($lib->checkCompleteArgument(['unique_id','live_url','live_title'],$dataComing
 				'id_live' => $arrayGroup[0]["ID_LIVE"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = "แก้ไขข้อมูลไม่สำเร็จไม่สำเร็จ";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}else{
 			$insert_news = $conmysql->prepare("INSERT INTO gclive(live_url,live_title,update_by) VALUES (:live_url,:live_title,:username)");
@@ -43,24 +43,24 @@ if($lib->checkCompleteArgument(['unique_id','live_url','live_title'],$dataComing
 					'username' => $payload["username"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = "แก้ไขข้อมูลไม่สำเร็จไม่สำเร็จ";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

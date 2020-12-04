@@ -41,8 +41,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
@@ -173,8 +173,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}else{
 						$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																	,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
@@ -237,8 +237,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}catch(SoapFault $e){
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
@@ -303,8 +303,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 				}
 			}catch(Throwable $e) {
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
@@ -370,8 +370,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0038";
@@ -381,7 +381,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':operate_date' => $dateOper,
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
-				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_code' => $arrResponse->RESPONSE_CODE,
 				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
@@ -391,16 +391,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -417,7 +417,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
