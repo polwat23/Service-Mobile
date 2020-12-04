@@ -40,24 +40,24 @@ if($lib->checkCompleteArgument(['unique_id','id_menu','schedule_type','schedule_
 					':time_end' => $time_end
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = "เพิ่มกำหนดการไม่สำเร็จ";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 			
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

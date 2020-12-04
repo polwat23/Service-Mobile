@@ -11,7 +11,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															bind.response_code,	
 															bind.response_message,
 															bind.data_bind_error,
-															bind.mobile_no,
 															bind.query_error,
 															bind.query_flag,
 															bind.coop_account_no,
@@ -22,6 +21,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													ON login.id_userlogin = bind.id_userlogin
 													WHERE bind.bind_status !=1 ORDER BY bind.attempt_bind_date DESC");
 		$fetchLogBindAccountError->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogBindAccountError = $fetchLogBindAccountError->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccountError = array();
 			$arrGroupLogBindAccountError["ID_LOGBINDACCOUNT"] = $rowLogBindAccountError["id_logbindaccount"];
@@ -30,10 +30,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupLogBindAccountError["BIND_STATUS"] = $rowLogBindAccountError["bind_status"];
 			$arrGroupLogBindAccountError["RESPONSE_CODE"] = $rowLogBindAccountError["response_code"];
 			$arrGroupLogBindAccountError["DEVICE_NAME"] = $rowLogBindAccountError["device_name"];
-			$arrGroupLogBindAccountError["MOBILE_NO"] = $lib->formatphone($rowLogBindAccountError["mobile_no"]);
 			$arrGroupLogBindAccountError["ATTEMPT_BIND_DATE"] =  $lib->convertdate($rowLogBindAccountError["attempt_bind_date"],'d m Y',true); 
 			$arrGroupLogBindAccountError["RESPONSE_MESSAGE"] = $rowLogBindAccountError["response_message"];
-			$arrGroupLogBindAccountError["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogBindAccountError["coop_account_no"],$func->getConstant('dep_format'));
+			$arrGroupLogBindAccountError["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowLogBindAccountError["coop_account_no"],$formatDept);
 			$arrGroupLogBindAccountError["COOP_ACCOUNT_NO"] = $rowLogBindAccountError["coop_account_no"];
 			$arrGroupLogBindAccountError["DATA_BIND_ERROR"] = $rowLogBindAccountError["data_bind_error"];
 			$arrGroupLogBindAccountError["QUERY_ERROR"] = $rowLogBindAccountError["query_error"];
@@ -43,17 +42,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["BIND_ACCOUNT_LOG"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>

@@ -46,17 +46,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["USER_LOGIN_DATA_WEB"] = $arrayGroupWeb;
 		$arrayResult["USER_LOGIN_DATA_MOBILE"] = $arrayGroupMobile;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

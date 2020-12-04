@@ -9,24 +9,24 @@ if($lib->checkCompleteArgument(['unique_id','id_menuschedule'],$dataComing)){
 			':id_menuschedule' => $dataComing["id_menuschedule"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_MESSAGE'] = "ลบกำหนดการไม่สำเร็จ";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
+			
 		}
 			
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

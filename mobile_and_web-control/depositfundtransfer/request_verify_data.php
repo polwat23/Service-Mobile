@@ -29,18 +29,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayResult['RESPONSE_CODE'] = "WS0085";
 					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}else{
 				$limit_dept = $func->getConstant("limit_deposit_asso");
-				if($amt_transfer >= $limit_dept){
+				if($amt_transfer > $limit_dept){
 					$remain_amount_deposit_per_month = intval($limit_dept) - $rowSumTran["NETAMT"];
 					$arrayResult['RESPONSE_CODE'] = "WS0085";
 					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}
 			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
@@ -54,21 +54,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['FEE_AMT'] = 0;
 			$arrayResult['ACCOUNT_NAME'] = $account_name_th;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
 			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($min_amount_deposit,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -85,7 +85,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

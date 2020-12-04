@@ -182,7 +182,7 @@
 			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
-		"R0502" :
+		"005" :
 			[{"th" : "ยอดคงเหลือในบัญชีธนาคารของท่านไม่พอหักเพื่อทำรายการฝาก กรุณาตรวจสอบยอดเงินก่อนทำรายการ","en" : "Balance of bank account  not enough for deposit to cooperative please check your balance before transaction"}]
 		}],
 		"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
