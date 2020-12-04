@@ -16,8 +16,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT account_status,phone_number FROM gcmemberaccount 
@@ -31,22 +31,22 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		if(empty($rowChkMemb["phone_number"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0094";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		if(strtolower($dataComing["tel"]) != strtolower($rowChkMemb["phone_number"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0095";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$template = $func->getTemplateSystem('ForgetPasswordSMS');
 		$arrayDataTemplate = array();
@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 				if($func->logoutAll(null,$member_no,'-9')){
 					$conmysql->commit();
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
@@ -89,8 +89,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 					$arrayResult['RESPONSE_CODE'] = "WS1014";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}else{
 				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
@@ -102,8 +102,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 				$arrayResult['RESPONSE_CODE'] = "WS0018";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$conmysql->rollback();
@@ -123,15 +123,15 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 			$arrayResult['RESPONSE_CODE'] = "WS1014";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -148,7 +148,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
