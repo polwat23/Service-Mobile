@@ -23,8 +23,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
 					$updateSmsQuery = $conmysql->prepare("UPDATE smsquery SET sms_query = :sms_query,column_selected = :column_selected,is_stampflag = :is_stampflag,
@@ -44,8 +43,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}
 			}else{
@@ -57,8 +55,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 					$conmysql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
 				}
 			}
 			$editTemplate = $conmysql->prepare("UPDATE smstemplate SET smstemplate_name = :smstemplate_name,smstemplate_body = :smstemplate_body
@@ -70,13 +67,12 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 			])){
 				$conmysql->commit();
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$conmysql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}
 		}else{
 			if(isset($dataComing["query_template_spc_"]) && $dataComing["query_template_spc_"] != "" && isset($dataComing["column_selected"])){
@@ -100,20 +96,18 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 						])){
 							$conmysql->commit();
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
 						}
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
 					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
@@ -136,20 +130,18 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 						])){
 							$conmysql->commit();
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
 						}
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}
 			}else{
@@ -162,26 +154,23 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 				])){
 					$conmysql->commit();
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../../include/exit_footer.php');
 				}else{
 					$conmysql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
 				}
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
