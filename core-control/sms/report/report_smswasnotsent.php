@@ -20,11 +20,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["end_date"]) && $dataComing["end_date"] != ''){
 			$arrayExecute["end_date"] = $dataComing["end_date"];
 		}
+		if(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != ''){
+			$arrayExecute["is_sendahead"] = $dataComing["is_sendahead"];
+		}
 		$fetchReport = $conmysql->prepare("SELECT message,member_no,tel_mobile,send_date,send_by,cause_notsent
 											FROM smswasnotsent WHERE 1=1
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."
 											".(isset($dataComing["send_by"]) && $dataComing["send_by"] != '' ? "and send_by = :send_by" : null)."
+											".(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != '' ? "and is_sendahead = :is_sendahead" : null)."
 											".(isset($dataComing["start_date"]) && $dataComing["start_date"] != '' ? "and date_format(send_date,'%Y-%m-%d') >= :start_date" : null)."
 											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and date_format(send_date,'%Y-%m-%d') <= :end_date" : null)." ORDER BY send_date DESC");
 		$fetchReport->execute($arrayExecute);
@@ -40,17 +44,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult['LIST_REPORT'] = $arrayAll;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>

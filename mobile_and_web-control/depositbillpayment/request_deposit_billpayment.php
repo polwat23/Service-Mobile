@@ -137,8 +137,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 					$arrayResult['RECEIVE_NAME'] = $rowName["PRENAME_SHORT"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 					$arrayResult['COOP_ACCOUNT_NO'] = $coop_account_no;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}else{
 					$arrayStruc = [
 						':member_no' => $dataComing["member_no"],
@@ -154,8 +154,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}catch(SoapFault $e){
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
@@ -173,8 +173,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e) {
 			$arrayResult["RESPONSE_CODE"] = 'WS9999';
@@ -192,8 +192,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}
 }else{
@@ -211,7 +211,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
