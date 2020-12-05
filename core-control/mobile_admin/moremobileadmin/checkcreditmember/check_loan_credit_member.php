@@ -7,52 +7,27 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupCredit = array();
 		$arrCanCal = array();
 		$arrCanReq = array();
-		
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.sms_mobilephone as MEM_TELMOBILE,
-											mb.member_date,mb.member_no,
-											mb.ADDR_NO as ADDR_NO,
-											mb.ADDR_MOO as ADDR_MOO,
-											mb.ADDR_SOI as ADDR_SOI,
-											mb.ADDR_VILLAGE as ADDR_VILLAGE,
-											mb.ADDR_ROAD as ADDR_ROAD,
-											MBT.TAMBOL_DESC AS TAMBOL_DESC,
-											MBD.DISTRICT_DESC AS DISTRICT_DESC,
-											MB.PROVINCE_CODE,
-											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.ADDR_POSTCODE AS ADDR_POSTCODE
-											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
-											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
-											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
-											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
-											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).
-											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null)
-											);
-		$fetchMember->execute([
-			':member_no' => $member_no
-		]);
-		
-		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
-			$arrayResult["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayResult["MEMBER_NO"] = $rowMember["MEMBER_NO"];
-			
-			$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
-			$fetchLoanCanCal->execute();
-			while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
-				$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
-				$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
-				$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
+		$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMemberType->execute([':member_no' => $member_no]);
+		$rowMemb = $getMemberType->fetch(PDO::FETCH_ASSOC);
+		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
+		$fetchLoanCanCal->execute();
+		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
+			$fetchLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code and (member_type = :member_type OR member_type = '0')");
+			$fetchLoanType->execute([
+				':loantype_code' => $rowCanCal["loantype_code"],
+				':member_type' => $rowMemb["MEMBER_TYPE"]
+			]);
+			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowLoanType["LOANTYPE_DESC"]) && $rowLoanType["LOANTYPE_DESC"] != ""){
 				$arrCredit = array();
 				$maxloan_amt = 0;
-				$rights_desc = null;
+				$arrCollShould = array();
+				$arrOtherInfo = array();
 				$canRequest = FALSE;
-				if($rowCanCal["loantype_code"] == '10'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_emer.php');
-				}else if($rowCanCal["loantype_code"] == '20'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_normal_share_coll.php');
-				}else if($rowCanCal["loantype_code"] == '30'){
-					include('../../../../mobile_and_web-control/credit/calculate_loan_special_share_coll.php');
+				$arrCollShould = array();
+				if(file_exists('../../../../mobile_and_web-control/credit/calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
+					include('../../../../mobile_and_web-control/credit/calculate_loan_'.$rowCanCal["loantype_code"].'.php');
 				}else{
 					include('../../../../mobile_and_web-control/credit/calculate_loan_etc.php');
 				}
@@ -72,6 +47,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						}
 					}
 				}
+				if(isset($collOnePerson)){
+					$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำคนเดียว";
+					$arrSubCollPerson["CREDIT_AMT"] = $collOnePerson;
+					$arrCollShould[] = $arrSubCollPerson;
+				}
+				if(isset($collTwoPerson)){
+					$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำมากกว่า 1 คน";
+					$arrSubCollPerson["CREDIT_AMT"] = $collTwoPerson;
+					$arrCollShould[] = $arrSubCollPerson;
+				}
+				$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
 				$arrCredit["ALLOW_REQUEST"] = $canRequest;
 				$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 				$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];

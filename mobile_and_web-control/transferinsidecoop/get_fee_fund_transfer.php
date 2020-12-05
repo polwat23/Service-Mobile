@@ -18,15 +18,15 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['RESPONSE_CODE'] = "WS0089";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		if($rowStatusAcc["DEPTGROUP_CODE"] == '01'){
 			$arrayResult['RESPONSE_CODE'] = "WS0090";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$getTypeAcc = $conoracle->prepare("SELECT DEPTTYPE_CODE FROM dpdeptmaster WHERE deptaccount_no = :acc_no");
 		$getTypeAcc->execute([':acc_no' => $deptaccount_no]);
@@ -42,8 +42,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
 			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowContDeptType["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		if($rowContDeptType["IS_CHECK_PENALTY"] == '1'){
 			$queryCheckPeriod = null;
@@ -117,14 +117,14 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$arrayResult['FEE_AMT'] = $penalty_amt;
 		$arrayResult['FEE_AMT_FORMAT'] = number_format($penalty_amt,2);
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -141,7 +141,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

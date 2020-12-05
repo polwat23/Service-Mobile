@@ -29,12 +29,11 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 				':member_no' => $member_no
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = "เเก้ไขสถานะไม่สำเร็จ";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}
 		}else{
 				$insertIntoInfo = $conmysql->prepare("INSERT INTO gcallowmemberreqloan(member_no,is_allow,update_username) VALUES (:member_no,:is_allow,:username)");
@@ -44,25 +43,22 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 						':username' => $payload["username"]
 				])){
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../../include/exit_footer.php');
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "อนุญาตการทำรายการไม่สำเร็จ";
 					$arrayResult['insertIntoInfo'] = $insertIntoInfo;
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
 				}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

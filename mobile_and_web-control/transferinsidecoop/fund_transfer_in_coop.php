@@ -20,15 +20,15 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayResult['RESPONSE_CODE'] = "WS0089";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		if($rowStatusAcc["DEPTGROUP_CODE"] == '01'){
 			$arrayResult['RESPONSE_CODE'] = "WS0090";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		// Start-Withdraw
 		$getAccDataSrc = $conoracle->prepare("SELECT DPT.ACCOUNT_ID,DPM.WITHDRAW_COUNT,DPM.PRNCBAL,DPT.MINPRNCBAL,
@@ -64,16 +64,16 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$arrayResult['RESPONSE_CODE'] = "WS0091";
 					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${sequest_amt}',number_format($rowAccData["SEQUEST_AMOUNT"] + $rowAccData["CHECKPEND_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0092";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$getMaxSeqNo = $conoracle->prepare("SELECT MAX(SEQ_NO) as MAX_SEQ_NO FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no");
 		$getMaxSeqNo->execute([':deptaccount_no' => $from_account_no]);
@@ -259,8 +259,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$log->writeLog('transferinside',$arrayStruc);
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 					}else{
 						$conoracle->rollback();
@@ -298,8 +298,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$log->writeLog('transferinside',$arrayStruc);
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}
 				$arrUpdateMaster = [
@@ -351,8 +351,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$log->writeLog('transferinside',$arrayStruc);
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 					if($rowAccDataDest["MAXBALANCE_FLAG"] == '1' && $dataComing["amt_transfer"] + $rowAccDataDest["PRNCBAL"] > $rowAccDataDest["MAXBALANCE"]){
 						$conoracle->rollback();
@@ -390,8 +390,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$log->writeLog('transferinside',$arrayStruc);
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 					if($dataComing["amt_transfer"] < $rowAccDataDest["MINDEPT_AMT"]){
 						$conoracle->rollback();
@@ -429,8 +429,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$log->writeLog('transferinside',$arrayStruc);
 						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 					$getDepPaytypeDest = $conoracle->prepare("SELECT group_itemtpe as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
 														FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
@@ -552,7 +552,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 										}
 									}
 									$arrayResult['RESULT'] = TRUE;
-									echo json_encode($arrayResult);
+									require_once('../../include/exit_footer.php');
 								}else{
 									$conoracle->rollback();
 									$arrayResult["RESPONSE_CODE"] = 'WS0064';
@@ -589,8 +589,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									$log->writeLog('transferinside',$arrayStruc);
 									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 									$arrayResult['RESULT'] = FALSE;
-									echo json_encode($arrayResult);
-									exit();
+									require_once('../../include/exit_footer.php');
+									
 								}
 							}else{
 								$conoracle->rollback();
@@ -628,8 +628,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$log->writeLog('transferinside',$arrayStruc);
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
-								echo json_encode($arrayResult);
-								exit();
+								require_once('../../include/exit_footer.php');
+								
 							}
 						}else{
 							$conoracle->rollback();
@@ -667,8 +667,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$log->writeLog('transferinside',$arrayStruc);
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 					}else{
 						$conoracle->rollback();
@@ -706,8 +706,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$log->writeLog('transferinside',$arrayStruc);
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}else{
 					$conoracle->rollback();
@@ -745,8 +745,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$log->writeLog('transferinside',$arrayStruc);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}else{
 				$conoracle->rollback();
@@ -784,8 +784,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$log->writeLog('transferinside',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$conoracle->rollback();
@@ -823,16 +823,16 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$log->writeLog('transferinside',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -849,7 +849,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

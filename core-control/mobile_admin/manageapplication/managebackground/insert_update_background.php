@@ -30,8 +30,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0008";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				if($createBg){
 					if(count($arrayGroup) > 0){
@@ -43,12 +42,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							'id_background' => $arrayGroup[0]["ID_BACKGROUND"]
 						])){
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../../../include/exit_footer.php');
 						}else{
 							$arrayResult['RESPONSE_MESSAGE'] = "อัพโหลดรุปภาพไม่สำเร็จ";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
 						}
 					}else{
 						$path_bg = '/resource/background/'.$createBg["normal_path"];
@@ -58,32 +56,28 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								':username' => $payload["username"]
 						])){
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../../../include/exit_footer.php');
 						}else{
 							$arrayResult['RESPONSE_MESSAGE'] = "อัพโหลดรุปภาพไม่สำเร็จ";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
 						}
 					}
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "อัพโหลดรุปภาพไม่สำเร็จ";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
 				}
 			}
 		
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
