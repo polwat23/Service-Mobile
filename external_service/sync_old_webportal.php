@@ -12,8 +12,8 @@ $arrGrp = array();
 
 $dbhost = "127.0.0.1";
 $dbuser = "root";
-$dbpass = "@TAK2020";
-$dbname = "mobile_tak";
+$dbpass = "@KTSCC2020";
+$dbname = "mobile_ktscc";
 try{
 	$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
 	$conmysql->exec("set names utf8mb4");
@@ -21,10 +21,10 @@ try{
 	echo json_encode($e);
 }
 
-$dbhost2 = "192.168.0.213";
+$dbhost2 = "192.168.10.253";
 $dbuser2 = "root";
 $dbpass2 = "WebServer";
-$dbname2 = "mobile_tak";
+$dbname2 = "mobile_ktscc";
 try{
 	$conmysql2 = new PDO("mysql:dbname={$dbname2};host={$dbhost2}", $dbuser2, $dbpass2);
 	$conmysql2->exec("set names utf8mb4");
