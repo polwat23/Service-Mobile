@@ -65,7 +65,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
@@ -159,10 +161,10 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)</p>
-				<p style="margin-top: -27px;font-size: 18px;">461 หมู่ 5 ถ.พหลโยธิน ต.น้ำรึม อ.เมือง จ.ตาก 63000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-511-061,055-541-554</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.taktcoop1.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกาญจนบุรี จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">245/1 ต.ปากแพรก อ.เมือง จ.กาญจนบุรี 71000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 034 540 784</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">mainweb.ktscc.org</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -268,9 +270,13 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 650px;margin-top:-40px;">
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-40px;">
 			.........................................................
 			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-150px;">
+			.........................................................
+			<p style="margin-left: 50px;">เจ้าหน้าที่การเงิน</p></div>
+
 			';
 
 	$dompdf = new DOMPDF();

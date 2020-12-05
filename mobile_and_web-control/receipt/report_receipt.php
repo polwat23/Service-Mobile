@@ -116,7 +116,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
@@ -215,10 +217,10 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)</p>
-			<p style="margin-top: -27px;font-size: 18px;">461 หมู่ 5 ถ.พหลโยธิน ต.น้ำรึม อ.เมือง จ.ตาก 63000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 055-511-061,055-541-554</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.taktcoop1.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกาญจนบุรี จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">245/1 ต.ปากแพรก อ.เมือง จ.กาญจนบุรี 71000</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร. 034 540 784</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">mainweb.ktscc.org</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -323,11 +325,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 650px;display:flex;">
+			<div style="width:200px;margin-left: 550px;display:flex;">
 			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
+			<div style="width:200px;margin-left: 770px;display:flex;">
+			<img src="../../resource/utility_icon/signature/finance.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="font-size: 18px;margin-left: 680px;margin-top:-40px;">ผู้จัดการ</div>
+			</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่การเงิน</div>
 			';
 
 	$dompdf = new DOMPDF();
