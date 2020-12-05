@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id','username','password','id_section_sy
 		$checkPk->execute([':username' => $dataComing["username"]]);
 		if($checkPk->rowCount() > 0){
 			$rowUser = $checkPk->fetch(PDO::FETCH_ASOC);
-			$updateUser = $conmysql->prepare("UPDATE coreuser SET password = :password,id_section_system = :id_section_system WHERE username = :username and is_use = '-9'");
+			$updateUser = $conmysql->prepare("UPDATE coreuser SET password = :password,id_section_system = :id_section_system,is_use = '1' WHERE username = :username and is_use = '-9'");
 			if($updateUser->execute([
 				':password' => $password,
 				':id_section_system' => $dataComing["id_section_system"],
