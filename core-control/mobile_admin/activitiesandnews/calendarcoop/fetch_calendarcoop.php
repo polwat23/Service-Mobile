@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		
 		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before
-												FROM gctaskevent");
+												FROM gctaskevent WHERE is_use = '1'");
 		$fetchCalendar->execute();
 		while($rowCalendar = $fetchCalendar->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
