@@ -80,11 +80,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':response_message' => $responseSoap->msg_output
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					if($responseSoap->msg_status == '0098'){
+						$arrayResult['RESPONSE_MESSAGE'] = str_replace($responseSoap->msg_status,'',str_ireplace(["\r","\n",'\r','\n'],'',$responseSoap->msg_output))." บาท";
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					}
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
+				
 				$ref_slipno = $responseSoap->ref_slipno;
 				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
 				$updateSyncNoti->execute([':ref_slipno' => $ref_slipno]);
@@ -103,8 +108,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$log->writeLog('deposittrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			// -----------------------------------------------
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/depositfundtransfer_kbank',$arrSendData);
@@ -148,8 +153,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$log->writeLog('deposittrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
@@ -220,7 +225,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin,bank_code)
@@ -260,8 +265,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$log->writeLog('deposittrans',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e) {
 			if($flag_transaction_coop){
@@ -304,23 +309,23 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$log->writeLog('deposittrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

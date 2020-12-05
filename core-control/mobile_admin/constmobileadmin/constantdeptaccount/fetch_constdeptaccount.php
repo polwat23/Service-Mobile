@@ -9,7 +9,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		id_accountconstant,
 																		dept_type_code,
 																		member_cate_code,
-																		allow_transaction
+																		allow_transaction,
+																		allow_showdetail
 																	FROM
 																		gcconstantaccountdept
 																	ORDER BY dept_type_code ASC");
@@ -20,6 +21,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["DEPTTYPE_CODE"] = $rowMenuMobile["dept_type_code"];
 			$arrConstans["MEMBER_TYPE_CODE"] = $rowMenuMobile["member_cate_code"];
 			$arrConstans["ALLOW_TRANSACTION"] = $rowMenuMobile["allow_transaction"];
+			$arrConstans["ALLOW_SHOWDETAIL"] = $rowMenuMobile["allow_showdetail"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
@@ -29,10 +31,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				if(array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE')) === False){
 						$arrayDepttype["ALLOW_TRANSACTION"] = 0;
 						$arrayDepttype["MEMBER_TYPE_CODE"] = 'AL';
+						$arrayDepttype["ALLOW_SHOWDETAIL"] = 0;
 				}else{
 					$arrayDepttype["ALLOW_TRANSACTION"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_TRANSACTION"];
 					$arrayDepttype["MEMBER_TYPE_CODE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["MEMBER_TYPE_CODE"];
-					//$arrayDepttype["ID_ACCCONSTANT"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ID_ACCCONSTANT"];
+					$arrayDepttype["ALLOW_SHOWDETAIL"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_SHOWDETAIL"];
 				}
 				
 			$arrayDepttype["DEPTTYPE_CODE"] = $rowDepttype["DEPTTYPE_CODE"];
@@ -43,17 +46,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["ACCOUNT_DATA"] = $arrayGroup;
 		
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

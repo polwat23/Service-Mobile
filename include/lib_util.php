@@ -235,14 +235,10 @@ class library {
 					return $arrayGrpSms;
 				}
 			}catch(SoapFault $e){
-				$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
-				file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
 				$arrayGrpSms["RESULT"] = FALSE;
 				return $arrayGrpSms;
 			}
 		}catch(Throwable $e){
-			$text = '#SMS Error : '.date("Y-m-d H:i:s").' > Send to : '.json_encode($e);
-			file_put_contents(__DIR__.'/../log/sms_error.txt', $text . PHP_EOL, FILE_APPEND);
 			$arrayGrpSms["RESULT"] = FALSE;
 			return $arrayGrpSms;
 			return false;
@@ -260,7 +256,12 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
+		$email_explode = explode("@", $email);
+		if(in_array(end($email_explode), array("yahoo.com", "yahoo.co.th"))){
+			$mailFunction->Host = 'cloud2.gensoft.co.th';
+		}else {
+			$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
+		}
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -268,6 +269,7 @@ class library {
 		$mailFunction->Port = 465;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
+		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
@@ -288,7 +290,7 @@ class library {
 		}
 	}
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
-		if(self::getBase64ImageSize($encode_string) < 1500){
+		if(self::getBase64ImageSize($encode_string) < 10000){
 			$data_Img = explode(',',$encode_string);
 			if(isset($data_Img[1])){
 				$dataImg = base64_decode($data_Img[1]);
@@ -303,6 +305,8 @@ class library {
 						$destination = $output_file.'/'.$filename;
 						$webP_destination = $output_file.'/'.$file_name.'.webp';
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$webP->convert($destination,$webP_destination,[]);
 							$arrPath = array();
@@ -323,6 +327,8 @@ class library {
 						$filename = $file_name.'.'.$ext_img;
 						$destination = $output_file.'/'.$filename;
 						if($ext_img == 'png'){
+							//fix background transparent 
+							imagesavealpha($im_string, true);
 							imagepng($im_string, $destination, 2);
 							$arrPath = array();
 							$arrPath["normal_path"] = $filename;
@@ -408,6 +414,10 @@ class library {
 					"body" => $payload["PAYLOAD"]["BODY"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
+				],
+				"data" => [
+					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
 				]
 			];
 		}else if($type_send == 'all'){
@@ -419,6 +429,10 @@ class library {
 					"body" => $payload["PAYLOAD"]["BODY"],
 					"sound" => "default",
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
+				],
+				"data" => [
+					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
 				]
 			];
 		}
@@ -445,16 +459,12 @@ class library {
 				if($resultNoti->success || ($type_send == 'all' && isset($resultNoti->message_id))){
 					return true;
 				}else{
-					//$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.json_encode($resultNoti);
-					//file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 					return false;
 				}
 			}else{
 				return false;
 			}
 		}else{
-			$text = '#Notify Error : '.date("Y-m-d H:i:s").' > '.json_encode($payload["TO"]).' | '.curl_error($ch);
-			file_put_contents(__DIR__.'/../log/notify_error.txt', $text . PHP_EOL, FILE_APPEND);
 			curl_close ($ch);
 			return false;
 		}
@@ -594,6 +604,73 @@ class library {
 		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
 																													 
 		curl_exec($ch);
+	}
+	public function truncateDecimal($amt,$precision){
+		$step = pow(10,$precision);
+		$value = intval($step * $amt);
+		return $value / $step;
+	}
+	public function roundDecimal($amt,$round_type){
+		$amtRound = $this->truncateDecimal($amt,2);
+		$amtRaw = $this->truncateDecimal($amtRound,0);
+		$fraction = floatval($amtRound - $amtRaw);
+		$fractionRaw = $this->truncateDecimal($fraction,1);
+		$fracVal = floatval($fraction - $fractionRaw);
+		$roundFrac = 0.00;
+		switch ($round_type){
+			case 1:
+				//ปัดที่ละสลึง
+				if ($fraction > 0.00 && $fraction <= 0.25) { $roundFrac = 0.25; }
+				if ($fraction > 0.25 && $fraction <= 0.50) { $roundFrac = 0.50; }
+				if ($fraction > 0.25 && $fraction <= 0.75) { $roundFrac = 0.75; }
+				if ($fraction > 0.75 && $fraction <= 0.99) { $roundFrac = 1.00; }
+				break;
+			case 2:
+				//ปัดที่ละ 5 สตางค์
+				if ($fracVal == 0.00) { return $amt; }
+				if ($fracVal == 0.05) { return $amt; }
+				if ($fracVal >= 0.01 && $fracVal <= 0.04) { $fracVal = 0.05; }
+				if ($fracVal >= 0.06 && $fracVal <= 0.09) { $fracVal = 0.10; }
+				$roundFrac = floatval($fractionRaw) + $fracVal;
+
+				break;
+			case 3:
+				//ปัดที่ละ 10 สตางค์
+
+				if ($fracVal == 0.00)
+				{
+					return $amt;
+				}
+				else
+				{
+					$fracVal = 0.10;
+				}
+				$roundFrac = floatval($fractionRaw) + $fracVal;
+
+				break;
+
+			case 4:
+				//ปัดเต็มบาท
+
+				if ($fraction > 0.49)
+				{
+					$roundFrac = 1.00;
+				}
+				else
+				{
+					$roundFrac = 0.00;
+				}
+
+				break;
+			case 99:
+				$roundFrac = $fraction;
+				break;
+
+			default:
+				$roundFrac = $fraction;
+				break;
+		}
+		return $amtRaw + floatval($roundFrac);
 	}
 }
 ?>

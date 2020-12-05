@@ -14,8 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			if($createImage == 'oversize'){
 				$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}else{
 				if($createImage){
 					$pathImg = $config["URL_SERVICE"]."resource/announce/".$createImage["normal_path"];
@@ -24,6 +23,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				}
 			}
 		}
+		
+		if(isset($dataComing["news_html_root_"]) && $dataComing["news_html_root_"] != null){
+			$detail_html = '<!DOCTYPE HTML>
+									<html>
+									<head>
+									<style>
+									img {
+										max-width: 100%;
+									}
+									</style>
+								  <meta charset="UTF-8">
+								  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+								  '.$dataComing["news_html_root_"].'
+								  </body>
+									</html>';
+		}
+		
 		$update_announce = $conmysql->prepare("UPDATE  gcannounce SET
 																		announce_cover = :announce_cover, 
 																		announce_title = :announce_title,
@@ -36,7 +52,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		is_check = :is_check,
 																		accept_text = :accept_text,
 																		cancel_text = :cancel_text,
-																		check_text = :check_text
+																		check_text = :check_text,
+																		announce_html = :announce_html
 																	WHERE id_announce = :id_announce");
 		if($update_announce->execute([
 			':id_announce' =>  $dataComing["id_announce"],
@@ -50,26 +67,25 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			':is_check' => (isset($dataComing["check_accept"]) && $dataComing["check_accept"] != null && $dataComing["check_accept"] != "") ? $dataComing["check_accept"] : 0,
 			':accept_text' => (isset($dataComing["accept_text"]) && $dataComing["accept_text"] != null && $dataComing["accept_text"] != "") ? $dataComing["accept_text"] : null,
 			':cancel_text' => (isset($dataComing["cancel_text"]) && $dataComing["cancel_text"] != null && $dataComing["cancel_text"] != "") ? $dataComing["cancel_text"] : null,
-			':check_text' => (isset($dataComing["check_text"]) && $dataComing["check_text"] != null && $dataComing["check_text"] != "") ? $dataComing["check_text"] : null			
+			':check_text' => (isset($dataComing["check_text"]) && $dataComing["check_text"] != null && $dataComing["check_text"] != "") ? $dataComing["check_text"] : null,
+			':announce_html' => $detail_html ?? null
 		])){
 			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
+			$arrayResult["announce_html"] = $dataComing["announce_html"];
+			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขประกาศได้ กรุณาติดต่อผู้พัฒนา ";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

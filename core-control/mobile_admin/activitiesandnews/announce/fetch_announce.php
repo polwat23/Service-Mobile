@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupAnnounce["ANNOUNCE_COVER"] = $rowAnnounce["announce_cover"];
 			$arrGroupAnnounce["ANNOUNCE_TITLE"] = $rowAnnounce["announce_title"];
 			$arrGroupAnnounce["ANNOUNCE_DETAIL"] = $rowAnnounce["announce_detail"];
-			//$arrGroupAnnounce["ANNOUNCE_HTML"] = $rowAnnounce["announce_html"];
+			$arrGroupAnnounce["ANNOUNCE_HTML"] = $rowAnnounce["announce_html"];
 			$arrGroupAnnounce["PRIORITY"] = $rowAnnounce["priority"];
 			$arrGroupAnnounce["USERNAME"] = $rowAnnounce["username"];
 			$arrGroupAnnounce["IS_CHECK"] = $rowAnnounce["is_check"];
@@ -72,18 +72,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["ANNOUNCE_DATA"] = $arrayGroup;
 
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
 

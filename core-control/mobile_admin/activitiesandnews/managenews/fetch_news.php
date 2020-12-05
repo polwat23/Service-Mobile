@@ -24,7 +24,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																img_gallery_2,
 																img_gallery_3,
 																img_gallery_4,
-																img_gallery_5 
+																img_gallery_5,
+																file_upload
 															FROM gcnews
 															WHERE is_use = '1' 
 															".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -49,23 +50,22 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupNews["PATH_IMG_3"] = $rowNews["img_gallery_3"];
 			$arrGroupNews["PATH_IMG_4"] = $rowNews["img_gallery_4"];
 			$arrGroupNews["PATH_IMG_5"] = $rowNews["img_gallery_5"];
+			$arrGroupNews["PATH_FILE"] = $rowNews["file_upload"];
 			$arrGroupNews["str_count"] = $str_count;
 			
 			$arrayGroup[] = $arrGroupNews;
 		}
 		$arrayResult["NEWS_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

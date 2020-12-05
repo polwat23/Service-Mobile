@@ -14,23 +14,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											ln.LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-											WHERE ln.member_no = :member_no and ln.contract_status > 0");
+											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
 			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 			$arrContract = array();
 			$arrContract["CONTRACT_NO"] = $contract_no;
-			if(mb_stripos($contract_no,'.') === FALSE){
-				$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-				if(mb_strlen($contract_no) == 10){
-					$arrContract["CONTRACT_REFNO"] = $loan_format;
-				}else if(mb_strlen($contract_no) == 11){
-					$arrContract["CONTRACT_REFNO"] = $loan_format.'-'.mb_substr($contract_no,10);
-				}
-			}else{
-				$arrContract["CONTRACT_REFNO"] = $contract_no;
-			}
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
@@ -48,14 +38,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult['DETAIL_LOAN'] = $arrAllLoan;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -72,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

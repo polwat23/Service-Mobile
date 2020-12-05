@@ -7,8 +7,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchEvent = $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
 										date_format(event_start_time,'%H:%i') as event_start_time,
 										date_format(event_end_time,'%H:%i') as event_end_time,
-										is_settime,create_date,update_date,is_notify,is_notify_before,create_by
-										FROM gctaskevent ORDER BY start_date DESC");
+										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html
+										FROM gctaskevent WHERE is_use = '1' ORDER BY start_date DESC");
 		$fetchEvent->execute();
 		while($rowEvent = $fetchEvent->fetch(PDO::FETCH_ASSOC)){
 			$arrayEvent = array();
@@ -27,18 +27,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayEvent["IS_NOTIFY"] = $rowEvent["is_notify"];
 			$arrayEvent["IS_NOTIFY_BEFORE"] = $rowEvent["is_notify_before"];
 			$arrayEvent["CREATE_BY"] = $rowEvent["create_by"];
+			$arrayEvent["EVENT_HTML"] = $rowEvent["event_html"];
 			$arrayGroupNews[] = $arrayEvent;
 		}
 		$arrayResult['EVENT'] = $arrayGroupNews;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -55,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

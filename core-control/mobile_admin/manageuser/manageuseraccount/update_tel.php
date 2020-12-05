@@ -1,7 +1,7 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','member_no','new_tel','old_tel'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','member_no','new_tel'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
 		$update_email = $conmysql->prepare("UPDATE gcmemberaccount 
 																SET phone_number = :new_tel
@@ -22,21 +22,18 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_tel','old_tel'],$da
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่เปลื่อยนอีเมลได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
-		echo json_encode($arrayResult);	
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
 

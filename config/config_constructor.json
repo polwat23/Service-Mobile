@@ -1,19 +1,21 @@
 {
-	"NAME_APP" : "MU Saving",
-	"COOP_KEY" : "mhd",
-	"COOP_ID" : "001001",
+	"NAME_APP" : "DOAE Connect",
+	"COOP_KEY" : "doae",
+	"COOP_ID" : "057001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/kbank",
-	"APP_ID" : "com.musaving.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/MHDCOOP/",
-	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
-	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
-	"WS_STRC_DB" : "Data Source=192.168.99.122:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=001001;coop_control=001001;",
-	"FIREBASE_API_KEY" : "AIzaSyAA8lDn_1AnwHxlLyYfbOdnB_JVBNdswKw",
-	"FIREBASE_SERVER_KEY" : "AAAACCPrzj0:APA91bEaaflR2Rbi6JAgzbIMWg6Z8w4_iouJYDpVWiiGOG_WJcgbgFbQnY15E57szqklLBkhf6s537HU_fM7VRBcK6WQxrNa_kOk0tyNlcFzCsK9trst9Yg4VpqeLyXf7rbzlrXakZay",
-	"SECRET_KEY_JWT" : "MHD!/-Gcoop+Connect^001001*!&",
-	"SECRET_KEY_CORE" : "MHD!/+Control-BackOffice^001001*!&",
-	"SIGNATURE_KEY_VERIFY_API" : "MHDGcoop+-API_LB-WITH-!KBank!-^001001*!&",
-	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-001001-MHD",
+	"APP_ID" : "com.doaecoop.mobile",
+	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/DOAECOOP/",
+	"URL_CORE_COOP" : "http://192.168.10.241/CORE/GCOOP/WcfService125/",
+	"URL_CORE_SMS" : "http://10.0.251.31:4382/",
+	"IP_SMS" : "10.0.251.31",
+	"PORT_SMS" : "4382",
+	"WS_STRC_DB" : "Data Source=192.168.10.241/gcoop;Persist Security Info=True;User ID=iscorfscuat;Password=iscorfscuat;Unicode=True;coop_id=050001;coop_control=050001;",
+	"FIREBASE_API_KEY" : "AIzaSyCJUxHupePRuA84_wnIKz2d3A4eVnIaggg",
+	"FIREBASE_SERVER_KEY" : "AAAAchjsKcM:APA91bGmicz9zVR7B1E7r0XWuJlC3eorMb65sE3VSo4eJdNH3RZn_G8TjW2G_DwRJ3mX1Yn_E5QEF7ud8uxn3Sgbms0CpjouLLyUDLAvqGAeys2XIamBr16P_PxJSSBVzM6ljQUVolLz",
+	"SECRET_KEY_JWT" : "DOAE!/-Gcoop+Connect^057001*!&",
+	"SECRET_KEY_CORE" : "DOAE!/+Control-BackOffice^057001*!&",
+	"SIGNATURE_KEY_VERIFY_API" : "Rfsc!/-Connect+-API_LB-WITH-!KBank!-^050001*!&",
+	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-050001-RFSC-Test",
 	"DEFAULT_BANNER_COLOR_DEG" : "90",
 	"DEFAULT_BANNER_COLOR_MAIN" : "#8e9eab",
 	"DEFAULT_BANNER_COLOR_SECON" : "#eef2f3",
@@ -22,22 +24,8 @@
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
-	"LIMIT_TRANSACTION" : {
-		"0" : {
-			"LIMIT_NAME" : "limit_amount_transaction_incoop",
-			"LIMIT_TYPE_TH" : "ธุรกรรมภายใน",
-			"LIMIT_TYPE_EN" : "Transaction in Coop",
-			"LIMIT_AMOUNT" : "2000000",
-			"LIMIT_AMOUNT_COOP" : "2000000",
-			"IS_USE" : "false"
-		},
-		"1" : {
-			"LIMIT_NAME" : "limit_amount_transaction",
-			"LIMIT_TYPE_TH" : "ธุรกรรมภายนอก",
-			"LIMIT_TYPE_EN" : "Transaction in Bank",
-			"LIMIT_AMOUNT" : "2000000",
-			"LIMIT_AMOUNT_COOP" : "2000000",
-			"IS_USE" : "true"
-		}
-	}
+	"CMD_SMS" : "SENDMSG",
+	"FROM_SERVICES_SMS" : "Forest_UAT",
+	"CHARGE_SMS" : "66614103343",
+	"CODE_SMS" : "45140200001"
 }

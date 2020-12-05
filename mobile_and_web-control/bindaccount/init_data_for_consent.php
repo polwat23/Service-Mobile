@@ -11,7 +11,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															WHERE gat.member_no = :member_no and gat.is_use = '1'");
+															LEFT JOIN gcconstantaccountdept gcd ON gat.id_accountconstant = gcd.id_accountconstant
+															WHERE gat.member_no = :member_no and gat.is_use = '1' and gcd.allow_deposit_outside = '1' and gcd.allow_withdraw_outside = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
 			]);
@@ -58,35 +59,35 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 					$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0005";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0005";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -103,7 +104,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
