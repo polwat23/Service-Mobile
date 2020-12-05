@@ -68,14 +68,14 @@ $configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
-	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
-	$lib->sendLineNotify($message_error);
+	//$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
+	//$lib->sendLineNotify($message_error);
 	http_response_code(500);
 	
 }
 if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
-	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
-	$lib->sendLineNotify($message_error);
+	//$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
+	//$lib->sendLineNotify($message_error);
 	$func->MaintenanceMenu("System");
 	http_response_code(500);
 	
