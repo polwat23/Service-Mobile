@@ -13,8 +13,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 			$arrayResult['RESPONSE_CODE'] = "WS0073";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		try {
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
@@ -63,16 +63,16 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 							$arrayResult['RESPONSE_CODE'] = "WS0071";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 						if($responseSoap->maxperiod_payment == 0){
 							$arrayResult = array();
 							$arrayResult['RESPONSE_CODE'] = "WS0072";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../include/exit_footer.php');
+							
 						}
 						$arrayResult['ROUNDPAY'] = $responseSoap->roundpay_factor;
 						$arrayResult['MAXPERIOD_PAYMENT'] = $responseSoap->maxperiod_payment ?? 0;
@@ -80,7 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 						$arrayResult['MAXRECEIVE_AMT'] = $responseSoap->maxreceive_amt;
 						$arrayResult['RECEIVE_AMT'] = round($responseSoap->loanpermiss_amt - $arrayResult['DIFF_OLD_CONTRACT'],2);
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
+						require_once('../../include/exit_footer.php');
 					}catch(SoapFault $e){
 						$filename = basename(__FILE__, '.php');
 						$logStruc = [
@@ -93,8 +93,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 						$arrayResult['RESPONSE_CODE'] = "WS0062";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../include/exit_footer.php');
+						
 					}
 				}else{
 					$filename = basename(__FILE__, '.php');
@@ -112,8 +112,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					}
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}catch(SoapFault $e){
 				$filename = basename(__FILE__, '.php');
@@ -127,8 +127,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 				$arrayResult['RESPONSE_CODE'] = "WS0058";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
@@ -145,16 +145,16 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 			$arrayResult['RESPONSE_CODE'] = "WS0058";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -171,7 +171,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','max_period','i
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

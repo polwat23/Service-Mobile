@@ -11,8 +11,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 					$arrayResult['RESPONSE_CODE'] = "WS0074";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
@@ -41,13 +41,13 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 					$arrayResult['RESPONSE_CODE'] = "WS0071";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 				$arrayResult['RECEIVE_AMT'] = $request_net;
 				$arrayResult['PERIOD_PAYMENT'] = round($responseSoap->period_payment,2) ?? 0;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}catch(SoapFault $e){
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
@@ -60,8 +60,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 				$arrayResult['RESPONSE_CODE'] = "WS0062";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
@@ -78,16 +78,16 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 			$arrayResult['RESPONSE_CODE'] = "WS0062";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -104,7 +104,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

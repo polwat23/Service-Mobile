@@ -16,8 +16,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT account_status,user_type FROM gcmemberaccount 
@@ -31,8 +31,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$member_no_RAW = $configAS[$member_no] ?? $member_no;
 		$getCardPerson = $conoracle->prepare("SELECT CARD_PERSON,MEM_TELMOBILE FROM mbmembmaster WHERE member_no = :member_no");
@@ -42,8 +42,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 			$arrayResult['RESPONSE_CODE'] = "WS0060";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		if($rowChkMemb['user_type'] == '0' || $rowChkMemb['user_type'] == '1'){
 			$arrayResult['IS_OTP'] = TRUE;
@@ -52,13 +52,13 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 		$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowMemb["MEM_TELMOBILE"]);
 		$arrayResult['TEMP_PASSWORD'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -75,7 +75,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
