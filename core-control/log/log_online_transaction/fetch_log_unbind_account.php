@@ -23,7 +23,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																			INNER JOIN gcuserlogin login ON
 																				unbin.id_userlogin = login.id_userlogin  
 																			ORDER BY unbin.attempt_unbind_date DESC");
-																					$fetchLogBindAccount->execute();
+		$fetchLogBindAccount->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogBindAccount = $fetchLogBindAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccount = array();
 			$fetchBinAccountCoopNo = $conmysql->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank FROM gcbindaccount WHERE id_bindaccount = '$rowLogBindAccount[id_bindaccount]' ");
@@ -41,8 +42,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupLogBindAccount["ID_BIND_ACCOUNT"] = $rowLogBindAccount["id_bindaccount"];
 			$arrGroupLogBindAccount["COOP_ACCOUNT_NO"] = $coop_no["deptaccount_no_coop"];
 			$arrGroupLogBindAccount["BANK_ACCOUNT_NO"] = $coop_no["deptaccount_no_bank"];
-			$arrGroupLogBindAccount["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_coop"],$func->getConstant('dep_format'));
-			$arrGroupLogBindAccount["BANK_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_bank"],$func->getConstant('dep_format'));
+			$arrGroupLogBindAccount["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_coop"],$formatDept);
+			$arrGroupLogBindAccount["BANK_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_bank"],$formatDept);
   		    $arrGroupLogBindAccount["DATA_UNBIND_ERROR"] = $rowLogBindAccount["data_unbind_error"];
 			$arrGroupLogBindAccount["QUERY_ERROR"] = $rowLogBindAccount["query_error"];
 			$arrGroupLogBindAccount["QUERY_FLAG"] = $rowLogBindAccount["query_flag"];
@@ -51,17 +52,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["UNBIND_ACCOUNT_LOG"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>

@@ -9,14 +9,14 @@ use Component\functions;
 
 $lib = new library();
 $func = new functions();
-
+$formatDept = $func->getConstant('hidden_dep');
 if($lib->checkCompleteArgument(['member_no','deptaccount_no','operate_date','deptitem_desc','amount'],$dataComing)){
 	$templateMessage = $func->getTemplateSystem('DepositInfo',1);
 	$arrToken = $func->getFCMToken('person',strtolower($lib->mb_str_pad($dataComing["member_no"])));
 	foreach($arrToken["LIST_SEND"] as $dest){
 		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
 			$dataMerge = array();
-			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));
+			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$formatDept);
 			$dataMerge["AMOUNT"] = number_format($dataComing["amount"],2);
 			$dataMerge["ITEMTYPE_DESC"] = $dataComing["deptitem_desc"];
 			$dataMerge["DATETIME"] = isset($dataComing["operate_date"]) && $dataComing["operate_date"] != '' ? 

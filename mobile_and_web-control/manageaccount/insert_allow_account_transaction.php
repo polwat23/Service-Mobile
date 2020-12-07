@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 				':id_accountconstant' => $dataComing["id_accountconstant"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
@@ -32,8 +32,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 				$arrayResult['RESPONSE_CODE'] = "WS1023";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$limit_trans = $func->getConstant("limit_withdraw");
@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 													VALUES".implode(",",$bulkInsertData));
 			if($insertDeptAllow->execute()){
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
@@ -60,8 +60,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 				$arrayResult['RESPONSE_CODE'] = "WS1023";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}
 	}else{
@@ -69,8 +69,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -87,7 +87,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

@@ -27,8 +27,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrResponseAPI = json_decode($arrResponseAPI);
 		if($arrResponseAPI->responseCode == "200"){
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 			$arrayResult['BANK_ACCOUNT_ENC'] = $dataComing["bank_account_no"];
 			$arrayResult['ACCOUNT_NAME'] = $arrResponseAPI->toCOOPAccountName;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0028";
 			if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
@@ -45,16 +45,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

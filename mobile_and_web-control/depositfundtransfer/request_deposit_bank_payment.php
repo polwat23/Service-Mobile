@@ -63,8 +63,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$log->writeLog('deposittrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
@@ -151,7 +151,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}
 			$ResponseAPI = json_decode($arrResponseAPI);
 			if($ResponseAPI->responseCode != "200"){
@@ -220,8 +220,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			$ref_slipno = $ResponseAPI->trxID;
 			// -----------------------------------------------
@@ -287,8 +287,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
 			$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0038";
 			$arrayStruc = [
@@ -297,7 +297,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':operate_date' => $dateOper,
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
-				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_code' => $arrResponse->RESPONSE_CODE,
 				':response_message' => $arrResponse->RESPONSE_MESSAGE
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
@@ -307,23 +307,23 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

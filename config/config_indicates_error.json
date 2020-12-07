@@ -102,6 +102,7 @@
 	"WS1029" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถสร้างรายการโปรดได้ กรุณาติดต่อสหกรณ์ #WS1029","en" : "Something was wronged that cannot create favorite transaction please contact cooperative #WS1029"}],
 	"WS1030" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนแปลงสถานะการพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1030","en" : "Something was wronged that cannot change status moratorium please contact cooperative #WS1030"}],
 	"WS1031" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถดึงข้อมูลเงินฝากได้ กรุณาติดต่อสหกรณ์ #WS1031","en" : "Something was wronged that cannot fetch information of deposits please contact cooperative #WS1031"}],
+	"WS1038" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถยืนยันยอดในเอกสารได้ กรุณาติดต่อสหกรณ์ #WS1038","en" : "Something was crashed that cannot confirm balance in document please contact cooperative #WS1038"}],
 	"WS9001" : [{"th" : "เกิดข้อผิดพลาดบางประการ กรุณาลองใหม่อีกครั้ง #WS9001","en" : "Something wrong please try again #WS9001"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการ กรุณาลองใหม่อีกครั้ง #WS9999","en" : "Something wrong please try again #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
@@ -151,7 +152,9 @@
 		"4007" : 
 			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
 		"9999" : 
-			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
+			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
+		"005" :
+			[{"th" : "ยอดคงเหลือในบัญชีธนาคารของท่านไม่พอหักเพื่อทำรายการฝาก กรุณาตรวจสอบยอดเงินก่อนทำรายการ","en" : "Balance of bank account  not enough for deposit to cooperative please check your balance before transaction"}]
 		}],
 	"SAVING_EGAT_ERR" : [{
 		"401" : 

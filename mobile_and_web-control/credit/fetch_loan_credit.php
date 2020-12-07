@@ -15,13 +15,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
 			$arrCredit = array();
 			$maxloan_amt = 0;
+			$arrCollShould = array();
+			$arrOtherInfo = array();
+			$arrOldContract = array();
 			$canRequest = FALSE;
-			if($rowCanCal["loantype_code"] == '10'){
-				include('calculate_loan_emer.php');
-			}else if($rowCanCal["loantype_code"] == '20'){
-				include('calculate_loan_normal_share_coll.php');
-			}else if($rowCanCal["loantype_code"] == '30'){
-				include('calculate_loan_special_share_coll.php');
+			if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
+				include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
 			}else{
 				include('calculate_loan_etc.php');
 			}
@@ -41,6 +40,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 				}
 			}
+			
+			$arrCredit["OTHER_INFO"] = $arrOtherInfo;
+			$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
+			$arrCredit["OLD_CONTRACT"] = $arrOldContract;
 			$arrCredit["ALLOW_REQUEST"] = $canRequest;
 			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 			$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
@@ -49,14 +52,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["LOAN_CREDIT"] = $arrGroupCredit;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -73,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

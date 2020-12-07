@@ -16,23 +16,20 @@ if($lib->checkCompleteArgument(['unique_id','member_no_group'],$dataComing)){
 				$conmysql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถตั้งแอดมินได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
 			}
 		}
 		$conmysql->commit();
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

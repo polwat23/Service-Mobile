@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 			if($func->logoutAll($payload["id_token"],$payload["member_no"],'-9')){
 				$conmysql->commit();
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
 				$conmysql->rollback();
 				$filename = basename(__FILE__, '.php');
@@ -30,8 +30,8 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS1012";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$conmysql->rollback();
@@ -51,16 +51,16 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1012";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

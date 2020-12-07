@@ -56,5 +56,5 @@ while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 }
 $arrayResult['ANNOUNCE'] = $arrGroupAnn;
 $arrayResult['RESULT'] = TRUE;
-echo json_encode($arrayResult);
+require_once('../../include/exit_footer.php');
 ?>
