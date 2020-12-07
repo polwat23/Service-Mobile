@@ -7,9 +7,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGrpYear = array();
 		$arrGroupAss = array();
 		$yearAss = 0;
-		$fetchAssGrpYear = $conoracle->prepare("SELECT EXTRACT(YEAR FROM REQ_DATE) as ASSIST_YEAR,sum(assist_amt) as ASS_RECEIVED FROM asreqmaster 
+		$fetchAssGrpYear = $conoracle->prepare("SELECT EXTRACT(YEAR FROM PAY_DATE) as ASSIST_YEAR,sum(assist_amt) as ASS_RECEIVED FROM asreqmaster 
 												WHERE member_no = :member_no and coopbranch_id = :branch_id and req_status IN('31','32')
-												GROUP BY REQ_DATE ORDER BY REQ_DATE DESC");
+												GROUP BY EXTRACT(YEAR FROM PAY_DATE) ORDER BY ASSIST_YEAR DESC");
 		$fetchAssGrpYear->execute([
 			':member_no' => $member_no,
 			':branch_id' => $payload["branch_id"]
@@ -26,15 +26,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
 			$yearAss = $dataComing["ass_year"] - 543;
 		}
+		$assistretryRemain = 0;
 		$fetchAssType = $conoracle->prepare("SELECT asm.ASSIST_DOCNO as ASSCONTRACT_NO,CASE WHEN asm.REQ_STATUS IN('31','32') THEN ASSIST_AMT ELSE 0 END as ASSIST_AMT,
-												asm.APPROVE_DATE as PAY_DATE,asm.ASSISTAPPROVE_AMT as APPROVE_AMT,asm.ASSISTTYPE_CODE,
+												asm.APPROVE_DATE as PAY_DATE,asm.ASSISTAPPROVE_AMT as APPROVE_AMT,TRIM(asm.ASSISTTYPE_CODE) as ASSISTTYPE_CODE,
 												ast.ASSISTTYPE_DESC,aur.STATUS_DESC 
 												FROM asreqmaster asm  LEFT JOIN asucfassisttype ast
 												ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE
 												LEFT JOIN asucfreqstatus aur ON asm.REQ_STATUS = aur.REQ_STATUS
 												WHERE asm.ASSISTTYPE_CODE IS NOT NULL and asm.member_no = :member_no
-												and coopbranch_id = :branch_id and asm.REQ_STATUS NOT IN('-9','0','99')
-												and EXTRACT(YEAR FROM asm.REQ_DATE) = :year");
+												and asm.coopbranch_id = :branch_id and asm.REQ_STATUS NOT IN('-9','0','99')
+												and EXTRACT(YEAR FROM asm.PAY_DATE) = :year");
 		$fetchAssType->execute([
 			':member_no' => $member_no,
 			':branch_id' => $payload["branch_id"],
@@ -42,6 +43,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		$arrGroupAss = array();
 		while($rowAssType = $fetchAssType->fetch(PDO::FETCH_ASSOC)){
+			if($rowAssType["ASSISTTYPE_CODE"] == '80'){
+				$assistretryRemain += $rowAssType["ASSIST_AMT"];
+			}
 			$arrAss = array();
 			$arrAss["ASSIST_RECVAMT"] = number_format($rowAssType["ASSIST_AMT"],2);
 			$arrAss["APPROVE_AMT"] = number_format($rowAssType["APPROVE_AMT"],2);
@@ -86,17 +90,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrRightGroupAss[] = $arrAss;
 		}
 		//สวัสดิการเงินสงเคราะห์ถึงแก่กรรม 
+		$arrAss = array();
+		$arrListAssist = array();
 		$fetchAsDeadCoffin = $conoracle->prepare("SELECT money_amt from  ASTIMERANGEMONEY 
 											WHERE RANGE_CODE = 'asdeadcoffin'
 											AND :year_count BETWEEN start_time AND end_time");
 		$fetchAsDeadCoffin->execute([':year_count' => $member_date_count]);
 		while($rowAsDeadCoffin = $fetchAsDeadCoffin->fetch(PDO::FETCH_ASSOC)){
-			$arrAss = array();
-			$arrAss["PAYPER_AMT"] = number_format($rowAsDeadCoffin["MONEY_AMT"],2);
-			$arrAss["ASSISTTYPE_DESC"] = 'สวัสดิการเงินสงเคราะห์ถึงแก่กรรม';
-			$arrRightGroupAss[] = $arrAss;
+			$arrSubAssist = array();
+			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "จ่ายรายละ" : "Pay per man";
+			$arrSubAssist["VALUE"] = number_format($rowAsDeadCoffin["MONEY_AMT"],2).($lang_locale == 'th' ? " บาท" : " Baht");
+			$arrListAssist[] = $arrSubAssist;
+			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "รับไปแล้ว" : "Received";
+			$arrSubAssist["VALUE"] = number_format($assistretryRemain,2).($lang_locale == 'th' ? " บาท" : " Baht");
+			$arrListAssist[] = $arrSubAssist;
+			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "คงเหลือรอจ่าย" : "Remain can receive";
+			$arrSubAssist["VALUE"] = number_format($rowAsDeadCoffin["MONEY_AMT"] - $assistretryRemain,2).($lang_locale == 'th' ? " บาท" : " Baht");
+			$arrListAssist[] = $arrSubAssist;
 		}
-		
+		$arrAss["ASSISTTYPE_DESC"] = "สวัสดิการเงินสงเคราะห์ถึงแก่กรรม";
+		$arrAss["TYPE_DISPLAY"] = "array";
+		$arrAss["LIST_ASSIST"] = $arrListAssist;
+		$arrRightGroupAss[] = $arrAss;
 		//สวัสดิการคู่สมรส/ทายาทเสียชีวิต 
 		$fetchAssCouple = $conoracle->prepare("SELECT envvalue from CMENVIRONMENTVAR where ENVCODE = 'couple'");
 		$fetchAssCouple->execute();
@@ -109,6 +124,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		//สวัสดิการเงินช่วยเหลือค่ารักษาพยาบาล 
 		$arrAss = array();
+		$arrListAssist = array();
 		$fetchAssHospital = $conoracle->prepare("SELECT envvalue, envcode from CMENVIRONMENTVAR 
 											WHERE envcode IN ('hospital','hospitalrate','hospitalrateday','hospitalday')");
 		$fetchAssHospital->execute();
@@ -124,7 +140,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrListAssist[] = $arrSubAssist;
 			}else if($rowAssHospital["ENVCODE"] == 'hospitalrateday'){
 				$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "จำนวนครั้งขอเงินช่วยเหลือได้สูงสุดต่อปี" : "Maximum times of money assist per year";
-				$arrSubAssist["VALUE"] = $rowAssHospital["ENVVALUE"].($lang_locale == 'th' ? " ปี" : " Year");
+				$arrSubAssist["VALUE"] = $rowAssHospital["ENVVALUE"].($lang_locale == 'th' ? " ครั้ง" : " Times");
 				$arrListAssist[] = $arrSubAssist;
 			}else if($rowAssHospital["ENVCODE"] == 'hospitalday'){
 				$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "ขอเงินช่วยเหลือภายใน" : "Request money assist in";
@@ -180,14 +196,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult["ASSIST"] = $arrGroupAss;
 		$arrayResult["RIGHTS_ASSIST"] = $arrRightGroupAss;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -204,7 +220,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

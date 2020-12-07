@@ -6,7 +6,8 @@ $member_no = $member_no ?? $dataComing["member_no"];
 $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 
-$getMemberData = $conoracle->prepare("SELECT mb.BIRTH_DATE,mb.MEMBER_DATE,mb.SALARY_AMOUNT,(sh.SHARESTK_AMT * 10) as SHARE_BAL
+$getMemberData = $conoracle->prepare("SELECT mb.MEMBER_DATE,mb.SALARY_AMOUNT,(sh.SHARESTK_AMT * 10) as SHARE_BAL,
+										TRUNC(MONTHS_BETWEEN(ADD_MONTHS( mb.birth_date, 720) , sysdate),0) AS PERIOD_REMAIN
 										FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no and mb.branch_id = sh.branch_id
 										WHERE mb.member_no = :member_no and mb.branch_id = :branch_id");
 $getMemberData->execute([
@@ -15,7 +16,7 @@ $getMemberData->execute([
 ]);
 $rowMembData = $getMemberData->fetch(PDO::FETCH_ASSOC);
 $member_duration = $lib->count_duration($rowMembData["MEMBER_DATE"],'m');
-$age = $lib->count_duration($rowMembData["BIRTH_DATE"],'m');
+$period_remain = $rowMembData["PERIOD_REMAIN"];
 $getLoantypeCustom = $conoracle->prepare("SELECT PERCENTSALARY, PERCENTSHARE, MAXLOAN_AMT 
 										FROM lnloantypecustom 
 										WHERE loantype_code = :loantype_code and
@@ -51,7 +52,7 @@ if(isset($rowLTCustom["MAXLOAN_AMT"])){
 	]);
 	$rowPeriod = $getPeriodMax->fetch(PDO::FETCH_ASSOC);
 	if($rowSalaryMin["RETRYCOLLCHK_FLAG"] == '1' || $rowSalaryMin["RETRYCOLLCHK_FLAG"] == '2'){
-		$maxperiod = (720 - $age) + $rowSalaryMin["RETRYLOANSEND_TIME"];
+		$maxperiod = $period_remain + $rowSalaryMin["RETRYLOANSEND_TIME"];
 		if($maxperiod > $rowPeriod["MAX_PERIOD"]){
 			$maxperiod = $rowPeriod["MAX_PERIOD"];
 		}

@@ -42,8 +42,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}
 					}
 				}
-				$arrCredit["NOTE"] = "กรุณาตรวจสอบสิทธิกู้กับทางสหกรณ์อีกครั้ง";
-				$arrCredit["NOTE_TEXT_COLOR"] = "red";
 				$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 				$arrCredit["OTHER_INFO"] = $arrOtherInfo;
 				$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
@@ -54,16 +52,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupCredit[] = $arrCredit;
 			}
 		}
-		$arrayResult["LOAN_CREDIT"] = $arrGroupCredit;
+		$getLoanDropFlag = $conoracle->prepare("SELECT DROPLOANALL_FLAG FROM mbmembmaster WHERE member_no = :member_no");
+		$getLoanDropFlag->execute([':member_no' => $member_no]);
+		$rowDropFlag = $getLoanDropFlag->fetch(PDO::FETCH_ASSOC);
+		if($rowDropFlag["DROPLOANALL_FLAG"] == "1"){
+			$arrayResult["NOTE"] = "ถูกระบบการกู้ชั่วคราว กรุณาติดต่อสหกรณฯ";
+			$arrayResult["NOTE_TEXT_COLOR"] = "red";
+		}else{
+			$arrayResult["NOTE_TOP"] = "กรุณาตรวจสอบสิทธิกู้กับทางสหกรณ์อีกครั้ง";
+			$arrayResult["NOTE_TOP_TEXT_COLOR"] = "red";
+			$arrayResult["LOAN_CREDIT"] = $arrGroupCredit;
+		}
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -80,7 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

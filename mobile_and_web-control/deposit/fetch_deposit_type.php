@@ -10,6 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
 		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+											dp.sequest_status,dp.sequest_amount,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 											WHERE dp.member_no = :member_no and dp.branch_id = :branch_id and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
@@ -34,6 +35,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 			]);
 			$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
+			if($rowAccount["SEQUEST_STATUS"] != "0"){
+				if($rowAccount["SEQUEST_STATUS"] == '1'){
+					$arrAccount["SEQUEST_DESC"] = "อายัดจำนวนเงิน ".number_format($rowAccount["SEQUEST_AMOUNT"],2)." บาท";
+				}else if($rowAccount["SEQUEST_STATUS"] == '2'){
+					$arrAccount["SEQUEST_DESC"] = "อายัดการเคลื่อนไหว";
+				}else if($rowAccount["SEQUEST_STATUS"] == '3'){
+					$arrAccount["SEQUEST_DESC"] = "อายัดรอปิดบัญชี";
+				}else if($rowAccount["SEQUEST_STATUS"] == '4'){
+					$arrAccount["SEQUEST_DESC"] = "อายัดห้ามถอน/ปิดบัญชี ".number_format($rowAccount["SEQUEST_AMOUNT"],2)." บาท";;
+				}else if($rowAccount["SEQUEST_STATUS"] == '5'){
+					$arrAccount["SEQUEST_DESC"] = "อายัดห้ามฝากเงิน";
+				}else if($rowAccount["SEQUEST_STATUS"] == '9'){
+					$arrAccount["SEQUEST_DESC"] = "อายัดเพื่อ ATM";
+				}else{
+					$arrAccount["SEQUEST_DESC"] = "อายัดด้วยเหตุผลบางประการ";
+				}
+				$arrAccount["SEQUEST_DESC_TEXT_COLOR"] = "red";
+			}
 			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
 			if(isset($rowAlias["path_alias_img"])){
 				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
@@ -61,14 +80,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -85,7 +104,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
