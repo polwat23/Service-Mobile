@@ -20,7 +20,11 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}
 }
-
+if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
+   ob_start("ob_gzhandler");
+}else{
+   ob_start();
+}
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
@@ -64,39 +68,33 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(400);
-					echo json_encode($arrayResult);
-					exit();
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}
 			}catch (ValidateException $e) {
 				$errorCode = $e->getCode();
 				if($errorCode === 3){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					echo json_encode($arrayResult);
-					exit();
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}else if($errorCode === 4){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					echo json_encode($arrayResult);
-					exit();
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}else{
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					echo json_encode($arrayResult);
-					exit();
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}
 			}
 		}else{
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
-			echo json_encode($arrayResult);
-			exit();
+			require_once(__DIR__.'/../include/exit_footer.php');
 		}
 	}
 }else{
 	$arrayResult['RESULT'] = TRUE;
 	http_response_code(203);
-	echo json_encode($arrayResult);
-	exit();
+	require_once(__DIR__.'/../include/exit_footer.php');
 }
 ?>

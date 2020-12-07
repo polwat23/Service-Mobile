@@ -16,8 +16,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 		if($func->logoutAll(null,$dataComing["member_no"],'-9')){
 			$conmysql->commit();
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$conmysql->rollback();
 			$filename = basename(__FILE__, '.php');
@@ -47,8 +47,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 			$arrayResult['RESPONSE_CODE'] = "WS1012";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$conmysql->rollback();
@@ -68,8 +68,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 		$arrayResult['RESPONSE_CODE'] = "WS1012";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

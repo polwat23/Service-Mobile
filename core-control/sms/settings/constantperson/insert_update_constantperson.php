@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขรายการได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}
 				}else{
 					$updatelist = $conmysql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
@@ -45,8 +45,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขรายการได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
+						
 					}
 				}
 				
@@ -83,8 +83,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$conmysql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มรายการได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}
 		
@@ -108,24 +108,24 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$conmysql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขรายการได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
+					
 				}
 			}
 			$conmysql->commit();
 		}
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);	
+		require_once('../../../../include/exit_footer.php');	
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			}
 			$arrayResult["SUB_MENU"] = $arrayGroup;
 			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayGroup = array();
 			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
@@ -69,18 +69,18 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			}
 			$arrayResult["SUB_MENU"] = $arrayGroup;
 			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

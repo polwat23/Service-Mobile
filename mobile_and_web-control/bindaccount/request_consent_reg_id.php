@@ -26,8 +26,8 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				$arrayResult['RESPONSE_CODE'] = "WS0036";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '8'");
 			$checkBeenBindForPending->execute([
@@ -69,15 +69,15 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$conmysql->commit();
 					$arrayResult["URL_CONSENT"] = $arrResponse->URL_CONSENT;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 				}else{
 					$conmysql->rollback();
 					$text = '#Bind #WS0039 : '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
@@ -85,8 +85,8 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 					$arrayResult['RESPONSE_CODE'] = "WS0039";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}else{
 				$conmysql->rollback();
@@ -109,8 +109,8 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				$arrayResult['RESPONSE_CODE'] = "WS1022";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e) {
 			$arrError = array();
@@ -120,23 +120,23 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

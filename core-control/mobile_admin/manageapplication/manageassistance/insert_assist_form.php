@@ -34,6 +34,16 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','inp
 			':input_format' => $dataComing["input_format"] ? json_encode($dataComing["input_format"], JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT ) : null,
 			':is_required' => $dataComing["is_required"]
 		])){
+			
+			$arrayStruc = [
+				':menu_name' => "manageassistance",
+				':username' => $payload["username"],
+				':use_list' => "insert assistform",
+				':details' => "add row ".$dataComing["input_name"]." (".$dataComing["id_const_welfare"].")"
+			];
+			
+			$log->writeLog('manageapplication',$arrayStruc);	
+
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["INPUT_LENGTH"] = $dataComing["input_length_spc_"];
 		}else{
@@ -50,20 +60,20 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','inp
 				':input_format' => $dataComing["input_format"] ? json_encode($dataComing["input_format"], JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT ) : null,
 				':is_required' => $dataComing["is_required"]
 			];
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
+			
 		}
-		echo json_encode($arrayResult);	
+		require_once('../../../../include/exit_footer.php');	
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

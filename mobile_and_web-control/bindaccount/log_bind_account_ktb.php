@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component','coop_account_no'],$dataComing)
 			];
 			$log->writeLog('bindaccount',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0039";
 			$arrayStruc = [
@@ -22,22 +22,22 @@ if($lib->checkCompleteArgument(['menu_component','coop_account_no'],$dataComing)
 				':id_userlogin' => $payload["id_userlogin"],
 				':bind_status' => '-9',
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $dataComing["bind_src_message"]["reason"].' / termSeq'.$dataComing["bind_src_message"]["term_seq"],
+				':response_message' => 'KTB / '.$dataComing["bind_src_message"]["reason"].' / termSeq'.$dataComing["bind_src_message"]["term_seq"],
 				':coop_account_no' => $coop_account_no,
 				':query_flag' => '1'
 			];
 			$log->writeLog('bindaccount',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','coop_account_no'],$dataComing)
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

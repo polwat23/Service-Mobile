@@ -68,13 +68,12 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 							];
 							$log->writeLog('editadmincontrol',$arrayStruc);
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
 						}
 					}else{
 						$UpdateSubmenuPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = :status_permission
@@ -92,13 +91,12 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 							];
 							$log->writeLog('editadmincontrol',$arrayStruc);
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							require_once('../../../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../../include/exit_footer.php');
 						}
 					}
 			}else{
@@ -137,38 +135,33 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 						];
 						$log->writeLog('editadmincontrol',$arrayStruc);
 						$arrayResult['RESULT'] = TRUE;
-						echo json_encode($arrayResult);
+						require_once('../../../../include/exit_footer.php');
 					}else{
 						$conmysql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
 					$conmysql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../../include/exit_footer.php');
 				}
 			}
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่พบเมนูหลักของระบบ";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

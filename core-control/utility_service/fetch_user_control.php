@@ -20,11 +20,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	}
 	$arrayResult['SYSTEM_CONTROL'] = $arrayGroupAll;
 	$arrayResult['RESULT'] = TRUE;
-	echo json_encode($arrayResult);
+	require_once('../../include/exit_footer.php');
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 		$arrayResult['FAILED'] = $arrGroupAllFailed;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else if($dataComing["menu_component"] == 'reportsmsnotsuccess'){
 		$getMessageLog = $conmysql->prepare("SELECT topic,message,member_no,send_platform,tel_mobile
 											FROM smswasnotsent WHERE id_smsnotsent = :id_smsnotsent");
@@ -102,7 +102,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 			$arrayResult['FAILED'] = $arrGroupAllFailed;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../include/exit_footer.php');
 		}else{
 			$destination = array();
 			$arrToken = $func->getFCMToken('person',$rowMessage["member_no"]);
@@ -136,7 +136,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 			$arrayResult['FAILED'] = $arrGroupAllFailed;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../include/exit_footer.php');
 		}
 	}else if($dataComing["menu_component"] == 'reportnotifysuccess'){
 		$getMessageLog = $conmysql->prepare("SELECT his_title,his_detail,member_no
@@ -175,7 +175,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 		$arrayResult['FAILED'] = $arrGroupAllFailed;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else if($dataComing["menu_component"] == 'reportsmstranwassent'){
 		$getMessageLog = $conmysql->prepare("SELECT sms_message,member_no,tel_mobile
 											FROM smstranwassent WHERE id_smssent = :id_smssent");
@@ -225,12 +225,12 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 		$arrayResult['FAILED'] = $arrGroupAllFailed;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

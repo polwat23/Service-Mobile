@@ -18,6 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																					loguseapplication l
 																				INNER JOIN gcuserlogin g ON
 																					g.id_userlogin = l.id_userlogin
+																				WHERE l.access_date BETWEEN NOW() - INTERVAL 3 MONTH and NOW()
 																					ORDER BY g.login_date DESC");
 		$fetchApplicationUseLog->execute();
 		while($rowAppUseLog = $fetchApplicationUseLog->fetch(PDO::FETCH_ASSOC)){
@@ -33,17 +34,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["APP_USE_LOG_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

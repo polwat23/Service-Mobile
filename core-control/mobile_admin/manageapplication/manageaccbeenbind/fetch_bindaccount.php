@@ -18,14 +18,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												    ON cs.bank_code = gba.bank_code 
 													WHERE gba.bindaccount_status = '1'");
 		$fetchBindAcount->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($dataBindAcount = $fetchBindAcount->fetch(PDO::FETCH_ASSOC)){
 			$bindaccount = array();
 			$bindaccount["MEMBER_NO"] = $dataBindAcount["member_no"];
 			$bindaccount["DEPTACCOUNT_NO_COOP"] = $dataBindAcount["deptaccount_no_coop"];
-			$bindaccount["DEPTACCOUNT_NO_COOP_FORMAT"] = $lib->formataccount($dataBindAcount["deptaccount_no_coop"],$func->getConstant('dep_format'));
+			$bindaccount["DEPTACCOUNT_NO_COOP_FORMAT"] = $lib->formataccount($dataBindAcount["deptaccount_no_coop"],$formatDept);
 			$bindaccount["ID_BINDACCOUNT"] = $dataBindAcount["id_bindaccount"];
 			$bindaccount["DEPTACCOUNT_NO_BANK"] = $dataBindAcount["deptaccount_no_bank"];
-			$bindaccount["DEPTACCOUNT_NO_BANK_FORMAT"] =$lib->formataccount($dataBindAcount["deptaccount_no_bank"],$func->getConstant('dep_format'));
+			$bindaccount["DEPTACCOUNT_NO_BANK_FORMAT"] =$lib->formataccount($dataBindAcount["deptaccount_no_bank"],$formatDept);
 			$bindaccount["BANK_ACCOUNT_NAME"] = $dataBindAcount["bank_account_name"];
 			$bindaccount["BANK_ACCOUNT_NAME_EN"] = $dataBindAcount["bank_account_name_en"];
 			$bindaccount["BANK_NAME"] = $dataBindAcount["bank_name"];
@@ -34,18 +35,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult['BINACCOUNT_DATA'] = $arrayBindaccount;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>
 

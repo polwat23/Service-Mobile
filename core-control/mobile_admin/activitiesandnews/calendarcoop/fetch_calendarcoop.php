@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		
 		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before,event_html
-												FROM gctaskevent");
+												FROM gctaskevent WHERE is_use = '1'");
 		$fetchCalendar->execute();
 		while($rowCalendar = $fetchCalendar->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
@@ -26,17 +26,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		$arrayResult["EVENT_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

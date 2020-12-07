@@ -34,6 +34,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												ORDER BY trans.operate_date DESC");
 												
 		$fetLogTransection->execute();
+		$formatDept = $func->getConstant('dep_format');
 		while($rowLogTransection = $fetLogTransection->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTransection = array();
 			$arrLogTransection["REF_NO"] = $rowLogTransection["ref_no"];
@@ -42,10 +43,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTransection["DEVICE_NAME"] = $rowLogTransection["device_name"];
 			$arrLogTransection["TRANSACTION_TYPE_CODE"] = $rowLogTransection["transaction_type_code"];
 			$arrLogTransection["FROM_ACCOUNT"] = $rowLogTransection["from_account"];
-			$arrLogTransection["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransection["from_account"],$func->getConstant('dep_format'));
+			$arrLogTransection["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransection["from_account"],$formatDept);
 			$arrLogTransection["DESTINATION_TYPE"] = $rowLogTransection["destination_type"];
 			$arrLogTransection["DESTINATION"] = $rowLogTransection["destination"];
-			$arrLogTransection["DESTINATION_FORMAT"] = $rowLogTransection["destination_type"]=='1'?$lib->formataccount($rowLogTransection["destination"],$func->getConstant('dep_format')):$rowLogTransection["destination"];
+			$arrLogTransection["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransection["destination"],$formatDept);
 			$arrLogTransection["TRANSFER_MODE"] = $rowLogTransection["transfer_mode"];
 			$arrLogTransection["AMOUNT"] = $rowLogTransection["amount"];
 			$arrLogTransection["AMOUNT_FORMAT"] = number_format($rowLogTransection["amount"],2);
@@ -68,17 +69,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["LOG_TRANSECTION_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

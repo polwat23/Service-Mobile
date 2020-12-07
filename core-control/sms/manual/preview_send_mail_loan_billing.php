@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 				$arrDataPre = array();
 				$getDataForPreview = $conoracle->prepare("SELECT MEMBER_NO
 														FROM kpkepnotenoughmoneytosms
-														WHERE member_no IN('".implode("','",$destination)."') and recv_period = (SELECT MAX(recv_period) FROM kpmastreceive)
+														WHERE member_no IN('".implode("','",$destination)."')
 														GROUP BY member_no");
 				$getDataForPreview->execute();
 				while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
@@ -39,11 +39,11 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 			$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 			$arrayResult['FAILED'] = $arrGroupAllFailed;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../include/exit_footer.php');
 		}else{
 			$getDataForPreview = $conoracle->prepare("SELECT MEMBER_NO
 													FROM kpkepnotenoughmoneytosms
-													WHERE mailpost_status = '0' and recv_period = (SELECT MAX(recv_period) FROM kpmastreceive) 
+													WHERE mailpost_status = '0' 
 													GROUP BY member_no");
 			$getDataForPreview->execute();
 			while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
@@ -67,18 +67,18 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 			$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 			$arrayResult['FAILED'] = $arrGroupAllFailed;
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

@@ -24,6 +24,7 @@ $getSMSConstant->execute();
 while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
 	$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
 }
+$formatDept = $func->getConstant('hidden_dep');
 $templateMessage = $func->getTemplateSystem('DepositInfo',1);
 if(isset($templateMessage)){
 	$fetchDataSTM = $conoracle->prepare("SELECT dit.SIGN_FLAG,dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,dm.MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO,
@@ -48,7 +49,7 @@ if(isset($templateMessage)){
 		if($rowSTM["SIGN_FLAG"] == '1'){
 			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_dept_send_free"] || $durationIdle >= 180){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 				$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);

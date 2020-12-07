@@ -14,16 +14,16 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				if($createImage == 'oversize'){
 					$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../../include/exit_footer.php');
+					
 				}else{
 					if($createImage){
 						$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
 					}else{
 						$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../include/exit_footer.php');
+						
 					}
 				}
 			}
@@ -79,7 +79,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 				$arrayResult['FAILED'] = $arrGroupAllFailed;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../include/exit_footer.php');
 			}else{
 				$arrGroupAllSuccess = array();
 				$arrGroupAllFailed = array();
@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$arrToken = $func->getFCMToken('all');
 					foreach($arrToken["LIST_SEND"] as $dest){
@@ -142,7 +142,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}
 			}
 		}else if($dataComing["channel_send"] == "sms"){
@@ -224,7 +224,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 				$arrayResult['FAILED'] = $arrGroupAllFailed;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../../include/exit_footer.php');
 			}else{
 				$arrGroupAllSuccess = array();
 				$arrGroupAllFailed = array();
@@ -295,7 +295,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$arrayTel = $func->getSMSPerson('all');
 					foreach($arrayTel as $dest){
@@ -312,20 +312,20 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
+	
 }
 ?>

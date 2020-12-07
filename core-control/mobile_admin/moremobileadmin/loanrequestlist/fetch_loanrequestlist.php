@@ -36,15 +36,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	
 		$arrayResult["LOAN_REQUES_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "4003";
 		$arrayResult['RESPONSE_AWARE'] = "permission";
 		$arrayResult['RESPONSE'] = "Not permission this menu";
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "4004";
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	$arrayResult['RESPONSE'] = "Not complete argument";
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>
