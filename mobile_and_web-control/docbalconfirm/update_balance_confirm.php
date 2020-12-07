@@ -5,17 +5,51 @@ use Dompdf\Dompdf;
 
 $dompdf = new DOMPDF();
 
-if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocBalanceConfirm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		
+		$updateFlagComfirm = $conoracle->prepare("UPDATE cmconfirmmaster SET confirm_flag = :confirm_flag,confirm_date = sysdate,remark = :remark 
+												WHERE member_no = :member_no and BALANCE_DATE = to_date(:balance_date,'YYYY-MM-DD')");
+		if($updateFlagComfirm->execute([
+			':confirm_flag' => $dataComing["confirm_flag"],
+			':member_no' => $member_no,
+			':remark' => isset($dataComing["remark"]) && $dataComing["remark"] != "" ? $dataComing["remark"] : null,
+			':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"]))
+		])){
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
+		}else{
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1038",
+				":error_desc" => "Update ลงตาราง  cmconfirmmaster ไม่ได้ "."\n".$updateFlagComfirm->queryString."\n"."data => ".json_encode([
+					':confirm_flag' => $dataComing["confirm_flag"],
+					':member_no' => $member_no,
+					':remark' => isset($dataComing["remark"]) && $dataComing["remark"] != "" ? $dataComing["remark"] : null,
+					':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"]))
+				]),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." Update ลงตาราง  cmconfirmmaster ไม่ได้"."\n".$updateFlagComfirm->queryString."\n"."data => ".json_encode([
+				':confirm_flag' => $dataComing["confirm_flag"],
+				':member_no' => $member_no,
+				':remark' => isset($dataComing["remark"]) && $dataComing["remark"] != "" ? $dataComing["remark"] : null,
+				':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"]))
+			]);
+			$lib->sendLineNotify($message_error);
+			$arrayResult['RESPONSE_CODE'] = "WS1038";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -34,135 +68,5 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
 	
-}
-function GeneratePdfDoc($arrHeader,$arrDetail) {
-	$html = '<style>
-				@font-face {
-				  font-family: THSarabun;
-				  src: url(../../resource/fonts/THSarabun.ttf);
-				}
-				@font-face {
-					font-family: "THSarabun";
-					src: url(../../resource/fonts/THSarabun Bold.ttf);
-					font-weight: bold;
-				}
-				* {
-				  font-family: THSarabun;
-				}
-				body {
-				  padding: 0;
-				}
-
-				table{
-				  border:1px solid;
-				}
-				th{
-					text-align:center;
-					border:1px solid ;
-					font-weight:bold;
-				}
-				.text-right{
-					text-align:right;
-				}
-				.text-center{
-					text-align:center
-				}
-				td{
-					border:1px solid;
-					padding-left: 5px;
-					padding-right: 5px;
-				}
-			</style>';
-	$html .= '<div style="border:1px solid #eee; height:auto; margin:-15">
-			<div style="margin-left:10px; margin-top:5px;"> 
-			<img src="../../resource/logo/logo.jpg" style="width:100px;" >
-			</div>
-
-			<div style="position: absolute; left: 130px; top: 3px; font-size:30px; font-weight:1000;  ">
-			 <b>  สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จํากัด </b>
-			</div>
-
-			<div style="position: absolute; left: 130px; top:45px; font-size:14pt ">
-			เลขที่ 53 หมู่ 2 ถนนจรัญสนิทวงศ์ อําเภอบางกรวย จังหวัดนนทบุรี 11130
-
-			</div>
-			<div style="margin-left:50px; font-size:19px; margin-bottom:30px;" >
-			<div>
-				<b>เรื่อง</b>
-			</div>
-			<div>
-			  <b>เรียน</b>
-			</div>
-			<div style="margin-top:10px">
-			  <div><b>เลขประจําตัว</b></div>
-			  <div style="position:absolute; left:260px; top:153px;"><b>ส่วนรับเงิน </b> </div>
-			  <div style="position:absolute; left:440px; top:153px;"><b>กอง  </b> </div>
-			  <div style="position:absolute; left:580px; top:153px;"><b>ฝ่าย   </b> </div>
-			</div>
-			<div style="margin-top:20px; text-indent:50px; line-height: 17px; ">
-			หนังสือนี้มิใช่คําเตือนให้ชําระเงิน แต่เพื่อประโยชน์ในการสอบบัญชีของสหกรณ์ ขอให้สมาชิกได้โปรดตรวจสอบ รายการด้าน  ล่างนี้ ว่าถูกต้องหรือคลาดเคลื่อนอย่างไร โดยกรอกรายการตามแบบตอบที่ด้านล่าง 
-			<b><u>และส่งแบบตอบไปยังกรรมการผู้จัดการใหญ่ สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จํากัด ภายในกําหนด 15 วัน นับแต่วันที่ได้ประกาศ</u></b> มิฉะนั้นจะถือว่าถูกต้อง
-			</div>
-			<div class="text-right"style="padding-right:110px; margin-top:30px;" >ขอแสดงความนับถือ</div>
-			<div class="text-right"style="padding-right:100px; margin-top:100px;">(นายพูนสุข โตชนาการ) </div>
-			<div class="text-right"style="padding-right:103px; margin-top:-5px;">กรรมการผู้จัดการใหญ่</div>
-			<div  style="position:absolute; right:80px; top:355px; ">
-				<img src="../../resource/utility_icon/signature/signature.png" style="width:130px;">
-			</div>
-			<div style="position:absolute; left:110px; top:86px;">
-				ขอแจ้งรายการบัญชีของท่านเพียงสิ้นวันที่ 30 มิถุนายน 2563
-			</div>
-			<div style="position:absolute; left:110px; top:114px;">'.$arrHeader["full_name"].'</div>
-			<div style="position:absolute; left:125px; top:153px;">'.$arrHeader["member_no"].'</div>
-			<div style="position:absolute; left:330px; top:153px;">'.$arrHeader["member_group"].'</div>
-			<div style="position:absolute; left:480px; top:153px;">'.$arrHeader["depart_group"].'</div>
-			<div style="position:absolute; left:620px; top:153px;">'.$arrHeader["department"].'</div>';
-	//ตารางข้อมูล
-	$html .= '
-	   <div style="margin-right:80px">
-		  <table  style="width:100%;  border-collapse: collapse; margin-top:20px;">
-		  <thead>
-			<tr>
-			  <th>ลำดับ</th>
-			  <th>รายการ</th>
-			  <th>จำนวนเงิน</th>
-			</tr>
-		  </thead>
-		  <tbody>';
-	//ข้อมูลในตาราง
-	for($i = 0;$i < sizeof($arrDetail);$i++){
-		$html .= '
-			<tr>
-			  <td class="text-center">'.($i+1).'</td>
-			  <td class="text-centr">'.$arrDetail[$i]["TYPE_DESC"].' '.$arrDetail[$i]["DEPTACCOUNT_NO"].'</td>  
-			  <td class="text-right">'.$arrDetail[$i]["BALANCE_AMT"].'</td>  
-			</tr>
-		  ';
-	}
-	$html .= '       
-		  </tbody>
-		</table>
-	   </div>
-	   </div>
-	';
-	$dompdf = new DOMPDF();
-	$dompdf->set_paper('A4', 'landscape');
-	$dompdf->load_html($html);
-	$dompdf->render();
-	$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm';
-	if(!file_exists($pathfile)){
-		mkdir($pathfile, 0777, true);
-	}
-	$pathfile = $pathfile.'/'.$arrHeader["member_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/docbalconfirm/'.$arrHeader["member_no"].'.pdf?v='.time();
-	$arrayPDF = array();
-	$output = $dompdf->output();
-	if(file_put_contents($pathfile, $output)){
-		$arrayPDF["RESULT"] = TRUE;
-	}else{
-		$arrayPDF["RESULT"] = FALSE;
-	}
-	$arrayPDF["PATH"] = $pathfile_show;
-	return $arrayPDF; 
 }
 ?>

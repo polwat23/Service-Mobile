@@ -62,6 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
 					' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
 					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+					$arrayResult['BALANCE_DATE'] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y');
 					$arrayResult['IS_CONFIRM'] = FALSE;
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');

@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':unbind_status' => '-9',
-						':response_code' => $arrayResult['RESPONSE_CODE'],
+						':response_code' => $arrResponse->RESPONSE_CODE,
 						':response_message' => $arrResponse->RESPONSE_MESSAGE,
 						':id_bindaccount' => $dataComing["id_bindaccount"],
 						':query_flag' => '1'
