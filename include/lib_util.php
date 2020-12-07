@@ -85,6 +85,8 @@ class library {
 		$date_duration = $dateNow->diff($dateconverted);
 		if($format == "ym"){
 			return  $date_duration->y ." ปี " .$date_duration->m." เดือน";
+		}else if($format == "y"){
+			return $date_duration->y;			
 		}else if($format == "m"){
 			return (($date_duration->y)*12)+($date_duration->m);			
 		}else if($format == "d"){

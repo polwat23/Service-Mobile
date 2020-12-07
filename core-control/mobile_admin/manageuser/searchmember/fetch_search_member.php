@@ -23,25 +23,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.ADDR_EMAIL AS EMAIL,MB.ADDR_MOBILEPHONE AS MEM_TELMOBILE,
+		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.email_address AS EMAIL,MB.mem_telmobile AS MEM_TELMOBILE,mb.mem_tel as MEM_TEL,
 											MB.MEMBER_DATE,MB.MEMBER_NO,
-											MB.ADDR_NO AS ADDR_NO,
-											MB.ADDR_MOO AS ADDR_MOO,
-											MB.ADDR_SOI AS ADDR_SOI,
-											MB.ADDR_VILLAGE AS ADDR_VILLAGE,
-											MB.ADDR_ROAD AS ADDR_ROAD,
-											MBT.TAMBOL_DESC AS TAMBOL_DESC,
+											MB.MEMB_ADDR AS ADDR_NO,
+											MB.ADDR_GROUP AS ADDR_MOO,
+											MB.SOI AS ADDR_SOI,
+											MB.MOOBAN AS ADDR_VILLAGE,
+											MB.ROAD AS ADDR_ROAD,
+											MB.TAMBOL AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.ADDR_POSTCODE AS ADDR_POSTCODE
+											MB.POSTCODE AS ADDR_POSTCODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
+											LEFT JOIN mbucfdistrict MBD ON mb.district_code = MBD.district_code AND MBP.province_code = MBD.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).
@@ -74,7 +72,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
 			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
+			$arrayGroup["TEL"] = $rowMember["MEM_TELMOBILE"].($rowMember["MEM_TELMOBILE"] && $rowMember["MEM_TEL"] ? ", " : "").$rowMember["MEM_TEL"];
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
 			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
@@ -82,17 +80,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["MEMBER_DATA"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

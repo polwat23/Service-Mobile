@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
+		
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
 															SELECT RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
 															from kpmastreceive where member_no = :member_no and branch_id = :branch_id
@@ -18,6 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
+			$arrKpmonth["PERIOD_INDEX"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
 			$getKPDetail = $conoracle->prepare("SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
 													FROM kpmastreceivedet kpd
@@ -44,16 +46,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayGroupPeriod[] = $arrKpmonth;
 		}
+		usort($arrayGroupPeriod, function($a, $b) {
+			return $a['PERIOD_INDEX'] <= $b['PERIOD_INDEX'];
+		});
 		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -70,7 +75,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

@@ -18,7 +18,7 @@ while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
 $templateMessage = $func->getTemplateSystem('LoanInfo',1);
 $fetchDataSTM = $conoracle->prepare("SELECT lut.loanitemtype_desc,lcn.loancontract_no,lcn.OPERATE_DATE,lcm.member_no,lcn.seq_no,
 									lcn.principal_payment,lcn.interest_payment,lcn.principal_balance
-									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
+									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no and lcn.branch_id = lcm.branch_id
 									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
 									WHERE lcn.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();

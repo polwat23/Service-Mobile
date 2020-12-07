@@ -14,11 +14,11 @@ $fetchDataGuarantee = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_nam
 										lcc.LOANCONTRACT_NO,lcc.seq_no,
 										 lcc.REF_COLLNO, lcm.startcont_date as STARTCONT_DATE,lt.loantype_desc as LOAN_TYPE,lcm.loanapprove_amt as AMOUNT
 										FROM lncontcoll lcc 
-										LEFT JOIN lncontmaster lcm ON lcc.loancontract_no = lcm.loancontract_no and lcc.coop_id = lcm.coop_id
+										LEFT JOIN lncontmaster lcm ON lcc.loancontract_no = lcm.loancontract_no and lcc.branch_id = lcm.branch_id
 										LEFT JOIN lnloantype lt ON lcm.loantype_code = lt.loantype_code
 										LEFT JOIN mbmembmaster mb ON lcm.member_no = mb.member_no
 										LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-										WHERE lcm.startcont_date BETWEEN (SYSDATE - 2) and SYSDATE and lcc.sync_notify_flag = '0' and lcc.coll_status = '1' and lcm.contract_status = '1' and lcc.loancolltype_code = '01' ");
+										WHERE lcm.startcont_date BETWEEN (SYSDATE - 2) and SYSDATE and lcc.sync_notify_flag = '0' and lcc.coll_status = '1' and lcm.contract_status = '1' and lcc.loancolltype_code = '04' ");
 $fetchDataGuarantee->execute();
 while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowGuarantee["REF_COLLNO"]);

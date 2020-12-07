@@ -6,6 +6,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
+		$getSequestDiv = $conoracle->prepare("SELECT SEQUEST_DIVAVG FROM mbmembmaster WHERE member_no = :member_no");
+		$getSequestDiv->execute([':member_no' => $member_no]);
+		$rowSeqDiv = $getSequestDiv->fetch(PDO::FETCH_ASSOC);
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT divavg_year AS DIV_YEAR FROM mbdivavgtemp WHERE TRIM(MEMBER_NO) = :member_no 
 												AND branch_id = :branch_id
 												GROUP BY divavg_year ORDER BY divavg_year DESC) where rownum <= :limit_year");
@@ -71,37 +74,47 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
 				$arrayRecv = array();
-				$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
-				if($rowMethpay["DIVAVG_CODE"] == 'CBT'){
-					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"].' '.$rowMethpay["BANK_NAME"].' '.$rowMethpay["BRANCH_NAME"];
+				if($rowSeqDiv["SEQUEST_DIVAVG"] == "1"){
+					$arrayRecv["NOTE_RECEIVE"] = "ถูกอายัดปันผล กรุณาติดต่อสหกรณฯ";
+					$arrayRecv["NOTE_TEXT_COLOR"] = "red";
 				}else{
-					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+					if(isset($rowMethpay["BANK_ACCOUNT"])){
+						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+					}
+					if($rowMethpay["DIVAVG_CODE"] == 'CBT'){
+						$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"].' '.$rowMethpay["BANK_NAME"].' '.$rowMethpay["BRANCH_NAME"];
+					}else{
+						$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+					}
+					$arrayRecv["RECEIVE_STATUS"] = $rowMethpay["RECEIVE_STATUS"];
 				}
-				$arrayRecv["RECEIVE_STATUS"] = $rowMethpay["RECEIVE_STATUS"];
 				//รายการหัก
 				$sumPay = 0;
 				$arrayPayGroup = array();
-
-				$arrayPay = array();
-				$arrayPay["TYPE_DESC"] = "หัก สสอค.";
-				$arrayPay["PAY_AMT"] = number_format($rowMethpay["SSOT_AMT"]+$rowMethpay["SSOT_AMT_FEEYEAR"],2);
-				$sumPay += ($rowMethpay["SSOT_AMT"]+$rowMethpay["SSOT_AMT_FEEYEAR"]);
-				$arrayPayGroup[] = $arrayPay;
-				$arrayPay = array();
-				$arrayPay["TYPE_DESC"] = "หัก สสอ.มศว";
-				$arrayPay["PAY_AMT"] = number_format($rowMethpay["SSOT_MSV"] + $rowMethpay["SSOT_MSV_FEEYEAR"],2);
-				$sumPay += ($rowMethpay["SSOT_MSV"] + $rowMethpay["SSOT_MSV_FEEYEAR"]);
-				$arrayPayGroup[] = $arrayPay;
-				$arrayPay = array();
-				$arrayPay["TYPE_DESC"] = "หัก สส. ชสอ.";
-				$arrayPay["PAY_AMT"] = number_format($rowMethpay["SSOT_FTSC"] + $rowMethpay["SSOT_FTSC_FEEYEAR"],2);
-				$sumPay += ($rowMethpay["SSOT_FTSC"] + $rowMethpay["SSOT_FTSC_FEEYEAR"]);
-				$arrayPayGroup[] = $arrayPay;
-
+				if($rowMethpay["SSOT_AMT"]+$rowMethpay["SSOT_AMT_FEEYEAR"] > 0){
+					$arrayPay = array();
+					$arrayPay["TYPE_DESC"] = "หัก สสอค.";
+					$arrayPay["PAY_AMT"] = number_format($rowMethpay["SSOT_AMT"]+$rowMethpay["SSOT_AMT_FEEYEAR"],2);
+					$sumPay += ($rowMethpay["SSOT_AMT"]+$rowMethpay["SSOT_AMT_FEEYEAR"]);
+					$arrayPayGroup[] = $arrayPay;
+				}
+				if($rowMethpay["SSOT_MSV"] + $rowMethpay["SSOT_MSV_FEEYEAR"] > 0){
+					$arrayPay = array();
+					$arrayPay["TYPE_DESC"] = "หัก สสอ.มศว";
+					$arrayPay["PAY_AMT"] = number_format($rowMethpay["SSOT_MSV"] + $rowMethpay["SSOT_MSV_FEEYEAR"],2);
+					$sumPay += ($rowMethpay["SSOT_MSV"] + $rowMethpay["SSOT_MSV_FEEYEAR"]);
+					$arrayPayGroup[] = $arrayPay;
+				}
+				if($rowMethpay["SSOT_FTSC"] + $rowMethpay["SSOT_FTSC_FEEYEAR"] > 0){
+					$arrayPay = array();
+					$arrayPay["TYPE_DESC"] = "หัก สส. ชสอ.";
+					$arrayPay["PAY_AMT"] = number_format($rowMethpay["SSOT_FTSC"] + $rowMethpay["SSOT_FTSC_FEEYEAR"],2);
+					$sumPay += ($rowMethpay["SSOT_FTSC"] + $rowMethpay["SSOT_FTSC_FEEYEAR"]);
+					$arrayPayGroup[] = $arrayPay;
+				}
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"] - $sumPay,2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			}
-			
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
 			$arrDivmaster[] = $arrDividend;
@@ -109,14 +122,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayResult["DIVIDEND"] = $arrDivmaster;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -133,7 +146,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

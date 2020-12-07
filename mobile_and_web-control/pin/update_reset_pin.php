@@ -7,7 +7,7 @@ if($updateResetPin->execute([
 ])){
 	if($func->logoutAll(null,$payload["member_no"],'-10')){
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$filename = basename(__FILE__, '.php');
 		$logStruc = [
@@ -22,8 +22,8 @@ if($updateResetPin->execute([
 		$arrayResult['RESPONSE_CODE'] = "WS1016";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -41,7 +41,7 @@ if($updateResetPin->execute([
 	$arrayResult['RESPONSE_CODE'] = "WS1016";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
