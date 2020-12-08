@@ -95,6 +95,8 @@
 	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
 	"WS0079" : [{"th" : "หมดเวลาการยื่นขอทุนแล้ว","en" : "Out of time for request welfare"}],
 	"WS0080" : [{"th" : "มีการยื่นเอกสารที่สหกรณ์เรียบร้อยแล้ว","en" : "You have already submitted documents at the cooperative"}],
+	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
+	"WS0096" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากไม่สามารถระบุรหัสการทำรายการ กรุณาติดต่อสหกรณ์","en" : "Cannot transaction because unknown this transaction code please contact cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
