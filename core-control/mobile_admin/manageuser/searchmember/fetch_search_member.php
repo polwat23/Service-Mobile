@@ -23,25 +23,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.mem_telmobile as MEM_TELMOBILE,
+		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.email_address as email,mb.mem_telmobile as MEM_TELMOBILE,
 											mb.member_date,mb.member_no,
-											mb.ADDR_NO as ADDR_NO,
-											mb.ADDR_MOO as ADDR_MOO,
-											mb.ADDR_SOI as ADDR_SOI,
-											mb.ADDR_VILLAGE as ADDR_VILLAGE,
-											mb.ADDR_ROAD as ADDR_ROAD,
-											MBT.TAMBOL_DESC AS TAMBOL_DESC,
-											MBD.DISTRICT_DESC AS DISTRICT_DESC,
-											MB.PROVINCE_CODE,
-											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.ADDR_POSTCODE AS ADDR_POSTCODE
+											mb.MEMBADDR_FULL as ADDR_NO
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
-											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).
@@ -82,17 +69,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["MEMBER_DATA"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

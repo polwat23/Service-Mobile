@@ -11,17 +11,26 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$argumentWS = [
 								"as_wspass" => $config["WS_STRC_DB"],
 								"as_account_no" => $deptaccount_no,
-								"as_itemtype_code" => "WTB",
+								"as_itemtype_code" => "WTX",
 								"adc_amt" => $dataComing["amt_transfer"],
 								"adtm_date" => date('c')
 				];
 				$resultWS = $clientWS->__call("of_chk_withdrawcount_amt", array($argumentWS));
 				$amt_transfer = $resultWS->of_chk_withdrawcount_amtResult;
-				$getWithdrawal = $conoracle->prepare("SELECT withdrawable_amt FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$getWithdrawal = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
+													dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal,dpm.CHECKPEND_AMT
+													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+													WHERE dpm.deptclose_status = '0' and dpm.deptaccount_no = :deptaccount_no
+													ORDER BY dpm.deptaccount_no");
 				$getWithdrawal->execute([':deptaccount_no' => $deptaccount_no]);
 				$rowWithdrawal = $getWithdrawal->fetch(PDO::FETCH_ASSOC);
 				$SumAmt_transfer = $amt_transfer + $dataComing["amt_transfer"];
-				if($SumAmt_transfer <= $rowWithdrawal["WITHDRAWABLE_AMT"]){
+				if($rowWithdrawal["SEQUEST_STATUS"] == '1'){
+					$withdrawable_amt = $rowWithdrawal["PRNCBAL"] - $rowWithdrawal["SEQUEST_AMOUNT"] - $rowWithdrawal["MINPRNCBAL"] - $rowWithdrawal["CHECKPEND_AMT"];
+				}else{
+					$withdrawable_amt = $rowWithdrawal["PRNCBAL"] - $rowWithdrawal["MINPRNCBAL"];
+				}
+				if($SumAmt_transfer <= $withdrawable_amt){
 					if($amt_transfer > 0){
 						$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 						$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
@@ -31,13 +40,13 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$arrayResult['PENALTY_AMT'] = $amt_transfer;
 					$arrayResult['PENALTY_AMT_FORMAT'] = number_format($amt_transfer,2);
 					$arrayResult['RESULT'] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../include/exit_footer.php');
 				}else{
 					$arrayResult["RESPONSE_CODE"] = 'WS0067';
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
+					
 				}
 			}catch(SoapFault $e){
 				$filename = basename(__FILE__, '.php');
@@ -51,8 +60,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$arrayResult["RESPONSE_CODE"] = 'WS0042';
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}catch(Throwable $e){
 			$filename = basename(__FILE__, '.php');
@@ -69,16 +78,16 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult["RESPONSE_CODE"] = 'WS0042';
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -95,7 +104,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
