@@ -61,13 +61,14 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 			$arrPayloadNotify["ACTION_PAGE"] = "LoanRequestTrack";
-			$arrPayloadNotify["ACTION_PARAMS"] = [];
+			$arrPayloadNotify["ACTION_PARAMS"] = null;
 			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
 			$arrMessage["BODY"] = $message_endpoint["BODY"];
 			$arrMessage["PATH_IMAGE"] = null;
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = $payload["username"];
 			if($func->insertHistory($arrPayloadNotify,'2')){
 				$lib->sendNotify($arrPayloadNotify,"person");
 			}

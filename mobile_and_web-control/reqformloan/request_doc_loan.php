@@ -85,12 +85,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':member_no' => $member_no
 		]);
 		$rowData = $fetchData->fetch(PDO::FETCH_ASSOC);
+		$dataMobile = $conmysql->prepare("SELECT phone_number,email FROM gcmemberaccount WHERE member_no = :member_no");
+		$dataMobile->execute([':member_no' => $member_no]);
+		$rowDataM = $dataMobile->fetch(PDO::FETCH_ASSOC);
 		$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 		$conmysql->beginTransaction();
 		$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url)
+																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,objective)
 																VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url)");
+																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:objective)");
 		if($InsertFormOnline->execute([
 			':reqloan_doc' => $reqloan_doc,
 			':member_no' => $payload["member_no"],
@@ -104,7 +107,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':salary_img' => $slipSalary,
 			':citizen_img' => $citizenCopy,
 			':id_userlogin' => $payload["id_userlogin"],
-			':contractdoc_url' => $pathFile
+			':contractdoc_url' => $pathFile,
+			':objective' => $dataComing["objective"]
 		])){
 			$arrData = array();
 			$arrData["requestdoc_no"] = $reqloan_doc;
@@ -117,6 +121,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 			$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 			$arrData["request_amt"] = $dataComing["request_amt"];
+			$arrData["objective"] = $dataComing["objective"];
+			$arrData["period"] = $dataComing["period"];
+			$arrData["tel"] = $rowDataM["phone_number"];
+			$arrData["email"] = $rowDataM["email"];
 			if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 				include('form_request_loan_'.$dataComing["loantype_code"].'.php');
 				$arrayPDF = GeneratePDFContract($arrData,$lib);
@@ -170,7 +178,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':salary_img' => $slipSalary,
 					':citizen_img' => $citizenCopy,
 					':id_userlogin' => $payload["id_userlogin"],
-					':contractdoc_url' => $pathFile
+					':contractdoc_url' => $pathFile,
+					':objective' => $dataComing["objective"]
 				]),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
@@ -188,7 +197,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				':salary_img' => $slipSalary,
 				':citizen_img' => $citizenCopy,
 				':id_userlogin' => $payload["id_userlogin"],
-				':contractdoc_url' => $pathFile
+				':contractdoc_url' => $pathFile,
+				':objective' => $dataComing["objective"]
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1036";

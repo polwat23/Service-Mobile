@@ -23,6 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrCredit = array();
 				$maxloan_amt = 0;
 				$arrCollShould = array();
+				$arrOldContract = array();
 				$arrOtherInfo = array();
 				$canRequest = FALSE;
 				if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
@@ -49,6 +50,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				
 				$arrCredit["OTHER_INFO"] = $arrOtherInfo;
 				$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
+				$arrCredit["OLD_CONTRACT"] = $arrOldContract;
 				$arrCredit["ALLOW_REQUEST"] = $canRequest;
 				$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 				$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
