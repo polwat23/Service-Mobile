@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
-												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
+												LEFT JOIN mbucfmembgroup mbg ON TRIM(mb.MEMBGROUP_CODE) = mbg.MEMBGROUP_CODE
 												WHERE mb.member_no = :member_no");
 		$fetchName->execute([
 			':member_no' => $member_no
@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -67,7 +67,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
@@ -159,11 +161,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ รพช.จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 3/12  (อาคาร 2 ชั้น 6)   กรมป้องกันบรรเทาสาธารณภัย</p>
-				<p style="margin-top: -25px;font-size: 18px;">ถนนอู่ทองนอก   แขวงดุสิต  เขตดุสิต กรุงเทพฯ  10300</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 02-243-0509 ,  02-2430510 ,  02-668-9229</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.ardcoop.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมส่งเสริมการเกษตร จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">2143/1 ถนนพหลโยธิน แขวงลาดยาว</p>
+				<p style="margin-top: -25px;font-size: 18px;">เขตจตุจักร กรุงเทพมหนคร 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 0-2579-0885, 02579-5038 ,  0-2579-8699</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.savco-doae.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
