@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+			$memberInfo = $conoracle->prepare("SELECT mp.prename_desc as PRENAME_SHORT,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mps.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
 													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
+													LEFT JOIN MBUCFMEMBGROUP mg ON TRIM(mb.MEMBGROUP_CODE) = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFPOSITION mps ON mb.POSITION_CODE = mps.POSITION_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
