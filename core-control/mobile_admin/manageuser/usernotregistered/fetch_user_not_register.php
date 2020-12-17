@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayGroup = array();
 		$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
-												,mb.mem_telmobile as MEM_TELMOBILE,mb.email_address as email 
+												,mb.addr_mobilephone as MEM_TELMOBILE,mb.addr_email as email 
 												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 												WHERE mb.resign_status = '0' and mb.member_no NOT IN(".implode(",",$arrayUserRegister).")");
 		$fetchUserNotRegis->execute();

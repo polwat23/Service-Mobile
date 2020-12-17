@@ -1,18 +1,16 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','name_fav','show_menu','destination','flag_trans'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','name_fav','fav_refno'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
-		$fav_refno = substr(time(),0,3).(date("Y") + 543).substr($payload["member_no"],4).date("i").date("s").$lib->randomText("all",2)."FAV";
-		$insertFavAccount = $conmysql->prepare("INSERT INTO gcfavoritelist(fav_refno,name_fav,flag_trans,destination,member_no,show_menu)
-											VALUES(:fav_refno,:name_fav,:flag_trans,:destination,:member_no,:show_menu)");
-		if($insertFavAccount->execute([
-			':fav_refno' => $fav_refno,
+		$updateFavAccount = $conmysql->prepare("UPDATE gcfavoritelist SET name_fav = :name_fav,show_menu = :show_menu,is_use = :is_use
+											WHERE fav_refno = :fav_refno and member_no = :member_no");
+		if($updateFavAccount->execute([
 			':name_fav' => $dataComing["name_fav"],
-			':flag_trans' => $dataComing["flag_trans"],
-			':destination' => $dataComing["destination"],
-			':member_no' => $payload["member_no"],
-			':show_menu' => $dataComing["show_menu"]
+			':show_menu' => $dataComing["show_menu"],
+			':is_use' => ($dataComing["is_use"] ?? '1'),
+			':fav_refno' => $dataComing["fav_refno"],
+			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
@@ -21,24 +19,18 @@ if($lib->checkCompleteArgument(['menu_component','name_fav','show_menu','destina
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS1029",
-				":error_desc" => "สร้างรายการโปรดไม่ได้ไม่สามารถ Insert gcfavoritelist ได้"."\n"."Query => ".$insertFavAccount->queryString."\n".json_encode([
-					':fav_refno' => $fav_refno,
+				":error_desc" => "แก้ไขรายการโปรดไม่ได้ไม่สามารถ UPDATE gcfavoritelist ได้"."\n"."Query => ".$updateFavAccount->queryString."\n".json_encode([
 					':name_fav' => $dataComing["name_fav"],
-					':flag_trans' => $dataComing["flag_trans"],
-					':destination' => $dataComing["destination"],
-					':member_no' => $payload["member_no"],
-					':show_menu' => $dataComing["show_menu"]
+					':fav_refno' => $dataComing["fav_refno"],
+					':member_no' => $payload["member_no"]
 				]),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "สร้างรายการโปรดไม่ได้ไม่สามารถ Insert gcfavoritelist ได้"."\n"."Query => ".$insertFavAccount->queryString."\n".json_encode([
-				':fav_refno' => $fav_refno,
+			$message_error = "แก้ไขรายการโปรดไม่ได้ไม่สามารถ UPDATE gcfavoritelist ได้"."\n"."Query => ".$updateFavAccount->queryString."\n".json_encode([
 				':name_fav' => $dataComing["name_fav"],
-				':flag_trans' => $dataComing["flag_trans"],
-				':destination' => $dataComing["destination"],
-				':member_no' => $payload["member_no"],
-				':show_menu' => $dataComing["show_menu"]
+				':fav_refno' => $dataComing["fav_refno"],
+				':member_no' => $payload["member_no"]
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1029";
