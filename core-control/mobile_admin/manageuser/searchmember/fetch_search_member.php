@@ -23,16 +23,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(empty($dataComing["member_no"]) && empty($dataComing["member_name"]) && empty($dataComing["province"])){
 			$arrayResult['RESPONSE'] = "ไม่สามารถค้นหาได้เนื่องจากไม่ได้ระบุค่าที่ต้องการค้นหา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.mem_telmobile as MEM_TELMOBILE,
-											mb.member_date,mb.member_no,
-											mb.ADDR_NO as ADDR_NO,
-											mb.ADDR_MOO as ADDR_MOO,
-											mb.ADDR_SOI as ADDR_SOI,
-											mb.ADDR_VILLAGE as ADDR_VILLAGE,
-											mb.ADDR_ROAD as ADDR_ROAD,
+		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.ADDR_EMAIL AS EMAIL,MB.ADDR_MOBILEPHONE AS MEM_TELMOBILE,
+											MB.MEMBER_DATE,MB.MEMBER_NO,
+											MB.ADDR_NO AS ADDR_NO,
+											MB.ADDR_MOO AS ADDR_MOO,
+											MB.ADDR_SOI AS ADDR_SOI,
+											MB.ADDR_VILLAGE AS ADDR_VILLAGE,
+											MB.ADDR_ROAD AS ADDR_ROAD,
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,
@@ -82,17 +81,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$arrayResult["MEMBER_DATA"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

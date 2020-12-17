@@ -15,7 +15,8 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$fetchAccountReceive = $conoracle->prepare("SELECT cb.BANK_DESC,cbb.BRANCH_NAME,acm.EXPENSE_ACCID,cb.ACCOUNT_FORMAT FROM asscontmaster acm 
+		$fetchAccountReceive = $conoracle->prepare("SELECT cb.BANK_DESC,cbb.BRANCH_NAME,acm.MONEYTYPE_CODE,acm.DEPTACCOUNT_NO,acm.EXPENSE_ACCID,
+													cb.ACCOUNT_FORMAT FROM asscontmaster acm 
 													LEFT JOIN cmucfbank cb ON acm.EXPENSE_BANK = cb.BANK_CODE
 													LEFT JOIN cmucfbankbranch cbb ON acm.EXPENSE_BANK = cbb.BANK_CODE and acm.EXPENSE_BRANCH = cbb.BRANCH_ID
 													WHERE acm.asscontract_no = :asscontract_no and acm.asscont_status = 1");
@@ -23,7 +24,6 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 			':asscontract_no' => $dataComing["asscontract_no"]
 		]);
 		$rowAccountRCV = $fetchAccountReceive->fetch(PDO::FETCH_ASSOC);
-		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
 		$fetchAssStatement = $conoracle->prepare("SELECT atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
 													FROM asscontmaster asm LEFT JOIN asscontstatement astm 
 													ON asm.ASSCONTRACT_NO = astm.ASSCONTRACT_NO LEFT JOIN assucfassitemcode atc
@@ -37,8 +37,16 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		]);
 		$arrGroupAssStm = array();
 		$arrGroupAssStm["ACCOUNT_RECEIVE"] = $accAssRcv;
-		$arrGroupAssStm["BANK_NAME"] = $rowAccountRCV["BANK_DESC"];
-		$arrGroupAssStm["BANK_BRANCH_NAME"] = $rowAccountRCV["BRANCH_NAME"];
+		if($rowAccountRCV["MONEYTYPE_CODE"] == 'CBT'){
+			$arrGroupAssStm["BANK_NAME"] = $rowAccountRCV["BANK_DESC"];
+			$arrGroupAssStm["BANK_BRANCH_NAME"] = $rowAccountRCV["BRANCH_NAME"];
+			$arrGroupAssStm["EXPENSE_ACCID"] = $rowAccountRCV["EXPENSE_ACCID"];
+			$arrGroupAssStm["ACCOUNT_RECEIVE"] = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
+		}else{
+			$arrGroupAssStm["BANK_NAME"] = ($rowAccountRCV["MONEYTYPE_CODE"] == 'TRN' ? "โอนภายใน " : "");
+			$arrGroupAssStm["EXPENSE_ACCID"] = $rowAccountRCV["DEPTACCOUNT_NO"];
+			$arrGroupAssStm["ACCOUNT_RECEIVE"] = $lib->formataccount($rowAccountRCV["DEPTACCOUNT_NO"],$func->getConstant("dep_format"));
+		}
 		while($rowAssStm = $fetchAssStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrAssStm = array();
 			$arrAssStm["ITEM_DESC"] = $rowAssStm["ITEM_DESC"];
@@ -49,14 +57,14 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		}
 		$arrayResult["ASSIST_STM"] = $arrGroupAssStm;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -73,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

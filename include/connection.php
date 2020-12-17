@@ -14,8 +14,9 @@ class connection {
 		$dbuser = $json_data["DBMOBILE_USERNAME_OLD"];
 		$dbpass = $json_data["DBMOBILE_PASSWORD_OLD"];
 		$dbname = $json_data["DBMOBILE_DATABASENAME_OLD"];
+		$dbport = $json_data["DBMOBILE_PORT_OLD"];
 		try{
-			$this->conoldmysql = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+			$this->conoldmysql = new \PDO("mysql:dbname={$dbname};host={$dbhost};port={$dbport}", $dbuser, $dbpass);
 			$this->conoldmysql->exec("set names utf8mb4");
 			return $this->conoldmysql;
 		}catch(\Throwable $e){

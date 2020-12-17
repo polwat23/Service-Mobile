@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				unlink($path);
 			}
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -73,16 +73,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$arrayResult['RESPONSE_CODE'] = "WS0019";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -99,8 +99,8 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
@@ -189,10 +189,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ครูสุรินทร์ จำกัด
+					สหกรณ์ออมทรัพย์กรมวิชาการเกษตร
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Surin Teacher Savings and Credit Cooperative Limited
+					Department of agriculture savings and credit cooperative ltd.
 			   </div>
 			   </div>
 				<div class="frame-info-user">

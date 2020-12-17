@@ -38,6 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		WHEN 'LON' THEN kpd.loancontract_no
 																	ELSE kpd.description END as PAY_ACCOUNT,
 																	kpd.period,
+																	kpd.description,
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -57,7 +58,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			if(isset($rowDetail["DESCRIPTION"])){
+				$arrDetail["TYPE_DESC"] = $rowDetail["DESCRIPTION"];
+			}else{
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			}
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
@@ -73,14 +78,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE
+																kpd.OPERATE_DATE || kpd.RECEIPT_DATE as OPERATE_DATE
 																FROM kptempreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
@@ -96,7 +103,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -111,16 +118,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -137,8 +144,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 
 function GenerateReport($dataReport,$header,$lib){
@@ -167,11 +174,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูสุรินทร์ จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">297 หมู่.16 ต.สลักได</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.เมือง สุรินทร์ 32000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 044-141753-6</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.coopsurin.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมวิชาการเกษตร จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">50 ถนน พหลโยธิน แขวง ลาดยาว</p>
+				<p style="margin-top: -25px;font-size: 18px;">เขต จตุจักร กรุงเทพมหานคร 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 080-4390844, 087-5574506, 084-9223897, 02-9405088, 02-9406825-6</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.doacoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -271,15 +278,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
-			</div>
 			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/finance.png" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/mg.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 750px;margin-top:-50px;">นางสาวกัลยาณี เสมา</div>
+			<div style="font-size: 18px;margin-left: 780px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new DOMPDF();

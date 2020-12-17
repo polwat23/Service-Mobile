@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpAllDept = array();
 		$arrGrpAllLoan = array();
 		$arrGrpLoanAll = array();
+		$formatDept = $func->getConstant('hidden_dep');
 		$getSumAllDept = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC ");
@@ -19,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGrpAllDept["COUNT_ACC"]++;
 			$arraysumDept["BALANCE"] = $rowSumAllDept["BALANCE"];
 			$arraysumDept["ACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowSumAllDept["DEPTACCOUNT_NAME"]));
-			$arraysumDept["SOURCE_NO"] = $lib->formataccount($rowSumAllDept["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			$arraysumDept["SOURCE_NO"] = $lib->formataccount($rowSumAllDept["DEPTACCOUNT_NO"],$formatDept);
 			$arraysumDept["TYPE_DESC"] = $rowSumAllDept["DEPTTYPE_DESC"];
 			$arrGrpDept['TYPE_ACCOUNT'] = $rowSumAllDept["DEPTTYPE_DESC"];
 			if(array_search($rowSumAllDept["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT')) === False){
@@ -62,14 +63,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['COLLECT_DEPT'] = $arrGrpAllDept;
 		$arrayResult['COLLECT_LOAN'] = $arrGrpAllLoan;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -86,7 +87,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

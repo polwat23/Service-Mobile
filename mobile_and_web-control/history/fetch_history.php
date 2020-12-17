@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 			}
 		}
 		$getHistory = $conmysql->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status,his_path_image FROM gchistory 
-											WHERE member_no = :member_no and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
+											WHERE member_no = :member_no and his_del_status = '0' and his_type = :his_type $extraQuery ORDER BY id_history DESC LIMIT 10");
 		$getHistory->execute($executeData);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();
@@ -36,14 +36,14 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 		}
 		$arrayResult['HISTORY'] = $arrGroupHis;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

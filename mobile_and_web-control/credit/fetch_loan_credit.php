@@ -10,101 +10,51 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
 		$fetchLoanCanCal->execute();
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
-			$typeMember = substr($member_no,2,1);
-			if($typeMember != '9' || $typeMember != '8'){
-				$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
-				$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
-				$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
-				$arrCredit = array();
-				$maxloan_amt = 0;
-				$canRequest = FALSE;
-				if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
-					include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
-				}else{
-					include('calculate_loan_etc.php');
-				}
-				if($canRequest === TRUE){
-					$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
-					$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-																FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
-					$CheckIsReq->execute([
-						':loantype_code' => $rowCanCal["loantype_code"],
-						':member_no' => $member_no
-					]);
-					if($CheckIsReq->rowCount() > 0 || $maxloan_amt <= 0){
-						$canRequest = FALSE;
-					}else {
-						if(!$func->check_permission($payload["user_type"],'LoanRequestForm','LoanRequestForm')){
-							$canRequest = FALSE;
-						}
-					}
-					if($rowCanCal["loantype_code"] == '23'){
-						$checkisReq = $conmysql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
-						$checkisReq->execute([':member_no' => $member_no]);
-						if($checkisReq->rowCount() == 0){
-							$canRequest = FALSE;
-						}
-					}
-				}
-				$arrCredit["ALLOW_REQUEST"] = $canRequest;
-				$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
-				$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
-				$arrCredit["LOAN_PERMIT_AMT"] = $maxloan_amt;
-				$arrGroupCredit[] = $arrCredit;
+			$arrOtherInfo = array();
+			$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
+			$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
+			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
+			$arrCredit = array();
+			$maxloan_amt = 0;
+			$canRequest = FALSE;
+			if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
+				include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
 			}else{
-				if($rowCanCal["loantype_code"] != '23'){
-					$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
-					$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
-					$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
-					$arrCredit = array();
-					$maxloan_amt = 0;
+				include('calculate_loan_etc.php');
+			}
+			if($canRequest === TRUE){
+				$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
+				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
+															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+				$CheckIsReq->execute([
+					':loantype_code' => $rowCanCal["loantype_code"],
+					':member_no' => $member_no
+				]);
+				if($CheckIsReq->rowCount() > 0 || $maxloan_amt <= 0){
 					$canRequest = FALSE;
-					if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
-						include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
-					}else{
-						include('calculate_loan_etc.php');
+				}else {
+					if(!$func->check_permission($payload["user_type"],'LoanRequestForm','LoanRequestForm')){
+						$canRequest = FALSE;
 					}
-					if($canRequest === TRUE){
-						$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
-						$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-																	FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
-						$CheckIsReq->execute([
-							':loantype_code' => $rowCanCal["loantype_code"],
-							':member_no' => $member_no
-						]);
-						if($CheckIsReq->rowCount() > 0 || $maxloan_amt <= 0){
-							$canRequest = FALSE;
-						}else {
-							if(!$func->check_permission($payload["user_type"],'LoanRequestForm','LoanRequestForm')){
-								$canRequest = FALSE;
-							}
-						}
-						if($rowCanCal["loantype_code"] == '23'){
-							$checkisReq = $conmysql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
-							$checkisReq->execute([':member_no' => $member_no]);
-							if($checkisReq->rowCount() == 0){
-								$canRequest = FALSE;
-							}
-						}
-					}
-					$arrCredit["ALLOW_REQUEST"] = $canRequest;
-					$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
-					$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
-					$arrCredit["LOAN_PERMIT_AMT"] = $maxloan_amt;
-					$arrGroupCredit[] = $arrCredit;
 				}
 			}
+			$arrCredit["OTHER_INFO"] = $arrOtherInfo;
+			$arrCredit["ALLOW_REQUEST"] = $canRequest;
+			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
+			$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
+			$arrCredit["LOAN_PERMIT_AMT"] = $maxloan_amt;
+			$arrGroupCredit[] = $arrCredit;
 		}
 		$arrayResult["LOAN_CREDIT"] = $arrGroupCredit;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -121,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

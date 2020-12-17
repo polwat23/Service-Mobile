@@ -22,22 +22,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($keep_forward == '1'){
 			if($MonthForCheck < $max_recv){
 				http_response_code(204);
-				exit();
+				
 			}else{
 				if($DayForCheck < $dateshow_kpmonth){
 					http_response_code(204);
-					exit();
+					
 				}
 			}
 		}else{
 			if($DayForCheck < $dateshow_kpmonth){
 				http_response_code(204);
-				exit();
+				
 			}
 		}
 		if((isset($rowBeenPay["RECV_PERIOD"]) && $rowBeenPay["RECV_PERIOD"] != "") || (empty($rowLastRecv["MAX_RECV"]) && $rowLastRecv["MAX_RECV"] == "")){
 			http_response_code(204);
-			exit();
+			
 		}
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
@@ -55,6 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																		WHEN 'LON' THEN kpd.loancontract_no
 																	ELSE kpd.description END as PAY_ACCOUNT,
 																	kpd.period,
+																	kpd.description,
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -74,7 +75,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			if(isset($rowDetail["DESCRIPTION"])){
+				$arrDetail["TYPE_DESC"] = $rowDetail["DESCRIPTION"];
+			}else{
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			}
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
@@ -90,21 +95,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -121,7 +128,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>
