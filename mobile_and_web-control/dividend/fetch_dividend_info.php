@@ -30,7 +30,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													CM.BANK_DESC AS BANK,
 													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
 													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
-													YM.METHPAYTYPE_CODE
+													YM.METHPAYTYPE_CODE,
+													YM.MONEYTYPE_CODE
 												FROM 
 													YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
 													YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
@@ -46,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
 				$arrayRecv = array();
 				if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
-					if(isset($rowMethpay["BANK"])){
+					if($rowMethpay["MONEYTYPE_CODE"] != 'TRN'){
 						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
 					}else{
 						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));

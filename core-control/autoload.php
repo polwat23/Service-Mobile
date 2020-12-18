@@ -48,6 +48,8 @@ $func = new functions();
 $log = new insertLog();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
+$jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
+$configError = json_decode($jsonConfigError,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
@@ -68,33 +70,33 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				if(!$lib->checkCompleteArgument(['section_system','username','exp'],$payload)){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(400);
-					require_once('../include/exit_footer.php');
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}
 			}catch (ValidateException $e) {
 				$errorCode = $e->getCode();
 				if($errorCode === 3){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					require_once('../include/exit_footer.php');
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}else if($errorCode === 4){
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					require_once('../include/exit_footer.php');
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}else{
 					$arrayResult['RESULT'] = FALSE;
 					http_response_code(401);
-					require_once('../include/exit_footer.php');
+					require_once(__DIR__.'/../include/exit_footer.php');
 				}
 			}
 		}else{
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(400);
-			require_once('../include/exit_footer.php');
+			require_once(__DIR__.'/../include/exit_footer.php');
 		}
 	}
 }else{
 	$arrayResult['RESULT'] = TRUE;
 	http_response_code(203);
-	require_once('../include/exit_footer.php');
+	require_once(__DIR__.'/../include/exit_footer.php');
 }
 ?>
