@@ -6,12 +6,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
+															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_coop,objective,pay_date
 															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
 			$fetchReqLoan->execute([
 				':member_no' => $payload["member_no"],
 				':req_status' => $dataComing["req_status"]
 			]);
+			$formatDept = $func->getConstant('dep_format');
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
 				$getLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 				$getLoanType->execute([':loantype_code' => $rowReqLoan["loantype_code"]]);
@@ -26,18 +27,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
-				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
+				//$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
+				$arrayReq["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowReqLoan["deptaccount_no_coop"],$formatDept);
+				$arrayReq["OBJECTIVE"] = $rowReqLoan["objective"];
+				$arrayReq["PAY_DATE"] = $lib->convertdate($rowReqLoan["pay_date"],'d m Y');
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
+															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,objective,pay_date
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
@@ -54,12 +58,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
-				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
+				//$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
+				$arrayReq["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowReqLoan["deptaccount_no_coop"],$formatDept);
+				$arrayReq["OBJECTIVE"] = $rowReqLoan["objective"];
+				$arrayReq["PAY_DATE"] = $lib->convertdate($rowReqLoan["pay_date"],'d m Y');
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
 			}

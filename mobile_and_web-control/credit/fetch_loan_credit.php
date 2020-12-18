@@ -7,16 +7,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupCredit = array();
 		$arrCanCal = array();
 		$arrCanReq = array();
-		$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
-		$getMemberType->execute([':member_no' => $member_no]);
-		$rowMemb = $getMemberType->fetch(PDO::FETCH_ASSOC);
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
 		$fetchLoanCanCal->execute();
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
-			$fetchLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code and (member_type = :member_type OR member_type = '0')");
+			$fetchLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 			$fetchLoanType->execute([
-				':loantype_code' => $rowCanCal["loantype_code"],
-				':member_type' => $rowMemb["MEMBER_TYPE"]
+				':loantype_code' => $rowCanCal["loantype_code"]
 			]);
 			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowLoanType["LOANTYPE_DESC"]) && $rowLoanType["LOANTYPE_DESC"] != ""){
@@ -24,6 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$maxloan_amt = 0;
 				$arrCollShould = array();
 				$arrOtherInfo = array();
+				$arrOldContract = array();
 				$canRequest = FALSE;
 				if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
 					include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
@@ -33,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				if($canRequest === TRUE){
 					$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
 					$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-																FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+																FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9','1')");
 					$CheckIsReq->execute([
 						':loantype_code' => $rowCanCal["loantype_code"],
 						':member_no' => $member_no
@@ -49,10 +46,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				
 				$arrCredit["OTHER_INFO"] = $arrOtherInfo;
 				$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
+				$arrCredit["OLD_CONTRACT"] = $arrOldContract;
 				$arrCredit["ALLOW_REQUEST"] = $canRequest;
 				$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
 				$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
-				$arrCredit["LOAN_PERMIT_AMT"] = $maxloan_amt;
+				$arrCredit["LOAN_PERMIT_AMT"] = floor($maxloan_amt - ($maxloan_amt % 100));
 				$arrGroupCredit[] = $arrCredit;
 			}
 		}

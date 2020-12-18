@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$itemtypeWithdraw = 'WIM';
+		$itemtypeWithdraw = 'WON';
 		$count_trans = 0;
 		$dateTrans = date('c');
 		$penalty_amt = 0;
@@ -114,8 +114,14 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$penalty_amt = $rowContFee["MAX_FEE"];
 			}
 		}
-		$arrayResult['FEE_AMT'] = $penalty_amt;
-		$arrayResult['FEE_AMT_FORMAT'] = number_format($penalty_amt,2);
+		if($penalty_amt > 0){
+			$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+			$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+			$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+			$arrayResult['CAUTION'] = $arrayCaution;
+		}
+		$arrayResult['PENALTY_AMT'] = $penalty_amt;
+		$arrayResult['PENALTY_AMT_FORMAT'] = number_format($penalty_amt,2);
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
 			$arrayDetailLoan = array();
 			$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9','1')");
 			$CheckIsReq->execute([
 				':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
 				':member_no' => $payload["member_no"]
@@ -29,18 +29,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayDetailLoan["IS_REQ"] = FALSE;
 				$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
 			}else{
-				$checkOldContract = $conoracle->prepare("SELECT LOANCONTRACT_NO FROM lncontmaster WHERE member_no = :member_no 
-														and loantype_code = :loantype_code and contract_status > 0 and contract_status <> 8");
-				$checkOldContract->execute([
-					':member_no' => $member_no,
-					':loantype_code' => $rowIntRate["LOANTYPE_CODE"]
-				]);
-				$rowOldCont = $checkOldContract->fetch(PDO::FETCH_ASSOC);
-				if(isset($rowOldCont["LOANCONTRACT_NO"]) && $rowOldCont["LOANCONTRACT_NO"] != ""){
-					$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_HAVE_OLD_CONTRACT"][0][$lang_locale];
-					$arrayDetailLoan["IS_REQ"] = FALSE;
-				}else{
+				$getDeptATM = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE depttype_code = '88' and deptclose_status = 0 and member_no = :member_no");
+				$getDeptATM->execute([':member_no' => $member_no]);
+				$rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowDept["DEPTACCOUNT_NO"]) && $rowDept["DEPTACCOUNT_NO"] != ""){
 					$arrayDetailLoan["IS_REQ"] = TRUE;
+				}else{
+					$arrayDetailLoan["FLAG_NAME"] = $configError["FLAG_NOT_HAVE_ATM"][0][$lang_locale];
+					$arrayDetailLoan["IS_REQ"] = FALSE;
 				}
 			}
 			$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
