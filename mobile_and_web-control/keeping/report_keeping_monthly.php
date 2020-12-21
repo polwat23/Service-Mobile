@@ -269,12 +269,6 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-20px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ/เหรัญญิก</p></div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
-			.........................................................
-			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
 			';
 
 	$dompdf = new DOMPDF();

@@ -324,11 +324,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 570px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:15px;"/>
 			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.png" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 770px;display:flex;">
+			<img src="../../resource/utility_icon/signature/staff_recv.png" width="100" height="50" style="margin-top:15px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ/เหรัญญิก</div>
