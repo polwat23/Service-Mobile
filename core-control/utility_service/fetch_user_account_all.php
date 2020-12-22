@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}
 		
-		$fetchDataOra = $conoracle->prepare("SELECT mb.sms_mobilephone as MEM_TELMOBILE,mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME 
+		$fetchDataOra = $conmssql->prepare("SELECT mb.sms_mobilephone as MEM_TELMOBILE,mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME 
 											FROM mbmembmaster mb
 											LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code											
 											WHERE mb.resign_status = '0' 
@@ -37,17 +37,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		$arrayResult["MEMBER_ACC"] = $member_acc;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
 }
 ?>

@@ -139,7 +139,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -154,16 +154,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -180,8 +180,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 
 function GenerateReport($dataReport,$header,$lib){
@@ -214,10 +214,10 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ จ. 55/96-98 ถ.ดาวดึงส์</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต ปากน้ำโพ อ.เมือง จ.นครสวรรค์</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5622-2046</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">63 หมู่ 4 ต.หนองหาร</p>
+				<p style="margin-top: -25px;font-size: 18px;">อ.สันทราย จ.เชียงใหม่ 50290</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-878077 , 053-873000</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
 				</div>
 			</div>

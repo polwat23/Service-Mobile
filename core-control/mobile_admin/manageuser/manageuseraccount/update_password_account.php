@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		$list_name = "reset password";
 
 		$dateNow = date('Y-m-d H:i:s',strtotime($dateOperC));
-		$fetchCitizenID = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchCitizenID = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON FROM mbmembmaster WHERE RTRIM(LTRIM(member_no)) = :member_no");
 		$fetchCitizenID->execute([
 			':member_no' => $dataComing["member_no"]
 		]);
@@ -27,23 +27,20 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 			
 			$log->writeLog('manageuser',$arrayStruc);	
 			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถรีเซ็ตรหัสผ่านได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>
