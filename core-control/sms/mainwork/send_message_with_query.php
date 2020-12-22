@@ -17,18 +17,16 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 					$createImage = $lib->base64_to_img($dataComing["send_image"],$file_name,$destination,null);
 					if($createImage == 'oversize'){
-						$arrayResult['RESPONSE_MESSAGE'] = "�ٻ�Ҿ����ͧ������բ�Ҵ�˭��Թ�";
+						$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
-						exit();
+						require_once('../../../include/exit_footer.php');
 					}else{
 						if($createImage){
 							$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
 						}else{
-							$arrayResult['RESPONSE_MESSAGE'] = "���ʡ��������١��ͧ";
+							$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
-							exit();
+							require_once('../../../include/exit_footer.php');
 						}
 					}
 				}
@@ -79,7 +77,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											$blukInsert = array();
 										}
 									}else{
-										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','�������ö�������� LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 										if(sizeof($blukInsertNot) == 1000){
 											$func->logSMSWasNotSent($blukInsertNot);
 											unset($blukInsertNot);
@@ -87,7 +85,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										}
 									}
 								}else{
-									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','�ѭ�ջ��·ҧ�����ʧ���Դ�Ѻ�������͹','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsertNot) == 1000){
 										$func->logSMSWasNotSent($blukInsertNot);
 										unset($blukInsertNot);
@@ -95,7 +93,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									}
 								}
 							}else{
-								$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','".$dataComing["channel_send"]."',null,null,'�� Token 㹡����������Ҩ���������͹حҵ���������͹�������ͧ','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+								$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 								if(sizeof($blukInsertNot) == 1000){
 									$func->logSMSWasNotSent($blukInsertNot);
 									unset($blukInsertNot);
@@ -117,7 +115,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$blukInsert = array();
 					}
 					$arrayResult["RESULT"] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$query = $rowQuery['sms_query'];
 					if(stripos($query,'WHERE') === FALSE){
@@ -195,7 +193,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 													$blukInsert = array();
 												}
 											}else{
-												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','�������ö�������� LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 												if(sizeof($blukInsertNot) == 1000){
 													$func->logSMSWasNotSent($blukInsertNot);
 													unset($blukInsertNot);
@@ -203,7 +201,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												}
 											}
 										}else{
-											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','�ѭ�ջ��·ҧ�����ʧ���Դ�Ѻ�������͹','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 											if(sizeof($blukInsertNot) == 1000){
 												$func->logSMSWasNotSent($blukInsertNot);
 												unset($blukInsertNot);
@@ -211,7 +209,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											}
 										}
 									}else{
-										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','".$dataComing["channel_send"]."',null,null,'�� Token 㹡����������Ҩ���������͹حҵ���������͹�������ͧ','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 										if(sizeof($blukInsertNot) == 1000){
 											$func->logSMSWasNotSent($blukInsertNot);
 											unset($blukInsertNot);
@@ -219,7 +217,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										}
 									}
 								}else{
-									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','".$dataComing["channel_send"]."',null,null,'��Ҫԡ�ѧ�������ҹ�ͻ���प��','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','".$dataComing["channel_send"]."',null,null,'สมาชิกยังไม่ได้ใช้งานแอปพลิเคชั่น','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsertNot) == 1000){
 										$func->logSMSWasNotSent($blukInsertNot);
 										unset($blukInsertNot);
@@ -242,13 +240,12 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$blukInsert = array();
 					}
 					$arrayResult["RESULT"] = TRUE;
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}
 			}else{
-				$arrayResult['RESPONSE'] = "��辺�ش����������� ��سҵԴ��ͼ��Ѳ��";
+				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
 			}
 		}else{
 			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,is_stampflag,stamp_table,where_stamp,set_column,condition_target 
@@ -297,7 +294,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								}
 							}else{
 								$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-								'sms',null,null,'��辺�������Ѿ��','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+								'sms',null,null,'ไม่พบเบอร์โทรศัพท์','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 								if(sizeof($bulkInsert) == 1000){
 									$func->logSMSWasNotSent($bulkInsert);
 									unset($bulkInsert);
@@ -317,7 +314,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}else{
 						$arrayResult['RESULT'] = TRUE;
 					}
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}else{
 					$query = $rowQuery['sms_query'];
 					if(stripos($query,'WHERE') === FALSE){
@@ -390,7 +387,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									}
 								}else{
 									$bulkInsert[] = "('".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-									'sms',null,null,'��辺�������Ѿ��','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+									'sms',null,null,'ไม่พบเบอร์โทรศัพท์','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($bulkInsert) == 1000){
 										$func->logSMSWasNotSent($bulkInsert);
 										unset($bulkInsert);
@@ -411,25 +408,22 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}else{
 						$arrayResult['RESULT'] = TRUE;
 					}
-					echo json_encode($arrayResult);
+					require_once('../../../include/exit_footer.php');
 				}
 			}else{
-				$arrayResult['RESPONSE'] = "��辺�ش����������� ��سҵԴ��ͼ��Ѳ��";
+				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../../include/exit_footer.php');
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../include/exit_footer.php');
 }
 ?>
