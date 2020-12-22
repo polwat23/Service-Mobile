@@ -202,8 +202,7 @@ function GeneratePDFContract($data,$lib) {
 		    <div class="leftBehide">
 			โอนเข้าบัญชีเงินฝากออมทรัพย์ ATM (เล่มฟ้า) เลขที่...................................................................................
 		    </div>
-		    <br>
-		    <div class="left">
+		    <div class="left" style="margin-top: 15px;">
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>ตรวจสอบสิทธิ์การให้เงินกู้เรียบร้อยแล้ว</b>
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
