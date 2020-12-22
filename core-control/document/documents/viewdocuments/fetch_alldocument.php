@@ -7,11 +7,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayDocument = array();
 				$arrayFile = array();
 				//group
-				$fetchDocumentSystems = $conmysql->prepare("SELECT docgrp_no, docgrp_name, docgrp_ref, 
+				$mainSelectDoc = "SELECT docgrp_no, docgrp_name, docgrp_ref, 
 														create_date, update_date, create_by 
 														FROM docgroupcontrol 
 														WHERE docgrp_ref = :docgrp_no
-														AND is_use = '1'");
+														AND is_use = '1' ";
+				$orderSelectDoc = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "docgrp_name")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
+				$selectDoccuments = $mainSelectDoc.$orderSelectDoc;
+				$fetchDocumentSystems = $conmysql->prepare($selectDoccuments);
 				$fetchDocumentSystems->execute([
 					':docgrp_no' => $dataComing["docgrp_no"]
 				]);
@@ -28,10 +31,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				}
 				
 				//file
-				$fetchDocument = $conmysql->prepare("SELECT doc_no, docgrp_no, doc_filename, doc_type, source_ref, 
+				$mainSelectFile = "SELECT doc_no, docgrp_no, doc_filename, doc_type, source_ref, 
 														doc_address, member_no, create_date, update_date, doc_status 
 														FROM `doclistmaster` 
-														WHERE doc_status = '1' AND docgrp_no = :docgrp_no");
+														WHERE doc_status = '1' AND docgrp_no = :docgrp_no ";
+				$orderSelectFile = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "doc_filename")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
+				$selectFiles = $mainSelectFile.$orderSelectFile;
+				$fetchDocument = $conmysql->prepare($selectFiles);
 				$fetchDocument->execute([
 					':docgrp_no' => $dataComing["docgrp_no"]
 				]);
@@ -58,11 +64,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayDocument = array();
-				$fetchDocumentSystems = $conmysql->prepare("SELECT docgrp_no, docgrp_name, docgrp_ref, 
+				$mainSelectDoc = "SELECT docgrp_no, docgrp_name, docgrp_ref, 
 														create_date, update_date, create_by 
 														FROM docgroupcontrol 
 														WHERE docgrp_ref IS NULL
-														AND is_use = '1' ORDER BY create_date");
+														AND is_use = '1' ";
+				$orderSelectDoc = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "docgrp_name")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
+				$selectDoccuments = $mainSelectDoc.$orderSelectDoc;
+				$fetchDocumentSystems = $conmysql->prepare($selectDoccuments);
 				$fetchDocumentSystems->execute();
 				while($dataSystem = $fetchDocumentSystems->fetch(PDO::FETCH_ASSOC)){
 					$systemsArray = array();

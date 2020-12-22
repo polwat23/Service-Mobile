@@ -34,15 +34,31 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				exit();
 			}
 		}else if($dataComing["req_status"] == '-9'){
+			$conmysql->beginTransaction();
 			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '-9',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
 				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
+				$updateDocReqLoan = $conmysql->prepare("UPDATE doclistmaster SET doc_status = '0' WHERE doc_no = :reqloan_doc OR doc_no = :reqloan_salary OR doc_no = :reqloan_citizen");
+				if($updateDocReqLoan->execute([
+					':reqloan_doc' => $dataComing["reqloan_doc"],
+					':reqloan_salary' => $dataComing["reqloan_doc"]."salary",
+					':reqloan_citizen' => $dataComing["reqloan_doc"]."citizen",
+				])){
+					$conmysql->commit();
+					$arrayResult['RESULT'] = TRUE;
+					echo json_encode($arrayResult);
+				}else{	
+					$conmysql->rollback();
+					$arrayResult['RESULT'] = FALSE;
+					$arrayResult['RESPONSE'] = "ไม่สามารถยกเลิกใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
+					echo json_encode($arrayResult);
+					exit();
+				}
+			}else{	
+				$conmysql->rollback();
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถยกเลิกใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
 				echo json_encode($arrayResult);
