@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
-		$check_account = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
+		$check_account = $conmysql->prepare("SELECT id_bindaccount,deptaccount_no_bank,bank_code  
+											FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
 											and bindaccount_status IN('0','1')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
@@ -14,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			':member_no' => $payload["member_no"]
 		]);
 		if($check_account->rowCount() > 0){
+			$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['exp'] = time() + 300;
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
@@ -23,10 +25,10 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$arrSendData["app_id"] = $config["APP_ID"];
 			$conmysql->beginTransaction();
 			$updateUnBindAccount = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW() 
-														WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
+														WHERE deptaccount_no_bank = :deptaccount_no_bank and bank_code = :bank_code and bindaccount_status IN('0','1')");
 			if($updateUnBindAccount->execute([
-				':sigma_key' => $dataComing["sigma_key"],
-				':id_bindaccount' => $dataComing["id_bindaccount"]
+				':deptaccount_no_bank' => $rowAcc["deptaccount_no_bank"],
+				':bank_code' => $rowAcc["bank_code"]
 			])){
 				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/kbank/request_unbind_espa_id',$arrSendData);
 				if(!$responseAPI["RESULT"]){
@@ -42,8 +44,9 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 						':query_flag' => '1'
 					];
 					$log->writeLog('unbindaccount',$arrayStruc);
-					$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/kbank/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+					$message_error = "ปิดเมนูผูกบัญชี เนื่องจากยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/kbank/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 					$lib->sendLineNotify($message_error);
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -99,11 +102,12 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 					':query_flag' => '-9'
 				];
 				$log->writeLog('unbindaccount',$arrayStruc);
-				$message_error = "ยกเลิกผูกบัญชี Update ลง gcbindaccount ไม่ได้ "."\n"."Query => ".$updateUnBindAccount->queryString."\n"."Param => ". json_encode([
+				$message_error = "ปิดเมนูผูกบัญชี เนื่องจากยกเลิกผูกบัญชี Update ลง gcbindaccount ไม่ได้ "."\n"."Query => ".$updateUnBindAccount->queryString."\n"."Param => ". json_encode([
 					':sigma_key' => $dataComing["sigma_key"],
 					':id_bindaccount' => $dataComing["id_bindaccount"]
 				]);
 				$lib->sendLineNotify($message_error);
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');

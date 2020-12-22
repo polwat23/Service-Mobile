@@ -69,8 +69,9 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id'],$da
 						':query_flag' => '1'
 					];
 					$log->writeLog('bindaccount',$arrayStruc);
-					$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/kbank/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+					$message_error = "ปิดเมนูผูกบัญชี เนื่องจากูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/kbank/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 					$lib->sendLineNotify($message_error);
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -133,7 +134,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id'],$da
 					':query_flag' => '-9'
 				];
 				$log->writeLog('bindaccount',$arrayStruc);
-				$message_error = "ผูกบัญชีไม่ได้เพราะ Insert ลง gcbindaccount ไม่ได้ "."\n"."Query => ".$insertPendingBindAccount->queryString."\n"."Param =>". json_encode([
+				$message_error = "ปิดเมนูผูกบัญชีเนื่องจากผูกบัญชีไม่ได้เพราะ Insert ลง gcbindaccount ไม่ได้ "."\n"."Query => ".$insertPendingBindAccount->queryString."\n"."Param =>". json_encode([
 					':sigma_key' => $sigma_key,
 					':member_no' => $payload["member_no"],
 					':coop_account_no' => $coop_account_no,
@@ -144,6 +145,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id'],$da
 					':id_token' => $payload["id_token"]
 				]);
 				$lib->sendLineNotify($message_error);
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');

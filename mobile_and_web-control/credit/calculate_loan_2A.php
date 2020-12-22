@@ -46,6 +46,9 @@ if($age_member >= 3){
 	if($max_period > $rowPeriod["MAX_PERIOD"]){
 		$max_period = $rowPeriod["MAX_PERIOD"];
 	}
+	if($max_period < 0){
+		$max_period = 0;
+	}
 	$arrSubOther["VALUE"] = $max_period." งวด";
 	$arrOtherInfo[] = $arrSubOther;
 }else{
