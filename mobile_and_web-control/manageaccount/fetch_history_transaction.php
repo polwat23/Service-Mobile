@@ -23,6 +23,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 			$fetchFormatAccBank->execute();
 			$rowBankDS = $fetchFormatAccBank->fetch(PDO::FETCH_ASSOC);
 		}
+		$formatDept = $func->getConstant('dep_format');
+		$formatDeptHidden = $func->getConstant('hidden_dep');
 		while($rowTrans = $fetchTransList->fetch(PDO::FETCH_ASSOC)){
 			$arrayTrans = array();
 			$arrayTrans["REF_NO"] = $rowTrans["REF_NO"];
@@ -61,8 +63,13 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
 					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
-					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["bank_format_account"]);
-					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["bank_format_account_hide"]);
+					if($rowTrans["TRANSFER_MODE"] == '9'){
+						$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["bank_format_account"]);
+						$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["bank_format_account_hide"]);
+					}else{
+						$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$formatDept);
+						$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$formatDeptHidden);
+					}
 				}else if($rowTrans["DESTINATION_TYPE"] == "3"){
 					$fetchNameLoanDes = $conoracle->prepare("SELECT lnt.loantype_desc FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code
 																	WHERE lnm.loancontract_no = :loancontract_no");
@@ -70,17 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$rowNameLn = $fetchNameLoanDes->fetch(PDO::FETCH_ASSOC);
 					$arrayTrans["DESTINATION_NAME"] = $rowNameLn["LOANTYPE_DESC"];
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขสัญญา';
-					$contract_no = preg_replace('/\//','',$rowTrans["DESTINATION"]);
-					if(mb_stripos($contract_no,'.') === FALSE){
-						$loan_format = mb_substr($contract_no,0,2).'.'.mb_substr($contract_no,2,6).'/'.mb_substr($contract_no,8,2);
-						if(mb_strlen($contract_no) == 10){
-							$arrayTrans["DESTINATION"] = $loan_format;
-						}else if(mb_strlen($contract_no) == 11){
-							$arrayTrans["DESTINATION"] = $loan_format.'-'.mb_substr($contract_no,10);
-						}
-					}else{
-						$arrayTrans["DESTINATION"] = $contract_no;
-					}
+					$arrayTrans["DESTINATION"] = preg_replace('/\//','',$rowTrans["DESTINATION"]);
 				}else{
 					$fetchNameDes = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME
 																	FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
@@ -97,8 +94,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 				$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
 				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
 				$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
-				$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format'));
-				$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$func->getConstant('hidden_dep'));
+				$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$formatDept);
+				$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$formatDeptHidden);
 			}
 			$arrayTransaction[] = $arrayTrans;
 		}
