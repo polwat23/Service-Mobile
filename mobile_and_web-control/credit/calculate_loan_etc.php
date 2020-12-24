@@ -59,16 +59,23 @@ if(isset($rowLTCustom["MAXLOAN_AMT"])){
 	}else{
 		$maxperiod = $rowPeriod["MAX_PERIOD"];
 	}
-	$arrSubOtherInfo = array();
-	$arrSubOtherInfo["LABEL"] = "งวดสูงสุด";
-	$arrSubOtherInfo["VALUE"] = $maxperiod." งวด";
-	$arrOtherInfo[] = $arrSubOtherInfo;
-	$arrSubOtherInfo = array();
-	$arrSubOtherInfo["LABEL"] = "เงินเดือนคงเหลืออย่างน้อย ".($rowSalaryMin["SALPERCT_BALANCE"] * 100)."% หลังหักชำระต่องวดเรียบร้อย";
-	$arrOtherInfo[] = $arrSubOtherInfo;
-	$arrSubOtherInfo = array();
-	$arrSubOtherInfo["LABEL"] = "เงินเดือนคงเหลือต้องไม่น้อยกว่า ".number_format($rowSalaryMin["SALAMT_BALANCE"],0)." บาทหลังหักชำระต่องวดเรียบร้อย";
-	$arrOtherInfo[] = $arrSubOtherInfo;
+	if($maxperiod > 0){
+		$arrSubOtherInfo = array();
+		$arrSubOtherInfo["LABEL"] = "งวดสูงสุด";
+		$arrSubOtherInfo["VALUE"] = $maxperiod." งวด";
+		$arrOtherInfo[] = $arrSubOtherInfo;
+		$arrSubOtherInfo = array();
+		$arrSubOtherInfo["LABEL"] = "เงินเดือนคงเหลืออย่างน้อย ".($rowSalaryMin["SALPERCT_BALANCE"] * 100)."% หลังหักชำระต่องวดเรียบร้อย";
+		$arrOtherInfo[] = $arrSubOtherInfo;
+		$arrSubOtherInfo = array();
+		$arrSubOtherInfo["LABEL"] = "เงินเดือนคงเหลือต้องไม่น้อยกว่า ".number_format($rowSalaryMin["SALAMT_BALANCE"],0)." บาทหลังหักชำระต่องวดเรียบร้อย";
+		$arrOtherInfo[] = $arrSubOtherInfo;
+	}else{
+		$arrSubOtherInfo = array();
+		$arrSubOtherInfo["LABEL"] = "ไม่มีสิทธิ์กู้กรุณาติดต่อสหกรณ์";
+		$arrSubOtherInfo["LEBEL_TEXT_PROPS"] = ["color" => 'red'];
+		$arrCollShould[] = $arrSubOtherInfo;
+	}
 }else{
 	$maxloan_amt = 0;
 	$arrSubOtherInfo = array();

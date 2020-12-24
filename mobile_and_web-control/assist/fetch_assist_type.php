@@ -43,9 +43,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		$arrGroupAss = array();
 		while($rowAssType = $fetchAssType->fetch(PDO::FETCH_ASSOC)){
-			if($rowAssType["ASSISTTYPE_CODE"] == '80'){
-				$assistretryRemain += $rowAssType["ASSIST_AMT"];
-			}
 			$arrAss = array();
 			$arrAss["ASSIST_RECVAMT"] = number_format($rowAssType["ASSIST_AMT"],2);
 			$arrAss["APPROVE_AMT"] = number_format($rowAssType["APPROVE_AMT"],2);
@@ -96,6 +93,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE RANGE_CODE = 'asdeadcoffin'
 											AND :year_count BETWEEN start_time AND end_time");
 		$fetchAsDeadCoffin->execute([':year_count' => $member_date_count]);
+		$getAmtRecvAss = $conoracle->prepare("SELECT SUM(asm.ASSIST_AMT) as ASSIST_AMT
+												FROM asreqmaster asm 
+												WHERE TRIM(asm.ASSISTTYPE_CODE) = '80' and asm.ASSISTTYPE_CODE IS NOT NULL and asm.member_no = :member_no
+												and asm.coopbranch_id = :branch_id and asm.REQ_STATUS IN('31','32')");
+		$getAmtRecvAss->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
+		$rowAmtRecv = $getAmtRecvAss->fetch(PDO::FETCH_ASSOC);
+		$assistretryRemain = $rowAmtRecv["ASSIST_AMT"];
 		while($rowAsDeadCoffin = $fetchAsDeadCoffin->fetch(PDO::FETCH_ASSOC)){
 			$arrSubAssist = array();
 			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "จ่ายรายละ" : "Pay per man";

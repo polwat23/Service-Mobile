@@ -36,8 +36,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.POSTCODE AS ADDR_POSTCODE
+											MB.POSTCODE AS ADDR_POSTCODE,
+											mb.MEMBGROUP_CODE,
+											mg.membgroup_desc
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+											LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											LEFT JOIN mbucfdistrict MBD ON mb.district_code = MBD.district_code AND MBP.province_code = MBD.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
@@ -75,6 +78,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["TEL"] = $rowMember["MEM_TELMOBILE"].($rowMember["MEM_TELMOBILE"] && $rowMember["MEM_TEL"] ? ", " : "").$rowMember["MEM_TEL"];
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
+			$arrayGroup["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+			$arrayGroup["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
 			$arrayGroupAll[] = $arrayGroup;
 		}

@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSequestDiv->execute([':member_no' => $member_no]);
 		$rowSeqDiv = $getSequestDiv->fetch(PDO::FETCH_ASSOC);
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT divavg_year AS DIV_YEAR FROM mbdivavgtemp WHERE TRIM(MEMBER_NO) = :member_no 
-												AND branch_id = :branch_id
+												AND branch_id = :branch_id and test_flag = '0'
 												GROUP BY divavg_year ORDER BY divavg_year DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
