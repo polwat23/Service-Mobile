@@ -122,7 +122,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
 																kpd.RECEIPT_DATE as OPERATE_DATE,
-																kpd.KEEPING_STATUS
+																kpd.KEEPING_STATUS,
+																kpd.INTEREST_ACCUM,
+																kpd.SHARESTK_VALUE
 																FROM kpmastreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
@@ -133,6 +135,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
+		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
+		$header["share_value"] = number_format($rowKPHeader["SHARESTK_VALUE"],2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -226,22 +230,28 @@ function GenerateReport($dataReport,$header,$lib){
 			<table style="width: 100%;">
 			<tbody>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
-			<td style="width: 350px;">'.$header["member_no"].'</td>
-			<td style="width: 50px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
-			<td style="width: 101px;">'.$header["receipt_no"].'</td>
+			<td style="width: 70px;font-size: 18px;">เลขสมาชิก :</td>
+			<td style="width: 250px;">'.$header["member_no"].'</td>
+			<td style="width: 70px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
+			<td style="width: 230px;">'.$header["receipt_no"].'</td>
+			<td style="width: 90px;font-size: 18px;">ทุนเรือนหุ้น :</td>
+			<td style="width: 200px;">'.$header["share_value"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">งวด :</td>
-			<td style="width: 350px;">'.$header["recv_period"].'</td>
-			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
-			<td style="width: 101px;">'.$header["operate_date"].'</td>
+			<td style="width: 70px;font-size: 18px;">งวด :</td>
+			<td style="width: 250px;">'.$header["recv_period"].'</td>
+			<td style="width: 70px;font-size: 18px;">วันที่ :</td>
+			<td style="width: 230px;">'.$header["operate_date"].'</td>
+			<td style="width: 90px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 200px;">'.$header["interest_accum"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
-			<td style="width: 350px;">'.$header["fullname"].'</td>
-			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
-			<td style="width: 101px;">'.$header["member_group"].'</td>
+			<td style="width: 70px;font-size: 18px;">ชื่อ - สกุล :</td>
+			<td style="width: 250px;">'.$header["fullname"].'</td>
+			<td style="width: 70px;font-size: 18px;">สังกัด :</td>
+			<td style="width: 230px;">'.$header["member_group"].'</td>
+			<td style="width: 90px;font-size: 18px;"></td>
+			<td style="width: 200px;"></td>
 			</tr>
 			</tbody>
 			</table>
