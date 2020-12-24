@@ -108,7 +108,8 @@ function GeneratePDFContract($data,$lib) {
 			  </p>
 			  <p style="text-indent:50px; margin:0px; margin-top:-20px;  text-align:left;">
 				ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์จํานวน........................................บาท (....................................................................)
-				โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)......................................................................................
+				โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)......................................................................................<br>
+				โดยโอนเงินเข้าบัญชีเงินฝากธนาคารกรุงไทย เลขที่บัญชี ................................... ชื่อบัญชี .............................................................
 			  </p>
 			  <p style="text-indent:50px; margin:0px; text-align:left;">
 				ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งชําระเงินดอกเบี้ยเป็นรายเดือน และส่งคืนเงินกู้เพื่อเหตุฉุกเฉินเต็มจํานวน พร้อมดอกเบี้ยเดือนสุดท้ายให้เสร็จสิ้นภายใน 12 เดือน
@@ -137,7 +138,7 @@ function GeneratePDFContract($data,$lib) {
 			  <p style="text-indent:50px; margin:0px;  text-align:left;">
 				 หนังสือนี้ ข้าพเจ้าอ่านและเข้าใจทั้งหมดแล้ว
 			  </p>
-			  <p style="text-indent:50px; margin-top:40px;  text-align:center;">
+			  <p style="text-indent:50px; margin-top:15px;  text-align:center;">
 				 ลงชื่อ...........................................................ผู้กู้ / ผู้รับเงิน
 			  </p>
 			  <p style="text-indent:232px;  margin-top:-20px; text-align:left;">
@@ -210,14 +211,23 @@ function GeneratePDFContract($data,$lib) {
 			เพื่อเหตุฉุกเฉิน
 			</div>  
 		  </div>
-
-		  <div style="position: absolute; left: 250px; bottom: 38px; width:195px; text-align:center;font-weight:bold; ">
+		<div style="position: absolute; left: 220px; top: 476px; width:280px; text-align:center;font-weight:bold;">
+			<div style="font-size: 20px; ">
+			'.$data["recv_account"].'
+			</div>  
+		  </div>
+		  <div style="position: absolute; left: 420px; top: 476px; width:280px; text-align:center;font-weight:bold;">
+			<div style="font-size: 20px; ">
+			'.$data["name"].'
+			</div>  
+		  </div>
+		  <div style="position: absolute; left: 250px; bottom: 33px; width:195px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			 '.$data["name"].'
 			</div>  
 		  </div>
 		  
-		  <div style="position: absolute; left: 250px; bottom: 13px; width:195px; text-align:center;font-weight:bold; ">
+		  <div style="position: absolute; left: 250px; bottom: 7px; width:195px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			 '.$data["full_name"].'
 			</div>  

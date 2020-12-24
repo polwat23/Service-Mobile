@@ -47,7 +47,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}
 			$request_amt = $dataComing["request_amt"] ?? $maxloan_amt;
 			if($request_amt < $oldBal){
-				$request_amt = $oldBal;
+				$arrayResult['RESPONSE_CODE'] = "WS0086";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
 			}
 			
 			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
@@ -73,13 +76,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 			$arrayResult["REQ_SALARY"] = FALSE;
 			$arrayResult["REQ_CITIZEN"] = FALSE;
-			$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
+			$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
 			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-			$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
+			$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
 			$arrayResult["BANK_ACCOUNT_REMARK"] = null;
+			$arrayResult["NOTE_DESC"] = "หากท่านขอกู้หลังจาก 14.00 น. ดอกเบี้ยจะถูกคิดวันถัดไป ทำให้จำนวนเงินที่จะได้รับมีการเปลี่ยนแปลง";
+			$arrayResult["NOTE_DESC_COLOR"] = "red";
 			if($dayremainEnd == 0){
-				$arrayResult["NOTE_DESC"] = "เงินต้นและดอกเบี้ยของท่าน ณ วันที่กู้จะถูกหักรวมกับยอดปันผล-เฉลี่ยคืนที่ท่านจะได้รับ";
+				$arrayResult["NOTE_DESC"] = "หากท่านขอกู้หลังจาก 14.00 น. ดอกเบี้ยจะถูกคิดวันถัดไป ทำให้จำนวนเงินที่จะได้รับมีการเปลี่ยนแปลง เงินต้นและดอกเบี้ยของท่าน ณ วันที่กู้จะถูกหักรวมกับยอดปันผล-เฉลี่ยคืนที่ท่านจะได้รับ";
 				$arrayResult["NOTE_DESC_COLOR"] = "red";
 			}
 			$arrayResult['RESULT'] = TRUE;
