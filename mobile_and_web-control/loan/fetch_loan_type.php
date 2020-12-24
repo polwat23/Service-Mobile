@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrContract = array();
 			$arrContract["CONTRACT_NO"] = $contract_no;
 			$arrContract["LOAN_BALANCE"] = mb_substr($rowContract["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowContract["LOANCONTRACT_NO"],4,1) <= '9' ?
-			"******" : number_format($rowContract["LOAN_BALANCE"]);
+			"******" : number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
 			$arrContract["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'D m Y');
