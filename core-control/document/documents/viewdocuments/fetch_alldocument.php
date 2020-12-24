@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayFile = array();
 				//group
 				$mainSelectDoc = "SELECT docgrp_no, docgrp_name, docgrp_ref, 
-														create_date, update_date, create_by 
+														create_date, update_date, create_by,is_lock
 														FROM docgroupcontrol 
 														WHERE docgrp_ref = :docgrp_no
 														AND is_use = '1' ";
@@ -24,6 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$systemsArray["DOCGRP_NAME"] = $dataSystem["docgrp_name"];
 					$systemsArray["DOCGRP_REF"] = $dataSystem["docgrp_ref"];
 					$systemsArray["CREATE_BY"] = $dataSystem["create_by"];
+					$systemsArray["IS_LOCK"] = $dataSystem["is_lock"] == "1" ? true : false;
 					$systemsArray["TYPE"] = "FOLDER";
 					$systemsArray["CREATE_DATE"] = $lib->convertdate($dataSystem["create_date"],'d m Y',true); 
 					$systemsArray["UPDATE_DATE"] = $lib->convertdate($dataSystem["update_date"],'d m Y',true); 
@@ -65,7 +66,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}else{
 				$arrayDocument = array();
 				$mainSelectDoc = "SELECT docgrp_no, docgrp_name, docgrp_ref, 
-														create_date, update_date, create_by 
+														create_date, update_date, create_by, is_lock
 														FROM docgroupcontrol 
 														WHERE docgrp_ref IS NULL
 														AND is_use = '1' ";
@@ -79,6 +80,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$systemsArray["DOCGRP_NAME"] = $dataSystem["docgrp_name"];
 					$systemsArray["DOCGRP_REF"] = $dataSystem["docgrp_ref"];
 					$systemsArray["CREATE_BY"] = $dataSystem["create_by"];
+					$systemsArray["IS_LOCK"] = $dataSystem["is_lock"] == "1" ? true : false;
 					$systemsArray["TYPE"] = "FOLDER";
 					$systemsArray["CREATE_DATE"] = $lib->convertdate($dataSystem["create_date"],'d m Y',true); 
 					$systemsArray["UPDATE_DATE"] = $lib->convertdate($dataSystem["update_date"],'d m Y',true); 

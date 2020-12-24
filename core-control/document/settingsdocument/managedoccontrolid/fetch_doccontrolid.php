@@ -4,8 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','managedocuments')){
 		$arrayDocument = array();
-		$fetchDocumentSystems = $conmysql->prepare("SELECT short_prefix, description, amount_prefix, prefix_data_type, 
-												data_value_column,data_desc_column, connection_db,query_string, update_date
+		$fetchDocumentSystems = $conmysql->prepare("SELECT short_prefix, description, amount_prefix, prefix_data_type, data_value_column, data_desc_column, connection_db, query_string
 												FROM doccontrolid
 												WHERE is_use = '1'");
 		$fetchDocumentSystems->execute();
@@ -17,29 +16,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$systemsArray["PREFIX_DATA_TYPE"] = $dataSystem["prefix_data_type"];
 			$systemsArray["DATA_VALUE_COLUMN"] = $dataSystem["data_value_column"];
 			$systemsArray["DATA_DESC_COLUMN"] = $dataSystem["data_desc_column"];
-			//$systemsArray["CONNECTION_DB"] = $dataSystem["connection_db"];
-			//$systemsArray["QUERY_STRING"] = $dataSystem["query_string"];
-			$systemsArray["UPDATE_DATE"] = $lib->convertdate($dataSystem["update_date"],'d m Y',true); 
-			
-			$arrayGroup = array();
-			if($dataSystem["prefix_data_type"] == "column"){
-				if($dataSystem["connection_db"] == "oracle"){
-					$query_string = $dataSystem["query_string"];
-					$fetchColumn = $conoracle->prepare($query_string);
-					$fetchColumn->execute();
-					while($rowColumn = $fetchColumn->fetch(PDO::FETCH_ASSOC)){
-						$arrayData = array();
-						$arrayData[$dataSystem["data_value_column"]] = $rowColumn[$dataSystem["data_value_column"]];
-						if(isset($dataSystem["data_desc_column"]) || $dataSystem["data_desc_column"] != ""){
-						$arrayData[$dataSystem["data_desc_column"]] = $rowColumn[$dataSystem["data_desc_column"]];
-						}
-						$arrayGroup[] = $arrayData;
-					}
-				}else{
-				}
-			}				
-			
-			$systemsArray["CONTROLCOLUMN"] = $arrayGroup;
+			$systemsArray["CONNECTION_DB"] = $dataSystem["connection_db"];
+			$systemsArray["QUERY_STRING"] = $dataSystem["query_string"];
 			$arrayDocument[] = $systemsArray;
 		}
 		$arrayResult['DOC_CONTROLID'] = $arrayDocument;

@@ -143,9 +143,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$getDeptATM->execute([':member_no' => $member_no]);
 				$rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_coop,objective,pay_date)
+																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_coop,objective,option_pay,pay_date,channel)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_coop,:objective,:pay_date)");
+																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_coop,:objective,:option_pay,:pay_date,:channel)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -162,7 +162,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':contractdoc_url' => $pathFile,
 					':deptaccount_no_coop' => $rowDept["DEPTACCOUNT_NO"],
 					':objective' => $dataComing["objective"],
-					':pay_date' => date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d'))))
+					':option_pay' => $dataComing["option_paytype"],
+					':pay_date' => date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d')))),
+					':channel' => $dataComing["channel"]
 				])){
 					$getTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
 					$getTel->execute([':member_no' => $payload["member_no"]]);
@@ -258,7 +260,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':contractdoc_url' => $pathFile,
 							':deptaccount_no_coop' => $rowDept["DEPTACCOUNT_NO"],
 							':objective' => $dataComing["objective"],
-							':pay_date' => date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d'))))
+							':option_pay' => $dataComing["option_paytype"],
+							':pay_date' => date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d')))),
+							':channel' => $dataComing["channel"]
 						]),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
@@ -279,7 +283,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':contractdoc_url' => $pathFile,
 						':deptaccount_no_coop' => $rowDept["DEPTACCOUNT_NO"],
 						':objective' => $dataComing["objective"],
-						':pay_date' => date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d'))))
+						':option_pay' => $dataComing["option_paytype"],
+						':pay_date' => date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d')))),
+						':channel' => $dataComing["channel"]
 					]);
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_CODE'] = "WS1036";

@@ -3,11 +3,12 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','managedocuments')){
-		$checkFolder = $conmysql->prepare("SELECT docgrp_no,is_use
+		$checkFolder = $conmysql->prepare("SELECT docgrp_no,is_use,menu_component
 												FROM docgroupcontrol
-												WHERE docgrp_no = :docgrp_no");
+												WHERE docgrp_no = :docgrp_no OR menu_component = :menu_component");
 		$checkFolder->execute([
-			':docgrp_no' =>  $dataComing["folder_key"]
+			':docgrp_no' =>  $dataComing["folder_key"],
+			':menu_component' => (isset($dataComing["menu_component"]) && $dataComing["menu_component"] != "") ? $dataComing["menu_component"] : NULL
 		]);
 		
 		if($checkFolder->rowCount() > 0){
@@ -40,10 +41,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					require_once('../../../../include/exit_footer.php');
 				}
 			}else{
-				$arrayResult['FORM_ERROR'] = "folder_key";
-				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มแฟ้มเอกสารได้เนื่องจากมี Key แฟ้มเอกสารนี้อยู่แล้ว";
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../../../include/exit_footer.php');
+				if((isset($dataComing["menu_component"]) && $dataComing["menu_component"] != "") && $dataComing["menu_component"] == $rowCheckFolder["menu_component"]){
+					$arrayResult['FORM_ERROR'] = "menu_component";
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มแฟ้มเอกสารได้เนื่องจากมีการใช้งานเมนูนี้อยู่แล้ว";
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../../../include/exit_footer.php');
+				}else{
+					$arrayResult['FORM_ERROR'] = "folder_key";
+					$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มแฟ้มเอกสารได้เนื่องจากมี Key แฟ้มเอกสารนี้อยู่แล้ว";
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../../../include/exit_footer.php');
+				}
 			}
 		}else{
 			$insertDocumentSystems = $conmysql->prepare("INSERT INTO docgroupcontrol(docgrp_no, docgrp_name, 
