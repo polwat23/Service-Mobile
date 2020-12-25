@@ -76,7 +76,7 @@ if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
 	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
 	$lib->sendLineNotify($message_error);
-	$func->MaintenanceMenu("System");
+	//$func->MaintenanceMenu("System");
 	http_response_code(500);
 	
 }
