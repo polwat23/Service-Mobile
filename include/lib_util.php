@@ -259,18 +259,16 @@ class library {
 			]
 		];
 		$email_explode = explode("@", $email);
-		if(in_array(end($email_explode), array("yahoo.com", "yahoo.co.th"))){
-			$mailFunction->Host = 'cloud2.gensoft.co.th';
-		}else {
-			$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
-		}
+		$mailFunction->Host = 'mail.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
-		$mailFunction->SMTPSecure = 'ssl';
-		$mailFunction->Port = 465;
+		$mailFunction->SMTPSecure = 'tls';
+		$mailFunction->Port = 587;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
+		$mailFunction->Hostname = 'gensoft.co.th';
+		$mailFunction->Helo = 'Gensoft-Mail';
 		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
@@ -411,6 +409,7 @@ class library {
 			$data = [
 				"registration_ids" => $payload["TO"],
 				"priority" => "high",
+				"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -418,14 +417,17 @@ class library {
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				],
 				"data" => [
+					"TYPE" => $payload["TYPE_NOTIFY"] ?? "1",
+					"READ_STATUS" => "0",
 					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
-					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => $payload["TYPE_NOTIFY"] ?? "1" ],
 				]
 			];
 		}else if($type_send == 'all'){
 			$data = [
 				"to" => $payload["TO"],
 				"priority" => "high",
+				"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -433,8 +435,10 @@ class library {
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				],
 				"data" => [
+					"TYPE" => $payload["TYPE_NOTIFY"] ?? "1",
+					"READ_STATUS" => "0",
 					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
-					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => $payload["TYPE_NOTIFY"] ?? "1" ],
 				]
 			];
 		}
