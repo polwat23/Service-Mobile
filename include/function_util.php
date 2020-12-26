@@ -740,5 +740,55 @@ class functions {
 			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
 			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
+		public function PrefixGenerate($prefix){
+			$arrPrefix = explode(",",$prefix);
+			$arrPrefixOut = array();
+			if(sizeof($arrPrefix) > 0){
+				$getTypePrefix = $this->con->prepare("SELECT short_prefix,prefix_data_type,data_value_column,connection_db,query_string,amount_prefix
+													FROM doccontrolid WHERE short_prefix IN('".implode("','",$arrPrefix)."') and is_use = '1'");
+				$getTypePrefix->execute();
+			}else{
+				$getTypePrefix = $this->con->prepare("SELECT short_prefix,prefix_data_type,data_value_column,connection_db,query_string,amount_prefix
+													FROM doccontrolid WHERE short_prefix = :short_prefix and is_use = '1'");
+				$getTypePrefix->execute([':short_prefix' => $prefix]);
+			}
+			while($rowPrefix = $getTypePrefix->fetch(\PDO::FETCH_ASSOC)){
+				$prefixValue = null;
+				if($rowPrefix["prefix_data_type"] == 'string'){
+					$prefixValue = $rowPrefix["data_value_column"];
+				}else if($rowPrefix["prefix_data_type"] == 'year'){
+					$prefixValue = substr((date('Y') + 543),0,$rowPrefix["amount_prefix"]);
+				}else if($rowPrefix["prefix_data_type"] == 'month'){
+					$prefixValue = substr(date('m'),0,$rowPrefix["amount_prefix"]);
+				}else if($rowPrefix["prefix_data_type"] == 'day'){
+					$prefixValue = substr(date('d'),0,$rowPrefix["amount_prefix"]);
+				}else if($rowPrefix["prefix_data_type"] == 'running'){
+					if($rowPrefix["connection_db"] == 'mysql'){
+						$getRunning = $this->con->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'oracle'){
+						$getRunning = $this->conora->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'mssql'){
+						//$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
+					}
+					$getRunning->execute();
+					$rowRunning = $getRunning->fetch(\PDO::FETCH_ASSOC);
+					$prefixValue = str_pad($rowRunning[$rowPrefix["data_value_column"]] + 1,$rowPrefix["amount_prefix"],'0',STR_PAD_LEFT);
+				}else if($rowPrefix["prefix_data_type"] == 'column'){
+					if($rowPrefix["connection_db"] == 'mysql'){
+						$getData = $this->con->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'oracle'){
+						$getData = $this->conora->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'mssql'){
+						//$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
+					}
+					$getData->execute();
+					$rowData = $getData->fetch(\PDO::FETCH_ASSOC);
+					$prefixValue = $rowData[$rowPrefix["data_value_column"]];
+				}
+				$arrPrefixOut[$rowPrefix["short_prefix"]] = $prefixValue;
+			}
+			return $arrPrefixOut;
+		}
+
 }
 ?>
