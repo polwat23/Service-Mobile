@@ -258,7 +258,6 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$email_explode = explode("@", $email);
 		$mailFunction->Host = 'mail.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
