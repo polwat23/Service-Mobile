@@ -8,7 +8,7 @@ use Connection\connection;
 $con = new connection();
 $conmysql = $con->connecttomysql();
 $checkSystem = $conmysql->prepare("SELECT menu_status FROM gcmenu									
-									WHERE menu_permission = '0' and menu_parent = '-1'
+									WHERE menu_parent = '-1'
 									and (menu_channel = :channel OR menu_channel = 'both')");
 $checkSystem->execute([':channel' => $dataComing["channel"]]);
 if($checkSystem->rowCount() > 0){
@@ -22,7 +22,7 @@ if($checkSystem->rowCount() > 0){
 		$conoracle = $con->connecttooracle();
 		$conoracle->IS_OPEN = '0';
 		if(!is_array($conoracle)){
-			$updateMenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1' WHERE menu_parent = '-1'");
+			$updateMenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1',menu_permission = '0' WHERE menu_parent = '-1' and menu_permission = '3'");
 			$updateMenu->execute();
 		}
 	}
@@ -30,7 +30,7 @@ if($checkSystem->rowCount() > 0){
 	$conoracle = $con->connecttooracle();
 	$conoracle->IS_OPEN = '0';
 	if(!is_array($conoracle)){
-		$updateMenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1' WHERE menu_parent = '-1'");
+		$updateMenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1',menu_permission = '0' WHERE menu_parent = '-1' and menu_permission = '3'");
 		$updateMenu->execute();
 	}
 }

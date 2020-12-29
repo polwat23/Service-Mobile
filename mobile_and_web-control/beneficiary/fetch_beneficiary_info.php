@@ -10,7 +10,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM mbgainmaster mgm LEFT JOIN mbgaindetail mg ON mgm.member_no = mg.member_no
 												LEFT JOIN mbucfgainconcern mc ON mg.CONCERN_CODE = mc.CONCERN_CODE
 												LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
-												WHERE mg.member_no = :member_no and mg.branch_id = :branch_id and mg.gain_status = '1' ORDER BY mg.seq_no ASC");
+												WHERE mg.member_no = :member_no and mg.branch_id = :branch_id and mg.dblink = 
+												(SELECT dblink FROM mbmembmaster WHERE member_no = :member_no and branch_id = :branch_id)
+												and mg.gain_status = '1' ORDER BY mg.seq_no ASC");
 		$getBeneficiary->execute([
 			':member_no' => $member_no,
 			':branch_id' => $payload["branch_id"]
