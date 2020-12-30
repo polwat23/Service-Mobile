@@ -10,7 +10,51 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 													WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-			$period_payment = round($dataComing["request_amt"] * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($dataComing["period"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+			$typeCalDate = $func->getConstant("process_keep_forward");
+			$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
+			$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
+			if($typeCalDate == "next"){
+				$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
+			}else{
+				$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+			}
+			$period_payment = ($dataComing["request_amt"] / $dataComing["period"]) + (($dataComing["request_amt"] * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
+			if($dataComing["recv_acc"] == '0'){
+				$arrGrpBank = array();
+				$getBank = $conoracle->prepare("SELECT TRIM(BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
+											WHERE bank_code IN('006','004') and USE_FLAG = '1' ORDER BY SETSORT ASC");
+				$getBank->execute();
+				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
+					$arrBank = array();
+					$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
+					$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
+					$arrGrpBank[] = $arrBank;
+				}
+				$arrayResult['COOP_ACCOUNT'] = [];
+				$arrayResult["REQ_BOOKBANK"] = TRUE;
+				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
+				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
+				$arrayResult['BANK'] = $arrGrpBank;
+			}else if($dataComing["recv_acc"] == '1'){
+				$arrGrpCoopAcc = array();
+				$formatDept = $func->getConstant('dep_format');
+				$getAccount = $conoracle->prepare("SELECT deptaccount_no FROM dpdeptmaster
+													WHERE member_no = :member_no and deptclose_status <> 1 ORDER BY deptaccount_no ASC");
+				$getAccount->execute([':member_no' => $member_no]);
+				while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
+					$arrCoopAcc = array();
+					$arrCoopAcc["ACCOUNT_NO"] = $rowAccount["DEPTACCOUNT_NO"];
+					$arrCoopAcc["ACCOUNT_NO_FORMAT"] =  $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept);
+					$arrGrpCoopAcc[] = $arrCoopAcc;
+				}
+				$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
+				$arrayResult["REQ_BOOKBANK"] = FALSE;
+				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
+				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
+				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
+				$arrayResult['BANK'] = [];
+			}
 			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -33,9 +77,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				
 			}
 			$request_amt = $dataComing["request_amt"] ?? $maxloan_amt;
-			if($request_amt < $oldBal){
-				$request_amt = $oldBal;
-			}
 			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
 															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt <= lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
@@ -45,23 +86,75 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMaxPeriod["MAX_PERIOD"])){
+				$getLoanObjective = $conoracle->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective WHERE loantype_code = :loantype");
+				$getLoanObjective->execute([':loantype' => $dataComing["loantype_code"]]);
+				$arrGrpObj = array();
+				$arrGrpBank = array();
+				while($rowLoanObj = $getLoanObjective->fetch(PDO::FETCH_ASSOC)){
+					$arrObj = array();
+					$arrObj["LOANOBJECTIVE_CODE"] = $rowLoanObj["LOANOBJECTIVE_CODE"];
+					$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
+					$arrGrpObj[] = $arrObj;
+				}
+				$getBank = $conoracle->prepare("SELECT TRIM(BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
+											WHERE bank_code IN('006','004') and USE_FLAG = '1' ORDER BY SETSORT ASC");
+				$getBank->execute();
+				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
+					$arrBank = array();
+					$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
+					$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
+					$arrGrpBank[] = $arrBank;
+				}
+				/*$arrGrpCoopAcc = array();
+				$formatDept = $func->getConstant('dep_format');
+				$getAccount = $conoracle->prepare("SELECT deptaccount_no FROM dpdeptmaster
+													WHERE member_no = :member_no and deptclose_status <> 1 ORDER BY deptaccount_no ASC");
+				$getAccount->execute([':member_no' => $member_no]);
+				while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
+					$arrCoopAcc = array();
+					$arrCoopAcc["ACCOUNT_NO"] = $rowAccount["DEPTACCOUNT_NO"];
+					$arrCoopAcc["ACCOUNT_NO_FORMAT"] =  $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept);
+					$arrGrpCoopAcc[] = $arrCoopAcc;
+				}*/
 				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 														WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-				$period_payment = round($maxloan_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
-				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
+				$typeCalDate = $func->getConstant("process_keep_forward");
+				$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
+				$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
+				if($typeCalDate == "next"){
+					$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
+				}else{
+					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+				}
+				$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]) + (($maxloan_amt * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
+				$arrRecvBank["VALUE"] = "0";
+				$arrRecvBank["DESC"] = "โอนเข้าบัญชีธนาคาร";
+				$arrGrpReceive[] = $arrRecvBank;
+				$arrRecvCoop["VALUE"] = "1";
+				$arrRecvCoop["DESC"] = "โอนเข้าบัญชีสหกรณ์";
+				$arrGrpReceive[] = $arrRecvCoop;
+				$arrayResult["DEFAULT_RECV_ACC"] = "0";
 				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
 				$arrayResult["REQUEST_AMT"] = $request_amt;
 				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = FALSE;
+				$arrayResult["RECV_ACC"] = $arrGrpReceive;
+				$arrayResult["REQ_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = FALSE;
+				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
+				$arrayResult["REQ_BOOKBANK"] = TRUE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
+				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+				$arrayResult['BANK'] = $arrGrpBank;
+				//$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

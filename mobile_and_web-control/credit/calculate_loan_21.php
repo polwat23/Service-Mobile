@@ -27,4 +27,9 @@ $arrSubOtherInfoSalaryRemain["VALUE"] = "1,000 บาท";
 $arrOtherInfo[] = $arrSubOtherInfoSalaryRemain;
 
 $maxloan_amt = $rowCredit["MAXLOAN_AMT"];
+if($oldBal > $maxloan_amt){
+	$arrSubInfo["LABEL"] = "หนี้เดิมของท่านเกินกว่าสิทธิ์กู้ หากท่านต้องการกู้หักกลบ ท่านต้องกูสัญญาประเภทอื่นร่วมด้วย";
+	$arrSubInfo["VALUE"] = "";
+	$arrCollShould[] = $arrSubInfo;
+}
 ?>

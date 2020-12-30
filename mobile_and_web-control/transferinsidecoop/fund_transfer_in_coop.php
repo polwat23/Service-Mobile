@@ -118,7 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
 			':laststmno' => $lastStmSrcNo,
 			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($rowAccData["LASTCALINT_DATE"])),
-			':acc_id' => $getMapAccidDest["ACCOUNT_ID"],
+			':acc_id' => $rowMapAccDest["ACCOUNT_ID"],
 			':penalty_amt' => $dataComing["penalty_amt"]
 		];
 		if($dataComing["penalty_amt"] > 0){
@@ -195,7 +195,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 														deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 														PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
 														DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
-														NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP
+														NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
 														POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 														TELLER_FLAG,OPERATE_TIME) 
 														VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,

@@ -21,6 +21,9 @@
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
+	"HW_APPID" : "102501321",
+    "HW_APPSECRET": "d5fb240c364a2942460eb764903ee1564dfc77782affa72640dd2212b6d77750",
+	"PORT_MAILSERVER" : "587",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",
