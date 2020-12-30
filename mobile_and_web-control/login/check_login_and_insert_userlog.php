@@ -133,11 +133,20 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['branch_id'] = $rowResign["BRANCH_ID"];
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
-							$updateFCMToken->execute([
-								':fcm_token' => $dataComing["fcm_token"] ?? null,
-								':member_no' => $member_no
-							]);
+							if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
+								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
+								$updateFCMToken->execute([
+									':fcm_token' => $dataComing["fcm_token"] ?? null,
+									':member_no' => $member_no
+								]);
+							}
+							if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
+								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
+								$updateFCMToken->execute([
+									':hms_token' => $dataComing["hms_token"] ?? null,
+									':member_no' => $member_no
+								]);
+							}
 						}
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([

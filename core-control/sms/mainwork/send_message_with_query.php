@@ -93,11 +93,57 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									}
 								}
 							}else{
-								$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-								if(sizeof($blukInsertNot) == 1000){
-									$func->logSMSWasNotSent($blukInsertNot);
-									unset($blukInsertNot);
-									$blukInsertNot = array();
+								if(isset($arrToken["LIST_SEND_HW"][0]["TOKEN"]) && $arrToken["LIST_SEND_HW"][0]["TOKEN"] != ""){
+									if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+										$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND_HW"][0]["TOKEN"]);
+										$arrPayloadNotify["MEMBER_NO"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
+										$arrMessage["SUBJECT"] = $arrMessageMerge["SUBJECT"];
+										$arrMessage["BODY"] = $arrMessageMerge["BODY"];
+										$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+										$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+										$arrPayloadNotify["SEND_BY"] = $payload["username"];
+										$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+										if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+											if($rowQuery["is_stampflag"] == '1'){
+												$arrayExecute = array();
+												preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+												foreach($arrayRawExecute[1] as $execute){
+													$arrayExecute[$execute] = $rowTarget[$execute];
+												}
+												$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+												$updateFlagStamp->execute($arrayExecute);
+											}
+											$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+											if(sizeof($blukInsert) == 1000){
+												$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+												$arrPayloadHistory["bulkInsert"] = $blukInsert;
+												$func->insertHistory($arrPayloadHistory);
+												unset($blukInsert);
+												$blukInsert = array();
+											}
+										}else{
+											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND_HW"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+											if(sizeof($blukInsertNot) == 1000){
+												$func->logSMSWasNotSent($blukInsertNot);
+												unset($blukInsertNot);
+												$blukInsertNot = array();
+											}
+										}
+									}else{
+										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND_HW"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										if(sizeof($blukInsertNot) == 1000){
+											$func->logSMSWasNotSent($blukInsertNot);
+											unset($blukInsertNot);
+											$blukInsertNot = array();
+										}
+									}
+								}else{
+									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+									if(sizeof($blukInsertNot) == 1000){
+										$func->logSMSWasNotSent($blukInsertNot);
+										unset($blukInsertNot);
+										$blukInsertNot = array();
+									}
 								}
 							}
 						}
@@ -209,11 +255,57 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											}
 										}
 									}else{
-										$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-										if(sizeof($blukInsertNot) == 1000){
-											$func->logSMSWasNotSent($blukInsertNot);
-											unset($blukInsertNot);
-											$blukInsertNot = array();
+										if(isset($arrToken["LIST_SEND_HW"][0]["TOKEN"]) && $arrToken["LIST_SEND_HW"][0]["TOKEN"] != ""){
+											if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+												$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND_HW"][0]["TOKEN"]);
+												$arrPayloadNotify["MEMBER_NO"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
+												$arrMessage["SUBJECT"] = $arrMessageMerge["SUBJECT"];
+												$arrMessage["BODY"] = $arrMessageMerge["BODY"];
+												$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+												$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+												$arrPayloadNotify["SEND_BY"] = $payload["username"];
+												$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+												if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+													if($rowQuery["is_stampflag"] == '1'){
+														$arrayExecute = array();
+														preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+														foreach($arrayRawExecute[1] as $execute){
+															$arrayExecute[$execute] = $rowTarget[$execute];
+														}
+														$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+														$updateFlagStamp->execute($arrayExecute);
+													}
+													$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+													if(sizeof($blukInsert) == 1000){
+														$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+														$arrPayloadHistory["bulkInsert"] = $blukInsert;
+														$func->insertHistory($arrPayloadHistory);
+														unset($blukInsert);
+														$blukInsert = array();
+													}
+												}else{
+													$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND_HW"][0]["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+													if(sizeof($blukInsertNot) == 1000){
+														$func->logSMSWasNotSent($blukInsertNot);
+														unset($blukInsertNot);
+														$blukInsertNot = array();
+													}
+												}
+											}else{
+												$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$arrToken["LIST_SEND_HW"][0]["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+												if(sizeof($blukInsertNot) == 1000){
+													$func->logSMSWasNotSent($blukInsertNot);
+													unset($blukInsertNot);
+													$blukInsertNot = array();
+												}
+											}
+										}else{
+											$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$target."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+											if(sizeof($blukInsertNot) == 1000){
+												$func->logSMSWasNotSent($blukInsertNot);
+												unset($blukInsertNot);
+												$blukInsertNot = array();
+											}
 										}
 									}
 								}else{
