@@ -40,10 +40,17 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				foreach($destinationFull as $dest){
 					$indexFound = array_search($dest["DESTINATION"], $arrToken["MEMBER_NO"]);
 					if($indexFound !== false){
-						$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
-						$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
-						$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
-						$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+						if(isset($arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"]) && $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"] != ""){
+							$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
+							$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
+							$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
+							$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+						}else{
+							$member_no = $arrToken["LIST_SEND_HW"][$indexFound]["MEMBER_NO"];
+							$token = $arrToken["LIST_SEND_HW"][$indexFound]["TOKEN"];
+							$recv_noti_news = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
+							$recv_noti_trans = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+						}
 						if(isset($token) && $token != ""){
 							if($recv_noti_news == "1"){
 								$arrPayloadNotify["TO"] = array($token);
@@ -54,7 +61,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["SEND_BY"] = $payload["username"];
 								$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
-								if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+								if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"]) || $lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
 									$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsert) == 1000){
 										$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
@@ -130,6 +137,36 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							}
 						}
 					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
+						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = $dest["MEMBER_NO"];
+							$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+							$message = ($dataComing["message_emoji_"] ?? "-");
+							$arrMessage["BODY"] = $message;
+							$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["SEND_BY"] = $payload["username"];
+							$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+							if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
+								$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+								if(sizeof($blukInsert) == 1000){
+									$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+									$arrPayloadHistory["bulkInsert"] = $blukInsert;
+									$func->insertHistory($arrPayloadHistory);
+									unset($blukInsert);
+									$blukInsert = array();
+								}
+							}else{
+								$blukInsertNot[] = "('".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+								if(sizeof($blukInsertNot) == 1000){
+									$func->logSMSWasNotSent($blukInsertNot);
+									unset($blukInsertNot);
+									$blukInsertNot = array();
+								}
+							}
+						}
+					}
 					if(sizeof($blukInsert) > 0){
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
@@ -173,6 +210,30 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							}
 						}
 					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
+						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
+							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
+								$arrAllMember_no[] = $dest["MEMBER_NO"];
+								$arrAllToken[] = $dest["TOKEN"];
+							}else{
+								$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
+								'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+							}
+							if(sizeof($bulkInsert) == 1000){
+								$func->logSMSWasNotSent($bulkInsert);
+								unset($bulkInsert);
+								$bulkInsert = array();
+							}
+						}else{
+							$bulkInsert[] = "('".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
+							'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+							if(sizeof($bulkInsert) == 1000){
+								$func->logSMSWasNotSent($bulkInsert);
+								unset($bulkInsert);
+								$bulkInsert = array();
+							}
+						}
+					}
 					if(sizeof($arrAllToken) > 0){
 						if(sizeof($bulkInsert) > 0){
 							$func->logSMSWasNotSent($bulkInsert);
@@ -188,7 +249,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 						$arrPayloadNotify["SEND_BY"] = $payload["username"];
 						$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
-						if($lib->sendNotify($arrPayloadNotify,'all')){
+						if($lib->sendNotify($arrPayloadNotify,'all') || $lib->sendNotifyHW($arrPayloadNotify,'all')){
 							if($func->insertHistory($arrPayloadNotify,'1')){ //รอแก้ไขส่งทุกคน Subscribe ตามห้อง
 								$arrayResult['RESULT'] = TRUE;
 								require_once('../../../include/exit_footer.php');
