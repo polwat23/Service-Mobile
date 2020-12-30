@@ -66,5 +66,46 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			}
 		}
 	}
+	foreach($arrToken["LIST_SEND_HW"] as $dest){
+		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+			$getData = $conoracle->prepare("SELECT * FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+			$getData->execute([
+				':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
+				':seq_no' => $rowSTM["SEQ_NO"]
+			]);
+			$rowData = $getData->fetch(PDO::FETCH_ASSOC);
+			$insertLog = $conmysql->prepare("INSERT INTO logtriggernotifystatement(log_data,member_no)
+											VALUES(:log_data,:member_no)");
+			$insertLog->execute([
+				':log_data' => json_encode($rowData),
+				':member_no' => $rowSTM["MEMBER_NO"]
+			]);
+			$dataMerge = array();
+			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDep);
+			$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
+			$dataMerge["BALANCE"] = number_format($rowSTM["PRNCBAL"],2);
+			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
+			$dataMerge["DATETIME"] = isset($rowSTM["ENTRY_TIME"]) && $rowSTM["ENTRY_TIME"] != '' ?
+			$lib->convertdate($rowSTM["ENTRY_TIME"],'D m Y',true) : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = 'system';
+			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
+				$updateSyncFlag = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+				$updateSyncFlag->execute([
+					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
+					':seq_no' => $rowSTM["SEQ_NO"]
+				]);
+			}
+		}
+	}
 }
 ?>
