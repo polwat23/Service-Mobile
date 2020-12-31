@@ -25,6 +25,9 @@
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"URL_COOP" : "www.musaving.com",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
+	"HW_APPID" : "102274297",
+    "HW_APPSECRET": "b56da9d3f60e6c7d8f390bfab7d1b84e079336d3b10ffc337328255c150a56f6",
+	"PORT_MAILSERVER" : "587",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",

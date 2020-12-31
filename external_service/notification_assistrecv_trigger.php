@@ -44,5 +44,30 @@ while($rowAss = $fetchDataAss->fetch(PDO::FETCH_ASSOC)){
 			}
 		}
 	}
+	foreach($arrToken["LIST_SEND_HW"] as $dest){
+		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+			$dataMerge = array();
+			$dataMerge["ASSISTTYPE_DESC"] = $rowAss["ASSISTTYPE_DESC"];
+			$dataMerge["MONEYTYPE"] = $rowAss["MONEYTYPE_DESC"];
+			$dataMerge["DEPTACCOUNT_NO"] = $rowAss["MONEYTYPE_CODE"] == 'TRN' ?  $lib->formataccount_hidden($lib->formataccount($rowAss["DEPACCOUNT_NO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep')) : "";
+			$dataMerge["PAYOUT_AMT"] = number_format($rowAss["PAYOUT_AMT"],2);
+			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
+			$arrMessage["PATH_IMAGE"] = null;
+			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = "system";
+			if($lib->sendNotify($arrPayloadNotify,"person")){
+				$func->insertHistory($arrPayloadNotify,'2');
+				$updateSyncFlag = $conoracle->prepare("UPDATE asnslippayout SET sync_notify_flag = '1' WHERE PAYOUTSLIP_NO = :PAYOUTSLIP_NO");
+				$updateSyncFlag->execute([
+					':PAYOUTSLIP_NO' => $rowAss["PAYOUTSLIP_NO"]
+				]);
+			}
+		}
+	}
 }
 ?>
