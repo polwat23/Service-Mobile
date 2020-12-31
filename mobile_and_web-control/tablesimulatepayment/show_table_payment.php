@@ -86,7 +86,25 @@ for($i = 0;$i < sizeof($arrPayment);$i++){ ?>
 ?>
 
 </tbody>
+<tfoot>
+<tr>
+<td colspan="4" style="background-color:#E8E7E7;padding: 5px;text-align: right;font-weight:bold">
+รวมดอกเบี้ย
+</td>
+<td colspan="1" style="background-color:black;padding: 5px;text-align: center;color:white;">
+<?php echo number_format($sumInt,2) ?>
+</td>
+<td colspan="1" style="background-color:#E8E7E7;padding: 5px;text-align: right;font-weight:bold">
+รวมชำระ
+</td>
+<td colspan="1" style="background-color:black;padding: 5px;text-align: center;color:white;">
+<?php echo number_format($sumPayment,2) ?>
+</td>
+</tr>
+</tfoot>
 </table>
+<div style="margin-bottom: 10px;" >
+</div>
 </body>
 
 </html>

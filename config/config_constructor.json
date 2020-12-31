@@ -24,6 +24,9 @@
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"URL_COOP" : "www.muktc.com",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
+	"HW_APPID" : "103001141",
+    "HW_APPSECRET": "67ff74c9a3e0b4b5d0b57aab3df982c2fe599695620610311a423b068a809928",
+	"PORT_MAILSERVER" : "587",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",
