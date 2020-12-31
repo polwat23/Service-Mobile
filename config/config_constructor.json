@@ -25,7 +25,7 @@
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
 	"HW_APPID" : "103213153",
     "HW_APPSECRET": "55ed3b3eba7f1448f353b6dfd41c5c5bc1fadec619fe2d02158747dd1d19eed7",
-	"PORT_MAILSERVER" : "25",
+	"PORT_MAILSERVER" : "587",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",
