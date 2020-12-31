@@ -23,5 +23,8 @@
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"URL_COOP" : "www.ardcoop.com",
-	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member"
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
+	"HW_APPID" : "102608863",
+    "HW_APPSECRET": "8de84d5f2b1a4da8cadbdfaf6ab7fd2e7c3372469913aa8f2ea5a7c6d5abf2ee",
+	"PORT_MAILSERVER" : "587"
 }
