@@ -395,42 +395,61 @@ class functions {
 			$arrayMemberGRP = array();
 			$arrayMember = array();
 			$arrayAll = array();
+			$arrayMemberGRPHW = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
 						$fetchFCMToken->execute();
 					}else{
-						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 						$fetchFCMToken->execute([':member_no' => $member_no]);
 					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 							$arrayMT = array();
-							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
-							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
-							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
-							$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
-							$arrayMember[] = $rowFCMToken["member_no"];
-							$arrayMemberGRP[] = $arrayMT;
+							if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
+								$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
+								$arrayMember[] = $rowFCMToken["member_no"];
+								$arrayMemberGRP[] = $arrayMT;
+							}else{
+								$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
+								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
+								$arrayMember[] = $rowFCMToken["member_no"];
+								$arrayMemberGRPHW[] = $arrayMT;
+							}
 						}
 					}
 				}
 			}else{
-				$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
+				$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
 				$fetchFCMToken->execute();
 				while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 						$arrayMT = array();
-						$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
-						$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
-						$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
-						$arrayMember[] = $rowFCMToken["member_no"];
-						$arrayMemberGRP[] = $arrayMT;
+						if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
+							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMember[] = $rowFCMToken["member_no"];
+							$arrayMemberGRP[] = $arrayMT;
+						}else{
+							$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
+							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMember[] = $rowFCMToken["member_no"];
+							$arrayMemberGRPHW[] = $arrayMT;
+						}
 					}
 				}
 			}
 			$arrayAll["MEMBER_NO"] = $arrayMember;
+			$arrayAll["LIST_SEND_HW"] = $arrayMemberGRPHW;
 			$arrayAll["LIST_SEND"] = $arrayMemberGRP;
 			return $arrayAll;
 		}
@@ -737,7 +756,7 @@ class functions {
 			}
 		}
 		public function MaintenanceMenu($menu_component) {
-			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0',menu_permission = '3' WHERE menu_component = :menu_component");
 			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
 		public function PrefixGenerate($prefix){
@@ -789,5 +808,6 @@ class functions {
 			}
 			return $arrPrefixOut;
 		}
+
 }
 ?>
