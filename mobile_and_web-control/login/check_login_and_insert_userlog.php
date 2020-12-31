@@ -20,6 +20,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_noBranch = $configAS[$member_no] ?? $member_no;
 	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
@@ -50,8 +51,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			}
 		}
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
-		$checkResign->execute([':member_no' => $member_no]);
+		$checkResign = $conoracle->prepare("SELECT resign_status,branch_id FROM mbmembmaster WHERE trim(member_no) = :member_no and member_status = '1'");
+		$checkResign->execute([
+			':member_no' => $member_noBranch
+		]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 		if($rowResign["RESIGN_STATUS"] == '1'){
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
@@ -127,13 +130,23 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['member_no'] = $member_no;
 						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 						$arrPayloadNew['refresh_amount'] = 0;
+						$arrPayloadNew['branch_id'] = $rowResign["BRANCH_ID"];
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
-							$updateFCMToken->execute([
-								':fcm_token' => $dataComing["fcm_token"] ?? null,
-								':member_no' => $member_no
-							]);
+							if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
+								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
+								$updateFCMToken->execute([
+									':fcm_token' => $dataComing["fcm_token"] ?? null,
+									':member_no' => $member_no
+								]);
+							}
+							if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
+								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
+								$updateFCMToken->execute([
+									':hms_token' => $dataComing["hms_token"] ?? null,
+									':member_no' => $member_no
+								]);
+							}
 						}
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([
@@ -258,7 +271,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$getCounter->execute([':member_no' => $member_no]);
 			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
 			if($rowCounter["counter_wrongpass"] >= 5){
-				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 
+														WHERE member_no = :member_no");
 				$updateAccountStatus->execute([':member_no' => $member_no]);
 				$struc = [
 					':member_no' =>  $member_no,
