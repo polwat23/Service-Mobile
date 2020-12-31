@@ -256,19 +256,16 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$email_explode = explode("@", $email);
-		if(in_array(end($email_explode), array("yahoo.com", "yahoo.co.th"))){
-			$mailFunction->Host = 'cloud2.gensoft.co.th';
-		}else {
-			$mailFunction->Host = 'win04-mail.zth.netdesignhost.com';
-		}
+		$mailFunction->Host = 'mail.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
-		$mailFunction->SMTPSecure = 'ssl';
-		$mailFunction->Port = 465;
+		$mailFunction->SMTPSecure = 'tls';
+		$mailFunction->Port = $json_data["PORT_MAILSERVER"] ?? 587;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
+		$mailFunction->Hostname = 'gensoft.co.th';
+		$mailFunction->Helo = 'Gensoft-Mail';
 		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
@@ -409,6 +406,7 @@ class library {
 			$data = [
 				"registration_ids" => $payload["TO"],
 				"priority" => "high",
+				//"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -416,14 +414,17 @@ class library {
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				],
 				"data" => [
+					"TYPE" => $payload["TYPE_NOTIFY"] ?? "1",
+					"READ_STATUS" => "0",
 					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
-					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => $payload["TYPE_NOTIFY"] ?? "1" ],
 				]
 			];
 		}else if($type_send == 'all'){
 			$data = [
 				"to" => $payload["TO"],
 				"priority" => "high",
+				//"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -431,8 +432,10 @@ class library {
 					"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? null
 				],
 				"data" => [
+					"TYPE" => $payload["TYPE_NOTIFY"] ?? "1",
+					"READ_STATUS" => "0",
 					"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
-					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => "2" ],
+					"action_params" => $payload["ACTION_PARAMS"] ?? [ "notificationActive" => $payload["TYPE_NOTIFY"] ?? "1" ],
 				]
 			];
 		}
@@ -469,6 +472,123 @@ class library {
 			return false;
 		}
 	}
+	private $hw_access_token = null;
+    private $hw_token_expiredtime = null;
+    public function sendNotifyHW($payload,$type_send){
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$json_data = json_decode($json,true);
+		if (!defined('HW_APPID')) define('HW_APPID', $json_data["HW_APPID"] ?? "");
+		if (!defined('HW_APPSECRET')) define('HW_APPSECRET', $json_data["HW_APPSECRET"] ?? "");
+
+		//refresh_token
+		if (!isset($this->hw_access_token) || (time() > $this->hw_token_expiredtime)) {
+			$header = array(
+				"Content-Type: application/x-www-form-urlencoded;charset=utf-8"
+			);
+			$data = http_build_query(
+				[
+					"grant_type" => "client_credentials",
+					"client_secret" => HW_APPSECRET,
+					"client_id" => HW_APPID
+				]
+			);
+
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, "https://oauth-login.cloud.huawei.com/oauth2/v2/token");
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+			$res = curl_exec($ch);
+			curl_close($ch);
+				
+			if(isset($res) && $res !== FALSE){
+				$result = json_decode($res);
+				if (!array_key_exists("access_token", $result)) {
+					$this->hw_access_token = null;
+				}else {
+					$this->hw_access_token = $result->access_token;
+					$this->hw_token_expiredtime = time() + $result->expires_in;
+				}
+			}else {
+				$this->hw_access_token = null;
+			}
+		}
+
+		if (!isset($this->hw_access_token)){
+			// access_token is null
+			return false;
+		}
+            
+		if($type_send == 'all'){
+			$data = [
+				"message" => [
+					"android" => [
+						"data" => json_encode(
+							[
+								"title" => $payload["PAYLOAD"]["SUBJECT"],
+								"body" => $payload["PAYLOAD"]["BODY"],
+								"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? "",
+								"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+								"action_params" => json_encode($payload["ACTION_PARAMS"] ?? ["notificationActive" => $payload["TYPE_NOTIFY"] ?? "1"])
+							]
+						)
+					],
+					"topic" => str_replace("/topics/", '', $payload["TO"])
+				]
+			];
+		}else {
+			$data = [
+				"message" => [
+					"android" => [
+						"data" => json_encode(
+							[
+								"title" => $payload["PAYLOAD"]["SUBJECT"],
+								"body" => $payload["PAYLOAD"]["BODY"],
+								"image" => $payload["PAYLOAD"]["PATH_IMAGE"] ?? "",
+								"action_page" => $payload["ACTION_PAGE"] ?? "Notification",
+								"action_params" => json_encode($payload["ACTION_PARAMS"] ?? ["notificationActive" => $payload["TYPE_NOTIFY"] ?? "1"])
+							]
+						)
+					],
+					"token" => $payload["TO"]
+				]
+			];
+		}
+
+		$header = array("Content-Type: application/json", "Authorization: Bearer {$this->hw_access_token}");
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, str_replace('{appid}', HW_APPID, "https://push-api.cloud.huawei.com/v1/{appid}/messages:send"));   
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+		$res = curl_exec($ch);
+		curl_close($ch);
+		if(isset($res) && $res !== FALSE){
+			$resultNoti = json_decode($res);
+			if(isset($resultNoti)){
+				if($resultNoti->code == "80000000"){
+					return true;
+				}else{
+					return false;
+				}    
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+	}
+
 	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
 		return $jwt_function->getPayload($token, $secret_key);
 	}
