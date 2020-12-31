@@ -756,7 +756,7 @@ class functions {
 			}
 		}
 		public function MaintenanceMenu($menu_component) {
-			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0',menu_permission = '3' WHERE menu_component = :menu_component");
 			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
 		public function PrefixGenerate($prefix){
@@ -808,5 +808,6 @@ class functions {
 			}
 			return $arrPrefixOut;
 		}
+
 }
 ?>

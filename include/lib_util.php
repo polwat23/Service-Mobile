@@ -603,20 +603,6 @@ class library {
 		}
 		return true;
 	}
-		
-	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
-		return $jwt_function->getPayload($token, $secret_key);
-	}
-	public function checkCompleteArgument($dataincome,$dataComing) {
-		foreach($dataincome as $data){
-			if(isset($dataComing[$data]) && ($dataComing[$data] == '0' || !empty($dataComing[$data]))){
-				continue;
-			}else{
-				return false;
-			}
-		}
-		return true;
-	}
 	public function addLogtoTxt($dataLog,$pathfile){
 		$dataLog["TIME"] = date("Y-m-d H:i:s");
 		file_put_contents(__DIR__.'/../log/'.$pathfile.'.txt', json_encode($dataLog) . PHP_EOL, FILE_APPEND);
