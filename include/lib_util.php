@@ -411,7 +411,7 @@ class library {
 			$data = [
 				"registration_ids" => $payload["TO"],
 				"priority" => "high",
-				//"content_available" => true,
+				"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -429,7 +429,7 @@ class library {
 			$data = [
 				"to" => $payload["TO"],
 				"priority" => "high",
-				//"content_available" => true,
+				"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
