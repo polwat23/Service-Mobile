@@ -97,7 +97,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 			$arrPayloadNotify["SEND_BY"] = 'system';
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
-			if($lib->sendNotify($arrPayloadNotify,"person")){
+			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
 				$updateSyncFlag = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
