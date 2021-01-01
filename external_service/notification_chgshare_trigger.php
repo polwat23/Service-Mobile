@@ -31,6 +31,7 @@ while($rowChgShr = $fetchDataChgShr->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 			$arrPayloadNotify["SEND_BY"] = "system";
+			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
 				$updateSyncFlag = $conoracle->prepare("UPDATE shpaymentadjust SET sync_notify_flag = '1' WHERE PAYADJUST_DOCNO = :PAYADJUST_DOCNO");
@@ -55,7 +56,8 @@ while($rowChgShr = $fetchDataChgShr->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 			$arrPayloadNotify["SEND_BY"] = "system";
-			if($lib->sendNotify($arrPayloadNotify,"person")){
+			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
 				$updateSyncFlag = $conoracle->prepare("UPDATE shpaymentadjust SET sync_notify_flag = '1' WHERE PAYADJUST_DOCNO = :PAYADJUST_DOCNO");
 				$updateSyncFlag->execute([

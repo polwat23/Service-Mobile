@@ -156,6 +156,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 											$arrMessage["BODY"] = $arrMessageMerge["BODY"];
 											$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 											$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+											$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 											if($lib->sendNotify($arrPayloadNotify,'person')){
 												if($rowQuery["is_stampflag"] == '1'){
 													$arrayExecute = array();
@@ -199,6 +200,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 												$arrMessage["BODY"] = $arrMessageMerge["BODY"];
 												$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 												$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+												$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 												if($lib->sendNotifyHW($arrPayloadNotify,'person')){
 													if($rowQuery["is_stampflag"] == '1'){
 														$arrayExecute = array();
@@ -312,6 +314,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 													$arrMessage["BODY"] = $arrMessageMerge["BODY"];
 													$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 													$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+													$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 													if($lib->sendNotify($arrPayloadNotify,'person')){
 														if($rowQuery["is_stampflag"] == '1'){
 															$arrayExecute = array();
@@ -355,6 +358,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 														$arrMessage["BODY"] = $arrMessageMerge["BODY"];
 														$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 														$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+														$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 														if($lib->sendNotifyHW($arrPayloadNotify,'person')){
 															if($rowQuery["is_stampflag"] == '1'){
 																$arrayExecute = array();
@@ -453,6 +457,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 											$arrMessage["BODY"] = $arrMessageMerge["BODY"];
 											$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 											$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+											$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 											if($lib->sendNotify($arrPayloadNotify,'person')){
 												if($rowQuery["is_stampflag"] == '1'){
 													$arrayExecute = array();
@@ -496,6 +501,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 												$arrMessage["BODY"] = $arrMessageMerge["BODY"];
 												$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
 												$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+												$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 												if($lib->sendNotifyHW($arrPayloadNotify,'person')){
 													if($rowQuery["is_stampflag"] == '1'){
 														$arrayExecute = array();
