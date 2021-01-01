@@ -20,6 +20,7 @@
 	"DEFAULT_BANNER_COLOR_TEXT" : "#000000",
 	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x",
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
+	"LINE_NOTIFY_USER" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
@@ -27,5 +28,8 @@
 	"SMS_SOURCE" : "66949179493",
 	"SMS_USERNAME" : "api1611733",
 	"SMS_PASSWORD" : "ei15oias&C",
-	"SMS_PROVIDER" : "DTAC"
+	"SMS_PROVIDER" : "DTAC",
+	"HW_APPID" : "103443119",
+    "HW_APPSECRET": "51ac131e7ee36a5e8befcee70d91a36ec5c6a6cfed7995fb56caef176aaac5e2",
+	"PORT_MAILSERVER" : "587"
 }

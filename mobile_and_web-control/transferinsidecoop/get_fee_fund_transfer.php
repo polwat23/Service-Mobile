@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$queryCheckPeriod = null;
 			if($rowContDeptType["PER_PERIOD_INCOUNT"] > 0){
 				if($rowContDeptType["PERIOD_UNIT_CHECK"] == '1'){
-					$monthCheck = date('Ym',strtotime('-'.$rowContDeptType["PER_PERIOD_INCOUNT"].' months'));
+					$monthCheck = date('Ym',strtotime('-'.($rowContDeptType["PER_PERIOD_INCOUNT"] -1).' months'));
 					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYYMM')";
 				}else if($rowContDeptType["PERIOD_UNIT_CHECK"] == '2'){
 					$thisMonth = date('m',strtotime($dateTrans));
@@ -63,8 +63,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 						$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '10' and to_char(TRUNC(sysdate),'YYYY') || '12'";
 					}
 				}else if($rowContDeptType["PERIOD_UNIT_CHECK"] == '3'){
-					$monthCheck = date('Ym',strtotime('-'.($rowContDeptType["PER_PERIOD_INCOUNT"] * 12).' months'));
-					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYYMM')";
+					$monthCheck = date('Y',strtotime('-'.($rowContDeptType["PER_PERIOD_INCOUNT"]-1).' years'));
+					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYY') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYY')";
 				}else if($rowContDeptType["PERIOD_UNIT_CHECK"] == '4'){
 					$queryCheckPeriod = "";
 				}else{
@@ -81,7 +81,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$rowItemCount = $checkItemIsCount->fetch(PDO::FETCH_ASSOC);
 				if($rowItemCount["IS_NOTCOUNT"] > 0){
 					$getCountTrans = $conoracle->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-														WHERE dps.deptaccount_no = :deptaccount_no and dps.deptitemtype_code <> :itemtype_code ".$queryCheckPeriod);
+														WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' 
+														and dps.deptitemtype_code <> :itemtype_code and dps.item_status = '1' ".$queryCheckPeriod);
 					$getCountTrans->execute([
 						':deptaccount_no' => $deptaccount_no,
 						':itemtype_code' => $itemtypeWithdraw
@@ -90,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$count_trans = $rowCountTrans["C_TRANS"];
 				}else{
 					$getCountTrans = $conoracle->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-														WHERE dps.deptaccount_no = :deptaccount_no ".$queryCheckPeriod);
+														WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and dps.item_status = '1' ".$queryCheckPeriod);
 					$getCountTrans->execute([
 						':deptaccount_no' => $deptaccount_no
 					]);

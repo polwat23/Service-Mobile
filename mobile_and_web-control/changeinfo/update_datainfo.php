@@ -11,89 +11,113 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrConstInfo[$rowConst["const_code"]] = $rowConst["save_tablecore"];
 		}
 		if(isset($dataComing["email"]) && $dataComing["email"] != ""){
-			if($arrConstInfo["email"] == '1'){
-				$arrayResult['RESULT_EMAIL'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$getOldEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
-				$getOldEmail->execute([':member_no' => $payload["member_no"]]);
-				$rowEmail = $getOldEmail->fetch(PDO::FETCH_ASSOC);
-				$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
-				if($updateEmail->execute([
-					':email' => $dataComing["email"],
-					':member_no' => $payload["member_no"]
-				])){
-					$logStruc = [
-						":member_no" => $payload["member_no"],
-						":old_data" => $rowEmail["email"] ?? "-",
-						":new_data" => $dataComing["email"] ?? "-",
-						":data_type" => "email",
-						":id_userlogin" => $payload["id_userlogin"]
-					];
-					$log->writeLog('editinfo',$logStruc);
-					$arrayResult['RESULT_EMAIL'] = TRUE;
+			$conmysql->beginTransaction();
+			$getOldEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
+			$getOldEmail->execute([':member_no' => $payload["member_no"]]);
+			$rowEmail = $getOldEmail->fetch(PDO::FETCH_ASSOC);
+			$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
+			if($updateEmail->execute([
+				':email' => $dataComing["email"],
+				':member_no' => $payload["member_no"]
+			])){
+				$logStruc = [
+					":member_no" => $payload["member_no"],
+					":old_data" => $rowEmail["email"] ?? "-",
+					":new_data" => $dataComing["email"] ?? "-",
+					":data_type" => "email",
+					":id_userlogin" => $payload["id_userlogin"]
+				];
+				$log->writeLog('editinfo',$logStruc);
+				if($arrConstInfo["email"] == '1'){
+					$updateEmailOracle = $conoracle->prepare("UPDATE mbmembmaster SET addr_email = :email WHERE member_no = :member_no");
+					if($updateEmailOracle->execute([
+						':email' => $dataComing["email"],
+						':member_no' => $member_no
+					])){
+						$conmysql->commit();
+						$arrayResult['RESULT_EMAIL'] = TRUE;
+					}else{
+						$conmysql->rollback();
+						$arrayResult['RESULT_EMAIL'] = FALSE;
+					}
 				}else{
-					$filename = basename(__FILE__, '.php');
-					$logStruc = [
-						":error_menu" => $filename,
-						":error_code" => "WS1010",
-						":error_desc" => "แก้ไขอีเมลไม่ได้เพราะ update ลงตาราง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateEmail->queryString."\n"."Param => ". json_encode([
-							':email' => $dataComing["email"],
-							':member_no' => $payload["member_no"]
-						]),
-						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-					];
-					$log->writeLog('errorusage',$logStruc);
-					$message_error = "แก้ไขอีเมลไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateEmail->queryString."\n"."Param => ". json_encode([
+					$conmysql->commit();
+					$arrayResult['RESULT_EMAIL'] = TRUE;
+				}
+			}else{
+				$conmysql->rollback();
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1010",
+					":error_desc" => "แก้ไขอีเมลไม่ได้เพราะ update ลงตาราง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateEmail->queryString."\n"."Param => ". json_encode([
 						':email' => $dataComing["email"],
 						':member_no' => $payload["member_no"]
-					]);
-					$lib->sendLineNotify($message_error);
-					$arrayResult['RESULT_EMAIL'] = FALSE;
-				}
+					]),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "แก้ไขอีเมลไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateEmail->queryString."\n"."Param => ". json_encode([
+					':email' => $dataComing["email"],
+					':member_no' => $payload["member_no"]
+				]);
+				$lib->sendLineNotify($message_error);
+				$arrayResult['RESULT_EMAIL'] = FALSE;
 			}
 		}
 		if(isset($dataComing["tel"]) && $dataComing["tel"] != ""){
-			if($arrConstInfo["tel"] == '1'){
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$getOldTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
-				$getOldTel->execute([':member_no' => $payload["member_no"]]);
-				$rowTel = $getOldTel->fetch(PDO::FETCH_ASSOC);
-				$updateTel = $conmysql->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE member_no = :member_no");
-				if($updateTel->execute([
-					':phone_number' => $dataComing["tel"],
-					':member_no' => $payload["member_no"]
-				])){
-					$logStruc = [
-						":member_no" => $payload["member_no"],
-						":old_data" => $rowTel["phone_number"] ?? "-",
-						":new_data" => $dataComing["tel"] ?? "-",
-						":data_type" => "tel",
-						":id_userlogin" => $payload["id_userlogin"]
-					];
-					$log->writeLog('editinfo',$logStruc);
-					$arrayResult["RESULT_TEL"] = TRUE;
+			$conmysql->beginTransaction();
+			$getOldTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+			$getOldTel->execute([':member_no' => $payload["member_no"]]);
+			$rowTel = $getOldTel->fetch(PDO::FETCH_ASSOC);
+			$updateTel = $conmysql->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE member_no = :member_no");
+			if($updateTel->execute([
+				':phone_number' => $dataComing["tel"],
+				':member_no' => $payload["member_no"]
+			])){
+				$logStruc = [
+					":member_no" => $payload["member_no"],
+					":old_data" => $rowTel["phone_number"] ?? "-",
+					":new_data" => $dataComing["tel"] ?? "-",
+					":data_type" => "tel",
+					":id_userlogin" => $payload["id_userlogin"]
+				];
+				$log->writeLog('editinfo',$logStruc);
+				if($arrConstInfo["tel"] == '1'){
+					$updateTelOracle = $conoracle->prepare("UPDATE mbmembmaster SET addr_mobilephone = :phone_number WHERE member_no = :member_no");
+					if($updateTelOracle->execute([
+						':phone_number' => $dataComing["tel"],
+						':member_no' => $member_no
+					])){
+						$conmysql->commit();
+						$arrayResult['RESULT_TEL'] = TRUE;
+					}else{
+						$conmysql->rollback();
+						$arrayResult['RESULT_TEL'] = FALSE;
+					}
 				}else{
-					$filename = basename(__FILE__, '.php');
-					$logStruc = [
-						":error_menu" => $filename,
-						":error_code" => "WS1003",
-						":error_desc" => "แก้ไขเบอร์โทรไม่ได้เพราะ update ลงตาราง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
-							':phone_number' => $dataComing["tel"],
-							':member_no' => $payload["member_no"]
-						]),
-						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-					];
-					$log->writeLog('errorusage',$logStruc);
-					$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
+					$conmysql->commit();
+					$arrayResult["RESULT_TEL"] = TRUE;
+				}
+			}else{
+				$conmysql->rollback();
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1003",
+					":error_desc" => "แก้ไขเบอร์โทรไม่ได้เพราะ update ลงตาราง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
 						':phone_number' => $dataComing["tel"],
 						':member_no' => $payload["member_no"]
-					]);
-					$lib->sendLineNotify($message_error);
-					$arrayResult["RESULT_TEL"] = FALSE;
-				}
+					]),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
+					':phone_number' => $dataComing["tel"],
+					':member_no' => $payload["member_no"]
+				]);
+				$lib->sendLineNotify($message_error);
+				$arrayResult["RESULT_TEL"] = FALSE;
 			}
 		}
 		if(isset($dataComing["address"]) && $dataComing["address"] != ""){
@@ -134,6 +158,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':old_address' => json_encode($arrOldAddress),
 					':address' => json_encode($dataComing["address"])
 				])){
+					$message_error = "มีการแก้ไขข้อมูลที่อยู่ / เลขสมาชิก : ".$payload["member_no"]." สามารถตรวจสอบข้อมูลได้ที่ Mobile admin";
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_USER"]);
 					$arrayResult["RESULT_ADDRESS"] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
