@@ -2,13 +2,14 @@
 ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
+if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
+	$lang_locale = 'en';
 	$transaction_no = $dataComing["tran_id"];
 	$etn_ref = $dataComing["bank_ref"];
 	$cmd_operate = substr($dataComing["coop_account_no"],0,2);
 	$coop_account_no = preg_replace('/-/','',substr($dataComing["coop_account_no"],2));
 	$time = time();
-	$fee_amt = $fee_amt;
+	$fee_amt = 0;
 	$dateOperC = date('c');
 	$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 	$ref_no = time().$lib->randomText('all',3);
@@ -21,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 		$arrayGroup = array();
 		$arrayGroup["account_id"] = null;
 		$arrayGroup["action_status"] = "1";
-		$arrayGroup["atm_no"] = "mobile";
+		$arrayGroup["atm_no"] = "MOBILE";
 		$arrayGroup["atm_seqno"] = null;
 		$arrayGroup["aviable_amt"] = null;
 		$arrayGroup["bank_accid"] = null;
@@ -132,29 +133,38 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 					$getNameMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname
 														FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 														WHERE mb.member_no = :member_no");
-					$getNameMember->execute([':member_no' => $member_no]);
+					$getNameMember->execute([':member_no' => $dataComing["member_no"]]);
 					$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
 					$arrayResult['RECEIVE_NAME'] = $rowName["PRENAME_SHORT"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 					$arrayResult['COOP_ACCOUNT_NO'] = $coop_account_no;
 					$arrayResult['RESULT'] = TRUE;
-					require_once('../../include/exit_footer.php');
+					ob_flush();
+					echo json_encode($arrayResult);
+					exit();
 					
 				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS0041";
 					$arrayStruc = [
 						':member_no' => $dataComing["member_no"],
-						':id_userlogin' => null,
+						':id_userlogin' => '5',
 						':operate_date' => $dateOper,
-						':sigma_key' => $dataComing["sigma_key"],
+						':sigma_key' => 'billpayment',
 						':amt_transfer' => $amt_transfer,
 						':response_code' => $responseSoap->msg_status,
 						':response_message' => $responseSoap->msg_output
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
-					$message_error = "ไม่สามารถฝากเงินได้ สาเหตุเพราะ ".$responseSoap->msg_output;
-					$lib->sendLineNotify($message_error);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
+					if(strpos($responseSoap->msg_output,'จำนวนเงินฝากขั้นต่ำ') === FALSE){
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = preg_replace('/[\/"]/', '', $responseSoap->msg_output);
+						$arrayResult['RESULT'] = FALSE;
+					}
+					$arrayResult['RESPONSE_MESSAGE_SOURCE'] = preg_replace('/[\/"]/', '', $responseSoap->msg_output);
+					ob_flush();
+					echo json_encode($arrayResult);
+					exit();
 					
 				}
 			}catch(SoapFault $e){
@@ -163,7 +173,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 					':member_no' => $dataComing["member_no"],
 					':id_userlogin' => null,
 					':operate_date' => $dateOper,
-					':sigma_key' => $dataComing["sigma_key"],
+					':sigma_key' => 'billpayment',
 					':amt_transfer' => $amt_transfer,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $e->getMessage()
@@ -172,8 +182,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 				$message_error = "ไม่สามารถฝากเงินได้ สาเหตุเพราะ ".$e->getMessage();
 				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = preg_replace('/[\/"]/', '', $e->getMessage());
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
+				ob_flush();
+				echo json_encode($arrayResult);
+				exit();
 				
 			}
 		}catch(Throwable $e) {
@@ -182,7 +195,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 				':member_no' => $dataComing["member_no"],
 				':id_userlogin' => null,
 				':operate_date' => $dateOper,
-				':sigma_key' => $dataComing["sigma_key"],
+				':sigma_key' => 'billpayment',
 				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $e->getMessage()
@@ -191,10 +204,21 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 			$message_error = "ไม่สามารถฝากเงินได้ สาเหตุเพราะ ".$e->getMessage();
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESPONSE_MESSAGE_SOURCE'] = preg_replace('/[\/"]/', '', $e->getMessage());
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
+			ob_flush();
+			echo json_encode($arrayResult);
+			exit();
 			
 		}
+	}else{
+		$arrayResult['RESPONSE_CODE'] = "WS0096";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
+		$arrayResult['RESULT'] = FALSE;
+		ob_flush();
+		echo json_encode($arrayResult);
+		exit();
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -209,9 +233,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer'],$dataComing)){
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+	$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	ob_flush();
+	echo json_encode($arrayResult);
+	exit();
 }
 ?>

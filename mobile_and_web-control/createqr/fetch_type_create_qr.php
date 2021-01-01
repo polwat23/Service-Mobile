@@ -15,17 +15,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrTypeQR["OPERATE_DESC"] = $rowTypeQR["operation_desc_".$lang_locale];
 			$arrayGrpTrans[] = $arrTypeQR;
 			if($rowTypeQR["trans_code_qr"] == '01'){
-				$getAccountinTrans = $conoracle->prepare("SELECT DEPTACCOUNT_NO,DEPTACCOUNT_NAME,PRNCBAL FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status <> 1");
+				$formatDept = $func->getConstant('dep_format');
+				$hiddenFormat = $func->getConstant('hidden_dep');
+				$checkCanReceive = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept WHERE allow_deposit_outside = '1'");
+				$checkCanReceive->execute();
+				$arrDepttypeAllow = array();
+				while($rowCanReceive = $checkCanReceive->fetch(PDO::FETCH_ASSOC)){
+					$arrDepttypeAllow[] = $rowCanReceive["dept_type_code"];
+				}
+				$getAccountinTrans = $conoracle->prepare("SELECT DEPTACCOUNT_NO,DEPTACCOUNT_NAME,PRNCBAL FROM dpdeptmaster 
+															WHERE member_no = :member_no and deptclose_status <> 1 and depttype_code IN('".implode(',',$arrDepttypeAllow)."')");
 				$getAccountinTrans->execute([':member_no' => $member_no]);
 				while($rowAccTrans = $getAccountinTrans->fetch(PDO::FETCH_ASSOC)){
 					$arrAccTrans = array();
-					$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($rowAccTrans["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-					$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$func->getConstant('hidden_dep'));
+					$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($rowAccTrans["DEPTACCOUNT_NO"],$formatDept);
+					$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$hiddenFormat);
 					$arrAccTrans["ACCOUNT_NAME"] = TRIM($rowAccTrans["DEPTACCOUNT_NAME"]);
 					$arrAccTrans["PRIN_BAL"] = $rowAccTrans["PRNCBAL"];
 					$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 					$arrGrpAcc[] = $arrAccTrans;
 				}
+			}else if($rowTypeQR["trans_code_qr"] == '02'){
+				
 			}
 		}
 		$arrayResult["TYPE_TRANS"] = $arrayGrpTrans;
