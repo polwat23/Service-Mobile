@@ -3,6 +3,7 @@ ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
+	$lang_locale = 'en';
 	$transaction_no = $dataComing["tran_id"];
 	$etn_ref = $dataComing["bank_ref"];
 	$cmd_operate = substr($dataComing["coop_account_no"],0,2);

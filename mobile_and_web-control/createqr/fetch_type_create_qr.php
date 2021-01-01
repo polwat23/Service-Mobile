@@ -35,6 +35,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 					$arrGrpAcc[] = $arrAccTrans;
 				}
+			}else if($rowTypeQR["trans_code_qr"] == '02'){
+				
 			}
 		}
 		$arrayResult["TYPE_TRANS"] = $arrayGrpTrans;

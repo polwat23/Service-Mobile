@@ -3,6 +3,7 @@ ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
+	$lang_locale = 'en';
 	$transaction_no = $dataComing["tran_id"];
 	$etn_ref = $dataComing["bank_ref"];
 	$cmd_operate = substr($dataComing["coop_account_no"],0,2);
@@ -43,6 +44,7 @@ if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
 			if($amt_transfer < $rowAccData["MINDEPT_AMT"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0056";
 				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 				$arrayResult['RESULT'] = FALSE;
 				ob_flush();
 				echo json_encode($arrayResult);
@@ -62,6 +64,7 @@ if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0026";
 			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 			$arrayResult['RESULT'] = FALSE;
 			ob_flush();
 			echo json_encode($arrayResult);
@@ -70,6 +73,7 @@ if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0025";
 		$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+		$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 		$arrayResult['RESULT'] = FALSE;
 		ob_flush();
 		echo json_encode($arrayResult);
