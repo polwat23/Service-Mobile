@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						if(!in_array($rowTarget[$rowQuery["target_field"]]."_".$arrMessageMerge["BODY"],$dataComing["destination_revoke"])){
 							$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["target_field"]]);
 							if(isset($arrToken["LIST_SEND"][0]["TOKEN"]) && $arrToken["LIST_SEND"][0]["TOKEN"] != ""){
-								if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+								if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_TRANSACTION"] == "1"){
 									$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND"][0]["TOKEN"]);
 									$arrPayloadNotify["MEMBER_NO"] = $arrToken["LIST_SEND"][0]["MEMBER_NO"];
 									$arrMessage["SUBJECT"] = $arrMessageMerge["SUBJECT"];
@@ -58,6 +58,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 									$arrPayloadNotify["SEND_BY"] = $payload["username"];
 									$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+									$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 									if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
 										if($rowQuery["is_stampflag"] == '1'){
 											$arrayExecute = array();
@@ -72,7 +73,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										if(sizeof($blukInsert) == 1000){
 											$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 											$arrPayloadHistory["bulkInsert"] = $blukInsert;
-											$func->insertHistory($arrPayloadHistory);
+											$func->insertHistory($arrPayloadHistory,'2');
 											unset($blukInsert);
 											$blukInsert = array();
 										}
@@ -94,7 +95,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								}
 							}else{
 								if(isset($arrToken["LIST_SEND_HW"][0]["TOKEN"]) && $arrToken["LIST_SEND_HW"][0]["TOKEN"] != ""){
-									if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+									if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_TRANSACTION"] == "1"){
 										$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND_HW"][0]["TOKEN"]);
 										$arrPayloadNotify["MEMBER_NO"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
 										$arrMessage["SUBJECT"] = $arrMessageMerge["SUBJECT"];
@@ -103,7 +104,8 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 										$arrPayloadNotify["SEND_BY"] = $payload["username"];
 										$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
-										if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+										$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+										if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
 											if($rowQuery["is_stampflag"] == '1'){
 												$arrayExecute = array();
 												preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
@@ -117,7 +119,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											if(sizeof($blukInsert) == 1000){
 												$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 												$arrPayloadHistory["bulkInsert"] = $blukInsert;
-												$func->insertHistory($arrPayloadHistory);
+												$func->insertHistory($arrPayloadHistory,'2');
 												unset($blukInsert);
 												$blukInsert = array();
 											}
@@ -156,7 +158,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(sizeof($blukInsert) > 0){
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
-						$func->insertHistory($arrPayloadHistory);
+						$func->insertHistory($arrPayloadHistory,'2');
 						unset($blukInsert);
 						$blukInsert = array();
 					}
@@ -211,7 +213,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								}
 								if(sizeof($arrToken["MEMBER_NO"]) > 0){
 									if(isset($arrToken["LIST_SEND"][0]["TOKEN"]) && $arrToken["LIST_SEND"][0]["TOKEN"] != ""){
-										if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+										if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_TRANSACTION"] == "1"){
 											$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND"][0]["TOKEN"]);
 											$arrPayloadNotify["MEMBER_NO"] = $arrToken["LIST_SEND"][0]["MEMBER_NO"];
 											$arrMessage["SUBJECT"] = $arrMessageMerge["SUBJECT"];
@@ -220,6 +222,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 											$arrPayloadNotify["SEND_BY"] = $payload["username"];
 											$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+											$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 											if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
 												if($rowQuery["is_stampflag"] == '1'){
 													$arrayExecute = array();
@@ -234,7 +237,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												if(sizeof($blukInsert) == 1000){
 													$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 													$arrPayloadHistory["bulkInsert"] = $blukInsert;
-													$func->insertHistory($arrPayloadHistory);
+													$func->insertHistory($arrPayloadHistory,'2');
 													unset($blukInsert);
 													$blukInsert = array();
 												}
@@ -256,7 +259,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										}
 									}else{
 										if(isset($arrToken["LIST_SEND_HW"][0]["TOKEN"]) && $arrToken["LIST_SEND_HW"][0]["TOKEN"] != ""){
-											if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+											if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_TRANSACTION"] == "1"){
 												$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND_HW"][0]["TOKEN"]);
 												$arrPayloadNotify["MEMBER_NO"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
 												$arrMessage["SUBJECT"] = $arrMessageMerge["SUBJECT"];
@@ -265,7 +268,8 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 												$arrPayloadNotify["SEND_BY"] = $payload["username"];
 												$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
-												if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+												$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+												if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
 													if($rowQuery["is_stampflag"] == '1'){
 														$arrayExecute = array();
 														preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
@@ -279,7 +283,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 													if(sizeof($blukInsert) == 1000){
 														$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 														$arrPayloadHistory["bulkInsert"] = $blukInsert;
-														$func->insertHistory($arrPayloadHistory);
+														$func->insertHistory($arrPayloadHistory,'2');
 														unset($blukInsert);
 														$blukInsert = array();
 													}
@@ -327,7 +331,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(sizeof($blukInsert) > 0){
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
-						$func->insertHistory($arrPayloadHistory);
+						$func->insertHistory($arrPayloadHistory,'2');
 						unset($blukInsert);
 						$blukInsert = array();
 					}
