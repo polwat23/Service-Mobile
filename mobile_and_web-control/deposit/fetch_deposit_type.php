@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
-			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept));
+			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept);
 			$arrayHeaderAcc = array();
 			if($dataComing["channel"] == 'web'){
 				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){

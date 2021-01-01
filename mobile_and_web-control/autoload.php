@@ -36,7 +36,6 @@ if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACC
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
-require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
@@ -68,14 +67,14 @@ $configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
-	//$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
-	//$lib->sendLineNotify($message_error);
+	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
+	$lib->sendLineNotify($message_error);
 	http_response_code(500);
 	
 }
-if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
-	//$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
-	//$lib->sendLineNotify($message_error);
+if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"] == '1'){
+	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
+	$lib->sendLineNotify($message_error);
 	$func->MaintenanceMenu("System");
 	http_response_code(500);
 	
