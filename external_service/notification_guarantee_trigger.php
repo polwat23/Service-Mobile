@@ -40,7 +40,8 @@ while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 			$arrPayloadNotify["SEND_BY"] = "system";
-			if($lib->sendNotify($arrPayloadNotify,"person")){
+			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
 				$updateSyncFlag = $conoracle->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
 				$updateSyncFlag->execute([
@@ -69,7 +70,8 @@ while($rowGuarantee = $fetchDataGuarantee->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 			$arrPayloadNotify["SEND_BY"] = "system";
-			if($lib->sendNotify($arrPayloadNotify,"person")){
+			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
 				$updateSyncFlag = $conoracle->prepare("UPDATE lncontcoll SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no and ref_collno = :ref_collno");
 				$updateSyncFlag->execute([
