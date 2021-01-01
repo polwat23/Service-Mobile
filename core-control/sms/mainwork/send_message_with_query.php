@@ -58,6 +58,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 									$arrPayloadNotify["SEND_BY"] = $payload["username"];
 									$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+									$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 									if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
 										if($rowQuery["is_stampflag"] == '1'){
 											$arrayExecute = array();
@@ -103,6 +104,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 										$arrPayloadNotify["SEND_BY"] = $payload["username"];
 										$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+										$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 										if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
 											if($rowQuery["is_stampflag"] == '1'){
 												$arrayExecute = array();
@@ -220,6 +222,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 											$arrPayloadNotify["SEND_BY"] = $payload["username"];
 											$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+											$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 											if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
 												if($rowQuery["is_stampflag"] == '1'){
 													$arrayExecute = array();
@@ -265,6 +268,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 												$arrPayloadNotify["SEND_BY"] = $payload["username"];
 												$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+												$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 												if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
 													if($rowQuery["is_stampflag"] == '1'){
 														$arrayExecute = array();
