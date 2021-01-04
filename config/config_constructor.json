@@ -27,6 +27,9 @@
 	"UN_SMSAPI" : "pct-coopthai",
 	"PW_SMSAPI" : "Coop@343",
 	"SenderName" : "PKKTSC",
+	"HW_APPID" : "103007865",
+    "HW_APPSECRET": "1e393ae923d4fe3a3804397291a570a34202b0d5a6e4efb4f73492faa2ac8c15",
+	"PORT_MAILSERVER" : "587",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
 			"LIMIT_NAME" : "limit_amount_transaction_incoop",
