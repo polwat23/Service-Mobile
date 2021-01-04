@@ -24,5 +24,6 @@
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
 	"HW_APPID" : "",
-    "HW_APPSECRET": ""
+    "HW_APPSECRET": "",
+	"PORT_MAILSERVER" : "587"
 }
