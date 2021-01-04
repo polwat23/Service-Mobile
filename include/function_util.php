@@ -785,9 +785,9 @@ class functions {
 					if($rowPrefix["connection_db"] == 'mysql'){
 						$getRunning = $this->con->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'oracle'){
-						$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
+						//$getRunning = $this->conora->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'mssql'){
-						//$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
+						$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
 					}
 					$getRunning->execute();
 					$rowRunning = $getRunning->fetch(\PDO::FETCH_ASSOC);
@@ -796,9 +796,9 @@ class functions {
 					if($rowPrefix["connection_db"] == 'mysql'){
 						$getData = $this->con->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'oracle'){
-						$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
+						//$getData = $this->conora->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'mssql'){
-						//$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
+						$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
 					}
 					$getData->execute();
 					$rowData = $getData->fetch(\PDO::FETCH_ASSOC);
