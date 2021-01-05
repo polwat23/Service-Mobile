@@ -22,5 +22,8 @@
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
-	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member"
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
+	"HW_APPID" : "103413875",
+    "HW_APPSECRET": "f2c7a20bc06897630048c81400d2d0e197987c7801b11e883a6f5fce546ad616",
+	"PORT_MAILSERVER" : "587"
 }
