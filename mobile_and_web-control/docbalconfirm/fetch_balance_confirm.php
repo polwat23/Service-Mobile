@@ -47,12 +47,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrBalDetail = array();
 			$arrBalDetail["TYPE_DESC"] = $rowBalDetail["DEPTTYPE_DESC"];
 			if($rowBalDetail["CONFIRMTYPE_CODE"] == "DEP"){
-				$arrBalDetail["DEPTACCOUNT_NO"] = $lib->formataccount($rowBalDetail["DEPTACCOUNT_NO"],$formatDept);
+				if(array_search($rowBalDetail["DEPTTYPE_DESC"],array_column($arrDetail,'TYPE_DESC')) === False){
+					$arrBalDetail["BALANCE_AMT"] = $rowBalDetail["BALANCE_AMT"];
+					$arrDetail[] = $arrBalDetail;
+				}else{
+					$arrDetail[array_search($rowBalDetail["DEPTTYPE_DESC"],array_column($arrDetail,'TYPE_DESC'))]["BALANCE_AMT"] += $rowBalDetail["BALANCE_AMT"];
+				}
 			}else{
+				$arrBalDetail["BALANCE_AMT"] = $rowBalDetail["BALANCE_AMT"];
 				$arrBalDetail["DEPTACCOUNT_NO"] = $rowBalDetail["DEPTACCOUNT_NO"];
+				$arrDetail[] = $arrBalDetail;
 			}
-			$arrBalDetail["BALANCE_AMT"] = number_format($rowBalDetail["BALANCE_AMT"],2);
-			$arrDetail[] = $arrBalDetail;
+		}
+		foreach($arrDetail as $key => $value){
+			$arrDetail[$key]["BALANCE_AMT"] = number_format($value["BALANCE_AMT"],2);
 		}
 		if(isset($rowBalMaster["MEMB_NAME"]) && sizeof($arrDetail) > 0){
 			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);

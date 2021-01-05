@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 		if($updateFlagComfirm->execute([
 			':confirm_flag' => $dataComing["confirm_flag"],
 			':member_no' => $member_no,
-			':remark' => isset($dataComing["remark"]) && $dataComing["remark"] != "" ? $dataComing["remark"] : null,
+			':remark' => 'MobileApp / '.$dataComing["remark"],
 			':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"]))
 		])){
 			$arrayResult['RESULT'] = TRUE;
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 				":error_desc" => "Update ลงตาราง  cmconfirmmaster ไม่ได้ "."\n".$updateFlagComfirm->queryString."\n"."data => ".json_encode([
 					':confirm_flag' => $dataComing["confirm_flag"],
 					':member_no' => $member_no,
-					':remark' => isset($dataComing["remark"]) && $dataComing["remark"] != "" ? $dataComing["remark"] : null,
+					':remark' => 'MobileApp / '.$dataComing["remark"],
 					':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"]))
 				]),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 			$message_error = "ไฟล์ ".$filename." Update ลงตาราง  cmconfirmmaster ไม่ได้"."\n".$updateFlagComfirm->queryString."\n"."data => ".json_encode([
 				':confirm_flag' => $dataComing["confirm_flag"],
 				':member_no' => $member_no,
-				':remark' => isset($dataComing["remark"]) && $dataComing["remark"] != "" ? $dataComing["remark"] : null,
+				':remark' => 'MobileApp / '.$dataComing["remark"],
 				':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"]))
 			]);
 			$lib->sendLineNotify($message_error);
