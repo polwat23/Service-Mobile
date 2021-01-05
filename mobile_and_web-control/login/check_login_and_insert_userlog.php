@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
+	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
@@ -67,7 +67,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			require_once('../../include/exit_footer.php');
 			
 		}else if($rowPassword['account_status'] == '-9'){
-			$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
+			if($rowPassword["temppass_is_md5"] == '1'){
+				$valid_pass = password_verify(md5($dataComing["password"]), $rowPassword['temppass']);
+			}else{
+				$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
+			}
 		}else{
 			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
 		}
@@ -78,7 +82,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
 				$getMemberLogged->execute([
 					':member_no' => $member_no,
-					':channel' => $dataComing["channel"]
+					':channel' => $arrPayload["PAYLOAD"]["channel"]
 				]);
 				if($getMemberLogged->rowCount() > 0){
 					$arrayIdToken = array();
@@ -124,12 +128,21 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
-						if($dataComing["channel"] == 'mobile_app'){
-							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token,counter_wrongpass = 0  WHERE member_no = :member_no");
-							$updateFCMToken->execute([
-								':fcm_token' => $dataComing["fcm_token"] ?? null,
-								':member_no' => $member_no
-							]);
+						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
+							if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
+								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
+								$updateFCMToken->execute([
+									':fcm_token' => $dataComing["fcm_token"] ?? null,
+									':member_no' => $member_no
+								]);
+							}
+							if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
+								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
+								$updateFCMToken->execute([
+									':hms_token' => $dataComing["hms_token"] ?? null,
+									':member_no' => $member_no
+								]);
+							}
 						}
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([
@@ -153,6 +166,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 									$arrayResult['TEMP_PASSWORD'] = FALSE;
 								}
 							}
+							$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
+							$updateWrongPassCount->execute([
+								':member_no' => $member_no
+							]);
 							$arrayResult['RESULT'] = TRUE;
 							require_once('../../include/exit_footer.php');
 						}else{
@@ -162,10 +179,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								":error_menu" => $filename,
 								":error_code" => "WS1001",
 								":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
-								":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+								":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 							];
 							$log->writeLog('errorusage',$logStruc);
-							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken."\n"."Data => ".json_encode([
+							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken->queryString."\n"."Data => ".json_encode([
 								':access_token' => $access_token,
 								':id_token' => $id_token
 							]);
@@ -183,10 +200,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							":error_menu" => $filename,
 							":error_code" => "WS1001",
 							":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
-							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+							":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 						];
 						$log->writeLog('errorusage',$logStruc);
-						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin."\n"."Data => ".json_encode([
+						$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gcuserlogin"."\n"."Query => ".$insertLogin->queryString."\n"."Data => ".json_encode([
 							':member_no' => $member_no,
 							':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 							':channel' => $arrPayload["PAYLOAD"]["channel"],
@@ -208,10 +225,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						":error_menu" => $filename,
 						":error_code" => "WS1001",
 						":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
-						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+						":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken."\n"."Data => ".json_encode([
+					$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken->queryString."\n"."Data => ".json_encode([
 						':refresh_token' => $refresh_token,
 						':unique_id' => $dataComing["unique_id"],
 						':channel' => $arrPayload["PAYLOAD"]["channel"],
@@ -232,7 +249,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					":error_menu" => $filename,
 					":error_code" => "WS1001",
 					":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".$e->getMessage(),
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 				];
 				$log->writeLog('errorusage',$logStruc);
 				$message_error = "ไม่สามารถเข้าสู่ระบบได้"."\n"."Error => ".$e->getMessage()."\n"."Data => ".json_encode($dataComing);
@@ -250,7 +267,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$getCounter->execute([':member_no' => $member_no]);
 			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
 			if($rowCounter["counter_wrongpass"] >= 5){
-				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
 				$updateAccountStatus->execute([':member_no' => $member_no]);
 				$struc = [
 					':member_no' =>  $member_no,

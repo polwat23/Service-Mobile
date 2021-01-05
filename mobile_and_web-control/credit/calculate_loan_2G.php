@@ -12,8 +12,12 @@ $arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 $arrDataAPI["MemberID"] = substr($member_no,-6);
 $arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 $arrResponseAPI = json_decode($arrResponseAPI);
+$balanceAll = 0;
 if($arrResponseAPI->responseCode == "200"){
 	foreach($arrResponseAPI->accountDetail as $accData){
+		if($accData->accountType != '40' && $accData->accountStatus == "0"){
+			$balanceAll += preg_replace('/,/', '', $accData->accountBalance);
+		}
 		$arrAccType[] = (string)$accData->accountType;
 	}
 }
@@ -24,11 +28,15 @@ if(in_array("10", $arrAccType) || in_array("11", $arrAccType) || in_array("16", 
 	$getPeriod->execute([':loantype_code' => $loantype_code]);
 	$rowPeriod = $getPeriod->fetch(PDO::FETCH_ASSOC);
 	$arrSubOther["LABEL"] = "งวดสูงสุด";
-	$max_period = $rowMemb["REMAIN_PERIOD"];
-	if($max_period > $rowPeriod["MAX_PERIOD"]){
-		$max_period = $rowPeriod["MAX_PERIOD"];
-	}
+	$max_period = $rowPeriod["MAX_PERIOD"];
+	$maxloan_amt = $balanceAll * 0.95;
 	$arrSubOther["VALUE"] = $max_period." งวด";
+	$arrOtherInfo[] = $arrSubOther;
+	$arrSubOther["LABEL"] = "อายัติยอดเงินเพื่อหลักประกัน";
+	$arrSubOther["VALUE"] = number_format($maxloan_amt * 0.95,2)." บาท";
+	$arrOtherInfo[] = $arrSubOther;
+	$arrSubOther["LABEL"] = "ผ่อนชำระขั้นต่ำงวดละ";
+	$arrSubOther["VALUE"] = "1,000.00 บาท";
 	$arrOtherInfo[] = $arrSubOther;
 }else{
 	$maxloan_amt = 0;
@@ -36,4 +44,5 @@ if(in_array("10", $arrAccType) || in_array("11", $arrAccType) || in_array("16", 
 	$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 	$arrCollShould[] = $arrSubOther;
 }
+$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 ?>

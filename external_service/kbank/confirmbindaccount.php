@@ -3,7 +3,8 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['sigma_key','bank_account_no','status_bind'],$payload)){
 	if($payload["status_bind"] == '0'){
-		$updateBindAcc = $conmysql->prepare("UPDATE gcbindaccount SET deptaccount_no_bank = :deptaccount_no_bank,bindaccount_status = '1',bind_date = NOW() WHERE sigma_key = :sigma_key");
+		$updateBindAcc = $conmysql->prepare("UPDATE gcbindaccount SET deptaccount_no_bank = :deptaccount_no_bank,bindaccount_status = '1',bind_date = NOW() 
+											WHERE sigma_key = :sigma_key and bindaccount_status = '8'");
 		if($updateBindAcc->execute([
 			':deptaccount_no_bank' => $payload["bank_account_no"],
 			':sigma_key' => $payload["sigma_key"]

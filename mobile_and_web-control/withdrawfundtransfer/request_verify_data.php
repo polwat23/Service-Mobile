@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$checkLimitBalance = $conmysql->prepare("SELECT SUM(amount) as sum_amt FROM gctransaction WHERE member_no = :member_no and result_transaction = '1'
-													and transaction_type_code = 'WTB' and from_account = :from_account and destination_type = '1'
+													and transaction_type_code = 'WTB' and from_account = :from_account and transfer_mode = '9' and destination_type = '1'
 													and DATE_FORMAT(operate_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')");
 		$checkLimitBalance->execute([
 			':member_no' => $payload["member_no"],

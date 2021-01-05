@@ -35,14 +35,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			
 		}
 		$arrResponseAPI = json_decode($arrResponseAPI);
+		$formatDept = $func->getConstant('dep_format');
+		$formatDeptHidden = $func->getConstant('hidden_dep');
 		if($arrResponseAPI->responseCode == "200"){
 			foreach($arrResponseAPI->accountDetail as $accData){
 				if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
 					$arrayResult['SUM_BALANCE'] += preg_replace('/,/', '', $accData->accountBalance);
 					$arrAccount = array();
 					$arrGroupAccount = array();
-					$arrAccount["DEPTACCOUNT_NO"] =  $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-					$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($arrAccount["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+					$arrAccount["DEPTACCOUNT_NO"] =  $lib->formataccount($accData->coopAccountNo,$formatDept);
+					$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($arrAccount["DEPTACCOUNT_NO"],$formatDeptHidden);
 					$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
 					$arrAccount["BALANCE"] = $accData->accountBalance;
 					if(isset($accData->rcvintrAccountNo) && $accData->rcvintrAccountNo != ""){
