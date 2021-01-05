@@ -395,42 +395,61 @@ class functions {
 			$arrayMemberGRP = array();
 			$arrayMember = array();
 			$arrayAll = array();
+			$arrayMemberGRPHW = array();
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
 						$fetchFCMToken->execute();
 					}else{
-						$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 						$fetchFCMToken->execute([':member_no' => $member_no]);
 					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 							$arrayMT = array();
-							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
-							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
-							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
-							$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
-							$arrayMember[] = $rowFCMToken["member_no"];
-							$arrayMemberGRP[] = $arrayMT;
+							if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
+								$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
+								$arrayMember[] = $rowFCMToken["member_no"];
+								$arrayMemberGRP[] = $arrayMT;
+							}else{
+								$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
+								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
+								$arrayMember[] = $rowFCMToken["member_no"];
+								$arrayMemberGRPHW[] = $arrayMT;
+							}
 						}
 					}
 				}
 			}else{
-				$fetchFCMToken = $this->con->prepare("SELECT fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
+				$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
 				$fetchFCMToken->execute();
 				while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 						$arrayMT = array();
-						$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
-						$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
-						$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
-						$arrayMember[] = $rowFCMToken["member_no"];
-						$arrayMemberGRP[] = $arrayMT;
+						if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
+							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMember[] = $rowFCMToken["member_no"];
+							$arrayMemberGRP[] = $arrayMT;
+						}else{
+							$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
+							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMember[] = $rowFCMToken["member_no"];
+							$arrayMemberGRPHW[] = $arrayMT;
+						}
 					}
 				}
 			}
 			$arrayAll["MEMBER_NO"] = $arrayMember;
+			$arrayAll["LIST_SEND_HW"] = $arrayMemberGRPHW;
 			$arrayAll["LIST_SEND"] = $arrayMemberGRP;
 			return $arrayAll;
 		}
@@ -737,8 +756,58 @@ class functions {
 			}
 		}
 		public function MaintenanceMenu($menu_component) {
-			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0',menu_permission = '3' WHERE menu_component = :menu_component");
 			$mainTenance->execute([':menu_component' => $menu_component]);
 		}
+		public function PrefixGenerate($prefix){
+			$arrPrefix = explode(",",$prefix);
+			$arrPrefixOut = array();
+			if(sizeof($arrPrefix) > 0){
+				$getTypePrefix = $this->con->prepare("SELECT short_prefix,prefix_data_type,data_value_column,connection_db,query_string,amount_prefix
+													FROM doccontrolid WHERE short_prefix IN('".implode("','",$arrPrefix)."') and is_use = '1'");
+				$getTypePrefix->execute();
+			}else{
+				$getTypePrefix = $this->con->prepare("SELECT short_prefix,prefix_data_type,data_value_column,connection_db,query_string,amount_prefix
+													FROM doccontrolid WHERE short_prefix = :short_prefix and is_use = '1'");
+				$getTypePrefix->execute([':short_prefix' => $prefix]);
+			}
+			while($rowPrefix = $getTypePrefix->fetch(\PDO::FETCH_ASSOC)){
+				$prefixValue = null;
+				if($rowPrefix["prefix_data_type"] == 'string'){
+					$prefixValue = $rowPrefix["data_value_column"];
+				}else if($rowPrefix["prefix_data_type"] == 'year'){
+					$prefixValue = substr((date('Y') + 543),0,$rowPrefix["amount_prefix"]);
+				}else if($rowPrefix["prefix_data_type"] == 'month'){
+					$prefixValue = substr(date('m'),0,$rowPrefix["amount_prefix"]);
+				}else if($rowPrefix["prefix_data_type"] == 'day'){
+					$prefixValue = substr(date('d'),0,$rowPrefix["amount_prefix"]);
+				}else if($rowPrefix["prefix_data_type"] == 'running'){
+					if($rowPrefix["connection_db"] == 'mysql'){
+						$getRunning = $this->con->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'oracle'){
+						$getRunning = $this->conora->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'mssql'){
+						//$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
+					}
+					$getRunning->execute();
+					$rowRunning = $getRunning->fetch(\PDO::FETCH_ASSOC);
+					$prefixValue = str_pad($rowRunning[$rowPrefix["data_value_column"]] + 1,$rowPrefix["amount_prefix"],'0',STR_PAD_LEFT);
+				}else if($rowPrefix["prefix_data_type"] == 'column'){
+					if($rowPrefix["connection_db"] == 'mysql'){
+						$getData = $this->con->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'oracle'){
+						$getData = $this->conora->prepare($rowPrefix["query_string"]);
+					}else if($rowPrefix["connection_db"] == 'mssql'){
+						//$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
+					}
+					$getData->execute();
+					$rowData = $getData->fetch(\PDO::FETCH_ASSOC);
+					$prefixValue = $rowData[$rowPrefix["data_value_column"]];
+				}
+				$arrPrefixOut[$rowPrefix["short_prefix"]] = $prefixValue;
+			}
+			return $arrPrefixOut;
+		}
+
 }
 ?>

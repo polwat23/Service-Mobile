@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM cmconfirmmaster cfm LEFT JOIN mbmembmaster mb ON cfm.MEMBER_NO = mb.MEMBER_NO
 												LEFT JOIN mbucfdepartment md ON mb.department_code = md.department_code
 												LEFT JOIN mbucfprename mp ON cfm.PRENAME_CODE = mp.PRENAME_CODE
-												WHERE cfm.member_no = :member_no and EXTRACT(YEAR FROM cfm.BALANCE_DATE) = EXTRACT(YEAR FROM add_months(trunc(sysdate) ,-24))
+												WHERE cfm.member_no = :member_no
 												ORDER BY cfm.balance_date DESC) WHERE rownum <= 1");
 		$getBalanceMaster->execute([':member_no' => $member_no]);
 		$rowBalMaster = $getBalanceMaster->fetch(PDO::FETCH_ASSOC);
@@ -55,29 +55,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDetail[] = $arrBalDetail;
 		}
 		if(isset($rowBalMaster["MEMB_NAME"]) && sizeof($arrDetail) > 0){
-			if($rowBalMaster["CONFIRM_FLAG"] == '0'){
-				$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
-				if($arrayPDF["RESULT"]){
-					$arrayResult['DATA_CONFIRM'] = "ข้าพเจ้า ".$arrHeader["full_name"]." เลขที่สมาชิก ".$member_no." ตามที่ทาง 
-					สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
-					' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
-					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-					$arrayResult['BALANCE_DATE'] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y');
-					$arrayResult['IS_CONFIRM'] = FALSE;
-					$arrayResult['RESULT'] = TRUE;
-					require_once('../../include/exit_footer.php');
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS0044";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-			}else{
-				$arrayResult['CONFIRM_DATE'] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y');
-				$arrayResult['IS_CONFIRM'] = TRUE;
+			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
+			if($arrayPDF["RESULT"]){
+				$arrayResult['DATA_CONFIRM'] = "ข้าพเจ้า ".$arrHeader["full_name"]." เลขที่สมาชิก ".$member_no." ตามที่ทาง 
+				สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
+				' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				$arrayResult['BALANCE_DATE'] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y');
+				$arrayResult['IS_CONFIRM'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0044";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
 			$arrayResult['IS_CONFIRM'] = FALSE;

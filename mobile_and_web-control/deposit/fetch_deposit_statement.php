@@ -108,6 +108,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				$arrayGroupSTM[] = $arrSTM;
 			}
 		}
+		$arrayResult["REQUEST_STATEMENT"] = FALSE;
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["RESULT"] = TRUE;
