@@ -16,7 +16,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$ref_no = time().$lib->randomText('all',3);
-		$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
+		$amt_transfer = $dataComing["amt_transfer"];
+		$receive_amt = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		$arrSendData = array();
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -25,6 +26,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['operate_date'] = $dateOperC;
 		$arrVerifyToken['ref_trans'] = $ref_no;
 		$arrVerifyToken['coop_account_no'] = $coop_account_no;
+		if($rowDataDeposit["bank_code"] == '025'){
+			$arrVerifyToken['etn_trans'] = $dataComing["ETN_REFNO"];
+			$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
+		}
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
@@ -64,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup = array();
 			$arrayGroup["account_id"] = $rowAccid["DEFAULT_ACCID"];
 			$arrayGroup["action_status"] = "1";
-			$arrayGroup["atm_no"] = "mobile";
+			$arrayGroup["atm_no"] = "MOBILE";
 			$arrayGroup["atm_seqno"] = null;
 			$arrayGroup["aviable_amt"] = null;
 			$arrayGroup["bank_accid"] = $rowDataDeposit["deptaccount_no_bank"];
@@ -74,7 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["coop_id"] = $config["COOP_ID"];
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-			$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
+			$arrayGroup["entry_id"] = 'MOBILE';
 			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $amt_transfer;
@@ -83,7 +88,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["msg_output"] = null;
 			$arrayGroup["msg_status"] = null;
 			$arrayGroup["operate_date"] = $dateOperC;
-			$arrayGroup["oprate_cd"] = "003";
+			$arrayGroup["oprate_cd"] = "002";
 			$arrayGroup["post_status"] = "1";
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_slipno"] = null;
@@ -169,7 +174,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$dataMerge = array();
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
 							}
@@ -177,8 +204,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						
@@ -234,7 +259,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$dataMerge = array();
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
 							}
@@ -242,8 +289,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						
@@ -301,7 +346,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$dataMerge = array();
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
 							}
@@ -309,8 +376,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						

@@ -72,7 +72,34 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 					$arrPayloadNotify["SEND_BY"] = "system";
+					$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 					if($lib->sendNotify($arrPayloadNotify,"person")){
+						$func->insertHistory($arrPayloadNotify,'2');
+						$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
+						$updateSyncNoti->execute([
+							':ref_slipno' => $slip_no,
+							':deptaccount_no' => $from_account_no
+						]);
+					}
+				}
+			}
+			foreach($arrToken["LIST_SEND_HW"] as $dest){
+				if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+					$dataMerge = array();
+					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
+					$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+					$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+					$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+					$arrMessage["BODY"] = $message_endpoint["BODY"];
+					$arrMessage["PATH_IMAGE"] = null;
+					$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+					$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+					$arrPayloadNotify["SEND_BY"] = "system";
+					$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+					if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 						$func->insertHistory($arrPayloadNotify,'2');
 						$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
 						$updateSyncNoti->execute([
