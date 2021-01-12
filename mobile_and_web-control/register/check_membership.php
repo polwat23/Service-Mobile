@@ -20,6 +20,15 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	if($member_no != '00000115' && $member_no != '00000145' && $member_no != '00001342' && $member_no != '00000738' && $member_no != '00000845' && $member_no != '00000047'
+	&& $member_no != '00001378' && $member_no != '00001510' && $member_no != '00000223' && $member_no != '00000491' && $member_no != '00000365' && $member_no != '00000154'
+	&& $member_no != '00000563' && $member_no != '00000977' && $member_no != '00000406' && $member_no != '00000596' && $member_no != '00000445'){
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+	}
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
