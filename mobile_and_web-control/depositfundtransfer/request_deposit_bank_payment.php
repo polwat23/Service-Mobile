@@ -17,7 +17,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$ref_no = time().$lib->randomText('all',3);
 		$amt_transfer = $dataComing["amt_transfer"];
-		$receive_amt = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
 		$arrSendData = array();
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];

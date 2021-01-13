@@ -25,7 +25,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}else{
 			$fee_amt = $dataComing["penalty_amt"] + $dataComing["fee_amt"];
 		}
-		$receive_amt = $amt_transfer - $fee_amt;
 		$arrVerifyToken['exp'] = $time + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
@@ -159,7 +158,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
-					':amount_receive' => $receive_amt,
+					':amount_receive' => $amt_transfer,
 					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
@@ -221,7 +220,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
-					':amount_receive' => $receive_amt,
+					':amount_receive' => $amt_transfer,
 					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
@@ -303,7 +302,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
-					':amount_receive' => $receive_amt,
+					':amount_receive' => $amt_transfer,
 					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
