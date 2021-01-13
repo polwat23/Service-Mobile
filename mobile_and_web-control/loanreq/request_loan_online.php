@@ -45,11 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 							"as_wspass" => $config["WS_STRC_DB"],
 							"atr_lnatm" => $structureReqLoanPayment
 						];
-						if($dataComing["loantype_code"] == '02023'){
-							$receive_net = round($dataComing["request_amt"] - $diff_old_contract,2);
-						}else{
-							$receive_net = round($responseSoap->loanpermiss_amt - $diff_old_contract,2);
-						}
+						$receive_net = $dataComing["request_amt"] - $diff_old_contract;
 						$resultWS = $clientWS->__call("of_saveloanmobile_atm_ivr", array($argumentWS));
 						$responseSoapSave = $resultWS->of_saveloanmobile_atm_ivrResult;
 						file_put_contents(__DIR__.'/../../log/requestloanonline.txt', json_encode($responseSoap) . PHP_EOL, FILE_APPEND);

@@ -37,14 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					$arrayResult['CONTRACT_CLR'] = $responseSoap->contclr_no;
 					$arrayResult['DIFF_OLD_CONTRACT'] = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
 					$arrayResult['LOANPERMIT_AMT'] = $responseSoap->loanpermiss_amt;
-					if($dataComing["loantype_code"] == '02023'){
-						$arrayResult['REQUEST_AMT'] = ($responseSoap->maxreceive_amt > 30000 ? 30000 : $responseSoap->maxreceive_amt) + $arrayResult['DIFF_OLD_CONTRACT'];
-						if($arrayResult['REQUEST_AMT'] > $responseSoap->loanrequest_amt){
-							$arrayResult['REQUEST_AMT'] = $responseSoap->loanrequest_amt;
-						}
-					}else{
-						$arrayResult['REQUEST_AMT'] = $responseSoap->loanpermiss_amt;
-					}
+					$arrayResult['REQUEST_AMT'] = $responseSoap->maxloanrequest_amt;
 					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
 					$arrayResult['PERIOD'] = $responseSoap->period_payamt;
 					$structureReqLoanPayment = array();
@@ -69,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
 						$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 						$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
-						$pay_period = preg_replace('/,/', '', number_format($responseSoap_Credit->period_payment,2));
+						$pay_period = preg_replace('/,/', '', $responseSoap_Credit->period_payment);
 						if($pay_period > $responseSoap->maxperiod_payment){
 							if(($responseSoap->maxperiod_payment - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
 								$arrayResult = array();
@@ -94,11 +87,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['MAXRECEIVE_AMT'] = $responseSoap->maxreceive_amt;
 						$arrayResult['DISABLE_AMOUNT'] = FALSE;
 						$arrayResult['DISABLE_PERIOD'] = FALSE;
-						if($dataComing["loantype_code"] == '02023'){
-							$arrayResult['RECEIVE_AMT'] = $arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'];
-						}else{
-							$arrayResult['RECEIVE_AMT'] = $responseSoap->loanpermiss_amt - $arrayResult['DIFF_OLD_CONTRACT'];
-						}
+						$arrayResult['RECEIVE_AMT'] = $arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'];
 						if($arrayResult['RECEIVE_AMT'] < 0){
 							$arrayResult = array();
 							$arrayResult['RESPONSE_CODE'] = "WS0086";

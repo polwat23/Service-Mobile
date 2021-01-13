@@ -4,7 +4,6 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date','create_by','id_task'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','calendarcoop')){
 		
-				
 		if(isset($dataComing["news_html_root_"]) && $dataComing["news_html_root_"] != null){
 		$detail_html = '<!DOCTYPE HTML>
 								<html>
@@ -20,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 							  </body>
 								</html>';
 		}
-		
+
 		$UpdateTaskEvent = $conmysql->prepare("UPDATE gctaskevent SET task_topic = :task_topic, task_detail = :task_detail, start_date = :start_date, end_date = :end_date,
 											event_start_time = :event_start_time,event_end_time = :event_end_time ,is_settime = :is_settime,create_by = :create_by,
 											is_notify = :is_notify,is_notify_before = :is_notify_before, event_html = :event_html
@@ -45,18 +44,15 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขกิจกรรมได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
-			
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../../include/exit_footer.php');
-		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../../include/exit_footer.php');
-	
 }
 ?>
