@@ -3,7 +3,7 @@
 
 del C:\Mobile\Service-MJU\external_service\backupDB_MJU.zip
 
-cd C:\Program Files\MariaDB 10.4\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@MJU2020 mobile_MJU > C:\Mobile\Service-MJU\external_service\backupDB_MJU.sql
+cd C:\Program Files\MariaDB 10.5\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@MJU2020 mobile_MJU > C:\Mobile\Service-MJU\external_service\backupDB_MJU.sql
 
 "C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\Service-MJU\external_service\backupDB_MJU.zip C:\Mobile\Service-MJU\external_service\backupDB_MJU.sql
 
