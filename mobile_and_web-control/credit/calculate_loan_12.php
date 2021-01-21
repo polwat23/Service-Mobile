@@ -18,7 +18,7 @@ $fetchDivAvg->execute([
 	':member_no' => $member_no
 ]);
 $rowDivAvg = $fetchDivAvg->fetch(PDO::FETCH_ASSOC);
-$maxloan_amt = floor(round($rowDivAvg["DIV_AVG"] * 0.70,0 )/100)*100;
+$maxloan_amt = floor(round($rowDivAvg["DIV_AVG"] * 0.50,0 )/100)*100;
 
 $canRequest = TRUE;
 ?>
