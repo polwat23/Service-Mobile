@@ -323,11 +323,27 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 650px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 530px;display:flex;">
+			<img src="../../resource/utility_icon/signature/president.jpg" width="70" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 680px;display:flex;">
+			<img src="../../resource/utility_icon/signature/secretary.jpg" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 830px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="40" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 680px;margin-top:-40px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 520px;margin-top:-180px;">
+			<p style="margin-left: 0px;">นายสงวน ศรีสวัสดิ์</p>
+			<p style="margin-left: 0px;margin-top:-20px">ประธานกรรมการ</p>
+			</div>
+			<div style="font-size: 18px;margin-left: 660px;margin-top:-90px;">
+			<p style="margin-left: 20px;">นายสมศักดิ์ เวียงคำ</p>
+			<p style="margin-left: 40px;margin-top:-20px">เลขานุการ</p></div>
+			<div style="font-size: 18px;margin-left: 840px;margin-top:-100px;">
+			<p style="margin-left: 10px;">นายประสิทธิ์   ศรีชุ่ม</p>
+			<p style="margin-left: 30px;margin-top:-20px">ผู้จัดการ</p>
+			</div>
 			';
 
 	$dompdf = new DOMPDF();
