@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = strtoupper(strtolower($lib->mb_str_pad($dataComing["member_no"])));
 	$member_noBranch = $configAS[$member_no] ?? $member_no;
 	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");

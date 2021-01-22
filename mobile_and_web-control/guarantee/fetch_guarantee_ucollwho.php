@@ -22,6 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE
 											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '04'
+											AND LCC.COLL_STATUS = '1'
 											AND LCC.REF_COLLNO = :member_no
 											and lcc.branch_id = :branch_id");
 		$getUcollwho->execute([
