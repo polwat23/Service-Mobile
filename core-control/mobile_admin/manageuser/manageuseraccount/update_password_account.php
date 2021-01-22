@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		$dateNow = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$fetchCitizenID = $conoracle->prepare("SELECT TRIM(card_person) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchCitizenID->execute([
-			':member_no' => $dataComing["member_no"]
+			':member_no' => strtoupper($dataComing["member_no"])
 		]);
 		$rowcitizenid = $fetchCitizenID->fetch(PDO::FETCH_ASSOC);
 		$new_password = $rowcitizenid["CARD_PERSON"];
