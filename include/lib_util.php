@@ -91,6 +91,7 @@ class library {
 			return $date_duration->days;			
 		}     
 	}
+	
 	public function formatcitizen($idcard,$separate=" "){
 		if(isset($idcard)){
 			$str1 = substr($idcard,0,1);

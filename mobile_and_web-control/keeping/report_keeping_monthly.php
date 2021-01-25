@@ -159,10 +159,10 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)</p>
-				<p style="margin-top: -27px;font-size: 18px;">461 หมู่ 5 ถ.พหลโยธิน ต.น้ำรึม อ.เมือง จ.ตาก 63000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-511-061,055-541-554</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.taktcoop1.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูพะเยา จํากัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">672 หมู่ 3 ถ.เชียงราย - นครสวรรค์ ต.ท่าวังทอง อ.เมือง จ.พะเยา 56000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 054-431-994,054-410-185</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.phayaotcl.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
