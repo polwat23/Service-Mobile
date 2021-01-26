@@ -91,6 +91,28 @@ class library {
 			return $date_duration->days;			
 		}     
 	}
+	public function count_duration_cursory($date,$format="ym"){
+		$date = preg_replace('|/|','-',$date);
+		$dateconverted = new \DateTime($date);
+		$dateNow = new \DateTime(date('d-m-Y'));
+		
+		$cursory_year = $dateNow->format('Y') - $dateconverted->format('Y');
+		if($dateNow->format('m') > $dateconverted->format('m')){
+			$cursory_month = $dateNow->format('m') - $dateconverted->format('m');
+		}else{
+			$cursory_month = ($dateNow->format('m')+12) - $dateconverted->format('m');
+			$cursory_year = $cursory_year - 1;
+		}
+		$cursory_day = $dateconverted->format('d');
+		
+		if($format == "ym"){
+			return  $cursory_year." ปี " .$cursory_month." เดือน";
+		}else if($format == "m"){
+			return $cursory_month;			
+		}else if($format == "d"){
+			return $cursory_day;			
+		}     
+	}
 	public function formatcitizen($idcard,$separate=" "){
 		if(isset($idcard)){
 			$str1 = substr($idcard,0,1);

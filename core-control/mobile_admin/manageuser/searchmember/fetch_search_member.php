@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 			$arrayGroup["ADDRESS"] = $address;
 			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
-			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
+			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration_cursory($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
