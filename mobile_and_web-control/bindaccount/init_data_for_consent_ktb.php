@@ -23,7 +23,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 				}
 				$arrAccBeenBind = array();
-				$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('6','7','8','-9')");
+				$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no 
+																and bindaccount_status NOT IN('6','7','8','-9') and deptaccount_no_coop IS NOT NULL");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 					$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
@@ -54,15 +55,37 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				if(sizeof($arrayGroupAccount) > 0){
 					$arrayResult['ACCOUNT'] = $arrayGroupAccount;
-					$getAccBankAllow = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
-															WHERE atr.member_no = :member_no and atr.expense_bank = '006'");
+					$getAccBankAllow = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
+															FROM atmregistermobile atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
+															WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1' 
+															and atr.connect_status = '1'");
 					$getAccBankAllow->execute([':member_no' => $member_no]);
 					$rowAccBank = $getAccBankAllow->fetch(PDO::FETCH_ASSOC);
-					$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBank["ACCOUNT_CODE"],$rowAccBank["ACCOUNT_FORMAT"]);
-					$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-					$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
-					$arrayResult['RESULT'] = TRUE;
-					require_once('../../include/exit_footer.php');
+					if(isset($rowAccBank["ACCOUNT_CODE"]) && $rowAccBank["ACCOUNT_CODE"] != ""){
+						$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBank["ACCOUNT_CODE"],$rowAccBank["ACCOUNT_FORMAT"]);
+						$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+						$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+						$arrayResult['RESULT'] = TRUE;
+						require_once('../../include/exit_footer.php');
+					}else{
+						$getAccBankAllowATM = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
+																FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
+																WHERE atr.member_no = :member_no and atr.expense_bank = '006'");
+						$getAccBankAllowATM->execute([':member_no' => $member_no]);
+						$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
+						if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] != ""){
+							$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBankATM["ACCOUNT_CODE"],$rowAccBankATM["ACCOUNT_FORMAT"]);
+							$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+							$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+							$arrayResult['RESULT'] = TRUE;
+							require_once('../../include/exit_footer.php');
+						}else{
+							$arrayResult['RESPONSE_CODE'] = "WS0099";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+					}
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0005";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

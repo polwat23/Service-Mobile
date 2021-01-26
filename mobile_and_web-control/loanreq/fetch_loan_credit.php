@@ -158,6 +158,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." คำนวณสิทธิ์กู้ไม่ได้เพราะต่อ Service เงินกู้ไม่ได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error => ".$e->getMessage();
 			$lib->sendLineNotify($message_error);
+			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_CODE'] = "WS0058";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

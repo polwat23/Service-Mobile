@@ -15,7 +15,6 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../../include/exit_footer.php');
-					
 				}else{
 					if($createImage){
 						$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
@@ -23,7 +22,6 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../include/exit_footer.php');
-						
 					}
 				}
 			}
@@ -38,10 +36,17 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				foreach($dataComing["message_importData"] as $dest){
 					$indexFound = array_search($dest["DESTINATION"], $arrToken["MEMBER_NO"]);
 					if($indexFound !== false){
-						$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
-						$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
-						$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
-						$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+						if(isset($arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"]) && $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"] != ""){
+							$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
+							$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
+							$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
+							$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+						}else{
+							$member_no = $arrToken["LIST_SEND_HW"][$indexFound]["MEMBER_NO"];
+							$token = $arrToken["LIST_SEND_HW"][$indexFound]["TOKEN"];
+							$recv_noti_news = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
+							$recv_noti_trans = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+						}
 						if(isset($token) && $token != ""){
 							if($recv_noti_news == "1"){
 								$arrGroupSuccess["DESTINATION"] = $member_no;
@@ -109,6 +114,26 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							$arrGroupAllFailed[] = $arrGroupCheckSend;
 						}
 					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
+						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
+							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
+								$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+								$arrGroupSuccess["REF"] = $dest["MEMBER_NO"];
+								$arrGroupSuccess["MESSAGE"] = ($dataComing["message_emoji_"] ?? "-").'^'.$dataComing["topic_emoji_"];
+								$arrGroupAllSuccess[] = $arrGroupSuccess;
+							}else{
+								$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+								$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
+								$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+								$arrGroupAllFailed[] = $arrGroupCheckSend;
+							}
+						}else{
+							$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+							$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
+							$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+							$arrGroupAllFailed[] = $arrGroupCheckSend;
+						}
+					}
 					$arrDiff = array_diff($destination,$arrToken["MEMBER_NO"]);
 					foreach($arrDiff as $memb_diff){
 						$arrGroupCheckSend["DESTINATION"] = $memb_diff;
@@ -123,6 +148,23 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				}else{
 					$arrToken = $func->getFCMToken('all');
 					foreach($arrToken["LIST_SEND"] as $dest){
+						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
+							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
+								$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+								$arrGroupSuccess["MESSAGE"] = $dataComing["message_emoji_"].'^'.$dataComing["topic_emoji_"];
+								$arrGroupAllSuccess[] = $arrGroupSuccess;
+							}else{
+								$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+								$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+								$arrGroupAllFailed[] = $arrGroupCheckSend;
+							}
+						}else{
+							$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+							$arrGroupCheckSend["MESSAGE"] = $dataComing["message_emoji_"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+							$arrGroupAllFailed[] = $arrGroupCheckSend;
+						}
+					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
 						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 								$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
@@ -320,12 +362,10 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../include/exit_footer.php');
-		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../include/exit_footer.php');
-	
 }
 ?>

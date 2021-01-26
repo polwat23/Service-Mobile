@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$ref_no = time().$lib->randomText('all',3);
-		$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
+		$amt_transfer = $dataComing["amt_transfer"];
 		$arrSendData = array();
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -25,6 +25,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['operate_date'] = $dateOperC;
 		$arrVerifyToken['ref_trans'] = $ref_no;
 		$arrVerifyToken['coop_account_no'] = $coop_account_no;
+		if($rowDataDeposit["bank_code"] == '025'){
+			$arrVerifyToken['etn_trans'] = $dataComing["ETN_REFNO"];
+			$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
+		}
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
@@ -40,7 +44,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
+				':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้",
+				':is_adj' => '0'
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
 			$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
@@ -75,7 +80,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
-			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
+			if($rowDataDeposit["bank_code"] != '006'){
+				$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
+			}else{
+				$arrayGroup["fee_amt"] = 0;
+			}
 			$arrayGroup["feeinclude_status"] = "1";
 			$arrayGroup["item_amt"] = $amt_transfer;
 			$arrayGroup["member_no"] = $member_no;
@@ -169,7 +178,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$dataMerge = array();
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
 							}
@@ -177,8 +208,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						
@@ -209,14 +238,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 							':sigma_key' => $dataComing["sigma_key"],
 							':amt_transfer' => $amt_transfer,
 							':response_code' => $responseSoap->msg_status,
-							':response_message' => $responseSoap->msg_output
+							':response_message' => $responseSoap->msg_output,
+							':is_adj' => '8'
 						];
 						$log->writeLog('deposittrans',$arrayStruc);
 						$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$responseSoap->msg_output;
 						$lib->sendLineNotify($message_error);
 						$message_error = "มีรายการฝากมาจาก ".$rowDataDeposit["bank_short_ename"]." ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
 						" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$responseSoap->msg_output;
-						$lib->sendLineNotify($message_error);
+						$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 						foreach($arrToken["LIST_SEND"] as $dest){
@@ -234,7 +264,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$dataMerge = array();
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
 							}
@@ -242,8 +294,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						
@@ -276,14 +326,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':sigma_key' => $dataComing["sigma_key"],
 						':amt_transfer' => $amt_transfer,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => $e->getMessage()
+						':response_message' => $e->getMessage(),
+						':is_adj' => '8'
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
 					$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
 					$lib->sendLineNotify($message_error);
 					$message_error = "มีรายการฝากมาจาก ".$rowDataDeposit["bank_short_ename"]." ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
 					" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
-					$lib->sendLineNotify($message_error);
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 						foreach($arrToken["LIST_SEND"] as $dest){
@@ -301,7 +352,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$dataMerge = array();
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = "system";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
 							}
@@ -309,8 +382,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-						$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						
@@ -343,14 +414,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':sigma_key' => $dataComing["sigma_key"],
 					':amt_transfer' => $amt_transfer,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $e->getMessage()
+					':response_message' => $e->getMessage(),
+					':is_adj' => '8'
 				];
 				$log->writeLog('deposittrans',$arrayStruc);
 				$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
 				$lib->sendLineNotify($message_error);
 				$message_error = "มีรายการฝากมาจาก ".$rowDataDeposit["bank_short_ename"]." ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
 				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
-				$lib->sendLineNotify($message_error);
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
@@ -377,8 +449,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['EXTERNAL_REF'] = $etn_ref;
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-				$arrayResult['PAYER_ACCOUNT'] = $arrResponse->PAYER_ACCOUNT;
-				$arrayResult['PAYER_NAME'] = $arrResponse->PAYER_NAME;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 				
@@ -392,7 +462,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrResponse->RESPONSE_CODE,
-				':response_message' => $arrResponse->RESPONSE_MESSAGE
+				':response_message' => $arrResponse->RESPONSE_MESSAGE,
+				':is_adj' => '0'
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
 			if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){

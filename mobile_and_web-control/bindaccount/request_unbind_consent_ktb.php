@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
 		$check_account = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
-											and bindaccount_status IN('0','1')");
+											and bindaccount_status IN('0','1','7')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
 			':id_bindaccount' => $dataComing["id_bindaccount"],

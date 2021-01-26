@@ -120,7 +120,26 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
 							$arrPayloadNotify["SEND_BY"] = "system";
+							$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 							if($lib->sendNotify($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
+								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+								$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
+							}
+						}
+					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
+						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							$arrPayloadNotify["SEND_BY"] = "system";
+							$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+							if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 								$func->insertHistory($arrPayloadNotify,'2');
 								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
 								$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);

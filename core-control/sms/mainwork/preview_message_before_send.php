@@ -17,7 +17,6 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../include/exit_footer.php');
-						
 					}else{
 						if($createImage){
 							$pathImg = $config["URL_SERVICE"]."resource/image_wait_to_be_sent/".$createImage["normal_path"];
@@ -25,7 +24,6 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../../include/exit_footer.php');
-							
 						}
 					}
 				}
@@ -56,9 +54,21 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								$arrGroupAllFailed[] = $arrGroupCheckSend;
 							}
 						}else{
-							$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
-							$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
-							$arrGroupAllFailed[] = $arrGroupCheckSend;
+							if(isset($arrToken["LIST_SEND_HW"][0]["TOKEN"]) && $arrToken["LIST_SEND_HW"][0]["TOKEN"] != ""){
+								if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+									$arrGroupSuccess["DESTINATION"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
+									$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"].'^'.$arrMessage["SUBJECT"];
+									$arrGroupAllSuccess[] = $arrGroupSuccess;
+								}else{
+									$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+									$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+									$arrGroupAllFailed[] = $arrGroupCheckSend;
+								}
+							}else{
+								$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+								$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+								$arrGroupAllFailed[] = $arrGroupCheckSend;
+							}
 						}
 					}
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -130,14 +140,36 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									$arrGroupAllFailed[] = $arrGroupCheckSend;
 								}
 							}else{
-								$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
-								$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
-								if($condition[1] == $rowQuery["target_field"]){
-									$arrGroupCheckSend["REF"] = $rowTarget[$rowQuery["target_field"]];
+								if(isset($arrToken["LIST_SEND_HW"][0]["TOKEN"]) && $arrToken["LIST_SEND_HW"][0]["TOKEN"] != ""){
+									if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
+										$arrGroupSuccess["DESTINATION"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
+										$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"].'^'.$arrMessage["SUBJECT"];
+										if($condition[1] == $rowQuery["target_field"]){
+											$arrGroupSuccess["REF"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
+										}else{
+											$arrGroupSuccess["REF"] = $target;
+										}
+										$arrGroupAllSuccess[] = $arrGroupSuccess;
+									}else{
+										$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+										$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+										if($condition[1] == $rowQuery["target_field"]){
+											$arrGroupCheckSend["REF"] = $rowTarget[$rowQuery["target_field"]];
+										}else{
+											$arrGroupCheckSend["REF"] = $target;
+										}
+										$arrGroupAllFailed[] = $arrGroupCheckSend;
+									}
 								}else{
-									$arrGroupCheckSend["REF"] = $target;
+									$arrGroupCheckSend["DESTINATION"] = $rowTarget[$rowQuery["target_field"]];
+									$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+									if($condition[1] == $rowQuery["target_field"]){
+										$arrGroupCheckSend["REF"] = $rowTarget[$rowQuery["target_field"]];
+									}else{
+										$arrGroupCheckSend["REF"] = $target;
+									}
+									$arrGroupAllFailed[] = $arrGroupCheckSend;
 								}
-								$arrGroupAllFailed[] = $arrGroupCheckSend;
 							}
 						}else{
 							$arrGroupCheckSend["DESTINATION"] = $target;
@@ -155,7 +187,6 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../include/exit_footer.php');
-				
 			}
 		}else{
 			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
@@ -278,19 +309,16 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$arrayResult['RESPONSE'] = "ไม่พบชุดคิวรี่ข้อมูล กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../include/exit_footer.php');
-				
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../include/exit_footer.php');
-		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../include/exit_footer.php');
-	
 }
 ?>

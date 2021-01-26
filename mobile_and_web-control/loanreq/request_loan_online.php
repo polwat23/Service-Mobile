@@ -48,7 +48,6 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 						$receive_net = $dataComing["request_amt"] - $diff_old_contract;
 						$resultWS = $clientWS->__call("of_saveloanmobile_atm_ivr", array($argumentWS));
 						$responseSoapSave = $resultWS->of_saveloanmobile_atm_ivrResult;
-						file_put_contents(__DIR__.'/../../log/requestloanonline.txt', json_encode($responseSoap) . PHP_EOL, FILE_APPEND);
 						$insertReqLoan = $conmysql->prepare("INSERT INTO logreqloan(member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
 															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
@@ -77,15 +76,33 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 						$dataMerge["RECEIVENET_AMT"] = number_format($dataComing["request_amt"] - $diff_old_contract,2);
 						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						foreach($arrToken["LIST_SEND"] as $dest){
-							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-							$arrMessage["BODY"] = $message_endpoint["BODY"];
-							$arrMessage["PATH_IMAGE"] = null;
-							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-							if($lib->sendNotify($arrPayloadNotify,"person")){
-								$func->insertHistory($arrPayloadNotify,'2');
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotify($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
+									$func->insertHistory($arrPayloadNotify,'2');
+								}
 							}
 						}
 						$arrayResult['TRANSACTION_DATE'] = $lib->convertdate(date('Y-m-d'),'d m Y');
@@ -165,6 +182,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." ต่อ Service ไปเงินกู้ไมได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error => ".$e->getMessage();
 			$lib->sendLineNotify($message_error);
+			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_CODE'] = "WS0062";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

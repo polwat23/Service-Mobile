@@ -22,11 +22,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			if(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != ""){
 				$arrayExecute["trans_flag"] = $dataComing["trans_flag"];
 			}
+			if(isset($dataComing["bank"]) && $dataComing["bank"] != ""){
+				$arrayExecute["bank"] = $dataComing["bank"];
+			}
 		
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
-														FROM gctransaction
+				$fetchReconcile = $conmysql->prepare("SELECT gt.ref_no,gt.trans_flag,gt.transaction_type_code,gt.from_account,gt.destination,gt.operate_date,gt.amount,
+														gt.penalty_amt,gt.fee_amt,gt.amount_receive,gt.result_transaction,gt.member_no,coop_slip_no,gt.bank_code,csb.bank_short_ename
+														FROM gctransaction gt
+														LEFT JOIN csbankdisplay csb ON csb.bank_code = gt.bank_code
 														WHERE transfer_mode = '9'  and result_transaction = '1'
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
 														"and date_format(operate_date,'%Y') >= :start_date" : null)."
@@ -37,12 +41,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
-														"and trans_flag = :trans_flag " : null)."".
+														"and trans_flag = :trans_flag " : null).""."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code = :bank " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
-														FROM gctransaction
+				$fetchReconcile = $conmysql->prepare("SELECT gt.ref_no,gt.trans_flag,gt.transaction_type_code,gt.from_account,gt.destination,gt.operate_date,gt.amount,
+														gt.penalty_amt,gt.fee_amt,gt.amount_receive,gt.result_transaction,gt.member_no,coop_slip_no,gt.bank_code,csb.bank_short_ename
+														FROM gctransaction gt
+														LEFT JOIN csbankdisplay csb ON csb.bank_code = gt.bank_code
 														WHERE transfer_mode = '9'  and  result_transaction = '1'
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
 														"and date_format(operate_date,'%Y-%m') >= :start_date" : null)."
@@ -53,12 +60,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
-														"and trans_flag = :trans_flag " : null)."".
+														"and trans_flag = :trans_flag " : null).""."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code = :bank " : null)."".
 														" ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
-														FROM gctransaction
+				$fetchReconcile = $conmysql->prepare("SELECT gt.ref_no,gt.trans_flag,gt.transaction_type_code,gt.from_account,gt.destination,gt.operate_date,gt.amount,
+														gt.penalty_amt,gt.fee_amt,gt.amount_receive,gt.result_transaction,gt.member_no,coop_slip_no,gt.bank_code,csb.bank_short_ename
+														FROM gctransaction gt
+														LEFT JOIN csbankdisplay csb ON csb.bank_code = gt.bank_code
 														WHERE transfer_mode = '9'  and  result_transaction = '1'
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
 														"and date_format(operate_date,'%Y-%m-%d') >= :start_date" : null)."
@@ -69,7 +79,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
-														"and trans_flag = :trans_flag " : null)."".
+														"and trans_flag = :trans_flag " : null).""."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code = :bank " : null)."".
 														"ORDER BY operate_date DESC");
 			}
 		}else{
@@ -82,42 +94,54 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			if(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != ""){
 				$arrayExecute["trans_flag"] = $dataComing["trans_flag"];
 			}
+			if(isset($dataComing["bank"]) && $dataComing["bank"] != ""){
+				$arrayExecute["bank"] = $dataComing["bank"];
+			}
 
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
-														FROM gctransaction
+				$fetchReconcile = $conmysql->prepare("SELECT gt.ref_no,gt.trans_flag,gt.transaction_type_code,gt.from_account,gt.destination,gt.operate_date,gt.amount,
+														gt.penalty_amt,gt.fee_amt,gt.amount_receive,gt.result_transaction,gt.member_no,coop_slip_no,gt.bank_code,csb.bank_short_ename
+														FROM gctransaction gt
+														LEFT JOIN csbankdisplay csb ON csb.bank_code = gt.bank_code
 														WHERE transfer_mode = '9' and  result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
-														"and trans_flag = :trans_flag " : null)."".
+														"and trans_flag = :trans_flag " : null).""."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code = :bank " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
-														FROM gctransaction
+				$fetchReconcile = $conmysql->prepare("SELECT gt.ref_no,gt.trans_flag,gt.transaction_type_code,gt.from_account,gt.destination,gt.operate_date,gt.amount,
+														gt.penalty_amt,gt.fee_amt,gt.amount_receive,gt.result_transaction,gt.member_no,coop_slip_no,gt.bank_code,csb.bank_short_ename
+														FROM gctransaction gt
+														LEFT JOIN csbankdisplay csb ON csb.bank_code = gt.bank_code
 														WHERE transfer_mode = '9' and  result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." 
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
-														"and trans_flag =  :trans_flag " : null)."".
+														"and trans_flag =  :trans_flag " : null).""." 
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code =  :bank " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
-														FROM gctransaction
+				$fetchReconcile = $conmysql->prepare("SELECT gt.ref_no,gt.trans_flag,gt.transaction_type_code,gt.from_account,gt.destination,gt.operate_date,gt.amount,
+														gt.penalty_amt,gt.fee_amt,gt.amount_receive,gt.result_transaction,gt.member_no,coop_slip_no,gt.bank_code,csb.bank_short_ename
+														FROM gctransaction gt
+														LEFT JOIN csbankdisplay csb ON csb.bank_code = gt.bank_code
 														WHERE transfer_mode = '9'  result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
-														"and trans_flag =  :trans_flag " : null)."".
+														"and trans_flag =  :trans_flag " : null).""."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code =  :bank " : null)."".
 														"ORDER BY operate_date DESC");
 			}
 		}
@@ -150,6 +174,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon["FEE_AMT"] = number_format($rowRecon["fee_amt"],2);
 			$arrayRecon["RESULT_TRANSACTION"] = $rowRecon["result_transaction"];
 			$arrayRecon["MEMBER_NO"] = $rowRecon["member_no"];
+			$arrayRecon["COOP_SLIP_NO"] = $rowRecon["coop_slip_no"];
+			$arrayRecon["BANK_CODE"] = $rowRecon["bank_code"];
+			$arrayRecon["BANK_NAME"] = $rowRecon["bank_short_ename"];
 			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["amount_receive"],2);
 			
 			$summary += $rowRecon["amount_receive"];
