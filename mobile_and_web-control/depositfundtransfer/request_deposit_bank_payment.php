@@ -33,7 +33,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
+				':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้",
+				':is_adj' => '0',
+				':ref_no' => null
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
 			$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
@@ -201,7 +203,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 							':sigma_key' => $dataComing["sigma_key"],
 							':amt_transfer' => $amt_transfer,
 							':response_code' => "WS0041",
-							':response_message' => $responseSoap->msg_output
+							':response_message' => $responseSoap->msg_output,
+							':is_adj' => '8',
+							':ref_no' => $ref_no
 						];
 						$log->writeLog('deposittrans',$arrayStruc);
 						$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$responseSoap->msg_output;
@@ -267,7 +271,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':sigma_key' => $dataComing["sigma_key"],
 						':amt_transfer' => $amt_transfer,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => $e->getMessage()
+						':response_message' => $e->getMessage(),
+						':is_adj' => '8',
+						':ref_no' => $ref_no
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
 					$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
@@ -333,7 +339,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':sigma_key' => $dataComing["sigma_key"],
 					':amt_transfer' => $amt_transfer,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $e->getMessage()
+					':response_message' => $e->getMessage(),
+					':is_adj' => '8',
+					':ref_no' => $ref_no
 				];
 				$log->writeLog('deposittrans',$arrayStruc);
 				$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
@@ -382,7 +390,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrResponse->RESPONSE_CODE,
-				':response_message' => $arrResponse->RESPONSE_MESSAGE
+				':response_message' => $arrResponse->RESPONSE_MESSAGE,
+				':is_adj' => '0',
+				':ref_no' => null
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
 			if(isset($configError["KBANK_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){

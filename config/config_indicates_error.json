@@ -1,6 +1,6 @@
 {
 	"WS0001" : [{"th" : "ไม่สามารถยืนยันการเข้าใช้งานได้เพราะเวลาในเครื่องไม่ตรง กรุณาตรวจสอบเวลาในเครื่องของท่าน","en" : "Unauthenticated because the time in device not correct please check time in your device"}],
-	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หากบัญชีถูกล็อคต้องติดต่อสหกรณ์เท่านั้น กรุณา คลิก ลืมรหัสผ่านเพื่อทำตามขั้นตอนของระบบ","en" : "Invalid password please check password again if account was locked you must contact cooperative only please click forget password for step by step of system"}],
+	"WS0002" : [{"th" : "ท่านกรอกรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หากบัญชีถูกล็อคโปรดติดต่อที่สำนักงานสหกรณ์สาขาที่ท่านสะดวกเท่านั้น กรุณาคลิกลืมรหัสผ่านเพื่อทำตามขั้นตอนหากท่านลืมรหัสผ่านในการล็อคอิน","en" : "Invalid password please check password again if account was locked you must contact cooperative only please click forget password for step by step of system"}],
 	"WS0003" : [{"th" : "ไม่พบข้อมูลผู้ใช้นี้ในระบบ กรุณาตรวจสอบเลขสมาชิก","en" : "Not found this user in system please check member no"}],
 	"WS0004" : [{"th" : "รหัสผ่านที่ท่านกรอกไม่ตรงกับรหัสผ่านเดิม","en" : "Password does not match"}],
 	"WS0005" : [{"th" : "ไม่พบบัญชีที่สามารถผูกได้ หากท่านต้องการผูกบัญชีกรุณาไปอนุญาตบัญชีที่สามารถทำธุรกรรมได้ที่หน้าจัดการบัญชีสหกรณ์","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
@@ -65,7 +65,7 @@
 	"WS0047" : [{"th" : "ไม่พบบัญชีปลายทางที่ระบุ กรุณาตรวจสอบเลขบัญชีอีกครั้ง","en" : "Not found account that specify please check the account number again"}],
 	"WS0048" : [{"th" : "บัญชีของท่านถูกระงับการใช้งาน กรุณาติดต่อสหกรณ์เพื่อปลดล็อคบัญชี","en" : "Your account is withhold please contact cooperative for unlock account"}],
 	"WS0049" : [{"th" : "ไม่พบข้อมูลอีเมลของท่านในฐานข้อมูล กรุณาติดต่อสหกรณ์เพื่อระบุอีเมล","en" : "Not found information your email please contact cooperative for specify email"}],
-	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบ กรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please check email again"}],
+	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบ กรุณาตรวจสอบอีกครั้งหรือติดต่อที่สำนักงานสหกรณ์","en" : "Your email does not match system please check email again"}],
 	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องจากท่านพ้นสภาพการเป็นสมาชิกแล้ว","en" : "Cannot use application because membership has terminated"}],
 	"WS0052" : [{"th" : "ไม่สามารถยกเลิกผูกบัญชีสหกรณ์ได้ ท่านต้องยกเลิกผูกบัญชีฝั่งธนาคารก่อน","en" : "Cannot unbind cooperative account, you need to unbind bank account"}],
 	"WS0053" : [{"th" : "เซสชั่นหมดอายุ เวลาการใช้งานถูกจำกัดไว้ที่ ${TIMEOUT} นาทีเพื่อความปลอดภัย กรุณาเข้าใช้งานใหม่อีกครั้ง","en" : "Session expired time limit for using is 15 minutes for secure, please access again"}],
