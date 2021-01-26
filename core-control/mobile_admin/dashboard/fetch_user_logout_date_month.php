@@ -49,7 +49,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											WHERE
 												login_date <= DATE_SUB(login_date, INTERVAL -6 MONTH)
 											GROUP BY
-												DATE_FORMAT(login_date, '%m')");
+												DATE_FORMAT(login_date, '%m')
+											ORDER BY login_date ASC");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
@@ -70,12 +71,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../include/exit_footer.php');
-		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../include/exit_footer.php');
-	
 }
 ?>

@@ -97,8 +97,8 @@ class insertLog {
 		}
 		private function logDepositTransfer($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logdepttransbankerror(member_no,id_userlogin,transaction_date,sigma_key,amt_transfer
-												,response_code,response_message) 
-												VALUES(:member_no,:id_userlogin,:operate_date,:sigma_key,:amt_transfer,:response_code,:response_message)");
+												,response_code,response_message,is_adj,ref_no) 
+												VALUES(:member_no,:id_userlogin,:operate_date,:sigma_key,:amt_transfer,:response_code,:response_message,:is_adj,:ref_no)");
 			$insertLog->execute($log_struc);
 		}
 		private function logWithdrawTransfer($log_struc){

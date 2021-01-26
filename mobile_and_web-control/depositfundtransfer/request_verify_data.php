@@ -6,13 +6,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$min_amount_deposit = $func->getConstant("min_amount_deposit");
 		if($dataComing["amt_transfer"] >= (int) $min_amount_deposit){
-			$getSumTransactionInMonth = $conoracle->prepare("SELECT NVL(SUM(DPS.DEPTSLIP_NETAMT),0) AS NETAMT FROM 
-																						DPUCFRECPPAYTYPE DPP, DPDEPTSLIP DPS, DPDEPTMASTER DPM WHERE 
-																						DPP.RECPPAYTYPE_CODE = DPS.RECPPAYTYPE_CODE AND
-																						DPS.DEPTACCOUNT_NO = DPM.DEPTACCOUNT_NO AND
-																						DPP.CHKLIMITDEPTPERSON_FLAG = 1 AND 
-																						DPS.ITEM_STATUS = 1 AND
-																						TO_CHAR(DPS.DEPTSLIP_DATE, 'YYYYMM') = TO_CHAR(SYSDATE,  'YYYYMM') AND
+			$getSumTransactionInMonth = $conoracle->prepare("SELECT NVL(SUM(DPS.DEPTSLIP_NETAMT),0) AS NETAMT 
+																						FROM 
+																						DPDEPTSLIP DPS LEFT JOIN DPUCFRECPPAYTYPE DPP ON DPS.RECPPAYTYPE_CODE = DPP.RECPPAYTYPE_CODE
+																						LEFT JOIN DPDEPTMASTER DPM ON DPS.DEPTACCOUNT_NO = DPM.DEPTACCOUNT_NO 
+																						WHERE 
+																						SUBSTR(DPS.RECPPAYTYPE_CODE,0,1) = 'D' AND DPP.CHKLIMITDEPTPERSON_FLAG = 1 
+																						AND DPS.ITEM_STATUS = 1 AND TO_CHAR(DPS.DEPTSLIP_DATE, 'YYYYMM') = TO_CHAR(SYSDATE,  'YYYYMM') AND
 																						DPM.MEMBER_NO = :member_no");
 			$getSumTransactionInMonth->execute([':member_no' => $member_no]);
 			$rowSumTran = $getSumTransactionInMonth->fetch(PDO::FETCH_ASSOC);
