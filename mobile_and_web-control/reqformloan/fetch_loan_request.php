@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$checkisReq = $conmysql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
 		$checkisReq->execute([':member_no' => $payload["member_no"]]);
-		if($checkisReq->rowCount() > 0){
+		$typeMember = substr($member_no,2,1);
+		if($checkisReq->rowCount() > 0 && ($typeMember != '9' && $typeMember != '8')){
 			$arrGrpLoan = array();
 			$arrCanCal = array();
 			$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");

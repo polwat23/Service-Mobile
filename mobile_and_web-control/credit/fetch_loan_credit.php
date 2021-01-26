@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLoanCanCal->execute();
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
 			$typeMember = substr($member_no,2,1);
-			if($typeMember != '9' || $typeMember != '8'){
+			if($typeMember != '9' && $typeMember != '8'){
 				$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
 				$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
 				$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);

@@ -32,34 +32,38 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											);
 		$fetchMember->execute($arrayExecute);
 		while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
-			$arrayGroup = array();
-			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
-			$arrayGroup["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
-			$arrayGroup["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
-			
-			$arrayGroup["CREATE_DATE"] = null;
-			$arrayGroup["UPDATE_DATE"] = null;
-			$arrayGroup["UPDATE_USERNAME"] = null;
-			$arrayGroup["IS_ALLOW"] = 0;
-			$arrayGroup["BANK_ACCOUNT_NO"] = null;
-			
-			$fetchAllow = $conmysql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow, bank_account_no
-											FROM gcallowmemberreqloan WHERE member_no = :member_no");
-			$fetchAllow->execute([
-				':member_no' => $rowMember["MEMBER_NO"]
-			]);
-			
-			while($rowAllow = $fetchAllow->fetch(PDO::FETCH_ASSOC)){
-				$arrayReport = array();
-				$arrayGroup["CREATE_DATE"] = $rowAllow["create_date"] ?? null;
-				$arrayGroup["UPDATE_DATE"] = $rowAllow["update_date"] ?? null;
-				$arrayGroup["UPDATE_USERNAME"] = $rowAllow["update_username"] ?? null;
-				$arrayGroup["IS_ALLOW"] = $rowAllow["is_allow"] ?? 0;
-				$arrayGroup["BANK_ACCOUNT_NO"] = $rowAllow["bank_account_no"] ?? null;
+			$typeMember = substr($rowMember["MEMBER_NO"],2,1);
+			if($typeMember != '9' && $typeMember != '8'){
+				$arrayGroup = array();
+				$arrayGroup["IS_ALLOW_UPDATE"] = true;
+				$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+				$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
+				$arrayGroup["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
+				$arrayGroup["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
+				
+				$arrayGroup["CREATE_DATE"] = null;
+				$arrayGroup["UPDATE_DATE"] = null;
+				$arrayGroup["UPDATE_USERNAME"] = null;
+				$arrayGroup["IS_ALLOW"] = 0;
+				$arrayGroup["BANK_ACCOUNT_NO"] = null;
+				
+				$fetchAllow = $conmysql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow, bank_account_no
+												FROM gcallowmemberreqloan WHERE member_no = :member_no");
+				$fetchAllow->execute([
+					':member_no' => $rowMember["MEMBER_NO"]
+				]);
+				
+				while($rowAllow = $fetchAllow->fetch(PDO::FETCH_ASSOC)){
+					$arrayReport = array();
+					$arrayGroup["CREATE_DATE"] = $rowAllow["create_date"] ?? null;
+					$arrayGroup["UPDATE_DATE"] = $rowAllow["update_date"] ?? null;
+					$arrayGroup["UPDATE_USERNAME"] = $rowAllow["update_username"] ?? null;
+					$arrayGroup["IS_ALLOW"] = $rowAllow["is_allow"] ?? 0;
+					$arrayGroup["BANK_ACCOUNT_NO"] = $rowAllow["bank_account_no"] ?? null;
+				}
+				
+				$arrayGroupAll[] = $arrayGroup;
 			}
-			
-			$arrayGroupAll[] = $arrayGroup;
 		}
 		$arrayResult["USER_ACCOUNT"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
