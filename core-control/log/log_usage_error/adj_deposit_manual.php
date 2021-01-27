@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['unique_id','id_depttran'],$dataComing)){
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../include/exit_footer.php');
 			}
-			$dateOperC = date('c');
+			$dateOperC = date('c',strtotime(date('Y-m-d',strtotime($rowLogDepositError["transaction_date"]))));
 			$fetchDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 			$fetchDepttype->execute([':deptaccount_no' => $rowLogDepositError["deptaccount_no_coop"]]);
 			$rowDataDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC);
