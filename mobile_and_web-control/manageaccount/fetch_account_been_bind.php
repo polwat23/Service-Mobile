@@ -43,6 +43,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccount["ICON_BANK"] = $config['URL_SERVICE'].$rowAccountBind["bank_logo_path"];
 					$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
 					$arrAccount["ICON_BANK_WEBP"] = $config['URL_SERVICE'].$explodePathBankLOGO[0].'.webp';
+					$arrAccount["BANK_CODE"] = $rowAccountBind["bank_code"];
 					$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
 					$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
 					$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];

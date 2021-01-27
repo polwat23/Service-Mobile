@@ -361,7 +361,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		
 	}
 }else{
-$filename = basename(__FILE__, '.php');
+	$filename = basename(__FILE__, '.php');
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
