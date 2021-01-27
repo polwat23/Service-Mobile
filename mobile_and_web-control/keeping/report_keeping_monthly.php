@@ -74,7 +74,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE
+																kpd.OPERATE_DATE,
+																kpd.INTEREST_ACCUM
 																FROM kptempreceive kpd
 																WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
 																and TRIM(kpd.ref_membno) = :ref_member_no");
@@ -87,6 +88,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
+		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
@@ -181,14 +183,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">งวด :</td>
-			<td style="width: 350px;">'.$header["recv_period"].'</td>
+			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
+			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
-			<td style="width: 350px;">'.$header["fullname"].'</td>
+			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 350px;">'.$header["interest_accum"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
