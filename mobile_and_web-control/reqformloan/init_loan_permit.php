@@ -106,6 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
 					$arrGrpObj[] = $arrObj;
 				}
+				$typeCalDate = $func->getConstant("process_keep_forward");
 				if($max_period == 0){
 					$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 															ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
@@ -113,7 +114,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 															ORDER BY lnt.loantype_code");
 					$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 					$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-					$typeCalDate = $func->getConstant("process_keep_forward");
 					$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
 					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
 					if($typeCalDate == "next"){
@@ -126,12 +126,21 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]) + (($maxloan_amt * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
 					$period_payment = floor($period_payment - ($period_payment % 100));
 				}
-				$arrPayPrin["VALUE"] = "0";
-				$arrPayPrin["DESC"] = "คงต้น";
-				$arrGrpPayType[] = $arrPayPrin;
-				$arrPayEqual["VALUE"] = "1";
-				$arrPayEqual["DESC"] = "คงยอด";
-				$arrGrpPayType[] = $arrPayEqual;
+				if($dataComing["loantype_code"] == '12'){
+					$arrPayEqual["VALUE"] = "2";
+					$arrPayEqual["DESC"] = "ชำระแค่ดอกเบี้ย";
+					$arrGrpPayType[] = $arrPayEqual;
+					$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "2";
+					$arrayResult["DISABLE_PERIOD"] = TRUE;
+				}else{
+					$arrPayPrin["VALUE"] = "0";
+					$arrPayPrin["DESC"] = "คงต้น";
+					$arrGrpPayType[] = $arrPayPrin;
+					$arrPayEqual["VALUE"] = "1";
+					$arrPayEqual["DESC"] = "คงยอด";
+					$arrGrpPayType[] = $arrPayEqual;
+					$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "0";
+				}
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/loan_termanduse.html";
 				//$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 				$arrayResult["LOANREQ_AMT_STEP"] = 100;
@@ -142,7 +151,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
 				$arrayResult["MAX_PERIOD"] = $period;
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-				$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "0";
 				$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 				$arrayResult["REQ_SALARY"] = TRUE;
@@ -150,9 +158,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
 				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
 				$arrayResult['OBJECTIVE'] = $arrGrpObj;
-				if($dataComing["loantype_code"] == '12'){
-					$arrayResult["DISABLE_PERIOD"] = TRUE;
-				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
