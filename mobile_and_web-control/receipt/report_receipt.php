@@ -18,7 +18,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-		$getKpSlipNo = $conoracle->prepare("SELECT KPSLIP_NO,KEEPING_STATUS,RECEIPT_NO,RECEIPT_DATE AS OPERATE_DATE from kpmastreceive where member_no = :member_no and recv_period = :recv_period");
+		$getKpSlipNo = $conoracle->prepare("SELECT KPSLIP_NO,KEEPING_STATUS,RECEIPT_NO,RECEIPT_DATE AS OPERATE_DATE,INTEREST_ACCUM 
+											from kpmastreceive where member_no = :member_no and recv_period = :recv_period");
 		$getKpSlipNo->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -27,6 +28,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$header["keeping_status"] = $rowKp["KEEPING_STATUS"];
+		$header["interest_accum"] = number_format($rowKp["INTEREST_ACCUM"],2);
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		CASE kut.system_code 
@@ -238,14 +240,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">งวด :</td>
-			<td style="width: 350px;">'.$header["recv_period"].'</td>
+			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
+			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
-			<td style="width: 350px;">'.$header["fullname"].'</td>
+			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 350px;">'.$header["interest_accum"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
