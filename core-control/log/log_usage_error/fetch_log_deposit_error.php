@@ -14,11 +14,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															login.device_name,
 															login.channel,
 															tb.is_adj,
-															gba.deptaccount_no_coop
+															gba.deptaccount_no_coop,
+															gt.coop_slip_no
 													FROM logdepttransbankerror tb
 													LEFT JOIN gcuserlogin login
 													ON login.id_userlogin = tb.id_userlogin 
 													LEFT JOIN gcbindaccount gba ON tb.sigma_key = gba.sigma_key
+													LEFT JOIN gctransaction gt ON tb.ref_no = gt.ref_no
 													ORDER BY tb.transaction_date DESC");
 		$fetchLogDepositError->execute();
 		while($rowLogDepositError = $fetchLogDepositError->fetch(PDO::FETCH_ASSOC)){
@@ -35,25 +37,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogDepositError["RESPONSE_CODE"] = $rowLogDepositError["response_code"];
 			$arrLogDepositError["RESPONSE_MESSAGE"] = $rowLogDepositError["response_message"];
 			if($rowLogDepositError["is_adj"] == '8'){
-				$checkAdj = $conoracle->prepare("SELECT DEPTSLIP_NO FROM dpdeptslip WHERE deptaccount_no = :deptaccount_no and deptslip_amt = :amt_transfer
-												and deptitemtype_code IN('DTB','DWR') and to_char(deptslip_date,'YYYY-MM-DD') = :date_oper");
-				$checkAdj->execute([
-					':deptaccount_no' => $rowLogDepositError["deptaccount_no_coop"],
-					':amt_transfer' => $rowLogDepositError["amt_transfer"],
-					':date_oper' => date('Y-m-d',strtotime($rowLogDepositError["transaction_date"]))
-				]);
-				$rowAdj = $checkAdj->fetch(PDO::FETCH_ASSOC);
-				if(empty($rowAdj["DEPTSLIP_NO"])){
-					$arrLogDepositError["IS_ADJ"] = TRUE;
-					$arrLogDepositError["ADJ_STATUS_DESC"] = 'รอ ADJ ยอด';
-				}else{
-					$arrLogDepositError["IS_ADJ"] = FALSE;
-					$arrLogDepositError["ADJ_STATUS_DESC"] = 'ADJ ยอดเรียบร้อย';
-				}
+				$arrLogDepositError["IS_ADJ"] = TRUE;
+				$arrLogDepositError["ADJ_STATUS_DESC"] = 'รอ ADJ ยอด';
 			}else{
 				$arrLogDepositError["IS_ADJ"] = FALSE;
 				if($rowLogDepositError["is_adj"] == '1'){
 					$arrLogDepositError["ADJ_STATUS_DESC"] = 'ADJ ยอดเรียบร้อย';
+					if(isset($rowLogDepositError["coop_slip_no"]) && $rowLogDepositError["coop_slip_no"] != ""){
+						$arrLogDepositError["IS_REJECT_ADJ"] = TRUE;
+					}
 				}
 			}
 			$arrayGroup[] = $arrLogDepositError;
