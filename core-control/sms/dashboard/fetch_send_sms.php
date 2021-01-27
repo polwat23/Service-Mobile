@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupMonth = array();
 		$fetchSmsSend = $conmysql->prepare("SELECT
 												COUNT(MEMBER_NO) AS C_NAME,
-												DATE_FORMAT(send_date, '%m') AS MONTH
+												DATE_FORMAT(send_date, '%m') AS MONTH,
+												DATE_FORMAT(send_date, '%Y') AS YEAR
 											FROM
 												smslogwassent
 											WHERE
@@ -19,7 +20,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSmsSend->execute();
 		while($rowSMSsend = $fetchSmsSend->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupSystemSendSMS = array();
-			$arrGroupSystemSendSMS["MONTH"] = $rowSMSsend["MONTH"];;
+			$arrGroupSystemSendSMS["MONTH"] = $rowSMSsend["MONTH"];
+			$arrGroupSystemSendSMS["YEAR"] = $rowSMSsend["YEAR"]+543;
 			$arrGroupSystemSendSMS["AMT"] = $rowSMSsend["C_NAME"];
 			$arrayGroup[] = $arrGroupSystemSendSMS;
 		}

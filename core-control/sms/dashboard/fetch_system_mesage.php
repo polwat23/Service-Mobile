@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupMonth = array();
 		$fetchSMSsystemSend = $conmysql->prepare("SELECT
 													COUNT(MEMBER_NO) AS C_NAME,
-													DATE_FORMAT(receive_date, '%m') AS MONTH
+													DATE_FORMAT(receive_date, '%m') AS MONTH,
+													DATE_FORMAT(receive_date, '%Y') AS YEAR
 												FROM
 													gchistory
 												WHERE
@@ -16,7 +17,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSMSsystemSend->execute();
 		while($rowSMSsendSytem = $fetchSMSsystemSend->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupSystemSendSMS = array();
-			$arrGroupSystemSendSMS["MONTH"] = $rowSMSsendSytem["MONTH"];;
+			$arrGroupSystemSendSMS["MONTH"] = $rowSMSsendSytem["MONTH"];
+			$arrGroupSystemSendSMS["YEAR"] = $rowSMSsendSytem["YEAR"]+543;
 			$arrGroupSystemSendSMS["AMT"] = $rowSMSsendSytem["C_NAME"];
 			$arrayGroup[] = $arrGroupSystemSendSMS;
 		}

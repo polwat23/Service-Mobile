@@ -87,16 +87,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					]);
 					$rowCollAsset = $whocolluAsset->fetch(PDO::FETCH_ASSOC);
 					$arrGroupAllMember["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
-					if(isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != ""){
-						$address =  isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != "" ? "โฉนดเลขที่ ".$rowCollAsset["COLLMAST_REFNO"] : "";
-						$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " บ้านเลขที่ ".$rowCollAsset["LAND_LANDNO"] : "";
-						$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " ต.".$rowCollAsset["POS_TUMBOL"] : "";
-						$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " อ.".$rowCollAsset["DISTRIC_DESC"] : "";
-						$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " จ.".$rowCollAsset["PROVINCE_DESC"] : "";
-						$arrGroupAllMember["DESCRIPTION"] = $address;
-					}else{
-						$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
-					}
+					$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '05'){
 					$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 				}
@@ -194,16 +185,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						]);
 						$rowCollAsset = $whocolluAsset->fetch(PDO::FETCH_ASSOC);
 						$arrGroupAllMember["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
-						if(isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != ""){
-							$address =  isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != "" ? "โฉนดเลขที่ ".$rowCollAsset["COLLMAST_REFNO"] : "";
-							$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " บ้านเลขที่ ".$rowCollAsset["LAND_LANDNO"] : "";
-							$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " ต.".$rowCollAsset["POS_TUMBOL"] : "";
-							$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " อ.".$rowCollAsset["DISTRIC_DESC"] : "";
-							$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " จ.".$rowCollAsset["PROVINCE_DESC"] : "";
-							$arrGroupAllMember["DESCRIPTION"] = $address;
-						}else{
-							$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
-						}
+						$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 					}else if($rowColl["LOANCOLLTYPE_CODE"] == '05'){
 						$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 					}

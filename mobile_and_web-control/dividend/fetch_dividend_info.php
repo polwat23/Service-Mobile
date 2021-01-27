@@ -62,7 +62,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LEFT JOIN cmucfbankbranch cmbb ON md.EXPENSE_BRANCH = cmbb.branch_id and
 												md.EXPENSE_BANK = cmbb.bank_code
 											WHERE  
-												md.EXPENSE_CODE IN ('CSH','TRS','TRN','CBT') AND 
 												TRIM(md.MEMBER_NO) = :member_no
 												AND md.DIVAVG_YEAR = :div_year
 												AND md.TEST_FLAG = '0'

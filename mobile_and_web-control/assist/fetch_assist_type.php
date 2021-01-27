@@ -82,7 +82,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchAssAsDead->execute([':year_count' => $member_date_count]);
 		while($rowAssAsDead = $fetchAssAsDead->fetch(PDO::FETCH_ASSOC)){
 			$arrAss = array();
-			$arrAss["PAYPER_AMT"] = number_format($rowAssAsDead["MONEY_AMT"],2);
+			$arrAss["APPROVE_AMT"] = number_format($rowAssAsDead["MONEY_AMT"],2);
 			$arrAss["ASSISTTYPE_DESC"] = 'สวัสดิการค่าทำศพ';
 			$arrRightGroupAss[] = $arrAss;
 		}
@@ -105,7 +105,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$assistretryRemain = $rowAmtRecv["ASSIST_AMT"];
 		while($rowAsDeadCoffin = $fetchAsDeadCoffin->fetch(PDO::FETCH_ASSOC)){
 			$arrSubAssist = array();
-			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "จ่ายรายละ" : "Pay per man";
+			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "วงเงินรับสวัสดิการ" : "Welfare limit";
 			$arrSubAssist["VALUE"] = number_format($rowAsDeadCoffin["MONEY_AMT"],2).($lang_locale == 'th' ? " บาท" : " Baht");
 			$arrListAssist[] = $arrSubAssist;
 			$arrSubAssist["LABEL"] = $lang_locale == 'th' ? "รับไปแล้ว" : "Received";
