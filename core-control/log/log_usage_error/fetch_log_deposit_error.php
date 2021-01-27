@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogDepositError["RESPONSE_MESSAGE"] = $rowLogDepositError["response_message"];
 			if($rowLogDepositError["is_adj"] == '8'){
 				$checkAdj = $conoracle->prepare("SELECT DEPTSLIP_NO FROM dpdeptslip WHERE deptaccount_no = :deptaccount_no and deptslip_amt = :amt_transfer
-												and deptitemtype_code = 'DTB' and to_char(deptslip_date,'YYYY-MM-DD') = :date_oper");
+												and deptitemtype_code IN('DTB','DWR') and to_char(deptslip_date,'YYYY-MM-DD') = :date_oper");
 				$checkAdj->execute([
 					':deptaccount_no' => $rowLogDepositError["deptaccount_no_coop"],
 					':amt_transfer' => $rowLogDepositError["amt_transfer"],
