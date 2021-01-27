@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupMonth = array();
 		$fetchUserlogin = $conmysql->prepare("SELECT
 												DATE_FORMAT(login_date, '%m') AS MONTH,
+												DATE_FORMAT(login_date, '%Y') AS YEAR,
 												IFNULL((
 													SELECT COUNT(member_no) as C_MEM_LOGIN 
 													FROM gcuserlogin 
@@ -55,6 +56,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
 			$arrGroupRootUserlogin["MONTH"] = $rowUserlogin["MONTH"];
+			$arrGroupRootUserlogin["YEAR"] = $rowUserlogin["YEAR"]+543;
 			$arrGroupRootUserlogin["C_MEM_LOGIN"] = $rowUserlogin["C_MEM_LOGIN"];
 			$arrGroupRootUserlogin["C_MEM_LOGIN_WEB"] = $rowUserlogin["C_MEM_LOGIN_WEB"];
 			$arrGroupRootUserlogin["C_MEM_LOGIN_MOBILE"] = $rowUserlogin["C_MEM_LOGIN_MOBILE"];
