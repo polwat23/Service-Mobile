@@ -266,6 +266,7 @@ class functions {
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}else{
+								file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 								$this->con->rollback();
 								return false;
 							}
@@ -278,6 +279,7 @@ class functions {
 							$this->con->commit();
 							return true;
 						}else{
+							file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 							$this->con->rollback();
 							return false;
 						}
@@ -296,6 +298,7 @@ class functions {
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}else{
+								file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 								$this->con->rollback();
 								return false;
 							}
@@ -308,6 +311,7 @@ class functions {
 							$this->con->commit();
 							return true;
 						}else{
+							file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 							$this->con->rollback();
 							return false;
 						}
@@ -325,6 +329,7 @@ class functions {
 						$this->con->commit();
 						return true;
 					}else{
+						file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 						$this->con->rollback();
 						return false;
 					}
@@ -335,6 +340,7 @@ class functions {
 						$this->con->commit();
 						return true;
 					}else{
+						file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 						$this->con->rollback();
 						return false;
 					}
@@ -756,9 +762,15 @@ class functions {
 			}
 		}
 		public function MaintenanceMenu($menu_component) {
-			$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0',menu_permission = '3' WHERE menu_component = :menu_component");
-			$mainTenance->execute([':menu_component' => $menu_component]);
+			if($menu_component == 'System'){
+				$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0',menu_permission = '3' WHERE menu_component = :menu_component");
+				$mainTenance->execute([':menu_component' => $menu_component]);
+			}else{
+				$mainTenance = $this->con->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
+				$mainTenance->execute([':menu_component' => $menu_component]);
+			}
 		}
+
 		public function PrefixGenerate($prefix){
 			$arrPrefix = explode(",",$prefix);
 			$arrPrefixOut = array();
