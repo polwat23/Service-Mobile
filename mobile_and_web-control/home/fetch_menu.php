@@ -43,7 +43,8 @@ if(!$anonymous){
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
-			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
+			$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT 
+												FROM lncontmaster WHERE member_no = :member_no and contract_status = 1 and PRINCIPAL_BALANCE > 0");
 			$fetchMenuLoan->execute([':member_no' => $member_no]);
 			$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 			$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);

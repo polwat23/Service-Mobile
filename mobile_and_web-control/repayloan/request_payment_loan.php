@@ -129,6 +129,48 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							}
 						}
 					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
+						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							$arrPayloadNotify["SEND_BY"] = "system";
+							if($lib->sendNotifyHW($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
+								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+								$updateSyncNoti->execute([
+									':deptaccount_no' => $responseSaveLN->deptaccount_no,
+									':seq_no' => $rowSeqno["SEQ_NO"]
+								]);
+								$updateSyncNoti = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
+								$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->payinslip_no]);
+							}
+						}
+					}
+					$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+					foreach($arrayTel as $dest){
+						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+							$message_body = $message_endpoint["BODY"];
+							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+							$arraySendSMS = $lib->sendSMS($arrayDest);
+							if($arraySendSMS["RESULT"]){
+								$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+								$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+							}else{
+								$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+								$func->logSMSWasNotSent($bulkInsert);
+							}
+						}else{
+							$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+									'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+							$func->logSMSWasNotSent($bulkInsert);
+						}
+					}
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{

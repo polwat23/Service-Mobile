@@ -64,19 +64,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							"adtm_lastcalint" => date('c')							
 						];
 						$resultWS = $clientWS->__call("of_computeinterest", array($argumentWS));
-						$arrLoan["INT_BALANCE"] = $resultWS->of_computeinterestResult ?? 0;
+						$arrLoan["INT_BALANCE"] = $resultWS->of_computeinterestResult ?? "0.00";
 					}catch(Throwable $e){
-						$arrLoan["INT_BALANCE"] = 0;
+						$arrLoan["INT_BALANCE"] = "0.00";
 					}
 				}catch(Throwable $e){
-					$arrLoan["INT_BALANCE"] = 0;
+					$arrLoan["INT_BALANCE"] = "0.00";
 				}
 				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
 					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
 				}else{
 					$arrLoan["LOAN_TYPE_IMG"] = null;
 				}
-				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
+				$getLoanConstant = $conmysql->prepare("SELECT loantype_alias_name FROM gcconstanttypeloan WHERE loantype_code = :loantype_code");
+				$getLoanConstant->execute([':loantype_code' => $rowLoan["LOANTYPE_CODE"]]);
+				$rowLoanCont = $getLoanConstant->fetch(PDO::FETCH_ASSOC);
+				$arrLoan["LOAN_TYPE"] = $rowLoanCont["loantype_alias_name"] ?? $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);

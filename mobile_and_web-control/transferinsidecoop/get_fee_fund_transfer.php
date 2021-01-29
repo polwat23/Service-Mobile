@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$SumAmt_transfer = $amt_transfer + $dataComing["amt_transfer"];
 				if($SumAmt_transfer <= $rowWithdrawal["WITHDRAWABLE_AMT"]){
 					$is_separate = $func->getConstant("separate_limit_amount_trans_online");
-					$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MOBILE_APP' and tran_status = 1");
+					$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
 					$getLimitAllDay->execute();
 					$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
 					if($is_separate){

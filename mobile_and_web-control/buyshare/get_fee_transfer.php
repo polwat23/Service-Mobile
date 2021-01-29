@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$getCurrShare->execute([':member_no' => $member_no]);
 		$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
 		$sharereq_value = ($rowCurrShare["SHARESTK_AMT"] * 10) + $dataComing["amt_transfer"];
-		$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MOBILE_APP' and tran_status = 1");
+		$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
 		$getLimitAllDay->execute();
 		$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
 		if($is_separate){

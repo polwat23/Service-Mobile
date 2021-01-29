@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayGrpLoan = array();
-		$getLoantype = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
+		$getLoantype = $conmysql->prepare("SELECT loantype_code,loantype_alias_name FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
 		$getLoantype->execute();
 		while($rowLoantype = $getLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					]);
 					$rowRights = $checkRightsLoan->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowRights["LOANTYPE_CODE"]) && $rowRights["LOANTYPE_CODE"] != ""){
-						$arrayLoan["LOANTYPE_DESC"] = $rowLoanData["LOANTYPE_DESC"];
+						$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["loantype_alias_name"] ?? $rowLoanData["LOANTYPE_DESC"];
 						$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
 						$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
 						if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayGrpLoan[] = $arrayLoan;
 					}
 				}else{
-					$arrayLoan["LOANTYPE_DESC"] = $rowLoanData["LOANTYPE_DESC"];
+					$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["loantype_alias_name"] ?? $rowLoanData["LOANTYPE_DESC"];
 					$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
 					$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
 					if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getLoanConst = $conoracle->prepare("SELECT ROUNDPERIODPOS_AMT FROM lnloanconstant");
 		$getLoanConst->execute();
 		$rowLoanConst = $getLoanConst->fetch(PDO::FETCH_ASSOC);
-		$arrayResult['TYPE_DECIMAL'] = $rowLoanConst["ROUNDPERIODPOS_AMT"];
+		//$arrayResult['TYPE_DECIMAL'] = $rowLoanConst["ROUNDPERIODPOS_AMT"];
 		$arrayResult['LOAN_TYPE'] = $arrayGrpLoan;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

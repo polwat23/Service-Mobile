@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$is_separate = $func->getConstant("separate_limit_amount_trans_online");
-		$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MOBILE_APP' and tran_status = 1");
+		$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
 		$getLimitAllDay->execute();
 		$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];

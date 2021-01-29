@@ -92,6 +92,8 @@
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
 	"WS0075" : [{"th" : "ไม่สามาถซื้อหุ้นได้เนื่องจากเหตุผลบางประการ กรุณาติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot buy shares because something was wronged please contact cooperative for more information"}],
 	"WS0086" : [{"th" : "ไม่สามารถขอกู้ได้ เนื่องจากหนี้เดิมของท่านมีมากกว่าสิทธิ์กู้ของท่าน","en" : "Cannot request loan because old debt is more than your loan rights"}],
+	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
+	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -167,6 +169,22 @@
 			[{"th" : "บัญชีปลายทางไม่ถูกต้อง","en" : "Destination account is not correct"}],
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
+	}],
+	"KTB_ERR" : [{
+		"EM004" :
+			[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Your balance is insufficient"}],
+		"EM006" :
+			[{"th" : "สถานะบัญชีของท่านไม่ตรงตามเงื่อนในการทำธุรกรรมกับธนาคาร กรุณาติดต่อสหกรณ์","en" : "Account status is not allowed please contact cooperative"}],
+		"EM013" :
+			[{"th" : "ไม่พบการผูกบัญชีของท่าน กรุณาผูกบัญชีก่อนทำรายการ","en" : "Not found your bind account please bind account before transaction"}],
+		"EM032" :
+			[{"th" : "เลขบัญชีของท่านไม่ถูกต้องหรือสถานะบัญชีไม่ตรงกับเงื่อนไขของธนาคาร กรุณาติดต่อสหกรณ์","en" : "Your account number incorrect or account status not allow for bank of condition please contact cooperative"}],
+		"EM037" :
+			[{"th" : "สถานะบัญชีของท่านไม่สามารถใช้งานได้ กรุณาติดต่อสหกรณ์","en" : "Your account status was not allowed please contact cooperative"}],
+		"EM043" :
+			[{"th" : "ท่านทำรายการเกินวงเงินที่ธนาคารกำหนด","en" : "The Bank Limit Amount Exceeded"}],
+		"EM053" :
+			[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Your balance is insufficient"}]
 	}],
 	"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
 	"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],

@@ -17,6 +17,7 @@ $con = new connection();
 $jwt_token = new Token();
 $lib = new library();
 $conmysql = $con->connecttomysql();
+$conoracle = $con->connecttooracle();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	

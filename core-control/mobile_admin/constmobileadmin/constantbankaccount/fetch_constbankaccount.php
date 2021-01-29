@@ -36,6 +36,27 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["COLOR_SECON"] = $rowAccount["color_secon"];
 			$arrConstans["COLOR_DEG"] = $rowAccount["color_deg"];
 			$arrConstans["COLOR_TEXT"] = $rowAccount["color_text"];
+			
+			//fect bank constant
+			$fetchConstant = $conmysql->prepare("SELECT
+										bank.bank_code,
+										bank.bank_name,
+										bank.bank_short_name,
+										bank.bank_logo_path,
+										bank.bank_format_account,
+										bank.bank_format_account_hide,
+										bank.id_palette,
+										color.type_palette,
+										color.color_main,
+										color.color_secon,
+										color.color_deg,
+										color.color_text
+									FROM
+										csbankdisplay bank
+									LEFT JOIN gcpalettecolor color ON
+										bank.id_palette = color.id_palette");
+			$fetchConstant->execute();
+			
 			$arrayGroup[] = $arrConstans;
 		}
 		$arrayResult["BANKACCOUNT_DATA"] = $arrayGroup;
