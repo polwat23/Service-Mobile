@@ -47,9 +47,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayRecv = array();
 				if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
 					if(isset($rowMethpay["BANK"])){
-						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x');
 					}else{
-						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format'));
 					}
 				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
