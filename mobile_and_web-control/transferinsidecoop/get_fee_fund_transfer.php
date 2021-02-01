@@ -34,8 +34,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$getDepPaytype = $conmssql->prepare("SELECT group_itemtpe as GRP_ITEMTYPE FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
 		$getDepPaytype->execute([':itemtype' => $itemtypeWithdraw]);
 		$rowDepPay = $getDepPaytype->fetch(PDO::FETCH_ASSOC);
-		$getContDeptType = $conmssql->prepare("SELECT MINWITD_AMT,NVL(s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(withcount_flag,0) as IS_CHECK_PENALTY
-												,NVL(s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(withcount_unit,1) as PERIOD_UNIT_CHECK FROM dpdepttype WHERE depttype_code = :depttype_code");
+		$getContDeptType = $conmssql->prepare("SELECT MINWITD_AMT,ISNULL(s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,ISNULL(withcount_flag,0) as IS_CHECK_PENALTY
+												,ISNULL(s_period_inmonth,1) as PER_PERIOD_INCOUNT,ISNULL(withcount_unit,1) as PERIOD_UNIT_CHECK FROM dpdepttype WHERE depttype_code = :depttype_code");
 		$getContDeptType->execute([':depttype_code' => $rowType["DEPTTYPE_CODE"]]);
 		$rowContDeptType = $getContDeptType->fetch(PDO::FETCH_ASSOC);
 		if($dataComing["amt_transfer"] < $rowContDeptType["MINWITD_AMT"]){
@@ -49,22 +49,22 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$queryCheckPeriod = null;
 			if($rowContDeptType["PER_PERIOD_INCOUNT"] > 0){
 				if($rowContDeptType["PERIOD_UNIT_CHECK"] == '1'){
-					$monthCheck = date('Ym',strtotime('-'.$rowContDeptType["PER_PERIOD_INCOUNT"].' months'));
-					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYYMM')";
+					$monthCheck = date('Ym',strtotime('-'.($rowContDeptType["PER_PERIOD_INCOUNT"] -1).' months'));
+					$queryCheckPeriod = "and FORMAT(dps.operate_date,'yyyyMM') BETWEEN ".$monthCheck." and FORMAT(GETDATE(),'yyyyMM')";
 				}else if($rowContDeptType["PERIOD_UNIT_CHECK"] == '2'){
 					$thisMonth = date('m',strtotime($dateTrans));
 					if($thisMonth >= 1 && $thisMonth <= 3){
-						$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '01' and to_char(TRUNC(sysdate),'YYYY') || '03'";
+						$queryCheckPeriod = "and FORMAT(dps.operate_date,'yyyyMM') BETWEEN FORMAT(GETDATE(),'yyyy') || '01' and FORMAT(GETDATE(),'yyyy') || '03'";
 					}else if($thisMonth >= 4 && $thisMonth <= 6){
-						$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '04' and to_char(TRUNC(sysdate),'YYYY') || '06'";
+						$queryCheckPeriod = "and FORMAT(dps.operate_date,'yyyyMM') BETWEEN FORMAT(GETDATE(),'yyyy') || '04' and FORMAT(GETDATE(),'yyyy') || '06'";
 					}else if($thisMonth >= 7 && $thisMonth <= 9){
-						$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '07' and to_char(TRUNC(sysdate),'YYYY') || '09'";
+						$queryCheckPeriod = "and FORMAT(dps.operate_date,'yyyyMM') BETWEEN FORMAT(GETDATE(),'yyyy') || '07' and FORMAT(GETDATE(),'yyyy') || '09'";
 					}else{
-						$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '10' and to_char(TRUNC(sysdate),'YYYY') || '12'";
+						$queryCheckPeriod = "and FORMAT(dps.operate_date,'yyyyMM') BETWEEN FORMAT(GETDATE(),'yyyy') || '10' and FORMAT(GETDATE(),'yyyy') || '12'";
 					}
 				}else if($rowContDeptType["PERIOD_UNIT_CHECK"] == '3'){
-					$monthCheck = date('Ym',strtotime('-'.($rowContDeptType["PER_PERIOD_INCOUNT"] * 12).' months'));
-					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYYMM')";
+					$monthCheck = date('Y',strtotime('-'.($rowContDeptType["PER_PERIOD_INCOUNT"]-1).' years'));
+					$queryCheckPeriod = "and FORMAT(dps.operate_date,'yyyy') BETWEEN ".$monthCheck." and FORMAT(GETDATE(),'yyyy')";
 				}else if($rowContDeptType["PERIOD_UNIT_CHECK"] == '4'){
 					$queryCheckPeriod = "";
 				}else{
@@ -81,7 +81,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$rowItemCount = $checkItemIsCount->fetch(PDO::FETCH_ASSOC);
 				if($rowItemCount["IS_NOTCOUNT"] > 0){
 					$getCountTrans = $conmssql->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-														WHERE dps.deptaccount_no = :deptaccount_no and dps.deptitemtype_code <> :itemtype_code ".$queryCheckPeriod);
+														WHERE dps.deptaccount_no = :deptaccount_no and SUBSTRING(dps.DEPTITEMTYPE_CODE,1,1) = 'W' 
+														and dps.deptitemtype_code <> :itemtype_code and dps.item_status = '1' ".$queryCheckPeriod);
 					$getCountTrans->execute([
 						':deptaccount_no' => $deptaccount_no,
 						':itemtype_code' => $itemtypeWithdraw
@@ -90,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$count_trans = $rowCountTrans["C_TRANS"];
 				}else{
 					$getCountTrans = $conmssql->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-														WHERE dps.deptaccount_no = :deptaccount_no ".$queryCheckPeriod);
+														WHERE dps.deptaccount_no = :deptaccount_no and SUBSTRING(dps.DEPTITEMTYPE_CODE,1,1) = 'W' and dps.item_status = '1' ".$queryCheckPeriod);
 					$getCountTrans->execute([
 						':deptaccount_no' => $deptaccount_no
 					]);
@@ -114,8 +115,14 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$penalty_amt = $rowContFee["MAX_FEE"];
 			}
 		}
-		$arrayResult['FEE_AMT'] = $penalty_amt;
-		$arrayResult['FEE_AMT_FORMAT'] = number_format($penalty_amt,2);
+		if($penalty_amt > 0){
+			$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+			$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+			$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+			$arrayResult['CAUTION'] = $arrayCaution;
+		}
+		$arrayResult['PENALTY_AMT'] = $penalty_amt;
+		$arrayResult['PENALTY_AMT_FORMAT'] = number_format($penalty_amt,2);
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

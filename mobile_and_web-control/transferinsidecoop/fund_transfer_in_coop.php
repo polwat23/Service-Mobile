@@ -101,22 +101,11 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
 			}
 		}
-		$PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		$lastStmSrcNo = $rowMaxSeqNo["MAX_SEQ_NO"] + 1;
 		$conmssql->beginTransaction();
-		$arrExecute = [
-			':deptslip_no' => $deptslip_no,
-			':deptaccount_no' => $from_account_no,
-			':itemtype_code' => $itemtypeWithdraw,
-			':slip_amt' => $dataComing["amt_transfer"],
-			':prncbal' => $rowAccData["PRNCBAL"],
-			':withdrawable_amt' => $rowAccData["WITHDRAWABLE_AMT"],
-			':checkpend_amt' => $rowAccData["CHECKPEND_AMT"],
-			':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-			':laststmno' => $lastStmSrcNo,
-			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($rowAccData["LASTCALINT_DATE"])),
-			':penalty_amt' => $dataComing["penalty_amt"]
-		];
+		$arrExecute = [$deptslip_no,$from_account_no,$itemtypeWithdraw,$dataComing["amt_transfer"],$rowAccData["PRNCBAL"],$rowAccData["WITHDRAWABLE_AMT"],
+		$rowAccData["CHECKPEND_AMT"],date('Y-m-d H:i:s',strtotime($dateOper)),$lastStmSrcNo,$itemtypeWithdraw,date('Y-m-d H:i:s',strtotime($rowAccData["LASTCALINT_DATE"])),
+		$dataComing["penalty_amt"],$dataComing["amt_transfer"],date('Y-m-d H:i:s',strtotime($dateOper))];
 		if($dataComing["penalty_amt"] > 0){
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 								deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
@@ -125,10 +114,11 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
 								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
-								VALUES(:deptslip_no,'".$config["COOP_ID"]."',:deptaccount_no,'".$rowAccData["DEPTTYPE_CODE"]."','".$config["COOP_ID"]."',
-								'".$rowAccData["DEPTGROUP_CODE"]."',GETDATE(),:itemtype_code,
-								:slip_amt,'".$rowDepPay["MONEYTYPE_SUPPORT"]."',:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',CONVERT(DATETIME,:entry_date),:laststmno,:itemtype_code,
-								CONVERT(DATETIME,:lastcalint_date),GETDATE(),1,0,:penalty_amt,0,0,'".$rowMapAccDest["ACCOUNT_ID"]."',2,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,CONVERT(DATETIME,:entry_date))";
+								VALUES(?,'".$config["COOP_ID"]."',?,'".$rowAccData["DEPTTYPE_CODE"]."','".$config["COOP_ID"]."',
+								'".$rowAccData["DEPTGROUP_CODE"]."',GETDATE(),?,
+								?,'".$rowDepPay["MONEYTYPE_SUPPORT"]."',?,?,?,'MOBILE',CONVERT(DATETIME,?),?,?,
+								CONVERT(DATETIME,?),GETDATE(),1,0,?,0,0,'".$rowMapAccDest["ACCOUNT_ID"]."',
+								2,0,0,?,0,0,0,1,1,1,0,1,1,CONVERT(DATETIME,?))";
 		}else{
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 								deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
@@ -137,10 +127,11 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
 								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
-								VALUES(:deptslip_no,'".$config["COOP_ID"]."',:deptaccount_no,'".$rowAccData["DEPTTYPE_CODE"]."','".$config["COOP_ID"]."',
-								'".$rowAccData["DEPTGROUP_CODE"]."',GETDATE(),:itemtype_code,
-								:slip_amt,'".$rowDepPay["MONEYTYPE_SUPPORT"]."',:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',CONVERT(DATETIME,:entry_date),:laststmno,:itemtype_code,
-								CONVERT(DATETIME,:lastcalint_date),GETDATE(),1,0,:penalty_amt,0,0,'".$rowMapAccDest["ACCOUNT_ID"]."',1,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,CONVERT(DATETIME,:entry_date))";
+								VALUES(?,'".$config["COOP_ID"]."',?,'".$rowAccData["DEPTTYPE_CODE"]."','".$config["COOP_ID"]."',
+								'".$rowAccData["DEPTGROUP_CODE"]."',GETDATE(),?,
+								?,'".$rowDepPay["MONEYTYPE_SUPPORT"]."',?,?,?,'MOBILE',CONVERT(DATETIME,?),?,?,
+								CONVERT(DATETIME,?),GETDATE(),1,0,?,0,0,'".$rowMapAccDest["ACCOUNT_ID"]."',
+								1,0,0,?,0,0,0,1,1,1,0,1,1,CONVERT(DATETIME,?))";
 		}
 		$insertDpSlip = $conmssql->prepare($insertDpSlipSQL);
 		if($insertDpSlip->execute($arrExecute)){
