@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 			$arrGroup["slip_amt"] = $dataComing["amt_transfer"];
 			$arrGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 			$arrGroup["member_no"] = $member_no;
+			$arrGroup["deptaccount_no"] = $from_account_no;
 			$arrGroup["slip_date"] = $dateOperC;
 			$ref_no = time().$lib->randomText('all',3);
 			try {

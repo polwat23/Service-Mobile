@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}else{
 						$getAccBankAllowATM = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
 																FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
-																WHERE atr.member_no = :member_no and atr.expense_bank = '006'");
+																WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1'");
 						$getAccBankAllowATM->execute([':member_no' => $member_no]);
 						$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
 						if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] != ""){

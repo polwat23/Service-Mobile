@@ -42,11 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
 					$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
 					$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
-					if($rowDataAccAll["SEQUEST_STATUS"] == '1'){
-						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"];
-					}else{
-						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["MINPRNCBAL"];
-					}
+					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]);
 					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
 					$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAll["PRNCBAL"],2);
 					$arrGroupAccAllow[] = $arrAccAllow;

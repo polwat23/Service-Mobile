@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
-												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.LOCKPROC_FLAG = '1' 
+												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.WEBSHOW_FLAG = '1' 
 												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
@@ -15,9 +15,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$getSlipDate = $conoracle->prepare("SELECT slip_date FROM yrslippayout WHERE member_no = :member_no and div_year = :div_year");
+			$getSlipDate = $conoracle->prepare("SELECT next_div_date as SLIP_DATE from ivrucfconfig where next_div_year = :div_year and rownum <= 1");
 			$getSlipDate->execute([
-				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$rowSlipDate = $getSlipDate->fetch(PDO::FETCH_ASSOC);

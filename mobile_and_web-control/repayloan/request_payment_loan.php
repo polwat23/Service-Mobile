@@ -46,6 +46,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$arrayGroupSaveLn["bfperiod_payment"] = $responseInitLn->bfperiod_payment;
 				$arrayGroupSaveLn["operate_date"] = date('c');
 				$arrayGroupSaveLn["slip_date"] = date('c');
+				$arrayGroupSaveLn["deptaccount_no"] = $from_account_no;
 				$arrayGroupSaveLn["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 				$arrayGroupSaveDP = array();
 				$arrayGroupSaveDP["coop_id"] = $coop_id;
@@ -202,7 +203,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					':status_flag' => '0',
 					':destination' => $dataComing["contract_no"],
 					':response_code' => "WS0066",
-					':response_message' => ($e->getMessage() ?? " Service ไม่ได้ Return Error มาให้"),
+					':response_message' => json_encode($e)
 				];
 				$log->writeLog('repayloan',$arrayStruc);
 				$arrayResult["RESPONSE_CODE"] = 'WS0066';

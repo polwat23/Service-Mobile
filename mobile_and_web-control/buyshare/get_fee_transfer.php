@@ -3,7 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
-		$is_separate = $func->getConstant("separate_limit_amount_trans_online");
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$getMembType = $conoracle->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMembType->execute([':member_no' => $member_no]);
@@ -11,28 +10,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$getCurrShare = $conoracle->prepare("SELECT SHARESTK_AMT FROM shsharemaster WHERE member_no = :member_no");
 		$getCurrShare->execute([':member_no' => $member_no]);
 		$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
-		$sharereq_value = ($rowCurrShare["SHARESTK_AMT"] * 10) + $dataComing["amt_transfer"];
-		$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
-		$getLimitAllDay->execute();
-		$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
-		if($is_separate){
-			$getSumAllDay = $conoracle->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) AS SUM_AMT FROM DPDEPTSTATEMENT 
-												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
-												and ITEM_STATUS = '1' and entry_id IN('MCOOP','ICOOP') and SUBSTR(deptitemtype_code,0,1) = 'W'");
-		}else{
-			$getSumAllDay = $conoracle->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) AS SUM_AMT FROM DPDEPTSTATEMENT 
-												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
-												and ITEM_STATUS = '1' and entry_id IN('MCOOP','ICOOP')");
-		}
-		$getSumAllDay->execute();
-		$rowSumAllDay = $getSumAllDay->fetch(PDO::FETCH_ASSOC);
-		if(($rowSumAllDay["SUM_AMT"] + $dataComing["amt_transfer"]) > $rowLimitAllDay["TOTAL_LIMIT"]){
-			$arrayResult["RESPONSE_CODE"] = 'WS0043';
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}
 		if($rowMembType["MEMBCAT_CODE"] == '10'){
 			$getConstantShare = $conoracle->prepare("SELECT MAXSHARE_HOLD,SHAREROUND_FACTOR FROM SHSHARETYPE WHERE SHARETYPE_CODE = '01'");
 			$getConstantShare->execute();
@@ -86,10 +63,40 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				
 			}
 		}
-		// $arrayResult['PENALTY_AMT'] = $amt_transfer;
-		// $arrayResult['PENALTY_AMT_FORMAT'] = number_format($amt_transfer,2);
-		$arrayResult['RESULT'] = TRUE;
-		require_once('../../include/exit_footer.php');
+		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WTX');
+		if($arrInitDep["RESULT"]){
+			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
+			if($arrRightDep["RESULT"]){
+				if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
+					$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+					$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+					$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+					$arrayResult['CAUTION'] = $arrayCaution;
+					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
+					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
+				}
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
+				if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+		}else{
+			$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
+			if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
+				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			}
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

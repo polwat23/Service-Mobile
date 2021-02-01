@@ -31,8 +31,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
 				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-				$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
-				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
+				$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAllow["DEPTACCOUNT_NO"]);
+				$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
 			$fetchShare = $conoracle->prepare("SELECT sharestk_amt FROM shsharemaster WHERE member_no = :member_no");
