@@ -266,7 +266,6 @@ class functions {
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}else{
-								file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 								$this->con->rollback();
 								return false;
 							}
@@ -279,7 +278,6 @@ class functions {
 							$this->con->commit();
 							return true;
 						}else{
-							file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 							$this->con->rollback();
 							return false;
 						}
@@ -298,7 +296,6 @@ class functions {
 								unset($bulkInsert);
 								$bulkInsert = array();
 							}else{
-								file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 								$this->con->rollback();
 								return false;
 							}
@@ -311,7 +308,6 @@ class functions {
 							$this->con->commit();
 							return true;
 						}else{
-							file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 							$this->con->rollback();
 							return false;
 						}
@@ -329,7 +325,6 @@ class functions {
 						$this->con->commit();
 						return true;
 					}else{
-						file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 						$this->con->rollback();
 						return false;
 					}
@@ -340,7 +335,6 @@ class functions {
 						$this->con->commit();
 						return true;
 					}else{
-						file_put_contents(__DIR__.'/../log/loginserthis.txt', json_encode($bulkInsert) . PHP_EOL, FILE_APPEND);
 						$this->con->rollback();
 						return false;
 					}
