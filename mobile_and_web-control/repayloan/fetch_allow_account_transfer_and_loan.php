@@ -48,7 +48,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}
-			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE
+			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.interest_arrear,lnm.intpayable_amt,lnm.principal_balance,
+													lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
 													WHERE member_no = :member_no and contract_status = 1");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
@@ -84,6 +85,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
+				$arrLoan["SUM_BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] + $arrLoan["INT_BALANCE"] + $rowLoan["INTEREST_ARREAR"] + $rowLoan["INTPAYABLE_AMT"],2);
 				$arrLoanGrp[] = $arrLoan;
 			}
 			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){

@@ -88,7 +88,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['DISABLE_AMOUNT'] = FALSE;
 						$arrayResult['DISABLE_PERIOD'] = FALSE;
 						$arrayResult['RECEIVE_AMT'] = $arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'];
-						if($arrayResult['RECEIVE_AMT'] < 0){
+						if($arrayResult['RECEIVE_AMT'] <= 0){
 							$arrayResult = array();
 							$arrayResult['RESPONSE_CODE'] = "WS0086";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

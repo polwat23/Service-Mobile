@@ -4,12 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$getMembType = $conoracle->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMembType->execute([':member_no' => $member_no]);
 		$rowMembType = $getMembType->fetch(PDO::FETCH_ASSOC);
 		$getCurrShare = $conoracle->prepare("SELECT SHARESTK_AMT FROM shsharemaster WHERE member_no = :member_no");
 		$getCurrShare->execute([':member_no' => $member_no]);
 		$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
+		$sharereq_value = ($rowCurrShare["SHARESTK_AMT"] * 10) + $dataComing["amt_transfer"];
 		if($rowMembType["MEMBCAT_CODE"] == '10'){
 			$getConstantShare = $conoracle->prepare("SELECT MAXSHARE_HOLD,SHAREROUND_FACTOR FROM SHSHARETYPE WHERE SHARETYPE_CODE = '01'");
 			$getConstantShare->execute();
