@@ -29,7 +29,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
+			$getRateDiv = $conoracle->prepare("SELECT DIVIDEND_RATE,AVERAGE_RATE FROM mbdivavgrate WHERE divavg_year = :year");
+			$getRateDiv->execute([':year' => $rowYear["DIV_YEAR"]]);
+			$rowRateDiv = $getRateDiv->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
+			$arrDividend["DIV_RATE"] = $rowRateDiv["DIVIDEND_RATE"] * 100;
+			$arrDividend["AVG_RATE"] = $rowRateDiv["AVERAGE_RATE"] * 100;
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["SUMDIV"],2);
