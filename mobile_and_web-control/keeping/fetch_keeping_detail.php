@@ -92,7 +92,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
-		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
+		$arrayResult['SHOW_SLIP_REPORT'] = FALSE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
