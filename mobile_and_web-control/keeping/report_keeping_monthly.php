@@ -159,10 +159,10 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ จ. 55/96-98 ถ.ดาวดึงส์</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต ปากน้ำโพ อ.เมือง จ.นครสวรรค์</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5622-2046</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขหนองคาย จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">229/1 ถ.ศูนย์ราชการ</p>
+				<p style="margin-top: -25px;font-size: 18px;">ต.หนองกอมเกาะ อ.เมือง จ.หนองคาย 43000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 042-420750 มือถือ 087-8604004 , 089-8619198</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
 				</div>
 			</div>
