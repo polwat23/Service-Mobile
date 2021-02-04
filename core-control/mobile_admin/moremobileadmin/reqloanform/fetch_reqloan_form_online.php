@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute[':end_date'] = $dataComing["end_date"];
 		}
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
+			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,bookbank_img,req_status,request_date,approve_date,contractdoc_url
 															FROM gcreqloan WHERE req_status = :req_status". 
 															($dataComing["is_filtered"] ? (
 															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
@@ -70,6 +70,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["LOANPERMIT_AMT"] = number_format($rowDocno["loanpermit_amt"],2);
 				$arrDocno["SALARY_IMG"] = $rowDocno["salary_img"];
 				$arrDocno["CITIZEN_IMG"] = $rowDocno["citizen_img"];
+				$arrDocno["BOOKBANK_IMG"] = $rowDocno["bookbank_img"];
 				$arrDocno["CONTRACTDOC_URL"] = $rowDocno["contractdoc_url"];
 				$arrDocno["REQ_STATUS"]  = $rowDocno["req_status"];
 				if($rowDocno["req_status"] == '8'){
@@ -86,7 +87,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGrp[] = $arrDocno;
 			}
 		}else{
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
+			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,bookbank_img,req_status,request_date,approve_date,contractdoc_url
 															FROM gcreqloan WHERE 1=1". 
 															($dataComing["is_filtered"] ? (
 															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
@@ -128,6 +129,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["LOANPERMIT_AMT"] = number_format($rowDocno["loanpermit_amt"],2);
 				$arrDocno["SALARY_IMG"] = $rowDocno["salary_img"];
 				$arrDocno["CITIZEN_IMG"] = $rowDocno["citizen_img"];
+				$arrDocno["BOOKBANK_IMG"] = $rowDocno["bookbank_img"];
 				$arrDocno["CONTRACTDOC_URL"] = $rowDocno["contractdoc_url"];
 				$arrDocno["REQ_STATUS"]  = $rowDocno["req_status"];
 				if($rowDocno["req_status"] == '8'){

@@ -38,34 +38,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAllow["PRNCBAL"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
-			$getLoanConstant = $conoracle->prepare("SELECT RDINTDEC_TYPE,RDINTSATANG_TYPE,DAYINYEAR FROM lnloanconstant");
-			$getLoanConstant->execute();
-			$rowLoanCont = $getLoanConstant->fetch(PDO::FETCH_ASSOC);
 			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE,
-													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnd.INTEREST_RATE,
+													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,
 													(CASE WHEN lnm.lastprocess_date <= lnm.LASTCALINT_DATE OR lnm.lastprocess_date IS NULL THEN '1' ELSE '0' END) as CHECK_KEEPING
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
-													LEFT JOIN lncfloanintratedet lnd 
-													ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8 
-													and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE");
+													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$interest = 0;
 				$arrLoan = array();
 				if($rowLoan["CHECK_KEEPING"] == '1'){
-					if($rowLoan["LOANPAYMENT_TYPE"] == '1'){
-						$daydiff = $lib->count_duration($rowLoan["LASTCALINT_DATE"],'d');
-						$interest = (($rowLoan["PRINCIPAL_BALANCE"] * ($rowLoan["INTEREST_RATE"] / 100)) * $daydiff) / $rowLoanCont["DAYINYEAR"];
-						$interest = $lib->roundDecimal($interest,$rowLoanCont["RDINTSATANG_TYPE"]);
-					}else{
-						$daydiff = $lib->count_duration($rowLoan["LASTCALINT_DATE"],'d');
-						$interest = (($rowLoan["PRINCIPAL_BALANCE"] * ($rowLoan["INTEREST_RATE"] / 100)) * $daydiff) / $rowLoanCont["DAYINYEAR"];
-						$interest = $lib->roundDecimal($interest,$rowLoanCont["RDINTSATANG_TYPE"]);
-					}
-					$arrLoan["INT_BALANCE"] = number_format($interest,2);
+					$arrLoan["INT_BALANCE"] = number_format($calloan->calculateInterest($rowLoan["LOANCONTRACT_NO"]),2);
 				}
-				
 				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
 					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
 				}else{
@@ -106,6 +90,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

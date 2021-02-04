@@ -223,9 +223,9 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. ฝ่ายบริหารทั่วไป 086-451-9488, ฝ่ายสินเชื่อ  086-451-9187</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมที่ดิน จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">117 หมู่ 9 ถนนติวานนท์ ตำบลบางพูด อำเภอปากเกร็ด จังหวัดนนทบุรี 11120</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทรศัพท์ 0-2194-2377-79 โทรสาร 0-2194-2380</p>
 			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
 			</div>
 			</div>
