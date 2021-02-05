@@ -32,4 +32,5 @@ if($oldBal > $maxloan_amt){
 	$arrSubInfo["VALUE"] = "";
 	$arrCollShould[] = $arrSubInfo;
 }
+$canRequest = TRUE;
 ?>

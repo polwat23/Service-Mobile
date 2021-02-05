@@ -3,18 +3,26 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conoracle->prepare("select (lir.interest_rate ) as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
-												ON lp.inttabrate_code = lir.loanintrate_code where to_char(sysdate,'YYYY-MM-DD') BETWEEN 
-												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
-		$fetchIntrate->execute();
 		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
-			$arrIntrate = array();
-			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
-			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
-			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
-			$arrIntGroup[] = $arrIntrate;
+		
+		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
+		$fetchLoanCanCal->execute();
+		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
+			$fetchIntrate = $conoracle->prepare("select (lir.interest_rate ) as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
+													ON lp.inttabrate_code = lir.loanintrate_code where lp.loantype_code = :loantype_code AND to_char(sysdate,'YYYY-MM-DD') BETWEEN 
+													to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
+			$fetchIntrate->execute([
+				':loantype_code' => $rowCanCal["loantype_code"]
+			]);
+			while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
+				$arrIntrate = array();
+				$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
+				$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
+				$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
+				$arrIntGroup[] = $arrIntrate;
+			}	
 		}
+		
 		$arrayResult['INT_RATE'] = $arrIntGroup;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
