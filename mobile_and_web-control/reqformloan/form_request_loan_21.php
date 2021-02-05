@@ -193,7 +193,7 @@ function GeneratePDFContract($data,$lib) {
 			(.......................................................................)
 	  </div>
 	  <div style="text-align:center; position: absolute; left:6.3 cm; margin-top:10px" >
-		ลงชื่อ......................................................................ผยาน
+		ลงชื่อ......................................................................พยาน
 		</div>
 
 		<div style="text-align:center; position: absolute; left:6.7 cm; margin-top:30px">
@@ -343,7 +343,7 @@ function GeneratePDFContract($data,$lib) {
 	</div>
 	';
 
-	// (ชื่อ นามสกุล) ผยาน
+	// (ชื่อ นามสกุล) พยาน
 	$html .= '
 	<div style="position:absolute; text-align:center; left:260px; top:1008px; width:217px;font-weight:bold;">
 
@@ -465,7 +465,7 @@ function GeneratePDFContract($data,$lib) {
 
 
 	<div style="margin-left:340px; margin-top:30px">
-	   ................................................................ผยาน
+	   ................................................................พยาน
 	</div>
 	<div style="margin-left:340px;">
 	   (..............................................................)

@@ -36,22 +36,24 @@ if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACC
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
+require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
-require_once(__DIR__.'/../include/cal_loan.php');
+require_once(__DIR__.'/../include/cal_deposit.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
 use Utility\Library;
 use Authorized\Authorization;
 use Component\functions;
-use CalculateLoan\CalculateLoan;
 use ControlLog\insertLog;
+use CalculateDeposit\CalculateDep;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
 use WebPConvert\WebPConvert;
+
 
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
@@ -60,7 +62,7 @@ $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
 $log = new insertLog();
-$calloan = new CalculateLoan();
+$cal_dep = new CalculateDep();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');

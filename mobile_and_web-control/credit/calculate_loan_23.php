@@ -54,7 +54,7 @@ if($rowMembData["SALARY_AMOUNT"] <= 10000){
 }else if($rowMembData["SALARY_AMOUNT"] > 30000 && $rowMembData["SALARY_AMOUNT"] <= 35000){
 	$arrSubOtherInfo["VALUE"] = "4 คน";
 	$arrSubOtherInfoSalaryRemain["VALUE"] = "3,500 บาท";
-}else if($rowMembData["SALARY_AMOUNT"] > 35000
+}else if($rowMembData["SALARY_AMOUNT"] > 35000){
 	$arrSubOtherInfo["VALUE"] = "5 คน";
 	$arrSubOtherInfoSalaryRemain["VALUE"] = "4,000 บาท";
 }

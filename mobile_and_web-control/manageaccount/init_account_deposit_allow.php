@@ -64,7 +64,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if($rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
 				$arrAccInCoop["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
 			}
-			$arrAllowAccGroup[] = $arrAccInCoop;
+			$depSeq = $cal_dep->getSequestAmt($rowAccIncoop["DEPTACCOUNT_NO"]);
+			if($depSeq["CAN_WITHDRAW"] || $depSeq["CAN_DEPOSIT"]){
+				$arrAllowAccGroup[] = $arrAccInCoop;
+			}
 		}
 		$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
 		$arrayResult['RESULT'] = TRUE;
