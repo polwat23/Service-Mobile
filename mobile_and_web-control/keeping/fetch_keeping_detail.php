@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
 		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
 		$getPaymentDetail = $conoracle->prepare("SELECT 
-																	CASE kut.system_code 
+																	CASE kut.keepitemtype_grp 
 																	WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
 																	WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 																	ELSE kut.keepitemtype_desc
