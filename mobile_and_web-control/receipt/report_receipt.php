@@ -215,11 +215,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูประจวบคีรีขันธ์ จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">5/1 ถนนประจวบศิริ ตำบลประจวบ</p>
-				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมือง จังหวัดประจวบคีรีขันธ์ 77000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร.0-3261-1212</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.pkn-coop.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ข้าราชการสหกรณ์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">20 ถนนพิชัย แขวงดุสิต</p>
+				<p style="margin-top: -25px;font-size: 18px;">เขตดุสิต กรุงเทพมหานคร 10300</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร.0-2244-8720-1, 0-2241-4711-2</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">cpd.upbean.co.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">

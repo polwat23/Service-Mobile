@@ -70,6 +70,11 @@ class Authorization {
 			':id_token' => $payload["id_token"]
 		]);
 		if($checkRT->rowCount() > 0){
+			$getLimit = $con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_session_timeout' and is_use = '1'");
+			$getLimit->execute();
+			
+			$rowLimit = $getLimit->fetch(\PDO::FETCH_ASSOC);
+
 			$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
 			if($rowToken["rt_is_revoke"] === '0'){
 				if(empty($rowToken["rt_expire_date"]) || ($rowToken["rt_expire_date"] > date('Y-m-d'))){
