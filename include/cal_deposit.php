@@ -102,17 +102,21 @@ class CalculateDep {
 			return $arrayResult;
 		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
-			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
+			$menucheckrights = "and gca.allow_deposit_inside = '1'";
+			$transfer_mode = "1";
 		}else if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
-			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
+			$menucheckrights = "and gca.allow_deposit_outside = '1'";
+			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
 			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
+			$transfer_mode = "2";
 		}
 		$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
 												LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
-												WHERE gua.deptaccount_no = :deptaccount_no ".$menucheckrights);
+												WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
 		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
 		if($rowUserAllow["is_use"] == "1"){
@@ -122,7 +126,7 @@ class CalculateDep {
 				return $arrayResult;
 			}
 			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
+				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
 														FROM gcbankconstantmapping gbm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gbm.id_bankconstant = gbc.id_bankconstant
@@ -142,10 +146,26 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'D'
-																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(sysdate),'YYYYMMDD')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						if($rowConstMapMenu["each_bank"] == '0'){
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':transfer_mode' => $transfer_mode
+							]);
+						}else{
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D') and bank_code = :bank_code
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':bank_code' => $bank_code,
+								':transfer_mode' => $transfer_mode
+							]);
+						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -158,10 +178,26 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'D'
-																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(sysdate),'YYYYMM')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						if($rowConstMapMenu["each_bank"] == '0'){
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':transfer_mode' => $transfer_mode
+							]);
+						}else{
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M') and bank_code = :bank_code
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':bank_code' => $bank_code,
+								':transfer_mode' => $transfer_mode
+							]);
+						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -174,10 +210,26 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'D'
-																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(sysdate),'YYYY')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						if($rowConstMapMenu["each_bank"] == '0'){
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':transfer_mode' => $transfer_mode
+							]);
+						}else{
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y') and bank_code = :bank_code
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':bank_code' => $bank_code,
+								':transfer_mode' => $transfer_mode
+							]);
+						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -212,10 +264,14 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'D'
-																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(sysdate),'YYYYMMDD')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':transfer_mode' => $transfer_mode
+						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -228,10 +284,14 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'D'
-																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(sysdate),'YYYYMM')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':transfer_mode' => $transfer_mode
+						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -244,10 +304,14 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'D'
-																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(sysdate),'YYYY')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':transfer_mode' => $transfer_mode
+						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -290,16 +354,20 @@ class CalculateDep {
 		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
+			$transfer_mode = "1";
 		}else if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
 			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
+			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
 			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
+			$transfer_mode = "2";
 		}
 		$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
 												LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
-												WHERE gua.deptaccount_no = :deptaccount_no ".$menucheckrights);
+												WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
 		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
 		if($rowUserAllow["is_use"] == "1"){
@@ -309,7 +377,7 @@ class CalculateDep {
 				return $arrayResult;
 			}
 			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw 
+				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw,gbc.each_bank
 														FROM gcbankconstantmapping gbm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gbm.id_bankconstant = gbc.id_bankconstant
@@ -329,10 +397,26 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'W'
-																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(sysdate),'YYYYMMDD')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						if($rowConstMapMenu["each_bank"] == '0'){
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':transfer_mode' => $transfer_mode
+							]);
+						}else{
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D') and bank_code = :bank_code
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':bank_code' => $bank_code,
+								':transfer_mode' => $transfer_mode
+							]);
+						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -345,10 +429,26 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'W'
-																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(sysdate),'YYYYMM')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						if($rowConstMapMenu["each_bank"] == '0'){
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':transfer_mode' => $transfer_mode
+							]);
+						}else{
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M') and bank_code = :bank_code
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':bank_code' => $bank_code,
+								':transfer_mode' => $transfer_mode
+							]);
+						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -361,10 +461,26 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'W'
-																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(sysdate),'YYYY')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						if($rowConstMapMenu["each_bank"] == '0'){
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':transfer_mode' => $transfer_mode
+							]);
+						}else{
+							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y') and bank_code = :bank_code
+                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+							$getTransaction->execute([
+								':deptaccount_no' => $deptaccount_no,
+								':bank_code' => $bank_code,
+								':transfer_mode' => $transfer_mode
+							]);
+						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -379,7 +495,7 @@ class CalculateDep {
 					}
 				}
 			}else{
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw 
+				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw
 														FROM gcmenuconstantmapping gmm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gmm.id_bankconstant = gbc.id_bankconstant
@@ -399,10 +515,14 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'W'
-																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(sysdate),'YYYYMMDD')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':transfer_mode' => $transfer_mode
+						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -415,10 +535,14 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'W'
-																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(sysdate),'YYYYMM')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':transfer_mode' => $transfer_mode
+						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
@@ -431,10 +555,14 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
-						$getTransaction = $this->conora->prepare("SELECT COUNT(seq_no) as NUMOF_TRANS,SUM(deptitem_amt) as SUM_AMT 
-																FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no and SUBSTR(deptitemtype_code,0,1) = 'W'
-																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(sysdate),'YYYY')");
-						$getTransaction->execute([':deptaccount_no' => $deptaccount_no]);
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':transfer_mode' => $transfer_mode
+						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
 						if($rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";

@@ -19,12 +19,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayLoantype["IS_CREDITLOAN"] = "0";
 				$arrayLoantype["IS_LOANREQUEST"] = "0";
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = "0";
-			$arrayLoantype["LOANTYPE_ALIAS_NAME"] = null;
+				//$arrayLoantype["LOANTYPE_ALIAS_NAME"] = null;
 			}else{
 				$arrayLoantype["IS_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_CREDITLOAN"];
 				$arrayLoantype["IS_LOANREQUEST"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_LOANREQUEST"];
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_ESTIMATE_CREDITLOAN"];
-			$arrayLoantype["LOANTYPE_ALIAS_NAME"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["LOANTYPE_ALIAS_NAME"];
+				//$arrayLoantype["LOANTYPE_ALIAS_NAME"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["LOANTYPE_ALIAS_NAME"];
 			}
 			$arrayLoantype["LOANTYPE_CODE"] = $rowLoantype["LOANTYPE_CODE"];
 			$arrayLoantype["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_DESC"];
