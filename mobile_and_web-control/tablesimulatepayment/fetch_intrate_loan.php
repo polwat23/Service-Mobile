@@ -3,13 +3,13 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conoracle->prepare("SELECT LOANTYPE_DESC,LOANTYPE_CODE FROM LNLOANTYPE");
+		$fetchIntrate = $conoracle->prepare("SELECT LOANTYPE_DESC,LOANTYPE_CODE,CONTINTTABLE_CODE FROM LNLOANTYPE");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();
 		while($rowLoantype = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
 			$getIntrate = $conoracle->prepare("SELECT INTEREST_RATE FROM (SELECT INTEREST_RATE FROM lnloanintrate WHERE loantype_code = :loantype_code and effective_date IS NOT NULL 
 												and to_char(sysdate,'YYYY-MM-DD') > to_char(effective_date,'YYYY-MM-DD') ORDER BY effective_date DESC ) WHERE rownum <= 1");
-			$getIntrate->execute([':loantype_code' => $rowLoantype["LOANTYPE_CODE"]]);
+			$getIntrate->execute([':loantype_code' => $rowLoantype["CONTINTTABLE_CODE"]]);
 			$rowIntrate = $getIntrate->fetch(PDO::FETCH_ASSOC);
 			$arrIntrate = array();
 			$arrIntrate["INT_RATE"] = "".($rowIntrate["INTEREST_RATE"] * 100)."";
