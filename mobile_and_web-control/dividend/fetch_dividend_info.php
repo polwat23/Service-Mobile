@@ -14,25 +14,31 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':limit_year' => $limit_year
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
+			$receive_net = 0;
 			$arrDividend = array();
-			$getDivMaster = $conoracle->prepare("SELECT dividend_amt as div_amt,average_amt as avg_amt FROM MBDIVMASTER WHERE member_no = :member_no and div_year = :div_year");
+			$getDivMaster = $conoracle->prepare("SELECT dividend_amt as div_amt,average_amt as avg_amt,plus_amt FROM MBDIVMASTER WHERE member_no = :member_no and div_year = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
-			$getDivETC = $conoracle->prepare("SELECT SUM(MDS.ETC_PAYMENT) AS ETC_AMT FROM MBDIVSTATEMENT MDS LEFT JOIN MBDIVPAYTYPE MDP ON MDS.DIVPAYTYPE_CODE = MDP.DIVPAYTYPE_CODE
-											WHERE MDS.DIV_YEAR = :year AND MDS.MEMBER_NO = :member_no AND MDP.SHOW_FLAG = 1 AND MDP.SIGN_FLAG = 1");
+			$getDivETC = $conoracle->prepare("SELECT MDS.ETC_PAYMENT AS ETC_AMT,MDP.DIVPAYTYPE_DESC as TYPE_DESC FROM MBDIVSTATEMENT MDS LEFT JOIN MBDIVPAYTYPE MDP ON MDS.DIVPAYTYPE_CODE = MDP.DIVPAYTYPE_CODE
+											WHERE MDS.MEMBER_NO = :member_no and MDS.DIV_YEAR = :div_year AND MDP.SHOW_FLAG = 1 AND MDP.SIGN_FLAG = 1");
 			$getDivETC->execute([
 				':div_year' => $rowYear["DIV_YEAR"],
 				':member_no' => $member_no
 			]);
-			$rowDivEtc = $getDivETC->fetch(PDO::FETCH_ASSOC);
+			while($rowDivEtc = $getDivETC->fetch(PDO::FETCH_ASSOC)){
+				$arrOtherDiv = array();
+				$arrOtherDiv["LABEL"] = $rowDivEtc["TYPE_DESC"];
+				$arrOtherDiv["VALUE"] = number_format($rowDivEtc["ETC_AMT"],2).' บาท';
+				$arrDividend["OTHER_ITEM"][] = $arrOtherDiv;
+			}
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
-			$arrDividend["ETC_AMT"] = number_format($rowDivEtc["ETC_AMT"],2);
-			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"] + $rowDivEtc["ETC_AMT"],2);
+			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"] + $rowDiv["PLUS_AMT"],2);
+			$receive_net = ($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"] + $rowDiv["PLUS_AMT"]);
 			$getMethpay = $conoracle->prepare("SELECT MDP.DIVPAYTYPE_DESC AS TYPE_DESC,MDM.ITEM_AMT AS ITEM_AMT ,MDM.CUT_TYPE,
 											TRIM( CASE WHEN CUT_TYPE = 1 THEN CUT_PERCENT * 100
 											WHEN CUT_TYPE = 2 THEN CUT_AMOUNT
@@ -84,9 +90,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrPay["TYPE_DESC"] = $rowPay["TYPE_DESC"];
 				$arrPay["PAY_AMT"] = number_format($rowPay["PAY_AMT"],2);
 				$sumPay += $rowPay["PAY_AMT"];
+				$receive_net -= $rowPay["PAY_AMT"];
 				$arrayPayGroup[] = $arrPay;
 			}
 			$arrDividend["RECEIVE_AMT"] = number_format($sum_recv - $sumPay,2);
+			$arrDividend["RECEIVE_NET"] = number_format($receive_net,2);
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
 			$arrDivmaster[] = $arrDividend;

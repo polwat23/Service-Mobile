@@ -256,7 +256,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.gensoft.co.th';
+		$mailFunction->Host = 'cloud2.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -408,7 +408,7 @@ class library {
 			$data = [
 				"registration_ids" => $payload["TO"],
 				"priority" => "high",
-				"content_available" => true,
+				//"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -426,7 +426,7 @@ class library {
 			$data = [
 				"to" => $payload["TO"],
 				"priority" => "high",
-				"content_available" => true,
+				//"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
