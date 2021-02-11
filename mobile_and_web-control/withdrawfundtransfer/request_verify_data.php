@@ -23,6 +23,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				':member_no' => $payload["member_no"]
 			]);
 			$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
+			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+													WHERE MB.member_no = :member_no");
+			$fetchMemberName->execute([
+				':member_no' => $member_no
+			]);
+			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
 			$arrDataAPI["ToBankAccountNo"] = $dataComing["bank_account_no"];
@@ -182,7 +189,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						
 					}
 				}
-				$arrayResult['ACCOUNT_NAME'] = $arrResponseAPI->toCOOPAccountName;
+				$arrayResult['ACCOUNT_NAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 				if($arrResponseAPI->coopFee > 0){
 					$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 					$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
