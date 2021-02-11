@@ -4,7 +4,31 @@ namespace Connection;
 
 class connection {
 	public $conmysql;
+	public $conwebmysql;
 	public $conoracle;
+	
+	public function connecttowebmysql() {
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
+		$json_data = json_decode($json,true);
+		$dbhost = $json_data["DBMOBILE_HOST_WEB"];
+		$dbuser = $json_data["DBMOBILE_USERNAME_WEB"];
+		$dbpass = $json_data["DBMOBILE_PASSWORD_WEB"];
+		$dbname = $json_data["DBMOBILE_DATABASENAME_WEB"];
+		try{
+			$this->conwebmysql = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+			$this->conwebmysql->exec("set names utf8mb4");
+			return $this->conwebmysql;
+		}catch(\Throwable $e){
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To MySQL Web Server";
+			return $arrayError;
+			http_response_code(200);
+			exit();
+		}
+	}
+
 	
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');

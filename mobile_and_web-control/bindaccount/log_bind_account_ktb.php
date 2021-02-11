@@ -2,9 +2,9 @@
 set_time_limit(150);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','coop_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
+		$coop_account_no = isset($dataComing["coop_account_no"]) && $dataComing["coop_account_no"] != "" ? preg_replace('/-/','',$dataComing["coop_account_no"]) : null;
 		if($dataComing["bind_src_message"]["result"] == 'success'){
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],

@@ -4,17 +4,9 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$time = date("Hi");
-		if($time >= 0000 && $time <= 0200){
-			$arrayResult['RESPONSE_CODE'] = "WS0035";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
-												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
+												csb.bank_format_account,csb.bank_format_account_hide,gba.bank_code,csb.bank_short_name
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
@@ -23,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBind = array();
 				$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
 				$arrAccBind["BANK_NAME"] = $rowAccBind["bank_short_name"];
+				$arrAccBind["BANK_CODE"] = $rowAccBind["bank_code"];
 				$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
 				$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
 				$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
@@ -34,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
 													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 													gat.id_accountconstant = gct.id_accountconstant
-													WHERE gct.allow_transaction = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+													WHERE gct.allow_withdraw_outside = '1' and gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 			if($fetchAccAllowTrans->rowCount() > 0){
 				while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){

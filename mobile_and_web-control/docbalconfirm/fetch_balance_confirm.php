@@ -24,6 +24,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrHeader["depart_group"] = TRIM($rowBalMaster["DEPART_GROUP"]);
 		$arrHeader["member_group"] = $rowBalMaster["MEMBGROUP_CODE"];
 		$arrHeader["member_no"] = $member_no;
+		$arrHeader["date_confirm"] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d M Y');
 		$getBalanceDetail = $conoracle->prepare("SELECT (CASE WHEN cfb.CONFIRMTYPE_CODE = 'DEP'
 												THEN dp.DEPTTYPE_DESC
 												WHEN cfb.CONFIRMTYPE_CODE = 'LON'
@@ -47,12 +48,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrBalDetail = array();
 			$arrBalDetail["TYPE_DESC"] = $rowBalDetail["DEPTTYPE_DESC"];
 			if($rowBalDetail["CONFIRMTYPE_CODE"] == "DEP"){
-				$arrBalDetail["DEPTACCOUNT_NO"] = $lib->formataccount($rowBalDetail["DEPTACCOUNT_NO"],$formatDept);
+				if(array_search($rowBalDetail["DEPTTYPE_DESC"],array_column($arrDetail,'TYPE_DESC')) === False){
+					$arrBalDetail["BALANCE_AMT"] = $rowBalDetail["BALANCE_AMT"];
+					$arrDetail[] = $arrBalDetail;
+				}else{
+					$arrDetail[array_search($rowBalDetail["DEPTTYPE_DESC"],array_column($arrDetail,'TYPE_DESC'))]["BALANCE_AMT"] += $rowBalDetail["BALANCE_AMT"];
+				}
 			}else{
+				$arrBalDetail["BALANCE_AMT"] = $rowBalDetail["BALANCE_AMT"];
 				$arrBalDetail["DEPTACCOUNT_NO"] = $rowBalDetail["DEPTACCOUNT_NO"];
+				$arrDetail[] = $arrBalDetail;
 			}
-			$arrBalDetail["BALANCE_AMT"] = number_format($rowBalDetail["BALANCE_AMT"],2);
-			$arrDetail[] = $arrBalDetail;
+		}
+		foreach($arrDetail as $key => $value){
+			$arrDetail[$key]["BALANCE_AMT"] = number_format($value["BALANCE_AMT"],2);
 		}
 		if(isset($rowBalMaster["MEMB_NAME"]) && sizeof($arrDetail) > 0){
 			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
@@ -61,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
 				' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
 				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				$arrayResult['BALANCE_DATE'] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y');
+				$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
 				$arrayResult['IS_CONFIRM'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -178,7 +187,7 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 				<img src="../../resource/utility_icon/signature/signature.png" style="width:130px;">
 			</div>
 			<div style="position:absolute; left:110px; top:86px;">
-				ขอแจ้งรายการบัญชีของท่านเพียงสิ้นวันที่ 30 มิถุนายน 2563
+				ขอแจ้งรายการบัญชีของท่านเพียงสิ้นวันที่ '.$arrHeader["date_confirm"].'
 			</div>
 			<div style="position:absolute; left:110px; top:114px;">'.$arrHeader["full_name"].'</div>
 			<div style="position:absolute; left:125px; top:153px;">'.$arrHeader["member_no"].'</div>
