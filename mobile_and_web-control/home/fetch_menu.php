@@ -93,7 +93,8 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			if(isset($dataComing["home_loan_account"])) {
 				$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-				$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, (SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status = 1 and branch_id = :branch_id) as C_CONTRACT
+				$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, (SELECT COUNT(loancontract_no) 
+														FROM lncontmaster WHERE member_no = :member_no and contract_status = 1) as C_CONTRACT
 														FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 														WHERE contract_status = 1 and loancontract_no = :contract_no");
 				$fetchMenuLoan->execute([
@@ -296,7 +297,8 @@ if(!$anonymous){
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							if(isset($dataComing["home_loan_account"])) {
 								$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-								$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, (SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status = 1 and branch_id = :branch_id) as C_CONTRACT
+								$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, 
+																		(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status = 1) as C_CONTRACT
 																		FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 																		WHERE contract_status = 1 and loancontract_no = :contract_no");
 								$fetchMenuLoan->execute([
