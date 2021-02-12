@@ -39,8 +39,8 @@ if(!$anonymous){
 				$arrTypeAllow = array();
 				$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
 														FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-														WHERE gct.allow_showdetail = '1' and gat.deptaccount_no = :account_no and gat.is_use = '1'");
-				$getTypeAllowShow->execute([':account_no' => $account_no]);
+														WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+				$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
 				if($getTypeAllowShow->rowCount() > 0){
 					while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
 						$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
@@ -49,27 +49,37 @@ if(!$anonymous){
 					$arrDataAPI["MemberID"] = substr($member_no,-6);
 					$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 					$accNum = 0;
+					$accNumTemp = 0;
+					$balance = 0;
+					$balanceTemp = 0;
 					$arrResponseAPI = json_decode($arrResponseAPI);
 					if($arrResponseAPI->responseCode == "200"){
 						foreach($arrResponseAPI->accountDetail as $accData){
-							if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->coopAccountNo == $account_no){
-								if($accData->accountStatus == "0"){
+							if (in_array($accData->coopAccountNo, $arrTypeAllow)){
+								$balanceTemp += preg_replace('/,/', '', $accData->accountBalance);
+								$accNumTemp++;
+								if($accData->accountStatus == "0" && $accData->coopAccountNo == $account_no){
 									$balance += preg_replace('/,/', '', $accData->accountBalance);
 									$accNum++;
 									$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 									$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
 									$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
 								}else{
-									$arrMenuDep["ACCOUNT_NO"] = "closee";	
+									$arrMenuDep["ACCOUNT_NO"] = "close";	
 								}
 							}
 						}
 					}
 				}else{
-					$arrMenuDep["ACCOUNT_NO"] = "closed";
+					$arrMenuDep["ACCOUNT_NO"] = "close";
 				}
-				$arrMenuDep["BALANCE"] = number_format($balance,2);
-				$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
+				if($arrMenuDep["ACCOUNT_NO"] == "close"){
+					$arrMenuDep["BALANCE"] = number_format($balanceTemp,2);
+					$arrMenuDep["AMT_ACCOUNT"] = $accNumTemp ?? 0;
+				}else{
+					$arrMenuDep["BALANCE"] = number_format($balance,2);
+					$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
+				}
 			}else{
 				$arrTypeAllow = array();
 				$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
@@ -258,8 +268,8 @@ if(!$anonymous){
 								$arrTypeAllow = array();
 								$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
 																		FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-																		WHERE gct.allow_showdetail = '1' and gat.deptaccount_no = :account_no and gat.is_use = '1'");
-								$getTypeAllowShow->execute([':account_no' => $account_no]);
+																		WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+								$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
 								if($getTypeAllowShow->rowCount() > 0){
 									while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
 										$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
@@ -268,27 +278,37 @@ if(!$anonymous){
 									$arrDataAPI["MemberID"] = substr($member_no,-6);
 									$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
 									$accNum = 0;
+									$accNumTemp = 0;
+									$balance = 0;
+									$balanceTemp = 0;
 									$arrResponseAPI = json_decode($arrResponseAPI);
 									if($arrResponseAPI->responseCode == "200"){
 										foreach($arrResponseAPI->accountDetail as $accData){
-											if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->coopAccountNo == $account_no){
-												if($accData->accountStatus == "0"){
+											if (in_array($accData->coopAccountNo, $arrTypeAllow)){
+												$balanceTemp += preg_replace('/,/', '', $accData->accountBalance);
+												$accNumTemp++;
+												if($accData->accountStatus == "0" && $accData->coopAccountNo == $account_no){
 													$balance += preg_replace('/,/', '', $accData->accountBalance);
 													$accNum++;
 													$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
 													$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
 													$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
 												}else{
-													$arrMenuDep["ACCOUNT_NO"] = "closee";	
+													$arrMenuDep["ACCOUNT_NO"] = "close";	
 												}
 											}
 										}
 									}
 								}else{
-									$arrMenuDep["ACCOUNT_NO"] = "closed";
+									$arrMenuDep["ACCOUNT_NO"] = "close";
 								}
-								$arrMenuDep["BALANCE"] = number_format($balance,2);
-								$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
+								if($arrMenuDep["ACCOUNT_NO"] == "close"){
+									$arrMenuDep["BALANCE"] = number_format($balanceTemp,2);
+									$arrMenuDep["AMT_ACCOUNT"] = $accNumTemp ?? 0;
+								}else{
+									$arrMenuDep["BALANCE"] = number_format($balance,2);
+									$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
+								}
 							}else{
 								$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
 																		FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct 
