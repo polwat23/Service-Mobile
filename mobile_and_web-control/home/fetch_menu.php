@@ -52,19 +52,21 @@ if(!$anonymous){
 					$arrResponseAPI = json_decode($arrResponseAPI);
 					if($arrResponseAPI->responseCode == "200"){
 						foreach($arrResponseAPI->accountDetail as $accData){
-							if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0" && $accData->coopAccountNo == $account_no){
-								$balance += preg_replace('/,/', '', $accData->accountBalance);
-								$accNum++;
-								$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-								$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-								$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
-							}else{
-								$arrMenuDep["ACCOUNT_NO"] = "close";
+							if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->coopAccountNo == $account_no){
+								if($accData->accountStatus == "0"){
+									$balance += preg_replace('/,/', '', $accData->accountBalance);
+									$accNum++;
+									$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+									$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+									$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
+								}else{
+									$arrMenuDep["ACCOUNT_NO"] = "closee";	
+								}
 							}
 						}
 					}
 				}else{
-					$arrMenuDep["ACCOUNT_NO"] = "close";
+					$arrMenuDep["ACCOUNT_NO"] = "closed";
 				}
 				$arrMenuDep["BALANCE"] = number_format($balance,2);
 				$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
@@ -269,19 +271,21 @@ if(!$anonymous){
 									$arrResponseAPI = json_decode($arrResponseAPI);
 									if($arrResponseAPI->responseCode == "200"){
 										foreach($arrResponseAPI->accountDetail as $accData){
-											if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0" && $accData->coopAccountNo == $account_no){
-												$balance += preg_replace('/,/', '', $accData->accountBalance);
-												$accNum++;
-												$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-												$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-												$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
-											}else{
-												$arrMenuDep["ACCOUNT_NO"] = "close";
+											if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->coopAccountNo == $account_no){
+												if($accData->accountStatus == "0"){
+													$balance += preg_replace('/,/', '', $accData->accountBalance);
+													$accNum++;
+													$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+													$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+													$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
+												}else{
+													$arrMenuDep["ACCOUNT_NO"] = "closee";	
+												}
 											}
 										}
 									}
 								}else{
-									$arrMenuDep["ACCOUNT_NO"] = "close";
+									$arrMenuDep["ACCOUNT_NO"] = "closed";
 								}
 								$arrMenuDep["BALANCE"] = number_format($balance,2);
 								$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
