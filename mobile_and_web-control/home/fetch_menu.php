@@ -39,27 +39,35 @@ if(!$anonymous){
 				$arrTypeAllow = array();
 				$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
 														FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-														WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
-				$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
-				while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
-					$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
-				}
-				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-				$arrDataAPI["MemberID"] = substr($member_no,-6);
-				$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-				$accNum = 0;
-				$arrResponseAPI = json_decode($arrResponseAPI);
-				if($arrResponseAPI->responseCode == "200"){
-					foreach($arrResponseAPI->accountDetail as $accData){
-						if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
-							$balance += preg_replace('/,/', '', $accData->accountBalance);
-							$accNum++;
+														WHERE gct.allow_showdetail = '1' and gat.deptaccount_no = :account_no and gat.is_use = '1'");
+				$getTypeAllowShow->execute([':account_no' => $account_no]);
+				if($getTypeAllowShow->rowCount() > 0){
+					while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
+						$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
+					}
+					$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+					$arrDataAPI["MemberID"] = substr($member_no,-6);
+					$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+					$accNum = 0;
+					$arrResponseAPI = json_decode($arrResponseAPI);
+					if($arrResponseAPI->responseCode == "200"){
+						foreach($arrResponseAPI->accountDetail as $accData){
+							if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->coopAccountNo == $account_no){
+								if($accData->accountStatus == "0"){
+									$balance += preg_replace('/,/', '', $accData->accountBalance);
+									$accNum++;
+									$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+									$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+									$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
+								}else{
+									$arrMenuDep["ACCOUNT_NO"] = "closee";	
+								}
+							}
 						}
 					}
+				}else{
+					$arrMenuDep["ACCOUNT_NO"] = "closed";
 				}
-				$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-				$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-				$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
 				$arrMenuDep["BALANCE"] = number_format($balance,2);
 				$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
 			}else{
@@ -93,17 +101,22 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			if(isset($dataComing["home_loan_account"])) {
 				$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-				$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, (SELECT COUNT(loancontract_no) 
-														FROM lncontmaster WHERE member_no = :member_no and contract_status = 1) as C_CONTRACT
+				$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, 
+														(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no 
+														and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 														FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
-														WHERE contract_status = 1 and loancontract_no = :contract_no");
+														WHERE contract_status > 0 and contract_status <> 8 and loancontract_no = :contract_no");
 				$fetchMenuLoan->execute([
 					':member_no' => $member_no,
 					':contract_no' => $contract_no
 				]);
 				$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
-				$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
-				$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+				if(isset($rowMenuLoan["LOANCONTRACT_NO"]) && $rowMenuLoan["LOANCONTRACT_NO"] != ""){
+					$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
+					$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+				}else{
+					$arrMenuLoan["CONTRACT_NO"] = 'close';
+				}
 				$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 				$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			}else{
@@ -245,27 +258,35 @@ if(!$anonymous){
 								$arrTypeAllow = array();
 								$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
 																		FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-																		WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
-								$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
-								while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
-									$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
-								}
-								$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-								$arrDataAPI["MemberID"] = substr($member_no,-6);
-								$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-								$accNum = 0;
-								$arrResponseAPI = json_decode($arrResponseAPI);
-								if($arrResponseAPI->responseCode == "200"){
-									foreach($arrResponseAPI->accountDetail as $accData){
-										if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
-											$balance += preg_replace('/,/', '', $accData->accountBalance);
-											$accNum++;
+																		WHERE gct.allow_showdetail = '1' and gat.deptaccount_no = :account_no and gat.is_use = '1'");
+								$getTypeAllowShow->execute([':account_no' => $account_no]);
+								if($getTypeAllowShow->rowCount() > 0){
+									while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
+										$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
+									}
+									$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+									$arrDataAPI["MemberID"] = substr($member_no,-6);
+									$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+									$accNum = 0;
+									$arrResponseAPI = json_decode($arrResponseAPI);
+									if($arrResponseAPI->responseCode == "200"){
+										foreach($arrResponseAPI->accountDetail as $accData){
+											if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->coopAccountNo == $account_no){
+												if($accData->accountStatus == "0"){
+													$balance += preg_replace('/,/', '', $accData->accountBalance);
+													$accNum++;
+													$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
+													$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
+													$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
+												}else{
+													$arrMenuDep["ACCOUNT_NO"] = "closee";	
+												}
+											}
 										}
 									}
+								}else{
+									$arrMenuDep["ACCOUNT_NO"] = "closed";
 								}
-								$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-								$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-								$arrMenuDep["ACCOUNT_DESC"] = $accData->accountDesc;
 								$arrMenuDep["BALANCE"] = number_format($balance,2);
 								$arrMenuDep["AMT_ACCOUNT"] = $accNum ?? 0;
 							}else{
@@ -298,16 +319,21 @@ if(!$anonymous){
 							if(isset($dataComing["home_loan_account"])) {
 								$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
 								$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, 
-																		(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status = 1) as C_CONTRACT
+																		(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no 
+																		and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																		FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
-																		WHERE contract_status = 1 and loancontract_no = :contract_no");
+																		WHERE contract_status > 0 and contract_status <> 8 and loancontract_no = :contract_no");
 								$fetchMenuLoan->execute([
 									':member_no' => $member_no,
 									':contract_no' => $contract_no
 								]);
 								$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
-								$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
-								$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+								if(isset($rowMenuLoan["LOANCONTRACT_NO"]) && $rowMenuLoan["LOANCONTRACT_NO"] != ""){
+									$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
+									$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+								}else{
+									$arrMenuLoan["CONTRACT_NO"] = 'close';
+								}
 								$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}else {
