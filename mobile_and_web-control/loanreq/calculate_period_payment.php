@@ -6,6 +6,13 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		try {
 			$request_net = $dataComing["request_amt"] - $dataComing["diff_old_contract"];
+			if($request_net <= 0){
+				$arrayResult = array();
+				$arrayResult['RESPONSE_CODE'] = "WS0086";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 			if($dataComing["maxreceive_amt"] > 0){
 				if($request_net > $dataComing["maxreceive_amt"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0074";

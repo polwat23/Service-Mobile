@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['sigma_key'],$payload)){
 			exit();
 		}
 	}else{
-		$getAccBankAllowATM = $conoracle->prepare("SELECT account_code FROM atmregister WHERE member_no = :member_no and expense_bank = '006'");
+		$getAccBankAllowATM = $conoracle->prepare("SELECT account_code FROM atmregister WHERE member_no = :member_no and expense_bank = '006' and appl_status = '1'");
 		$getAccBankAllowATM->execute([':member_no' => $member_no]);
 		$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] == $payload["bank_account_no"]){

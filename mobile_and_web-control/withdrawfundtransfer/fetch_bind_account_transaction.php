@@ -17,39 +17,50 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE gct.allow_withdraw_outside = '1' and gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["deptaccount_no_coop"]]);
 				if($fetchAccountBeenAllow->rowCount() > 0){
-					$arrAccBind = array();
-					$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
-					$arrAccBind["BANK_NAME"] = $rowAccBind["bank_short_name"];
-					$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
-					$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
-					$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
-					$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
-					$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
-					$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
-					$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
-					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
-					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
-					$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.prncbal,dpm.depttype_code,
-														dpm.PRNCBAL,dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01'");
-					$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
-					$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-					if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-						if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
-							$arrAccBind["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+					$checkSeqAmt = $cal_dep->getSequestAmount($rowAccBind["deptaccount_no_coop"],'WTX');
+					if($checkSeqAmt["RESULT"]){
+						if($checkSeqAmt["CAN_WITHDRAW"]){
+							$arrAccBind = array();
+							$arrAccBind["SIGMA_KEY"] = $rowAccBind["sigma_key"];
+							$arrAccBind["BANK_NAME"] = $rowAccBind["bank_short_name"];
+							$arrAccBind["DEPTACCOUNT_NO"] = $rowAccBind["deptaccount_no_coop"];
+							$arrAccBind["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
+							$arrAccBind["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
+							$arrAccBind["BANK_LOGO"] = $config["URL_SERVICE"].$rowAccBind["bank_logo_path"];
+							$explodePathLogo = explode('.',$rowAccBind["bank_logo_path"]);
+							$arrAccBind["BANK_LOGO_WEBP"] = $config["URL_SERVICE"].$explodePathLogo[0].'.webp';
+							$arrAccBind["DEPTACCOUNT_NO_BANK"] = $rowAccBind["deptaccount_no_bank"];
+							$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
+							$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
+							$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code,
+																dpm.PRNCBAL,dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal
+																FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+																WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01'");
+							$getDataAcc->execute([':deptaccount_no' => $rowAccBind["deptaccount_no_coop"]]);
+							$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
+							if(isset($rowDataAcc["DEPTTYPE_DESC"])){
+								if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
+									$arrAccBind["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+								}else{
+									$arrAccBind["DEPT_TYPE_IMG"] = null;
+								}
+								$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
+								$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+								$arrAccBind["BALANCE"] = $checkSeqAmt["SEQUEST_AMOUNT"] ?? $cal_dep->getWithdrawable($rowAccBind["deptaccount_no_coop"]);
+								$arrAccBind["BALANCE_FORMAT"] = number_format($arrAccBind["BALANCE"],2);
+								$arrGroupAccBind[] = $arrAccBind;
+							}
 						}else{
-							$arrAccBind["DEPT_TYPE_IMG"] = null;
+							$arrayResult['RESPONSE_CODE'] = "WS0104";
+							$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
 						}
-						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
-						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-						if($rowDataAcc["SEQUEST_STATUS"] == '1'){
-							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAcc["SEQUEST_AMOUNT"] - $rowDataAcc["MINPRNCBAL"];
-						}else{
-							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAcc["MINPRNCBAL"];
-						}
-						$arrAccBind["BALANCE_FORMAT"] = number_format($arrAccBind["BALANCE"],2);
-						$arrGroupAccBind[] = $arrAccBind;
+					}else{
+						$arrayResult['RESPONSE_CODE'] = $checkSeqAmt["RESPONSE_CODE"];
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
 					}
 				}
 			}

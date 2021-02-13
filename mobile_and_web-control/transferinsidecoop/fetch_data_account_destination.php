@@ -25,19 +25,34 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			]);
 			$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
 			if($rowContAllow["allow_deposit_inside"] == '1'){
-				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
-					$arrarDataAcc["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				$checkSeqAmt = $cal_dep->getSequestAmount($to_deptaccount_no,'DTX');
+				if($checkSeqAmt["RESULT"]){
+					if($checkSeqAmt["CAN_DEPOSIT"]){
+						if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
+							$arrarDataAcc["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+						}else{
+							$arrarDataAcc["DEPT_TYPE_IMG"] = null;
+						}
+						$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
+						$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
+						$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));
+						$arrarDataAcc["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
+						$arrarDataAcc["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+						$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
+						$arrayResult['RESULT'] = TRUE;
+						require_once('../../include/exit_footer.php');
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "WS0104";
+						$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
 				}else{
-					$arrarDataAcc["DEPT_TYPE_IMG"] = null;
+					$arrayResult['RESPONSE_CODE'] = $checkSeqAmt["RESPONSE_CODE"];
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
 				}
-				$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
-				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
-				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));
-				$arrarDataAcc["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
-				$arrarDataAcc["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-				$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0026";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

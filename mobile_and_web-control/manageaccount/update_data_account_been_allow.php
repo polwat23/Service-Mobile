@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'
 		if($dataComing["allow_status"] == '-9'){
 			$checkBindBank = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and deptaccount_no_coop = :dept_acc and bindaccount_status = '1'");
 			$checkBindBank->execute([
-				':member_no' => $dataComing["member_no"],
+				':member_no' => $payload["member_no"],
 				':dept_acc' => $dataComing["deptaccount_no"]
 			]);
 			if($checkBindBank->rowCount() > 0){
@@ -17,10 +17,12 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'
 				
 			}
 		}
-		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status WHERE deptaccount_no = :deptaccount_no AND is_use <> '-9'");
+		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status 
+													WHERE deptaccount_no = :deptaccount_no AND member_no = :member_no AND is_use <> '-9'");
 		if($updateAccountBeenAllow->execute([
 			':allow_status' => $dataComing["allow_status"],
-			':deptaccount_no' => $dataComing["deptaccount_no"]
+			':deptaccount_no' => $dataComing["deptaccount_no"],
+			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

@@ -6,11 +6,11 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		try {
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-			$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MOBILE_APP' and tran_status = 1");
+			$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
 			$getLimitAllDay->execute();
 			$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
 			$getSumAllDay = $conoracle->prepare("SELECT SUM(DEPTITEM_AMT) AS SUM_AMT FROM DPDEPTSTATEMENT 
-												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1' and entry_id = 'MOBILE'");
+												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1' and entry_id IN('MCOOP','ICOOP')");
 			$getSumAllDay->execute();
 			$rowSumAllDay = $getSumAllDay->fetch(PDO::FETCH_ASSOC);
 			$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $dataComing["amt_transfer"];
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["depttype_code"] = null;
 			$arrayGroup["dest_deptaccount_no"] = $to_account_no;
 			$arrayGroup["dest_slipitemtype_code"] = "DTX";
-			$arrayGroup["dest_stmitemtype_code"] = "WTX";
+			$arrayGroup["dest_stmitemtype_code"] = "DTX";
 			$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
 			$arrayGroup["feeinclude_status"] = $penalty_include;
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["ref_app"] = "mobile";
 			$arrayGroup["ref_slipno"] = null;
 			$arrayGroup["slipitemtype_code"] = "WTX";
-			$arrayGroup["stmtitemtype_code"] = "DTX";
+			$arrayGroup["stmtitemtype_code"] = "WTX";
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			try {
@@ -144,6 +144,26 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
 								$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
 							}
+						}
+					}
+					$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+					foreach($arrayTel as $dest){
+						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+							$message_body = $message_endpoint["BODY"];
+							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+							$arraySendSMS = $lib->sendSMS($arrayDest);
+							if($arraySendSMS["RESULT"]){
+								$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+								$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+							}else{
+								$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+								$func->logSMSWasNotSent($bulkInsert);
+							}
+						}else{
+							$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+									'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+							$func->logSMSWasNotSent($bulkInsert);
 						}
 					}
 					$arrayResult['RESULT'] = TRUE;

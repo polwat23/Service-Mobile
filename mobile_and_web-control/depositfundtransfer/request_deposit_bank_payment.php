@@ -80,7 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
-			if($rowDataDeposit["bank_code"] != '006'){
+			if($rowDataDeposit["bank_code"] == '006'){
 				$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
 			}else{
 				$arrayGroup["fee_amt"] = 0;
@@ -163,13 +163,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						}
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+						$dataMerge = array();
+						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+						$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						foreach($arrToken["LIST_SEND"] as $dest){
 							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -186,11 +186,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						}
 						foreach($arrToken["LIST_SEND_HW"] as $dest){
 							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -203,6 +198,26 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
+							}
+						}
+						$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+						foreach($arrayTel as $dest){
+							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+								$message_body = $message_endpoint["BODY"];
+								$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+								$arraySendSMS = $lib->sendSMS($arrayDest);
+								if($arraySendSMS["RESULT"]){
+									$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+									$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+								}else{
+									$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+											'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+									$func->logSMSWasNotSent($bulkInsert);
+								}
+							}else{
+								$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+										'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+								$func->logSMSWasNotSent($bulkInsert);
 							}
 						}
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
@@ -249,13 +264,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+						$dataMerge = array();
+						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+						$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						foreach($arrToken["LIST_SEND"] as $dest){
 							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -272,11 +287,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						}
 						foreach($arrToken["LIST_SEND_HW"] as $dest){
 							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -289,6 +299,26 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 									$func->insertHistory($arrPayloadNotify,'2');
 								}
+							}
+						}
+						$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+						foreach($arrayTel as $dest){
+							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+								$message_body = $message_endpoint["BODY"];
+								$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+								$arraySendSMS = $lib->sendSMS($arrayDest);
+								if($arraySendSMS["RESULT"]){
+									$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+									$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+								}else{
+									$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+											'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+									$func->logSMSWasNotSent($bulkInsert);
+								}
+							}else{
+								$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+										'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+								$func->logSMSWasNotSent($bulkInsert);
 							}
 						}
 						$arrayResult['EXTERNAL_REF'] = $etn_ref;
@@ -336,54 +366,69 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
 					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
-						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
-						foreach($arrToken["LIST_SEND"] as $dest){
-							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-								$arrMessage["BODY"] = $message_endpoint["BODY"];
-								$arrMessage["PATH_IMAGE"] = null;
-								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-								$arrPayloadNotify["SEND_BY"] = "system";
-								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
-								if($lib->sendNotify($arrPayloadNotify,"person")){
-									$func->insertHistory($arrPayloadNotify,'2');
-								}
+					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+					$dataMerge = array();
+					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+					$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);		
+					foreach($arrToken["LIST_SEND"] as $dest){
+						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							$arrPayloadNotify["SEND_BY"] = "system";
+							$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+							if($lib->sendNotify($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
 							}
 						}
-						foreach($arrToken["LIST_SEND_HW"] as $dest){
-							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-								$arrMessage["BODY"] = $message_endpoint["BODY"];
-								$arrMessage["PATH_IMAGE"] = null;
-								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-								$arrPayloadNotify["SEND_BY"] = "system";
-								$arrPayloadNotify["TYPE_NOTIFY"] = "2";
-								if($lib->sendNotifyHW($arrPayloadNotify,"person")){
-									$func->insertHistory($arrPayloadNotify,'2');
-								}
+					}
+					foreach($arrToken["LIST_SEND_HW"] as $dest){
+						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+							$arrMessage["BODY"] = $message_endpoint["BODY"];
+							$arrMessage["PATH_IMAGE"] = null;
+							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+							$arrPayloadNotify["SEND_BY"] = "system";
+							$arrPayloadNotify["TYPE_NOTIFY"] = "2";
+							if($lib->sendNotifyHW($arrPayloadNotify,"person")){
+								$func->insertHistory($arrPayloadNotify,'2');
 							}
 						}
-						$arrayResult['EXTERNAL_REF'] = $etn_ref;
-						$arrayResult['TRANSACTION_NO'] = $ref_no;
-						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-						$arrayResult['RESULT'] = TRUE;
-						require_once('../../include/exit_footer.php');
+					}
+					$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+					foreach($arrayTel as $dest){
+						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+							$message_body = $message_endpoint["BODY"];
+							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+							$arraySendSMS = $lib->sendSMS($arrayDest);
+							if($arraySendSMS["RESULT"]){
+								$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+								$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+							}else{
+								$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+								$func->logSMSWasNotSent($bulkInsert);
+							}
+						}else{
+							$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+									'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+							$func->logSMSWasNotSent($bulkInsert);
+						}
+					}
+					$arrayResult['EXTERNAL_REF'] = $etn_ref;
+					$arrayResult['TRANSACTION_NO'] = $ref_no;
+					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
 						
 				}
 			}catch(Throwable $e) {
@@ -426,13 +471,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+				$dataMerge = array();
+				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+				$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+				$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+						
 				foreach($arrToken["LIST_SEND"] as $dest){
 					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-						$dataMerge = array();
-						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-						$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -444,6 +490,41 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						if($lib->sendNotify($arrPayloadNotify,"person")){
 							$func->insertHistory($arrPayloadNotify,'2');
 						}
+					}
+				}
+				foreach($arrToken["LIST_SEND_HW"] as $dest){
+					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+						$arrMessage["BODY"] = $message_endpoint["BODY"];
+						$arrMessage["PATH_IMAGE"] = null;
+						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = "system";
+						if($lib->sendNotifyHW($arrPayloadNotify,"person")){
+							$func->insertHistory($arrPayloadNotify,'2');
+						}
+					}
+				}
+				$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+				foreach($arrayTel as $dest){
+					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+						$message_body = $message_endpoint["BODY"];
+						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+						$arraySendSMS = $lib->sendSMS($arrayDest);
+						if($arraySendSMS["RESULT"]){
+							$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+							$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+						}else{
+							$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+									'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+							$func->logSMSWasNotSent($bulkInsert);
+						}
+					}else{
+						$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+								'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+						$func->logSMSWasNotSent($bulkInsert);
 					}
 				}
 				$arrayResult['EXTERNAL_REF'] = $etn_ref;
