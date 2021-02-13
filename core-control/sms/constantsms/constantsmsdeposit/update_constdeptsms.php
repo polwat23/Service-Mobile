@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant = $conmysql->prepare("SELECT
 																		id_smsconstantdept,
 																		dept_itemtype_code,
-																		allow_smsconstantdept
+																		allow_smsconstantdept,
+																		allow_notify
 																	FROM
 																		smsconstantdept
 																	ORDER BY dept_itemtype_code ASC");
@@ -18,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrConstans["ID_SMSCONSTANTDEPT"] = $rowMenuMobile["id_smsconstantdept"];
 			$arrConstans["DEPTITEMTYPE_CODE"] = $rowMenuMobile["dept_itemtype_code"];
 			$arrConstans["ALLOW_SMSCONSTANTDEPT"] = $rowMenuMobile["allow_smsconstantdept"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTITEMTYPE_CODE,DEPTITEMTYPE_DESC FROM DPUCFDEPTITEMTYPE ORDER BY DEPTITEMTYPE_CODE ASC  ");
@@ -26,8 +28,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrayDepttype = array();
 				if(array_search($rowDepttype["DEPTITEMTYPE_CODE"],array_column($arrayChkG,'DEPTITEMTYPE_CODE')) === False){
 						$arrayDepttype["ALLOW_SMSCONSTANTDEPT"] = 0;
+						$arrayDepttype["ALLOW_NOTIFY"] = 0;
 				}else{
 					$arrayDepttype["ALLOW_SMSCONSTANTDEPT"] = $arrayChkG[array_search($rowDepttype["DEPTITEMTYPE_CODE"],array_column($arrayChkG,'DEPTITEMTYPE_CODE'))]["ALLOW_SMSCONSTANTDEPT"];
+					$arrayDepttype["ALLOW_NOTIFY"] = $arrayChkG[array_search($rowDepttype["DEPTITEMTYPE_CODE"],array_column($arrayChkG,'DEPTITEMTYPE_CODE'))]["ALLOW_NOTIFY"];
 				}
 				
 			$arrayDepttype["DEPTITEMTYPE_CODE"] = $rowDepttype["DEPTITEMTYPE_CODE"];
@@ -45,18 +49,19 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["DEPTITEMTYPE_CODE"],array_column($arrayChkG,'DEPTITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["DEPTITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTDEPT"]."')";
-						$insertBulkContLog[]='DEPTITEMTYPE_CODE=> '.$value_diff["DEPTITEMTYPE_CODE"].' ALLOW_SMSCONSTANTDEPT ='.$value_diff["ALLOW_SMSCONSTANTDEPT"];
+						$insertBulkCont[] = "('".$value_diff["DEPTITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTDEPT"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$insertBulkContLog[]='DEPTITEMTYPE_CODE=> '.$value_diff["DEPTITEMTYPE_CODE"].' ALLOW_SMSCONSTANTDEPT ='.$value_diff["ALLOW_SMSCONSTANTDEPT"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantdept SET allow_smsconstantdept = :ALLOW_SMSCONSTANTDEPT WHERE dept_itemtype_code = :DEPTITEMTYPE_CODE");
+						$updateConst = $conmysql->prepare("UPDATE smsconstantdept SET allow_smsconstantdept = :ALLOW_SMSCONSTANTDEPT, allow_notify = :ALLOW_NOTIFY WHERE dept_itemtype_code = :DEPTITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTDEPT' => $value_diff["ALLOW_SMSCONSTANTDEPT"],
+							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
 							':DEPTITEMTYPE_CODE' => $value_diff["DEPTITEMTYPE_CODE"]
 						]);
-						$updateConstLog = 'DEPTITEMTYPE_CODE=> '.$value_diff["DEPTITEMTYPE_CODE"].' ALLOW_SMSCONSTANTDEPT='.$value_diff["ALLOW_SMSCONSTANTDEPT"];
+						$updateConstLog = 'DEPTITEMTYPE_CODE=> '.$value_diff["DEPTITEMTYPE_CODE"].' ALLOW_SMSCONSTANTDEPT='.$value_diff["ALLOW_SMSCONSTANTDEPT"].' ALLOW_NOTIFY='.$value_diff["ALLOW_NOTIFY"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantdept(dept_itemtype_code,allow_smsconstantdept)
+				$insertConst = $conmysql->prepare("INSERT smsconstantdept(dept_itemtype_code,allow_smsconstantdept,allow_notify)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

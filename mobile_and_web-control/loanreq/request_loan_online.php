@@ -19,6 +19,21 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 				$resultWS = $clientWS->__call("of_initloanrequest_mobile_atm", array($argumentWS));
 				$responseSoap = $resultWS->atr_lnatm;
 				if($responseSoap->msg_status == '000'){
+					$checkSeqAmt = $cal_dep->getSequestAmount($responseSoap->account_id,'DTX');
+					if($checkSeqAmt["RESULT"]){
+						if($checkSeqAmt["CAN_DEPOSIT"]){
+						}else{
+							$arrayResult['RESPONSE_CODE'] = "WS0104";
+							$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+					}else{
+						$arrayResult['RESPONSE_CODE'] = $checkSeqAmt["RESPONSE_CODE"];
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
 					$diff_old_contract = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
 					$structureReqLoanPayment = array();
 					$structureReqLoanPayment["coop_id"] = $config["COOP_ID"];

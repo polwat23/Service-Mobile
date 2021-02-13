@@ -5,22 +5,37 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["bank_code"]);
-		if($arrRightDep["RESULT"]){
-			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
-														FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
-														WHERE MB.member_no = :member_no");
-			$fetchMemberName->execute([
-				':member_no' => $member_no
-			]);
-			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
-			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
-			$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit
-													FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
-													WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
-			$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
-			if($getBankDisplay->rowCount() > 0){
-				$rowBankDisplay = $getBankDisplay->fetch(PDO::FETCH_ASSOC);
+		$checkSeqAmt = $cal_dep->getSequestAmount($dataComing["deptaccount_no"],'DTX');
+		if($checkSeqAmt["RESULT"]){
+			if($checkSeqAmt["CAN_DEPOSIT"]){
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0104";
+				$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+		}else{
+			$arrayResult['RESPONSE_CODE'] = $checkSeqAmt["RESPONSE_CODE"];
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
+		$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+													WHERE MB.member_no = :member_no");
+		$fetchMemberName->execute([
+			':member_no' => $member_no
+		]);
+		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
+		$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename
+												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
+												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
+		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
+		if($getBankDisplay->rowCount() > 0){
+			$rowBankDisplay = $getBankDisplay->fetch(PDO::FETCH_ASSOC);
+			$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowBankDisplay["bank_code"]);
+			if($arrRightDep["RESULT"]){
 				if($rowBankDisplay["bank_code"] == '025'){
 					$dateOperC = date('c');
 					$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
@@ -90,21 +105,22 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					$arrayResult['ACCOUNT_NAME'] = $account_name_th;
 					$arrayResult['RESULT'] = TRUE;
 				}
+				
 			}else{
-				$arrayResult['ACCOUNT_NAME'] = $account_name_th;
-				$arrayResult['RESULT'] = TRUE;
+				$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
+				if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
 			}
-			require_once('../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
-			if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
-				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			}
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
+			$arrayResult['ACCOUNT_NAME'] = $account_name_th;
+			$arrayResult['RESULT'] = TRUE;
 		}
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

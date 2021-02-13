@@ -10,14 +10,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		min_deposit,
 		max_deposit,
 		min_withdraw,
-		max_withdraw)
+		max_withdraw,
+		each_bank)
 		VALUES (:transaction_cycle,
 		:max_numof_deposit,
 		:max_numof_withdraw,
 		:min_deposit,
 		:max_deposit,
 		:min_withdraw,
-		:max_withdraw)");
+		:max_withdraw,
+		:each_bank)");
 		if($updateConstants->execute([
 			':transaction_cycle' => $dataComing["transaction_cycle"],
 			':max_numof_deposit' => $dataComing["max_numof_deposit"],
@@ -25,7 +27,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			':min_deposit' => $dataComing["min_deposit"],
 			':max_deposit' => $dataComing["max_deposit"],
 			':min_withdraw' => $dataComing["min_withdraw"],
-			':max_withdraw' => $dataComing["max_withdraw"]
+			':max_withdraw' => $dataComing["max_withdraw"],
+			':each_bank' => $dataComing["each_bank"]
 		])){
 			$arrayStruc = [
 					':menu_name' => "constantbankaccount",

@@ -31,6 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['amt_transfer'] = $amt_transfer;
 		$arrVerifyToken['coop_account_no'] = $coop_account_no;
 		$arrVerifyToken['operate_date'] = $dateOperC;
+		$arrVerifyToken['ref_trans'] = $ref_no;
 		$refbank_no = null;
 		$etnrefbank_no = null;
 		if($rowDataWithdraw["bank_code"] == '004'){
