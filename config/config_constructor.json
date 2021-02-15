@@ -23,8 +23,8 @@
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
-	"HW_APPID" : "",
-    "HW_APPSECRET": "",
+	"HW_APPID" : "103787829",
+    "HW_APPSECRET": "dddde2bd39ee0240104f3ebbdc90e60dbda73810ab197a88176ab6b5fcba5a3a",
 	"PORT_MAILSERVER" : "587",
 	"LIMIT_TRANSACTION" : {
 		"0" : {
