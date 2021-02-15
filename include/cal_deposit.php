@@ -28,8 +28,8 @@ class CalculateDep {
 			$arrayResult["PENALTY_AMT"] = $penalty_amt;
 			$arrayResult['PENALTY_AMT_FORMAT'] = number_format($penalty_amt,2);
 		}
-		$DataSeqAmt = $this->getSequestAmt($deptaccount_no);
-		$sumAllTransfer = ($dataConst["PRNCBAL"] - $DataSeqAmt["SEQUEST_BALANCE"]) - ($penalty_amt + $fee_amt + $amt_transfer);
+		//$DataSeqAmt = $this->getSequestAmt($deptaccount_no);
+		$sumAllTransfer = ($dataConst["PRNCBAL"]) - ($penalty_amt + $fee_amt + $amt_transfer);
 		if($sumAllTransfer < $dataConst["MINPRNCBAL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0100";
 			$arrayResult['RESULT'] = FALSE;
@@ -96,7 +96,7 @@ class CalculateDep {
 	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
-		if($dataConst["MAXBALANCE_FLAG"] == '1'){
+		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
 				$arrayResult['RESULT'] = FALSE;

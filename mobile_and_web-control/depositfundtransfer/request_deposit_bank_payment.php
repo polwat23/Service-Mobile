@@ -16,7 +16,12 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$ref_no = time().$lib->randomText('all',3);
-		$amt_transfer = $dataComing["amt_transfer"];
+		$penalty_include = $func->getConstant("include_penalty");
+		if($penalty_include == '0'){
+			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
+		}else{
+			$amt_transfer = $dataComing["amt_transfer"];
+		}
 		$arrSendData = array();
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -42,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':id_userlogin' => $payload["id_userlogin"],
 				':operate_date' => $dateOper,
 				':sigma_key' => $dataComing["sigma_key"],
-				':amt_transfer' => $amt_transfer,
+				':amt_transfer' => $dataComing["amt_transfer"],
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้",
 				':is_adj' => '0'
@@ -165,7 +170,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 						$dataMerge = array();
 						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+						$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 						$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						foreach($arrToken["LIST_SEND"] as $dest){
@@ -251,7 +256,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 							':id_userlogin' => $payload["id_userlogin"],
 							':operate_date' => $dateOper,
 							':sigma_key' => $dataComing["sigma_key"],
-							':amt_transfer' => $amt_transfer,
+							':amt_transfer' => $dataComing["amt_transfer"],
 							':response_code' => $responseSoap->msg_status,
 							':response_message' => $responseSoap->msg_output,
 							':is_adj' => '8'
@@ -260,13 +265,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$responseSoap->msg_output;
 						$lib->sendLineNotify($message_error);
 						$message_error = "มีรายการฝากมาจาก ".$rowDataDeposit["bank_short_ename"]." ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
-						" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$responseSoap->msg_output;
+						" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$dataComing["amt_transfer"]." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$responseSoap->msg_output;
 						$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 						$dataMerge = array();
 						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+						$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 						$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						foreach($arrToken["LIST_SEND"] as $dest){
@@ -354,7 +359,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':id_userlogin' => $payload["id_userlogin"],
 						':operate_date' => $dateOper,
 						':sigma_key' => $dataComing["sigma_key"],
-						':amt_transfer' => $amt_transfer,
+						':amt_transfer' => $dataComing["amt_transfer"],
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $e->getMessage(),
 						':is_adj' => '8'
@@ -363,13 +368,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
 					$lib->sendLineNotify($message_error);
 					$message_error = "มีรายการฝากมาจาก ".$rowDataDeposit["bank_short_ename"]." ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
-					" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
+					" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$dataComing["amt_transfer"]." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
 					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 					$dataMerge = array();
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-					$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+					$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 					$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);		
 					foreach($arrToken["LIST_SEND"] as $dest){
@@ -457,7 +462,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':id_userlogin' => $payload["id_userlogin"],
 					':operate_date' => $dateOper,
 					':sigma_key' => $dataComing["sigma_key"],
-					':amt_transfer' => $amt_transfer,
+					':amt_transfer' => $dataComing["amt_transfer"],
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $e->getMessage(),
 					':is_adj' => '8'
@@ -466,14 +471,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ".$e->getMessage();
 				$lib->sendLineNotify($message_error);
 				$message_error = "มีรายการฝากมาจาก ".$rowDataDeposit["bank_short_ename"]." ตัดเงินเรียบร้อยแต่ไม่สามารถยิงฝากเงินเข้าบัญชีสหกรณ์ได้ เลขรหัสรายการ ".$transaction_no.
-				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$amt_transfer." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
+				" เลขสมาชิก ".$payload["member_no"]." เข้าบัญชี : ".$coop_account_no." ยอดทำรายการ : ".$dataComing["amt_transfer"]." บาทเมื่อวันที่ ".$dateOper." สาเหตุที่ล้มเหลวเพราะ".$e->getMessage();
 				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				$dataMerge = array();
 				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-				$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+				$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 				$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						

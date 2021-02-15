@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN gcuserlogin login ON
 												pay.id_userlogin = login.id_userlogin
 											WHERE pay.status_flag ='0'
-											ORDER BY pay.transaction_date");
+											ORDER BY pay.transaction_date DESC");
 												
 		$fetchLogRepayLoan->execute();
 		while($rowLogRepayLoan = $fetchLogRepayLoan->fetch(PDO::FETCH_ASSOC)){

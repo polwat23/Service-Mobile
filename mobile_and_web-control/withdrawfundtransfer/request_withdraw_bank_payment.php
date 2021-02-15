@@ -18,12 +18,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$ref_no = $time.$lib->randomText('all',3);
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$penalty_include = $func->getConstant("include_penalty");
-		$amt_transfer = $dataComing["amt_transfer"];
 		$fee_amt = 0;
 		if($rowDataWithdraw["bank_code"] == '025'){
 			$fee_amt = $dataComing["penalty_amt"];
 		}else{
 			$fee_amt = $dataComing["penalty_amt"] + $dataComing["fee_amt"];
+		}
+		if($penalty_include == '0'){
+			$amt_transfer = $dataComing["amt_transfer"] - $fee_amt;
+		}else{
+			$amt_transfer = $dataComing["amt_transfer"];
 		}
 		$arrVerifyToken['exp'] = $time + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -247,7 +251,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 				$dataMerge = array();
 				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-				$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
+				$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 				$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
 				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 				foreach($arrToken["LIST_SEND"] as $dest){
