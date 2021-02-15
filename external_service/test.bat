@@ -1,5 +1,3 @@
-
-
-C:\Program1\php7.4\php7.4\php.exe C:\Mobile\service-pjt-test\external_service\test.php
+cd C:\Program Files\MariaDB 10.5\bin & mysql.exe -hlocalhost -P3306 -u root -p@PJT2020 mobile_pjt < C:\Mobile\service-pjt-test\external_service\backupDB_pjt.sql
 
 pause
