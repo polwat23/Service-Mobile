@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayDept = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
 												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-												WHERE gct.allow_transaction = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+												WHERE gat.member_no = :member_no and gat.is_use = '1' and (gct.allow_deposit_inside = '1' OR gct.allow_withdraw_inside = '1')");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
