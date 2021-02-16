@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				$arrayResult["RECEIVE_NET"] = $receive_net;
 			}
-			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
+			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $arrayResult["RECEIVE_NET"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			if($dataComing["loantype_code"] != '23'){
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -65,6 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 			$arrayResult["RECEIVE_NET"] = $receive_net;
 			$arrayResult["REQUEST_AMT"] = $request_amt;
+			$arrayResult["LOANREQ_AMT_STEP"] = 100;
 			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
 			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
 			$arrayResult["MAX_PERIOD"] = (string)$dayremainEnd;
