@@ -685,7 +685,7 @@ class CalculateDep {
 			]);
 		}
 		$rowCountTrans = $getCountTrans->fetch(\PDO::FETCH_ASSOC);
-		$count_trans = $rowCountTrans["C_TRANS"];
+		$count_trans = $rowCountTrans["C_TRANS"] + 1;
 		if($count_trans > $dataConst["MAXWITHD_INMONTH"]){
 			$getContDeptTypeFee = $this->conora->prepare("SELECT CHARGE_FLAG,s_chrg_amt1 as MIN_FEE,s_chrg_perc1 as PERCENT_FEE,s_chrg_amt2 as MAX_FEE 
 														FROM dpdepttype WHERE depttype_code = :depttype_code");
