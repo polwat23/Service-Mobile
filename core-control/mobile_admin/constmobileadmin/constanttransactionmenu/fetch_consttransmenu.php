@@ -35,6 +35,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												bc.max_deposit,
 												bc.min_withdraw,
 												bc.max_withdraw,
+												bc.each_bank,
 												bcp.id_constantmapping 
 												FROM gcbankconstant bc
 												LEFT JOIN gcmenuconstantmapping bcp ON bc.id_bankconstant = bcp.id_bankconstant
@@ -62,6 +63,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrMapping["MAX_DEPOSIT"] = $rowBankMapping["max_deposit"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["max_deposit"],2)." บาท";
 					$arrMapping["MIN_WITHDRAW"] = $rowBankMapping["min_withdraw"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["min_withdraw"],2)." บาท";
 					$arrMapping["MAX_WITHDRAW"] = $rowBankMapping["max_withdraw"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["max_withdraw"],2)." บาท";
+					$arrMapping["EACH_BANK"] = $rowBankMapping["each_bank"];
 					$arrMapping["ID_CONSTANTMAPPING"] = $rowBankMapping["id_constantmapping"];
 					$arrMenu["BANK_CONSTANT"][] = $arrMapping;
 				}
