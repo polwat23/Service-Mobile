@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.MEM_TELMOBILE as MEM_TELMOBILE,
+		$fetchMember = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,
 											mb.MEMBER_DATE,mb.MEMBER_NO,
 											mb.ADDRESS_NO as ADDR_NO,
 											mb.ADDRESS_MOO as ADDR_MOO,
@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
 			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayGroup["TEL"] = isset($rowMember["MEM_TELMOBILE"]) ? $lib->formatphone(preg_replace('/[^0-9]/', '', $rowMember["MEM_TELMOBILE"]),'-') : "-";
+			$arrayGroup["TEL"] = "-";
 			$arrayGroup["EMAIL"] = "-";
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
 			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
