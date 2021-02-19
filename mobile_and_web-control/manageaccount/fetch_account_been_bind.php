@@ -89,7 +89,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
 			$arrayBankGrp[] = $arrayBank;
 		}
-		$arrayResult['BANK_LIST'] = $arrayBankGrp;
+		if($payload["member_no"] == '00009885' || $payload["member_no"] == '00013298'){
+			$arrayResult['BANK_LIST'] = $arrayBankGrp;
+		}
 		$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

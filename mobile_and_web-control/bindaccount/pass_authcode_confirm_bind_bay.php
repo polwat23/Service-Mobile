@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','auth_code','sigma_key','coop_a
 		$conmysql->beginTransaction();
 		$updateBindAcc = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '1',bind_date = NOW() WHERE sigma_key = :sigma_key");
 		if($updateBindAcc->execute([':sigma_key' => $dataComing["sigma_key"]])){
-			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
+			$coop_account_no = $payload["member_no"];
 			$arrPayloadverify = array();
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
 			$arrPayloadverify['auth_code'] = $dataComing["auth_code"];

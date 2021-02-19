@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchConstant = $conmysql->prepare("SELECT
 																		id_smsconstantloan,
 																		loan_itemtype_code,
-																		allow_smsconstantloan
+																		allow_smsconstantloan,
+																		allow_notify
 																	FROM
 																		smsconstantloan
 																	ORDER BY loan_itemtype_code ASC");
@@ -18,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ID_SMSCONSTANTLOAN"] = $rowMenuMobile["id_smsconstantloan"];
 			$arrConstans["LOANITEMTYPE_CODE"] = $rowMenuMobile["loan_itemtype_code"];
 			$arrConstans["ALLOW_SMSCONSTANTLOAN"] = $rowMenuMobile["allow_smsconstantloan"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT LOANITEMTYPE_CODE,LOANITEMTYPE_DESC FROM LNUCFLOANITEMTYPE ORDER BY LOANITEMTYPE_CODE ASC");
@@ -26,8 +28,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayDepttype = array();
 				if((array_search($rowDepttype["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE')) === False) || sizeof($arrayChkG) == 0){
 						$arrayDepttype["ALLOW_SMSCONSTANTLOAN"] = 0;
+						$arrayDepttype["ALLOW_NOTIFY"] = 0;
 				}else{
 					$arrayDepttype["ALLOW_SMSCONSTANTLOAN"] = $arrayChkG[array_search($rowDepttype["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE'))]["ALLOW_SMSCONSTANTLOAN"];
+					$arrayDepttype["ALLOW_NOTIFY"] = $arrayChkG[array_search($rowDepttype["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE'))]["ALLOW_NOTIFY"];
 				}
 				
 			$arrayDepttype["LOANITEMTYPE_CODE"] = $rowDepttype["LOANITEMTYPE_CODE"];

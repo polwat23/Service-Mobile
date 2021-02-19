@@ -10,7 +10,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		min_deposit= :min_deposit,
 		max_deposit= :max_deposit,
 		min_withdraw= :min_withdraw,
-		max_withdraw= :max_withdraw
+		max_withdraw= :max_withdraw,
+		each_bank= :each_bank
 		WHERE id_bankconstant = :id_bankconstant");
 		if($updateConstants->execute([
 			':transaction_cycle' => $dataComing["transaction_cycle"],
@@ -20,6 +21,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			':max_deposit' => $dataComing["max_deposit"],
 			':min_withdraw' => $dataComing["min_withdraw"],
 			':max_withdraw' => $dataComing["max_withdraw"],
+			':each_bank' => $dataComing["each_bank"],
 			':id_bankconstant' => $dataComing["id_bankconstant"]
 		])){
 			$arrayStruc = [
@@ -32,7 +34,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								" min_deposit => ".$dataComing["min_deposit"].
 								" max_deposit => ".$dataComing["max_deposit"].
 								" min_withdraw => ".$dataComing["min_withdraw"].
-								" max_withdraw => ".$dataComing["max_withdraw"]
+								" max_withdraw => ".$dataComing["max_withdraw"].
+								" each_bank => ".$dataComing["each_bank"].
+								" id_bankconstant => ".$dataComing["id_bankconstant"]
 			];
 			$log->writeLog('manageuser',$arrayStruc);
 			$arrayResult["RESULT"] = TRUE;
