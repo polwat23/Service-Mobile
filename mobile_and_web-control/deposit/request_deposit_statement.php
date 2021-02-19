@@ -191,7 +191,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 					สหกรณ์ออมทรัพย์สาธารณสุขหนองคาย จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Nongkhai Public Health Savings And Credit Cooperatives Limited
+					Nongkhai Public Health Savings And Credit
+			   </div>
+			   <div style=" position: fixed;top:47px; left: 60px;font-size:20px">
+					Cooperatives Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
