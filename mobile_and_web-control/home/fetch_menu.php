@@ -36,20 +36,24 @@ if(!$anonymous){
 			$arrMenuDep = array();
 			if(isset($dataComing["home_deposit_account"])) {
 				$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-				$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
+				$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
 													WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 														FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-														WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+														WHERE deptaccount_no = :account_no");
 				$fetchMenuDep->execute([
 					':member_no' => $member_no,
 					':account_no' => $account_no
 				]);
 				$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
-				$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-				$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-				$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
-				$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 				$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+				if($rowMenuDep["DEPTCLOSE_STATUS"] != '1'){
+					$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+					$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+					$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
+					$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
+				}else{
+					$arrMenuDep["ACCOUNT_NO"] = "close";
+				}
 			}else {
 				$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
 												WHERE member_no = :member_no and deptclose_status = 0");
@@ -66,19 +70,23 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			if(isset($dataComing["home_loan_account"])) {
 				$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-				$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, 
+				$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, ln.contract_status,
 													(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 														FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
-														WHERE contract_status > 0 and contract_status <> 8 and loancontract_no = :contract_no");
+														WHERE loancontract_no = :contract_no");
 				$fetchMenuLoan->execute([
 					':member_no' => $member_no,
 					':contract_no' => $contract_no
 				]);
 				$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
-				$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
-				$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
-				$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 				$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+				if($rowMenuLoan["CONTRACT_STATUS"] > '0' && $rowMenuLoan["CONTRACT_STATUS"] != "8"){
+					$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
+					$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+					$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
+				}else{
+					$arrMenuLoan["CONTRACT_NO"] = 'close';
+				}
 			}else {
 				$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
 													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
@@ -210,23 +218,28 @@ if(!$anonymous){
 							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
-						if($rowMenu["menu_component"] == "DepositInfo"){
+						if($dataComing["menu_component"] == "DepositInfo"){
+							$arrMenuDep = array();
 							if(isset($dataComing["home_deposit_account"])) {
 								$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-								$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no, dt.depttype_desc, 
-																	(SELECT COUNT(deptaccount_no) FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
+								$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
+																	WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 																		FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-																		WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+																		WHERE deptaccount_no = :account_no");
 								$fetchMenuDep->execute([
 									':member_no' => $member_no,
 									':account_no' => $account_no
 								]);
 								$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
-								$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-								$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-								$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
-								$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+								if($rowMenuDep["DEPTCLOSE_STATUS"] != '1'){
+									$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+									$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+									$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
+									$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
+								}else{
+									$arrMenuDep["ACCOUNT_NO"] = "close";
+								}
 							}else {
 								$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
 																WHERE member_no = :member_no and deptclose_status = 0");
@@ -238,25 +251,31 @@ if(!$anonymous){
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							}
 							$arrMenuDep["LAST_STATEMENT"] = TRUE;
-						}else if($rowMenu["menu_component"] == "LoanInfo"){
+							$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
+						}else if($dataComing["menu_component"] == "LoanInfo"){
+							$arrMenuLoan = array();
 							if(isset($dataComing["home_loan_account"])) {
 								$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-								$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, 
+								$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, ln.contract_status,
 																	(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																		FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
-																		WHERE contract_status > 0 and contract_status <> 8 and loancontract_no = :contract_no");
+																		WHERE loancontract_no = :contract_no");
 								$fetchMenuLoan->execute([
 									':member_no' => $member_no,
 									':contract_no' => $contract_no
 								]);
 								$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
-								$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
-								$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
-								$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+								if($rowMenuLoan["CONTRACT_STATUS"] > '0' && $rowMenuLoan["CONTRACT_STATUS"] != "8"){
+									$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
+									$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+									$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
+								}else{
+									$arrMenuLoan["CONTRACT_NO"] = 'close';
+								}
 							}else {
 								$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
-																WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+																	WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 								$fetchMenuLoan->execute([
 									':member_no' => $member_no
 								]);
@@ -265,6 +284,7 @@ if(!$anonymous){
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+							$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 						}			
 					}
 				}else{
@@ -283,23 +303,28 @@ if(!$anonymous){
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
-					if($rowMenu["menu_component"] == "DepositInfo"){
+					if($dataComing["menu_component"] == "DepositInfo"){
+						$arrMenuDep = array();
 						if(isset($dataComing["home_deposit_account"])) {
 							$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-							$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no, dt.depttype_desc, 
-																(SELECT COUNT(deptaccount_no) FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
+							$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
+																WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 																	FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-																	WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+																	WHERE deptaccount_no = :account_no");
 							$fetchMenuDep->execute([
 								':member_no' => $member_no,
 								':account_no' => $account_no
 							]);
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
-							$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-							$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-							$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
-							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
+							if($rowMenuDep["DEPTCLOSE_STATUS"] != '1'){
+								$arrMenuDep["ACCOUNT_NO"] = $lib->formataccount($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+								$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowMenuDep["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+								$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
+								$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
+							}else{
+								$arrMenuDep["ACCOUNT_NO"] = "close";
+							}
 						}else {
 							$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
 															WHERE member_no = :member_no and deptclose_status = 0");
@@ -311,25 +336,31 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
 						$arrMenuDep["LAST_STATEMENT"] = TRUE;
-					}else if($rowMenu["menu_component"] == "LoanInfo"){
+						$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
+					}else if($dataComing["menu_component"] == "LoanInfo"){
+						$arrMenuLoan = array();
 						if(isset($dataComing["home_loan_account"])) {
 							$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-							$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, 
+							$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, ln.contract_status,
 																(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																	FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
-																	WHERE contract_status > 0 and contract_status <> 8 and loancontract_no = :contract_no");
+																	WHERE loancontract_no = :contract_no");
 							$fetchMenuLoan->execute([
 								':member_no' => $member_no,
 								':contract_no' => $contract_no
 							]);
 							$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
-							$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
-							$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
-							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
+							if($rowMenuLoan["CONTRACT_STATUS"] > '0' && $rowMenuLoan["CONTRACT_STATUS"] != "8"){
+								$arrMenuLoan["CONTRACT_NO"] = preg_replace('/\//','',$rowMenuLoan["LOANCONTRACT_NO"]);
+								$arrMenuLoan["CONTRACT_DESC"] = $rowMenuLoan["LOAN_TYPE"];
+								$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
+							}else{
+								$arrMenuLoan["CONTRACT_NO"] = 'close';
+							}
 						}else {
 							$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
-															WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+																WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 							$fetchMenuLoan->execute([
 								':member_no' => $member_no
 							]);
@@ -338,6 +369,7 @@ if(!$anonymous){
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						}
 						$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+						$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 					}
 				}
 			}
