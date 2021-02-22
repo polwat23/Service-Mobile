@@ -29,22 +29,22 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
+		$checkValid = $conmysqlcoop->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											WHERE mb.member_no = :member_no");
 		$checkValid->execute([
 			':member_no' => $member_no
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMember["MEMB_NAME"])){
-			if($rowMember["RESIGN_STATUS"] == '1'){
+		if(isset($rowMember["memb_name"])){
+			if($rowMember["resign_status"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
 			}
-			if($rowMember["CARD_PERSON"] != $dataComing["id_card"]){
+			if($rowMember["card_person"] != $dataComing["id_card"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0060";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -53,11 +53,13 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			}
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
-			$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+			$arrayResult['MEMBER_FULLNAME'] = $rowMember["prename_desc"].$rowMember["memb_name"].' '.$rowMember["memb_surname"];
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['MEMBER_NO'] = $member_no;
+			$arrayResult['rowMember'] = $rowMember;
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');

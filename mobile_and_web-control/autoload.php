@@ -73,13 +73,6 @@ if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 	http_response_code(500);
 	
 }
-if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
-	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
-	$lib->sendLineNotify($message_error);
-	$func->MaintenanceMenu("System");
-	http_response_code(500);
-	
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();

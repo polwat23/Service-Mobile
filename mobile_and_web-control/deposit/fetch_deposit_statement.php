@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getAccount = $conoracle->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
+		$getAccount = $conmysqlcoop->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
 											WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
 		$getAccount->execute([
 			':account_no' => $account_no
@@ -46,28 +46,28 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrSlipTrans[] = $rowslipTrans["coop_slip_no"];
 		}
 		if(sizeof($arrSlipTrans) > 0){
-			$fetchStmSeqDept = $conoracle->prepare("SELECT dpstm_no FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
+			$fetchStmSeqDept = $conmysqlcoop->prepare("SELECT DPSTM_NO FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
 			$fetchStmSeqDept->execute([':deptacc_no' => $account_no]);
 			while($rowstmseq = $fetchStmSeqDept->fetch(PDO::FETCH_ASSOC)){
 				$arrSlipStm[] = $rowstmseq["DPSTM_NO"];
 			}
 		}
 		if(sizeof($arrSlipStm) > 0){
-			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+			$getStatement = $conmysqlcoop->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.SEQ_NO,
+												dsm.OPERATE_DATE,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
-												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+												BETWEEN STR_TO_DATE(:datebefore,'%Y-%m-%d') and STR_TO_DATE(:datenow,'%Y-%m-%d') ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC LIMIT ".$rownum." ");
 		}else{
-			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
-												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+			$getStatement = $conmysqlcoop->prepare("SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.SEQ_NO,
+												dsm.OPERATE_DATE,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
 												WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
-												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+												BETWEEN STR_TO_DATE(:datebefore,'%Y-%m-%d') and STR_TO_DATE(:datenow,'%Y-%m-%d') ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC LIMIT ".$rownum." ");
 		}
 		$getStatement->execute([
 			':account_no' => $account_no,

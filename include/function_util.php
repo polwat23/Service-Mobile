@@ -11,7 +11,6 @@ class functions {
 		function __construct() {
 			$connection = new connection();
 			$this->con = $connection->connecttomysql();
-			$this->conora = $connection->connecttooracle();
 		}
 		
 		public function checkLogin($id_token) {
