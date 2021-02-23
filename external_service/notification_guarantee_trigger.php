@@ -11,7 +11,7 @@ $func = new functions();
 
 $templateMessage = $func->getTemplateSystem('GuaranteeInfo',1);
 $fetchDataGuarantee = $conmssql->prepare("SELECT mp.prename_desc + mb.memb_name + ' ' + mb.memb_surname as FULL_NAME,
-										lcc.LOANCONTRACT_NO,lcc.seq_no,
+										lcc.LOANCONTRACT_NO,lcc.SEQ_NO,
 										 lcc.REF_COLLNO, lcm.startcont_date as STARTCONT_DATE,lt.loantype_desc as LOAN_TYPE,lcm.loanapprove_amt as AMOUNT
 										FROM lncontcoll lcc 
 										LEFT JOIN lncontmaster lcm ON lcc.loancontract_no = lcm.loancontract_no and lcc.coop_id = lcm.coop_id
