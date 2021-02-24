@@ -3,7 +3,7 @@
 
 del C:\Mobile\service-doa\external_service\backupDB_doa.zip
 
-cd C:\Program Files\MariaDB 10.4\bin
+cd C:\Program Files\MariaDB 10.5\bin
 
 C:
 
