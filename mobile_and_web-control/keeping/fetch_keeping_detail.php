@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$dateshow_kpmonth = $func->getConstant('dateshow_kpmonth');
 		$keep_forward = $func->getConstant('process_keep_forward');
-		$MonthForCheck = date('m');
+		$MonthForCheck = date('m');	
 		$DayForCheck = date('d');
 		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT,KPSLIP_NO
 															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT,KPSLIP_NO ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
@@ -36,8 +36,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		if((isset($rowBeenPay["RECV_PERIOD"]) && $rowBeenPay["RECV_PERIOD"] != "") || (empty($rowLastRecv["MAX_RECV"]) && $rowLastRecv["MAX_RECV"] == "")){
-			http_response_code(204);
-			
+			$date_process_kp = $func->getConstant('date_process_kp');
+			if($date_process_kp < 10){
+				$date_process_kp = '0'.$date_process_kp;
+			}
+			$MonthForCheckFuture = date('Ym',strtotime("+1 months"));
+			$dateFuture = $MonthForCheckFuture.$date_process_kp;
+			if(date('Ymd') > $dateFuture){
+				http_response_code(204);
+			}
 		}
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
