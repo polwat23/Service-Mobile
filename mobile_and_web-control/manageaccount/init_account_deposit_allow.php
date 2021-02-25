@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAllowAccGroup = array();
 		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept WHERE 
 												allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'
-												OR allow_buy_share = '1' OR allow_pay_loan = '1'");
+												OR allow_buy_share = '1' OR allow_pay_loan = '1' OR allow_showdetail = '1'");
 		$getDeptTypeAllow->execute();
 		if($getDeptTypeAllow->rowCount() > 0 ){
 			while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																allow_buy_share,allow_pay_loan,id_accountconstant,allow_showdetail FROM gcconstantaccountdept
 																WHERE dept_type_code = :depttype_code and 
 																(allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'
-																OR allow_buy_share = '1' OR allow_pay_loan = '1')");
+																OR allow_buy_share = '1' OR allow_pay_loan = '1' OR allow_showdetail = '1')");
 						$getIDDeptTypeAllow->execute([
 							':depttype_code' => $accData->accountType
 						]);

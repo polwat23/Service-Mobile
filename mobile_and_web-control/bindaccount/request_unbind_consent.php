@@ -95,16 +95,16 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 					':response_message' => $arrayResult['RESPONSE_MESSAGE'],
 					':id_bindaccount' => $dataComing["id_bindaccount"],
 					':data_bind_error' => json_encode([
-						':sigma_key' => $dataComing["sigma_key"],
-						':id_bindaccount' => $dataComing["id_bindaccount"]
+						':deptaccount_no_bank' => $rowAcc["deptaccount_no_bank"],
+						':bank_code' => $rowAcc["bank_code"]
 					]),
 					':query_error' => $updateUnBindAccount->queryString,
 					':query_flag' => '-9'
 				];
 				$log->writeLog('unbindaccount',$arrayStruc);
 				$message_error = "ปิดเมนูผูกบัญชี เนื่องจากยกเลิกผูกบัญชี Update ลง gcbindaccount ไม่ได้ "."\n"."Query => ".$updateUnBindAccount->queryString."\n"."Param => ". json_encode([
-					':sigma_key' => $dataComing["sigma_key"],
-					':id_bindaccount' => $dataComing["id_bindaccount"]
+					':deptaccount_no_bank' => $rowAcc["deptaccount_no_bank"],
+					':bank_code' => $rowAcc["bank_code"]
 				]);
 				$lib->sendLineNotify($message_error);
 				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);

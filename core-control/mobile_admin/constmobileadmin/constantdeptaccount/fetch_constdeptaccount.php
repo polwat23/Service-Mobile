@@ -14,7 +14,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		allow_deposit_outside,
 																		allow_withdraw_outside,
 																		allow_buy_share,
-																		allow_pay_loan
+																		allow_pay_loan,
+																		allow_showdetail
 																	FROM
 																		gcconstantaccountdept
 																	ORDER BY dept_type_code ASC");
@@ -30,6 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ALLOW_WITHDRAW_OUTSIDE"] = $rowMenuMobile["allow_withdraw_outside"];
 			$arrConstans["ALLOW_BUY_SHARE"] = $rowMenuMobile["allow_buy_share"];
 			$arrConstans["ALLOW_PAY_LOAN"] = $rowMenuMobile["allow_pay_loan"];
+			$arrConstans["ALLOW_SHOWDETAIL"] = $rowMenuMobile["allow_showdetail"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
@@ -43,6 +45,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayDepttype["ALLOW_WITHDRAW_OUTSIDE"] = '0';
 				$arrayDepttype["ALLOW_BUY_SHARE"] = '0';
 				$arrayDepttype["ALLOW_PAY_LOAN"] = '0';
+				$arrayDepttype["ALLOW_SHOWDETAIL"] = '0';
 				$arrayDepttype["MEMBER_TYPE_CODE"] = 'AL';
 			}else{
 				$arrayDepttype["ALLOW_DEPOSIT_INSIDE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_DEPOSIT_INSIDE"];
@@ -51,6 +54,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayDepttype["ALLOW_WITHDRAW_OUTSIDE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_WITHDRAW_OUTSIDE"];
 				$arrayDepttype["ALLOW_BUY_SHARE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_BUY_SHARE"];
 				$arrayDepttype["ALLOW_PAY_LOAN"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_PAY_LOAN"];
+				$arrayDepttype["ALLOW_SHOWDETAIL"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_SHOWDETAIL"];
 				$arrayDepttype["MEMBER_TYPE_CODE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["MEMBER_TYPE_CODE"];
 				//$arrayDepttype["ID_ACCCONSTANT"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ID_ACCCONSTANT"];
 			}
