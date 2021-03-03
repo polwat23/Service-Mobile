@@ -3,7 +3,7 @@
 
 del C:\Mobile\service-crh\external_service\backupDB_crh.zip
 
-cd C:\Program Files\MariaDB 10.4\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@CRH2020 mobile_crh > C:\Mobile\service-crh\external_service\backupDB_crh.sql
+cd C:\Program Files\MariaDB 10.5\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@CRH2020 mobile_crh > C:\Mobile\service-crh\external_service\backupDB_crh.sql
 
 "C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\service-crh\external_service\backupDB_crh.zip C:\Mobile\service-crh\external_service\backupDB_crh.sql
 

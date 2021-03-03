@@ -703,9 +703,12 @@ class CalculateDep {
 		}
 		return $penalty_amt;
 	}
-	public function getVcMapID($depttype_code){
-		$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = 'DEP' AND SLIPITEMTYPE_CODE = 'DEP' AND SHRLONTYPE_CODE = :depttype_code");
-		$getvc->execute([':depttype_code' => $depttype_code]);
+	public function getVcMapID($depttype_code,$sys_code='DEP'){
+		$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = :sys_code AND SLIPITEMTYPE_CODE = :sys_code AND SHRLONTYPE_CODE = :depttype_code");
+		$getvc->execute([
+			':depttype_code' => $depttype_code,
+			':sys_code' => $sys_code
+		]);
 		$rowvc = $getvc->fetch(\PDO::FETCH_ASSOC);
 		return $rowvc;
 	}
@@ -734,12 +737,12 @@ class CalculateDep {
 			if($key == 'P'){
 				$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
 			}else if($key == 'Y'){
-				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],0,$countYear);
+				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
 			}else if($key == 'R'){
 				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
 			}
 		}
-		$arrayResult["DEPTSLIP_NO"] = $deptslip_no;
+		$arrayResult["SLIP_NO"] = $deptslip_no;
 		$arrayResult["QUERY"] = $rowLastSlip;
 		return $arrayResult;
 	}
