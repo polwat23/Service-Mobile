@@ -5,6 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'QueueService')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayGroup = array();
+		$currentTime = date("H.i");
 		$fetchQueue = $conmysql->prepare("SELECT qdt.member_no,qdt.queuedt_id,qmt.queue_id,qmt.coop_branch_id,qmt.max_queue,qmt.queue_date,qmt.queue_starttime,qmt.queue_endtime,qmt.queue_status,qmt.remain_queue
 														FROM gcqueuedetail qdt
 														LEFT JOIN gcqueuemaster qmt ON qdt.queue_id = qmt.queue_id
@@ -26,6 +27,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupUserAcount["COOP_BRANCH_DESC"] = null;
 			if(date("Y-m-d") == $rowQueue["queue_date"]){
 				$arrayResult['IS_CAN_CANCEL'] = false;
+			}else if((int)date("Ymd",strtotime("+1 day")) == (int)date_create($rowQueue["queue_date"])->format("Ymd")){
+				if((float)$currentTime > 16.00){
+					$arrayResult['IS_CAN_CANCEL'] = false;
+				}else{
+					$arrayResult['IS_CAN_CANCEL'] = TRUE;
+				}
 			}else{
 				$arrayResult['IS_CAN_CANCEL'] = TRUE;
 			}
