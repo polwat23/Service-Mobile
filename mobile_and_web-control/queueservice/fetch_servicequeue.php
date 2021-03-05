@@ -4,6 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'QueueService')){
 		$arrayGroup = array();
+		$currentTime = date("H.i");
 		$fetchBranch = $conmysql->prepare("SELECT qmt.queue_id, qmt.coop_branch_id, qmt.max_queue, qmt.queue_date, qmt.queue_starttime, qmt.queue_endtime, qmt.queue_status,qmt.remain_queue
 														FROM gcqueuemaster qmt
 														WHERE qmt.queue_date = :queue_date AND qmt.coop_branch_id = :coop_branch_id");
@@ -21,6 +22,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupUserAcount["QUEUE_ENDTIME"] = $rowBranch["queue_endtime"];
 			$arrGroupUserAcount["QUEUE_STATUS"] = $rowBranch["queue_status"];
 			$arrGroupUserAcount["REMAIN_QUEUE"] = $rowBranch["remain_queue"];
+			if((int)date("Ymd") > (int)date_create($rowBranch["queue_date"])->format("Ymd")){
+					$arrGroupUserAcount["IS_DISABLE"] = true;
+					$arrGroupUserAcount["IS_HIDE"] = false;
+			}else if((int)date("Ymd",strtotime("+1 day")) == (int)date_create($rowBranch["queue_date"])->format("Ymd")){
+					
+				if($rowBranch["queue_status"] == '1' && $rowBranch["remain_queue"] > 0){
+					$arrGroupUserAcount["ERROR_MSG"] = "กรุณารับบัตรคิวก่อนเวลา 16.00 น.";
+				}
+			
+				if((float)$currentTime > 16.00 && $rowBranch["queue_status"] == '1' && $rowBranch["remain_queue"] > 0){
+					$arrGroupUserAcount["IS_DISABLE"] = true;
+					$arrGroupUserAcount["IS_HIDE"] = false;
+				}
+			}
+			
 			$arrGroupUserAcount["MEMBERS"] = array();
 			
 			$fetchMember= $conmysql->prepare("SELECT member_no FROM gcqueuedetail WHERE queue_id = :queue_id");

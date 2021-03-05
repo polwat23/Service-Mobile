@@ -114,6 +114,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
+		$arrayResult["REQUEST_TAX"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
