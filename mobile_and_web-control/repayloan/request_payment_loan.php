@@ -13,6 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$int_return = 0;
 		$prinPay = 0;
 		$interest = 0;
+		$int_returnFull = 0;
 		$withdrawStatus = FALSE;
 		$amt_transfer = 0;
 		if($dataComing["amt_transfer"] > $dataCont["INTEREST_ARREAR"]){
@@ -42,7 +43,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		if($dataCont["CHECK_KEEPING"] == '0'){
 			if($dataCont["SPACE_KEEPING"] != 0){
 				$int_return = $cal_loan->calculateIntReturn($dataComing["contract_no"],$dataComing["amt_transfer"],$interest);
+				$int_returnFull = $int_return;
 			}
+		}
+		if($int_return >= $interest){
+			$int_return = $int_return - $interest;
+			$interest = 0;
+		}else{
+			$interest = $interest - $int_return;
+			$int_return = 0;
 		}
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
@@ -385,7 +394,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 																		TRUNC(TO_DATE(:lastprocess_date,'yyyy/mm/dd  hh24:mi:ss')),
 																		:period_payment,:principal,1,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
 								if($insertSLSlipDet->execute($executeSlDet)){
-									$intArr = $interestFull - $dataComing["amt_transfer"];
+									$intArr = $interestFull - $dataComing["amt_transfer"] - $int_returnFull;
 									if($intArr < 0){
 										$intArr = 0;
 									}

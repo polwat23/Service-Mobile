@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE,
-													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE
+													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnm.INTEREST_RETURN
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
 													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
@@ -46,6 +46,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan = array();
 				$interest = $cal_loan->calculateInterest($rowLoan["LOANCONTRACT_NO"]);
 				if($interest > 0){
+					$int_return = $rowLoan["INTEREST_RETURN"];
+					if($int_return >= $interest){
+						$int_return = $int_return - $interest;
+						$interest = 0;
+					}else{
+						$interest = $interest - $int_return;
+						$int_return = 0;
+					}
 					$arrLoan["INT_BALANCE"] = $interest;
 				}
 				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){

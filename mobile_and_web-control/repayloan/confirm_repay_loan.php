@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
 					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 				}
-				$fetchLoanRepay = $conoracle->prepare("SELECT principal_balance
+				$fetchLoanRepay = $conoracle->prepare("SELECT principal_balance,INTEREST_RETURN
 														FROM lncontmaster
 														WHERE loancontract_no = :loancontract_no");
 				$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
@@ -30,6 +30,14 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 					}
 					if($prinPay < 0){
 						$prinPay = 0;
+					}
+					$int_return = $rowLoan["INTEREST_RETURN"];
+					if($int_return >= $interest){
+						$int_return = $int_return - $interest;
+						$interest = 0;
+					}else{
+						$interest = $interest - $int_return;
+						$int_return = 0;
 					}
 					$arrayResult["PAYMENT_INT"] = $interest;
 					$arrayResult["PAYMENT_PRIN"] = $prinPay;
