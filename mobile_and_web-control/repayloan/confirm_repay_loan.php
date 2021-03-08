@@ -16,8 +16,90 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing))
 					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
 					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 				}
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
+				try {
+					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
+					try {
+						$arrayGroup = array();
+						$arrayGroup["coop_id"] = $config["COOP_ID"];
+						$arrayGroup["loancontract_no"] = $dataComing["loancontract_no"];
+						$arrayGroup["member_no"] = $member_no;
+						$arrayGroup["operate_date"] = $dateOperC;
+						$arrayGroup["slip_date"] = $dateOperC;
+						$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
+						$argumentWS = [
+							"as_wspass" => $config["WS_STRC_DB"],
+							"astr_lninitloans" => $arrayGroup
+						];
+						$resultWS = $clientWS->__call("of_initslippayin_mobile", array($argumentWS));
+						if($resultWS->of_initslippayin_mobileResult == '1'){
+							$resultService = $resultWS->astr_lninitloans;
+							$arrayResult['RESULT'] = TRUE;
+							if($resultService->fee_amt > 0){
+								$arrayResult["RESPONSE_CODE"] = 'WS0105';
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								require_once('../../include/exit_footer.php');
+								//$arrayResult['FEE_AMT'] = $resultService->fee_amt;
+							}
+							if($resultService->fine_amt > 0){
+								$arrayResult['PENALTY_AMT'] = $resultService->fine_amt;
+							}
+							require_once('../../include/exit_footer.php');
+						}else{
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => $dateOper,
+								':deptaccount_no' => $deptaccount_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':status_flag' => '0',
+								':destination' => $dataComing["loancontract_no"],
+								':response_code' => "WS0066",
+								':response_message' => json_encode($resultWS)
+							];
+							$log->writeLog('repayloan',$arrayStruc);
+							$arrayResult["RESPONSE_CODE"] = 'WS0066';
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+					}catch(SoapFault $e){
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':operate_date' => $dateOper,
+							':deptaccount_no' => $deptaccount_no,
+							':amt_transfer' => $dataComing["amt_transfer"],
+							':status_flag' => '0',
+							':destination' => $dataComing["contract_no"],
+							':response_code' => "WS0066",
+							':response_message' => json_encode($e)
+						];
+						$log->writeLog('repayloan',$arrayStruc);
+						$arrayResult["RESPONSE_CODE"] = 'WS0066';
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}
+				}catch(Throwable $e){
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS0066",
+						":error_desc" => "ไมสามารถต่อไปยัง Service ชำระหนี้ได้ "."\n"."Error => ".$e->getMessage(),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$message_error = "ไฟล์ ".$filename." ไมสามารถต่อไปยัง Service ชำระหนี้ได้ "."\n"."Error => ".$e->getMessage()."\n"."DATA => ".json_encode($dataComing);
+					$lib->sendLineNotify($message_error);
+					$func->MaintenanceMenu($dataComing["menu_component"]);
+					$arrayResult["RESPONSE_CODE"] = 'WS0066';
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+					
+				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
 				if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){

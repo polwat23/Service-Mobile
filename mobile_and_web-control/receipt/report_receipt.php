@@ -123,7 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
+																kpd.RECEIPT_DATE as OPERATE_DATE,
 																kpd.KEEPING_STATUS
 																FROM kpmastreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");

@@ -65,6 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBank["ACCOUNT_CODE"],$rowAccBank["ACCOUNT_FORMAT"]);
 						$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 						$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+						$arrayResult['IS_CHOOSE_ACCOUNT'] = FALSE;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 					}else{
@@ -77,6 +78,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBankATM["ACCOUNT_CODE"],$rowAccBankATM["ACCOUNT_FORMAT"]);
 							$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 							$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+							$arrayResult['IS_CHOOSE_ACCOUNT'] = FALSE;
 							$arrayResult['RESULT'] = TRUE;
 							require_once('../../include/exit_footer.php');
 						}else{

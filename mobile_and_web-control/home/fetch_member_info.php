@@ -9,7 +9,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		if($memberInfoMobile->rowCount() > 0){
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
-			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
 				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
 				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
@@ -18,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,mb.email,
 												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.mem_telmobile,
 												mb.ADDRESS_NO as ADDR_NO,mb.ADDRESS_MOO as ADDR_MOO,mb.ADDRESS_ROAD as ADDR_ROAD,
 												mb.ADDRESS_SOI as ADDR_SOI,mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
@@ -53,6 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$arrayResult["EMAIL"] = $rowMember["EMAIL"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$memberAddress = $conoracle->prepare("SELECT 
 													ma.ADDRESS_CODE AS ADDRESS_CODE,

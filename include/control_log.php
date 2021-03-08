@@ -41,9 +41,15 @@ class insertLog {
 				$this->logEditSMS($log_struc);
 			}else if($type_log == 'editinfo'){
 				$this->logEditInfo($log_struc);
+			}else if($type_log == 'changepass'){
+				$this->logChangePassword($log_struc);
 			}
 		}
-		
+		private function logChangePassword($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logchangepassword(member_no,id_userlogin,app_version,method,email,is_send_mail,send_error) 
+												VALUES(:member_no,:id_userlogin,:app_version,:method,:email,:status_send,:send_error)");
+			$insertLog->execute($log_struc);
+		}
 		private function logUseApplication($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO loguseapplication(member_no,id_userlogin,access_date,ip_address) 
 												VALUES(:member_no,:id_userlogin,NOW(),:ip_address)");

@@ -6,21 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		try {
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-			$getLimitAllDay = $conoracle->prepare("SELECT total_limit FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
-			$getLimitAllDay->execute();
-			$rowLimitAllDay = $getLimitAllDay->fetch(PDO::FETCH_ASSOC);
-			$getSumAllDay = $conoracle->prepare("SELECT SUM(DEPTITEM_AMT) AS SUM_AMT FROM DPDEPTSTATEMENT 
-												WHERE TO_CHAR(OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') and ITEM_STATUS = '1' and entry_id IN('MCOOP','ICOOP')");
-			$getSumAllDay->execute();
-			$rowSumAllDay = $getSumAllDay->fetch(PDO::FETCH_ASSOC);
-			$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $dataComing["amt_transfer"];
-			if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
-				$arrayResult["RESPONSE_CODE"] = 'WS0043';
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
+			
 			$penalty_include = $func->getConstant("include_penalty");
 			if($penalty_include == '0'){
 				$recv_amt = $dataComing["amt_transfer"] - $dataComing["fee_amt"];

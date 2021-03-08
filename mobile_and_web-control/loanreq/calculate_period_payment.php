@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 			$structureReqLoanPayment["period_payment"] = 0;
 			$structureReqLoanPayment["progess_flag"] = 0;
 			$structureReqLoanPayment["progess_rate"] = 0;
-			$structureReqLoanPayment["roundpay_flag"] = $dataComing["roundpay"];
+			$structureReqLoanPayment["roundpay_flag"] = '1';
 			$structureReqLoanPayment["salary_amount"] = preg_replace('/,/','',$dataComing["salary_amt"]);
 			try {
 				$argumentWS = [

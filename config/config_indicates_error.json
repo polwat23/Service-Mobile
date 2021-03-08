@@ -101,6 +101,7 @@
 	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
 	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
 	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัติบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
+	"WS0105" : [{"th" : "การชำระสัญญานี้มีค่าธรรมเนียมการชำระ กรุณาติดต่อชำระเงินที่เคาน์เตอร์เท่านั้น","en" : "The payment of this loan has fee please payment at a counter only"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -222,5 +223,6 @@
 	}],
 	"BIND_ACCOUNT_DESC" : [{
 		"7" : [{"th" : "บัญชีนี้ไม่สามารถทำรายการได้เนื่องจากท่านเลือกเลขบัญชีธนาคารไม่ตรงกับที่ระบุไว้กับสหกรณ์","en" : "This account cannot transaction because you choose bank's account does not match you apply with cooperative"}]
-	}]
+	}],
+	"ERROR_HEADER_CUSTOM" : [{"th" : "โปรดทราบ","en" : "Inform"}]
 }

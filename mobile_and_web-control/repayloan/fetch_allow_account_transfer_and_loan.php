@@ -16,41 +16,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt as prncbal,dpm.depttype_code
+			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal as prncbal,dpm.depttype_code
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.acccont_type = '01' and dpm.deptclose_status = 0
 													ORDER BY dpm.deptaccount_no ASC");
 			$getDataBalAcc->execute();
 			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
-				$checkSeqAmt = $cal_dep->getSequestAmount($rowDataAccAllow["DEPTACCOUNT_NO"],'WTX');
-				if($checkSeqAmt["RESULT"]){
-					if($checkSeqAmt["CAN_WITHDRAW"]){
-						$arrAccAllow = array();
-						if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png')){
-							$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png?v='.date('Ym');
-						}else{
-							$arrAccAllow["DEPT_TYPE_IMG"] = null;
-						}
-						$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
-						$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-						$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-						$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
-						$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-						$arrAccAllow["BALANCE"] = $checkSeqAmt["SEQUEST_AMOUNT"] ?? $cal_dep->getWithdrawable($rowDataAccAllow["DEPTACCOUNT_NO"]);
-						$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
-						$arrGroupAccAllow[] = $arrAccAllow;
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0104";
-						$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
+				$arrAccAllow = array();
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png')){
+					$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAllow["DEPTTYPE_CODE"].'.png?v='.date('Ym');
 				}else{
-					$arrayResult['RESPONSE_CODE'] = $checkSeqAmt["RESPONSE_CODE"];
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
+					$arrAccAllow["DEPT_TYPE_IMG"] = null;
 				}
+				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAllow["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
+				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
+				$arrAccAllow["PRN_BALANCE"] = number_format($rowDataAccAllow["PRNCBAL"],2);
+				$arrAccAllow["BALANCE"] = $checkSeqAmt["SEQUEST_AMOUNT"] ?? $cal_dep->getWithdrawable($rowDataAccAllow["DEPTACCOUNT_NO"]);
+				$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
+				$arrGroupAccAllow[] = $arrAccAllow;
 			}
 			$getAccFav = $conmysql->prepare("SELECT gts.destination,gfl.name_fav
 												FROM gcfavoritelist gfl LEFT JOIN gctransaction gts ON gfl.ref_no = gts.ref_no
@@ -70,23 +56,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$arrLoan = array();
-				try {
-					$clientWSLoan = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
-					try {
-						$argumentWSLoan = [
-							"as_wspass" => $config["WS_STRC_DB"],
-							"as_coopid" => $config["COOP_ID"],
-							"as_contno" => $rowLoan["LOANCONTRACT_NO"],
-							"adtm_lastcalint" => date('c')							
-						];
-						$resultWSLoan = $clientWSLoan->__call("of_computeinterest", array($argumentWSLoan));
-						$arrLoan["INT_BALANCE"] = $resultWSLoan->of_computeinterestResult ?? "0.00";
-					}catch(Throwable $e){
-						$arrLoan["INT_BALANCE"] = "0.00";
-					}
-				}catch(Throwable $e){
-					$arrLoan["INT_BALANCE"] = "0.00";
-				}
 				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
 					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
 				}else{
@@ -100,13 +69,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
-				$arrLoan["SUM_BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] + $arrLoan["INT_BALANCE"] + $rowLoan["INTEREST_ARREAR"] + $rowLoan["INTPAYABLE_AMT"],2);
 				$arrLoanGrp[] = $arrLoan;
 			}
 			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['LOAN'] = $arrLoanGrp;
+				$arrayResult['IS_DEFAULT'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

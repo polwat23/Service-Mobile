@@ -119,6 +119,31 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
+		$getLimitAllDay->execute();
+		$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
+		if($rowLimitAllDay["FIXED_UNIT"] == '1'){
+			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
+												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		}else{
+			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
+												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		}
+		$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
+		$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $amt_transfer;
+		if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
+			$arrayResult["RESPONSE_CODE"] = 'WS0043';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
 			$transfer_mode = "1";
@@ -613,7 +638,7 @@ class CalculateDep {
 	private function getConstantAcc($deptaccount_no){
 		$getConst = $this->conora->prepare("SELECT dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
 											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,NVL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
-											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG,dpm.CHECKPEND_AMT
+											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG,dpm.CHECKPEND_AMT,dpm.MEMBER_NO
 											,NVL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.DEPTTYPE_CODE  = dpt.DEPTTYPE_CODE
 											WHERE dpm.DEPTACCOUNT_NO = :deptaccount_no");
@@ -672,7 +697,7 @@ class CalculateDep {
 			]);
 		}
 		$rowCountTrans = $getCountTrans->fetch(\PDO::FETCH_ASSOC);
-		$count_trans = $rowCountTrans["C_TRANS"];
+		$count_trans = $rowCountTrans["C_TRANS"] + 1;
 		if($count_trans > $dataConst["MAXWITHD_INMONTH"]){
 			$getContDeptTypeFee = $this->conora->prepare("SELECT CHARGE_FLAG,s_chrg_amt1 as MIN_FEE,s_chrg_perc1 as PERCENT_FEE,s_chrg_amt2 as MAX_FEE 
 														FROM dpdepttype WHERE depttype_code = :depttype_code");

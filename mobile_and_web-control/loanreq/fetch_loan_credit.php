@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					$structureReqLoanPayment["period_lastpayment"] = $responseSoap->period_payamt;
 					$structureReqLoanPayment["period_payment"] = 0;
 					$structureReqLoanPayment["progess_flag"] = 0;
-					$structureReqLoanPayment["roundpay_flag"] = $responseSoap->roundpay_factor;
+					$structureReqLoanPayment["roundpay_flag"] = '1';
 					$structureReqLoanPayment["salary_amount"] = $responseSoap->approve_amt;
 					try {
 						$argumentWS_Credit = [

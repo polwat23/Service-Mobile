@@ -11,6 +11,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
 		if($fetchBindAccount->rowCount() > 0){
 			while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
+				$getAccBankAllow = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
+														FROM atmregistermobile atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
+														WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1' 
+														and atr.connect_status = '1'");
+				$getAccBankAllow->execute([':member_no' => $payload["member_no"]]);
+				$rowAccBank = $getAccBankAllow->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowAccBank["ACCOUNT_CODE"]) && $rowAccBank["ACCOUNT_CODE"] != ""){
+				}else{
+					$getAccBankAllowATM = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
+															FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
+															WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1'");
+					$getAccBankAllowATM->execute([':member_no' => $payload["member_no"]]);
+					$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
+					if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] != ""){
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "WS0099";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
+				}
 				$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no 
 													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 													gat.id_accountconstant = gct.id_accountconstant

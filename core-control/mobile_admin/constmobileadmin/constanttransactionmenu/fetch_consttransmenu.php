@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu')){
 		$arrayGroup = array();
 		$fetchConstant = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path FROM gcmenu mc
-										WHERE id_menu in (18,56,57) AND menu_status<> -9");
+										WHERE id_menu in (56) AND menu_status<> -9");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();

@@ -146,9 +146,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}
 		$fetchReconcile->execute($arrayExecute);
-		$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = '004'");
-		$fetchFormatAccBank->execute();
-		$rowFormatAcc = $fetchFormatAccBank->fetch();
+		$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank");
+		$fetchFormatAccBank->execute([':bank' => isset($dataComing["bank"]) && $dataComing["bank"] != "" ? $dataComing["bank"] : '006']);
+		$rowFormatAcc = $fetchFormatAccBank->fetch(PDO::FETCH_ASSOC);
 		$summary = 0;
 		$formatDept = $func->getConstant('dep_format');
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
