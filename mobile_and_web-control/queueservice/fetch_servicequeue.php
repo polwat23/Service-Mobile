@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupUserAcount["QUEUE_ENDTIME"] = $rowBranch["queue_endtime"];
 			$arrGroupUserAcount["QUEUE_STATUS"] = $rowBranch["queue_status"];
 			$arrGroupUserAcount["REMAIN_QUEUE"] = $rowBranch["remain_queue"];
-			if((int)date("Ymd") > (int)date_create($rowBranch["queue_date"])->format("Ymd")){
+			if((int)date("Ymd") >= (int)date_create($rowBranch["queue_date"])->format("Ymd")){
 					$arrGroupUserAcount["IS_DISABLE"] = true;
 					$arrGroupUserAcount["IS_HIDE"] = false;
 			}else if((int)date("Ymd",strtotime("+1 day")) == (int)date_create($rowBranch["queue_date"])->format("Ymd")){
