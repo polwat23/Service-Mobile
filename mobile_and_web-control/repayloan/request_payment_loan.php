@@ -15,30 +15,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$interest = 0;
 		$int_returnFull = 0;
 		$withdrawStatus = FALSE;
-		$amt_transfer = 0;
 		if($dataComing["amt_transfer"] > $dataCont["INTEREST_ARREAR"]){
 			$intarrear = $dataCont["INTEREST_ARREAR"];
 		}else{
 			$intarrear = $dataComing["amt_transfer"];
 		}
-		$amt_transfer = $dataComing["amt_transfer"] - $intarrear;
-		if($amt_transfer > 0){
-			$interest = $cal_loan->calculateInterest($dataComing["contract_no"],$dataComing["amt_transfer"]);
-			$interestFull = $interest;
-			if($interest > 0){
-				if($amt_transfer < $interest){
-					$interest = $amt_transfer;
-				}else{
-					$prinPay = $amt_transfer - $interest;
-				}
-				if($prinPay < 0){
-					$prinPay = 0;
-				}
+		$interest = $cal_loan->calculateInterest($dataComing["contract_no"],$dataComing["amt_transfer"]);
+		$interestFull = $interest;
+		if($interest > 0){
+			if($dataComing["amt_transfer"] < $interest){
+				$interest = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $amt_transfer;
+				$prinPay = $dataComing["amt_transfer"] - $interest;
+			}
+			if($prinPay < 0){
+				$prinPay = 0;
 			}
 		}else{
-			$amt_transfer = 0;
+			$prinPay = $dataComing["amt_transfer"];
 		}
 		if($dataCont["CHECK_KEEPING"] == '0'){
 			if($dataCont["SPACE_KEEPING"] != 0){
