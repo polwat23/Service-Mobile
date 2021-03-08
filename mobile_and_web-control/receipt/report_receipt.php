@@ -219,7 +219,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 3/12  (อาคาร 2 ชั้น 6)   กรมป้องกันบรรเทาสาธารณภัย</p>
 				<p style="margin-top: -25px;font-size: 18px;">ถนนอู่ทองนอก   แขวงดุสิต  เขตดุสิต กรุงเทพฯ  10300</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทร : 02-243-0509 ,  02-2430510 ,  02-668-9229</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.ardcoop.com</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">ard.icoopsiam.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -258,6 +258,13 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>';
 			// Detail
 	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
+	$html .='
+		<div style="position:absolute; color:red; font-weight:bold; opacity: 0.6;  top:120px;  line-height:8px;">
+				<div style="text-align:center;">***&nbsp;คำเตือน &nbsp;***</div>
+				<div style="text-align:center;">ตามข้อบังคับสหกรณ์ฯ สมาชิกที่ผิดนัดชำระหนี้และหุ้นรายเดือน</div>
+				<div style="text-align:center;">จะไม่ได้รับเงินเฉลี่ยคืนสำหรับปีนั้น</div>
+		</div>';
+
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
