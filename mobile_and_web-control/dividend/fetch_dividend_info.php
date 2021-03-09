@@ -23,8 +23,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrItem["LABEL"] = "สวัสดิการ";
-			$arrItem["VALUE"] = number_format($rowDiv["ETC_AMT"],2);
-			$arrDividend["OTHER_HEAD_ITEM"] = $arrItem;
+			$arrItem["VALUE"] = number_format($rowDiv["ETC_AMT"],2)." บาท";
+			$arrDividend["OTHER_HEAD_ITEM"][] = $arrItem;
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"] + $rowDiv["ETC_AMT"],2);
 			$getMethpay = $conoracle->prepare("SELECT
@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
 												WHERE
 													YM.MEMBER_NO = :member_no
-													AND YM.METHPAYTYPE_CODE <> 'LON'
+													AND YM.METHPAYTYPE_CODE NOT IN('INS','LON','SQL','SQC','SQA')
 													AND YM.DIV_YEAR = :div_year");
 			$getMethpay->execute([
 				':member_no' => $member_no,
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
-											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code = 'LON'");
+											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code IN('INS','LON','SQL','SQC','SQA')");
 			$getPaydiv->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
