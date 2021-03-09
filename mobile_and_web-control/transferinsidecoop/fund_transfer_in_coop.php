@@ -59,8 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':entry_date' => $dateOperC,
 				':laststmno' => $lastStmSrcNo,
 				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-				':acc_id' => $destvcid["ACCOUNT_ID"],
-				':penalty_amt' => $dataComing["penalty_amt"]
+				':acc_id' => $destvcid["ACCOUNT_ID"]
 			];
 			if($dataComing["penalty_amt"] > 0){
 				$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
@@ -72,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									TELLER_FLAG,OPERATE_TIME) 
 									VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 									:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:laststmno,:itemtype_code,
-									TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss'),TRUNC(sysdate),1,0,:penalty_amt,0,0,:acc_id,2,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
+									TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss'),TRUNC(sysdate),1,0,0,0,0,:acc_id,3,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 			}else{
 				$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 									deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
@@ -83,7 +82,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									TELLER_FLAG,OPERATE_TIME) 
 									VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 									:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:laststmno,:itemtype_code,
-									TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss'),TRUNC(sysdate),1,0,:penalty_amt,0,0,:acc_id,1,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
+									TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss'),TRUNC(sysdate),1,0,0,0,0,:acc_id,3,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 			}
 			$insertDpSlip = $conoracle->prepare($insertDpSlipSQL);
 			if($insertDpSlip->execute($arrExecute)){
@@ -498,7 +497,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 										$arrToken = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
 										$templateMessage = $func->getTemplateSystem('DestinationReceive',1);
 										$dataMerge = array();
-										$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
+										$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($to_account_no,$func->getConstant('hidden_dep'));
 										$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
 										$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 										$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
