@@ -10,6 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		$itemtypeDepositDest = 'DIM';
 		$ref_no = time().$lib->randomText('all',3);
 		$dateOper = date('c');
+		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
 		// Start-Withdraw
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
 		$constToAcc = $cal_dep->getConstantAcc($to_account_no);
@@ -32,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		}
 		$rowMaxSeqNo = $cal_dep->getLastSeqNo($from_account_no);
 		$arrSlipno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_no = $arrSlipno["DEPTSLIP_NO"];
+		$deptslip_no = $arrSlipno["SLIP_NO"];
 		$lastStmSrcNo = $rowMaxSeqNo["MAX_SEQ_NO"] + 1;
 		$rowDepPay = $cal_dep->getConstPayType($itemtypeWithdraw);
 		if($dataComing["penalty_amt"] > 0){
@@ -55,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				':prncbal' => $constFromAcc["PRNCBAL"],
 				':withdrawable_amt' => $constFromAcc["WITHDRAWABLE_AMT"],
 				':checkpend_amt' => $constFromAcc["CHECKPEND_AMT"],
-				':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+				':entry_date' => $dateOperC,
 				':laststmno' => $lastStmSrcNo,
 				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 				':acc_id' => $destvcid["ACCOUNT_ID"],
@@ -95,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					':slip_amt' => $dataComing["amt_transfer"],
 					':balance_forward' => $constFromAcc["PRNCBAL"],
 					':after_trans_amt' => $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"],
-					':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+					':entry_date' => $dateOperC,
 					':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 					':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
 					':deptslip_no' => $deptslip_no
@@ -122,7 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							':prncbal' => $constFromAcc["PRNCBAL"],
 							':withdrawable_amt' => $constFromAcc["WITHDRAWABLE_AMT"],
 							':checkpend_amt' => $constFromAcc["CHECKPEND_AMT"],
-							':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+							':entry_date' => $dateOperC,
 							':laststmno' => $lastStmSrcNo,
 							':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 							':acc_id' => $rowMapAccFee["ACCOUNT_ID"],
@@ -139,7 +140,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 															:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:laststmno,:itemtype_code,
 															TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss'),TRUNC(sysdate),1,0,0,0,:acc_id,2,:refer_deptslip_no,0,0,:slip_amt,'DEP',0,0,0,1,1,1,0,1,1,
 															TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
-						if($insertDpSlipPenalty->execute($arrExecute)){
+						if($insertDpSlipPenalty->execute($arrExecutePenalty)){
 							$arrExecuteStmPenalty = [
 								':coop_id' => $config["COOP_ID"],
 								':from_account_no' => $from_account_no,
@@ -148,7 +149,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								':slip_amt' => $dataComing["penalty_amt"],
 								':balance_forward' => $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"],
 								':after_trans_amt' => $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
-								':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':entry_date' => $dateOperC,
 								':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 								':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
 								':deptslip_no' => $deptslip_noPenalty
@@ -166,8 +167,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									$arrayStruc = [
 										':member_no' => $payload["member_no"],
 										':id_userlogin' => $payload["id_userlogin"],
-										':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-										':operate_date' => $dateOper,
+										':operate_date' => $dateOperC,
 										':deptaccount_no' => $from_account_no,
 										':amt_transfer' => $dataComing["amt_transfer"],
 										':penalty_amt' => $dataComing["penalty_amt"],
@@ -181,7 +181,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									$arrayStruc = [
 										':member_no' => $payload["member_no"],
 										':id_userlogin' => $payload["id_userlogin"],
-										':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+										':operate_date' => $dateOperC,
 										':deptaccount_no' => $from_account_no,
 										':amt_transfer' => $dataComing["amt_transfer"],
 										':penalty_amt' => $dataComing["penalty_amt"],
@@ -205,8 +205,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-									':operate_date' => $dateOper,
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -220,7 +219,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -241,7 +240,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$arrUpdateMaster = [
 						':withdraw_after_pay' => $constFromAcc["WITHDRAWABLE_AMT"] - $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
 						':prncbal_after_pay' => $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
-						':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+						':entry_date' => $dateOperC,
 						':seq_no' => $lastStmSrcNo,
 						':from_account_no' => $from_account_no
 					];
@@ -258,8 +257,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-									':operate_date' => $dateOper,
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -273,7 +271,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -297,8 +295,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-									':operate_date' => $dateOper,
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -312,7 +309,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -336,8 +333,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-									':operate_date' => $dateOper,
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -351,7 +347,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -384,7 +380,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							':prncbal' => $constToAcc["PRNCBAL"],
 							':withdrawable_amt' => $constToAcc["WITHDRAWABLE_AMT"],
 							':checkpend_amt' => $constToAcc["CHECKPEND_AMT"],
-							':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+							':entry_date' => $dateOperC,
 							':laststmno' => $lastStmDestNo,
 							':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
 							':acc_id' => $srcvcid["ACCOUNT_ID"]
@@ -409,7 +405,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								':slip_amt' => $dataComing["amt_transfer"],
 								':balance_forward' => $constToAcc["PRNCBAL"],
 								':after_trans_amt' => $constToAcc["PRNCBAL"] + $dataComing["amt_transfer"],
-								':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':entry_date' => $dateOperC,
 								':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
 								':cash_type' => $rowDepPayDest["MONEYTYPE_SUPPORT"],
 								':deptslip_no' => $deptslip_no
@@ -422,7 +418,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrUpdateMasterDest = [
 									':withdraw_after_pay' => $constToAcc["WITHDRAWABLE_AMT"] + $dataComing["amt_transfer"],
 									':prncbal_after_pay' => $constToAcc["PRNCBAL"] + $dataComing["amt_transfer"],
-									':entry_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+									':entry_date' => $dateOperC,
 									':seq_no' => $lastStmDestNo,
 									':to_account_no' => $to_account_no
 								];
@@ -452,7 +448,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 										':amount' => $dataComing["amt_transfer"],
 										':penalty_amt' => $dataComing["penalty_amt"],
 										':amount_receive' => $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
-										':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+										':operate_date' => $dateOperC,
 										':member_no' => $payload["member_no"],
 										':slip_no' => $slipWithdraw,
 										':id_userlogin' => $payload["id_userlogin"]
@@ -505,8 +501,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 										$arrayStruc = [
 											':member_no' => $payload["member_no"],
 											':id_userlogin' => $payload["id_userlogin"],
-											':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-											':operate_date' => $dateOper,
+											':operate_date' => $dateOperC,
 											':deptaccount_no' => $from_account_no,
 											':amt_transfer' => $dataComing["amt_transfer"],
 											':penalty_amt' => $dataComing["penalty_amt"],
@@ -520,7 +515,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 										$arrayStruc = [
 											':member_no' => $payload["member_no"],
 											':id_userlogin' => $payload["id_userlogin"],
-											':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+											':operate_date' => $dateOperC,
 											':deptaccount_no' => $from_account_no,
 											':amt_transfer' => $dataComing["amt_transfer"],
 											':penalty_amt' => $dataComing["penalty_amt"],
@@ -544,8 +539,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									$arrayStruc = [
 										':member_no' => $payload["member_no"],
 										':id_userlogin' => $payload["id_userlogin"],
-										':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-										':operate_date' => $dateOper,
+										':operate_date' => $dateOperC,
 										':deptaccount_no' => $from_account_no,
 										':amt_transfer' => $dataComing["amt_transfer"],
 										':penalty_amt' => $dataComing["penalty_amt"],
@@ -559,7 +553,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 									$arrayStruc = [
 										':member_no' => $payload["member_no"],
 										':id_userlogin' => $payload["id_userlogin"],
-										':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+										':operate_date' => $dateOperC,
 										':deptaccount_no' => $from_account_no,
 										':amt_transfer' => $dataComing["amt_transfer"],
 										':penalty_amt' => $dataComing["penalty_amt"],
@@ -583,8 +577,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-									':operate_date' => $dateOper,
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -598,7 +591,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrayStruc = [
 									':member_no' => $payload["member_no"],
 									':id_userlogin' => $payload["id_userlogin"],
-									':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+									':operate_date' => $dateOperC,
 									':deptaccount_no' => $from_account_no,
 									':amt_transfer' => $dataComing["amt_transfer"],
 									':penalty_amt' => $dataComing["penalty_amt"],
@@ -622,8 +615,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$arrayStruc = [
 								':member_no' => $payload["member_no"],
 								':id_userlogin' => $payload["id_userlogin"],
-								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-								':operate_date' => $dateOper,
+								':operate_date' => $dateOperC,
 								':deptaccount_no' => $from_account_no,
 								':amt_transfer' => $dataComing["amt_transfer"],
 								':penalty_amt' => $dataComing["penalty_amt"],
@@ -637,7 +629,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$arrayStruc = [
 								':member_no' => $payload["member_no"],
 								':id_userlogin' => $payload["id_userlogin"],
-								':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+								':operate_date' => $dateOperC,
 								':deptaccount_no' => $from_account_no,
 								':amt_transfer' => $dataComing["amt_transfer"],
 								':penalty_amt' => $dataComing["penalty_amt"],
@@ -661,8 +653,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$arrayStruc = [
 							':member_no' => $payload["member_no"],
 							':id_userlogin' => $payload["id_userlogin"],
-							':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-							':operate_date' => $dateOper,
+							':operate_date' => $dateOperC,
 							':deptaccount_no' => $from_account_no,
 							':amt_transfer' => $dataComing["amt_transfer"],
 							':penalty_amt' => $dataComing["penalty_amt"],
@@ -676,7 +667,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						$arrayStruc = [
 							':member_no' => $payload["member_no"],
 							':id_userlogin' => $payload["id_userlogin"],
-							':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+							':operate_date' => $dateOperC,
 							':deptaccount_no' => $from_account_no,
 							':amt_transfer' => $dataComing["amt_transfer"],
 							':penalty_amt' => $dataComing["penalty_amt"],
@@ -700,8 +691,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
-						':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-						':operate_date' => $dateOper,
+						':operate_date' => $dateOperC,
 						':deptaccount_no' => $from_account_no,
 						':amt_transfer' => $dataComing["amt_transfer"],
 						':penalty_amt' => $dataComing["penalty_amt"],
@@ -715,7 +705,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
-						':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+						':operate_date' => $dateOperC,
 						':deptaccount_no' => $from_account_no,
 						':amt_transfer' => $dataComing["amt_transfer"],
 						':penalty_amt' => $dataComing["penalty_amt"],
@@ -738,8 +728,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
-					':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
-					':operate_date' => $dateOper,
+					':operate_date' => $dateOperC,
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -753,7 +742,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
-					':operate_date' => date('Y-m-d H:i:s',strtotime($dateOper)),
+					':operate_date' => $dateOperC,
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],

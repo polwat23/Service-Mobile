@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 																		allow_withdraw_inside,
 																		allow_deposit_outside,
 																		allow_withdraw_outside,
-																		allow_payloan
+																		allow_pay_loan
 																	FROM
 																		gcconstantaccountdept
 																	ORDER BY dept_type_code ASC");
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrConstans["ALLOW_WITHDRAW_INSIDE"] = $rowMenuMobile["allow_withdraw_inside"];
 			$arrConstans["ALLOW_DEPOSIT_OUTSIDE"] = $rowMenuMobile["allow_deposit_outside"];
 			$arrConstans["ALLOW_WITHDRAW_OUTSIDE"] = $rowMenuMobile["allow_withdraw_outside"];
-			$arrConstans["ALLOW_PAYLOAN"] = $rowMenuMobile["allow_payloan"];
+			$arrConstans["ALLOW_PAYLOAN"] = $rowMenuMobile["allow_pay_loan"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 																			allow_withdraw_inside = :ALLOW_WITHDRAW_INSIDE,
 																			allow_deposit_outside = :ALLOW_DEPOSIT_OUTSIDE,
 																			allow_withdraw_outside = :ALLOW_WITHDRAW_OUTSIDE,
-																			allow_payloan = :ALLOW_PAYLOAN
+																			allow_pay_loan = :ALLOW_PAYLOAN
 																			WHERE dept_type_code = :DEPTTYPE_CODE");
 						$updateConst->execute([
 							':MEMBER_TYPE_CODE' => $value_diff["MEMBER_TYPE_CODE"],
@@ -89,7 +89,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$value_diff["ALLOW_DEPOSIT_INSIDE"].' ALLOW_WITHDRAW_INSIDE='.$value_diff["ALLOW_WITHDRAW_INSIDE"].' ALLOW_DEPOSIT_OUTSIDE='.$value_diff["ALLOW_DEPOSIT_OUTSIDE"].' ALLOW_WITHDRAW_OUTSIDE='.$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAYLOAN='.$value_diff["ALLOW_PAYLOAN"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT gcconstantaccountdept(dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,allow_deposit_outside,allow_withdraw_outside,allow_payloan)
+				$insertConst = $conmysql->prepare("INSERT gcconstantaccountdept(dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,allow_deposit_outside,allow_withdraw_outside,allow_pay_loan)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [
