@@ -208,7 +208,6 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align:center;">ตามข้อบังคับสหกรณ์ฯ สมาชิกที่ผิดนัดชำระหนี้และหุ้นรายเดือน</div>
 				<div style="text-align:center;">จะไม่ได้รับเงินเฉลี่ยคืนสำหรับปีนั้น</div>
 		</div>';
-	
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
