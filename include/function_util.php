@@ -197,7 +197,8 @@ class functions {
 					':menu_component' => $menu_component
 				]);
 			}else{
-				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu ,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
+				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu and (gm2.menu_channel = :channel OR gm2.menu_channel = 'both') ,
+										(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
 										WHERE gm.menu_component = :menu_component and (gm2.menu_status = '1' OR gm.menu_parent IN('0','-1','-2','-8','-9'))
 										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both') and menu_system.menu_status = '1'");
 				$checkPermission->execute([

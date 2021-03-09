@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE TRIM(member_no) = :member_no");
+		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE TRIM(member_no) = :member_no and deptclose_status <> 1");
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
