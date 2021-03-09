@@ -583,31 +583,31 @@ class CalculateDep {
 		$getSequestAmt->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowSeqAmt = $getSequestAmt->fetch(\PDO::FETCH_ASSOC);
 		if(isset($rowSeqAmt["SEQUEST_STATUS"])){
-			if($rowSeqAmt["SEQUEST_STATUS"] == '1'){ // อายัติจำนวนเงิน
+			if($rowSeqAmt["SEQUEST_STATUS"] == '1'){ // อายัดจำนวนเงิน
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '2'){ // อายัติการเคลื่อนไหว
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '2'){ // อายัดการเคลื่อนไหว
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '3'){ // อายัติรอปิดบัญชี
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '3'){ // อายัดรอปิดบัญชี
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '4'){ // อายัติห้ามถอน/ปิดบัญชี
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '4'){ // อายัดห้ามถอน/ปิดบัญชี
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '5'){ // อายัติห้ามฝาก
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '5'){ // อายัดห้ามฝาก
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '9'){ // อายัติเพื่อ ATM
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '9'){ // อายัดเพื่อ ATM
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '0'){ // ไม่อายัติ
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '0'){ // ไม่อายัด
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
@@ -703,9 +703,12 @@ class CalculateDep {
 		}
 		return $penalty_amt;
 	}
-	public function getVcMapID($depttype_code){
-		$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = 'DEP' AND SLIPITEMTYPE_CODE = 'DEP' AND SHRLONTYPE_CODE = :depttype_code");
-		$getvc->execute([':depttype_code' => $depttype_code]);
+	public function getVcMapID($depttype_code,$sys_code='DEP'){
+		$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = :sys_code AND SLIPITEMTYPE_CODE = :sys_code AND SHRLONTYPE_CODE = :depttype_code");
+		$getvc->execute([
+			':depttype_code' => $depttype_code,
+			':sys_code' => $sys_code
+		]);
 		$rowvc = $getvc->fetch(\PDO::FETCH_ASSOC);
 		return $rowvc;
 	}
@@ -734,12 +737,12 @@ class CalculateDep {
 			if($key == 'P'){
 				$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
 			}else if($key == 'Y'){
-				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],0,$countYear);
+				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
 			}else if($key == 'R'){
 				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
 			}
 		}
-		$arrayResult["DEPTSLIP_NO"] = $deptslip_no;
+		$arrayResult["SLIP_NO"] = $deptslip_no;
 		$arrayResult["QUERY"] = $rowLastSlip;
 		return $arrayResult;
 	}

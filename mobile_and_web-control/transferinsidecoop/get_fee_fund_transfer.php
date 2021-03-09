@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			if($arrRightDep["RESULT"]){
 				$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 				if($arrRightDeposit["RESULT"]){
-					$checkSeqAmt = $cal_dep->getSequestAmt($to_deptaccount_no,'DIM');
+					$checkSeqAmt = $cal_dep->getSequestAmt($to_deptaccount_no,'DTX');
 					if($checkSeqAmt["CAN_DEPOSIT"]){
 						if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
 							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
