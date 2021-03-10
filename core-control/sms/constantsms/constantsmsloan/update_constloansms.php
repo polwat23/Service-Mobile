@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant = $conmysql->prepare("SELECT
 																		id_smsconstantloan,
 																		loan_itemtype_code,
-																		allow_smsconstantloan
+																		allow_smsconstantloan,
+																		allow_notify
 																	FROM
 																		smsconstantloan
 																	ORDER BY loan_itemtype_code ASC");
@@ -18,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrConstans["ID_SMSCONSTANTLOAN"] = $rowMenuMobile["id_smsconstantloan"];
 			$arrConstans["LOANITEMTYPE_CODE"] = $rowMenuMobile["loan_itemtype_code"];
 			$arrConstans["ALLOW_SMSCONSTANTLOAN"] = $rowMenuMobile["allow_smsconstantloan"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT LOANITEMTYPE_CODE,LOANITEMTYPE_DESC FROM LNUCFLOANITEMTYPE ORDER BY LOANITEMTYPE_CODE ASC");
@@ -26,8 +28,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrayDepttype = array();
 				if(array_search($rowDepttype["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE')) === False){
 						$arrayDepttype["ALLOW_SMSCONSTANTLOAN"] = 0;
+						$arrayDepttype["ALLOW_NOTIFY"] = 0;
 				}else{
 					$arrayDepttype["ALLOW_SMSCONSTANTLOAN"] = $arrayChkG[array_search($rowDepttype["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE'))]["ALLOW_SMSCONSTANTLOAN"];
+					$arrayDepttype["ALLOW_NOTIFY"] = $arrayChkG[array_search($rowDepttype["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE'))]["ALLOW_NOTIFY"];
 				}
 				
 			$arrayDepttype["LOANITEMTYPE_CODE"] = $rowDepttype["LOANITEMTYPE_CODE"];
@@ -45,18 +49,19 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."')";
-						$insertBulkContLog[]='LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN ='.$value_diff["ALLOW_SMSCONSTANTLOAN"];
+						$insertBulkCont[] = "('".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$insertBulkContLog[]='LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN ='.$value_diff["ALLOW_SMSCONSTANTLOAN"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
+						$updateConst = $conmysql->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN, allow_notify = :ALLOW_NOTIFY WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTLOAN' => $value_diff["ALLOW_SMSCONSTANTLOAN"],
+							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
 							':LOANITEMTYPE_CODE' => $value_diff["LOANITEMTYPE_CODE"]
 						]);
-						$updateConstLog = 'LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN='.$value_diff["ALLOW_SMSCONSTANTLOAN"];
+						$updateConstLog = 'LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN='.$value_diff["ALLOW_SMSCONSTANTLOAN"].' ALLOW_NOTIFY='.$value_diff["ALLOW_NOTIFY"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantloan(loan_itemtype_code,allow_smsconstantloan)
+				$insertConst = $conmysql->prepare("INSERT smsconstantloan(loan_itemtype_code,allow_smsconstantloan,allow_notify)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

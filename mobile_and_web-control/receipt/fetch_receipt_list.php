@@ -5,6 +5,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
+		$date_process_kp = $func->getConstant('date_process_kp');
+		if($date_process_kp < 10){
+			$date_process_kp = '0'.$date_process_kp;
+		}
+		$dateNow = date('Ymd');
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
 															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
@@ -40,7 +45,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$arrKpmonth["IS_CANCEL"] = FALSE;
 			}
-			$arrayGroupPeriod[] = $arrKpmonth;
+			
+			$dateraw = (substr($rowPeriod["RECV_PERIOD"],0,4)-543).'-'.substr($rowPeriod["RECV_PERIOD"],4,2);
+			$dateraw = date('Ym',strtotime('+1 months',strtotime($dateraw)));
+			$dateFuture = $dateraw.$date_process_kp;
+			if($dateNow >= $dateFuture){
+				$arrayGroupPeriod[] = $arrKpmonth;
+			}
 		}
 		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;

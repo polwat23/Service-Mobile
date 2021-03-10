@@ -2,17 +2,17 @@
 set_time_limit(150);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','citizen_id','coop_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		try {
-			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
+			$coop_account_no = $payload["member_no"];
 			$getPhone = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
 			$getPhone->execute([':member_no' => $payload["member_no"]]);
 			$rowPhone = $getPhone->fetch(PDO::FETCH_ASSOC);
 			$mobile_no = $rowPhone["phone_number"];
 			$arrPayloadverify = array();
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['account_no'] = $coop_account_no;
+			$arrPayloadverify['account_no'] = $payload["member_no"];
 			$arrPayloadverify['mobile_no'] = $mobile_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];

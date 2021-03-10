@@ -245,7 +245,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.gensoft.co.th';
+		$mailFunction->Host = 'cloud2.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -720,7 +720,7 @@ class library {
 		$value = intval($step * $amt);
 		return $value / $step;
 	}
-	public function roundDecimal($amt,$round_type){
+	public function roundDecimal($amt,$round_type,$flag_return='0'){
 		$amtRound = $this->truncateDecimal($amt,2);
 		$amtRaw = $this->truncateDecimal($amtRound,0);
 		$fraction = floatval($amtRound - $amtRaw);
@@ -730,10 +730,50 @@ class library {
 		switch ($round_type){
 			case 1:
 				//ปัดที่ละสลึง
-				if ($fraction > 0.00 && $fraction <= 0.25) { $roundFrac = 0.25; }
-				if ($fraction > 0.25 && $fraction <= 0.50) { $roundFrac = 0.50; }
-				if ($fraction > 0.25 && $fraction <= 0.75) { $roundFrac = 0.75; }
-				if ($fraction > 0.75 && $fraction <= 0.99) { $roundFrac = 1.00; }
+				if ($fraction > 0.00 && $fraction <= 0.25) { 
+					if($flag_return == '1'){
+						if($fraction > 0.125){
+							$roundFrac = 0.25;
+						}else{
+							$roundFrac = 0;
+						}
+					}else{
+						$roundFrac = 0.25;
+					}
+				}
+				if ($fraction > 0.25 && $fraction <= 0.50) {
+					if($flag_return == '1'){
+						if($fraction > 0.375){
+							$roundFrac = 0.50;
+						}else{
+							$roundFrac = 0.25;
+						}
+					}else{
+						$roundFrac = 0.50;
+					}
+				}
+				if ($fraction > 0.50 && $fraction <= 0.75) { 
+					if($flag_return == '1'){
+						if($fraction > 0.625){
+							$roundFrac = 0.75;
+						}else{
+							$roundFrac = 0.50;
+						}
+					}else{
+						$roundFrac = 0.75;
+					}
+				}
+				if ($fraction > 0.75 && $fraction <= 0.99) { 
+					if($flag_return == '1'){
+						if($fraction > 0.875){
+							$roundFrac = 1;
+						}else{
+							$roundFrac = 0.75;
+						}
+					}else{
+						$roundFrac = 1;
+					}
+				}
 				break;
 			case 2:
 				//ปัดที่ละ 5 สตางค์

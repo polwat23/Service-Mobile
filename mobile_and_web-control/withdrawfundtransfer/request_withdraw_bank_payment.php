@@ -5,11 +5,11 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','penalty_amt','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataDeposit = $conmysql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.link_withdraw_coopdirect,csb.bank_short_ename
+		$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.link_withdraw_coopdirect,csb.bank_short_ename
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
-		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
+		$rowDataWithdraw = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$flag_transaction_coop = false;
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 		$time = time();
@@ -18,12 +18,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$ref_no = $time.$lib->randomText('all',3);
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$penalty_include = $func->getConstant("include_penalty");
-		$amt_transfer = $dataComing["amt_transfer"];
 		$fee_amt = 0;
-		if($rowDataDeposit["bank_code"] == '025'){
+		if($rowDataWithdraw["bank_code"] == '025'){
 			$fee_amt = $dataComing["penalty_amt"];
 		}else{
 			$fee_amt = $dataComing["penalty_amt"] + $dataComing["fee_amt"];
+		}
+		if($penalty_include == '0'){
+			$amt_transfer = $dataComing["amt_transfer"] - $fee_amt;
+		}else{
+			$amt_transfer = $dataComing["amt_transfer"];
 		}
 		$arrVerifyToken['exp'] = $time + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -31,17 +35,20 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['amt_transfer'] = $amt_transfer;
 		$arrVerifyToken['coop_account_no'] = $coop_account_no;
 		$arrVerifyToken['operate_date'] = $dateOperC;
+		$arrVerifyToken['ref_trans'] = $ref_no;
 		$refbank_no = null;
 		$etnrefbank_no = null;
-		if($rowDataDeposit["bank_code"] == '004'){
+		if($rowDataWithdraw["bank_code"] == '004'){
 			$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
 			$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
 			$arrVerifyToken['citizen_id_enc'] = $dataComing["citizen_id_enc"];
 			$arrVerifyToken['dept_account_enc'] = $dataComing["dept_account_enc"];
 			$refbank_no = $dataComing["kbank_ref_no"];
-		}else if($rowDataDeposit["bank_code"] == '006'){
-			
-		}else if($rowDataDeposit["bank_code"] == '025'){
+		}else if($rowDataWithdraw["bank_code"] == '006'){
+			$arrVerifyToken['tran_date'] = $dateOper;
+			$arrVerifyToken['bank_account'] = $rowDataWithdraw["deptaccount_no_bank"];
+			$arrVerifyToken['citizen_id'] = $rowDataWithdraw["citizen_id"];
+		}else if($rowDataWithdraw["bank_code"] == '025'){
 			$arrVerifyToken['etn_trans'] = $dataComing["ETN_REFNO"];
 			$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
 			$refbank_no = $dataComing["SOURCE_REFNO"];
@@ -61,8 +68,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrayGroup["atm_no"] = "MOBILE";
 		$arrayGroup["atm_seqno"] = "";
 		$arrayGroup["aviable_amt"] = null;
-		$arrayGroup["bank_accid"] = $rowDataDeposit["deptaccount_no_bank"];
-		$arrayGroup["bank_cd"] = $rowDataDeposit["bank_code"];
+		$arrayGroup["bank_accid"] = $rowDataWithdraw["deptaccount_no_bank"];
+		$arrayGroup["bank_cd"] = $rowDataWithdraw["bank_code"];
 		$arrayGroup["branch_cd"] = null;
 		$arrayGroup["coop_code"] = $config["COOP_KEY"];
 		$arrayGroup["coop_id"] = $config["COOP_ID"];
@@ -81,8 +88,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrayGroup["post_status"] = "1";
 		$arrayGroup["principal_amt"] = null;
 		$arrayGroup["ref_slipno"] = null;
-		$arrayGroup["slipitemtype_code"] = $rowDataDeposit["itemtype_wtd"];
-		$arrayGroup["stmtitemtype_code"] = $rowDataDeposit["itemtype_wtd"];
+		$arrayGroup["slipitemtype_code"] = $rowDataWithdraw["itemtype_wtd"];
+		$arrayGroup["stmtitemtype_code"] = $rowDataWithdraw["itemtype_wtd"];
 		$arrayGroup["system_cd"] = "02";
 		$arrayGroup["withdrawable_amt"] = null;
 		$ref_slipno = null;
@@ -143,7 +150,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				
 			}
 			// -----------------------------------------------
-			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataDeposit["link_withdraw_coopdirect"],$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
@@ -152,9 +159,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 															,:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
-					':itemtype' => $rowDataDeposit["itemtype_wtd"],
+					':itemtype' => $rowDataWithdraw["itemtype_wtd"],
 					':from_account' => $coop_account_no,
-					':destination' => $rowDataDeposit["deptaccount_no_bank"],
+					':destination' => $rowDataWithdraw["deptaccount_no_bank"],
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -166,7 +173,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':etn_ref' => $etnrefbank_no,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $refbank_no,
-					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
+					':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
 				]);
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
@@ -214,9 +221,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				]);
 				$arrExecute = [
 					':ref_no' => $ref_no,
-					':itemtype' => $rowDataDeposit["itemtype_wtd"],
+					':itemtype' => $rowDataWithdraw["itemtype_wtd"],
 					':from_account' => $coop_account_no,
-					':destination' => $rowDataDeposit["deptaccount_no_bank"],
+					':destination' => $rowDataWithdraw["deptaccount_no_bank"],
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -228,7 +235,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':etn_ref' => $etnrefbank_no,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $refbank_no,
-					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
+					':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
 				];
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
@@ -242,13 +249,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				}
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 				$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+				$dataMerge = array();
+				$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
+				$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+				$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
+				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 				foreach($arrToken["LIST_SEND"] as $dest){
 					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-						$dataMerge = array();
-						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-						$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
-						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -265,11 +272,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				}
 				foreach($arrToken["LIST_SEND_HW"] as $dest){
 					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-						$dataMerge = array();
-						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-						$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-						$dataMerge["DATETIME"] = $lib->convertdate($dateOper,'D m Y',true);
-						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
@@ -284,6 +286,26 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						}
 					}
 				}
+				$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+				foreach($arrayTel as $dest){
+					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+						$message_body = $message_endpoint["BODY"];
+						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+						$arraySendSMS = $lib->sendSMS($arrayDest);
+						if($arraySendSMS["RESULT"]){
+							$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+							$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
+						}else{
+							$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+									'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+							$func->logSMSWasNotSent($bulkInsert);
+						}
+					}else{
+						$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+								'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+						$func->logSMSWasNotSent($bulkInsert);
+					}
+				}
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 				$arrayResult['RESULT'] = TRUE;
@@ -296,9 +318,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 															,:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
-					':itemtype' => $rowDataDeposit["itemtype_wtd"],
+					':itemtype' => $rowDataWithdraw["itemtype_wtd"],
 					':from_account' => $coop_account_no,
-					':destination' => $rowDataDeposit["deptaccount_no_bank"],
+					':destination' => $rowDataWithdraw["deptaccount_no_bank"],
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -310,7 +332,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':etn_ref' => $etnrefbank_no,
 					':id_userlogin' => $payload["id_userlogin"],
 					':ref_no_source' => $refbank_no,
-					':bank_code' => $rowDataDeposit["bank_code"] ?? '004'
+					':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
 				]);
 				$arrayGroup["post_status"] = "-1";
 				$arrayGroup["atm_no"] = $ref_slipno;
@@ -333,8 +355,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':response_message' => $arrResponse->RESPONSE_MESSAGE
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
-				if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+				if(isset($configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				}

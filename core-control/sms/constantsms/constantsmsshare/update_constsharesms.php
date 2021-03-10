@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant = $conmysql->prepare("SELECT
 																		id_smsconstantshare,
 																		share_itemtype_code,
-																		allow_smsconstantshare
+																		allow_smsconstantshare,
+																		allow_notify
 																	FROM
 																		smsconstantshare
 																	ORDER BY share_itemtype_code ASC");
@@ -18,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrConstans["ID_SMSCONSTANTSHARE"] = $rowMenuMobile["id_smsconstantshare"];
 			$arrConstans["SHRITEMTYPE_CODE"] = $rowMenuMobile["share_itemtype_code"];
 			$arrConstans["ALLOW_SMSCONSTANTSHARE"] = $rowMenuMobile["allow_smsconstantshare"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT SHRITEMTYPE_CODE,SHRITEMTYPE_DESC FROM SHUCFSHRITEMTYPE ORDER BY SHRITEMTYPE_CODE ASC");
@@ -26,8 +28,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrayDepttype = array();
 				if(array_search($rowDepttype["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE')) === False){
 						$arrayDepttype["ALLOW_SMSCONSTANTSHARE"] = 0;
+						$arrayDepttype["ALLOW_NOTIFY"] = 0;
 				}else{
 					$arrayDepttype["ALLOW_SMSCONSTANTSHARE"] = $arrayChkG[array_search($rowDepttype["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE'))]["ALLOW_SMSCONSTANTSHARE"];
+					$arrayDepttype["ALLOW_NOTIFY"] = $arrayChkG[array_search($rowDepttype["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE'))]["ALLOW_NOTIFY"];
 				}
 				
 			$arrayDepttype["SHRITEMTYPE_CODE"] = $rowDepttype["SHRITEMTYPE_CODE"];
@@ -45,18 +49,19 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTSHARE"]."')";
-						$insertBulkContLog[]='SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE ='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
+						$insertBulkCont[] = "('".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTSHARE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$insertBulkContLog[]='SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE ='.$value_diff["ALLOW_SMSCONSTANTSHARE"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
+						$updateConst = $conmysql->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE, allow_notify = :ALLOW_NOTIFY WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTSHARE' => $value_diff["ALLOW_SMSCONSTANTSHARE"],
+							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
 							':SHRITEMTYPE_CODE' => $value_diff["SHRITEMTYPE_CODE"]
 						]);
-						$updateConstLog = 'SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
+						$updateConstLog = 'SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantshare(share_itemtype_code,allow_smsconstantshare)
+				$insertConst = $conmysql->prepare("INSERT smsconstantshare(share_itemtype_code,allow_smsconstantshare,allow_notify)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [
