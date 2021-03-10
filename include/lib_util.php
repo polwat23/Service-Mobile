@@ -205,44 +205,33 @@ class library {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($json,true);
 		$arrayGrpSms = array();
-		try{
-			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
-			try {
-				if($bulk){
-					foreach($arrayDestination as $dest){
-						$argumentWS = [
-							"Member_No" => $dest["member_no"],
-							"MobilePhone" => $dest["tel"],
-							"Message" => $dest["message"]
-						];
-						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-						$responseSoap = $resultWS->RqSendOTPResult;
-						$arraySms["MEMBER_NO"] = $dest["member_no"];
-						$arraySms["RESULT"] = $responseSoap;
-						$arrayGrpSms[] = $arraySms;
-					}
-					return $arrayGrpSms;
-				}else{
-					$argumentWS = [
-						"Member_No" => $arrayDestination["member_no"],
-						"MobilePhone" => $arrayDestination["tel"],
-						"Message" => $arrayDestination["message"]
-					];
-					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-					$responseSoap = $resultWS->RqSendOTPResult;
-					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
-					$arrayGrpSms["RESULT"] = $responseSoap;
-					return $arrayGrpSms;
-				}
-			}catch(SoapFault $e){
+		$dest = $arrayDestination;
+		$smsparam = "?seq_no=1&sms_msg=".urlencode($dest["message"])."&sms_response=".urlencode($dest["header_cmd"])."&mobile_no=".$dest["tel"]."&comment=".$dest["member_no"];
+		$smsurl = $config["URL_CORE_SMS"].$smsparam;
+		$ch = curl_init();
+		
+		curl_setopt($ch, CURLOPT_URL, $smsurl);
+		curl_setopt($ch. CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$result = curl_exec($ch);
+		curl_close ($ch);
+		$xml = simplexml_load_string($result);
+		if(is_object($xml)){
+			$sms_status = $xml->sms->status;
+			if($sms_status == 'OK'){
+				$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
+				$arrayGrpSms["RESULT"] = TRUE;
+			}else{
+				$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
+				$arrayGrpSms["RESPONSE_MESSAGE"] = $sms_status;
 				$arrayGrpSms["RESULT"] = FALSE;
-				return $arrayGrpSms;
 			}
-		}catch(Throwable $e){
+		}else{
+			$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
+			$arrayGrpSms["RESPONSE_MESSAGE"] = $smsurl;
 			$arrayGrpSms["RESULT"] = FALSE;
-			return $arrayGrpSms;
-			return false;
 		}
+		return $arrayGrpSms;
 	}
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
