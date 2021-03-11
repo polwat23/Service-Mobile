@@ -62,7 +62,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 			':member_no' => $member_no
 		])){
 			$arrMessage = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-			$arrayDest["member_no"] = $dataComing["member_no"];
+			$arrayDest["member_no"] = $member_no;
 			$arrayDest["tel"] = $dataComing["tel"];
 			$arrayDest["header_cmd"] = $arrMessage["SUBJECT"];
 			$arrayDest["message"] = $arrMessage["BODY"];
