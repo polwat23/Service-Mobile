@@ -324,7 +324,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 650px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/mg.gif" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 680px;margin-top:-40px;">ผู้จัดการ</div>

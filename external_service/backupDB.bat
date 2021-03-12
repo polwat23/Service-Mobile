@@ -3,7 +3,7 @@
 
 del C:\Mobile\service-tak\external_service\backupDB_tak.zip
 
-cd C:\Program Files\MariaDB 10.4\bin
+cd C:\Program Files\MariaDB 10.5\bin
 
 C:
 
