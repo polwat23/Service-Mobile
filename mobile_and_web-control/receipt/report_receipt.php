@@ -3,8 +3,6 @@ require_once('../autoload.php');
 
 use Dompdf\Dompdf;
 
-$dompdf = new DOMPDF();
-
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -202,16 +200,16 @@ function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
 				@font-face {
-				  font-family: THSarabun;
-				  src: url(../../resource/fonts/THSarabun.ttf);
+				  font-family: TH Niramit AS;
+				  src: url(../../resource/fonts/TH Niramit AS.ttf);
 				}
 				@font-face {
-					font-family: "THSarabun";
-					src: url(../../resource/fonts/THSarabun Bold.ttf);
+					font-family: TH Niramit AS;
+					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 					font-weight: bold;
 				}
 				* {
-				  font-family: THSarabun;
+				  font-family: TH Niramit AS;
 				}
 				body {
 				  padding: 0 30px;
@@ -232,7 +230,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 2 อาคารศรีสวรินทิรา ชั้น 1 และ ชั้น 6 ถนนวังหลัง</p>
 				<p style="margin-top: -25px;font-size: 18px;">แขวงศิริราช เขตบางกอกน้อย กรุงเทพมหานคร 10700</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2444-7741-3, 0-2419-7543-5, 0-2419-8363-4</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.si.mahidol.ac.th</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.musaving.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -352,7 +350,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
