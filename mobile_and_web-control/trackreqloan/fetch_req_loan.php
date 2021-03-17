@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
+															diff_old_contract,receive_net,bookbank_img,bookcoop_img,salary_img,citizen_img,remark,approve_date,contractdoc_url
 															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
 			$fetchReqLoan->execute([
 				':member_no' => $payload["member_no"],
@@ -28,6 +28,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
 				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
+				$arrayReq["BOOKBANK_IMG"] = $rowReqLoan["bookbank_img"];
+				$arrayReq["BOOKCOOP_IMG"] = $rowReqLoan["bookcoop_img"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
@@ -37,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}else{
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
+															diff_old_contract,receive_net,bookbank_img,bookcoop_img,salary_img,citizen_img,remark,approve_date,contractdoc_url
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
@@ -56,6 +58,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
 				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
+				$arrayReq["BOOKBANK_IMG"] = $rowReqLoan["bookbank_img"];
+				$arrayReq["BOOKCOOP_IMG"] = $rowReqLoan["bookcoop_img"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];

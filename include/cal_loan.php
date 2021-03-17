@@ -60,16 +60,19 @@ class CalculateLoan {
 				}
 				$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
 				if($yearDiffTemp == 0 && $yearDiff > 0){
-					$dateTo = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+					$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
 					$date_duration = $dateTo->diff($dateFrom);
 					$dayInterest = $date_duration->days;
 					if($dayInterest == 0){
 						$dayInterest++;
 					}
 				}else{
+					if($yearDiffTemp > 0){
+						$dateFrom = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+					}
 					$dateTo = new \DateTime(date('d-m-Y'));
 					$date_duration = $dateTo->diff($dateFrom);
-					$dayInterest = $date_duration->days - $yearDiffTemp;
+					$dayInterest = $date_duration->days;
 				}
 				$yearDiffTemp++;
 				if($constLoanContract["PAYSPEC_METHOD"] == '1'){
@@ -106,7 +109,7 @@ class CalculateLoan {
 		$yearFrom = date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"]));
 		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'ynd'));
 		$yearTo = date('Y');
-		$yearDiff = $yearTo - $yearFrom;
+		$yearDiff = $yearFrom - $yearTo;
 		if($changerateint){
 			$yearDiff = 1;
 		}
@@ -127,16 +130,19 @@ class CalculateLoan {
 			}
 			$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTPROCESS_DATE"]))));
 			if($yearDiffTemp == 0 && $yearDiff > 0){
-				$dateTo = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTPROCESS_DATE"]))));
+				$dateTo = new \DateTime('31-12-'.date('Y'));
 				$date_duration = $dateFrom->diff($dateTo);
 				$dayInterest = $date_duration->days;
 				if($dayInterest == 0){
 					$dayInterest++;
 				}
 			}else{
+				if($yearDiffTemp > 0){
+					$dateFrom = new \DateTime('31-12-'.date('Y'));
+				}
 				$dateTo = new \DateTime(date('d-m-Y'));
 				$date_duration = $dateFrom->diff($dateTo);
-				$dayInterest = $date_duration->days - $yearDiffTemp;
+				$dayInterest = $date_duration->days;
 			}
 			$yearDiffTemp++;
 			$prn_bal = $amt_transfer;
@@ -183,7 +189,7 @@ class CalculateLoan {
 											LNM.LOANTYPE_CODE,LNM.INTEREST_ARREAR,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
-											(CASE WHEN LNM.LASTPROCESS_DATE <= LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
+											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
 											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE
 											FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE
 											WHERE lnm.loancontract_no = :contract_no and lnm.contract_status > 0 and lnm.contract_status <> 8");
@@ -194,7 +200,7 @@ class CalculateLoan {
 	}
 	private function getRateIntTable($inttabcode){
 		$conRate = $this->conora->prepare("SELECT INTEREST_RATE FROM lncfloanintratedet WHERE LOANINTRATE_CODE = :inttabcode
-											and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE");
+											and SYSDATE BETWEEN EFFECTIVE_DATE and EXPIRE_DATE");
 		$conRate->execute([':inttabcode' => $inttabcode]);
 		$rowRate = $conRate->fetch(\PDO::FETCH_ASSOC);
 		return $rowRate["INTEREST_RATE"];

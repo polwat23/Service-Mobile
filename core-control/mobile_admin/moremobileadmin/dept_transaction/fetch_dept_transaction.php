@@ -118,7 +118,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["transaction_type_code"];
 			$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$formatDept);
 			$arrayRecon["FROM_ACCOUNT"] = $rowRecon["from_account"];
-			$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$formatDept);
+			$arrayRecon["DESTINATION_FORMAT"] = (isset($dataComing["destination"]) && $dataComing["destination"] != "") ?
+											$lib->formataccount($rowRecon["destination"],$formatDept) : null;
 			$arrayRecon["REF_NO"] = $rowRecon["ref_no"];
 			$arrayRecon["DESTINATION"] = $rowRecon["destination"];
 			$arrayRecon["TRANS_FLAG"] = $rowRecon["trans_flag"];

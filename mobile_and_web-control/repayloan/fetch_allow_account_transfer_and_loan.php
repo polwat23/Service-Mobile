@@ -39,7 +39,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE,
 													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnm.INTEREST_RETURN
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
-													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8 and
+													lnm.principal_balance - lnm.rkeep_principal > 0 ");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$interest = 0;
