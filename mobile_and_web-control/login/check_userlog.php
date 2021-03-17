@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
-	$checkResign->execute([':member_no' => $payload["member_no"]]);
+	$checkResign->execute([':member_no' => $payload["ref_memno"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 	if($rowResign["RESIGN_STATUS"] == '1'){
 		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");

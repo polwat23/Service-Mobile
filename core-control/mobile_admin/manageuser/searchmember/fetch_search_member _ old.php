@@ -5,9 +5,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','searchmember')){
 		$arrayGroupAll = array();
 		$arrayExecute = array();
-		$arrRegisterCoop = array();
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){
-			$arrayExecute[':member_no'] = $dataComing["member_no"];
+			$arrayExecute[':member_no'] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 		}
 		if(isset($dataComing["member_name"]) && $dataComing["member_name"] != ''){
 			$arrName = explode(' ',$dataComing["member_name"]);
@@ -26,22 +25,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}
-		
-		$fetchAccount = $conmysql->prepare("SELECT member_no FROM gcmembonlineregis  where appl_status = '1'  ");
-		$fetchAccount->execute();
-		while($rowUser = $fetchAccount->fetch(PDO::FETCH_ASSOC)){
-			$arrRegisterCoop[] = $rowUser["member_no"];
-		}
-		
-		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_ENAME,MB.BIRTH_DATE,MB.ADDR_EMAIL AS EMAIL,MB.ADDR_MOBILEPHONE AS MEM_TELMOBILE,
-											MB.COOPREGIS_DATE,
-											MB.CLOSE_DATE,
-											MB.COOPREGIS_NO,
-											MB.MEMB_REGNO,
-											MB.TAX_ID,
-											MB.ACCYEARCLOSE_DATE,
-											MB.MEMBER_DATE,
-											MB.MEMBER_NO,
+		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.ADDR_EMAIL AS EMAIL,MB.ADDR_MOBILEPHONE AS MEM_TELMOBILE,
+											MB.MEMBER_DATE,MB.MEMBER_NO,
 											MB.ADDR_NO AS ADDR_NO,
 											MB.ADDR_MOO AS ADDR_MOO,
 											MB.ADDR_SOI AS ADDR_SOI,
@@ -54,12 +39,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											MB.ADDR_POSTCODE AS ADDR_POSTCODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.district_code = MBD.district_code
+											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
-											WHERE ".(count($arrRegisterCoop) > 0 ? (" mb.member_no IN(".implode(',',$arrRegisterCoop).")") : null)."
-											and 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
+											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
-											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_ename) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_ename) LIKE :member_name)" : null)).
+											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).
 											(isset($dataComing["province"]) && $dataComing["province"] != '' ? " and mb.province_code = :province_code" : null)
 											);
 		$fetchMember->execute($arrayExecute);
@@ -89,21 +73,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
 			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayGroup["TEL"] = $rowMember["MEM_TELMOBILE"];
+			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
 			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');
-			$arrayGroup["COOPREGIS_DATE"] = $lib->convertdate($rowMember["COOPREGIS_DATE"],'D m Y');//จดทะเบียนเมื่อวันที่
-			$arrayGroup["CLOSE_DATE"] = $lib->convertdate($rowMember["CLOSE_DATE"],'D m Y');//วันสิ้นปีทางบัญชี
-			$arrayGroup["COOPREGIS_NO"] = $rowMember["COOPREGIS_NO"];  //ทะเบียนเลขที่
-			$arrayGroup["MEMB_REGNO"] = $rowMember["MEMB_REGNO"];  //เลข 13 หลักของสหกรณ์ 
-			$arrayGroup["TAX_ID"] = $rowMember["TAX_ID"];  //เลขประจำตัวผู้เสียภาษีอากร
-			$arrayGroup["ACCYEARCLOSE_DATE"] = $rowMember["ACCYEARCLOSE_DATE"];  //วันสิ้นปีทางบัญชี
 			$arrayGroupAll[] = $arrayGroup;
 		}
 		$arrayResult["MEMBER_DATA"] = $arrayGroupAll;
 		$arrayResult["RESULT"] = TRUE;
-		$arrayResult["arrRegisterCoop"] = $arrRegisterCoop;
 		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;

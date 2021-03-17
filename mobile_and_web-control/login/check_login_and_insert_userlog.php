@@ -19,10 +19,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
+	$member_no = $dataComing["member_no"];
+	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 , ref_memno FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
+	
 	if($checkLogin->rowCount() > 0){
 		if($arrPayload["PAYLOAD"]["channel"] == "mobile_app" && isset($dataComing["is_root"])){
 			$checkBlackList = $conmysql->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1' and type_blacklist = '1'");
@@ -50,8 +51,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			}
 		}
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
-		$checkResign->execute([':member_no' => $member_no]);
+		$checkResign = $conoracle->prepare("SELECT resign_status   FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign->execute([':member_no' => $rowPassword['ref_memno']]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 		if($rowResign["RESIGN_STATUS"] == '1'){
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
@@ -125,6 +126,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['user_type'] = $rowPassword['user_type'];
 						$arrPayloadNew['id_token'] = $id_token;
 						$arrPayloadNew['member_no'] = $member_no;
+						$arrPayloadNew['ref_memno'] = $rowPassword['ref_memno']; 
 						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);

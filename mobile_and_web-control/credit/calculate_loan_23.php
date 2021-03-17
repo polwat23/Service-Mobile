@@ -2,7 +2,7 @@
 require_once(__DIR__.'/../../autoloadConnection.php');
 require_once(__DIR__.'/../../include/validate_input.php');
 
-$member_no = $member_no ?? $dataComing["member_no"];
+//$member_no = $member_no ?? $dataComing["member_no"];
 $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
@@ -11,7 +11,7 @@ $arrSubOtherInfo = array();
 $arrSubOtherInfoSalaryRemain = array();
 
 $getMemberData = $conoracle->prepare("SELECT member_date,salary_amount FROM mbmembmaster WHERE member_no = :member_no");
-$getMemberData->execute([':member_no' => $member_no]);
+$getMemberData->execute([':member_no' => $payload["ref_memno"]]);
 $rowMembData = $getMemberData->fetch(PDO::FETCH_ASSOC);
 $duration_month = $lib->count_duration($rowMembData["MEMBER_DATE"],'m');
 if($duration_month <= 3){
@@ -19,7 +19,7 @@ if($duration_month <= 3){
 	return;
 }
 $getDeptATM = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE member_no = :member_no and depttype_code = '88' and deptclose_status = '0'");
-$getDeptATM->execute([':member_no' => $member_no]);
+$getDeptATM->execute([':member_no' => $payload["ref_memno"]]);
 $rowDeptATM = $getDeptATM->fetch(PDO::FETCH_ASSOC);
 if(empty($rowDeptATM["DEPTACCOUNT_NO"]) || $rowDeptATM["DEPTACCOUNT_NO"] == ""){
 	$maxloan_amt = 0;
@@ -29,7 +29,7 @@ $getLoanCustomCredit = $conoracle->prepare("SELECT lc.maxloan_amt FROM lnloantyp
 											WHERE mb.member_no = :member_no and lc.LOANTYPE_CODE = :loantype_code 
 											and mb.salary_amount BETWEEN lc.startsalary_amt and lc.endsalary_amt");
 $getLoanCustomCredit->execute([
-	':member_no' => $member_no,
+	':member_no' => $payload["ref_memno"],
 	':loantype_code' => $loantype_code
 ]);
 $rowLoanCustom = $getLoanCustomCredit->fetch(PDO::FETCH_ASSOC);

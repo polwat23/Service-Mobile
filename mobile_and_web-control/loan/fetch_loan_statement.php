@@ -29,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
 		}
-		$getAccount = $conoracle->prepare("SELECT principal_balance as LOAN_BALANCE FROM lncontmaster
+		$getAccount = $conoracle->prepare("SELECT principal_balance as LOAN_BALANCE FROM lccontmaster
 											WHERE contract_status = 1 and loancontract_no = :contract_no");
 		$getAccount->execute([
 			':contract_no' => $contract_no
@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
-											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
+											FROM lccontstatement lsm LEFT JOIN LCUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
 											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 

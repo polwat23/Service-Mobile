@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-		$getCardPerson->execute([':member_no' => $member_no]);
+		$getCardPerson->execute([':member_no' => $payload["ref_memno"]]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				$arraySTMGrp[] = $arraySTM;
 			}
 			$arrayData["STATEMENT"] = $arraySTMGrp;
-			$arrayData["MEMBER_NO"] = $payload["member_no"];
+			$arrayData["MEMBER_NO"] = $payload["ref_memno"];
 			$arrayData["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];

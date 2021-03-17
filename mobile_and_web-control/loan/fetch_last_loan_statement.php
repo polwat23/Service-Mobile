@@ -12,13 +12,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
 		$fetchLastStmAcc = $conoracle->prepare("SELECT * FROM (SELECT lnm.loancontract_no,lt.LOANTYPE_DESC AS LOAN_TYPE,lnm.principal_balance as LOAN_BALANCE,
-												lnm.loanapprove_amt as APPROVE_AMT,lnm.startcont_date,lnm.period_payment,lnm.period_payamt as PERIOD,
+												lnm.loanapprove_amt as APPROVE_AMT,lnm.startcont_date,lnm.period_payment, lnm.period_installment  as PERIOD,
 												LAST_PERIODPAY as LAST_PERIOD,lns.operate_date as LAST_OPERATE_DATE
-												from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
-												lnm.loancontract_no = lns.loancontract_no and lnm.coop_id = lns.coop_id LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE 
+												from lccontmaster lnm LEFT JOIN lccontstatement lns ON 
+												lnm.loancontract_no = lns.loancontract_no and lnm.branch_id = lns.branch_id LEFT JOIN LCCFLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 												WHERE lnm.member_no = :member_no and lnm.contract_status > 0 and lnm.contract_status <> 8
 												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
-		$fetchLastStmAcc->execute([':member_no' => $member_no]);
+		$fetchLastStmAcc->execute([':member_no' => $payload["ref_memno"]]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
 		$arrContract = array();
@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
-											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
+											FROM lccontstatement lsm LEFT JOIN LCUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 

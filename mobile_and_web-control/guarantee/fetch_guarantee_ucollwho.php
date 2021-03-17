@@ -6,24 +6,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayResult = array();
 		$arrayGroupLoan = array();
-		$getUcollwho = $conoracle->prepare("SELECT
+		$getUcollwho = $conoracle->prepare("SELECT 
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
 											LNTYPE.loantype_desc as TYPE_DESC,
-											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
+											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_ENAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
 											NVL(LCM.principal_balance,0) as LOAN_BALANCE,
 											LCM.LAST_PERIODPAY as LAST_PERIOD,
-											LCM.period_payamt as PERIOD
+											LCM.period_installment as PERIOD
 											FROM
-											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
+											LCCONTCOLL LCC LEFT JOIN LCCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
 											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
 											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
-											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
+											LEFT JOIN lCCFLOANTYPE LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
 											WHERE
 											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '01'
 											AND LCC.REF_COLLNO = :member_no");
-		$getUcollwho->execute([':member_no' => $member_no]);
+		$getUcollwho->execute([':member_no' => $payload["member_no"]]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];

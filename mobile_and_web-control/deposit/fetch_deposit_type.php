@@ -3,10 +3,10 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $payload["ref_memno"];
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no");
-		$getSumAllAccount->execute([':member_no' => $member_no]);
+		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE TRIM(member_no) = :member_no ");
+		$getSumAllAccount->execute([':member_no' => $payload["ref_memno"]]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
 		$formatDept = $func->getConstant('dep_format');
@@ -14,8 +14,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
-		$getAccount->execute([':member_no' => $member_no]);
+											WHERE TRIM(dp.member_no) = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+		$getAccount->execute([':member_no' => $payload["ref_memno"]]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
