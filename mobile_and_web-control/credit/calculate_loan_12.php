@@ -10,7 +10,7 @@ $request_amt = 0;
 $shareColl = null;
 $getShareData = $conoracle->prepare("SELECT (sh.sharestk_amt * 10) as SHARE_BALANCE
 									FROM shsharemaster sh WHERE sh.member_no = :member_no");
-$getShareData->execute([':member_no' => $member_no]);
+$getShareData->execute([':member_no' => $payload["ref_memno"]]);
 $rowShareData = $getShareData->fetch(PDO::FETCH_ASSOC);
 $shareColl = $rowShareData["SHARE_BALANCE"] * 0.90;
 if(isset($shareColl)){
@@ -19,7 +19,7 @@ if(isset($shareColl)){
 	$arrCollShould[] = $arrSubCollCheckAmt;
 }
 $getDeptAccount = $conoracle->prepare("SELECT DEPTACCOUNT_NO,PRNCBAL FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = '0'");
-$getDeptAccount->execute([':member_no' => $member_no]);
+$getDeptAccount->execute([':member_no' => $payload["ref_memno"]]);
 while($rowDept = $getDeptAccount->fetch(PDO::FETCH_ASSOC)){
 	$arrSubCollCheckAmt = array();
 	$deptvalue = $rowDept["PRNCBAL"] * 0.90;

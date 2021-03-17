@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrCanCal = array();
 		$arrCanReq = array();
 		$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
-		$getMemberType->execute([':member_no' => $member_no]);
+		$getMemberType->execute([':member_no' => $payload["ref_memno"]]);
 		$rowMemb = $getMemberType->fetch(PDO::FETCH_ASSOC);
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
 		$fetchLoanCanCal->execute();

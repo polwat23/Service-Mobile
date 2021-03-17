@@ -13,14 +13,14 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
-		$getCardPerson->execute([':member_no' => $member_no]);
+		$getCardPerson = $conoracle->prepare("SELECT  membreg_no as card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$getCardPerson->execute([':member_no' => $payload["ref_memno"]]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
+			$fetchDataSTM = $conoracle->prepare("SELECT dpt.RECPPAYTYPE_DESC AS TYPE_TRAN,dpt.recppaytype_flag as  SIGN_FLAG,dps.DEPTSLIP_NO,
 																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
-																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
+																		FROM dpdeptstatement dps LEFT JOIN dpucfrecppaytype dpt ON dps.DEPTITEMTYPE_CODE = dpt.RECPPAYTYPE_CODE
 																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
 																		ORDER BY dps.SEQ_NO DESC");
 			$fetchDataSTM->execute([
@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				$arraySTMGrp[] = $arraySTM;
 			}
 			$arrayData["STATEMENT"] = $arraySTMGrp;
-			$arrayData["MEMBER_NO"] = $payload["member_no"];
+			$arrayData["MEMBER_NO"] = $payload["ref_memno"];
 			$arrayData["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
