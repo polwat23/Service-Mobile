@@ -157,14 +157,14 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมุกดาหาร จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">30/1 ถนนชยางกูร ก. ตำบลมุกดาหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองมุกดาหาร จังหวัดมุกดาหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 042-611-454</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.muktc.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูบุรีรัมย์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">36/100 ถนนอินจันทร์ณรงค์ ตำบลในเมือง</p> 
+				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมือง จังหวัดบุรีรัมย์  31000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 044-611-581 และ 044-612-264 </p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.w2.br-tsc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
