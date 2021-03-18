@@ -21,22 +21,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 													mb.member_date,mps.position_desc,mg.membgroup_desc,mt.membtype_desc,
-													mb.ADDRESS_NO as ADDR_NO,
-													mb.ADDRESS_MOO as ADDR_MOO,
-													mb.ADDRESS_SOI as ADDR_SOI,
-													mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
-													mb.ADDRESS_ROAD as ADDR_ROAD,
+													mb.ADDR_NO as ADDR_NO,
+													mb.ADDR_MOO as ADDR_MOO,
+													mb.ADDR_SOI as ADDR_SOI,
+													mb.ADDR_VILLAGE as ADDR_VILLAGE,
+													mb.ADDR_ROAD as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MB.PROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.POSTCODE AS ADDR_POSTCODE
+													MB.ADDR_POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFPOSITION mps ON mb.POSITION_CODE = mps.POSITION_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.AMPHUR_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
@@ -60,6 +60,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}
+			$getSignature = $conoracle->prepare("SELECT 
+												STARTUP_DATE AS STARTUP_DATE,
+												REPLACE(PICTURE_PATH, 'X:\', '') as PICTURE_PATH
+												FROM MBMEMBPICDET WHERE MEMBER_NO = :member_no and picture_status = '1'");
+			$getSignature->execute([':member_no' => $member_no]);
+			$rowSig = $getSignature->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowSig["PICTURE_PATH"]) && $rowSig["PICTURE_PATH"] != ""){
+				$filename = strtolower($rowSig["PICTURE_PATH"]);
+				$pathname = __DIR__.'/../../resource/utility_icon/signature/'.$filename;
+				if(file_exists($pathname)){
+					$arraySig = array();
+					$arraySig["LAST_UPDATE"] = $lib->convertdate($rowSig["STARTUP_DATE"],'d M Y');
+					$arraySig["SIGNATURE_IMG"] = $config["URL_SERVICE"]."resource/utility_icon/signature/".$filename;
+				}else{
+					$arraySig = array();
+					$arraySig["LAST_UPDATE"] = $lib->convertdate($rowSig["STARTUP_DATE"],'d M Y');
+					$pathimg = "http://192.168.1.172/BRM/GCOOP/Saving/image/signature/".$filename;
+					file_put_contents($pathname,base64_decode(base64_encode(file_get_contents($pathimg))));
+					$arraySig["SIGNATURE_IMG"] = $config["URL_SERVICE"]."resource/utility_icon/signature/".$filename;
+				}
+				$arrayResult["SIGNATURE"][] = $arraySig;
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
