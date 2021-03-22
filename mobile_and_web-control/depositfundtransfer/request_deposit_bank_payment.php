@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['amt_transfer'] = $amt_transfer;
 		$arrVerifyToken['operate_date'] = $dateOperC;
 		$arrVerifyToken['coop_account_no'] = $coop_account_no;
-		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
+		$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
 		// Deposit Inside --------------------------------------

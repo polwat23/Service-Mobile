@@ -7,7 +7,7 @@
 	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/PTTCOOP-TEST/",
 	"URL_CORE_COOP" : "http://10.220.6.31/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
-	"WS_STRC_DB" : "Data Source=10.220.6.31/gcoop;Persist Security Info=True;User ID=iscotest;Password=iscotest;Unicode=True;coop_id=011001;coop_control=011001;",
+	"WS_STRC_DB" : "Data Source=10.220.6.31/gcoop;Persist Security Info=True;User ID=iscoyear;Password=iscoyear;Unicode=True;coop_id=011001;coop_control=011001;",
 	"FIREBASE_API_KEY" : "AIzaSyDJ-s4dBMl7tpQBQLWL7Sy4yOy77P_-RT4",
 	"FIREBASE_SERVER_KEY" : "AAAAItpAWjM:APA91bHGxzn8wttphMFI31__F2fR0XgFGR4o4vqd5ZiwuIMsB4a-Zg803I7b98mUj5nBvTG1etFXL-XxLJJ44Cekjr9294Aw6utu7uGhAtyHv7723qmdMCqKEz9RB59DaRERbWFDFAV1",
 	"SECRET_KEY_JWT" : "PTT!/-Gcoop+Connect^011001*!&",
@@ -26,5 +26,6 @@
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
 	"HW_APPID" : "102616199",
     "HW_APPSECRET": "39ae8b327af91a7cf416ea21a81dc76407cffffcdfb8c84642001dce176f315c",
-	"PORT_MAILSERVER" : "587"
+	"PORT_MAILSERVER" : "465",
+	"PROTOCOL_MAILSERVER": "ssl"
 }
