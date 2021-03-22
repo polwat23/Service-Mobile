@@ -73,19 +73,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
 			$arrPic = explode('.',$rowAllow["bank_logo_path"]);
 			$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
-			if($rowAllow["bank_code"] == '006'){
-				if($payload["member_no"] == '00862320' || $payload["member_no"] == '00862819' || $payload["member_no"] == '00862843' || $payload["member_no"] == '00862924' ||
-				$payload["member_no"] == '00863068' || $payload["member_no"] == '00863290' || $payload["member_no"] == '00862878' || $payload["member_no"] == '00862533' ||
-				$payload["member_no"] == '00862487' || $payload["member_no"] == '00863173' || $payload["member_no"] == '00863203' || $payload["member_no"] == '00863254' ||
-				$payload["member_no"] == '00863303' || $payload["member_no"] == '00863308' || $payload["member_no"] == '00862509' || $payload["member_no"] == '00863076' ||
-				$payload["member_no"] == '00862398' || $payload["member_no"] == '00862401' || $payload["member_no"] == '00862681' || $payload["member_no"] == '00862908' ||
-				$payload["member_no"] == '00863294' || $payload["member_no"] == '00862746' || $payload["member_no"] == '00862762' || $payload["member_no"] == '00862827' ||
-				$payload["member_no"] == '00862991' || $payload["member_no"] == '00863299'){
-					$arrayBankGrp[] = $arrayBank;
-				}
-			}else{
-				$arrayBankGrp[] = $arrayBank;
-			}
+			$arrayBankGrp[] = $arrayBank;
 		}
 		$arrayResult['BANK_LIST'] = $arrayBankGrp;
 		$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;

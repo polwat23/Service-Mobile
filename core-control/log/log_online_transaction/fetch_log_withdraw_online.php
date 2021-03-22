@@ -23,11 +23,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													trans.coop_slip_no,
 													trans.ref_no_source,
 													login.device_name,
-													login.channel
+													login.channel,
+													csb.bank_short_name,
+													csb.bank_short_ename
 												FROM
 													gctransaction trans
 												LEFT JOIN gcuserlogin login ON
 													login.id_userlogin = trans.id_userlogin
+												LEFT JOIN csbankdisplay csb ON
+													csb.bank_code = trans.bank_code
 												WHERE
 													trans.trans_flag = '-1'
 													AND transfer_mode ='9'
@@ -40,6 +44,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTransection["REF_NO"] = $rowLogTransection["ref_no"];
 			$arrLogTransection["MEMBER_NO"] = $rowLogTransection["member_no"];
 			$arrLogTransection["CHANNEL"] = $rowLogTransection["channel"];
+			$arrLogTransection["BANK_SHORT_NAME"] = $rowLogTransection["bank_short_name"];
+			$arrLogTransection["BANK_SHORT_ENAME"] = $rowLogTransection["bank_short_ename"];
 			$arrLogTransection["DEVICE_NAME"] = $rowLogTransection["device_name"];
 			$arrLogTransection["TRANSACTION_TYPE_CODE"] = $rowLogTransection["transaction_type_code"];
 			$arrLogTransection["FROM_ACCOUNT"] = $rowLogTransection["from_account"];

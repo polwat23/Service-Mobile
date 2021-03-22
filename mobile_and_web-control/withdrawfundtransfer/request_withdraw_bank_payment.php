@@ -291,7 +291,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			]);
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["TrxId"] = $ref_slipno;
-			$arrResponseAPI = $lib->posting_data($config["URL_SERVICE_EGAT"]."Account/ReverseWithDraw",$arrDataAPI,$arrHeaderAPI);
+			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/ReverseWithDraw",$arrDataAPI,$arrHeaderAPI);
 			$arrayResult['RESPONSE_CODE'] = "WS0037";
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],

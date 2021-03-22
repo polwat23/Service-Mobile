@@ -20,10 +20,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													trans.result_transaction,
 													trans.ref_no_1,trans.coop_slip_no,
 													trans.ref_no_source,
-													login.device_name,login.channel	
+													login.device_name,login.channel,
+													csb.bank_short_name,
+													csb.bank_short_ename
 												FROM gctransaction trans
 												INNER JOIN gcuserlogin login
 												ON login.id_userlogin = trans.id_userlogin
+												LEFT JOIN csbankdisplay csb
+												ON csb.bank_code = trans.bank_code
 												WHERE trans.trans_flag = '1'
 													  AND transfer_mode ='9'
 												ORDER BY trans.operate_date DESC");
@@ -34,6 +38,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogDepositOnline["REF_NO"] = $rowLogDepositOnline["ref_no"];
 			$arrLogDepositOnline["MEMBER_NO"] = $rowLogDepositOnline["member_no"];
 			$arrLogDepositOnline["CHANNEL"] = $rowLogDepositOnline["channel"];
+			$arrLogDepositOnline["BANK_SHORT_NAME"] = $rowLogDepositOnline["bank_short_name"];
+			$arrLogDepositOnline["BANK_SHORT_ENAME"] = $rowLogDepositOnline["bank_short_ename"];
 			$arrLogDepositOnline["DEVICE_NAME"] = $rowLogDepositOnline["device_name"];
 			$arrLogDepositOnline["TRANSACTION_TYPE_CODE"] = $rowLogDepositOnline["transaction_type_code"];
 			$arrLogDepositOnline["FROM_ACCOUNT"] = $rowLogDepositOnline["from_account"];

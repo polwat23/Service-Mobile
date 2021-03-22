@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
 													FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 													gat.id_accountconstant = gct.id_accountconstant
-													WHERE gct.allow_withdraw_outside = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+													WHERE gct.allow_deposit_outside = '1' and gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 			if($fetchAccAllowTrans->rowCount() > 0){
 				while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
@@ -84,6 +84,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
+				$arrayResult['IS_DEFAULT_BIND_ACCOUNT'] = FALSE;
+				$arrayResult['IS_DEFAULT_COOP_ACCOUNT'] = FALSE;
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
