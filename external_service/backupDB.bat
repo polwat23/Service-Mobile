@@ -3,7 +3,7 @@
 
 del D:\Mobile\service-ptt\external_service\backupDB_ptt.zip
 
-cd C:\Program Files\MariaDB 10.4\bin
+cd C:\Program Files\MariaDB 10.5\bin
 
 C:
 

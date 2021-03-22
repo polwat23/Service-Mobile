@@ -260,7 +260,7 @@ class library {
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
-		$mailFunction->SMTPSecure = 'tls';
+		$mailFunction->SMTPSecure = $json_data["PROTOCOL_MAILSERVER"] ?? 'tls';
 		$mailFunction->Port = $json_data["PORT_MAILSERVER"] ?? 587;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
