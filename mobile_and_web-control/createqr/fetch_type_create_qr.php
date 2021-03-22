@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGrpAcc[] = $arrAccTrans;
 				}
 			}else if($rowTypeQR["trans_code_qr"] == '02'){
-				$checkCanGen = $conmysql->prepare("SELECT loantype_code FROM loantype_code WHERE is_qrpayment = '1'");
+				$checkCanGen = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_qrpayment = '1'");
 				$checkCanGen->execute();
 				$arrLoantypeAllow = array();
 				while($rowCanGen = $checkCanGen->fetch(PDO::FETCH_ASSOC)){
