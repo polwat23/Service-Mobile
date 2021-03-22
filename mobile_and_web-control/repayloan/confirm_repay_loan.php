@@ -1,6 +1,21 @@
 <?php
 require_once('../autoload.php');
-
+require_once(__DIR__.'/../../include/cal_deposit_test.php');
+use CalculateDepTest\CalculateDepTest;
+$cal_dep = new CalculateDepTest();
+$dbuser = 'iscotest';
+$dbpass = 'iscotest';
+$dbname = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = gcoop)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
@@ -31,7 +46,9 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 					if($prinPay < 0){
 						$prinPay = 0;
 					}
-					$arrayResult["PAYMENT_INT"] = $interest;
+					if($interest > 0){
+						$arrayResult["PAYMENT_INT"] = $interest;
+					}
 					$arrayResult["PAYMENT_PRIN"] = $prinPay;
 				}else{
 					$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];

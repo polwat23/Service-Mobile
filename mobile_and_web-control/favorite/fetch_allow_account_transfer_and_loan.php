@@ -1,24 +1,8 @@
 <?php
 require_once('../autoload.php');
-require_once(__DIR__.'/../../include/cal_deposit_test.php');
-use CalculateDepTest\CalculateDepTest;
-$cal_dep = new CalculateDepTest();
-$dbuser = 'iscotest';
-$dbpass = 'iscotest';
-$dbname = "(DESCRIPTION =
-			(ADDRESS_LIST =
-			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
-			)
-			(CONNECT_DATA =
-			  (SERVICE_NAME = gcoop)
-			)
-		  )";
-$conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
-$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
-$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
@@ -47,8 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccAllow["DEPTACCOUNT_NO_FORMAT"],$formatDeptHidden);
 					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAllow["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"];
-					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
+					$arrAccAllow["BALANCE"] = number_format($cal_dep->getWithdrawable($rowDataAccAllow["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"]);
 					$arrGroupAccAllow[] = $arrAccAllow;
 				}
 			}
@@ -77,27 +60,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoanGrp[] = $arrLoan;
 			}
 			
-			$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'LPM'");
-			$getAccFav->execute([':member_no' => $payload["member_no"]]);
-			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
-				$arrFavMenu = array();
-				$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
-				$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
-				$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
-				$arrFavMenu["DESTINATION_FORMAT"] = $rowAccFav["destination"];
-				$arrFavMenu["DESTINATION_HIDDEN"] = $rowAccFav["destination"];
-				if(isset($rowAccFav["from_account"])) {
-					$arrFavMenu["FROM_ACCOUNT"] = $rowAccFav["from_account"];
-					$arrFavMenu["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowAccFav["from_account"],$func->getConstant('dep_format'));
-					$arrFavMenu["FROM_ACCOUNT_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["from_account"],$func->getConstant('hidden_dep'));
-				}
-				$arrGroupAccFav[] = $arrFavMenu;
-			}
-			
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['LOAN'] = $arrLoanGrp;
-				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
