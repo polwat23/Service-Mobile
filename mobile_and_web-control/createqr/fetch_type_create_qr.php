@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayGrpTrans = array();
 		$arrGrpAcc = array();
+		$arrGrpCont = array();
 		$getTypeTransQR = $conmysql->prepare("SELECT trans_code_qr,trans_desc_qr,operation_desc_th,operation_desc_en FROM gcconttypetransqrcode WHERE is_use = '1'");
 		$getTypeTransQR->execute();
 		while($rowTypeQR = $getTypeTransQR->fetch(PDO::FETCH_ASSOC)){
@@ -24,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrDepttypeAllow[] = $rowCanReceive["dept_type_code"];
 				}
 				$getAccountinTrans = $conoracle->prepare("SELECT DEPTACCOUNT_NO,DEPTACCOUNT_NAME,PRNCBAL FROM dpdeptmaster 
-															WHERE member_no = :member_no and deptclose_status <> 1 and depttype_code IN('".implode(',',$arrDepttypeAllow)."')");
+															WHERE member_no = :member_no and deptclose_status <> 1 and depttype_code IN('".implode("','",$arrDepttypeAllow)."')");
 				$getAccountinTrans->execute([':member_no' => $member_no]);
 				while($rowAccTrans = $getAccountinTrans->fetch(PDO::FETCH_ASSOC)){
 					$arrAccTrans = array();
@@ -36,7 +37,31 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGrpAcc[] = $arrAccTrans;
 				}
 			}else if($rowTypeQR["trans_code_qr"] == '02'){
-				
+				$checkCanGen = $conmysql->prepare("SELECT loantype_code FROM loantype_code WHERE is_qrpayment = '1'");
+				$checkCanGen->execute();
+				$arrLoantypeAllow = array();
+				while($rowCanGen = $checkCanGen->fetch(PDO::FETCH_ASSOC)){
+					$arrLoantypeAllow[] = $rowCanGen["loantype_code"];
+				}
+				$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
+											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,
+											ln.LAST_PERIODPAY as LAST_PERIOD,
+											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
+											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
+											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8 and ln.LOANTYPE_CODE IN('".implode("','",$arrLoantypeAllow)."')");
+				$getContract->execute([':member_no' => $member_no]);
+				while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
+					$arrContract = array();
+					$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
+					$arrContract["ACCOUNT_NO"] = $contract_no;
+					$arrAccTrans["ACCOUNT_NO_HIDE"] = $contract_no;
+					$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+					$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+					$arrContract['ACCOUNT_NAME'] = $rowContract["LOAN_TYPE"];
+					$arrContract['INT_BALANCE'] = 0;
+					$arrContract["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
+					$arrGrpAcc[] = $arrContract;
+				}
 			}
 		}
 		$arrayResult["TYPE_TRANS"] = $arrayGrpTrans;
