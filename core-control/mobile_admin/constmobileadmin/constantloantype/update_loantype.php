@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_QRPAYMENT FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;
@@ -18,9 +18,11 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 			if(array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE')) === False){
 				$arrayLoantype["IS_CREDITLOAN"] = "0";
 				$arrayLoantype["IS_LOANREQUEST"] = "0";
+				$arrayLoantype["IS_QRPAYMENT"] = "0";
 			}else{
 				$arrayLoantype["IS_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_CREDITLOAN"];
 				$arrayLoantype["IS_LOANREQUEST"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_LOANREQUEST"];
+				$arrayLoantype["IS_QRPAYMENT"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_QRPAYMENT"];
 			}
 			$arrayLoantype["LOANTYPE_CODE"] = $rowLoantype["LOANTYPE_CODE"];
 			$arrayLoantype["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_DESC"];
@@ -36,19 +38,20 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 			});
 			foreach($resultUDiff as $value_diff){
 				if(array_search($value_diff["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE')) === False){
-					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."')";
-					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"];
+					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_QRPAYMENT"]."')";
+					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_QRPAYMENT ='.$value_diff["IS_QRPAYMENT"];
 				}else{
-					$updateConst = $conmysql->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
+					$updateConst = $conmysql->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST,IS_QRPAYMENT = :IS_QRPAYMENT WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
 					$updateConst->execute([
 						':IS_CREDITLOAN' => $value_diff["IS_CREDITLOAN"],
 						':IS_LOANREQUEST' => $value_diff["IS_LOANREQUEST"],
+						':IS_QRPAYMENT' => $value_diff["IS_QRPAYMENT"],
 						':LOANTYPE_CODE' => $value_diff["LOANTYPE_CODE"]
 					]);
-					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_CREDITLOAN='.$value_diff["IS_LOANREQUEST"];
+					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_QRPAYMENT='.$value_diff["IS_QRPAYMENT"];
 				}
 			}
-			$insertConst = $conmysql->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST)
+			$insertConst = $conmysql->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_QRPAYMENT)
 															VALUES".implode(',',$insertBulkCont));
 			$insertConst->execute();
 			$arrayStruc = [
