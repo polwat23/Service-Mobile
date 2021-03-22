@@ -449,7 +449,7 @@ class library {
 
 		curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );                                                                  
 		curl_setopt( $ch,CURLOPT_POST, true );  
-		curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
+		curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
@@ -501,7 +501,7 @@ class library {
 			curl_setopt($ch, CURLOPT_URL, "https://oauth-login.cloud.huawei.com/oauth2/v2/token");
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-			curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
+			curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
 			curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -747,7 +747,7 @@ class library {
 
 		curl_setopt( $ch,CURLOPT_URL, "https://notify-api.line.me/api/notify" );                                                                  
 		curl_setopt( $ch,CURLOPT_POST, true );
-		curl_setopt( $ch,CURLOPT_PROXY, 'http://proxy.egat.co.th');
+		curl_setopt( $ch,CURLOPT_PROXY, '10.20.220.63');
 		curl_setopt( $ch,CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );

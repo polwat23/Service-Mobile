@@ -88,13 +88,13 @@ class CalculateDep {
 		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
 		if($rowUserAllow["is_use"] == "1"){
-			if(isset($bank_code)){
+			/*if(isset($bank_code)){
 				if($amt_transfer > $rowUserAllow["limit_transaction_amt"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0093";
 					$arrayResult['RESULT'] = FALSE;
 					return $arrayResult;
 				}
-			}
+			}*/
 			if(isset($bank_code)){
 				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
 														FROM gcbankconstantmapping gbm 

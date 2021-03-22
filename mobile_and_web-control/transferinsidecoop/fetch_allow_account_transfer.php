@@ -8,13 +8,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
+		$arrGrpAcc = array();
+		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no,gct.allow_deposit_inside,gct.allow_withdraw_inside
 												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
 												WHERE gat.member_no = :member_no and gat.is_use = '1' and (gct.allow_deposit_inside = '1' OR gct.allow_withdraw_inside = '1')");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
+				$arrayDeptGrp = array();
 				$arrayDept[] = $rowAccAllow["deptaccount_no"];
+				$arrayDeptGrp["allow_deposit_inside"] = $rowAccAllow["allow_deposit_inside"];
+				$arrayDeptGrp["allow_withdraw_inside"] = $rowAccAllow["allow_withdraw_inside"];
+				$arrGrpAcc[$rowAccAllow["deptaccount_no"]] = $arrayDeptGrp;
 			}
 			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 			$arrDataAPI["MemberID"] = substr($member_no,-6);
@@ -50,8 +55,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAccAllow["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
 						$arrAccAllow["BALANCE_FORMAT"] = $accData->availableBalance;
 						$arrAccAllow["BALANCE_DEST"] = preg_replace('/,/', '', $accData->accountBalance);
-						$arrAccAllow["CAN_DEPOSIT"] = $accData->creditFlag == '1' ? '0' : '1';
-						$arrAccAllow["CAN_WITHDRAW"] = $accData->debitFlag == '1' ? '0' : '1';
+						$arrAccAllow["CAN_DEPOSIT"] = $arrGrpAcc[$accData->coopAccountNo]["allow_deposit_inside"];
+						$arrAccAllow["CAN_WITHDRAW"] = $arrGrpAcc[$accData->coopAccountNo]["allow_withdraw_inside"];
 						$arrGroupAccAllow[] = $arrAccAllow;
 					}
 				}

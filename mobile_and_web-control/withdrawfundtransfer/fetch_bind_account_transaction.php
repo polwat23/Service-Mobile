@@ -84,6 +84,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
+				$arrayResult['IS_DEFAULT_BIND_ACCOUNT'] = FALSE;
+				$arrayResult['IS_DEFAULT_COOP_ACCOUNT'] = FALSE;
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
