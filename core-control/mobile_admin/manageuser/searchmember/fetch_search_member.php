@@ -25,21 +25,21 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.addr_email as email,mb.ADDR_PHONE as MEM_TELMOBILE,
+		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.email as email,mb.MEM_TELMOBILE as MEM_TELMOBILE,
 											mb.member_date,mb.member_no,
-											mb.ADDR_NO as ADDR_NO,
-											mb.ADDR_MOO as ADDR_MOO,
-											mb.ADDR_SOI as ADDR_SOI,
-											mb.ADDR_VILLAGE as ADDR_VILLAGE,
-											mb.ADDR_ROAD as ADDR_ROAD,
+											mb.ADDRESS_NO as ADDR_NO,
+											mb.ADDRESS_MOO as ADDR_MOO,
+											mb.ADDRESS_SOI as ADDR_SOI,
+											mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
+											mb.ADDRESS_ROAD as ADDR_ROAD,
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.ADDR_POSTCODE AS ADDR_POSTCODE
+											MB.POSTCODE AS ADDR_POSTCODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
+											LEFT JOIN mbucfdistrict MBD ON mb.district_code = MBD.district_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
 			$arrayGroup["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
 			$arrayGroup["NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
-			$arrayGroup["TEL"] = $rowMember["MEM_TELMOBILE"];
+			$arrayGroup["TEL"] = $lib->formatphone($rowMember["MEM_TELMOBILE"],'-');
 			$arrayGroup["EMAIL"] = $rowMember["EMAIL"];
 			$arrayGroup["MEMBER_NO"] = $rowMember["MEMBER_NO"];
 			$arrayGroup["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],'D m Y');

@@ -13,7 +13,9 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$getCardPerson = $conoracle->prepare("SELECT MB.CARD_PERSON
+											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code 
+											WHERE mb.member_no = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
@@ -39,8 +41,12 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
 				$arraySTMGrp[] = $arraySTM;
 			}
+			$fetchAccountName = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM DPDEPTMASTER WHERE deptaccount_no = :deptaccount_no");
+			$fetchAccountName->execute([':deptaccount_no' => $account_no]);
+			$rowAccName = $fetchAccountName->fetch(PDO::FETCH_ASSOC);
 			$arrayData["STATEMENT"] = $arraySTMGrp;
 			$arrayData["MEMBER_NO"] = $payload["member_no"];
+			$arrayData["ACCOUNT_NAME"] = $rowAccName["DEPTACCOUNT_NAME"];
 			$arrayData["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
@@ -103,22 +109,27 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	//style table
 	  $html = '<style>
 
-		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
+		   @font-face {
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
-		  * {
-			font-family: THSarabun;
-		  }
+			* {
+			  font-family: TH Niramit AS;
+			}
+
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -186,7 +197,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
 					สหกรณ์ออมทรัพย์ครูบุรีรัมย์ จำกัด
 			   </div>
@@ -196,8 +207,8 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			   </div>
 				<div class="frame-info-user">
 					<div style="display:flex;width: 100%;padding-top: -20px;">
-					<div class="label">เลขสมาชิก</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
+					<div class="label">ชื่อบัญชี</div>
+					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["ACCOUNT_NAME"].'</div>
 					</div>
 					<div style="display:flex;width: 100%;padding-top: -20px;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
@@ -296,7 +307,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;
