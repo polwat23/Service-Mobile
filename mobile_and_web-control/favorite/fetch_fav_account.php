@@ -29,7 +29,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrGrpFav['ALLOW_ADDFAV'] = FALSE;
 		$arrayResult['FAV_ACCOUNT'] = $arrGrpFav;
-		$arrayResult['ALLOW_ADDFAV'] = FALSE;
+		$arrayResult['ALLOW_ADD_TRANFER'] = TRUE;
+		$arrayResult['ALLOW_ADD_PAYLOAN'] = FALSE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
