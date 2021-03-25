@@ -103,22 +103,26 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	//style table
-	  $html = '<style>
+	$html = '<style>
 
 		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
-			}
-			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
-				font-weight: bold;
-			}
-		  * {
-			font-family: THSarabun;
-		  }
+		  font-family: TH Niramit AS;
+		  src: url(../../resource/fonts/TH Niramit AS.ttf);
+		}
+		@font-face {
+			font-family: TH Niramit AS;
+			src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+			font-weight: bold;
+		}
+		* {
+		  font-family: TH Niramit AS;
+		}
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -296,7 +300,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;
