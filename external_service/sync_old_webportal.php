@@ -12,8 +12,8 @@ $arrGrp = array();
 
 $dbhost = "127.0.0.1";
 $dbuser = "root";
-$dbpass = "@KTSCC2020";
-$dbname = "mobile_ktscc";
+$dbpass = "@SPT2021";
+$dbname = "mobile_spt";
 try{
 	$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
 	$conmysql->exec("set names utf8mb4");
@@ -21,10 +21,10 @@ try{
 	echo json_encode($e);
 }
 
-$dbhost2 = "192.168.10.253";
+$dbhost2 = "127.0.0.1";
 $dbuser2 = "root";
-$dbpass2 = "WebServer";
-$dbname2 = "mobile_ktscc";
+$dbpass2 = "@SPT2021";
+$dbname2 = "old_mobile_spt";
 try{
 	$conmysql2 = new PDO("mysql:dbname={$dbname2};host={$dbhost2}", $dbuser2, $dbpass2);
 	$conmysql2->exec("set names utf8mb4");
@@ -51,14 +51,14 @@ try{
 			$pathInsert = '/resource/avatar/'.$rowMe["member_no"].'/'.$rowMe["member_no"].'.jpg';
 			$insertTOSRN[] = "('".$rowMe["member_no"]."','".$pass."','".$pin."','".
 			$rowMe["ADDR_PHONE"]."','".$rowMe["ADDR_EMAIL"]."','-9','".$pass."','".
-			$pathInsert."','1')";
+			$pathInsert."','1','".$rowMe["register_date"]."')";
 		}else{
 			$insertTOSRN[] = "('".$rowMe["member_no"]."','".$pass."','".$pin."','".
-			$rowMe["ADDR_PHONE"]."','".$rowMe["ADDR_EMAIL"]."','-9','".$pass."',null,'1')";
+			$rowMe["ADDR_PHONE"]."','".$rowMe["ADDR_EMAIL"]."','-9','".$pass."',null,'1','".$rowMe["register_date"]."')";
 
 		}
 		if(sizeof($insertTOSRN) == 1000){
-			$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,temppass_is_md5)
+			$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,temppass_is_md5,register_date)
 											VALUES".implode(',',$insertTOSRN));
 			if($insert->execute()){
 				echo 'done insert 1000';
@@ -73,7 +73,7 @@ try{
 	}
 		
 	if(sizeof($insertTOSRN) > 0){
-		$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,temppass_is_md5)
+		$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,temppass_is_md5,register_date)
 												VALUES".implode(',',$insertTOSRN));
 		$insert->execute();
 	}
