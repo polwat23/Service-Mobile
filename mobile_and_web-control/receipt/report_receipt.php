@@ -192,16 +192,16 @@ function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
 			@font-face {
-				font-family: THSarabun;
-				src: url(../../resource/fonts/THSarabun.ttf);
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
 			* {
-			  font-family: THSarabun;
+			  font-family: TH Niramit AS;
 			}
 			body {
 			  padding: 0 30px;
@@ -328,17 +328,21 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			<div style="width:200px;margin-left: 770px;display:flex;">
-			<img src="../../resource/utility_icon/signature/finance.png" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/finance.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่การเงิน</div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
