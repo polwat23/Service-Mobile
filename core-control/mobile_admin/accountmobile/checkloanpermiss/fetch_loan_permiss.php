@@ -4,6 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','checkloanpermiss')){
 		$arrayGroup = array();
+		$arrGroupConfirm = array();
 		$CoopName = null;
 		$ref_memno = null;
 		if($func->check_permission_core($payload,'mobileadmin','checkloanpermiss')){
@@ -21,12 +22,36 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 
 			$arrayContractCheckGrp = array();
-			$fetchContractTypeCheck = $conmysql->prepare("SELECT CONTRACT_NO, MEMBER_NO, IS_CLOSESTATUS FROM gcconstantcontractno WHERE member_no = :member_no");
+			$fetchContractTypeCheck = $conmysql->prepare("SELECT CONTRACT_NO, MEMBER_NO, IS_CLOSESTATUS ,IS_CONFIRMBALANCE FROM gcconstantcontractno WHERE member_no = :member_no");
 			$fetchContractTypeCheck->execute([':member_no' => $ref_memno]);
 			while($rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC)){
 				$arrayContractCheck = $rowContractnoCheck;
 				$arrayContractCheckGrp[] = $arrayContractCheck;
 			}
+			
+			$fetchConfirm = $conoracle->prepare("SELECT cm.balance_value,cm.bizzaccount_no,lcy.loantype_desc,lc.loancontract_no
+												FROM cmconfirmbalance cm LEFT JOIN lccontmaster lc on cm.bizzaccount_no = lc.loancontract_no
+												LEFT JOIN lccfloantype lcy on  lc.loantype_code = lcy.loantype_code 
+												WHERE cm.bizz_system ='LON' 
+												AND cm.member_no = :member_no
+												AND cm.confirmbal_date	= to_date(:balance_date,'YYYY-MM-DD')  ");
+			$fetchConfirm->execute([':member_no' => $ref_memno , 
+									':balance_date' => $dataComing["start_date"] 
+								   ]);
+			while($rowContractBalance = $fetchConfirm->fetch(PDO::FETCH_ASSOC)){
+				$contract_no = preg_replace('/\//','',$rowContractBalance["LOANCONTRACT_NO"]);
+				if(array_search($contract_no,array_column($arrayContractCheckGrp,'CONTRACT_NO')) === False){
+					$arrGroupConfirm[$contract_no]["IS_CONFIRMBALANCE"] = "0";
+				}else{					
+					$arrGroupConfirm[$contract_no]["IS_CONFIRMBALANCE"] = $arrayContractCheckGrp[array_search($contract_no,array_column($arrayContractCheckGrp,'CONTRACT_NO'))]["IS_CONFIRMBALANCE"];				
+				}
+				$arrGroupConfirm[$contract_no]["CONTRACT_NO"] = $contract_no;
+				$arrGroupConfirm[$contract_no]["LOAN_TYPE"] = $rowContractBalance["LOANTYPE_DESC"];
+				$arrGroupConfirm[$contract_no]["BALANCE_STATUS"] = "1";
+				$arrGroupConfirm[$contract_no]["BALANCE_VALUE"] = number_format($rowContractBalance["BALANCE_VALUE"],2);
+			}
+			
+			
 			$fetchLoantype = $conoracle->prepare("SELECT mp.prename_desc||''||mb.memb_name||' '|| mb.memb_ename as COOP_NAME , lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 												ln.loanapprove_amt as APPROVE_AMT,
 												(SELECT max(operate_date) FROM lccontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
@@ -36,26 +61,22 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 			$fetchLoantype->execute([':member_no' => $ref_memno]);
 			while($rowContract = $fetchLoantype->fetch(PDO::FETCH_ASSOC)){
-				$arrayContractno = array();
 				$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 				if(array_search($contract_no,array_column($arrayContractCheckGrp,'CONTRACT_NO')) === False){
-					$arrayContractno["IS_CLOSESTATUS"] = "0";
+					$arrGroupConfirm[$contract_no]["IS_CLOSESTATUS"] = "0";
 				}else{					
-					$arrayContractno["IS_CLOSESTATUS"] = $arrayContractCheckGrp[array_search($contract_no,array_column($arrayContractCheckGrp,'CONTRACT_NO'))]["IS_CLOSESTATUS"];				
+					$arrGroupConfirm[$contract_no]["IS_CLOSESTATUS"] = $arrayContractCheckGrp[array_search($contract_no,array_column($arrayContractCheckGrp,'CONTRACT_NO'))]["IS_CLOSESTATUS"];				
 				}
-				$arrGroupContract = array();
 				$CoopName = $rowContract["COOP_NAME"];
-				$arrayContractno["CONTRACT_NO"] = $contract_no;
-				$arrayContractno["LOAN_TYPE"] = $rowContract["LOAN_TYPE"];
-				$arrayContractno["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
-				$arrayContractno["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
-				$arrayContractno['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
-				$arrayGroup[] = $arrayContractno;
+				$arrGroupConfirm[$contract_no]["CONTRACT_NO"] = $contract_no;
+				$arrGroupConfirm[$contract_no]["LOAN_TYPE"] = $rowContract["LOAN_TYPE"];
+				$arrGroupConfirm[$contract_no]["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+				$arrGroupConfirm[$contract_no]["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			}
 		}
 		$arrayResult["COOP_NAME"] = $CoopName;
 		$arrayResult["MEMBER"] = $ref_memno;
-		$arrayResult["LOAN_CREDIT"] = $arrayGroup;
+		$arrayResult["CONFIRM_BALANCE"] = $arrGroupConfirm;
 		$arrayResult["IS_ESTIMATE"] = TRUE; //เปิด checkbox ประมาณการสิทธิ์กู้
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');

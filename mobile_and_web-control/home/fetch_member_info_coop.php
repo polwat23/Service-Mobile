@@ -53,6 +53,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												mb.ADDR_EMAIL as ADDR_REG_EMAIL,
 												mb.ADDR_MOBILEPHONE as ADDR_REG_MOBILEPHONE,
 												mb.ADDR_PHONE as ADDR_PHONE,
+												mb.ADDR_FAX as ADDR_FAX,
 												MB.PROVINCE_CODE AS PROVINCE_CODE,
 												MB.ADDR_POSTCODE AS ADDR_POSTCODE,
 												MBT.TAMBOL_DESC AS TAMBOL_REG_DESC,
@@ -103,6 +104,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayData["TH_NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"];
 		$arrayData["EN_NAME"] = $rowMember["MEMB_ENAME"];
 		$arrayData["ADDR_PHONE"] = $rowMember["ADDR_PHONE"];  //โทรศัพท์
+		$arrayData["ADDR_FAX"] = $rowMember["ADDR_FAX"];  //โทรศัพท์
 		$arrayData["ADDR_EMAIL"] = $rowMember["ADDR_REG_EMAIL"];  // E-Mail 
 		$arrayData["COOPREGIS_DATE"] = $lib->convertdate($rowMember["COOPREGIS_DATE"],"D m Y");
 		$arrayData["COOPREGIS_NO"] = $rowMember["COOPREGIS_NO"];  //ทะเบียนเลขที่

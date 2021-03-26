@@ -84,9 +84,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':old_website' => $rowMember_info["WEBSITE"],
 			':new_website' => $dataComing["website"],
 			':old_coopregis_date' => $rowMember_info["COOPREGIS_DATE"],
-			':new_coopregis_date' => $dataComing["coopregis_date"],
+			':new_coopregis_date' => $dataComing["coopregis_date"] == "" ? null : $dataComing["coopregis_date"],
 			':old_accyearclose_date' => $arrMember["accyearclose_date"],
-			':new_accyearclose_date' => $dataComing["accyearclose_date"],
+			':new_accyearclose_date' => $dataComing["accyearclose_date"] == "" ? null : $dataComing["accyearclose_date"],
 			':old_coopregis_no' => $rowMember_info["COOPREGIS_NO"],
 			':new_coopregis_no' => $dataComing["coopregis_no"],
 			':old_memb_regno' => $rowMember_info["MEMB_REGNO"],
@@ -105,6 +105,31 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1039";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
+			$arrayResult['sdsd'] = [
+					':member_no' => $member_no,
+					':old_address' => json_encode($arrOldAddress),
+					':address' => json_encode($dataComing["address"]),
+					':old_email' => $rowMember_info["ADDR_EMAIL"],
+					':new_email' => $dataComing["addr_reg_email"],
+					':old_tel' => $arrMember["addr_phone"],
+					':new_tel' => $dataComing["addr_phone"],
+					':old_fax' => $arrMember["addr_fax"],
+					':new_fax' => $dataComing["addr_fax"],
+					':old_website' => $rowMember_info["WEBSITE"],
+					':new_website' => $dataComing["website"],
+					':old_coopregis_date' => $rowMember_info["COOPREGIS_DATE"],
+					':new_coopregis_date' => $dataComing["coopregis_date"] == "" ? null : $dataComing["coopregis_date"],
+					':old_accyearclose_date' => $arrMember["accyearclose_date"],
+					':new_accyearclose_date' => $dataComing["accyearclose_date"] == "" ? null : $dataComing["accyearclose_date"],
+					':old_coopregis_no' => $rowMember_info["COOPREGIS_NO"],
+					':new_coopregis_no' => $dataComing["coopregis_no"],
+					':old_memb_regno' => $rowMember_info["MEMB_REGNO"],
+					':new_memb_regno' => $dataComing["memb_regno"],
+					':old_tax_id' => $rowMember_info["TAX_ID"],
+					':new_tax_id' => $dataComing["tax_id"],
+					':inputgroup_type' => $inputgroup_type,
+					':username'=> $payload["username"]
+			];
 			require_once('../../include/exit_footer.php');
 			
 		}
