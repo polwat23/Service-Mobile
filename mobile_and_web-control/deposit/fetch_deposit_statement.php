@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
+												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and TRUNC(dsm.OPERATE_DATE) 
 												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		}else{
@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
 												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
 												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
-												WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
+												WHERE dsm.deptaccount_no = :account_no and TRUNC(dsm.OPERATE_DATE) 
 												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
 												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		}

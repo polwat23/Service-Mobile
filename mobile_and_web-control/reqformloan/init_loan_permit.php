@@ -18,11 +18,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 			}
-			$period_payment = ($dataComing["request_amt"] / $dataComing["period"]) + (($dataComing["request_amt"] * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
+			$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);// + (($dataComing["request_amt"] * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
+			$period_payment = (int)$period_payment - ($period_payment % 100) + 100;
 			if($dataComing["recv_acc"] == '0'){
 				$arrGrpBank = array();
 				$getBank = $conoracle->prepare("SELECT TRIM(BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
-											WHERE bank_code IN('006','004') and USE_FLAG = '1' ORDER BY SETSORT ASC");
+											WHERE bank_code IN('006') and USE_FLAG = '1' ORDER BY SETSORT ASC");
 				$getBank->execute();
 				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
 					$arrBank = array();
@@ -32,15 +33,17 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult['COOP_ACCOUNT'] = [];
 				$arrayResult["REQ_BOOKBANK"] = TRUE;
+				$arrayResult["REQ_BOOKCOOP"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
 				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
 				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
 				$arrayResult['BANK'] = $arrGrpBank;
 			}else if($dataComing["recv_acc"] == '1'){
 				$arrGrpCoopAcc = array();
 				$formatDept = $func->getConstant('dep_format');
 				$getAccount = $conoracle->prepare("SELECT deptaccount_no FROM dpdeptmaster
-													WHERE member_no = :member_no and deptclose_status <> 1 ORDER BY deptaccount_no ASC");
+													WHERE member_no = :member_no and deptclose_status <> 1 AND depttype_code IN('00','88') ORDER BY deptaccount_no ASC");
 				$getAccount->execute([':member_no' => $member_no]);
 				while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 					$arrCoopAcc = array();
@@ -50,8 +53,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
 				$arrayResult["REQ_BOOKBANK"] = FALSE;
+				$arrayResult["REQ_BOOKCOOP"] = TRUE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
 				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
+				$arrayResult["IS_UPLOAD_BOOKCOOP"] = TRUE;
 				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
 				$arrayResult['BANK'] = [];
 			}
@@ -97,7 +102,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrGrpObj[] = $arrObj;
 				}
 				$getBank = $conoracle->prepare("SELECT TRIM(BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
-											WHERE bank_code IN('006','004') and USE_FLAG = '1' ORDER BY SETSORT ASC");
+											WHERE bank_code IN('006') and USE_FLAG = '1' ORDER BY SETSORT ASC");
 				$getBank->execute();
 				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
 					$arrBank = array();
@@ -129,7 +134,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}else{
 					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 				}
-				$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]) + (($maxloan_amt * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
+				$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]);// + (($maxloan_amt * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
+				$period_payment = (int)$period_payment - ($period_payment % 100) + 100;
 				$arrRecvBank["VALUE"] = "0";
 				$arrRecvBank["DESC"] = "โอนเข้าบัญชีธนาคาร";
 				$arrGrpReceive[] = $arrRecvBank;
@@ -142,15 +148,18 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 				$arrayResult["RECV_ACC"] = $arrGrpReceive;
 				$arrayResult["REQ_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
 				$arrayResult["REQ_BOOKBANK"] = TRUE;
+				$arrayResult["REQ_BOOKCOOP"] = FALSE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
 				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
 				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
 				$arrayResult['OBJECTIVE'] = $arrGrpObj;
 				$arrayResult['BANK'] = $arrGrpBank;

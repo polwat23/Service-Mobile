@@ -1,12 +1,12 @@
 <?php
 
-namespace CalculateDeposit;
+namespace CalculateDepTest;
 
 use Connection\connection;
 use Utility\Library;
 
 
-class CalculateDep {
+class CalculateDepTest {
 	private $con;
 	private $conora;
 	private $lib;
@@ -15,7 +15,20 @@ class CalculateDep {
 		$connection = new connection();
 		$this->lib = new library();
 		$this->con = $connection->connecttomysql();
-		$this->conora = $connection->connecttooracle();
+		//$this->conora = $connection->connecttooracle();
+		$dbuser = 'iscocrp_test237';
+		$dbpass = 'iscocrp_test237';
+		$dbname = "(DESCRIPTION =
+					(ADDRESS_LIST =
+					  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.237)(PORT = 1521))
+					)
+					(CONNECT_DATA =
+					  (SERVICE_NAME = iorcl)
+					)
+				  )";
+		$this->conora = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
