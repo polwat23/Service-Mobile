@@ -126,6 +126,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchFormatAccBank->execute();
 		$rowFormatAcc = $fetchFormatAccBank->fetch();
 		$summary = 0;
+		$summaryDeposit = 0;
+		$summaryWithdraw = 0;
 		$formatDept = $func->getConstant('dep_format');
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrayRecon = array();
@@ -153,11 +155,20 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["amount_receive"],2);
 			
 			$summary += $rowRecon["amount_receive"];
+			if($rowRecon["trans_flag"] == "1"){
+				$summaryDeposit += $rowRecon["amount_receive"];
+			}else{
+				$summaryWithdraw += $rowRecon["amount_receive"];
+			}
 			$arrayGrpAll[] = $arrayRecon;
 		}
 		
 		$arrayResult['SUMMARY'] = $summary;
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
+		$arrayResult['SUMMARYDEPOSIT'] = $summaryDeposit;
+		$arrayResult['SUMMARYDEPOSIT_FORMAT'] = number_format($summaryDeposit,2);
+		$arrayResult['SUMMARYWIHTDRAW'] = $summaryWithdraw;
+		$arrayResult['SUMMARYWIHTDRAW_FORMAT'] = number_format($summaryWithdraw,2);
 		$arrayResult['RECONCILE'] = $arrayGrpAll;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');

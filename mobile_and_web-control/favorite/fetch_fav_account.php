@@ -3,7 +3,8 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
-		$getListFavAcc = $conmysql->prepare("SELECT name_fav,destination,flag_trans,fav_refno,show_menu FROM gcfavoritelist WHERE member_no = :member_no and is_use = '1'");
+		$getListFavAcc = $conmysql->prepare("SELECT from_account,name_fav,destination,flag_trans,fav_refno,show_menu,menu_component 
+											FROM gcfavoritelist WHERE member_no = :member_no and is_use = '1'");
 		$getListFavAcc->execute([':member_no' => $payload["member_no"]]);
 		$arrGrpFav = array();
 		$formatDept = $func->getConstant('dep_format');
@@ -13,16 +14,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrListFav["NAME_FAV"] = $rowListFav["name_fav"];
 			if($rowListFav["flag_trans"] == 'TRN'){
 				$arrListFav["DESTINATION"] = $lib->formataccount($rowListFav["destination"],$formatDept);
-				$arrListFav["DESTINATION_HIDDEN"] = $lib->formataccount($arrListFav["DESTINATION"],$formatDeptHidden);
 			}else{
 				$arrListFav["DESTINATION"] = $rowListFav["destination"];
 			}
+			if(isset($rowListFav["from_account"])) {
+				$arrListFav["FROM_ACCOUNT"] = $lib->formataccount($rowListFav["from_account"],$formatDept);
+				$arrListFav["FROM_ACCOUNT_HIDE"] = $lib->formataccount_hidden($rowListFav["from_account"],$formatDeptHidden);
+			}
+			$arrListFav["MENU_COMPONENT"] = $rowListFav["menu_component"];
 			$arrListFav["FLAG_TRANS"] = $rowListFav["flag_trans"];
 			$arrListFav["SHOW_MENU"] = $rowListFav["show_menu"];
 			$arrListFav["FAV_REFNO"] = $rowListFav["fav_refno"];
 			$arrGrpFav[$rowListFav["flag_trans"]][] = $arrListFav;
 		}
 		$arrayResult['FAV_ACCOUNT'] = $arrGrpFav;
+		$arrayResult['ALLOW_ADD_TRANFER'] = TRUE;
+		$arrayResult['ALLOW_ADD_PAYLOAN'] = TRUE;
+		$arrayResult['IS_SAVE_SOURCE'] = FALSE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

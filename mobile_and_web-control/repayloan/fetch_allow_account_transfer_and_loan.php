@@ -1,5 +1,21 @@
 <?php
 require_once('../autoload.php');
+require_once(__DIR__.'/../../include/cal_deposit_test.php');
+use CalculateDepTest\CalculateDepTest;
+$cal_dep = new CalculateDepTest();
+$dbuser = 'iscotest';
+$dbpass = 'iscotest';
+$dbname = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = gcoop)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
@@ -37,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE,
-													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnm.INTEREST_RETURN
+													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnm.INTEREST_RETURN,lnm.RKEEP_PRINCIPAL
 													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
 													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
@@ -55,14 +71,35 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
-				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
+				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"],2);
+				$arrLoan["SUM_BALANCE"] = number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest,2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;
 			}
+			
+			$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'LPM' and is_use = '1'");
+			$getAccFav->execute([':member_no' => $payload["member_no"]]);
+			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
+				$arrFavMenu = array();
+				$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
+				$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
+				$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
+				$arrFavMenu["DESTINATION_FORMAT"] = $rowAccFav["destination"];
+				$arrFavMenu["DESTINATION_HIDDEN"] = $rowAccFav["destination"];
+				if(isset($rowAccFav["from_account"])) {
+					$arrFavMenu["FROM_ACCOUNT"] = $rowAccFav["from_account"];
+					$arrFavMenu["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowAccFav["from_account"],$func->getConstant('dep_format'));
+					$arrFavMenu["FROM_ACCOUNT_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["from_account"],$func->getConstant('hidden_dep'));
+				}
+				$arrGroupAccFav[] = $arrFavMenu;
+			}
+			
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['LOAN'] = $arrLoanGrp;
+				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
+				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
