@@ -439,7 +439,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 										':int_return' => $int_returnSrc,
 										':moneytype_code' => 'TRN',
 										':ref_slipno' => $lnslip_no,
-										':bfint_return' => $constLoanContract["INTEREST_RETURN"],
+										':bfint_return' => $dataCont["INTEREST_RETURN"],
 										':int_period' => $interestPeriod
 									];
 									if($interestPeriod > 0){
@@ -477,13 +477,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 											':int_pay' => $interest,
 											':laststmno' => $dataCont["LAST_STM_NO"] + 1,
 										];
-										$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
-																					PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
-																					LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
-																					INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																					INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																					INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno
-																					WHERE loancontract_no = :loancontract_no");
+										if($dataCont["RKEEP_PRINCIPAL"] == 0 && $dataCont["PRINCIPAL_BALANCE"] - $prinPay == 0){
+											$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
+																						PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
+																						LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
+																						INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
+																						INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
+																						INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
+																						CONTRACT_STATUS = '0'
+																						WHERE loancontract_no = :loancontract_no");
+										}else{
+											$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
+																						PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
+																						LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
+																						INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
+																						INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
+																						INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno
+																						WHERE loancontract_no = :loancontract_no");
+										}
 										if($updateLnContmaster->execute($executeLnMaster)){
 											$conoracle->commit();
 											$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
@@ -510,6 +521,30 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 												':member_no' => $payload["member_no"],
 												':slip_no' => $slipWithdraw,
 												':id_userlogin' => $payload["id_userlogin"]
+											]);
+											$insertTransLog = $conmysql->prepare("INSERT INTO gcrepayloan(ref_no,from_account,loancontract_no,source_type,amount,penalty_amt,principal
+																					,interest,interest_return,interest_arrear,bfinterest_return,bfinterest_arrear,member_no,id_userlogin,
+																					app_version,is_offset,bfkeeping)
+																					VALUES(:ref_no,:from_account,:loancontract_no,'1',:amount,:penalty_amt,:principal,:interest,
+																					:interest_return,:interest_arrear,:bfinterest_return,:bfinterest_arrear,:member_no,:id_userlogin,
+																					:app_version,:is_offset,:bfkeeping)");
+											$insertTransLog->execute([
+												':ref_no' => $ref_no,
+												':from_account' => $from_account_no,
+												':loancontract_no' => $dataComing["contract_no"],
+												':amount' => $dataComing["amt_transfer"],
+												':penalty_amt' => $dataComing["penalty_amt"],
+												':principal' => $prinPay,
+												':interest' => $interest,
+												':interest_return' => $int_returnSrc,
+												':interest_arrear' => $intArr,
+												':bfinterest_return' => $dataCont["INTEREST_RETURN"],
+												':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
+												':member_no' => $payload["member_no"],
+												':id_userlogin' => $payload["id_userlogin"],
+												':app_version' => $dataComimg["app_version"],
+												':is_offset' => ($dataCont["RKEEP_PRINCIPAL"] == 0 && $dataCont["PRINCIPAL_BALANCE"] - $prinPay == 0) ? '2' : '1',
+												':bfkeeping' => $dataCont["RKEEP_PRINCIPAL"]
 											]);
 											$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 											$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);

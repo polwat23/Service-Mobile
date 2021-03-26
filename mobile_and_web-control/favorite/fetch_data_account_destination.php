@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptaccount_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		if($dataComing["source_deptaccount_no"] == $dataComing["deptaccount_no"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0045";

@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
 					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 				}
-				$fetchLoanRepay = $conoracle->prepare("SELECT principal_balance,INTEREST_RETURN
+				$fetchLoanRepay = $conoracle->prepare("SELECT principal_balance,INTEREST_RETURN,RKEEP_PRINCIPAL
 														FROM lncontmaster
 														WHERE loancontract_no = :loancontract_no");
 				$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 				}else{
 					$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 				}
-				if($dataComing["amt_transfer"] > $rowLoan["PRINCIPAL_BALANCE"] + $interest){
+				if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
 					$arrayResult['RESPONSE_CODE'] = "WS0098";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;

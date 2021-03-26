@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
-				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");
+				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN' and is_use = '1'");
 				$getAccFav->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
 					$arrFavMenu = array();
@@ -102,7 +102,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccFav[] = $arrFavMenu;
 				}
 			}else {
-				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE menu_component = 'TransferSelfDepInsideCoop' and member_no = :member_no and flag_trans = 'TRN'");
+				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE menu_component = 'TransferSelfDepInsideCoop' 
+												and member_no = :member_no and flag_trans = 'TRN' and is_use = '1'");
 				$getAccFav->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
 					$arrFavMenu = array();
@@ -122,6 +123,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
+				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

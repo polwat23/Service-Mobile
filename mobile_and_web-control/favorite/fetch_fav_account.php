@@ -28,7 +28,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGrpFav[$rowListFav["flag_trans"]][] = $arrListFav;
 		}
 		$arrayResult['FAV_ACCOUNT'] = $arrGrpFav;
-		$arrayResult['ALLOW_ADDFAV'] = TRUE;
+		$arrayResult['ALLOW_ADD_TRANFER'] = TRUE;
+		$arrayResult['ALLOW_ADD_PAYLOAN'] = TRUE;
+		$arrayResult['IS_SAVE_SOURCE'] = FALSE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

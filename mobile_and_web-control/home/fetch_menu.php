@@ -377,7 +377,7 @@ if(!$anonymous){
 			}
 			$arrFavMenuGroup = array();
 			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans,menu_component,from_account 
-												FROM gcfavoritelist WHERE member_no = :member_no");
+												FROM gcfavoritelist WHERE member_no = :member_no and is_use = '1' and show_menu = '1'");
 			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
