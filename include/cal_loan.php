@@ -15,7 +15,20 @@ class CalculateLoan {
 		$connection = new connection();
 		$this->lib = new library();
 		$this->con = $connection->connecttomysql();
-		$this->conora = $connection->connecttooracle();
+		//$this->conora = $this->connecttooracle();
+		$dbuser = 'iscocrp_test237';
+		$dbpass = 'iscocrp_test237';
+		$dbname = "(DESCRIPTION =
+					(ADDRESS_LIST =
+					  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.237)(PORT = 1521))
+					)
+					(CONNECT_DATA =
+					  (SERVICE_NAME = iorcl)
+					)
+				  )";
+		$this->conora = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 	}
 	public function calculateInterest($loancontract_no,$amt_transfer=0){
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
@@ -153,7 +166,7 @@ class CalculateLoan {
 		if($constLoanContract["PXAFTERMTHKEEP_TYPE"] != '1'){
 			$int_return = $int_return + $interest;
 		}
-		$int_return = $this->lib->roundDecimal($int_return,$constLoan["RDINTSATANG_TYPE"],'1') + $constLoanContract["INTEREST_RETURN"];
+		$int_return = $this->lib->roundDecimal($int_return,$constLoan["RDINTSATANG_TYPE"],'1');
 		return $int_return;
 	}
 	private function getRateInt($inttabcode,$date){
