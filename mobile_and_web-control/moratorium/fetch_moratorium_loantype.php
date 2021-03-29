@@ -47,10 +47,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			
 			
-			$fetchMoratorium = $conoracle->prepare("select MORATORIUM_DOCNO, LOANCONTRACT_NO, REQUEST_DATE, REQUEST_STATUS, 
-																	ENTRY_ID, ENTRY_DATE, CANCEL_ID, CANCEL_DATE, CANCEL_PRINCIPAL_BALANCE,CANCEL_COOP,CANCEL_DOCNO
-																	from LNREQMORATORIUM where member_no = :member_no AND LOANCONTRACT_NO = :loancontract_no AND REQUEST_STATUS = '1'
-																	AND ENTRY_DATE >= to_date('2021-01-01','YYYY-MM-DD')");
+			$fetchMoratorium = $conoracle->prepare("select rm.MORATORIUM_DOCNO, rm.LOANCONTRACT_NO, rm.REQUEST_DATE, rm.REQUEST_STATUS, 
+																	rm.ENTRY_ID, rm.ENTRY_DATE, rm.CANCEL_ID, rm.CANCEL_DATE, rm.CANCEL_PRINCIPAL_BALANCE,rm.CANCEL_COOP,rm.CANCEL_DOCNO,cm.LOANTYPE_CODE
+																	from LNREQMORATORIUM rm
+																	join LNCONTMASTER cm ON cm.LOANCONTRACT_NO = rm.LOANCONTRACT_NO
+																	where rm.member_no = :member_no AND rm.LOANCONTRACT_NO = :loancontract_no AND rm.REQUEST_STATUS = '1'
+																	AND rm.ENTRY_DATE >= to_date('2021-01-01','YYYY-MM-DD')");
 			$fetchMoratorium->execute([
 				':member_no' => $member_no,
 				':loancontract_no' => $rowLoanType["LOANCONTRACT_NO"]
@@ -58,7 +60,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowMoratorium = $fetchMoratorium->fetch(PDO::FETCH_ASSOC)){
 				$arrMoratorium = array();
 				$arrMoratorium["IS_SHOWREQ"] = true;
-				$arrMoratorium["IS_CANCANCELREQ"] = true;
+				if($rowMoratorium["LOANTYPE_CODE"] == '23' || $rowMoratorium["LOANTYPE_CODE"] == '24' || $rowMoratorium["LOANTYPE_CODE"] == '25' || $rowMoratorium["LOANTYPE_CODE"] == '26'){
+					$arrMoratorium["IS_CANCANCELREQ"] = false;
+				}else{
+					$arrMoratorium["IS_CANCANCELREQ"] = true;
+				}
 				$arrMoratorium["MORATORIUM_DOCNO"] = $rowMoratorium["MORATORIUM_DOCNO"];
 				$arrMoratorium["REQUEST_DATE"] = $lib->convertdate($rowMoratorium["ENTRY_DATE"] , 'D m Y', true);
 				$arrLoanType["REQ_MORATORIUM"] = $arrMoratorium;
