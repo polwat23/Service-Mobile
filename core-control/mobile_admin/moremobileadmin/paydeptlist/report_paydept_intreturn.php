@@ -35,7 +35,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$header["loancontract_no"] =  $dataComing["loancontract_no"];
 		$header["amount"] = $dataComing["amount"];
 		$header["principal"] =  $dataComing["principal"];
-		$header["interest"] =  $dataComing["interest"];
+		$header["interest_return"] =  $dataComing["interest_return"];
+		$header["calint_to"] =  $dataComing["calint_to"];
+		if(isset($dataComing["calint_to"]) && $dataComing["calint_to"] != ""){
+			$header["calint_toraw"] = date("d/m/", strtotime($dataComing["calint_to"])).(date("Y", strtotime($dataComing["calint_to"]))+543);
+			$fromdate=date_create($dataComing["operate_date"]);
+			$todate=date_create($dataComing["calint_to"]);
+			$count_date = date_diff($fromdate,$todate);
+			$header["count_date"] = intval($count_date->format("%R%a"))-1;
+		}else{
+			$header["calint_toraw"] = null;
+			$header["count_date"] = null;
+		}
 		$arrGroupDetail["member_no"] = $member_no;
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
@@ -203,12 +214,12 @@ function GenerateReport($dataReport,$header,$lib){
 			 <tbody>
 			  <tr>
 				<td>'.$header["loancontract_no"].'</td>
-				<td class="text-right" ></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td class="text-right">'.number_format($header["principal"],2).'</td>
-				<td class="text-right">'.number_format($header["interest"],2).'</td>
+				<td class="text-right" >'.number_format($header["principal"],2).'</td>
+				<td>'.$header["operate_datetimeraw"].'</td>
+				<td>'.$header["calint_toraw"].'</td>
+				<td>'.$header["count_date"].'</td>
+				<td class="text-right">0.00</td>
+				<td class="text-right">'.number_format($header["interest_return"],2).'</td>
 			  </tr>
 			 </tbody>
 		  </table>
@@ -216,13 +227,13 @@ function GenerateReport($dataReport,$header,$lib){
 			  เป็นเงิน
 		  </div>
 		  <div class="text-center font-bold" style="position:absolut; float :left;  width:390px;">
-			'.$lib->baht_text($header["amount"]).'
+			'.$lib->baht_text($header["interest_return"]).'
 		  </div>
 		  <div class="text-center" style="position:absolut; float :left;">
 			  รวม
 		  </div>
 		  <div class="text-right font-bold" style="position:absolut; float :left;  width:130px;  border-bottom:3px double ;   ">
-			  '.number_format($header["amount"],2).'
+			  '.number_format($header["interest_return"],2).'
 		  </div>
 	  </div>
 	';
