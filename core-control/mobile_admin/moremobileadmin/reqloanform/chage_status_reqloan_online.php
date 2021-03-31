@@ -11,23 +11,28 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถอนุมัติใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
-				require_once('../../../../include/exit_footer.php');
+				echo json_encode($arrayResult);
+				exit();
 			}
-		}else if($dataComing["req_status"] == '7'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '7',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
+		}else if($dataComing["req_status"] == '7' || $dataComing["req_status"] == '6' || $dataComing["req_status"] == '2' || $dataComing["req_status"] == '3' || $dataComing["req_status"] == '4'){
+			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = :req_status,remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
+				':req_status' => $dataComing["req_status"],
 				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถเปลี่ยนสถานะใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
-				require_once('../../../../include/exit_footer.php');
+				echo json_encode($arrayResult);
+				exit();
 			}
 		}else if($dataComing["req_status"] == '-9'){
 			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '-9',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
@@ -37,10 +42,12 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				':reqloan_doc' => $dataComing["reqloan_doc"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
 			}else{
 				$arrayResult['RESULT'] = FALSE;
 				$arrayResult['RESPONSE'] = "ไม่สามารถยกเลิกใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
-				require_once('../../../../include/exit_footer.php');
+				echo json_encode($arrayResult);
+				exit();
 			}
 		}
 		$getDataReqDoc = $conmysql->prepare("SELECT member_no FROM gcreqloan WHERE reqloan_doc = :reqloan_doc");
@@ -55,26 +62,28 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 			$arrPayloadNotify["ACTION_PAGE"] = "LoanRequestTrack";
-			$arrPayloadNotify["ACTION_PARAMS"] = [];
+			$arrPayloadNotify["ACTION_PARAMS"] = null;
 			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
 			$arrMessage["BODY"] = $message_endpoint["BODY"];
 			$arrMessage["PATH_IMAGE"] = null;
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+			$arrPayloadNotify["SEND_BY"] = $payload["username"];
 			if($func->insertHistory($arrPayloadNotify,'2')){
 				$lib->sendNotify($arrPayloadNotify,"person");
 			}
 		}
-		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		require_once('../../../../include/exit_footer.php');
+		echo json_encode($arrayResult);
+		exit();
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../../../include/exit_footer.php');
+	echo json_encode($arrayResult);
+	exit();
 }
 ?>

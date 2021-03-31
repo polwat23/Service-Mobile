@@ -4,9 +4,9 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$checkisReq = $conmysql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
+		/*$checkisReq = $conmysql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
 		$checkisReq->execute([':member_no' => $payload["member_no"]]);
-		if($checkisReq->rowCount() > 0){
+		if($checkisReq->rowCount() > 0){*/
 			$arrGrpLoan = array();
 			$arrCanCal = array();
 			$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$fetchLoanIntRate = $conmssql->prepare("SELECT lnt.LOANTYPE_DESC,lnt.LOANTYPE_CODE,lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 																	ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-																	WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
+																	WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and getdate() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 			$fetchLoanIntRate->execute();
 			while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
 				$arrayDetailLoan = array();
@@ -42,13 +42,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["LOAN_LIST"] = $arrGrpLoan;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
-		}else{
+		/*}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0087";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
-		}
+		}*/
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

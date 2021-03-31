@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':req_status' => $dataComing["req_status"]
 			]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-				$getLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
+				$getLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 				$getLoanType->execute([':loantype_code' => $rowReqLoan["loantype_code"]]);
 				$rowLoan = $getLoanType->fetch(PDO::FETCH_ASSOC);
 				$arrayReq = array();
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-				$getLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
+				$getLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 				$getLoanType->execute([':loantype_code' => $rowReqLoan["loantype_code"]]);
 				$rowLoan = $getLoanType->fetch(PDO::FETCH_ASSOC);
 				$arrayReq = array();
