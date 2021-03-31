@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,sharebegin_amt
+		$getSharemasterinfo = $conmysqlcoop->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,SHAREBEGIN_AMT
 													FROM shsharemaster WHERE member_no = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
@@ -25,11 +25,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$date_now = date('Y-m-d');
 			}
-			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
-														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period,stm.ref_slipno
+			$getShareStatement = $conmysqlcoop->prepare("SELECT stm.OPERATE_DATE,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
+														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.SHRITEMTYPE_DESC,stm.PERIOD,stm.REF_SLIPNO
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
-														WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.operate_date
-														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no DESC");
+														WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.OPERATE_DATE
+														BETWEEN STR_TO_DATE(:datebefore,'%Y-%m-%d') and STR_TO_DATE(:datenow,'%Y-%m-%d') ORDER BY stm.seq_no DESC");
 			$getShareStatement->execute([
 				':member_no' => $member_no,
 				':datebefore' => $date_before,

@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentMonthlyDetail')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+		$fetchName = $conmysqlcoop->prepare("SELECT mb.MEMB_NAME,mb.MEMB_SURNAME,mp.PRENAME_DESC,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
@@ -20,28 +20,28 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
-		$getPaymentDetail = $conoracle->prepare("SELECT 
-																	CASE kut.system_code 
-																	WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
-																	WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
-																	ELSE kut.keepitemtype_desc
-																	END as TYPE_DESC,
-																	kut.keepitemtype_grp as TYPE_GROUP,
-																	case kut.keepitemtype_grp 
-																		WHEN 'DEP' THEN kpd.description
-																		WHEN 'LON' THEN kpd.loancontract_no
-																	ELSE kpd.description END as PAY_ACCOUNT,
-																	kpd.period,
-																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	NVL(kpd.interest_payment,0) AS INT_BALANCE
-																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																	kpd.keepitemtype_code = kut.keepitemtype_code
-																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																	ORDER BY kut.SORT_IN_RECEIVE ASC");
+		$getPaymentDetail = $conmysqlcoop->prepare("SELECT 
+												(CASE  
+												WHEN kut.system_code = 'LON' THEN IFNULL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+												WHEN kut.system_code = 'DEP' THEN IFNULL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+												ELSE kut.keepitemtype_desc
+												END) as TYPE_DESC,
+												kut.keepitemtype_grp as TYPE_GROUP,
+												(CASE 
+													WHEN kut.keepitemtype_grp = 'DEP' THEN kpd.description
+													WHEN kut.keepitemtype_grp = 'LON' THEN kpd.loancontract_no
+												ELSE kpd.description END) as PAY_ACCOUNT,
+												kpd.period,
+												IFNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+												IFNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+												IFNULL(kpd.principal_payment,0) AS PRN_BALANCE,
+												IFNULL(kpd.interest_payment,0) AS INT_BALANCE
+												FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+												kpd.keepitemtype_code = kut.keepitemtype_code
+												LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+												LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+												ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
-		$getDetailKPHeader = $conoracle->prepare("SELECT 
+		$getDetailKPHeader = $conmysqlcoop->prepare("SELECT 
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE
 																FROM kptempreceive kpd

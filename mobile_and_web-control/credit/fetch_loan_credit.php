@@ -11,12 +11,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
 			$arrCanCal[] = $rowCanCal["loantype_code"];
 		}
-		$fetchCredit = $conoracle->prepare("SELECT lt.loantype_code as LOANTYPE_CODE,lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,lc.percentshare,lc.percentsalary,mb.salary_amount,(sh.sharestk_amt*10) as SHARE_AMT
+		$fetchCredit = $conmysqlcoop->prepare("SELECT lt.loantype_code as LOANTYPE_CODE,lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,lc.percentshare,lc.percentsalary,mb.salary_amount,(sh.sharestk_amt*10) as SHARE_AMT
 													FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb 
 													LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 													WHERE mb.member_no = :member_no and 
 													LT.LOANTYPE_CODE IN(".implode(',',$arrCanCal).")
-													and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
+													and DATE(TIMESTAMPDIFF(MONTH, now(),mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
 		$fetchCredit->execute([':member_no' => $member_no]);
 		while($rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC)){
 			$arrCredit = array();

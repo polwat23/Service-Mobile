@@ -6,12 +6,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayResult = array();
 		$arrayGroupLoan = array();
-		$getUcollwho = $conoracle->prepare("SELECT
+		$getUcollwho = $conmysqlcoop->prepare("SELECT
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
-											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT
+											IFNULL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT
 											FROM
 											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
 											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO

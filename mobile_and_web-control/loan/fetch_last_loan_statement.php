@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conoracle->prepare("SELECT * FROM (SELECT lnm.loancontract_no,lt.LOANTYPE_DESC AS LOAN_TYPE,lnm.principal_balance as LOAN_BALANCE,
+		$fetchLastStmAcc = $conmysqlcoop->prepare("SELECT * FROM (SELECT lnm.loancontract_no,lt.LOANTYPE_DESC AS LOAN_TYPE,lnm.principal_balance as LOAN_BALANCE,
 												lnm.loanapprove_amt as APPROVE_AMT,lnm.startcont_date,lnm.period_payment,lnm.period_payamt as PERIOD,
 												LAST_PERIODPAY as LAST_PERIOD,lns.operate_date as LAST_OPERATE_DATE
 												from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
 		}
-		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
+		$getStatement = $conmysqlcoop->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
