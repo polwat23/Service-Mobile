@@ -55,9 +55,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			
 			$getMaxPeriod = $conmssql->prepare("SELECT MAX_PERIOD 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
-															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
+															WHERE :request_amt_1 >= lnd.MONEY_FROM and :request_amt_2 < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
 			$getMaxPeriod->execute([
-				':request_amt' => $maxloan_amt,
+				':request_amt_1' => $maxloan_amt,
+				':request_amt_2' => $maxloan_amt,
 				':loantype_code' => $dataComing["loantype_code"]
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
@@ -76,10 +77,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 			$arrayResult["REQ_SALARY"] = FALSE;
 			$arrayResult["REQ_CITIZEN"] = FALSE;
-			$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
+			$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
 			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-			$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
+			$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
 			$arrayResult["BANK_ACCOUNT_REMARK"] = null;
 			if($dayremainEnd == 0){
 				$arrayResult["NOTE_DESC"] = "เงินต้นและดอกเบี้ยของท่าน ณ วันที่กู้จะถูกหักรวมกับยอดปันผล-เฉลี่ยคืนที่ท่านจะได้รับ";

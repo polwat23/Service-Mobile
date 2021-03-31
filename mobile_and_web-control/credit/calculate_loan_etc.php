@@ -13,11 +13,11 @@ $getMemb = $conmssql->prepare("SELECT mb.MEMBTYPE_CODE,mg.MEMBGROUP_CONTROL,(sh.
 											WHERE mb.member_no = :member_no");
 $getMemb->execute([':member_no' => $member_no]);
 $rowMemb = $getMemb->fetch(PDO::FETCH_ASSOC);
-$fetchCredit = $conmssql->prepare("SELECT lt.loantype_code as LOANTYPE_CODE,lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,lc.percentshare,lc.percentsalary
+$fetchCredit = $conmssql->prepare("SELECT lt.loantype_code as LOANTYPE_CODE,lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,lc.PERCENTSHARE,lc.PERCENTSALARY
 											FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb
 											WHERE mb.member_no = :member_no and 
 											LT.LOANTYPE_CODE = :loantype_code
-											and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
+											and DATEDIFF(month,mb.member_date,getDate()) BETWEEN lc.startmember_time and lc.endmember_time");
 $fetchCredit->execute([
 	':member_no' => $member_no,
 	':loantype_code' => $loantype_code

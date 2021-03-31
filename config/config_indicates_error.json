@@ -217,10 +217,14 @@
 			}]
 		}],
 		"REQ_LOAN_STATUS" : [{
-			"8" : [{"th" : "รอลงรับ","en" : "Wait for accept"}],
+			"8" : [{"th" : "ส่งคำขอกู้","en" : "Wait for accept"}],
 			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
 			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
-			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
+			"7" : [{"th" : "รออนุมัติ","en" : "Accept for check rights"}],
+			"6" : [{"th" : "พิมพ์คำขอกู้","en" : "Print form loan request"}],
+			"2" : [{"th" : "ผู้ค้ำประกันยืนยัน","en" : "Guarantor Confirm"}],
+			"3" : [{"th" : "ระบบตรวจสอบคำขอกู้ พิมพ์สัญญา","en" : "Review the loan request"}],
+			"4" : [{"th" : "รอเซ็นต์สัญญา/รอประกัน","en" : "Waiting for sign or guarantor"}],
 			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
 		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
