@@ -38,35 +38,76 @@ while($rowTaskList = $getTranTaskList->fetch(PDO::FETCH_ASSOC)){
 													WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use = '1' and (gad.allow_deposit_inside = '1' OR gad.allow_withdraw_inside = '1')");
 		$fetchAccAllowTrans->execute([':deptaccount_no' => $rowTaskList["from_account"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
-			$arrBody = array();
-			$arrBody['menu_component'] = "TransferSelfDepInsideCoop";
-			$arrBody['from_deptaccount_no'] = $rowTaskList['from_account'];
-			$arrBody['to_deptaccount_no'] = $rowTaskList['destination'];
-			$arrBody['amt_transfer'] = $rowTaskList['amt_transfer'];
-			$arrBody['penalty_amt'] = 0;
-			$arrBody['channel'] = 'mobile_app';
+			$checkSelfTransfer = $conoracle->prepare("SELECT MEMBER_NO FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+			$checkSelfTransfer->execute([':deptaccount_no' => $rowTaskList['destination']]);
+			$rowSelfTran = $checkSelfTransfer->fetch(PDO::FETCH_ASSOC);
+			$arrBodyInq = array();
+			if($rowSelfTran["MEMBER_NO"] == $rowTaskList['member_no']){
+				$arrBodyInq['menu_component'] = "TransferSelfDepInsideCoop";
+			}else{
+				$arrBodyInq['menu_component'] = "TransferDepInsideCoop";
+			}
+			$arrBodyInq['deptaccount_no'] = $rowTaskList['from_account'];
+			$arrBodyInq['amt_transfer'] = $rowTaskList['amt_transfer'];
+			$arrBodyInq['channel'] = 'mobile_app';
 			$arrPayloadNew = array();
 			$arrPayloadNew['id_userlogin'] = $rowTaskList['id_userlogin'];
 			$arrPayloadNew['member_no'] = $rowTaskList['member_no'];
 			$arrPayloadNew['user_type'] = '0';
 			$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 			$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
-			$header[] = "Authorization: Bearer ".$access_token;
-			$header[] = "transaction_scheduler: 1";
-			$responseAPI = $lib->posting_data($config["URL_SERVICE"].'mobile_and_web-control/transferinsidecoop/fund_transfer_in_coop',$arrBody,$header);
-			if($responseAPI["RESULT"]){
-				$updateFailTrans = $conmysql->prepare("UPDATE gctransactionschedule SET scheduler_status = '1' WHERE id_transchedule = :id_transchedule");
-				$updateFailTrans->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
-				$getMaxSeqNo = $conmysql->prepare("SELECT IFNULL(MAX(SEQ_NO),0) as M_SEQ_NO FROM gctransactionschedulestatement WHERE id_transchedule = :id_transchedule");
-				$getMaxSeqNo->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
-				$rowMaxSeqNo = $getMaxSeqNo->fetch(PDO::FETCH_ASSOC);
-				$insertStmScheduler = $conmysql->prepare("INSERT INTO gctransactionschedulestatement(id_transchedule,seq_no,scheduler_status) 
-															VALUES(:id_transchedule,:seq_no,'1')");
-				$insertStmScheduler->execute([
-					':id_transchedule' => $rowTaskList["id_transchedule"],
-					':seq_no' => $rowMaxSeqNo["M_SEQ_NO"] + 1
-				]);
-				$conmysql->commit();
+			$headerInq[] = "Authorization: Bearer ".$access_token;
+			$headerInq[] = "transaction_scheduler: 1";
+			$responseAPIInq = $lib->posting_data($config["URL_SERVICE"].'mobile_and_web-control/transferinsidecoop/get_fee_fund_transfer',$arrBodyInq,$headerInq);
+			if($responseAPIInq["RESULT"]){
+				$arrBody = array();
+				if($rowSelfTran["MEMBER_NO"] == $rowTaskList['member_no']){
+					$arrBody['menu_component'] = "TransferSelfDepInsideCoop";
+				}else{
+					$arrBody['menu_component'] = "TransferDepInsideCoop";
+				}
+				$arrBody['from_deptaccount_no'] = $rowTaskList['from_account'];
+				$arrBody['to_deptaccount_no'] = $rowTaskList['destination'];
+				$arrBody['amt_transfer'] = $rowTaskList['amt_transfer'];
+				$arrBody['penalty_amt'] = $responseAPIInq["PENALTY_AMT"];
+				$arrBody['channel'] = 'mobile_app';
+				$arrPayloadNew = array();
+				$arrPayloadNew['id_userlogin'] = $rowTaskList['id_userlogin'];
+				$arrPayloadNew['member_no'] = $rowTaskList['member_no'];
+				$arrPayloadNew['user_type'] = '0';
+				$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
+				$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
+				$header[] = "Authorization: Bearer ".$access_token;
+				$header[] = "transaction_scheduler: 1";
+				$responseAPI = $lib->posting_data($config["URL_SERVICE"].'mobile_and_web-control/transferinsidecoop/fund_transfer_in_coop',$arrBody,$header);
+				if($responseAPI["RESULT"]){
+					$updateFailTrans = $conmysql->prepare("UPDATE gctransactionschedule SET scheduler_status = '1' WHERE id_transchedule = :id_transchedule");
+					$updateFailTrans->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
+					$getMaxSeqNo = $conmysql->prepare("SELECT IFNULL(MAX(SEQ_NO),0) as M_SEQ_NO FROM gctransactionschedulestatement WHERE id_transchedule = :id_transchedule");
+					$getMaxSeqNo->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
+					$rowMaxSeqNo = $getMaxSeqNo->fetch(PDO::FETCH_ASSOC);
+					$insertStmScheduler = $conmysql->prepare("INSERT INTO gctransactionschedulestatement(id_transchedule,seq_no,scheduler_status) 
+																VALUES(:id_transchedule,:seq_no,'1')");
+					$insertStmScheduler->execute([
+						':id_transchedule' => $rowTaskList["id_transchedule"],
+						':seq_no' => $rowMaxSeqNo["M_SEQ_NO"] + 1
+					]);
+					$conmysql->commit();
+				}else{
+					$updateFailTrans = $conmysql->prepare("UPDATE gctransactionschedule SET scheduler_status = '-99' WHERE id_transchedule = :id_transchedule");
+					$updateFailTrans->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
+					$getMaxSeqNo = $conmysql->prepare("SELECT IFNULL(MAX(SEQ_NO),0) as M_SEQ_NO FROM gctransactionschedulestatement WHERE id_transchedule = :id_transchedule");
+					$getMaxSeqNo->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
+					$rowMaxSeqNo = $getMaxSeqNo->fetch(PDO::FETCH_ASSOC);
+					$insertStmScheduler = $conmysql->prepare("INSERT INTO gctransactionschedulestatement(id_transchedule,seq_no,scheduler_status,scheduler_detail) 
+																VALUES(:id_transchedule,:seq_no,'-99',:text_error)");
+					$insertStmScheduler->execute([
+						':id_transchedule' => $rowTaskList["id_transchedule"],
+						':seq_no' => $rowMaxSeqNo["M_SEQ_NO"] + 1,
+						':text_error' => $responseAPI["RESPONSE_MESSAGE"]
+					]);
+					$conmysql->commit();
+				}
 			}else{
 				$updateFailTrans = $conmysql->prepare("UPDATE gctransactionschedule SET scheduler_status = '-99' WHERE id_transchedule = :id_transchedule");
 				$updateFailTrans->execute([':id_transchedule' => $rowTaskList["id_transchedule"]]);
@@ -78,7 +119,7 @@ while($rowTaskList = $getTranTaskList->fetch(PDO::FETCH_ASSOC)){
 				$insertStmScheduler->execute([
 					':id_transchedule' => $rowTaskList["id_transchedule"],
 					':seq_no' => $rowMaxSeqNo["M_SEQ_NO"] + 1,
-					':text_error' => $responseAPI["RESPONSE_MESSAGE"]
+					':text_error' => $responseAPIInq["RESPONSE_MESSAGE"]
 				]);
 				$conmysql->commit();
 			}

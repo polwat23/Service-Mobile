@@ -57,10 +57,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		$arrayResult['TRANSFER'] = $arrayTransfer;
-		$arrayResult['REPAYLOAN'] = $arrayRepayLoan;
-		$arrayResult['BUYSHARE'] = $arrayBuyShare;
-		$arrayResult['DEPOSIT'] = $arrayDeposit;
-		$arrayResult['WITHDRAW'] = $arrayWithdraw;
+		//$arrayResult['REPAYLOAN'] = $arrayRepayLoan;
+		//$arrayResult['BUYSHARE'] = $arrayBuyShare;
+		//$arrayResult['DEPOSIT'] = $arrayDeposit;
+		//$arrayResult['WITHDRAW'] = $arrayWithdraw;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
