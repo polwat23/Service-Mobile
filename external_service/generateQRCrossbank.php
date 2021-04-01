@@ -1,26 +1,51 @@
 <?php
-require_once('../autoload.php');
+ini_set('display_errors', false);
+ini_set('error_log', __DIR__.'/../log/external_error.log');
+header("Access-Control-Allow-Methods: POST");
 
+require_once(__DIR__.'/../extension/vendor/autoload.php');
+require_once(__DIR__.'/../include/connection.php');
+require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/validate_input.php');
+
+if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
+   ob_start("ob_gzhandler");
+}else{
+   ob_start();
+}
+
+use Utility\library;
+use Connection\connection;
 use Endroid\QrCode\QrCode;
 
-if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GenerateQR')){
+$con = new connection();
+$lib = new library();
+$conmysql = $con->connecttomysql();
+
+$lang_locale = "th";
+
+$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
+$config = json_decode($jsonConfig,true);
+$jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
+$configError = json_decode($jsonConfigError,true);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	if(isset($dataComing) && $lib->checkCompleteArgument(['member_no','transList'],$dataComing)){
 		$conmysql->beginTransaction();
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$currentDate = date_create();
 		$tempExpire = new DateTime(date_format($currentDate,"Y-m-d H:i:s"));
 
-		$randQrRef = date_format($currentDate,"YmdHis").rand(1000,9999);
+		$randQrRef = $dataComing["refer_qr"] ?? date_format($currentDate,"YmdHis").rand(1000,9999);
 		$generateDate = date_format($currentDate,"Y-m-d H:i:s").rand(1000,9999);
 		$qrTransferAmt = 0;
 		$qrTransferFee = 0;
-		$expireDate = $tempExpire->add(new DateInterval('PT15M'));
-		
+		$expireDate = $tempExpire->add(new DateInterval('PT'.($dataComing["expire_minutes"] ?? 15).'M'));
+
 		$insertQrMaster = $conmysql->prepare("INSERT INTO gcqrcodegenmaster(qrgenerate, member_no, generate_date, expire_date) 
 												VALUES (:qrgenerate,:member_no,:generate_date,:expire_date)");
 		if($insertQrMaster->execute([
 			':qrgenerate' => $randQrRef,
-			':member_no' => $member_no,
+			':member_no' => $dataComing["member_no"],
 			':generate_date' => date_format($currentDate,"Y-m-d H:i:s"),
 			':expire_date' =>  date_format($expireDate,"Y-m-d H:i:s")
 		])){
@@ -44,17 +69,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
+					require_once('../include/exit_footer.php');
 				}
 			}
 			$qrTransferAmtFormat = number_format($qrTransferAmt, 2, '.', '');
 			$qrTransferFeeFormat = number_format($qrTransferFee, 2, '.', '');
-			$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".str_replace('.','',$qrTransferAmtFormat)."\r\n".str_replace('.','',$qrTransferFeeFormat);
+			$stringQRGenerate = "|".($dataComing["biller_id"] ?? $config["CROSSBANK_TAX_SUFFIX"])."\r\n".$dataComing["member_no"]."\r\n".$randQrRef."\r\n".str_replace('.','',$qrTransferAmtFormat)."\r\n".str_replace('.','',$qrTransferFeeFormat);
 			$qrCode = new QrCode($stringQRGenerate);
 			header('Content-Type: '.$qrCode->getContentType());
 			$qrCode->writeString();
-			$qrCode->writeFile(__DIR__.'/../../resource/qrcode/'.$payload["member_no"].$randQrRef.'.png');
-			$fullPath = $config["URL_SERVICE"].'/resource/qrcode/'.$payload["member_no"].$randQrRef.'.png';
+			$qrCode->writeFile(__DIR__.'/../resource/qrcode/'.$dataComing["member_no"].$randQrRef.'.png');
+			$fullPath = $config["URL_SERVICE"].'/resource/qrcode/'.$dataComing["member_no"].$randQrRef.'.png';
 			header('Content-Type: application/json;charset=utf-8');
 			
 			$updateQrMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster 
@@ -71,45 +96,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["REF_NO"] = $randQrRef;
 				$arrayResult["EXPIRE_DATE"] = date_format($expireDate,"Y-m-d H:i:s");
 				$arrayResult["RESULT"] = TRUE;
-				require_once('../../include/exit_footer.php');
+				require_once('../include/exit_footer.php');
 			}else{
 				$conmysql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS9999";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
+				require_once('../include/exit_footer.php');
 			}
 		}else{
 			$conmysql->rollback();
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
+			require_once('../include/exit_footer.php');
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_CODE'] = "WS4004";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-		
+		http_response_code(400);
+		require_once('../include/exit_footer.php');
 	}
 }else{
-	$filename = basename(__FILE__, '.php');
-	$logStruc = [
-		":error_menu" => $filename,
-		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
-		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-	];
-	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
-	$lib->sendLineNotify($message_error);
-	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	http_response_code(500);
 }
 ?>
