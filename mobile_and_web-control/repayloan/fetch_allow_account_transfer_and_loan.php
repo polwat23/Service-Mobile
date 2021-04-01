@@ -100,6 +100,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['LOAN'] = $arrLoanGrp;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
+				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
