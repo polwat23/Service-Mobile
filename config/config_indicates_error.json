@@ -100,6 +100,7 @@
 	"WS0084" : [{"th" : "ไม่สามารถยื่นกู้ได้เนื่องจากสิทธิ์การกู้ของท่านไม่เพียงพอ กรุณาตรวจสอบสิทธิ์การกู้ของท่านได้ที่เมนูสิทธิ์กู้โดยประมาณหรือติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot request loan because your loan rights amount not enough please check your rights in menu Loan Estimate or contact cooperative"}],
 	"WS0085" : [{"th" : "ท่านทำรายการเกินยอดสูงสุดต่อเดือนที่กำหนด ยอดทำรายการคงเหลือต่อเดือนคือ ${remain_amount_deposit_per_month} บาท","en" : "Money transactions amount per month over define, money transactions amount remain per month is ${remain_amount_deposit_per_month} Baht"}],
 	"WS0086" : [{"th" : "ขออภัย รอบบริการนี้เต็มแล้ว","en" : "Sorry, this service time is full."}],
+	"WS0106" : [{"th" : "ยอดทำรายการต้องลงท้ายด้วยหลัก 100 ห้ามมีเศษหลักสิบหรือหลักหน่วย","en" : "Amount must end with 100 digits,do not end with ten or single digit"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],

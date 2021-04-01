@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			
 			
 			$fetchMoratorium = $conoracle->prepare("select rm.MORATORIUM_DOCNO, rm.LOANCONTRACT_NO, rm.REQUEST_DATE, rm.REQUEST_STATUS, 
-																	rm.ENTRY_ID, rm.ENTRY_DATE, rm.CANCEL_ID, rm.CANCEL_DATE, rm.CANCEL_PRINCIPAL_BALANCE,rm.CANCEL_COOP,rm.CANCEL_DOCNO,cm.LOANTYPE_CODE
+																	rm.ENTRY_ID, rm.ENTRY_DATE, rm.CANCEL_ID, rm.CANCEL_DATE, rm.CANCEL_PRINCIPAL_BALANCE,rm.CANCEL_COOP,rm.CANCEL_DOCNO,cm.LOANTYPE_CODE,TO_CHAR(rm.ENTRY_DATE,'YYYY-MM-DD') as ENTRY_DATE_FORMAT
 																	from LNREQMORATORIUM rm
 																	join LNCONTMASTER cm ON cm.LOANCONTRACT_NO = rm.LOANCONTRACT_NO
 																	where rm.member_no = :member_no AND rm.LOANCONTRACT_NO = :loancontract_no AND rm.REQUEST_STATUS = '1'
@@ -60,7 +60,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowMoratorium = $fetchMoratorium->fetch(PDO::FETCH_ASSOC)){
 				$arrMoratorium = array();
 				$arrMoratorium["IS_SHOWREQ"] = true;
-				if($rowMoratorium["LOANTYPE_CODE"] == '23' || $rowMoratorium["LOANTYPE_CODE"] == '24' || $rowMoratorium["LOANTYPE_CODE"] == '25' || $rowMoratorium["LOANTYPE_CODE"] == '26'){
+				if((int)date_create($rowQueue["ENTRY_DATE_FORMAT"])->format("Ymd") <= (int)date_create("2021-03-26")->format("Ymd")){
+					$arrMoratorium["IS_CANCANCELREQ"] = false;
+				}else if($rowMoratorium["LOANTYPE_CODE"] == '23' || $rowMoratorium["LOANTYPE_CODE"] == '24' || $rowMoratorium["LOANTYPE_CODE"] == '25' || $rowMoratorium["LOANTYPE_CODE"] == '26'){
 					$arrMoratorium["IS_CANCANCELREQ"] = false;
 				}else{
 					$arrMoratorium["IS_CANCANCELREQ"] = true;
