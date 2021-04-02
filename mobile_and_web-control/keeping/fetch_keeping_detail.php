@@ -62,7 +62,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																	kpd.keepitemtype_code = kut.keepitemtype_code
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																	and SUBSTR(kpd.shrlontype_code,1) = 'L'
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																	and SUBSTR(kpd.shrlontype_code,1) = 'D'
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([

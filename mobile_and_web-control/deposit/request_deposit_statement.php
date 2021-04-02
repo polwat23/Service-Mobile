@@ -103,26 +103,20 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new Dompdf([
-		'fontDir' => realpath('../../resource/fonts'),
-		'chroot' => realpath('/'),
-		'isRemoteEnabled' => true
-	]);
 	//style table
-	$html = '<style>
-
+	  $html = '<style>
 		  @font-face {
-		  font-family: TH Niramit AS;
-		  src: url(../../resource/fonts/TH Niramit AS.ttf);
-		}
-		@font-face {
-			font-family: TH Niramit AS;
-			src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
-			font-weight: bold;
-		}
-		* {
-		  font-family: TH Niramit AS;
-		}
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
+			}
+			@font-face {
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+				font-weight: bold;
+			}
+			* {
+			  font-family: TH Niramit AS;
+			}
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -151,7 +145,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  }
 		  td{
 			padding:5px;
-			font-size: 18px;
+			font-size: 17px;
 		  }
 		  p{
 			margin:0px;
@@ -169,6 +163,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding-top: 80px;
 		}
 		.frame-info-user {
+			line-height: 12px;
 			padding: 10px -10px 10px 10px;
 			position: fixed;
 			left: 440px;
@@ -185,7 +180,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		}
 		  </style>
 		';
-	//head table   
+	//head table
 	$html .='
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
@@ -199,17 +194,17 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			   </div>
 			   </div>
 				<div class="frame-info-user">
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;padding-top: 0px;">
 					<div class="label">เลขสมาชิก</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
+					<div style="padding-left: 120px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
 					</div>
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;padding-top: 0px;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
+					<div style="padding-left: 120px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
 					</div>
 					<div style="display:flex;width: 100%">
 					<div class="label">ระหว่างวันที่</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DATE_BETWEEN_FORMAT"].'</div>
+					<div style="padding-left: 120px;font-weight: bold;font-size: 17px;">'.$arrayData["DATE_BETWEEN_FORMAT"].'</div>
 					</div>
 				</div>
 			   <div class="label-type">
@@ -294,7 +289,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
-
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();

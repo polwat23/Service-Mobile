@@ -44,7 +44,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		and SUBSTR(kpd.shrlontype_code,1) = 'L'
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																		and SUBSTR(kpd.shrlontype_code,1) = 'D'
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																		and kpd.seq_no = :seq_no
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
@@ -77,7 +79,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																		and SUBSTR(kpd.shrlontype_code,1) = 'L'
 																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																		and SUBSTR(kpd.shrlontype_code,1) = 'D'
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
@@ -139,6 +143,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
+		$getDataConstant = $conoracle->prepare("SELECT MANAGER,OFFICE_FINANCE FROM cmcoopconstant");
+		$getDataConstant->execute();
+		$rowDataConstant = $getDataConstant->fetch(PDO::FETCH_ASSOC);
+		$header["manager"] = $rowDataConstant["MANAGER"];
+		$header["finance"] = $rowDataConstant["OFFICE_FINANCE"];
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
@@ -220,7 +229,7 @@ function GenerateReport($dataReport,$header,$lib){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
 	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูสุพรรณบุรี จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">476 ถ.ประชาธิปไตย ต.ท่าพี่เลี้ยง อ.เมือง จ.สุพรรณบุรี 72000</p>
+			<p style="margin-top: -27px;font-size: 18px;">77 ม.3 ต.รั้วใหญ่ อ.เมืองสุพรรณบุรี จ.สุพรรณบุรี</p>
 			<p style="margin-top: -25px;font-size: 18px;">โทร. 035-511492, 035-521870, 081-3533984</p>
 			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.sptcoop.net</p>
 			</div>
@@ -327,15 +336,13 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 550px;display:flex;height:30px;">
 			</div>
-			<div style="width:200px;margin-left: 770px;display:flex;">
-			<img src="../../resource/utility_icon/signature/finance.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 770px;display:flex;height:30px;">
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่การเงิน</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-80px;">'.$header["manager"].'</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-70px;">'.$header["finance"].'</div>
 			';
 
 	$dompdf = new Dompdf([

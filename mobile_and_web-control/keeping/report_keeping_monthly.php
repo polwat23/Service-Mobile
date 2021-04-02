@@ -39,7 +39,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																	kpd.keepitemtype_code = kut.keepitemtype_code
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+																	and SUBSTR(kpd.shrlontype_code,1) = 'L'
 																	LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																	and SUBSTR(kpd.shrlontype_code,1) = 'D'
 																	WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
@@ -162,9 +164,9 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
 				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
-				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
+				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">รายการเรียกเก็บประจำเดือน '.$header["recv_period"].'</p>
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูสุพรรณบุรี จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">476 ถ.ประชาธิปไตย ต.ท่าพี่เลี้ยง อ.เมือง จ.สุพรรณบุรี 72000</p>
+				<p style="margin-top: -27px;font-size: 18px;">77 ม.3 ต.รั้วใหญ่ อ.เมืองสุพรรณบุรี จ.สุพรรณบุรี</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทร. 035-511492, 035-521870, 081-3533984</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.sptcoop.net</p>
 				</div>
