@@ -21,7 +21,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE
 											LCM.CONTRACT_STATUS > 0 and LCM.CONTRACT_STATUS <> 8
 											AND LCC.LOANCOLLTYPE_CODE = '01'
-											AND LCC.REF_COLLNO = :member_no");
+											AND LCC.REF_COLLNO = :member_no
+											AND LCC.COLL_STATUS = '1'");
 		$getUcollwho->execute([':member_no' => $member_no]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
