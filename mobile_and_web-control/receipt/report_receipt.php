@@ -215,11 +215,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูหนองคาย จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">143 ถ.ประจักษ์ ต.ในเมือง อ.เมือง</p>
-			<p style="margin-top: -25px;font-size: 18px;">จังหวัดหนองคาย 43000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร : 042-411-334</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.nktsc.org</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูยโสธร จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">272 ถ.เลี่ยงเมือง ต.ในเมือง </p>
+			<p style="margin-top: -25px;font-size: 18px;">อ.เมืองยโสธร จ.ยโสธร 35000</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร : 045-712758 ต่อ 11</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.yasocoop.in.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
