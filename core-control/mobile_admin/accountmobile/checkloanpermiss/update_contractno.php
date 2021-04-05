@@ -13,14 +13,21 @@ if($lib->checkCompleteArgument(['unique_id','loancontract','member_no'],$dataCom
 			$arrayContractCheckGrp[] = $arrayLoanCheck;
 		}
 		
+		$getBalanceMaster = $conoracle->prepare("SELECT max(confirmbal_date) as BALANCE_DATE  FROM cmconfirmbalance WHERE member_no =  :member_no");
+		$getBalanceMaster->execute([':member_no' => $dataComing["member_no"]]);
+		$rowBalMaster = $getBalanceMaster->fetch(PDO::FETCH_ASSOC);
+		$arrHeader = array();
+		$arrHeader["date_confirm"] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d M Y');
+		
 		$fetchConfirm = $conoracle->prepare("SELECT cm.balance_value,cm.bizzaccount_no,lcy.loantype_desc,lc.loancontract_no
 												FROM cmconfirmbalance cm LEFT JOIN lccontmaster lc on cm.bizzaccount_no = lc.loancontract_no
 												LEFT JOIN lccfloantype lcy on  lc.loantype_code = lcy.loantype_code 
 												WHERE cm.bizz_system ='LON' 
 												AND cm.member_no = :member_no
 												AND cm.confirmbal_date	= to_date(:balance_date,'YYYY-MM-DD')");
-		$fetchConfirm->execute([':member_no' => $dataComing["member_no"] , 
-								':balance_date' => $dataComing["start_date"]]);
+		$fetchConfirm->execute([':member_no' => $dataComing["member_no"],
+								 ':balance_date' => date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]))
+								]);
 		while($rowContractBalance = $fetchConfirm->fetch(PDO::FETCH_ASSOC)){
 			$contract_no = preg_replace('/\//','',$rowContractBalance["LOANCONTRACT_NO"]);
 			if(array_search($contract_no,array_column($arrayContractCheckGrp,'CONTRACT_NO')) === False){

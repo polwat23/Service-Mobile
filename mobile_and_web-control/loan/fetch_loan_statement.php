@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
+											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance ,lsm.REF_SLIPNO as SLIP_NO
 											FROM lccontstatement lsm LEFT JOIN LCUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
 											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
@@ -58,6 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);
 			$arrSTM["SUM_PAYMENT"] = number_format($rowStm["INT_PAYMENT"] + $rowStm["PRN_PAYMENT"],2);
 			$arrSTM["LOAN_BALANCE"] = number_format($rowStm["LOAN_BALANCE"],2);
+			$arrSTM["SLIP_NO"] = TRIM($rowStm["SLIP_NO"]);
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;

@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id','arr_id_editdata'],$dataComing)){
 		if($update_edit->execute()){
 			$arrayStruc = [
 				':menu_name' => "reportmembereditdata",
-				':username' => $payload["username"],
+				':username' => $payload["member_no"],
 				':use_list' => "update member edit data",
 				':details' => implode(',',$dataComing["arr_id_editdata"])
 			];

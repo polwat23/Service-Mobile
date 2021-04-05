@@ -94,7 +94,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':old_tax_id' => $rowMember_info["TAX_ID"],
 			':new_tax_id' => $dataComing["tax_id"],
 			':inputgroup_type' => $inputgroup_type,
-			':username'=> $payload["username"]
+			':username'=> $payload["member_no"]
 		])){
 			$arrayResult["RESULT_EDIT"] = TRUE;
 		}else{

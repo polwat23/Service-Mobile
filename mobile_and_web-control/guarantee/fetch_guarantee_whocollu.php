@@ -53,8 +53,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
 					$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster
-														WHERE deptaccount_no = :deptaccount_no");
-					$whocolluDept->execute([':deptaccount_no' => $rowColl["REF_COLLNO"]]);
+														WHERE deptaccount_no = :deptaccount_no AND member_no= :member_no");
+					$whocolluDept->execute([':deptaccount_no' => $rowColl["REF_COLLNO"],
+											':member_no' => $member_no
+										    ]);
 					$rowCollDept = $whocolluDept->fetch(PDO::FETCH_ASSOC);
 					$arrGroupAllMember["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
 					$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];

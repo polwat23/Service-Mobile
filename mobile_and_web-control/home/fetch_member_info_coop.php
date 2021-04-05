@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayMember = array();
 		$arrayOfficer = array();
 		
-		$mdInfo = $conmysql->prepare("SELECT id ,member_no, md_name, md_type ,md_count  FROM gcmanagement WHERE member_no  = :member_no");
+		$mdInfo = $conmysql->prepare("SELECT id ,member_no, md_name, md_type ,md_count  FROM gcmanagement WHERE board_status = '1' AND member_no  = :member_no");
 		$mdInfo->execute([':member_no' => $payload["ref_memno"]]);
 		while($rowUser = $mdInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayMd = array();

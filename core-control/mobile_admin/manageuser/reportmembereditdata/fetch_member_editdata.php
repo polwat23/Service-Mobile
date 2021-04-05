@@ -4,13 +4,15 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','reportmembereditdata')){
 		$arrayGroup = array();
-		$fetchUserAccount = $conmysql->prepare("SELECT id_editdata, member_no, edit_date, old_data, incoming_data,update_date,inputgroup_type,old_email,new_email,old_tel,new_tel,old_website,new_website,old_coopregis_date,new_coopregis_date,old_coopregis_no,new_coopregis_no,old_memb_regno,new_memb_regno,old_tax_id,new_tax_id
+		$arrGroupUserAcount = array();
+
+		$fetchUserAccount = $conmysql->prepare("SELECT id_editdata, member_no, edit_date, old_data, incoming_data,update_date,inputgroup_type,old_email,new_email,old_tel,new_tel,old_website,new_website,old_coopregis_date,new_coopregis_date,old_coopregis_no,new_coopregis_no,old_memb_regno,new_memb_regno,old_tax_id,new_tax_id,username
 											FROM gcmembereditdata WHERE is_updateoncore = '0'");
 		$fetchUserAccount->execute();
 		while($rowUser = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
-			$arrGroupUserAcount = array();
 			$arrGroupUserAcount["ID_EDITDATA"] = $rowUser["id_editdata"];
 			$arrGroupUserAcount["MEMBER_NO"] = $rowUser["member_no"];
+			$arrGroupUserAcount["USERNAME"] = $rowUser["username"];
 			$arrGroupUserAcount["EDIT_DATE"] = $lib->convertdate($rowUser["edit_date"],'d m Y H-i-s',true);
 			$arrGroupUserAcount["OLD_DATA_JSON"] = json_decode(($rowUser["old_data"]), true);
 			$arrGroupUserAcount["INCOMING_DATA_JSON"] = json_decode(($rowUser["incoming_data"]), true);
@@ -30,6 +32,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["memb_regno"] = $rowUser["new_memb_regno"];
 			$arrGroupUserAcount["OLD_DATA_JSON"]["tax_id"] = $rowUser["old_tax_id"];
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["tax_id"] = $rowUser["new_tax_id"];
+			
+			$fetchName = $conmysql->prepare("SELECT member_no,ref_memno,acc_name,acc_surname,phone_number FROM gcmemberaccount WHERE  member_no = :member_no AND ref_memno = :ref_memno");
+			$fetchName->execute([':member_no' => $rowUser["username"],
+								 ':ref_memno' => $rowUser["member_no"]
+							]);
+			while($rowContName = $fetchName->fetch(PDO::FETCH_ASSOC)){
+				$arrGroupUserAcount["NAME"] = $rowContName["acc_name"].' '.$rowContName["acc_surname"];
+				$arrGroupUserAcount["PHONE_NUMBER"] = $rowContName["phone_number"];
+			}
 			$arrayGroup[] = $arrGroupUserAcount;
 		}
 		$arrayResult["MEMBER_EDIT_DATA"] = $arrayGroup;

@@ -3,9 +3,8 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocBalanceConfirm')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$conwebmysql = $con->connecttowebmysql();
-		$getBalStatus = $conwebmysql->prepare("SELECT confirm_status FROM confirm_balance WHERE member_no = :member_no and confirmation = :confirmdate");
+		$member_no = $configAS[$payload["ref_memno"]] ?? $payload["ref_memno"];
+		$getBalStatus = $conmysql->prepare("SELECT confirm_status FROM confirm_balance WHERE member_no = :member_no and balance_date = :confirmdate");
 		$getBalStatus->execute([
 			':member_no' => $member_no,
 			':confirmdate' => date('Y-m-d',strtotime($dataComing["balance_date"]))
@@ -17,24 +16,20 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 		}
-		$getMemberName = $conoracle->prepare("SELECT mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.MEMBGROUP_CODE,
-												md.SHORT_NAME2 as DEPART_GROUP
+		$getMemberName = $conoracle->prepare("SELECT mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_ENAME
 												FROM mbmembmaster mb
-												LEFT JOIN mbucfdepartment md ON mb.department_code = md.department_code
 												LEFT JOIN mbucfprename mp ON mb.PRENAME_CODE = mp.PRENAME_CODE
 												WHERE mb.member_no = :member_no");
 		$getMemberName->execute([':member_no' => $member_no]);
 		$rowname = $getMemberName->fetch(PDO::FETCH_ASSOC);
-		$FlagComfirm = $conwebmysql->prepare("INSERT INTO confirm_balance(member_no,fullname,confirmation,confirm_status,reason,membgroup_code,department_code,position_code,comfirmdate,ip)
-											VALUES(:member_no,:name,:balance_date,:confirm_flag,:remark,:membgroup,:depart_code,' ',NOW(),:ip)");
+		$FlagComfirm = $conmysql->prepare("INSERT INTO confirm_balance(member_no,fullname,balance_date,confirm_status,reason,comfirmdate,ip)
+											VALUES(:member_no,:name,:balance_date,:confirm_flag,:remark,NOW(),:ip)");
 		if($FlagComfirm->execute([
 			':member_no' => $member_no,
-			':name' => $rowname["PRENAME_DESC"].$rowname["MEMB_NAME"].' '.$rowname["MEMB_SURNAME"],
+			':name' => $rowname["PRENAME_DESC"].$rowname["MEMB_NAME"].' '.$rowname["MEMB_ENAME"],
 			':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"])),
 			':confirm_flag' => $dataComing["confirm_flag"],
 			':remark' => 'MobileApp / '.$dataComing["remark"],
-			':membgroup' => $rowname["MEMBGROUP_CODE"],
-			':depart_code' => isset($rowname["DEPART_GROUP"]) && $rowname["DEPART_GROUP"] != "" ? $rowname["DEPART_GROUP"] : ' ',
 			':ip' => $dataComing["ip_address"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
@@ -46,12 +41,10 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 				":error_code" => "WS1038",
 				":error_desc" => "Update ลงตาราง  cmconfirmmaster ไม่ได้ "."\n".$FlagComfirm->queryString."\n"."data => ".json_encode([
 					':member_no' => $member_no,
-					':name' => $rowname["PRENAME_DESC"].$rowname["MEMB_NAME"].' '.$rowname["MEMB_SURNAME"],
+					':name' => $rowname["PRENAME_DESC"].$rowname["MEMB_NAME"].' '.$rowname["MEMB_ENAME"],
 					':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"])),
 					':confirm_flag' => $dataComing["confirm_flag"],
 					':remark' => 'MobileApp / '.$dataComing["remark"],
-					':membgroup' => $rowname["MEMBGROUP_CODE"],
-					':depart_code' => isset($rowname["DEPART_GROUP"]) && $rowname["DEPART_GROUP"] != "" ? $rowname["DEPART_GROUP"] : ' ',
 					':ip' => $dataComing["ip_address"]
 				]),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
@@ -59,16 +52,15 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." Update ลงตาราง  cmconfirmmaster ไม่ได้"."\n".$FlagComfirm->queryString."\n"."data => ".json_encode([
 				':member_no' => $member_no,
-				':name' => $rowname["PRENAME_DESC"].$rowname["MEMB_NAME"].' '.$rowname["MEMB_SURNAME"],
+				':name' => $rowname["PRENAME_DESC"].$rowname["MEMB_NAME"].' '.$rowname["MEMB_ENAME"],
 				':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"])),
 				':confirm_flag' => $dataComing["confirm_flag"],
 				':remark' => 'MobileApp / '.$dataComing["remark"],
-				':membgroup' => $rowname["MEMBGROUP_CODE"],
-				':depart_code' => isset($rowname["DEPART_GROUP"]) && $rowname["DEPART_GROUP"] != "" ? $rowname["DEPART_GROUP"] : ' ',
 				':ip' => $dataComing["ip_address"]
 			]);
-			$lib->sendLineNotify($message_error);
+			//$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1038";
+			$arrayResult['BUG'] =$member_no;
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
