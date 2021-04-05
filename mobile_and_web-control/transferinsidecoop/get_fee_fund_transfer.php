@@ -9,6 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$from_deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$checkWithdraw = $cal_dep->depositCheckWithdrawRights($from_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 		if($checkWithdraw["RESULT"]){
+			
 			$checkDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($checkDeposit["RESULT"]){
 				$getMemberNo = $conmysql->prepare("SELECT member_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use = '1'");
@@ -85,6 +86,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
+			
 		}else{
 			$arrayResult['RESPONSE_CODE'] = $checkWithdraw["RESPONSE_CODE"];
 			if($checkWithdraw["RESPONSE_CODE"] == 'WS0056'){

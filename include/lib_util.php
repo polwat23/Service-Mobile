@@ -572,7 +572,7 @@ class library {
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
+		curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -626,7 +626,7 @@ class library {
 		$ch = curl_init( $url );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
-		curl_setopt( $ch, CURLOPT_PROXY, 'http://proxy.egat.co.th');
+		curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
