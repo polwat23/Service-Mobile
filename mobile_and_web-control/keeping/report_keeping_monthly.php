@@ -170,7 +170,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมที่ดิน จำกัด</p>
 				<p style="margin-top: -27px;font-size: 18px;">117 หมู่ 9 ถนนติวานนท์ ตำบลบางพูด อำเภอปากเกร็ด จังหวัดนนทบุรี 11120</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทรศัพท์ 0-2194-2377-79 โทรสาร 0-2194-2380</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.landcoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
