@@ -20,44 +20,45 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
-													mb.MEMBER_DATE,mb.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
-													mb.CURRADDR_NO as ADDR_NO,
-													mb.CURRADDR_MOO as ADDR_MOO,
-													mb.CURRADDR_SOI as ADDR_SOI,
-													mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
-													mb.CURRADDR_ROAD as ADDR_ROAD,
+													mb.MEMBER_DATE,mup.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
+													mb.ADDRESS_NO as ADDR_NO,
+													mb.ADDRESS_MOO as ADDR_MOO,
+													mb.ADDRESS_SOI as ADDR_SOI,
+													mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
+													mb.ADDRESS_ROAD as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
-													MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
+													MB.PROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.CURRADDR_POSTCODE AS ADDR_POSTCODE
+													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													LEFT JOIN MBUCFPOSITION mup ON mb.POSITION_CODE = mup.POSITION_CODE
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' à¸¡.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' à¸‹à¸­à¸¢'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' à¸«à¸¡à¸¹à¹ˆà¸šà¹‰à¸²à¸™'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' à¸–à¸™à¸™'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' à¹à¸‚à¸§à¸‡'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' à¹€à¸‚à¸•'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' Á.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' «ÍÂ'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' ËÁÙèºéÒ¹'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ¶¹¹'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' á¢Ç§'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' à¢µ'.$rowMember["DISTRICT_DESC"] : null);
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}else{
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' à¸¡.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' à¸‹à¸­à¸¢'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' à¸«à¸¡à¸¹à¹ˆà¸šà¹‰à¸²à¸™'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' à¸–à¸™à¸™'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' à¸•.'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' à¸­.'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' à¸ˆ.'.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' Á.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' «ÍÂ'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' ËÁÙèºéÒ¹'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ¶¹¹'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' µ.'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' Í.'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' ¨.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
@@ -95,11 +96,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
+		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
+	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

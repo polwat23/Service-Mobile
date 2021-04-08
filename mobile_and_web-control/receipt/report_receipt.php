@@ -209,17 +209,17 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">63 หมู่ 4 ต.หนองหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.สันทราย จ.เชียงใหม่ 50290</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-878077 , 053-873000</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สยามคูโบต้า จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">101/19-24 หมู่ที่ 20 นิคมอุตสาหกรรมนวนคร</p>
+				<p style="margin-top: -25px;font-size: 18px;">ตำบลคลองหนึ่ง อำเภอคลองหลวง จังหวัดปทุมธานี 12120</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 0 2909 0300</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
 				</div>
 			</div>
@@ -326,10 +326,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/ts.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
 			';
 
 	$dompdf = new DOMPDF();

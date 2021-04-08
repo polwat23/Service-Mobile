@@ -186,12 +186,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด
+					สหกรณ์ออมทรัพย์สยามคูโบต้า จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Nakhon Sawan General Education Saving and Credit Co.,LTD
+					Siam Kubota Saving and Credit Co.,LTD
 			   </div>
 			   </div>
 				<div class="frame-info-user">
