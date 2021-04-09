@@ -476,7 +476,7 @@ class CalculateLoan {
 
 	}
 	public function paySlip($conoracle,$amt_transfer,$config,$slipdoc_no,$operate_date,
-	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWTD,$conmysql,$penalty_amt){
+	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWTD,$conmysql,$penalty_amt=0){
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$getShareinfo = $conoracle->prepare("SELECT SHARESTK_AMT FROM SHSHAREMASTER WHERE member_no = :member_no");
 		$getShareinfo->execute([':member_no' => $member_no]);
