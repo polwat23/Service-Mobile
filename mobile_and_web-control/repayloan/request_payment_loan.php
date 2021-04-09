@@ -28,6 +28,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
+		if($int_return >= $interest){
+			$int_return = $int_return - $interest;
+			$interest = 0;
+		}else{
+			$interest = $interest - $int_return;
+			$int_return = 0;
+		}
 		if($interest > 0){
 			if($dataComing["amt_transfer"] < $interest){
 				$interest = $dataComing["amt_transfer"];
@@ -42,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		}
 		if($dataCont["CHECK_KEEPING"] == '0'){
 			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = 0;
+				$int_returnSrc = $cal_loan->calculateIntReturn($contract_no,$prinPay,$interest);
 				$int_returnFull = $int_returnSrc;
 			}
 		}
