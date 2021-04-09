@@ -56,9 +56,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											FROM gcrepayloan pl
 											LEFT JOIN csbankdisplay cb ON pl.bank_code = cb.bank_code
 										WHERE 1=1 ".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-										"and date_format(operate_date,'%Y-%m-%d') >= :start_date" : null)."
+										"and date_format(operate_date,'%Y-%m-%d') >= date_format(:start_date,'%Y-%m-%d')" : null)."
 										".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-										"and date_format(operate_date,'%Y-%m-%d') <= :end_date" : null)." 
+										"and date_format(operate_date,'%Y-%m-%d') <= date_format(:end_date,'%Y-%m-%d')" : null)." 
 										".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 										"and ref_no <= :ref_no" : null)." 
 										".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
