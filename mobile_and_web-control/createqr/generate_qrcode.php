@@ -16,24 +16,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$qrTransferAmt = 0;
 		$qrTransferFee = 0;
 		$expireDate = $tempExpire->add(new DateInterval('PT15M'));
-		
+		if(date_format($expireDate,"His") > "235959"){
+			$expireDate = date("Y-m-d")." 23:59:59";
+		}else{
+			$expireDate = date_format($expireDate,"Y-m-d H:i:s");
+		}
 		$insertQrMaster = $conmysql->prepare("INSERT INTO gcqrcodegenmaster(qrgenerate, member_no, generate_date, expire_date) 
 												VALUES (:qrgenerate,:member_no,:generate_date,:expire_date)");
 		if($insertQrMaster->execute([
 			':qrgenerate' => $randQrRef,
 			':member_no' => $member_no,
 			':generate_date' => date_format($currentDate,"Y-m-d H:i:s"),
-			':expire_date' =>  date_format($expireDate,"Y-m-d H:i:s")
+			':expire_date' => $expireDate
 		])){
 			//insert success
 			foreach ($dataComing["transList"] as $transValue) {
-				
+				$account_no = preg_replace('/-/','',$transValue["account_no"]);
 				$insertQrDetail = $conmysql->prepare("INSERT INTO gcqrcodegendetail(qrgenerate, trans_code_qr, ref_account, qrtransferdt_amt, qrtransferdt_fee) 
 													VALUES (:qrgenerate, :trans_code_qr, :ref_account, :qrtransferdt_amt, :qrtransferdt_fee)");
 				if($insertQrDetail->execute([
 					':qrgenerate' => $randQrRef,
 					':trans_code_qr' => $transValue["trans_code"],
-					':ref_account' => $transValue["account_no"],
+					':ref_account' => $account_no,
 					':qrtransferdt_amt' => $transValue["amt_transfer"],
 					':qrtransferdt_fee' => 0,
 				])){
@@ -71,7 +75,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$conmysql->commit();
 				$arrayResult["QRCODE_PATH"] = $fullPath;
 				$arrayResult["REF_NO"] = $randQrRef;
-				$arrayResult["EXPIRE_DATE"] = date_format($expireDate,"Y-m-d H:i:s");
+				$arrayResult["EXPIRE_DATE"] = $expireDate;
 				$arrayResult["RESULT"] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
