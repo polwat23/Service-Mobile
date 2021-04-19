@@ -2,217 +2,239 @@
 ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
+if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 	$lang_locale = 'en';
-	$transaction_no = $dataComing["tran_id"];
-	$etn_ref = $dataComing["bank_ref"];
-	$cmd_operate = substr($dataComing["coop_account_no"],0,2);
-	$coop_account_no = preg_replace('/-/','',substr($dataComing["coop_account_no"],2));
-	$time = time();
-	$fee_amt = 0;
-	$dateOperC = date('c');
-	$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-	$ref_no = time().$lib->randomText('all',3);
-	$amt_transfer = $dataComing["amt_transfer"];
-	if($cmd_operate == '01'){
-		$depositItemtype = "DTE";
-		$fetchDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
-		$fetchDepttype->execute([':deptaccount_no' => $coop_account_no]);
-		$rowDataDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC);
-		$arrayGroup = array();
-		$arrayGroup["account_id"] = null;
-		$arrayGroup["action_status"] = "1";
-		$arrayGroup["atm_no"] = "MOBILE";
-		$arrayGroup["atm_seqno"] = null;
-		$arrayGroup["aviable_amt"] = null;
-		$arrayGroup["bank_accid"] = null;
-		$arrayGroup["bank_cd"] = null;
-		$arrayGroup["branch_cd"] = null;
-		$arrayGroup["coop_code"] = $config["COOP_KEY"];
-		$arrayGroup["coop_id"] = $config["COOP_ID"];
-		$arrayGroup["deptaccount_no"] = $coop_account_no;
-		$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-		$arrayGroup["entry_id"] = "MOBILE";
-		$arrayGroup["fee_amt"] = $fee_amt;
-		$arrayGroup["feeinclude_status"] = "1";
-		$arrayGroup["item_amt"] = $amt_transfer;
-		$arrayGroup["member_no"] = $dataComing["member_no"];
-		$arrayGroup["moneytype_code"] = "CBT";
-		$arrayGroup["msg_output"] = null;
-		$arrayGroup["msg_status"] = null;
-		$arrayGroup["operate_date"] = $dateOperC;
-		$arrayGroup["oprate_cd"] = "003";
-		$arrayGroup["post_status"] = "1";
-		$arrayGroup["principal_amt"] = null;
-		$arrayGroup["ref_slipno"] = null;
-		$arrayGroup["slipitemtype_code"] = $depositItemtype;
-		$arrayGroup["stmtitemtype_code"] = $depositItemtype;
-		$arrayGroup["system_cd"] = "02";
-		$arrayGroup["withdrawable_amt"] = null;
-		$ref_slipno = null;
-		try {
-			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl",array(
-				'keep_alive' => false,
-				'connection_timeout' => 900
-			));
-			try {
-				$argumentWS = [
-					"as_wspass" => $config["WS_STRC_DB"],
-					"astr_dept_inf_serv" => $arrayGroup
-				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoap = $resultWS->of_dept_inf_servResult;
-				if($responseSoap->msg_status == '0000'){
-					$ref_slipno = $responseSoap->ref_slipno;
-					$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
-					$updateSyncNoti->execute([
-						':ref_slipno' => $ref_slipno,
-						':deptaccount_no' => $coop_account_no
-					]);
-					$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no and deptaccount_no = :deptaccount_no");
-					$fetchSeqno->execute([
-						':deptslip_no' => $ref_slipno,
-						':deptaccount_no' => $coop_account_no
-					]);
-					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-														VALUES(:remark,:deptaccount_no,:seq_no)");
-					$insertRemark->execute([
-						':remark' => $dataComing["remark"],
-						':deptaccount_no' => $coop_account_no,
-						':seq_no' => $rowSeqno["SEQ_NO"]
-					]);
-					$arrExecute = [
-						':ref_no' => $ref_no,
-						':itemtype' => $depositItemtype,
-						':from_account' => $coop_account_no,
-						':destination' => $coop_account_no,
-						':amount' => $dataComing["amt_transfer"],
-						':fee_amt' => $fee_amt,
-						':amount_receive' => $amt_transfer,
-						':operate_date' => $dateOper,
-						':member_no' => $dataComing["member_no"],
-						':ref_no1' => $coop_account_no,
-						':slip_no' => $ref_slipno,
-						':etn_ref' => $etn_ref,
-						':ref_no_source' => $transaction_no,
-						':bank_code' => $dataComing["bank_code"]
-					];
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
-																,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-																ref_no_1,coop_slip_no,etn_refno,ref_no_source,bank_code)
-																VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'1',:member_no,
-																:ref_no1,:slip_no,:etn_ref,:ref_no_source,:bank_code)");
-					if($insertTransactionLog->execute($arrExecute)){
-					}else{
-						$message_error = "ไม่สามารถ Insert ลงตาราง gctransaction ได้"."\n"."Query => ".$insertTransactionLog->queryString."\n".json_encode($arrExecute);
-						$lib->sendLineNotify($message_error);
-					}
-					$arrToken = $func->getFCMToken('person',$dataComing["member_no"]);
-					$templateMessage = $func->getTemplateSystem('BillPaymentDeposit',1);
-					foreach($arrToken["LIST_SEND"] as $dest){
-						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-							$dataMerge = array();
-							$dataMerge["COOP_ACCOUNT_NO"] = $lib->formataccount_hidden($coop_account_no,$func->getConstant('hidden_dep'));
-							$dataMerge["AMT_TRANSFER"] = number_format($amt_transfer,2);
-							$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-							$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-							$arrMessage["BODY"] = $message_endpoint["BODY"];
-							$arrMessage["PATH_IMAGE"] = null;
-							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-							$arrPayloadNotify["SEND_BY"] = "system";
-							if($lib->sendNotify($arrPayloadNotify,"person")){
-								$func->insertHistory($arrPayloadNotify,'2');
+	$checkBillAvailable = $conmysql->prepare("SELECT transfer_status,expire_date,id_userlogin,app_version,member_no
+											FROM gcqrcodegenmaster 
+											WHERE qrgenerate = :tran_id and member_no = :member_no");
+	$checkBillAvailable->execute([
+		':tran_id' => $dataComing["tran_id"],
+		':member_no' => $dataComing["member_no"]
+	]);
+	if($checkBillAvailable->rowCount() > 0){
+		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
+		$fee_amt = 0;
+		$dateOperC = date('c');
+		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		if($rowCheckBill["transfer_status"] == '0'){
+			if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
+				$payload = array();
+				$payload["member_no"] = $rowCheckBill["member_no"];
+				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
+				$payload["app_version"] = $rowCheckBill["app_version"];
+				$amt_tranferLon = $dataComing["amt_transfer"];
+				$vccAccID = $func->getConstant('map_account_id_ktb');
+				$getDetailTranDP = $conmysql->prepare("SELECT ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
+													WHERE qrgenerate = :tran_id and trans_code_qr = '01'");
+				$getDetailTranDP->execute([':tran_id' => $dataComing["tran_id"]]);
+				$arrDpSlip = array();
+				while($rowDetailDP = $getDetailTranDP->fetch(PDO::FETCH_ASSOC)){
+					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
+					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+					$arrDpSlip[$rowDetailDP["ref_account"]] = $arrSlipDPnoDest["SLIP_NO"];
+					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
+					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
+				}
+				$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
+				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
+				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
+				$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
+				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
+				$conoracle->beginTransaction();
+				$conmysql->beginTransaction();
+				$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
+				$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
+				'WFS',$conmysql,0,'006');
+				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
+													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no
+													FROM gcqrcodegendetail 
+													WHERE qrgenerate = :tran_id");
+				$getDetailTran->execute([':tran_id' => $dataComing["tran_id"]]);
+				while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
+					$ref_no = time().$lib->randomText('all',3);
+					if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
+						$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
+						$getlastseq_noDest = $cal_dep->getLastSeqNo($deptaccount_no);
+						$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$vccAccID,'DTE',
+						$rowDetail["qrtransferdt_amt"],0,$dateOper,$config,$log,$dataComing["bank_ref"],$payload,
+						$arrDpSlip[$rowDetail["ref_account"]],$lib,$getlastseq_noDest["MAX_SEQ_NO"],"TransactionDeposit",null,'006');
+						if($depositMoney["RESULT"]){
+						}else{
+							$conoracle->rollback();
+							$conmysql->rollback();
+							$arrayResult['RESPONSE_CODE'] = $depositMoney["RESPONSE_CODE"];
+							if($depositMoney["RESPONSE_CODE"] == "WS0056"){
+								$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($depositMoney["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+							}else{
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							}
+							$arrayResult['RESULT'] = FALSE;
+							ob_flush();
+							echo json_encode($arrayResult);
+							exit();
+						}
+					}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
+						$dataCont = $cal_loan->getContstantLoanContract($rowDetail["ref_account"]);
+						$int_return = $dataCont["INTEREST_RETURN"];
+						if($rowDetail["qrtransferdt_amt"] > $dataCont["INTEREST_ARREAR"]){
+							$intarrear = $dataCont["INTEREST_ARREAR"];
+						}else{
+							$intarrear = $rowDetail["qrtransferdt_amt"];
+						}
+						$int_returnSrc = 0;
+						$int_returnFull = 0;
+						$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+						$interestFull = $interest;
+						$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+						if($interestPeriod < 0){
+							$interestPeriod = 0;
+						}
+						if($interest > 0){
+							if($rowDetail["qrtransferdt_amt"] < $interest){
+								$interest = $rowDetail["qrtransferdt_amt"];
+							}else{
+								$prinPay = $rowDetail["qrtransferdt_amt"] - $interest;
+							}
+							if($prinPay < 0){
+								$prinPay = 0;
+							}
+						}else{
+							$prinPay = $rowDetail["qrtransferdt_amt"];
+						}
+						if($dataCont["CHECK_KEEPING"] == '0'){
+							if($dataCont["SPACE_KEEPING"] != 0){
+								$int_returnSrc = 0;
+								$int_returnFull = $int_returnSrc;
 							}
 						}
-					}
-					$getNameMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname
-														FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-														WHERE mb.member_no = :member_no");
-					$getNameMember->execute([':member_no' => $dataComing["member_no"]]);
-					$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
-					$arrayResult['RECEIVE_NAME'] = $rowName["PRENAME_SHORT"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-					$arrayResult['COOP_ACCOUNT_NO'] = $coop_account_no;
-					$arrayResult['RESULT'] = TRUE;
-					ob_flush();
-					echo json_encode($arrayResult);
-					exit();
-					
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS0041";
-					$arrayStruc = [
-						':member_no' => $dataComing["member_no"],
-						':id_userlogin' => '5',
-						':operate_date' => $dateOper,
-						':sigma_key' => 'billpayment',
-						':amt_transfer' => $amt_transfer,
-						':response_code' => $responseSoap->msg_status,
-						':response_message' => $responseSoap->msg_output
-					];
-					$log->writeLog('deposittrans',$arrayStruc);
-					if(strpos($responseSoap->msg_output,'จำนวนเงินฝากขั้นต่ำ') === FALSE){
+						$paykeepingdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
+						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
+						$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
+						if($paykeepingdet["RESULT"]){
+							$ref_noLN = time().$lib->randomText('all',3);
+							$repayloan = $cal_loan->repayLoan($conoracle,$rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"],0,$config,$payinslipdoc_no,$dateOper,
+							$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_noLN,$payload["app_version"]);
+							if($repayloan["RESULT"]){
+							}else{
+								$conoracle->rollback();
+								$conmysql->rollback();
+								$arrayResult['RESPONSE_CODE'] = $repayloan["RESPONSE_CODE"];
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								ob_flush();
+								echo json_encode($arrayResult);
+								exit();
+							}
+						}else{
+							$conoracle->rollback();
+							$conmysql->rollback();
+							$arrayResult['RESPONSE_CODE'] = $paykeepingdet["RESPONSE_CODE"];
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							ob_flush();
+							echo json_encode($arrayResult);
+							exit();
+						}
+					}else{
+						$conoracle->rollback();
+						$conmysql->rollback();
+						$arrayResult['RESPONSE_CODE'] = "WS0096";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = preg_replace('/[\/"]/', '', $responseSoap->msg_output);
-						$arrayResult['RESULT'] = FALSE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
 					}
-					$arrayResult['RESPONSE_MESSAGE_SOURCE'] = preg_replace('/[\/"]/', '', $responseSoap->msg_output);
-					ob_flush();
-					echo json_encode($arrayResult);
-					exit();
-					
 				}
-			}catch(SoapFault $e){
-				$arrayResult['RESPONSE_CODE'] = "WS0041";
-				$arrayStruc = [
-					':member_no' => $dataComing["member_no"],
-					':id_userlogin' => null,
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+															coop_slip_no,id_userlogin,ref_no_source)
+															VALUES(:ref_no,:slip_type,:from_account,:destination,'5',:amount,:penalty_amt,
+															:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:source_no)");
+				$insertTransactionLog->execute([
+					':ref_no' => $ref_no,
+					':slip_type' => 'DTE',
+					':from_account' => $dataComing["bank_ref"],
+					':destination' => $dataComing["tran_id"],
+					':amount' => $dataComing["amt_transfer"],
+					':penalty_amt' => 0,
+					':amount_receive' => $dataComing["qrtransferdt_amt"],
 					':operate_date' => $dateOper,
-					':sigma_key' => 'billpayment',
-					':amt_transfer' => $amt_transfer,
-					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $e->getMessage()
-				];
-				$log->writeLog('deposittrans',$arrayStruc);
-				$message_error = "ไม่สามารถฝากเงินได้ สาเหตุเพราะ ".$e->getMessage();
-				$lib->sendLineNotify($message_error);
+					':member_no' => $payload["member_no"],
+					':slip_no' => $payinslip_no,
+					':source_no' => $dataComing["source_ref"],
+					':id_userlogin' => $payload["id_userlogin"]
+				]);
+				$conoracle->commit();
+				$conmysql->commit();
+				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
+				$templateMessage = $func->getTemplateSystem("Billpayment",1);
+				$dataMerge = array();
+				$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+				$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+				foreach($arrToken["LIST_SEND"] as $dest){
+					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+						$arrMessage["BODY"] = $message_endpoint["BODY"];
+						$arrMessage["PATH_IMAGE"] = null;
+						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = 'system';
+						$arrPayloadNotify["TYPE_NOTIFY"] = '2';
+						if($func->insertHistory($arrPayloadNotify,'2')){
+							$lib->sendNotify($arrPayloadNotify,"person");
+						}
+					}
+				}
+				foreach($arrToken["LIST_SEND_HW"] as $dest){
+					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+						$arrMessage["BODY"] = $message_endpoint["BODY"];
+						$arrMessage["PATH_IMAGE"] = null;
+						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = 'system';
+						$arrPayloadNotify["TYPE_NOTIFY"] = '2';
+						if($func->insertHistory($arrPayloadNotify,'2')){
+							$lib->sendNotifyHW($arrPayloadNotify,"person");
+						}
+					}
+				}
+				$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
+				$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
+				$arrayResult['RESULT'] = TRUE;
+				ob_flush();
+				echo json_encode($arrayResult);
+				exit();
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0109";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = preg_replace('/[\/"]/', '', $e->getMessage());
 				$arrayResult['RESULT'] = FALSE;
 				ob_flush();
 				echo json_encode($arrayResult);
 				exit();
-				
 			}
-		}catch(Throwable $e) {
-			$arrayResult["RESPONSE_CODE"] = 'WS9999';
-			$arrayStruc = [
-				':member_no' => $dataComing["member_no"],
-				':id_userlogin' => null,
-				':operate_date' => $dateOper,
-				':sigma_key' => 'billpayment',
-				':amt_transfer' => $amt_transfer,
-				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $e->getMessage()
-			];
-			$log->writeLog('deposittrans',$arrayStruc);
-			$message_error = "ไม่สามารถฝากเงินได้ สาเหตุเพราะ ".$e->getMessage();
-			$lib->sendLineNotify($message_error);
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0108";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESPONSE_MESSAGE_SOURCE'] = preg_replace('/[\/"]/', '', $e->getMessage());
 			$arrayResult['RESULT'] = FALSE;
 			ob_flush();
 			echo json_encode($arrayResult);
 			exit();
-			
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0096";
+		$arrayResult['RESPONSE_CODE'] = "WS0107";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 		$arrayResult['RESULT'] = FALSE;

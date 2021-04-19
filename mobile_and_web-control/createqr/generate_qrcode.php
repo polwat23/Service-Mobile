@@ -21,13 +21,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$expireDate = date_format($expireDate,"Y-m-d H:i:s");
 		}
-		$insertQrMaster = $conmysql->prepare("INSERT INTO gcqrcodegenmaster(qrgenerate, member_no, generate_date, expire_date) 
-												VALUES (:qrgenerate,:member_no,:generate_date,:expire_date)");
+		$insertQrMaster = $conmysql->prepare("INSERT INTO gcqrcodegenmaster(qrgenerate, member_no, generate_date, expire_date,id_userlogin,app_version) 
+												VALUES (:qrgenerate,:member_no,:generate_date,:expire_date,:id_userlogin,:app_version)");
 		if($insertQrMaster->execute([
 			':qrgenerate' => $randQrRef,
-			':member_no' => $member_no,
+			':member_no' => $payload["member_no"],
 			':generate_date' => date_format($currentDate,"Y-m-d H:i:s"),
-			':expire_date' => $expireDate
+			':expire_date' => $expireDate,
+			':id_userlogin' => $payload["id_userlogin"],
+			':app_version' => $dataComing["app_version"]
 		])){
 			//insert success
 			foreach ($dataComing["transList"] as $transValue) {

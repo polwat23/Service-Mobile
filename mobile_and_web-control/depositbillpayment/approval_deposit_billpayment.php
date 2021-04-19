@@ -3,6 +3,7 @@ ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
+	$lang_locale = 'en';
 	$checkBillAvailable = $conmysql->prepare("SELECT transfer_status,expire_date FROM gcqrcodegenmaster 
 											WHERE qrgenerate = :tran_id and member_no = :member_no");
 	$checkBillAvailable->execute([
@@ -44,13 +45,29 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 							exit();
 						}
 					}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
-						
+						$fetchLoanRepay = $conoracle->prepare("SELECT PRINCIPAL_BALANCE,INTEREST_RETURN,RKEEP_PRINCIPAL
+																FROM lncontmaster
+																WHERE loancontract_no = :loancontract_no");
+						$fetchLoanRepay->execute([':loancontract_no' => $rowDetail["ref_account"]]);
+						$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
+						$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+						if($rowDetail["qrtransferdt_amt"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+							$arrayResult['RESPONSE_CODE'] = "WS0098";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							ob_flush();
+							echo json_encode($arrayResult);
+							exit();
+						}
 					}
 				}
+				$arrayResult['RESULT'] = TRUE;
+				ob_flush();
+				echo json_encode($arrayResult);
+				exit();
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0109";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 				$arrayResult['RESULT'] = FALSE;
 				ob_flush();
 				echo json_encode($arrayResult);
@@ -59,7 +76,6 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0108";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 			$arrayResult['RESULT'] = FALSE;
 			ob_flush();
 			echo json_encode($arrayResult);
@@ -68,7 +84,6 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0107";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 		$arrayResult['RESULT'] = FALSE;
 		ob_flush();
 		echo json_encode($arrayResult);
@@ -87,7 +102,6 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-	$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	ob_flush();
