@@ -38,6 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['ref_trans'] = $ref_no;
 		$refbank_no = null;
 		$etnrefbank_no = null;
+		$vccAccID = null;
 		if($rowDataWithdraw["bank_code"] == '004'){
 			$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
 			$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
@@ -45,10 +46,12 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrVerifyToken['dept_account_enc'] = $dataComing["dept_account_enc"];
 			$refbank_no = $dataComing["kbank_ref_no"];
 		}else if($rowDataWithdraw["bank_code"] == '006'){
+			$vccAccID = $func->getConstant('map_account_id_ktb');
 			$arrVerifyToken['tran_date'] = $dateOper;
 			$arrVerifyToken['bank_account'] = $rowDataWithdraw["deptaccount_no_bank"];
 			$arrVerifyToken['citizen_id'] = $rowDataWithdraw["citizen_id"];
 		}else if($rowDataWithdraw["bank_code"] == '025'){
+			$vccAccID = $func->getConstant('map_account_id_bay');
 			$arrVerifyToken['etn_trans'] = $dataComing["ETN_REFNO"];
 			$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
 			$refbank_no = $dataComing["SOURCE_REFNO"];
@@ -58,131 +61,26 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		// Withdraw Inside --------------------------------------
-		$fetchDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
-		$fetchDepttype->execute([':deptaccount_no' => $coop_account_no]);
-		$rowDataDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC);
-		$arrayGroup = array();
-		$arrayGroup["account_id"] = $func->getConstant("operative_account");
-		$arrayGroup["action_status"] = "1";
-		$arrayGroup["atm_no"] = "MOBILE";
-		$arrayGroup["atm_seqno"] = "";
-		$arrayGroup["aviable_amt"] = null;
-		$arrayGroup["bank_accid"] = $rowDataWithdraw["deptaccount_no_bank"];
-		$arrayGroup["bank_cd"] = $rowDataWithdraw["bank_code"];
-		$arrayGroup["branch_cd"] = null;
-		$arrayGroup["coop_code"] = $config["COOP_KEY"];
-		$arrayGroup["coop_id"] = $config["COOP_ID"];
-		$arrayGroup["deptaccount_no"] = $coop_account_no;
-		$arrayGroup["depttype_code"] = $rowDataDepttype["DEPTTYPE_CODE"];
-		$arrayGroup["entry_id"] = "MOBILE";
-		$arrayGroup["fee_amt"] = $fee_amt;
-		$arrayGroup["feeinclude_status"] = $penalty_include;
-		$arrayGroup["item_amt"] = $amt_transfer;
-		$arrayGroup["member_no"] = $member_no;
-		$arrayGroup["moneytype_code"] = "CBT";
-		$arrayGroup["msg_output"] = null;
-		$arrayGroup["msg_status"] = null;
-		$arrayGroup["operate_date"] = $dateOperC;
-		$arrayGroup["oprate_cd"] = "003";
-		$arrayGroup["post_status"] = "1";
-		$arrayGroup["principal_amt"] = null;
-		$arrayGroup["ref_slipno"] = null;
-		$arrayGroup["slipitemtype_code"] = $rowDataWithdraw["itemtype_wtd"];
-		$arrayGroup["stmtitemtype_code"] = $rowDataWithdraw["itemtype_wtd"];
-		$arrayGroup["system_cd"] = "02";
-		$arrayGroup["withdrawable_amt"] = null;
-		$ref_slipno = null;
-		try{
-			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl",array(
-					'keep_alive' => false,
-					'connection_timeout' => 900
-			));
-			try {
-				$argumentWS = [
-					"as_wspass" => $config["WS_STRC_DB"],
-					"astr_dept_inf_serv" => $arrayGroup
-				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoap = $resultWS->of_dept_inf_servResult;
-				if($responseSoap->msg_status != '0000'){
-					$arrayResult['RESPONSE_CODE'] = "WS0041";
-					$arrayStruc = [
-						':member_no' => $payload["member_no"],
-						':id_userlogin' => $payload["id_userlogin"],
-						':operate_date' => $dateOper,
-						':amt_transfer' => $dataComing["amt_transfer"],
-						':penalty_amt' => $dataComing["penalty_amt"],
-						':fee_amt' => $dataComing["fee_amt"],
-						':deptaccount_no' => $coop_account_no,
-						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => $responseSoap->msg_output
-					];
-					$log->writeLog('withdrawtrans',$arrayStruc);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-				$ref_slipno = $responseSoap->ref_slipno;
-				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
-				$updateSyncNoti->execute([
-					':ref_slipno' => $ref_slipno,
-					':deptaccount_no' => $coop_account_no
-				]);
-			}catch(SoapFault $e){
-				$arrayResult['RESPONSE_CODE'] = "WS0041";
-				$arrayStruc = [
-					':member_no' => $payload["member_no"],
-					':id_userlogin' => $payload["id_userlogin"],
-					':operate_date' => $dateOper,
-					':amt_transfer' => $dataComing["amt_transfer"],
-					':penalty_amt' => $dataComing["penalty_amt"],
-					':fee_amt' => $dataComing["fee_amt"],
-					':deptaccount_no' => $coop_account_no,
-					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $e->getMessage()
-				];
-				$log->writeLog('withdrawtrans',$arrayStruc);
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-			// -----------------------------------------------
+		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$deptslip_no = $arrSlipDPno["SLIP_NO"];
+		if($fee_amt > 0){
+			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
+		}else{
+			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+		}
+		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
+		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
+		$conoracle->beginTransaction();
+		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,'WTX',$dataComing["amt_transfer"],
+		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
+		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+		if($wtdResult["RESULT"]){
+			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
-															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
-															,:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
-				$insertTransactionLog->execute([
-					':ref_no' => $ref_no,
-					':itemtype' => $rowDataWithdraw["itemtype_wtd"],
-					':from_account' => $coop_account_no,
-					':destination' => $rowDataWithdraw["deptaccount_no_bank"],
-					':amount' => $dataComing["amt_transfer"],
-					':fee_amt' => $dataComing["fee_amt"],
-					':penalty_amt' => $dataComing["penalty_amt"],
-					':amount_receive' => $amt_transfer,
-					':oper_date' => $dateOper,
-					':member_no' => $payload["member_no"],
-					':ref_no1' => $coop_account_no,
-					':slip_no' => $ref_slipno,
-					':etn_ref' => $etnrefbank_no,
-					':id_userlogin' => $payload["id_userlogin"],
-					':ref_no_source' => $refbank_no,
-					':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
-				]);
-				$arrayGroup["post_status"] = "-1";
-				$arrayGroup["atm_no"] = $ref_slipno;
-				$argumentWS = [
-						"as_wspass" => $config["WS_STRC_DB"],
-						"astr_dept_inf_serv" => $arrayGroup
-				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0030";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
@@ -206,18 +104,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
-				$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no and deptaccount_no = :deptaccount_no");
-				$fetchSeqno->execute([
-					':deptslip_no' => $ref_slipno,
-					':deptaccount_no' => $coop_account_no
-				]);
-				$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
+				$conoracle->commit();
 				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 													VALUES(:remark,:deptaccount_no,:seq_no)");
 				$insertRemark->execute([
 					':remark' => $dataComing["remark"],
 					':deptaccount_no' => $coop_account_no,
-					':seq_no' => $rowSeqno["SEQ_NO"]
+					':seq_no' => $getlastseq_no["MAX_SEQ_NO"] + 1
 				]);
 				$arrExecute = [
 					':ref_no' => $ref_no,
@@ -286,62 +179,12 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						}
 					}
 				}
-				$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
-				foreach($arrayTel as $dest){
-					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-						$message_body = $message_endpoint["BODY"];
-						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
-						$arraySendSMS = $lib->sendSMS($arrayDest);
-						if($arraySendSMS["RESULT"]){
-							$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
-							$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
-						}else{
-							$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
-									'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
-							$func->logSMSWasNotSent($bulkInsert);
-						}
-					}else{
-						$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
-								'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
-						$func->logSMSWasNotSent($bulkInsert);
-					}
-				}
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
-															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',NOW(),:member_no
-															,:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
-				$insertTransactionLog->execute([
-					':ref_no' => $ref_no,
-					':itemtype' => $rowDataWithdraw["itemtype_wtd"],
-					':from_account' => $coop_account_no,
-					':destination' => $rowDataWithdraw["deptaccount_no_bank"],
-					':amount' => $dataComing["amt_transfer"],
-					':fee_amt' => $dataComing["fee_amt"],
-					':penalty_amt' => $dataComing["penalty_amt"],
-					':amount_receive' => $amt_transfer,
-					':oper_date' => $dateOper,
-					':member_no' => $payload["member_no"],
-					':ref_no1' => $coop_account_no,
-					':slip_no' => $ref_slipno,
-					':etn_ref' => $etnrefbank_no,
-					':id_userlogin' => $payload["id_userlogin"],
-					':ref_no_source' => $refbank_no,
-					':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
-				]);
-				$arrayGroup["post_status"] = "-1";
-				$arrayGroup["atm_no"] = $ref_slipno;
-				$argumentWS = [
-						"as_wspass" => $config["WS_STRC_DB"],
-						"astr_dept_inf_serv" => $arrayGroup
-				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoapCancel = $resultWS->of_dept_inf_servResult;
+				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0037";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
@@ -364,15 +207,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				require_once('../../include/exit_footer.php');
 				
 			}
-		}catch(Throwable $e) {
-			$arrayResult['RESPONSE_CODE'] = "WS0037";
-			$message_error = "ไม่สามารถถอนเงินได้สาเหตุเพราะ ".$e->getMessage();
-			$lib->sendLineNotify($message_error);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
+		}else{
+			$conoracle->rollback();
+			$arrayResult['RESPONSE_CODE'] = "WS0041";
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $dateOper,
+				':amt_transfer' => $dataComing["amt_transfer"],
+				':penalty_amt' => $dataComing["penalty_amt"],
+				':fee_amt' => $dataComing["fee_amt"],
+				':deptaccount_no' => $coop_account_no,
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $wtdResult["ACTION"]
+			];
+			$log->writeLog('withdrawtrans',$arrayStruc);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

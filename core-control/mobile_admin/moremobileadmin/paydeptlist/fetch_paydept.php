@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$getRePayLoan = $conmysql->prepare("SELECT pl.ref_no, pl.from_account, pl.loancontract_no, pl.source_type, pl.amount, pl.fee_amt, 
 											pl.penalty_amt, pl.principal, pl.interest, pl.interest_return, pl.interest_arrear, pl.bfinterest_return, 
 											pl.bfinterest_arrear, pl.bank_code, pl.operate_date, pl.update_date, pl.result_transaction, pl.cancel_date, 
-											pl.member_no, pl.id_userlogin, pl.app_version, pl.is_offset, pl.bfkeeping, cb.bank_short_name 
+											pl.member_no, pl.id_userlogin, pl.app_version, pl.is_offset, pl.bfkeeping, pl.calint_to, cb.bank_short_name
 											FROM gcrepayloan pl
 											LEFT JOIN csbankdisplay cb ON pl.bank_code = cb.bank_code
 										WHERE 1=1 ".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$getRePayLoan = $conmysql->prepare("SELECT pl.ref_no, pl.from_account, pl.loancontract_no, pl.source_type, pl.amount, pl.fee_amt, 
 											pl.penalty_amt, pl.principal, pl.interest, pl.interest_return, pl.interest_arrear, pl.bfinterest_return, 
 											pl.bfinterest_arrear, pl.bank_code, pl.operate_date, pl.update_date, pl.result_transaction, pl.cancel_date, 
-											pl.member_no, pl.id_userlogin, pl.app_version, pl.is_offset, pl.bfkeeping, cb.bank_short_name 
+											pl.member_no, pl.id_userlogin, pl.app_version, pl.is_offset, pl.bfkeeping, pl.calint_to, cb.bank_short_name 
 											FROM gcrepayloan pl
 											LEFT JOIN csbankdisplay cb ON pl.bank_code = cb.bank_code
 										WHERE 1=1 ".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$getRePayLoan = $conmysql->prepare("SELECT pl.ref_no, pl.from_account, pl.loancontract_no, pl.source_type, pl.amount, pl.fee_amt, 
 											pl.penalty_amt, pl.principal, pl.interest, pl.interest_return, pl.interest_arrear, pl.bfinterest_return, 
 											pl.bfinterest_arrear, pl.bank_code, pl.operate_date, pl.update_date, pl.result_transaction, pl.cancel_date, 
-											pl.member_no, pl.id_userlogin, pl.app_version, pl.is_offset, pl.bfkeeping, cb.bank_short_name 
+											pl.member_no, pl.id_userlogin, pl.app_version, pl.is_offset, pl.bfkeeping, pl.calint_to, cb.bank_short_name 
 											FROM gcrepayloan pl
 											LEFT JOIN csbankdisplay cb ON pl.bank_code = cb.bank_code
 										WHERE 1=1 ".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -105,6 +105,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrRePay["APP_VERSION"] = $rowRePayLoan["app_version"];
 			$arrRePay["IS_OFFSET"] = $rowRePayLoan["is_offset"] == '1' ? " ไม่หักกลบ" : "หักกลบสัญญา";
 			$arrRePay["BFKEEPING"] = $rowRePayLoan["bfkeeping"];
+			$arrRePay["CALINT_TO"] = $rowRePayLoan["calint_to"];
 			
 			$arrGrp[] = $arrRePay;
 		}

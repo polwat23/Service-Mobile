@@ -82,11 +82,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			if(isset($rowDetail["DESCRIPTION"])){
-				$arrDetail["TYPE_DESC"] = $rowDetail["DESCRIPTION"];
-			}else{
-				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
-			}
+			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){

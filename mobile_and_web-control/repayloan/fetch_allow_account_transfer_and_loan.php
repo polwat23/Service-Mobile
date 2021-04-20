@@ -23,6 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
+		$arrLoanGrp = array();
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
@@ -100,6 +101,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['LOAN'] = $arrLoanGrp;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
+				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

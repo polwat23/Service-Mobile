@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 															ORDER BY ref_no DESC LIMIT ".$rownum);
 		$fetchTransList->execute([
 			':member_no' => $payload["member_no"],
-			':deptaccount_no' => preg_replace('/-/','',$dataComing["deptaccount_no"])
+			':deptaccount_no' => $dataComing["deptaccount_no"]
 		]);
 		if($dataComing["source_type"] == "coop"){
 			$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account,bank_format_account_hide FROM csbankdisplay WHERE bank_code = '004' ");

@@ -10,17 +10,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayDeposit = array();
 		$arrayWithdraw = array();
 		$formatDept = $func->getConstant('dep_format');
-		$getTaskSchedulerList = $conmysql->prepare("SELECT transaction_type,from_account,destination,scheduler_date,transaction_date,amt_transfer,
+		$getTaskSchedulerList = $conmysql->prepare("SELECT id_transchedule,transaction_type,from_account,destination,scheduler_date,transaction_date,amt_transfer,
 													bank_code,scheduler_status,scheduler_type,end_date FROM gctransactionschedule 
 													WHERE member_no = :member_no");
 		$getTaskSchedulerList->execute([':member_no' => $payload["member_no"]]);
 		while($rowTask = $getTaskSchedulerList->fetch(PDO::FETCH_ASSOC)){
 			$arrayTaskList = array();
+			$arrayTaskList["ID_TRANSCHEDULE"] = $rowTask["id_transchedule"];
 			$arrayTaskList["SCHEDULER_TYPE"] = $rowTask["scheduler_type"];
 			$arrayTaskList["SCHEDULER_STATUS"] = $rowTask["scheduler_status"];
 			if($rowTask["scheduler_type"] == '2'){
 				$arrayTaskList["START_DATE"] = $lib->convertdate($rowTask["scheduler_date"],'d M Y');
-				$arrayTaskList["END_DATE"] = $lib->convertdate($rowTask["end_date"],'d M Y');
+				$arrayTaskList["END_DATE"] = !empty($rowTask["end_date"]) ? $lib->convertdate($rowTask["end_date"],'d M Y') : NULL;
 			}
 			$arrayTaskList["SCHEDULER_DATE"] = $lib->convertdate($rowTask["scheduler_date"],'d M Y');
 			if($rowTask["scheduler_status"] == '1' && $rowTask["scheduler_status"] == '-99'){
@@ -56,10 +57,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		$arrayResult['TRANSFER'] = $arrayTransfer;
-		$arrayResult['REPAYLOAN'] = $arrayRepayLoan;
-		$arrayResult['BUYSHARE'] = $arrayBuyShare;
-		$arrayResult['DEPOSIT'] = $arrayDeposit;
-		$arrayResult['WITHDRAW'] = $arrayWithdraw;
+		//$arrayResult['REPAYLOAN'] = $arrayRepayLoan;
+		//$arrayResult['BUYSHARE'] = $arrayBuyShare;
+		//$arrayResult['DEPOSIT'] = $arrayDeposit;
+		//$arrayResult['WITHDRAW'] = $arrayWithdraw;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
