@@ -121,6 +121,7 @@
 	"WS1009" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถตั้ง Pin ได้กรุณาติดต่อสหกรณ์ #WS1009","en" : "Something was wronged that cannot set Pin please contact cooperative #WS1009"}],
 	"WS1011" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถบันทึก OTP ได้กรุณาติดต่อเจ้าหน้าที่สหกรณ์ #WS1011","en" : "Something was wronged that cannot save OTP please contact cooperative #WS1011"}],
 	"WS1012" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนรหัสผ่านได้กรุณาติดต่อสหกรณ์ #WS1012","en" : "Something was wronged that cannot change password please contact cooperative #WS1012"}],
+	"WS1013" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถสร้าง QR Code ได้ กรุณาลองใหม่อีกครั้ง #WS1013","en" : "Something was wronged that cannot generate QR Code please try again #WS1013"}],
 	"WS1014" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถขอรหัสผ่านชั่วคราวได้ กรุณาติดต่อสหกรณ์ #WS1014","en" : "Something was wronged that cannot request temp password please contact cooperative #WS1014"}],
 	"WS1015" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยน Pin ได้กรุณาติดต่อสหกรณ์ #WS1015","en" : "Something was wronged that cannot change Pin please contact cooperative #WS1015"}],
 	"WS1016" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถรีเซ็ต Pin ได้กรุณาติดต่อสหกรณ์ #WS1016","en" : "Something was wronged that cannot reset Pin please contact cooperative #WS1016"}],
