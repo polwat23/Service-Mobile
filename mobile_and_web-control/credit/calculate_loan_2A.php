@@ -53,7 +53,7 @@ if($age_member >= 3){
 	$arrOtherInfo[] = $arrSubOther;
 }else{
 	$maxloan_amt = 0;
-	$arrSubOther["LABEL"] = "ต้องเป็นสมาชิกอย่างน้อย 3 ปีขึ้นไป";
+	$arrSubOther["LABEL"] = "ต้องเป็นสมาชิกอย่างน้อย 6 เดือนขึ้นไป";
 	$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 	$arrCollShould[] = $arrSubOther;
 }

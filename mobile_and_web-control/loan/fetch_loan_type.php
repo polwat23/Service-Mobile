@@ -5,7 +5,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllLoan = array();
-		$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE member_no = :member_no and contract_status = 1");
+		$getSumAllContract = $conoracle->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE member_no = :member_no 
+												and contract_status > 0 and contract_status <> 8");
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
@@ -26,7 +27,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE rownum <= 1");
 			$getIntRate->execute([':loantype_code' => $rowContract["LOANTYPE_CODE"]]);
 			$rowIntRate = $getIntRate->fetch(PDO::FETCH_ASSOC);
-			$arrContract["INT_RATE"] = ($rowIntRate["INTEREST_RATE"] * 100)."%";
+			$getIntSpc = $conoracle->prepare("SELECT LN.INTRATE_INCREASE FROM lnloantypeintspc,
+											(SELECT inttime_amt,INTRATE_INCREASE FROM lnloantypeintspc WHERE loantype_code = :loantype_code ORDER BY inttime_amt ASC) LN 
+											WHERE loantype_code = :loantype_code and :period <= LN.inttime_amt and rownum <= 1");
+			$getIntSpc->execute([
+				':loantype_code' => $rowContract["LOANTYPE_CODE"],
+				':period' => $rowContract["LAST_PERIOD"]
+			]);
+			$rowIntSpc = $getIntSpc->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowIntSpc["INTRATE_INCREASE"]) && $rowIntSpc["INTRATE_INCREASE"] != ""){
+				$arrContract["INT_RATE"] = (($rowIntRate["INTEREST_RATE"] * 100) - $rowIntSpc["INTRATE_INCREASE"])."%";
+			}else{
+				$arrContract["INT_RATE"] = ($rowIntRate["INTEREST_RATE"] * 100)."%";
+			}
 			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
