@@ -66,6 +66,8 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 				echo json_encode($arrayResult);
 				exit();
 			}else{
+				$updateQRExpire = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '-9' WHERE qrgenerate = :tran_id");
+				$updateQRExpire->execute([':tran_id' => $dataComing["tran_id"]]);
 				$arrayResult['RESPONSE_CODE'] = "WS0109";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

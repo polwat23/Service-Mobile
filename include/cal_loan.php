@@ -211,7 +211,7 @@ class CalculateLoan {
 		$constLoanContractCont = $getLoanConstant->fetch(\PDO::FETCH_ASSOC);
 		return $constLoanContractCont;
 	}
-	public function repayLoan($conoracle,$contract_no,$amt_transfer,$penalty_amt,$config,$arrSlipDocNo,$operate_date,
+	public function repayLoan($conoracle,$contract_no,$amt_transfer,$penalty_amt,$config,$slipdocno,$operate_date,
 	$tofrom_accid,$slipwtd,$log,$lib,$payload,$from_account_no,$lnslip_no,$member_no,$ref_no,$app_version){
 		$dataCont = $this->getContstantLoanContract($contract_no);
 		$int_return = $dataCont["INTEREST_RETURN"];
@@ -262,7 +262,7 @@ class CalculateLoan {
 				':loancontract_no' => $contract_no,
 				':lastseq_no' => $dataCont["LAST_STM_NO"] + 1,
 				':stm_itemtype' => 'LPX',
-				':document_no' => $arrSlipDocNo["SLIP_NO"],
+				':document_no' => $slipdocno,
 				':lastperiod' => $lastperiod,
 				':prin_pay' => $prinPay,
 				':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] - $prinPay,
