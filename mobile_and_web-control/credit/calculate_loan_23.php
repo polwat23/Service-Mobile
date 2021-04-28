@@ -10,11 +10,13 @@ $request_amt = 0;
 $arrSubOtherInfo = array();
 $arrSubOtherInfoSalaryRemain = array();
 
-$getMemberData = $conoracle->prepare("SELECT member_date,salary_amount FROM mbmembmaster WHERE member_no = :member_no");
+$getMemberData = $conoracle->prepare("SELECT salary_amount FROM mbmembmaster WHERE member_no = :member_no");
 $getMemberData->execute([':member_no' => $member_no]);
 $rowMembData = $getMemberData->fetch(PDO::FETCH_ASSOC);
-$duration_month = $lib->count_duration($rowMembData["MEMBER_DATE"],'m');
-if($duration_month <= 3){
+$getSharePeriod = $conoracle->prepare("SELECT LAST_PERIOD FROM shsharemaster WHERE member_no = :member_no");
+$getSharePeriod->execute([':member_no' => $member_no]);
+$rowShare = $getSharePeriod->fetch(PDO::FETCH_ASSOC);
+if($rowShare < 3){
 	$maxloan_amt = 0;
 	return;
 }
