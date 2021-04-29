@@ -133,6 +133,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
+						$arrayResult['bank_code'] = $rowBankDisplay["bank_code"];
 						$arrayResult['FEE_AMT'] = $arrResponse->FEE_AMT;
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 						$arrayResult['SOURCE_REFNO'] = $arrResponse->SOURCE_REFNO;
@@ -164,10 +165,12 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 						$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 					}
+					$arrayResult['bank_code'] = $rowBankDisplay["bank_code"];
 					$arrayResult['ACCOUNT_NAME'] = $account_name_th;
 					$arrayResult['RESULT'] = TRUE;
 				}
 			}else{
+				$arrayResult['bank_code'] = $rowBankDisplay["bank_code"];
 				$arrayResult['ACCOUNT_NAME'] = $account_name_th;
 				$arrayResult['RESULT'] = TRUE;
 			}

@@ -35,7 +35,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayTaskList["DESTINATION_ACCOUNT_NAME"] = $dataDep["DEPTACCOUNT_NAME"];
 				$arrayTransfer[] = $arrayTaskList;
 			}else if($rowTask["transaction_type"] == '2'){
-				$arrayTaskList["FROM_ACCOUNT"] = $lib->formataccount($rowTask["from_account"],$formatDept);
+				if(isset($rowTask["bank_code"])){
+					$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,csb.bank_short_name,csb.bank_logo_path,gba.bank_account_name
+																FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+																WHERE gba.id_bindaccount = :id_bindaccount and gba.bindaccount_status = '1'");
+					$fetchAccountBeenBind->execute([
+						':id_bindaccount' => $rowTask["from_account"]
+					]);
+					if($fetchAccountBeenBind->rowCount() > 0){
+						$rowFetchAcc = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC);
+						if($rowTask["bank_code"] == '025'){
+							$arrayTaskList["FROM_ACCOUNT"] = $rowFetchAcc["deptaccount_no_bank"];
+						}else{
+							$arrayTaskList["FROM_ACCOUNT"] = $lib->formataccount($rowFetchAcc["deptaccount_no_bank"],$formatDept);
+						}
+					}
+				}else{
+					$arrayTaskList["FROM_ACCOUNT"] = $lib->formataccount($rowTask["from_account"],$formatDept);
+				}
 				$arrayTaskList["DESTINATION"] = $rowTask["destination"];
 				$dataLoan = $cal_loan->getContstantLoanContract($rowTask["destination"]);
 				$arrayTaskList["LOANTYPE_DESC"] = $dataLoan["LOANTYPE_DESC"];
