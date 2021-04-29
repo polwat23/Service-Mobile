@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','extramonthlypaymentmember')){
+	if($func->check_permission_core($payload,'mobileadmin','extramonthlypaymentmembers')){
 		$arrayGroup = array();
 		$arrayAllGroup = array();
 		
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupUserAcount = array();
 			$arrGroupUserAcount["ID_EXTRAPAYMENT"] = $rowUserGroup["id_extrapayment"];
 			$arrGroupUserAcount["MEMBGROUP_CODE"] = $rowUserGroup["membgroup_code"];
-			$arrGroupUserAcount["MEMBGROUP_DESC"] = $arrayAllGroup[$rowUserGroup["membgroup_code"]]["MEMBGROUP_DESC"];
+			$arrGroupUserAcount["MEMBGROUP_DESC"] = $rowUserGroup["membgroup_code"].' - '.$arrayAllGroup[$rowUserGroup["membgroup_code"]]["MEMBGROUP_DESC"];
 			$arrGroupUserAcount["IS_USE"] = $rowUserGroup["is_use"] == '1';
 			
 			$arrayGroup[] = $arrGroupUserAcount;

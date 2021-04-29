@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','membgroup_code','checked'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','extramonthlypaymentmember')){
+	if($func->check_permission_core($payload,'mobileadmin','extramonthlypaymentmembers')){
 		$arrayGroup = array();
 		
 		$fetchUserGroup = $conmysql->prepare("SELECT id_extrapayment, membgroup_code, is_use FROM gcextrapaymentmembergroup WHERE membgroup_code = :membgroup_code");

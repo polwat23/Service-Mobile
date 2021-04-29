@@ -16,10 +16,22 @@ $dbname = "(DESCRIPTION =
 $conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
 $conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
 $conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
-if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','deptaccount_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$from_account_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		$getBankDisplay = $conmysql->prepare("SELECT cs.link_deposit_coopdirect,cs.bank_short_ename,gc.bank_code,
+												cs.fee_deposit,cs.bank_short_ename,gc.deptaccount_no_bank
+												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
+												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
+		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
+		$rowBankDisplay = $getBankDisplay->fetch(PDO::FETCH_ASSOC);
+		$vccAccID = null;
+		if($rowBankDisplay["bank_code"] == '025'){
+			$vccAccID = $func->getConstant('map_account_id_bay');
+		}else if($rowBankDisplay["bank_code"] == '006'){
+			$vccAccID = $func->getConstant('map_account_id_ktb');
+		}
+		$from_account_no = $rowBankDisplay["deptaccount_no_bank"];
 		$itemtypeWithdraw = 'WFS';
 		$ref_no = time().$lib->randomText('all',3);
 		$dateOper = date('c');
@@ -62,8 +74,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 			}
 		}
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
-		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
-		$destvcid = $cal_dep->getVcMapID($dataCont["LOANTYPE_CODE"],'LON');
 		$checkSeqAmtSrc = $cal_dep->getSequestAmt($from_account_no,$itemtypeWithdraw);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
 			if($constFromAcc["MINPRNCBAL"] > $constFromAcc["PRNCBAL"] - ($checkSeqAmtSrc["SEQUEST_AMOUNT"] + $constFromAcc["CHECKPEND_AMT"] + $dataComing["amt_transfer"])){
@@ -74,7 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 			}
 			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
-			if($dataComing["penalty_amt"] > 0){
+			if($dataComing["fee_amt"] > 0){
 				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
 			}else{
 				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
@@ -93,47 +103,85 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 			$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
 			$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 			$conoracle->beginTransaction();
-			$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
-			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
-			if($wtdResult["RESULT"]){
-				$payslip = $cal_loan->paySlip($conoracle,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
-				$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
-				if($payslip["RESULT"]){
-					$payslipdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
-					$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
-					$intarrear,$int_returnSrc,$interestPeriod,'1');
-					if($payslipdet["RESULT"]){
-						$repayloan = $cal_loan->repayLoan($conoracle,$dataComing["contract_no"],$dataComing["amt_transfer"],$dataComing["penalty_amt"],
-						$config,$payinslipdoc_no,$dateOperC,
-						$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$dataComing["app_version"]);
-						if($repayloan["RESULT"]){
-							$conoracle->commit();
-							$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-																VALUES(:remark,:deptaccount_no,:seq_no)");
-							$insertRemark->execute([
-								':remark' => $dataComing["remark"],
-								':deptaccount_no' => $from_account_no,
-								':seq_no' => $getlastseq_no["MAX_SEQ_NO"] + 1
-							]);
+			$conmysql->beginTransaction();
+			$payslip = $cal_loan->paySlip($conoracle,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
+			$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
+			if($payslip["RESULT"]){
+				$payslipdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
+				$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
+				$intarrear,$int_returnSrc,$interestPeriod,'1');
+				if($payslipdet["RESULT"]){
+					$repayloan = $cal_loan->repayLoan($conoracle,$dataComing["contract_no"],$dataComing["amt_transfer"],0,
+					$config,$payinslipdoc_no,$dateOperC,
+					$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$dataComing["app_version"],$dataComing["fee_amt"]);
+					if($repayloan["RESULT"]){
+						$arrSendData = array();
+						$arrVerifyToken['exp'] = time() + 300;
+						$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
+						$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+						$arrVerifyToken['amt_transfer'] = $dataComing["amt_transfer"];
+						$arrVerifyToken['operate_date'] = $dateOperC;
+						$arrVerifyToken['ref_trans'] = $ref_no;
+						$arrVerifyToken['coop_account_no'] = null;
+						if($rowBankDisplay["bank_code"] == '025'){
+							$arrVerifyToken['etn_trans'] = $dataComing["ETN_REFNO"];
+							$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
+						}
+						$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
+						$arrSendData["verify_token"] = $verify_token;
+						$arrSendData["app_id"] = $config["APP_ID"];
+						// Deposit Inside --------------------------------------
+						$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowBankDisplay["link_deposit_coopdirect"],$arrSendData);
+						if(!$responseAPI["RESULT"]){
+							$conoracle->rollback();
+							$conmysql->rollback();
+							$filename = basename(__FILE__, '.php');
+							$arrayResult['RESPONSE_CODE'] = "WS0027";
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => $dateOperC,
+								':sigma_key' => $dataComing["sigma_key"],
+								':amt_transfer' => $rowReceiveAmt["RECEIVE_AMT"],
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
+							];
+							$log->writeLog('deposittrans',$arrayStruc);
+							$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
+							$lib->sendLineNotify($message_error);
+							$func->MaintenanceMenu($dataComing["menu_component"]);
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+							
+						}
+						$arrResponse = json_decode($responseAPI);
+						if($arrResponse->RESULT){
+							$transaction_no = $arrResponse->TRANSACTION_NO;
+							$etn_ref = $arrResponse->EXTERNAL_REF;
 							$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
 																		destination,transfer_mode
-																		,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-																		coop_slip_no,id_userlogin,ref_no_source)
-																		VALUES(:ref_no,:slip_type,:from_account,'3',:destination,'2',:amount,:penalty_amt,
-																		:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
+																		,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																		etn_refno,id_userlogin,ref_no_source,bank_code)
+																		VALUES(:ref_no,:slip_type,:from_account,'3',:destination,'2',:amount,:fee_amt,
+																		:amount_receive,'-1',:operate_date,'1',:member_no,:etn_refno,:id_userlogin,:ref_no_source,:bank_code)");
 							$insertTransactionLog->execute([
 								':ref_no' => $ref_no,
 								':slip_type' => $itemtypeWithdraw,
 								':from_account' => $from_account_no,
 								':destination' => $dataComing["contract_no"],
 								':amount' => $dataComing["amt_transfer"],
-								':penalty_amt' => $dataComing["penalty_amt"],
-								':amount_receive' => $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
+								':fee_amt' => $dataComing["fee_amt"],
+								':amount_receive' => $dataComing["amt_transfer"] - $dataComing["fee_amt"],
 								':operate_date' => $dateOperC,
 								':member_no' => $payload["member_no"],
-								':slip_no' => $wtdResult["DEPTSLIP_NO"],
-								':id_userlogin' => $payload["id_userlogin"]
+								':etn_refno' => $etn_ref,
+								':id_userlogin' => $payload["id_userlogin"],
+								':ref_no_source' => $transaction_no,
+								':bank_code' => $rowBankDisplay["bank_code"]
 							]);
+							$conoracle->commit();
+							$conmysql->commit();
 							$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 							$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 							$dataMerge = array();
@@ -182,45 +230,48 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							require_once('../../include/exit_footer.php');
 						}else{
 							$conoracle->rollback();
-							$arrayResult['RESPONSE_CODE'] = $repayloan["RESPONSE_CODE"];
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$conmysql->rollback();
+							$arrayResult['RESPONSE_CODE'] = "WS0038";
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => $dateOperC,
+								':sigma_key' => $dataComing["sigma_key"],
+								':amt_transfer' => $rowReceiveAmt["RECEIVE_AMT"],
+								':response_code' => $arrResponse->RESPONSE_CODE,
+								':response_message' => $arrResponse->RESPONSE_MESSAGE
+							];
+							$log->writeLog('deposittrans',$arrayStruc);
+							if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+							}else{
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							}
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../include/exit_footer.php');
+							
 						}
 					}else{
 						$conoracle->rollback();
-						$arrayResult['RESPONSE_CODE'] = $payslipdet["RESPONSE_CODE"];
+						$conmysql->rollback();
+						$arrayResult['RESPONSE_CODE'] = $repayloan["RESPONSE_CODE"];
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 					}
 				}else{
 					$conoracle->rollback();
-					$arrayResult['RESPONSE_CODE'] = $payslip["RESPONSE_CODE"];
+					$conmysql->rollback();
+					$arrayResult['RESPONSE_CODE'] = $payslipdet["RESPONSE_CODE"];
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 				}
 			}else{
 				$conoracle->rollback();
-				$arrayResult['RESPONSE_CODE'] = $wtdResult["RESPONSE_CODE"];
-				if($wtdResult["RESPONSE_CODE"] == 'WS0091'){
-					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${sequest_amt}',number_format($wtdResult["SEQUEST_AMOUNT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				}
-				$arrayStruc = [
-					':member_no' => $payload["member_no"],
-					':id_userlogin' => $payload["id_userlogin"],
-					':operate_date' => $dateOperC,
-					':deptaccount_no' => $from_account_no,
-					':amt_transfer' => $dataComing["amt_transfer"],
-					':status_flag' => '0',
-					':destination' => $dataComing["contract_no"],
-					':response_code' => "WS0066",
-					':response_message' => $wtdResult["ACTION"]
-				];
-				$log->writeLog('repayloan',$arrayStruc);
+				$conmysql->rollback();
+				$arrayResult['RESPONSE_CODE'] = $payslip["RESPONSE_CODE"];
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}

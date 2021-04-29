@@ -33,6 +33,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		if(sizeof($arrLoanGrp) > 0){
 			$arrayResult['LOAN'] = $arrLoanGrp;
+			$arrayResult['IS_SAVE_SOURCE'] = FALSE;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

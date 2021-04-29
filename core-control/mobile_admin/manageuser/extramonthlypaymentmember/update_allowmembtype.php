@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_extrapayment','checked'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','extramonthlypaymentmember')){
+	if($func->check_permission_core($payload,'mobileadmin','extramonthlypaymentmembers')){
 		$arrayGroup = array();
 		$updateMembType = $conmysql->prepare("UPDATE gcextrapaymentmembertype SET is_use = :checked WHERE id_extrapayment = :id_extrapayment");
 		if($updateMembType->execute([
