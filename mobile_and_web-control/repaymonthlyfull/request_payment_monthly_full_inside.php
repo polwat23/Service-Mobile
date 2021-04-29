@@ -251,6 +251,25 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','depta
 								require_once('../../include/exit_footer.php');
 							}
 						}
+						$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
+																	destination,transfer_mode
+																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																	coop_slip_no,id_userlogin,ref_no_source)
+																	VALUES(:ref_no,:slip_type,:from_account,'3',:destination,'2',:amount,:penalty_amt,
+																	:amount_receive,'-1',:operate_date,'1',:member_no,:coop_slip_no,:id_userlogin,:coop_slip_no)");
+						$insertTransactionLog->execute([
+							':ref_no' => $ref_no,
+							':slip_type' => 'WTM',
+							':from_account' => $from_account_no,
+							':destination' => $payinslip_no,
+							':amount' => $dataComing["amt_transfer"],
+							':penalty_amt' => $penalty_amt,
+							':amount_receive' => $dataComing["amt_transfer"] - $penalty_amt,
+							':operate_date' => $dateOperC,
+							':member_no' => $payload["member_no"],
+							':coop_slip_no' => $wtdResult["DEPTSLIP_NO"],
+							':id_userlogin' => $payload["id_userlogin"]
+						]);
 						$conoracle->commit();
 						$conmysql->commit();
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);

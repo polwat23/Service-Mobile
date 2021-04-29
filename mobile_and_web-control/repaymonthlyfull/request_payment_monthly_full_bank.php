@@ -1,12 +1,27 @@
 <?php
 require_once('../autoload.php');
-
+require_once(__DIR__.'/../../include/cal_deposit_test.php');
+use CalculateDepTest\CalculateDepTest;
+$cal_dep = new CalculateDepTest();
+$dbuser = 'iscotest';
+$dbpass = 'iscotest';
+$dbname = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = gcoop)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PayMonthlyFull')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$amt_transfer = $dataComing["amt_transfer"];
 		$dateOper = date('c');
-		$penalty_amt = $dataComing["penalty_amt"] + $dataComing["fee_amt"];
+		$penalty_amt = $dataComing["fee_amt"];
 		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
 		$ref_no = time().$lib->randomText('all',3);
 		$getBankDisplay = $conmysql->prepare("SELECT cs.link_deposit_coopdirect,cs.bank_short_ename,gc.bank_code,
@@ -273,6 +288,27 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','sigma
 			if($arrResponse->RESULT){
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
+															destination,transfer_mode
+															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+															etn_refno,id_userlogin,ref_no_source,bank_code)
+															VALUES(:ref_no,:slip_type,:from_account,'3',:destination,'2',:amount,:fee_amt,
+															:amount_receive,'-1',:operate_date,'1',:member_no,:etn_refno,:id_userlogin,:ref_no_source,:bank_code)");
+				$insertTransactionLog->execute([
+					':ref_no' => $ref_no,
+					':slip_type' => 'WTM',
+					':from_account' => $from_account_no,
+					':destination' => $payinslip_no,
+					':amount' => $dataComing["amt_transfer"],
+					':fee_amt' => $penalty_amt,
+					':amount_receive' => $dataComing["amt_transfer"] - $penalty_amt,
+					':operate_date' => $dateOperC,
+					':member_no' => $payload["member_no"],
+					':etn_refno' => $etn_ref,
+					':id_userlogin' => $payload["id_userlogin"],
+					':ref_no_source' => $transaction_no,
+					':bank_code' => $rowBankDisplay["bank_code"]
+				]);
 				$conoracle->commit();
 				$conmysql->commit();
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);

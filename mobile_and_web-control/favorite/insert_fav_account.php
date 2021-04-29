@@ -17,13 +17,12 @@ if($lib->checkCompleteArgument(['menu_component','name_fav','show_menu','destina
 		}else{
 			$menu_component = 'TransferDepPayLoan';
 		}
-		$insertFavAccount = $conmysql->prepare("INSERT INTO gcfavoritelist(fav_refno,name_fav,flag_trans,from_account,destination,member_no,show_menu,menu_component)
-											VALUES(:fav_refno,:name_fav,:flag_trans,:from_account,:destination,:member_no,:show_menu,:menu_component)");
+		$insertFavAccount = $conmysql->prepare("INSERT INTO gcfavoritelist(fav_refno,name_fav,flag_trans,destination,member_no,show_menu,menu_component)
+											VALUES(:fav_refno,:name_fav,:flag_trans,:destination,:member_no,:show_menu,:menu_component)");
 		if($insertFavAccount->execute([
 			':fav_refno' => $fav_refno,
 			':name_fav' => $dataComing["name_fav"],
 			':flag_trans' => $dataComing["flag_trans"],
-			':from_account' => $dataComing["from_account"] ?? null,
 			':destination' => $dataComing["destination"],
 			':member_no' => $payload["member_no"],
 			':show_menu' => $dataComing["show_menu"],
@@ -40,7 +39,6 @@ if($lib->checkCompleteArgument(['menu_component','name_fav','show_menu','destina
 					':fav_refno' => $fav_refno,
 					':name_fav' => $dataComing["name_fav"],
 					':flag_trans' => $dataComing["flag_trans"],
-					':from_account' => $dataComing["from_account"] ?? null,
 					':destination' => $dataComing["destination"],
 					':member_no' => $payload["member_no"],
 					':show_menu' => $dataComing["show_menu"]

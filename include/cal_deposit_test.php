@@ -773,7 +773,7 @@ class CalculateDepTest {
 		return $rowConstPay;
 	}
 	public function DepositMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_dpt,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$from_account_no,$payload,$deptslip,$lib,$max_seqno,$menu_component,$slipWithdraw=null,$bank_code=null){
+	$operate_date,$config,$log,$from_account_no,$payload,$deptslip,$lib,$max_seqno,$menu_component,$ref_no,$is_transfer=false,$slipWithdraw=null,$bank_code=null){
 		$constToAcc = $this->getConstantAcc($deptaccount_no);
 		$rowDepPayDest = $this->getConstPayType($itemtype_dpt);
 		if($constToAcc["LIMITDEPT_FLAG"] == '1' && $amt_transfer > $constToAcc["LIMITDEPT_AMT"]){
@@ -947,24 +947,26 @@ class CalculateDepTest {
 					if(isset($bank_code)){
 						
 					}else{
-						$insertTransactionLog = $this->con->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-																	coop_slip_no,id_userlogin,ref_no_source)
-																	VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
-																	:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
-						$insertTransactionLog->execute([
-							':ref_no' => $ref_no,
-							':slip_type' => $itemtype_dpt,
-							':from_account' => $from_account_no,
-							':destination' => $deptaccount_no,
-							':amount' => $amt_transfer,
-							':penalty_amt' => $penalty_amt,
-							':amount_receive' => $amt_transfer - $penalty_amt,
-							':operate_date' => $operate_date,
-							':member_no' => $payload["member_no"],
-							':slip_no' => $deptslip_no,
-							':id_userlogin' => $payload["id_userlogin"]
-						]);
+						if(!$is_transfer){
+							$insertTransactionLog = $this->con->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+																		,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																		coop_slip_no,id_userlogin,ref_no_source)
+																		VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
+																		:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
+							$insertTransactionLog->execute([
+								':ref_no' => $ref_no,
+								':slip_type' => $itemtype_dpt,
+								':from_account' => $from_account_no,
+								':destination' => $deptaccount_no,
+								':amount' => $amt_transfer,
+								':penalty_amt' => $penalty_amt,
+								':amount_receive' => $amt_transfer - $penalty_amt,
+								':operate_date' => $operate_date,
+								':member_no' => $payload["member_no"],
+								':slip_no' => $deptslip_no,
+								':id_userlogin' => $payload["id_userlogin"]
+							]);
+						}
 					}
 					$arrayResult['RESULT'] = TRUE;
 					return $arrayResult;

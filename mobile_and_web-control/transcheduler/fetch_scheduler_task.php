@@ -45,22 +45,44 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayTaskList["DESTINATION"] = $rowTask["destination"];
 				$arrayBuyShare[] = $arrayTaskList;
 			}else if($rowTask["transaction_type"] == '4'){
-				$arrayTaskList["BANK_CODE"] = $rowTask["bank_code"];
-				$arrayTaskList["FROM_ACCOUNT"] = $lib->formataccount($rowTask["from_account"],$formatDept);
-				$arrayTaskList["DESTINATION"] = $rowTask["destination"];
-				$arrayDeposit[] = $arrayTaskList;
+				$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,csb.bank_short_name,csb.bank_logo_path,gba.bank_account_name
+															FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+															WHERE gba.id_bindaccount = :id_bindaccount and gba.bindaccount_status = '1'");
+				$fetchAccountBeenBind->execute([
+					':id_bindaccount' => $rowTask["from_account"]
+				]);
+				if($fetchAccountBeenBind->rowCount() > 0){
+					$rowFetchAcc = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC);
+					$arrayTaskList["FROM_ACCOUNT"] = $rowFetchAcc["deptaccount_no_bank"];
+					$arrayTaskList["DESTINATION"] = $lib->formataccount($rowTask["destination"],$formatDept);
+					$arrayTaskList["BANK_CODE"] = $rowTask["bank_code"];
+					$arrayTaskList["DESTINATION_ACCOUNT_NAME"] = $rowFetchAcc["bank_account_name"];
+					$arrayDeposit[] = $arrayTaskList;
+				}
 			}else if($rowTask["transaction_type"] == '5'){
 				$arrayTaskList["FROM_ACCOUNT"] = $lib->formataccount($rowTask["from_account"],$formatDept);
-				$arrayTaskList["DESTINATION"] = $rowTask["destination"];
-				$arrayTaskList["BANK_CODE"] = $rowTask["bank_code"];
-				$arrayWithdraw[] = $arrayTaskList;
+				$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,csb.bank_short_name,csb.bank_logo_path,gba.bank_account_name
+															FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+															WHERE gba.id_bindaccount = :id_bindaccount and gba.bindaccount_status = '1'");
+				$fetchAccountBeenBind->execute([
+					':id_bindaccount' => $rowTask["destination"]
+				]);
+				if($fetchAccountBeenBind->rowCount() > 0){
+					$rowFetchAcc = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC);
+					$arrayTaskList["DESTINATION"] = $rowFetchAcc["deptaccount_no_bank"];
+					$arrayTaskList["BANK_CODE"] = $rowTask["bank_code"];
+					$arrayTaskList["DESTINATION_ACCOUNT_NAME"] = $rowFetchAcc["bank_account_name"];
+					$arrayTaskList["BANK_NAME"] = $rowFetchAcc["bank_short_name"];
+					$arrayTaskList["IMG"] = $config["URL_SERVICE"].$rowFetchAcc["bank_logo_path"];
+					$arrayWithdraw[] = $arrayTaskList;
+				}
 			}
 		}
 		$arrayResult['TRANSFER'] = $arrayTransfer;
-		//$arrayResult['REPAYLOAN'] = $arrayRepayLoan;
+		$arrayResult['REPAYLOAN'] = $arrayRepayLoan;
 		//$arrayResult['BUYSHARE'] = $arrayBuyShare;
-		//$arrayResult['DEPOSIT'] = $arrayDeposit;
-		//$arrayResult['WITHDRAW'] = $arrayWithdraw;
+		$arrayResult['DEPOSIT'] = $arrayDeposit;
+		$arrayResult['WITHDRAW'] = $arrayWithdraw;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

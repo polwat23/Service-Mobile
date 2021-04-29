@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$getlastseq_noDest = $cal_dep->getLastSeqNo($to_account_no);
 				$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$to_account_no,$srcvcid["ACCOUNT_ID"],$itemtypeDepositDest,
 				$dataComing["amt_transfer"],0,$dateOperC,$config,$log,$from_account_no,$payload,$deptslip_noDest,$lib,
-				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$wtdResult["DEPTSLIP_NO"]);
+				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,$wtdResult["DEPTSLIP_NO"]);
 				if($depositMoney["RESULT"]){
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 														VALUES(:remark,:deptaccount_no,:seq_no)");
@@ -95,6 +95,24 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							}
 						}
 					}
+					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																coop_slip_no,id_userlogin,ref_no_source)
+																VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
+																:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
+					$insertTransactionLog->execute([
+						':ref_no' => $ref_no,
+						':slip_type' => $itemtypeWithdraw,
+						':from_account' => $from_account_no,
+						':destination' => $to_account_no,
+						':amount' => $dataComing["amt_transfer"],
+						':penalty_amt' => $dataComing["penalty_amt"],
+						':amount_receive' => $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
+						':operate_date' => $dateOperC,
+						':member_no' => $payload["member_no"],
+						':slip_no' => $deptslip_no,
+						':id_userlogin' => $payload["id_userlogin"]
+					]);
 					if($payload["member_no"] != $constToAcc["MEMBER_NO"]){
 						$arrToken = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
 						$templateMessage = $func->getTemplateSystem('DestinationReceive',1);
