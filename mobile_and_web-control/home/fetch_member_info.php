@@ -54,6 +54,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			$getDivReceive = $conoracle->prepare("SELECT BANK_ACCID from mbmembmoneytr WHERE TRIM(TRTYPE_CODE) = 'DVAV1' and member_no = :member_no");
+			$getDivReceive->execute([':member_no' => $member_no]);
+			$rowDivRecv = $getDivReceive->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
@@ -107,6 +110,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["FULL_ADDRESS_REG"] = $addressReg;
+			$arrayResult["RECEIVE_DIV"] = 'บัญชีสหกรณ์ : '.$lib->formataccount($rowDivRecv["BANK_ACCID"],$func->getConstant('dep_format'));
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
