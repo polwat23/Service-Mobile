@@ -211,8 +211,10 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}
 					}
 				}
-				$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
-				$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
+				if($dataComing["tran_id"] != '202104261434325280'){
+					$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
+					$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
+				}
 				$arrayResult['RESULT'] = TRUE;
 				ob_flush();
 				echo json_encode($arrayResult);
