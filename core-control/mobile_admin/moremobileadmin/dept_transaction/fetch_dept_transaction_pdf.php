@@ -80,7 +80,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$arraySlip["SLIPITEMTYPE_CODE"] = $rowSlSlip["SLIPITEMTYPE_CODE"];
 						$arraySlip["SLIPITEM_DESC"] = $rowSlSlip["SLIPITEM_DESC"];
 						$arraySlip["LOANCONTRACT_NO"] = $rowSlSlip["LOANCONTRACT_NO"];
-						$arraySlip["ITEM_PAYAMT"] = number_format($rowSlSlip["ITEM_PAYAMT"]);
+						$arraySlip["ITEM_PAYAMT"] = number_format($rowSlSlip["ITEM_PAYAMT"],2);
 						$arrayRecon["SLIPDETAILS"][] = $arraySlip;
 					}
 			}
