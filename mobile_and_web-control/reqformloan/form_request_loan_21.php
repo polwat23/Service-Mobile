@@ -1,24 +1,24 @@
 <?php
 use Dompdf\Dompdf;
 
-$dompdf = new DOMPDF();
 function GeneratePDFContract($data,$lib) {
 	$arrRequestDate = explode(' ',$lib->convertdate(date('Y-m-d'),'d M Y'));
 	$html = '
 	<style>
 
 		@font-face {
-		  font-family: THSarabun;
-		  src: url(../../resource/fonts/THSarabun.ttf);
+		  font-family: TH Niramit AS;
+		  src: url(../../resource/fonts/TH Niramit AS.ttf);
 		}
 		@font-face {
-			font-family: "THSarabun";
-			src: url(../../resource/fonts/THSarabun Bold.ttf);
+			font-family: TH Niramit AS;
+			src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 			font-weight: bold;
 		}
 		* {
-		  font-family: THSarabun;
+		  font-family: TH Niramit AS;
 		}
+
 		.text-center{
 		  text-align:center;
 		}
@@ -67,9 +67,9 @@ function GeneratePDFContract($data,$lib) {
 	$html .= '
 		<div style="position: absolute; right:-10px; top: 0px;">
 			<div style="border: 1px solid black;width: 200px;height: 95px;line-height:0.5em;padding: 0 5px;">
-				<p>หนังสือกู้ที่ ฉ...........................................</p>
-				<p>วันที่ ................../.................../...............</p>
-				<p>บัญชีเงินกู้ที่ .............................................</p>
+				<p>หนังสือกู้ที่ ฉ.....................................</p>
+				<p>วันที่ ........./........................./.............</p>
+				<p>บัญชีเงินกู้ที่ ......................................</p>
 			</div>
 		</div>
 	';
@@ -114,25 +114,25 @@ function GeneratePDFContract($data,$lib) {
 		เรียน คณะกรรมการดําเนินการสหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จํากัด
 	  </div>
 	  <div style="margin-top:18px;" class="indent" >
-		ข้าพเจ้า.....................................................................................สมาชิกเลขทะเบียนที่................................................
+		ข้าพเจ้า..........................................................................สมาชิกเลขทะเบียนที่...........................................
 	  </div>
 	  <div>
-		รับราชการหรือทํางานประจําในตําแหน่ง.......................................................................สังกัด.................................................................
+		รับราชการหรือทํางานประจําในตําแหน่ง................................................................สังกัด.....................................................
 	  </div>
 	  <div>
-		อำเภอ………………………................................…..……จังหวัด…..…………….....…………………………โทรศัพท์..................................................
+		อำเภอ………………………............................…..……จังหวัด…..…………….....…………………………โทรศัพท์..............................................
 	  </div>
 	  <div>
-		ได้รับเงินเดือน  จำนวน........................................................................บาท  ขอเสนอคําขอกู้เงินเพื่อเหตุฉุกเฉินออนไลน์ดังต่อไปนี้
+		ได้รับเงินเดือน  จำนวน..............................................................บาท  ขอเสนอคําขอกู้เงินเพื่อเหตุฉุกเฉินออนไลน์ดังต่อไปนี้
 	  </div>
 	  <div class="indent">
-		ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์ ฯ จํานวน................................บาท(...................................................)
+		ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์ ฯ จํานวน...............................บาท(...................................................)
 	  </div>
 	  <div>
 		 โดยจะนําไปใช้เพื่อการดัง...........................................................................................................................
 	  </div>
 	  <div  class="indent">
-		ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้   ข้าพเจ้าขอส่งเงินกู้คืน   เป็นงวดรายเดือนเท่ากันงวดละ.......................................บาท
+		ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้   ข้าพเจ้าขอส่งเงินกู้คืน   เป็นงวดรายเดือนเท่ากันงวดละ...........................บาท
 	  </div>
 	  <div>
 		พร้อมด้วยดอกเบี้ยเป็นจำนวน............................งวด   (ตามระเบียบที่สหกรณ์ ฯ  กำหนด)  โดยเริ่มส่งคืนเงินกู้ตั้งแต่
@@ -165,12 +165,7 @@ function GeneratePDFContract($data,$lib) {
 		จะแจ้งเป็นหนังสือให้สหกรณ์ทราบและจัดการชำระหนี้ซึ่งมีอยู่ต่อสหกรณ์ให้เสร็จสิ้นเสียก่อน ถ้าข้าพเจ้าไม่จัดการชำระหนี้
 	  </div>
 	  <div>
-		ให้เสร็จสิ้นตามที่กล่าวข้างต้น เมื่อข้าพเจ้าได้ลงชื่อรับเงินเดือน ค่าจ้าง เงินสะสม บำเหน็จบำนาญเงินทุนเลี้ยงชีพหรือเงินอื่นใด  
-	  </div>
-	  <div>
-		ในหลักฐานที่ทางราชการหรือหน่วยงานเจ้าสังกัดหรือนายจ้าง จะจ่ายเงินให้แก่ข้าพเจ้า  ข้าพเจ้ายินยอมให้เจ้าหน้าที่ผู้จ่ายเงิน
-	  </div>
-	  <div>
+		ให้เสร็จสิ้นตามที่กล่าวข้างต้น เมื่อข้าพเจ้าได้ลงชื่อรับเงินเดือน ค่าจ้าง เงินสะสม บำเหน็จบำนาญ เงินทุนเลี้ยงชีพ หรือเงินอื่นใด  ในหลักฐานที่ทางราชการหรือหน่วยงานเจ้าสังกัดหรือนายจ้าง จะจ่ายเงินให้แก่ข้าพเจ้า  ข้าพเจ้ายินยอมให้เจ้าหน้าที่ผู้จ่ายเงิน
 		ดังกล่าว  หักเงินชำระหนี้พร้อมดอกเบี้ยส่งชำระหนี้ต่อสหกรณ์ให้เสร็จสิ้นเสียก่อนได้
 	  </div>
 	  <div  class="indent" style="margin-top:10px;text-align: right">
@@ -190,159 +185,111 @@ function GeneratePDFContract($data,$lib) {
 		<div style="position:absolute; text-align:center; left:510px; top:3px; width:100px;font-weight:bold; ">
 		  
 		</div>
-		<div style="position:absolute; text-align:center; left:515px; top:30px; width:100px;font-weight:bold; ">
+		<div style="position:absolute; text-align:center; left:498px; top:34px; width:100px;font-weight:bold; ">
 		 '.$arrRequestDate[0].'
 		</div>
-		<div style="position:absolute; text-align:center; left:575px; top:30px; width:100px;font-weight:bold; ">
+		<div style="position:absolute; text-align:center; left:557px; top:34px; width:100px;font-weight:bold; ">
 		 '.$arrRequestDate[1].'
 		</div>
-		<div style="position:absolute; text-align:center; left:625px; top:30px; width:100px;font-weight:bold; ">
+		<div style="position:absolute; text-align:center; left:627px; top:34px; width:100px;font-weight:bold; ">
 		 '.$arrRequestDate[2].'
 		</div>';
-	// ข้อมูล เขียนที่ /วันที่ / เดือน/ พ.ศ.
-	/*$html .= '
-	  <div style="position:absolute; text-align:center; left:415px; top:136px; width:60px;font-weight:bold; ">
-		  '.$arrRequestDate[0].'
-	  </div>
-
-	  <div style="position:absolute; text-align:center; left:505px; top:136px; width:115px;font-weight:bold; ">
-		 '.$arrRequestDate[1].'
-	  </div>
-
-	  <div style="position:absolute; text-align:left; left:650px; top:136px;font-weight:bold; ">
-		 '.$arrRequestDate[2].'
-	  </div>
-	';*/
-
 	// ข้อมูล หน้าแรก/
 
 	//  ชื่อ นามสกุล
 	$html .= '
-	<div style="position:absolute; text-align:center; left:105px; top:299px; width:315px;font-weight:bold ">
+	<div style="position:absolute; text-align:center; left:105px; top:287px; width:315px;font-weight:bold ">
 	   '.$data["full_name"].'
 	</div>';
 
 	//เลขสมาชิก
 	$html .= '
-	<div style="position:absolute; text-align:center; left:500px; top:299px; width:206px;font-weight:bold ">
+	<div style="position:absolute; text-align:center; left:500px; top:287px; width:206px;font-weight:bold ">
 		'.$data["member_no"].'
 	</div>';
 
 	// ตำแหน่ง
 	$html .= '
-	<div style="position:absolute; text-align:center; left:203px; top:327px; width:195px;font-weight:bold">
+	<div style="position:absolute; text-align:center; left:203px; top:313px; width:195px;font-weight:bold">
 	   '.($data["position"] ?? "-").'
 	</div>
 	';
 
 	// สังกัด
 	$html .= '
-	<div style="position:absolute; text-align:center; left:425px; top:327px; width:230px;font-weight:bold ">
+	<div style="position:absolute; text-align:center; left:435px; top:313px; width:230px;font-weight:bold ">
 		'.($data["pos_group"] ?? "-").'
 	</div>
 	';
 	// district_desc
 	$html .= '
-	<div style="position:absolute; text-align:center; left:100px; top:354px; width:100px;font-weight:bold">
+	<div style="position:absolute; text-align:center; left:100px; top:339px; width:100px;font-weight:bold">
 		'.$data["district_desc"].'
 	</div>
 	';
 	
 	// province_desc
 	$html .= '
-	<div style="position:absolute; text-align:center; left:320px; top:354px; width:150px;font-weight:bold">
+	<div style="position:absolute; text-align:center; left:320px; top:339px; width:150px;font-weight:bold">
 		'.$data["province_desc"].'
 	</div>
 	';
 
 	// โทรศัพท์
 	$html .= '
-	<div style="position:absolute; text-align:center; left:520px; top:354px; width:100px;font-weight:bold">
+	<div style="position:absolute; text-align:center; left:520px; top:339px; width:100px;font-weight:bold">
 		'.($lib->formatphone($data["tel"],' ') ?? "-").'
 	</div>
 	';
 
 	// รายเดือน
 	$html .= '
-	<div style="position:absolute; text-align:right; left:165px; top:383px;font-weight:bold ">
+	<div style="position:absolute; text-align:right; left:165px; top:365px;font-weight:bold ">
 		'.($data["salary_amount"] ?? "-").'
 	</div>
 	';
 
 	// จำนวนเงินกู้ตัวเลข
 	$html .= '
-	<div style="position:absolute; text-align:right; left:350px; top:409px;font-weight:bold">
+	<div style="position:absolute; text-align:right; left:370px; top:389px;font-weight:bold">
 		'.(number_format($data["request_amt"],2) ?? "-").'
 	</div>
 	';
 
 	// จำนวนเงินกู้ ตัวอักษร
 	$html .= '
-	<div style="position:absolute; text-align:center; left:410px; top:409px; width:230px;font-weight:bold">
+	<div style="position:absolute; text-align:center; left:435px; top:389px; width:230px;font-weight:bold">
 	  '.($lib->baht_text($data["request_amt"]) ?? "-").'
 	</div>
 	';
 
 	// นำไปใช้เพื่อ
 	$html .= '
-	<div style="position:absolute; text-align:left; left:175px; top:437px;font-weight:bold">
+	<div style="position:absolute; text-align:left; left:185px; top:415px;font-weight:bold">
 	  '.($data["objective"] ?? "-").'
 	</div>
 	';
 
-	// ที่
-	$html .= '
-	<div style="position:absolute; text-align:center; left:240px; top:473px; width:80px;font-weight:bold ">
-	 
-	</div>
-	';
-
-	// เพื่อ
-	$html .= '
-	<div style="position:absolute; text-align:center; left:143px; top:501px; width:240px;font-weight:bold ">
-
-	</div>
-	';
-
-	// เงินต้นคงเหลือ
-	$html .= '
-	<div style="position:absolute; text-align:center; left:455px; top:501px; width:110px;font-weight:bold">
-
-	</div>
-	';
-
-	// ดอกเบี้ย
-	$html .= '
-	<div style="position:absolute; text-align:center; left:605px; top:501px; width:80px;font-weight:bold">
-
-	</div>
-	';
 
 	// งวด
 	$html .= '
-	<div style="position:absolute; text-align:center; left:185px; top:493px; width:70px;font-weight:bold">
+	<div style="position:absolute; text-align:center; left:190px; top:465px; width:70px;font-weight:bold">
 	  '.($data["period"] ?? "-").'
 	</div>
 	';
 
-	// วันที่
-	$html .= '
-	<div style="position:absolute; text-align:left; left:135px; top:520px;font-weight:bold">
-		
-	</div>
-	';
 	$periodPay = $data["request_amt"] / $data["period"];
 	$periodPay = (int)$periodPay - ($periodPay % 100) + 100;
 	// ชำระต่องวด
 	$html .= '
-	<div style="position:absolute; text-align:center; left:510px; top:467px; width:115px;font-weight:bold;">
+	<div style="position:absolute; text-align:center; left:530px; top:440px; width:115px;font-weight:bold;">
 	  '.(number_format($periodPay,2) ?? "-").'
 	</div>
 	';
 
 	// (ชื่อ นามสกุล) ผู้กู้
 	$html .= '
-	<div style="position:absolute; text-align:center; left:420px; top:892px; width:217px;font-weight:bold;">
+	<div style="position:absolute; text-align:center; left:425px; top:831px; width:217px;font-weight:bold;">
 	 '.($data["full_name"] ?? "-").'
 	</div>
 	';
@@ -361,7 +308,7 @@ function GeneratePDFContract($data,$lib) {
 
 	//head page 2
 	$html .= '
-	<div style=" height:auto; margin-left:0cm; margin-top:0px; margin-right:0cm;">
+	<div style=" height:auto; margin-left:0cm; margin-top:63px; margin-right:0cm;">
 		<div style="text-align:center">-2-</div>
 	';
 	/*
@@ -379,12 +326,8 @@ function GeneratePDFContract($data,$lib) {
 			ข้าพเจ้าผู้กู้ได้อ่านและรับทราบข้อกำหนดและเงื่อนไขในการใช้บริการขอกู้ฉุกเฉินออนไลน์ของทางสหกรณ์
 		  </div>
 		  <div>
-			ตาม "ข้อกำหนดและเงื่อนไขการใช้บริการขอกู้ฉุกเฉินออนไลน์ต่อท้ายสัญญา" ในวันที่ทำคำขอนี้แล้วและตกลงยินยอมผูกพัน
-		  </div>
-		  <div>
-			และรับปฏิบัติตามข้อกำหนดและเงื่อนไขดังกล่าว หากข้าพเจ้าไม่ปฏิบัติตามข้อกำหนดและเงื่อนไขดังกล่าวจนเป็นเหตุให้เกิด
-		  </div>
-		  <div>
+			ตาม "ข้อกำหนดและเงื่อนไขการใช้บริการขอกู้ฉุกเฉินออนไลน์ต่อท้ายสัญญา" ในวันที่ทำคำขอนี้แล้วและตกลงยินยอม ผูกพัน
+			และรับปฏิบัติตามข้อกำหนดและเงื่อนไขดังกล่าว หากข้าพเจ้าไม่ปฏิบัติตามข้อกำหนดและเงื่อนไขดังกล่าวจนเป็น เหตุให้เกิด
 			ความเสียหายใดๆ ข้าพเจ้ายินยอมรับผิดชอบทั้งสิ้น
 		  </div>
 		  <table class="none-border-table" cellspacing="0" cellpadding="0" style="margin-top: 20px">
@@ -395,10 +338,10 @@ function GeneratePDFContract($data,$lib) {
 							รหัสผู้ใช้...............................…………........……………...
 						</div>
 						<div>
-							เลขที่รายการ…………………......................………………
+							เลขที่รายการ…………………........................………………
 						</div>
 						<div>
-							วันที่ทำรายการ…..........…../………….......…../….........
+							วันที่ทำรายการ….......…../…………..........…../…...........
 						</div>
 						<div>
 							เวลาทำรายการ…………..…….............…..……..........น.
@@ -407,16 +350,16 @@ function GeneratePDFContract($data,$lib) {
 				</td>
 				<td style="border: 1px solid;padding: 10px;width: 50%;">
 					<div>
-						ชื่อ – สกุล ผู้กู้..…………….…….................………..............
+						ชื่อ – สกุล ผู้กู้..…………….…….................……….................
 					</div>
 					<div>
-						ทะเบียนสมาชิก..............................................................
+						ทะเบียนสมาชิก............................................................
 					</div>
 					<div>
-						เบอร์โทร.........................................................................
+						เบอร์โทร......................................................................
 					</div>
 					<div>
-						เลขบัญชีเงินฝากสหกรณ์…...............…..............…….…....
+						เลขบัญชีเงินฝากสหกรณ์…...............…..............…….…...
 					</div>
 					<div>
 						เลขบัญชีเงินฝากธนาคารกรุงไทย…................……….…....
@@ -460,7 +403,7 @@ function GeneratePDFContract($data,$lib) {
 					หักหนี้เดิมชำระ............................................บาท
 				</div>
 				<div>
-					ทำรายการเมื่อวันที่.......…../………...…../…....……
+					ทำรายการเมื่อวันที่.......…../………......…../…....……
 				</div>
 				<div>
 					เลขที่.................................................
@@ -482,7 +425,7 @@ function GeneratePDFContract($data,$lib) {
 						……………...................……………………….เจ้าหน้าที่
 					</div>
 					<div>
-						………………………………..................…….
+						………………………………..................……..
 					</div>
 				</td>
 				<td style="width: 40%;padding: 10px;">
@@ -494,7 +437,7 @@ function GeneratePDFContract($data,$lib) {
 							……………...................……………………….เจ้าหน้าที่
 						</div>
 						<div>
-							………………………………..................…….
+							………………………………..................……..
 						</div>
 					</div>
 				</td>
@@ -507,13 +450,13 @@ function GeneratePDFContract($data,$lib) {
 						เห็นควรอนุมัติ
 					</div>
 					<div>
-						…..……………………………..........................…หัวหน้าสินเชื่อ/รองผู้จัดการ
+						…..…………………………….....................…หัวหน้าสินเชื่อ/รองผู้จัดการ
 					</div>
 					<div>
-						………………......................……………………..
+						……………….........................………………
 					</div>
 					<div>
-						……..............……/…………….../…….........…
+						……........……/……………........../……........
 					</div>
 				</td>
 				<td style="width: 50%;padding: 10px;">
@@ -543,25 +486,25 @@ function GeneratePDFContract($data,$lib) {
 	  </div>';
 	//doc_no
 	$html .= '
-	  <div style="position:absolute; text-align:left; left:160px; top:216px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:left; left:160px; top:264px; width:287px;font-weight:bold;">
 	  '.$data["requestdoc_no"].'
 	  </div>';
 	  
 	//date
 	$html .= '
-	  <div style="position:absolute; text-align:left; left:150px; top:244px; width:257px;font-weight:bold;">
+	  <div style="position:absolute; text-align:left; left:140px; top:289px; width:257px;font-weight:bold;">
 		'.$arrRequestDate[0].'
 	  </div>
-	  <div style="position:absolute; text-align:left; left:196px; top:244px; width:257px;font-weight:bold;">
+	  <div style="position:absolute; text-align:left; left:185px; top:289px; width:257px;font-weight:bold;">
 		'.$arrRequestDate[1].'
 	  </div>
-	  <div style="position:absolute; text-align:left; left:265px; top:244px; width:257px;font-weight:bold;">
+	  <div style="position:absolute; text-align:left; left:270px; top:289px; width:257px;font-weight:bold;">
 		'.$arrRequestDate[2].'
 	  </div>';
 
 	//gวลา
 	$html .= '
-	  <div style="position:absolute; text-align:left; left:160px; top:271px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:left; left:160px; top:315px; width:287px;font-weight:bold;">
 		'.date("H:i").'
 	  </div>';
 	  
@@ -569,30 +512,30 @@ function GeneratePDFContract($data,$lib) {
 	  
 	//ชื่อผู้กู้
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:380px; top:187px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:380px; top:238px; width:287px;font-weight:bold;">
 	  '.$data["full_name"].'
 	  </div>';
 	//member_no
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:385px; top:216px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:385px; top:264px; width:287px;font-weight:bold;">
 	  '.$data["member_no"].'
 	  </div>';
 	  
 	//tel
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:380px; top:244px; width:257px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:380px; top:289px; width:257px;font-weight:bold;">
 		'.($lib->formatphone($data["tel"],' ') ?? "-").'
 	  </div>';
 
 	//เลข บช สหกรณ์ 
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:390px; top:271px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:410px; top:315px; width:287px;font-weight:bold;">
 		'.($data["deptaccount_no_coop"]).'
 	  </div>';
 	  
 	//เลข บช ธนาคาร 
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:410px; top:300px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:450px; top:338px; width:287px;font-weight:bold;">
 		  '.($data["deptaccount_no_bank"]).'
 	  </div>';
 
@@ -605,17 +548,22 @@ function GeneratePDFContract($data,$lib) {
 	  
 	//เลข บช สหกรณ์ 
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:290px; top:473px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:300px; top:504px; width:287px;font-weight:bold;">
 		'.($data["deptaccount_no_coop"]).'
 	  </div>';
 	  
 	//เลข บช ธนาคาร 
 	$html .= '
-	  <div style="position:absolute; text-align:center; left:290px; top:500px; width:287px;font-weight:bold;">
+	  <div style="position:absolute; text-align:center; left:300px; top:529px; width:287px;font-weight:bold;">
 		  '.($data["deptaccount_no_bank"]).'
 	  </div>';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();

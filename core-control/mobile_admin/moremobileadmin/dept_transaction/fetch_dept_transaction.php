@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 			}
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -81,7 +81,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 			}
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -90,7 +90,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -99,7 +99,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type

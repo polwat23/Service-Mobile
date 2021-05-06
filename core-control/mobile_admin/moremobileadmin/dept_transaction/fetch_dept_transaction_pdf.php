@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 		}
 			
-		$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+		$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,destination_type,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -68,6 +68,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon["MEMBER_NO"] = $rowRecon["member_no"];
 			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["amount_receive"],2);
 			
+			if($rowRecon["destination_type"] == '3'){
+					$fetchSlSlip = $conoracle->prepare("SELECT SLIPITEMTYPE_CODE,SLIPITEM_DESC,LOANCONTRACT_NO,ITEM_PAYAMT
+													FROM SLSLIPPAYINDET 
+													WHERE PAYINSLIP_NO = :destination");
+					$fetchSlSlip->execute([
+						':destination' => $rowRecon["destination"]
+					]);
+					while($rowSlSlip = $fetchSlSlip->fetch(PDO::FETCH_ASSOC)){
+						$arraySlip = array();
+						$arraySlip["SLIPITEMTYPE_CODE"] = $rowSlSlip["SLIPITEMTYPE_CODE"];
+						$arraySlip["SLIPITEM_DESC"] = $rowSlSlip["SLIPITEM_DESC"];
+						$arraySlip["LOANCONTRACT_NO"] = $rowSlSlip["LOANCONTRACT_NO"];
+						$arraySlip["ITEM_PAYAMT"] = number_format($rowSlSlip["ITEM_PAYAMT"],2);
+						$arrayRecon["SLIPDETAILS"][] = $arraySlip;
+					}
+			}
+			
 			if( $rowRecon["result_transaction"]=='1'){
 				$summary += $rowRecon["amount_receive"];
 			}else{
@@ -78,8 +95,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['SUMMARY'] = $summary;
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['DEPT_TRANSACTION'] = $arrayGrpAll;
-		$arrayResult['arrayExecute'] = $arrayExecute;
-		$arrayResult['fetchReconcile'] = $fetchReconcile;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

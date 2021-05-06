@@ -3,8 +3,6 @@ require_once('../autoload.php');
 
 use Dompdf\Dompdf;
 
-$dompdf = new DOMPDF();
-
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -107,18 +105,19 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	//style table
 	  $html = '<style>
 
-		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
+		 @font-face {
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
-		  * {
-			font-family: THSarabun;
-		  }
+			* {
+			  font-family: TH Niramit AS;
+			}
+
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -147,7 +146,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  }
 		  td{
 			padding:5px;
-			font-size: 18px;
+			font-size: 17px;
 		  }
 		  p{
 			margin:0px;
@@ -165,6 +164,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding-top: 80px;
 		}
 		.frame-info-user {
+			line-height: 12px;
 			padding: 10px -10px 10px 10px;
 			position: fixed;
 			left: 440px;
@@ -174,6 +174,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			border: 0.5px #DDDDDD solid;
 			border-radius: 5px;
 		}
+
 		.label {
 			width: 30%;
 			padding: 0 5px;
@@ -195,11 +196,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			   </div>
 			   </div>
 				<div class="frame-info-user">
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;padding-top: 0px;">
 					<div class="label">เลขสมาชิก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
 					</div>
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;padding-top: 0px;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
 					</div>
@@ -217,7 +218,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:70px;">วัน เดือน ปี</th>
+		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
 		  <th>รายการ</th>
 		  <th>ฝาก</th>
 		  <th>ถอน</th>
@@ -290,13 +291,17 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
-
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;

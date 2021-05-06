@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
 					$CheckIsReq->execute([
 						':loantype_code' => $rowCanCal["loantype_code"],
-						':member_no' => $member_no
+						':member_no' => $payload["member_no"]
 					]);
 					if($CheckIsReq->rowCount() > 0 || $maxloan_amt <= 0){
 						$canRequest = FALSE;

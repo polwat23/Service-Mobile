@@ -228,7 +228,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 														mbucfprename mp ON mb.prename_code = mp.prename_code
 														LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
 														LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
-														LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
+														LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 														LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 														WHERE mb.member_no = :member_no");
 				$fetchData->execute([
@@ -292,7 +292,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						$arrayPDF["RESULT"] = FALSE;
 					}
 					if($arrayPDF["RESULT"]){
-						$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+						/*$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 																VALUES(:doc_no,:docgrp_no,:doc_filename,'pdf',:doc_address,:member_no)");
 						$insertDocMaster->execute([
 							':doc_no' => $reqloan_doc,
@@ -309,7 +309,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':file_name' => $reqloan_doc.'.pdf',
 							':id_userlogin' => $payload["id_userlogin"]
 						]);
-						$conmysql->commit();
+						$conmysql->commit();*/
 						$arrayResult['REPORT_URL'] = $pathFile;
 						$arrayResult['APV_DOCNO'] = $reqloan_doc;
 						$arrayResult['RESULT'] = TRUE;
