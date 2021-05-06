@@ -228,7 +228,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 														mbucfprename mp ON mb.prename_code = mp.prename_code
 														LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
 														LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
-														LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
+														LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 														LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 														WHERE mb.member_no = :member_no");
 				$fetchData->execute([
