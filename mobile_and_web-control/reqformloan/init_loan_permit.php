@@ -32,12 +32,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrGrpBank[] = $arrBank;
 				}
 				$arrayResult['COOP_ACCOUNT'] = [];
-				$arrayResult["REQ_BOOKBANK"] = FALSE;
+				$arrayResult["REQ_BOOKBANK"] = TRUE;
 				$arrayResult["REQ_BOOKCOOP"] = FALSE;
-				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
-				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
+				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
 				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
-				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
+				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
 				$arrayResult['BANK'] = $arrGrpBank;
 			}else if($dataComing["recv_acc"] == '1'){
 				$arrGrpCoopAcc = array();
@@ -53,10 +53,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
 				$arrayResult["REQ_BOOKBANK"] = FALSE;
-				$arrayResult["REQ_BOOKCOOP"] = FALSE;
+				$arrayResult["REQ_BOOKCOOP"] = TRUE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
 				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
-				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
+				$arrayResult["IS_UPLOAD_BOOKCOOP"] = TRUE;
 				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
 				$arrayResult['BANK'] = [];
 			}
@@ -151,19 +151,19 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 				$arrayResult["RECV_ACC"] = $arrGrpReceive;
-				$arrayResult["REQ_SALARY"] = FALSE;
+				$arrayResult["REQ_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = FALSE;
-				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
-				$arrayResult["REQ_BOOKBANK"] = FALSE;
+				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
+				$arrayResult["REQ_BOOKBANK"] = TRUE;
 				$arrayResult["REQ_BOOKCOOP"] = FALSE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
+				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
 				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
 				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
 				$arrayResult['OBJECTIVE'] = $arrGrpObj;
 				$arrayResult['BANK'] = $arrGrpBank;
-				$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
+				//$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
