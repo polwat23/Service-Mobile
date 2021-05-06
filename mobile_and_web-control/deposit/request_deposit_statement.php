@@ -190,7 +190,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 					สหกรณ์ออมทรัพย์ รพช.จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Disaster Saving Cooperative, Limited.
+					The ARD Savings and Credit Cooperative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
