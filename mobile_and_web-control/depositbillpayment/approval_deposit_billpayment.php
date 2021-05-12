@@ -77,12 +77,21 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 						exit();
 					}
 				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS0108";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					ob_flush();
-					echo json_encode($arrayResult);
-					exit();
+					if($rowCheckBill["transfer_status"] == '-9'){
+						$arrayResult['RESPONSE_CODE'] = "WS0109";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "WS0108";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
+					}
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0112";
