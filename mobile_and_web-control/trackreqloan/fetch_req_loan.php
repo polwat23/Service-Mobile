@@ -66,7 +66,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGrpReq[] = $arrayReq;
 			}
 		}
+		
+		$fetchReqStatus = $conmysql->prepare("SELECT id_reqstatus, req_value, req_desc
+											FROM gcconstantreqstatus WHERE menu_component = 'LoanRequestTrack' AND is_use = '1'");
+		$fetchReqStatus->execute();
+		while($rowReqStatus = $fetchReqStatus->fetch(PDO::FETCH_ASSOC)){
+			$filter[] = ["STATUS" => $rowReqStatus["req_value"], "DESC" => $rowReqStatus["req_desc"]];
+		}
+		
 		$arrayResult['REQ_LIST'] = $arrGrpReq;
+		$arrayResult['FILTER'] = $filter;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
