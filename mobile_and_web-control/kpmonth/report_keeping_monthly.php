@@ -239,14 +239,14 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. ฝ่ายบริหารทั่วไป 086-451-9488, ฝ่ายสินเชื่อ  086-451-9187</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ไทยน้ำทิพย์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">416 ถนนรามคำแหง </p>
+				<p style="margin-top: -25px;font-size: 18px;">แขวงหัวหมาก   เขต บางกะปิ   กทม  10240</p>
+				<p style="margin-top: -25px;font-size: 18px;">02-3740252-60</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">http://www.thainamthip.co.th</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
