@@ -2,69 +2,108 @@
 ini_set('default_socket_timeout', 300);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
+if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 	$lang_locale = 'en';
-	$transaction_no = $dataComing["tran_id"];
-	$etn_ref = $dataComing["bank_ref"];
-	$cmd_operate = substr($dataComing["coop_account_no"],0,2);
-	$coop_account_no = preg_replace('/-/','',substr($dataComing["coop_account_no"],2));
-	$time = time();
-	$fee_amt = 0;
-	$amt_transfer = $dataComing["amt_transfer"];
-	$getAccData = $conoracle->prepare("SELECT DPM.DEPTACCOUNT_NO,DPT.MINDEPT_AMT,DPT.LIMITDEPT_FLAG,DPT.LIMITDEPT_AMT,
-											DPT.MAXBALANCE,DPT.MAXBALANCE_FLAG,DPM.PRNCBAL,DPT.DEPTTYPE_CODE
-											FROM DPDEPTMASTER DPM 
-											LEFT JOIN DPDEPTTYPE DPT ON DPM.DEPTTYPE_CODE = DPT.DEPTTYPE_CODE
-											WHERE DPM.DEPTACCOUNT_NO = :account_no");
-	$getAccData->execute([':account_no' => $coop_account_no]);
-	$rowAccData = $getAccData->fetch(PDO::FETCH_ASSOC);
-	if(isset($rowAccData["DEPTACCOUNT_NO"]) && $rowAccData["DEPTACCOUNT_NO"] != ""){
-		$checkCanReceive = $conmysql->prepare("SELECT allow_deposit_outside FROM gcconstantaccountdept WHERE dept_type_code = :depttype_code");
-		$checkCanReceive->execute([':depttype_code' => $rowAccData["DEPTTYPE_CODE"]]);
-		$rowCanReceive = $checkCanReceive->fetch(PDO::FETCH_ASSOC);
-		if($rowCanReceive["allow_deposit_outside"] == '1'){
-			if($rowAccData["LIMITDEPT_FLAG"] == '1' && $amt_transfer >= $rowAccData["LIMITDEPT_AMT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0093";
+	$checkBillAvailable = $conmysql->prepare("SELECT transfer_status,expire_date,member_no,qrtransfer_amt FROM gcqrcodegenmaster 
+											WHERE qrgenerate = :tran_id");
+	$checkBillAvailable->execute([
+		':tran_id' => $dataComing["tran_id"]
+	]);
+	if($checkBillAvailable->rowCount() > 0){
+		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
+		if($rowCheckBill["member_no"] == $dataComing["member_no"]){
+			if($rowCheckBill["qrtransfer_amt"] == $dataComing["amt_transfer"]){
+				if($rowCheckBill["transfer_status"] == '0'){
+					if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
+						$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
+															WHERE qrgenerate = :tran_id");
+						$getDetailTran->execute([':tran_id' => $dataComing["tran_id"]]);
+						while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
+							if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
+								$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
+								$checkSeqAmt = $cal_dep->getSequestAmt($deptaccount_no,'DTE');
+								if($checkSeqAmt["CAN_DEPOSIT"]){
+									$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","006");
+									if($arrRightDep["RESULT"]){
+									}else{
+										$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
+										if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
+											$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+										}else{
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+										}
+										$arrayResult['RESULT'] = FALSE;
+										ob_flush();
+										echo json_encode($arrayResult);
+										exit();
+									}
+								}else{
+									$arrayResult['RESPONSE_CODE'] = "WS0104";
+									$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
+									$arrayResult['RESULT'] = FALSE;
+									ob_flush();
+									echo json_encode($arrayResult);
+									exit();
+								}
+							}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
+								$fetchLoanRepay = $conoracle->prepare("SELECT PRINCIPAL_BALANCE,INTEREST_RETURN,RKEEP_PRINCIPAL
+																		FROM lncontmaster
+																		WHERE loancontract_no = :loancontract_no");
+								$fetchLoanRepay->execute([':loancontract_no' => $rowDetail["ref_account"]]);
+								$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
+								$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+								if($rowDetail["qrtransferdt_amt"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+									$arrayResult['RESPONSE_CODE'] = "WS0098";
+									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+									$arrayResult['RESULT'] = FALSE;
+									ob_flush();
+									echo json_encode($arrayResult);
+									exit();
+								}
+							}
+						}
+						$arrayResult['RESULT'] = TRUE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
+					}else{
+						$updateQRExpire = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '-9' WHERE qrgenerate = :tran_id");
+						$updateQRExpire->execute([':tran_id' => $dataComing["tran_id"]]);
+						$arrayResult['RESPONSE_CODE'] = "WS0109";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
+					}
+				}else{
+					if($rowCheckBill["transfer_status"] == '-9'){
+						$arrayResult['RESPONSE_CODE'] = "WS0109";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "WS0108";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						ob_flush();
+						echo json_encode($arrayResult);
+						exit();
+					}
+				}
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0112";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 				$arrayResult['RESULT'] = FALSE;
 				ob_flush();
 				echo json_encode($arrayResult);
 				exit();
 			}
-			if($rowAccData["MAXBALANCE_FLAG"] == '1' && $amt_transfer + $rowAccData["PRNCBAL"] > $rowAccData["MAXBALANCE"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0093";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
-				$arrayResult['RESULT'] = FALSE;
-				ob_flush();
-				echo json_encode($arrayResult);
-				exit();
-			}
-			if($amt_transfer < $rowAccData["MINDEPT_AMT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0056";
-				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-				$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
-				$arrayResult['RESULT'] = FALSE;
-				ob_flush();
-				echo json_encode($arrayResult);
-				exit();
-			}
-			$getNameMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname
-												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.member_no = :member_no");
-			$getNameMember->execute([':member_no' => $dataComing["member_no"]]);
-			$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
-			$arrayResult['RECEIVE_NAME'] = $rowName["PRENAME_SHORT"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-			$arrayResult['COOP_ACCOUNT_NO'] = $coop_account_no;
-			$arrayResult['RESULT'] = TRUE;
-			ob_flush();
-			echo json_encode($arrayResult);
-			exit();
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0026";
-			$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-			$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
+			$arrayResult['RESPONSE_CODE'] = "WS0107";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			ob_flush();
 			echo json_encode($arrayResult);
@@ -72,8 +111,7 @@ if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0025";
-		$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($rowAccDataDest["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-		$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		ob_flush();
 		echo json_encode($arrayResult);
@@ -92,7 +130,6 @@ if($lib->checkCompleteArgument(['amt_transfer'],$dataComing)){
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-	$arrayResult['RESPONSE_MESSAGE_SOURCE'] = $arrayResult['RESPONSE_MESSAGE'];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	ob_flush();
