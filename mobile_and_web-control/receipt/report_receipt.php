@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE,mb.current_coopid
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
@@ -143,7 +143,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"] + $intinPeriod,2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
-		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib,$rowName["CURRENT_COOPID"]);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
@@ -192,21 +192,22 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	
 }
 
-function GenerateReport($dataReport,$header,$lib){
+function GenerateReport($dataReport,$header,$lib,$current_coopid=null){
 	$sumBalance = 0;
 	$html = '<style>
 			@font-face {
-				font-family: THSarabun;
-				src: url(../../resource/fonts/THSarabun.ttf);
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
 			* {
-			  font-family: THSarabun;
+			  font-family: TH Niramit AS;
 			}
+
 			body {
 			  padding: 0 30px;
 			}
@@ -216,17 +217,17 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. ฝ่ายบริหารทั่วไป 086-451-9488, ฝ่ายสินเชื่อ  086-451-9187</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ไทยน้ำทิพย์ จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">416 ถนนรามคำแหง   แขวงหัวหมาก   เขต บางกะปิ   กทม  10240</p>
+			<p style="margin-top: -25px;font-size: 18px;">02-3740252-60</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">http://www.thainamthip.co.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -338,17 +339,22 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/'.$current_coopid.'.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();

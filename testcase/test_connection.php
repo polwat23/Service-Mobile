@@ -22,7 +22,7 @@ $con = new connection();
 $basetest = json_decode(isset($headers["basetest"]) ? $headers["basetest"] : false);
 $conmysql = $con->connecttomysql($basetest);
 $conoracle = $con->connecttooracle($basetest);
-$conmongo = $con->connecttomongo($basetest);
+//$conmongo = $con->connecttomongo($basetest);
 
 // Test MariaDB
 $testMariaDB = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = 'dev@mode'");
@@ -44,11 +44,13 @@ if(isset($rowtest["COOP_ID"])){
 }
 
 // Test MongoDB
+/*
 $statusId = $conmongo->GCLOGUSERACCESSAFTERLOGIN->getCollectionName();
 if(isset($statusId)){
 	$arrResult["MONGODB"] = 'MONGODB is Connected 🟢';
 }else{
 	$arrResult["MONGODB"] = 'MONGODB is Disconnect 🟠';
 }
+*/
 echo json_encode($arrResult);
 ?>
