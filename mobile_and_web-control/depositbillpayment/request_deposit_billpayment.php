@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$payload["member_no"] = $rowCheckBill["member_no"];
 				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
 				$payload["app_version"] = $rowCheckBill["app_version"];
-				$amt_tranferLon = $dataComing["amt_transfer"];
+				$amt_transferLon = $dataComing["amt_transfer"];
 				$vccAccID = $func->getConstant('map_account_id_ktb');
 				$getDetailTranDP = $conmysql->prepare("SELECT ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
 													WHERE qrgenerate = :tran_id and trans_code_qr = '01'");
@@ -164,7 +164,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					':destination' => $dataComing["tran_id"],
 					':amount' => $dataComing["amt_transfer"],
 					':penalty_amt' => 0,
-					':amount_receive' => $dataComing["qrtransferdt_amt"],
+					':amount_receive' => $dataComing["amt_transfer"],
 					':operate_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':slip_no' => $payinslip_no,
@@ -211,10 +211,8 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}
 					}
 				}
-				if($dataComing["tran_id"] != '202104261434325280'){
-					$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
-					$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
-				}
+				$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
+				$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
 				$arrayResult['RESULT'] = TRUE;
 				ob_flush();
 				echo json_encode($arrayResult);

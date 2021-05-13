@@ -25,7 +25,7 @@ class CalculateLoan {
 			$calInt = TRUE;
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
-				$calInt = TRUE;
+				$calInt = FALSE;
 			}else{
 				if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
 					$calInt = FALSE;
@@ -39,14 +39,27 @@ class CalculateLoan {
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
 			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'ynd'));
 			$yearTo = date('Y');
+			$roundLoop = 0;
 			$yearDiff = $yearTo - $yearFrom;
+			if($yearDiff > 0){
+				$roundLoop += 1;
+			}
 			if($changerateint){
-				$yearDiff = 1;
+				$roundLoop += 1;
 			}
 			$yearDiffTemp = 0;
-			for($i = 0;$i <= $yearDiff;$i++){
+			for($i = 0;$i <= $roundLoop;$i++){
 				if($constLoanContract["INT_CONTINTTYPE"] == '2'){
-					$intrate = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+					if($changerateint){
+						if($i == 0){
+							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+						}else{
+							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],date('Y-m-d'));
+						}
+					}else{
+						$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+					}
+					$intrate = $intrateData["INTEREST_RATE"];
 				}else if($constLoanContract["INT_CONTINTTYPE"] == '1'){
 					$intrate = $constLoanContract["INT_CONTINTRATE"];
 				}else if($constLoanContract["INT_CONTINTTYPE"] == '0'){
@@ -56,25 +69,66 @@ class CalculateLoan {
 				if($constLoan["DAYINYEAR"] > 0){
 					$dayinyear = $constLoan["DAYINYEAR"];
 				}else{
-					$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));	
+					if($changerateint){
+						if($i == 0){
+							$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}else if($i == 1){
+							if($yearDiff > 0){
+								$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+							}else{
+								$dayinyear = $this->lib->getnumberofYear(date('Y'));
+							}
+						}else{
+							$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+1 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}
+					}else{
+						$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+					}
 				}
-				$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
-				if($yearDiffTemp == 0 && $yearDiff > 0){
-					$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
-					$date_duration = $dateTo->diff($dateFrom);
-					$dayInterest = $date_duration->days;
-					if($dayInterest == 0){
-						$dayInterest++;
+				if($changerateint){
+					if($i == 0){
+						$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						$dateTo = new \DateTime(date('d-m-Y',strtotime('+1 days',strtotime($intrateData["EXPIRE_DATE"]))));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}else if($i == 1){
+						if($yearDiff > 0){
+							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
+							$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+							$date_duration = $dateTo->diff($dateFrom);
+							$dayInterest = $date_duration->days;
+						}else{
+							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
+							$dateTo = new \DateTime(date('d-m-Y'));
+							$date_duration = $dateTo->diff($dateFrom);
+							$dayInterest = $date_duration->days;
+						}
+					}else{
+						$dateFrom = new \DateTime('01-01-'.date('Y'));
+						$dateTo = new \DateTime(date('d-m-Y'));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
 					}
 				}else{
-					if($yearDiffTemp > 0){
-						$dateFrom = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+					if($yearDiffTemp == 0 && $yearDiff > 0){
+						$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}else{
+						if($yearDiffTemp > 0){
+							$dateFrom = new \DateTime('01-01-'.date('Y'));
+						}else{
+							$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}
+						$dateTo = new \DateTime(date('d-m-Y'));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
 					}
-					$dateTo = new \DateTime(date('d-m-Y'));
-					$date_duration = $dateTo->diff($dateFrom);
-					$dayInterest = $date_duration->days;
 				}
-				$yearDiffTemp++;
+				if(!$changerateint){
+					$yearDiffTemp++;
+				}
 				if($constLoanContract["PAYSPEC_METHOD"] == '1'){
 					$prn_bal = $constLoanContract["PRINCIPAL_BALANCE"];
 				}else{
