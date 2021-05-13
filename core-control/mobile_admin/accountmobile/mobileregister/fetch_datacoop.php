@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			require_once('../../../../include/exit_footer.php');
 		}
 		
-		$fetchAccount = $conmysql->prepare("SELECT member_no, prename_desc, memb_name, prename_edesc, memb_ename, remark
+		$fetchAccount = $conmysql->prepare("SELECT member_no, prename_desc, memb_name, prename_edesc, memb_ename, remark ,service_status
 										FROM gcmembonlineregis 
 										WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and member_no = :member_no" : null).
 										(isset($dataComing["memb_name"]) && $dataComing["memb_name"] != '' ? " and TRIM(memb_name) LIKE :memb_name" : null));
@@ -31,6 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrUserAcount["MEMB_NAME"] = $rowUser["memb_name"];
 			$arrUserAcount["MEMB_ENAME"] = $rowUser["memb_ename"];
 			$arrUserAcount["REMARK"] = $rowUser["remark"];
+			$arrUserAcount["SERVICE_STATUS"] = $rowUser["service_status"];
 			$arrUserAcount["CHECK_REGIS"] = true;
 			$arrRegisterCoop[] = $rowUser["member_no"];
 			$arrayAccount[] = $arrUserAcount;
@@ -42,8 +43,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
                             mb.memb_name,
                             mb.memb_ename
                             from mbmembmaster mb , mbucfprename mp 
-                            where mb.prename_code = mp.prename_code
-                            and mp.prename_type in ( '01','00' )
+                            where mb.resign_status = 0
+							AND mb.prename_code = mp.prename_code
 							".(count($arrRegisterCoop) > 0 ? ("and mb.member_no NOT IN(".implode(',',$arrRegisterCoop).")") : null)."
                             and 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no " : null).
 							(isset($dataComing["memb_name"]) && $dataComing["memb_name"] != '' ? " and TRIM(mb.memb_name) LIKE :memb_name" : null));

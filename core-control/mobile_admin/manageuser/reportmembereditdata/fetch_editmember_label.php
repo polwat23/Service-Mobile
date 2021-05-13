@@ -25,6 +25,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup["coopregis_no"] = "เลขทะเบียนสหกรณ์";
 		$arrayGroup["memb_regno"] = "เลข 13 หลักสหกรณ์";
 		$arrayGroup["tax_id"] = "เลขประจำตัวผู้เสียภาษีอากร";
+		$arrayGroup["accyearclose_date"] = "วันสิ้นปีทางบัญชี";
+		$arrayGroup["share_stk"] = "ทุนเรือนหุ้น";
 		$arrayResult["EDIT_MEMBER_LABEL"] = $arrayGroup;
 
 		$arrayResult["RESULT"] = TRUE;

@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id' , 'ref_memno'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','mobileregister')){
 		$arrayAccount = array();
 		$fetchAccount = $conmysql->prepare("SELECT member_no, ref_memno, password, acc_name, acc_surname, phone_number, email,  account_status, register_date
-											FROM gcmemberaccount where ref_memno = :ref_memno");
+											FROM gcmemberaccount where account_status  <> '8'  AND ref_memno = :ref_memno");
 		$fetchAccount->execute([':ref_memno' => $dataComing["ref_memno"]]);
 		while($rowUser = $fetchAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrUserAcount = array();

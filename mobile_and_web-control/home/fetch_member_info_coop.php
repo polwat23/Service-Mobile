@@ -10,6 +10,25 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayBusiness = array();
 		$arrayMember = array();
 		$arrayOfficer = array();
+		$arrayData = array();
+		$arrayDocData = array();
+		
+		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 500) as SHARE_AMT,(shrpar_value * shrpar_ratio) as PERIOD_SHARE_AMT, sharebegin_amt
+													FROM shsharemaster WHERE TRIM(member_no) = :member_no");
+		$getSharemasterinfo->execute([':member_no' => $payload["ref_memno"]]);
+		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
+		if($rowMastershare){
+			$arrayData['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
+		}
+		
+		$getDocType = $conmysql->prepare("SELECT docgrp_name, docgrp_no FROM docgroupcontrol where menu_component = 'Coopinfo' AND is_use ='1'");
+		$getDocType->execute();
+		while($rowDocType = $getDocType->fetch(PDO::FETCH_ASSOC)){
+			$arrayDoc = array();
+			$arrayDoc["DOCGRP_NAME"] = $rowDocType["docgrp_name"];
+			$arrayDoc["DOCGRP_NO"] = $rowDocType["docgrp_no"];
+			$arrayDocData[] = $arrayDoc;
+		}
 		
 		$mdInfo = $conmysql->prepare("SELECT id ,member_no, md_name, md_type ,md_count  FROM gcmanagement WHERE board_status = '1' AND member_no  = :member_no");
 		$mdInfo->execute([':member_no' => $payload["ref_memno"]]);
@@ -71,7 +90,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE mb.member_no = :member_no");
 		$memberInfo->execute([':member_no' => $payload["ref_memno"]]);
 		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
-		$arrayData = array();
 		$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 		if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 			$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
@@ -118,11 +136,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayData["MEMBER_COUNT"] = $arrayMember;  //จํานวนสมาชิก
 		$arrayData["PRESIDENT"] = $arrayChairman;		//ประธานกรรมการ
 		$arrayData["BOARD"] =  $arrayBoard;		//รายชื่อคณะกรรมการ
-		$arrayData["MAX_BOARD"] =  15;		//จำนวนรายชื่อคณะกรรมการ
+		$arrayData["MAX_BOARD"] =  15;		//จำนวน max รายชื่อคณะกรรมการ
 		$arrayData["BUSINESS"] = $arrayBusiness;		//ผู้ตรวจสอบกิจการ
-		$arrayData["MAX_BUSINESS"] = 5;		//จำนวนผู้ตรวจสอบกิจการ
+		$arrayData["MAX_BUSINESS"] = 5;		//จำนวน max ผู้ตรวจสอบกิจการ
 		$arrayData["MANAGER"] = $arrayManager;		//ผู้จัดการ
-		$arrayData["COOP_OFFICER"] = $arrayOfficer;		//เจ้าหน้าที่สหกรณ์	
+		$arrayData["COOP_OFFICER"] = $arrayOfficer;		//เจ้าหน้าที่สหกรณ์
+		$arrayData["DOCUMENTTYPE_LIST"] = $arrayDocData;		//เอกสาร	
+		
 		$arrAllTambol = array();
 		$dataTambol = $conoracle->prepare("SELECT TAMBOL_CODE,TAMBOL_DESC,DISTRICT_CODE FROM MBUCFTAMBOL");
 		$dataTambol->execute();

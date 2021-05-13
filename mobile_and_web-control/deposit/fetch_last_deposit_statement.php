@@ -22,8 +22,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.branch_id = dps.branch_id
-												LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code AND dpm.deptgroup_code = dt.deptgroup_code
-												WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
+											LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code AND dpm.deptgroup_code = dt.deptgroup_code
+											WHERE dpm.member_no = :member_no and dps.deptgroup_code = '01' and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $payload["ref_memno"]]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);

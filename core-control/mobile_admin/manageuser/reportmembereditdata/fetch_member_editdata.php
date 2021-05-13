@@ -6,7 +6,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$arrGroupUserAcount = array();
 
-		$fetchUserAccount = $conmysql->prepare("SELECT id_editdata, member_no, edit_date, old_data, incoming_data,update_date,inputgroup_type,old_email,new_email,old_tel,new_tel,old_website,new_website,old_coopregis_date,new_coopregis_date,old_coopregis_no,new_coopregis_no,old_memb_regno,new_memb_regno,old_tax_id,new_tax_id,username
+		$fetchUserAccount = $conmysql->prepare("SELECT id_editdata, member_no, edit_date, old_data, incoming_data,update_date,inputgroup_type,old_email,new_email,old_tel,new_tel,old_website,new_website,old_coopregis_date,new_coopregis_date,
+												old_accyearclose_date,new_accyearclose_date,old_coopregis_no,new_coopregis_no,old_memb_regno,new_memb_regno,old_tax_id,new_tax_id,old_share_stk,new_share_stk,username
 											FROM gcmembereditdata WHERE is_updateoncore = '0'");
 		$fetchUserAccount->execute();
 		while($rowUser = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
@@ -26,12 +27,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["website"] = $rowUser["new_website"];
 			$arrGroupUserAcount["OLD_DATA_JSON"]["coopregis_date"] = $lib->convertdate($rowUser["old_coopregis_date"],'d m Y');
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["coopregis_date"] = $lib->convertdate($rowUser["new_coopregis_date"],'d m Y');
+			$arrGroupUserAcount["OLD_DATA_JSON"]["accyearclose_date"] = $lib->convertdate($rowUser["old_accyearclose_date"],'d m Y');
+			$arrGroupUserAcount["INCOMING_DATA_JSON"]["accyearclose_date"] = $lib->convertdate($rowUser["new_accyearclose_date"],'d m Y');
 			$arrGroupUserAcount["OLD_DATA_JSON"]["coopregis_no"] = $rowUser["old_coopregis_no"];
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["coopregis_no"] = $rowUser["new_coopregis_no"];
 			$arrGroupUserAcount["OLD_DATA_JSON"]["memb_regno"] = $rowUser["old_memb_regno"];
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["memb_regno"] = $rowUser["new_memb_regno"];
 			$arrGroupUserAcount["OLD_DATA_JSON"]["tax_id"] = $rowUser["old_tax_id"];
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["tax_id"] = $rowUser["new_tax_id"];
+			$arrGroupUserAcount["OLD_DATA_JSON"]["share_stk"] = number_format($rowUser["old_share_stk"],2);
+			$arrGroupUserAcount["INCOMING_DATA_JSON"]["share_stk"] = number_format($rowUser["new_share_stk"],2);
 			
 			$fetchName = $conmysql->prepare("SELECT member_no,ref_memno,acc_name,acc_surname,phone_number FROM gcmemberaccount WHERE  member_no = :member_no AND ref_memno = :ref_memno");
 			$fetchName->execute([':member_no' => $rowUser["username"],

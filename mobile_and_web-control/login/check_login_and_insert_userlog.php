@@ -20,8 +20,9 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		
 	}
 	$member_no = $dataComing["member_no"];
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 , ref_memno FROM gcmemberaccount 
-										WHERE member_no = :member_no");
+	$checkLogin = $conmysql->prepare("SELECT gc.password,gc.user_type,gc.pin,gc.account_status,gc.temppass,gc.temppass_is_md5 , gc.ref_memno ,gcm.service_status 
+									  FROM gcmemberaccount gc LEFT JOIN gcmembonlineregis gcm ON gc.ref_memno = gcm.member_no 
+									  WHERE gc.member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
 	
 	if($checkLogin->rowCount() > 0){
@@ -61,7 +62,13 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			require_once('../../include/exit_footer.php');
 			
 		}
-		if($rowPassword['account_status'] == '-8'){
+		if($rowPassword['service_status'] == '8'){
+			$arrayResult['RESPONSE_CODE'] = "WS0048";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}else if($rowPassword['account_status'] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
