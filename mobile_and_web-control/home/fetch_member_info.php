@@ -20,23 +20,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
-													mb.MEMBER_DATE,mb.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
-													mb.CURRADDR_NO as ADDR_NO,
-													mb.CURRADDR_MOO as ADDR_MOO,
-													mb.CURRADDR_SOI as ADDR_SOI,
-													mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
-													mb.CURRADDR_ROAD as ADDR_ROAD,
+													mb.MEMBER_DATE,mbup.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
+													mb.address_no as ADDR_NO,
+													mb.address_moo as ADDR_MOO,
+													mb.address_soi as ADDR_SOI,
+													mb.address_village as ADDR_VILLAGE,
+													mb.address_road as ADDR_ROAD,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
-													MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
+													MB.province_code AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.CURRADDR_POSTCODE AS ADDR_POSTCODE
+													MB.postcode AS ADDR_POSTCODE,
+													MB.expense_accid AS EXPENSE_ACCID,
+													BK.bank_desc AS EXPENSE_BANK
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													LEFT JOIN CMUCFBANK bk ON bk.bank_code = mb.expense_bank
+													LEFT JOIN MBUCFPOSITION mbup ON mbup.position_code = mb.position_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.tambol_code = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.district_code = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.province_code = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
@@ -73,6 +77,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["EXPENSE_ACCID"] = $rowMember["EXPENSE_ACCID"];
+			$arrayResult["EXPENSE_BANK"] = $rowMember["EXPENSE_BANK"];
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
