@@ -27,17 +27,27 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 				require_once('../../include/exit_footer.php');
 			}
 		}else if($dataComing["trans_code"] == '02'){
-			$fetchLoanRepay = $conoracle->prepare("SELECT principal_balance,INTEREST_RETURN,RKEEP_PRINCIPAL
+			$fetchLoanRepay = $conoracle->prepare("SELECT PRINCIPAL_BALANCE,INTEREST_RETURN,RKEEP_PRINCIPAL,LAST_PERIODPAY,
+													LOANTYPE_CODE
 													FROM lncontmaster
 													WHERE loancontract_no = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["destination"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
 			$interest = $cal_loan->calculateInterest($dataComing["destination"],$dataComing["trans_amount"]);
+			$amt_prin = $dataComing["trans_amount"] - $interest;
 			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
+			}
+			if(($rowLoan["LOANTYPE_CODE"] == '12' || $rowLoan["LOANTYPE_CODE"] == '30') && $rowLoan["LAST_PERIODPAY"] < 24){
+				$fee_amt = $amt_prin * 0.02;
+				$arrOther = array();
+				$arrOther["LABEL"] = 'ค่าธรรมเนียมชำระก่อนกำหนด';
+				$arrOther["VALUE_TEXT_PROPS"] = ['color' => 'red'];
+				$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
+				$arrayResult["OTHER_INFO"][] = $arrOther;
 			}
 		}
 		$arrayResult["RESULT"] = TRUE;

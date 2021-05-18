@@ -25,7 +25,7 @@ class CalculateLoan {
 			$calInt = TRUE;
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
-				$calInt = TRUE;
+				$calInt = FALSE;
 			}else{
 				if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
 					$calInt = FALSE;
@@ -39,14 +39,27 @@ class CalculateLoan {
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
 			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'ynd'));
 			$yearTo = date('Y');
+			$roundLoop = 0;
 			$yearDiff = $yearTo - $yearFrom;
+			if($yearDiff > 0){
+				$roundLoop += 1;
+			}
 			if($changerateint){
-				$yearDiff = 1;
+				$roundLoop += 1;
 			}
 			$yearDiffTemp = 0;
-			for($i = 0;$i <= $yearDiff;$i++){
+			for($i = 0;$i <= $roundLoop;$i++){
 				if($constLoanContract["INT_CONTINTTYPE"] == '2'){
-					$intrate = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+					if($changerateint){
+						if($i == 0){
+							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+						}else{
+							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],date('Y-m-d'));
+						}
+					}else{
+						$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+					}
+					$intrate = $intrateData["INTEREST_RATE"];
 				}else if($constLoanContract["INT_CONTINTTYPE"] == '1'){
 					$intrate = $constLoanContract["INT_CONTINTRATE"];
 				}else if($constLoanContract["INT_CONTINTTYPE"] == '0'){
@@ -56,25 +69,66 @@ class CalculateLoan {
 				if($constLoan["DAYINYEAR"] > 0){
 					$dayinyear = $constLoan["DAYINYEAR"];
 				}else{
-					$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));	
+					if($changerateint){
+						if($i == 0){
+							$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}else if($i == 1){
+							if($yearDiff > 0){
+								$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+							}else{
+								$dayinyear = $this->lib->getnumberofYear(date('Y'));
+							}
+						}else{
+							$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+1 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}
+					}else{
+						$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+					}
 				}
-				$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
-				if($yearDiffTemp == 0 && $yearDiff > 0){
-					$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
-					$date_duration = $dateTo->diff($dateFrom);
-					$dayInterest = $date_duration->days;
-					if($dayInterest == 0){
-						$dayInterest++;
+				if($changerateint){
+					if($i == 0){
+						$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						$dateTo = new \DateTime(date('d-m-Y',strtotime('+1 days',strtotime($intrateData["EXPIRE_DATE"]))));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}else if($i == 1){
+						if($yearDiff > 0){
+							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
+							$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+							$date_duration = $dateTo->diff($dateFrom);
+							$dayInterest = $date_duration->days;
+						}else{
+							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
+							$dateTo = new \DateTime(date('d-m-Y'));
+							$date_duration = $dateTo->diff($dateFrom);
+							$dayInterest = $date_duration->days;
+						}
+					}else{
+						$dateFrom = new \DateTime('01-01-'.date('Y'));
+						$dateTo = new \DateTime(date('d-m-Y'));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
 					}
 				}else{
-					if($yearDiffTemp > 0){
-						$dateFrom = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+					if($yearDiffTemp == 0 && $yearDiff > 0){
+						$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}else{
+						if($yearDiffTemp > 0){
+							$dateFrom = new \DateTime('01-01-'.date('Y'));
+						}else{
+							$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}
+						$dateTo = new \DateTime(date('d-m-Y'));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
 					}
-					$dateTo = new \DateTime(date('d-m-Y'));
-					$date_duration = $dateTo->diff($dateFrom);
-					$dayInterest = $date_duration->days;
 				}
-				$yearDiffTemp++;
+				if(!$changerateint){
+					$yearDiffTemp++;
+				}
 				if($constLoanContract["PAYSPEC_METHOD"] == '1'){
 					$prn_bal = $constLoanContract["PRINCIPAL_BALANCE"];
 				}else{
@@ -640,6 +694,84 @@ class CalculateLoan {
 													:bfintarr,TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),
 													TRUNC(TO_DATE(:lastprocess_date,'yyyy/mm/dd  hh24:mi:ss')),
 													:period_payment,:principal,1,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
+
+		}
+		if($insertSLSlipDet->execute($executeSlDet)){
+			$arrayResult['RESULT'] = TRUE;
+			return $arrayResult;
+		}else{
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $operate_date,
+				':deptaccount_no' => $from_account_no,
+				':amt_transfer' => $amt_transfer,
+				':status_flag' => '0',
+				':destination' => $payinslip_no,
+				':response_code' => "WS0066",
+				':response_message' => 'INSERT slslippayindet ไม่ได้'.$insertSLSlipDet->queryString."\n".json_encode($executeSlDet)
+			];
+			$log->writeLog('repayloan',$arrayStruc);
+			$arrayResult["RESPONSE_CODE"] = 'WS0066';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+	}
+	public function paySlipFeeDet($conoracle,$dataCont,$amt_transfer,$config,$operate_date,
+	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$contract_no,$prinPay=0,$interest=0
+	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1){
+		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		$executeSlDet = [
+			':coop_id' => $config["COOP_ID"], 
+			':payinslip_no' => $payinslip_no,
+			':slipitemtype' => $slipitemtype,
+			':slipseq_no' => $slipseq_no,
+			':loantype_code' => $shrloantype_code,
+			':loancontract_no' => $contract_no ?? null,
+			':itemtype_desc' => 'ค่าธรรมเนียมชำระหนี้ก่อนกำหนด',
+			':lastperiod' => 0,
+			':prin_pay' => 0,
+			':int_pay' => 0,
+			':int_arrear' => 0,
+			':itempay_amt' => $amt_transfer,
+			':prin_bal' => 0,
+			':principal' => 0,
+			':int_return' => 0,
+			':bfperiod' => 0,
+			':bfintarr' => 0,
+			':period_payment' => 0,
+			':payspec_method' => 0,
+			':rkeep_principal' => 0,
+			':rkeep_interest' => 0,
+			':nkeep_interest' => 0,
+			':int_period' => 0
+		];
+		if($interestPeriod > 0){
+			$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
+													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
+													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
+													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
+													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
+													VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:loancontract_no,:itemtype_desc,
+													:lastperiod,:prin_pay,:int_pay,:int_arrear,:itempay_amt,:prin_bal,:principal,
+													null,null,:int_period,:int_return,
+													null,:bfperiod,
+													:bfintarr,null,
+													null,
+													:period_payment,:itempay_amt,0,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
+		}else{
+			$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
+													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
+													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
+													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
+													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
+													VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:loancontract_no,:itemtype_desc,
+													:lastperiod,:prin_pay,:int_pay,:int_arrear,:itempay_amt,:prin_bal,:principal,
+													null,null
+													,:int_period,:int_return,null,:bfperiod,
+													:bfintarr,null,
+													null,
+													:period_payment,:itempay_amt,0,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
 
 		}
 		if($insertSLSlipDet->execute($executeSlDet)){

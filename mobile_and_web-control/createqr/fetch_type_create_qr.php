@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,
-											ln.LAST_PERIODPAY as LAST_PERIOD,
+											ln.LAST_PERIODPAY as LAST_PERIOD,ln.LOANTYPE_CODE,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8 and ln.LOANTYPE_CODE IN('".implode("','",$arrLoantypeAllow)."')");
