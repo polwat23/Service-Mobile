@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 				require_once('../../include/exit_footer.php');
 			}
 		}else if($dataComing["trans_code"] == '02'){
-			$fetchLoanRepay = $conoracle->prepare("SELECT PRINCIPAL_BALANCE,INTEREST_RETURN,RKEEP_PRINCIPAL,PERIOD_PAYAMT,
+			$fetchLoanRepay = $conoracle->prepare("SELECT PRINCIPAL_BALANCE,INTEREST_RETURN,RKEEP_PRINCIPAL,LAST_PERIODPAY,
 													LOANTYPE_CODE
 													FROM lncontmaster
 													WHERE loancontract_no = :loancontract_no");
@@ -41,12 +41,13 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			if(($rowLoan["LOANTYPE_CODE"] == '12' || $rowLoan["LOANTYPE_CODE"] == '30') && $rowLoan["PERIOD_PAYAMT"] < 24){
+			if(($rowLoan["LOANTYPE_CODE"] == '12' || $rowLoan["LOANTYPE_CODE"] == '30') && $rowLoan["LAST_PERIODPAY"] < 24){
 				$fee_amt = $amt_prin * 0.02;
 				$arrOther = array();
 				$arrOther["LABEL"] = 'ค่าธรรมเนียมชำระก่อนกำหนด';
-				$arrOther["VALUE"] = $fee_amt;
-				$arrayResult["OTHER_INFO"] = $arrOther;
+				$arrOther["VALUE_TEXT_PROPS"] = ['color' => 'red'];
+				$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
+				$arrayResult["OTHER_INFO"][] = $arrOther;
 			}
 		}
 		$arrayResult["RESULT"] = TRUE;

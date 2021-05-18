@@ -717,5 +717,83 @@ class CalculateLoan {
 			return $arrayResult;
 		}
 	}
+	public function paySlipFeeDet($conoracle,$dataCont,$amt_transfer,$config,$operate_date,
+	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$contract_no,$prinPay=0,$interest=0
+	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1){
+		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		$executeSlDet = [
+			':coop_id' => $config["COOP_ID"], 
+			':payinslip_no' => $payinslip_no,
+			':slipitemtype' => $slipitemtype,
+			':slipseq_no' => $slipseq_no,
+			':loantype_code' => $shrloantype_code,
+			':loancontract_no' => $contract_no ?? null,
+			':itemtype_desc' => 'ค่าธรรมเนียมชำระหนี้ก่อนกำหนด',
+			':lastperiod' => 0,
+			':prin_pay' => 0,
+			':int_pay' => 0,
+			':int_arrear' => 0,
+			':itempay_amt' => $amt_transfer,
+			':prin_bal' => 0,
+			':principal' => 0,
+			':int_return' => 0,
+			':bfperiod' => 0,
+			':bfintarr' => 0,
+			':period_payment' => 0,
+			':payspec_method' => 0,
+			':rkeep_principal' => 0,
+			':rkeep_interest' => 0,
+			':nkeep_interest' => 0,
+			':int_period' => 0
+		];
+		if($interestPeriod > 0){
+			$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
+													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
+													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
+													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
+													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
+													VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:loancontract_no,:itemtype_desc,
+													:lastperiod,:prin_pay,:int_pay,:int_arrear,:itempay_amt,:prin_bal,:principal,
+													null,null,:int_period,:int_return,
+													null,:bfperiod,
+													:bfintarr,null,
+													null,
+													:period_payment,:itempay_amt,0,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
+		}else{
+			$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
+													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
+													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
+													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
+													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
+													VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:loancontract_no,:itemtype_desc,
+													:lastperiod,:prin_pay,:int_pay,:int_arrear,:itempay_amt,:prin_bal,:principal,
+													null,null
+													,:int_period,:int_return,null,:bfperiod,
+													:bfintarr,null,
+													null,
+													:period_payment,:itempay_amt,0,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
+
+		}
+		if($insertSLSlipDet->execute($executeSlDet)){
+			$arrayResult['RESULT'] = TRUE;
+			return $arrayResult;
+		}else{
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $operate_date,
+				':deptaccount_no' => $from_account_no,
+				':amt_transfer' => $amt_transfer,
+				':status_flag' => '0',
+				':destination' => $payinslip_no,
+				':response_code' => "WS0066",
+				':response_message' => 'INSERT slslippayindet ไม่ได้'.$insertSLSlipDet->queryString."\n".json_encode($executeSlDet)
+			];
+			$log->writeLog('repayloan',$arrayStruc);
+			$arrayResult["RESPONSE_CODE"] = 'WS0066';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+	}
 }
 ?>

@@ -117,6 +117,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
 						$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
 						if($paykeepingdet["RESULT"]){
+							if(($dataCont["LOANTYPE_CODE"] == '12' || $dataCont["LOANTYPE_CODE"] == '30') && $dataCont["LAST_PERIODPAY"] < 24){
+								$fee_amt = $prinPay * 0.02;
+								$paykeepingFeedet = $cal_loan->paySlipFeeDet($conoracle,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
+								$dataComing["bank_ref"],$payinslip_no,'FBD',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
+								$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
+							}
 							$ref_noLN = time().$lib->randomText('all',3);
 							$repayloan = $cal_loan->repayLoan($conoracle,$rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"],0,$config,$payinslipdoc_no,$dateOper,
 							$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_noLN,$payload["app_version"]);
