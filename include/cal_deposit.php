@@ -735,11 +735,17 @@ class CalculateDep {
 		asort($arrPosString);
 		foreach($arrPosString as $key => $value){
 			if($key == 'P'){
-				$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				if($countPrefix > 0){
+					$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				}
 			}else if($key == 'Y'){
-				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				if($countYear > 0){
+					$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				}
 			}else if($key == 'R'){
-				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+				if($countRunning > 0){
+					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+				}
 			}
 		}
 		$arrayResult["SLIP_NO"] = $deptslip_no;
