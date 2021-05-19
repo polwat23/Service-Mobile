@@ -50,7 +50,7 @@ class CalculateLoan {
 		}
 		if($calInt){
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
-			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'ynd'));
+			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y n d',false,true));
 			$yearTo = date('Y');
 			$roundLoop = 0;
 			$yearDiff = $yearTo - $yearFrom;
@@ -174,7 +174,7 @@ class CalculateLoan {
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
 		$constLoan = $this->getLoanConstant();
 		$yearFrom = date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"]));
-		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'ynd'));
+		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'y n d',false,true));
 		$yearTo = date('Y');
 		$yearDiff = $yearFrom - $yearTo;
 		if($yearDiff > 0){
@@ -278,7 +278,8 @@ class CalculateLoan {
 	}
 
 	private function getRateInt($inttabcode,$date){
-		$contLoan = $this->conora->prepare("SELECT INTEREST_RATE
+		$contLoan = $this->conora->prepare("SELECT INTEREST_RATE,TO_CHAR(EXPIRE_DATE,'YYYY-MM-DD') as EXPIRE_DATE
+											,TO_CHAR(EFFECTIVE_DATE,'YYYY-MM-DD') as EFFECTIVE_DATE
 											FROM lncfloanintratedet
 											WHERE LOANINTRATE_CODE = :inttabcode
 											and '".$date."' BETWEEN TO_CHAR(EFFECTIVE_DATE,'YYYY-MM-DD') and TO_CHAR(EXPIRE_DATE,'YYYY-MM-DD')");
@@ -286,8 +287,9 @@ class CalculateLoan {
 			':inttabcode' => $inttabcode
 		]);
 		$constLoanRate = $contLoan->fetch(\PDO::FETCH_ASSOC);
-		return $constLoanRate["INTEREST_RATE"];
+		return $constLoanRate;
 	}
+
 	private function checkChangeRateInt($inttabcode,$date){
 		$change_rate = FALSE;
 		$contLoan = $this->conora->prepare("SELECT TO_CHAR(EFFECTIVE_DATE,'YYYYMMDD') as EFFECTIVE_DATE
