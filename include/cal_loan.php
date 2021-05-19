@@ -37,7 +37,7 @@ class CalculateLoan {
 		}
 		if($calInt){
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
-			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'ynd'));
+			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y n d',false,true));
 			$yearTo = date('Y');
 			$roundLoop = 0;
 			$yearDiff = $yearTo - $yearFrom;
@@ -161,7 +161,7 @@ class CalculateLoan {
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
 		$constLoan = $this->getLoanConstant();
 		$yearFrom = date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"]));
-		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'ynd'));
+		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'y n d',false,true));
 		$yearTo = date('Y');
 		$yearDiff = $yearFrom - $yearTo;
 		if($yearDiff > 0){

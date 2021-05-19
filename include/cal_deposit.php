@@ -747,7 +747,7 @@ class CalculateDep {
 		return $arrayResult;
 	}
 	public function getConstPayType($itemtype){
-		$getConstPay = $this->conora->prepare("SELECT group_itemtpe as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
+		$getConstPay = $this->conora->prepare("SELECT group_itemtype as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
 											FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
 		$getConstPay->execute([':itemtype' => $itemtype]);
 		$rowConstPay = $getConstPay->fetch(\PDO::FETCH_ASSOC);
