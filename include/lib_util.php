@@ -115,13 +115,13 @@ class library {
 	}
 	public function formataccount($account_no,$format) {
 		if(isset($account_no) && isset($format)){
-			$formatArray = explode('-',$format);
+			$formatArray = explode('/',$format);
 			$account_text = '';
 			for($i = 0;$i < sizeof($formatArray);$i++){
 				if($i == 0){
 					$account_text = substr($account_no,$i,strlen($formatArray[$i]));
 				}else{
-					$account_text .= '-'.substr($account_no,strlen(preg_replace('/-/','',$account_text)),strlen($formatArray[$i]));
+					$account_text .= '/'.substr($account_no,strlen(preg_replace('/-/','',$account_text)),strlen($formatArray[$i]));
 				}
 			}
 			return $account_text;

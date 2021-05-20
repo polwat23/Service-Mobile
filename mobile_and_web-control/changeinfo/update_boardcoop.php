@@ -7,7 +7,19 @@ if ($lib->checkCompleteArgument(['menu_component', 'president', 'board', 'busine
 		$conmysql->beginTransaction();
 
 		//president
-		if (isset($dataComing["president"]["ID"]) && $dataComing["president"]["ID"] != "") {
+		
+		//$data = json_encode($dataComing["president","board","business","manager","officer_count","member_count"]);
+		$newArr = array();
+		$newArr["BOARD"] = $dataComing["board"];
+		$newArr["PRESIDENT"] = $dataComing["president"];
+		$newArr["BUSINESS"] = $dataComing["business"];
+		$newArr["MANAGER"] = $dataComing["manager"];
+		$newArr["OFFICER_COUNT"] = $dataComing["officer_count"];
+		$newArr["MEMBER_COUNT"] = $dataComing["member_count"];
+		
+		$incomming = json_encode($newArr);
+		$endocde = json_encode($incomming);
+		/*if (isset($dataComing["president"]["ID"]) && $dataComing["president"]["ID"] != "") {
 			$insertPresData = $conmysql->prepare("UPDATE gcmanagement
 											SET md_name=:md_name
 											WHERE id = :id");
@@ -192,7 +204,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'president', 'board', 'busine
 			} else {
 				$arrayResult["RESULT_EDIT"] = FALSE;
 			}
-		}
+		}*/
 
 		if (isset($arrayResult["RESULT_EDIT"]) && !$arrayResult["RESULT_EDIT"]) {
 			$conmysql->rollback();
@@ -203,6 +215,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'president', 'board', 'busine
 		} else {
 			$conmysql->commit();
 			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['DATA'] = $endocde;
 			require_once('../../include/exit_footer.php');
 		}
 	} else {

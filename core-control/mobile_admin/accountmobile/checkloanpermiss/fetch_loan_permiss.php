@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGroupConfirm[$contract_no]["BALANCE_VALUE"] = number_format($rowContractBalance["BALANCE_VALUE"],2);
 			}
 			
-			$fetchLoantype = $conoracle->prepare("SELECT mp.prename_desc||''||mb.memb_name||' '|| mb.memb_ename as COOP_NAME , lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
+			$fetchLoantype = $conoracle->prepare("SELECT mp.prename_desc||''||mb.memb_name as COOP_NAME , lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as LOAN_BALANCE,
 												ln.loanapprove_amt as APPROVE_AMT,
 												(SELECT max(operate_date) FROM lccontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 												FROM lccontmaster ln LEFT JOIN LCCFLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 

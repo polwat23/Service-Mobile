@@ -62,15 +62,17 @@ if($lib->checkCompleteArgument(['menu_component','docgrp_no','document_data'],$d
 					}
 				}
 				
-				$arrayResult['REPORT_URL'] = $pathFile;
+				$arrayResult['REPORT_URL'] = $slipSalary;
 				$arrayResult['APV_DOCNO'] = $reqloan_doc;
 				$arrayResult['master'] = [
-					':doc_no' => $reqloan_doc,
-					':docgrp_no' => $dataComing["docgrp_no"],
-					':doc_filename' => $reqloan_doc,
-					':doc_address' => $pathFile,
-					':member_no' => $member_no
-				];
+							':doc_no' => $reqloan_doc,
+							':docgrp_no' => $dataComing["docgrp_no"],
+							':doc_filename' => $reqloan_doc,
+							':doc_type' => $ext_img,
+							':doc_address' => $slipSalary,
+							':member_no' => $member_no,
+							':username' => $payload["member_no"]
+						];
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 				
@@ -95,7 +97,7 @@ if($lib->checkCompleteArgument(['menu_component','docgrp_no','document_data'],$d
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0063",
-				":error_desc" => "ไม่พบเลขเอกสารของระบบขอกู้ออนไลน์ กรุณาสร้างชุด Format เลขเอกสาร",
+				":error_desc" => "ไม่พบเลขเอกสารของระบบ กรุณาสร้างชุด Format เลขเอกสาร",
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);

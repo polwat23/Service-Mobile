@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayAccountnoCheck = $rowAccountnoCheck;
 				$arrayAccountnoCheckGrp[] = $arrayAccountnoCheck;
 			}
-			$fetcAccountno = $conoracle->prepare("SELECT  cfb.member_no,mp.prename_desc||''||mb.memb_name||' '|| mb.memb_ename as COOP_NAME,
+			$fetcAccountno = $conoracle->prepare("SELECT  cfb.member_no,mp.prename_desc||''||mb.memb_name as COOP_NAME,
 												cfb.BIZZACCOUNT_NO , cfb.BALANCE_VALUE as BALANCE_AMT , dp.DEPTTYPE_DESC
 												FROM cmconfirmbalance cfb LEFT JOIN dpdeptmaster dm ON cfb.BIZZACCOUNT_NO = dm.deptaccount_no AND cfb.member_no = dm.member_no and dm.deptclose_status = 0
 												LEFT JOIN dpdepttype dp   ON dm.depttype_code = dp.depttype_code AND dm.deptgroup_code = dp.deptgroup_code

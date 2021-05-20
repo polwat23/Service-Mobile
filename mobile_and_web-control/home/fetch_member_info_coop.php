@@ -12,9 +12,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayOfficer = array();
 		$arrayData = array();
 		$arrayDocData = array();
-		
-		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 500) as SHARE_AMT,(shrpar_value * shrpar_ratio) as PERIOD_SHARE_AMT, sharebegin_amt
-													FROM shsharemaster WHERE TRIM(member_no) = :member_no");
+		$year = date(Y) +543;
+		$getSharemasterinfo = $conmysql->prepare("SELECT (new_share_stk) as SHARE_AMT FROM gcmembereditdata WHERE TRIM(member_no) = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $payload["ref_memno"]]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
@@ -30,27 +29,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayDocData[] = $arrayDoc;
 		}
 		
-		$mdInfo = $conmysql->prepare("SELECT id ,member_no, md_name, md_type ,md_count  FROM gcmanagement WHERE board_status = '1' AND member_no  = :member_no");
-		$mdInfo->execute([':member_no' => $payload["ref_memno"]]);
+		$mdInfo = $conoracle->prepare("SELECT  MB.BOARD_NAME as MD_NAME,  MY.MEMBERSHIP_AMT as MD_COUNT, BDRANK_CODE as MD_TYPE
+									FROM MBMEMBDETYEARBOARD MB LEFT JOIN MBMEMBDETYEARBIZ MY ON MB.MEMBER_NO = MY.MEMBER_NO AND MB.BIZ_YEAR  = MY.BIZ_YEAR
+									WHERE  MB.MEMBER_NO = :member_no  AND MB.BIZ_YEAR = :year");
+		$mdInfo->execute([':member_no' => $payload["ref_memno"] ,':year' => '2561']);
 		while($rowUser = $mdInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayMd = array();
-			$arrayMd["ID"] = $rowUser["id"];
-			$arrayMd["MD_NAME"] = $rowUser["md_name"];
-			$arrayMd["MD_TYPE"] = $rowUser["md_type"];
-			$arrayMd["MD_COUNT"] = $rowUser["md_count"];
-			if($rowUser["md_type"] == "0"){			//ประธาน
+			$arrayMd["MD_NAME"] = $rowUser["MD_NAME"];
+			$arrayMd["MD_TYPE"] = $rowUser["MD_TYPE"];
+			$arrayMd["MD_COUNT"] = $rowUser["MD_COUNT"];
+			if($rowUser["MD_TYPE"] == "01"){			//ประธาน
 				$arrayChairman[] = $arrayMd;
-			}else if($rowUser["md_type"] == "1"){	//ผู้จัดการ
+			}else if($rowUser["MD_TYPE"] == "09"){	//ผู้จัดการ
 				$arrayManager[] = $arrayMd;
-			}else if($rowUser["md_type"] == "2"){	//คณะกรรมการ
+			}else if($rowUser["MD_TYPE"] == "08"){	//คณะกรรมการ
 				$arrayBoard[] = $arrayMd;
-			}else if($rowUser["md_type"] == "3"){	//ผู้ตรวจสอบกิจการ
+			}else if($rowUser["MD_TYPE"] == "12"){	//ผู้ตรวจสอบกิจการ
 				$arrayBusiness[] = $arrayMd;
-			}else if($rowUser["md_type"] == "4"){	//จํานวนสมาชิก  ราย
-				$arrayMember = $arrayMd;
-			}else if($rowUser["md_type"] == "5"){	//เจ้าหน้าที่สหกรณ์ ราย
-				$arrayOfficer = $arrayMd;
-			}		
+			}
+				$arrayMember["MD_COUNT"] = $arrayMd["MD_COUNT"];
+				//$arrayOfficer["MD_COUNT"]  = $arrayMd["MD_COUNT"];		
 		}
 		
 		
@@ -179,6 +177,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayResult["COUNTRY"] = $arrayDataGeo;
 		$arrayResult['DATA'] = $arrayData;
+		$arrayResult['$year'] = $arrayMd["MD_NAME"]; 
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

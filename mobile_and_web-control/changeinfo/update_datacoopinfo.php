@@ -32,17 +32,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE mb.member_no = :member_no ");
 		$memberInfo->execute([':member_no' => $member_no]);
 		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
-		$arrOldAddress["addr_no"] = $rowMember["ADDR_NO"];
-		$arrOldAddress["addr_moo"] = $rowMember["ADDR_MOO"];
-		$arrOldAddress["addr_soi"] = $rowMember["ADDR_SOI"];
-		$arrOldAddress["addr_village"] = $rowMember["ADDR_VILLAGE"];
-		$arrOldAddress["addr_road"] = $rowMember["ADDR_ROAD"];
-		$arrOldAddress["district_code"] = $rowMember["DISTRICT_CODE"];
-		$arrOldAddress["addr_postcode"] = $rowMember["ADDR_POSTCODE"];
-		$arrOldAddress["tambol_code"] = $rowMember["TAMBOL_CODE"];
+		$arrOldAddress["addr_no"] = $rowMember["ADDR_NO"] == null ? "" : $rowMember["ADDR_NO"];
+		$arrOldAddress["addr_moo"] = $rowMember["ADDR_MOO"] == null ? "" : $rowMember["ADDR_MOO"];
+		$arrOldAddress["addr_soi"] = $rowMember["ADDR_SOI"] == null ? "" : $rowMember["ADDR_SOI"];
+		$arrOldAddress["addr_village"] = $rowMember["ADDR_VILLAGE"]  ==  null ? "" : $rowMember["ADDR_VILLAGE"];
+		$arrOldAddress["addr_road"] = $rowMember["ADDR_ROAD"] == null ? "" : $rowMember["ADDR_ROAD"];
+		$arrOldAddress["district_code"] = $rowMember["DISTRICT_CODE"] == null ? "" : $rowMember["DISTRICT_CODE"];
+		$arrOldAddress["addr_postcode"] = $rowMember["ADDR_POSTCODE"] == null ? "" : $rowMember["ADDR_POSTCODE"];
+		$arrOldAddress["tambol_code"] = $rowMember["TAMBOL_CODE"] == null ? "" : $rowMember["TAMBOL_CODE"];
 		
-		$shareInfo = $conoracle->prepare("SELECT (sharestk_amt * 500) as SHARE_AMT,(shrpar_value * shrpar_ratio) as PERIOD_SHARE_AMT, sharebegin_amt
-													FROM shsharemaster WHERE TRIM(member_no) = :member_no");
+		$shareInfo = $conmysql->prepare("SELECT (Old_share_stk) as SHARE_AMT FROM gcmembereditdata WHERE TRIM(member_no) = :member_no");
 		$shareInfo->execute([':member_no' => $member_no]);
 		$rowShare = $shareInfo->fetch(PDO::FETCH_ASSOC);
 		
@@ -66,7 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrMember["coopregis_no"] = $rowMember_info["COOPREGIS_NO"];
 		$arrMember["memb_regno"] = $rowMember_info["MEMB_REGNO"];
 		$arrMember["accyearclose_date"] = $rowMember_info["ACCYEARCLOSE_DATE"];
-		$arrMember["tax_id"] = $rowMember_info["TAX_ID"];
+		$arrMember["tax_id"] = $rowMember_info["TAX_ID"] ;
 			
 
 

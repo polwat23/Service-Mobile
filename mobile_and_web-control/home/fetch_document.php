@@ -7,7 +7,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGroupDoc = array();
 		$fetchDoc = $conmysql->prepare("SELECT dm.member_no , dm.doc_address ,dc.docgrp_name,dm.update_date
 										FROM doclistmaster dm LEFT JOIN docgroupcontrol dc ON dm.docgrp_no = dc.docgrp_no
-										where dm.member_no= :member_no");
+										where dm.member_no= :member_no
+										ORDER BY dm.update_date DESC");
 		$fetchDoc->execute([':member_no' => $member_no]);
 		while($rowDoc = $fetchDoc->fetch(PDO::FETCH_ASSOC)){
 			$arrayDoc = array();

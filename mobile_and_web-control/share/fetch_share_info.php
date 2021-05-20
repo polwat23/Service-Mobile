@@ -3,16 +3,36 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
-		//$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 500) as SHARE_AMT,(shrpar_value * shrpar_ratio) as PERIOD_SHARE_AMT, sharebegin_amt
-													FROM shsharemaster WHERE TRIM(member_no) = :member_no");
-		$getSharemasterinfo->execute([':member_no' => $payload["ref_memno"]]);
+		$member_no = $payload["ref_memno"];
+	
+		$getSharemasterinfo = $conoracle->prepare("SELECT MB.MEMBER_NO,   
+												MP.PRENAME_DESC||MB.MEMB_NAME ||' '|| MP.SUFFNAME_DESC AS COOP_NAME,   
+												(SHR.SHARESTK_AMT  * SHY.UNITSHARE_VALUE) AS  SHARESTK_AMT, SHR.SHRPAR_STKCHKVALUE,SHR.SHRPAR_STKBIZVALUE,
+												SHR .SHRPAR_VALUE,
+												(CASE WHEN SHR.SHRPAR_STATUS = 0 THEN 'พอดีเกณฑ์'
+													WHEN SHR.SHRPAR_STATUS = -1 THEN 'ต่ำกว่าเกณฑ์' 
+														WHEN SHR.SHRPAR_STATUS = 1 THEN 'เกินกว่าเกณฑ์' ELSE '' END) AS SHRPAR_STATUS,
+												(CASE WHEN (SHR.SHRPAR_VALUE - SHR.SHRPAR_STKCHKVALUE) < 0 THEN  (SHR.SHRPAR_VALUE - SHR.SHRPAR_STKCHKVALUE) * -1
+												ELSE (SHR.SHRPAR_VALUE - SHR.SHRPAR_STKCHKVALUE) END ) AS  SHRPAR_AMT
+												FROM MBMEMBMASTER MB,   SHSHAREMASTER SHR,   SHSHARETYPE SHY,   MBUCFPRENAME MP  
+												WHERE  MP.PRENAME_CODE = MB.PRENAME_CODE   
+												AND MB.MEMBER_NO = SHR.MEMBER_NO   
+												AND SHR.SHARETYPE_CODE = SHY.SHARETYPE_CODE    
+												AND MB.MEMBER_NO = :member_no");
+		$getSharemasterinfo->execute([':member_no' => $member_no]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
-			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
-			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
-			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
+			$arrayResult['MEMBER_NO'] = $rowMastershare["MEMBER_NO"];
+			$arrayResult['COOP_NAME'] = $rowMastershare["COOP_NAME"];
+			$arrayResult['SHARESTK_AMT'] = number_format($rowMastershare["SHARESTK_AMT"] * 10,2);
+			$arrayResult['SHRPAR_STKCHKVALUE'] = number_format($rowMastershare["SHRPAR_STKCHKVALUE"],2);
+			$arrayResult['SHRPAR_VALUE'] = number_format($rowMastershare["SHRPAR_VALUE"],2);
+			$arrayResult['SHRPAR_AMT'] = number_format($rowMastershare["SHRPAR_AMT"],2);
+			$arrayResult['SHRPAR_STKBIZVALUE'] = number_format($rowMastershare["SHRPAR_STKBIZVALUE"],2);
+			$arrayResult['SHRPAR_STATUS'] = $rowMastershare["SHRPAR_STATUS"];
+			
+			
 			$limit = $func->getConstant('limit_stmshare');
 			$arrayResult['LIMIT_DURATION'] = $limit;
 			if($lib->checkCompleteArgument(["date_start"],$dataComing)){
@@ -25,28 +45,40 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$date_now = date('Y-m-d');
 			}
-			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,
-														(stm.share_amount * 500) as PERIOD_SHARE_AMOUNT,
-														(stm.sharestk_amt*500) as SUM_SHARE_AMT,
-														sht.shritemtype_desc, 
-														stm.tmp_seqno as period,
-														stm.ref_slipno
-														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
-														WHERE TRIM(stm.member_no) = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.operate_date
-														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no DESC");
+			$getShareStatement = $conoracle->prepare("SELECT SHSHARECERTIFICATE.SHARECERT_TYPE,   
+										SHSHARECERTIFICATE.CERTSERIAL_NO,   
+										TRIM(SHSHARECERTIFICATE.SHARECERT_NO) as SHARECERT_NO,   
+										SHSHARECERTIFICATE.SHARE_AMT,   
+										SHSHARECERTIFICATE.SHARECERT_DATE,   
+										SHSHARECERTIFICATE.SHAREBUY_DATE, 
+										SHSHARETYPE.UNITSHARE_VALUE,   
+										TRIM(SHSHARECERTIFICATE.SHARENO_STARTPREFIX)||'-'||SHSHARECERTIFICATE.SHARENO_START as SHARENO_START,
+										TRIM(SHSHARECERTIFICATE.SHARENO_ENDPREFIX)||'-'||SHSHARECERTIFICATE.SHARENO_END   as SHARENO_ENDPREFIX,
+										SHSHARECERTIFICATE.SHARE_AMT * SHSHARETYPE.UNITSHARE_VALUE as SHARESTK_AMT
+										FROM SHSHARECERTIFICATE, SHSHAREMASTER, SHSHARETYPE  
+										WHERE ( SHSHARECERTIFICATE.MEMBRANCH_ID = SHSHAREMASTER.BRANCH_ID )   
+										AND ( SHSHARECERTIFICATE.MEMBER_NO = SHSHAREMASTER.MEMBER_NO )   
+										AND ( SHSHAREMASTER.BRANCH_ID = SHSHARETYPE.BRANCH_ID )   
+										AND ( SHSHAREMASTER.SHARETYPE_CODE = SHSHARETYPE.SHARETYPE_CODE )   
+										AND (  shsharemaster.member_no = :member_no)   
+										AND ( shsharecertificate.sharecert_status = 1 )  
+										AND (shsharecertificate.SHAREBUY_DATE BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD'))
+										ORDER BY SHSHARECERTIFICATE.SHAREBUY_DATE");
 			$getShareStatement->execute([
-				':member_no' => $payload["ref_memno"],
+				':member_no' => $member_no ,
 				':datebefore' => $date_before,
 				':datenow' => $date_now
 			]);
 			while($rowStm = $getShareStatement->fetch(PDO::FETCH_ASSOC)){
 				$arrayStm = array();
-				$arrayStm["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
-				$arrayStm["PERIOD_SHARE_AMOUNT"] = number_format($rowStm["PERIOD_SHARE_AMOUNT"],2);
-				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SUM_SHARE_AMT"],2);
-				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
-				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
-				$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
+				$arrayStm["SHARECERT_NO"] = $rowStm["SHARECERT_NO"];
+				$arrayStm["CERTSERIAL_NO"] = $rowStm["CERTSERIAL_NO"];
+				$arrayStm["SHARECERT_DATE"] = $lib->convertdate($rowStm["SHARECERT_DATE"],'D m Y');
+				$arrayStm["SHAREBUY_DATE"] = $lib->convertdate($rowStm["SHAREBUY_DATE"],'D m Y');
+				$arrayStm["SHARENO_START"] = $rowStm["SHARENO_START"];
+				$arrayStm["SHARENO_ENDPREFIX"] = $rowStm["SHARENO_ENDPREFIX"];
+				$arrayStm["SHARE_AMT"] = number_format($rowStm["SHARE_AMT"],2);
+				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SHARESTK_AMT"],2);
 				$arrGroupStm[] = $arrayStm;
 			}
 			$arrayResult['STATEMENT'] = $arrGroupStm;

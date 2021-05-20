@@ -4,51 +4,65 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $payload["ref_memno"];
+		$date_now = date('Y-m-d');
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE TRIM(member_no) = :member_no AND deptclose_status <> 1 and deptgroup_code = '01' ");
+		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE TRIM(member_no) = :member_no AND  deptclose_status = 0 and deptgroup_code = '01' ");
 		$getSumAllAccount->execute([':member_no' => $payload["ref_memno"]]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
-											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code AND dp.deptgroup_code = dt.deptgroup_code   
-											WHERE TRIM(dp.member_no) = :member_no and dp.deptclose_status <> 1  and dp.deptgroup_code = '01'
-											ORDER BY dp.deptaccount_no ASC");
-		$getAccount->execute([':member_no' => $payload["ref_memno"]]);
+		
+		$getAccount = $conoracle->prepare("SELECT DPDEPTPRNCFIXED.PRNC_DATE,
+										DPDEPTMASTER.DEPTACCOUNT_NAME,
+										DPDEPTMASTER.MEMBER_NO,
+										SUBSTR(DPDEPTMASTER.DEPTPASSBOOK_NO,5) as DEPTPASSBOOK_NO,
+										DPDEPTMASTER.DEPTACCOUNT_NO,
+										DPDEPTPRNCFIXED.INTEREST_RATE,
+										DPDEPTPRNCFIXED.PRNCDUE_NMONTH,
+										NVL(DPDEPTPRNCFIXED.PRNCDUE_DATE, TO_DATE(:datenow,'YYYY-MM-DD') ) AS PRNCDUE_DATE,
+										DPDEPTTYPE.DEPTTYPE_DESC,
+										DPDEPTTYPE.DEPTTYPE_CODE,
+										DPDEPTPRNCFIXED.PRNC_AMT,
+										DECODE(DPDEPTMASTER.DEPTCLOSE_STATUS, 1 , 0 , ((DPDEPTPRNCFIXED.PRNC_AMT * (DPDEPTPRNCFIXED.PRNCDUE_DATE - MAX(DECODE(DPINTDUEDATE.RECV_INTFLAG, 1, NVL(DPINTDUEDATE.END_CALINT_DATE, DPDEPTPRNCFIXED.PRNC_DATE), DPDEPTPRNCFIXED.PRNC_DATE ) ) ) / 365 * DPDEPTPRNCFIXED.INTEREST_RATE/ 100) ) ) AS INT_AMT
+										FROM DPDEPTMASTER, DPDEPTPRNCFIXED, DPDEPTTYPE, DPINTDUEDATE
+										WHERE ( DPDEPTPRNCFIXED.DEPTACCOUNT_NO = DPDEPTMASTER.DEPTACCOUNT_NO ) 
+										AND ( DPDEPTPRNCFIXED.MASTER_BRANCH_ID = DPDEPTMASTER.BRANCH_ID ) 
+										AND ( DPDEPTMASTER.DEPTTYPE_CODE = DPDEPTTYPE.DEPTTYPE_CODE ) 
+										AND ( DPDEPTMASTER.DEPTTYPE_BRANCH_ID = DPDEPTTYPE.BRANCH_ID ) 
+										AND ( DPDEPTMASTER.DEPTGROUP_CODE = DPDEPTPRNCFIXED.DEPTGROUP_CODE ) 
+										AND ( DPDEPTMASTER.DEPTGROUP_CODE = DPDEPTTYPE.DEPTGROUP_CODE ) 
+										AND (DPDEPTPRNCFIXED.PRINC_ID = DPINTDUEDATE.PRINC_ID(+)) 
+										AND ( ( TRIM(DPDEPTMASTER.MEMBER_NO) = :member_no) 
+										AND ( DPDEPTTYPE.DEPTGROUP_CODE = '01' ) 
+										AND (DPDEPTMASTER.DEPTOPEN_DATE <= TO_DATE(:datenow,'YYYY-MM-DD') ) 
+										AND ((DPDEPTMASTER.DEPTCLOSE_DATE > TO_DATE(:datenow,'YYYY-MM-DD') 
+										AND DPDEPTMASTER.DEPTCLOSE_STATUS = 1) OR DPDEPTMASTER.DEPTCLOSE_STATUS = 0) AND
+										(DPDEPTMASTER.CANCEL_DATE < TO_DATE(:datenow,'YYYY-MM-DD') OR DPDEPTMASTER.CANCEL_DATE IS NULL) )
+										GROUP BY DPINTDUEDATE.PRINC_ID,DPDEPTPRNCFIXED.PRNC_DATE,DPDEPTMASTER.DEPTACCOUNT_NAME,DPDEPTMASTER.MEMBER_NO,
+										DPDEPTMASTER.DEPTPASSBOOK_NO,DPDEPTMASTER.DEPTACCOUNT_NO,DPDEPTPRNCFIXED.INTEREST_RATE,DPDEPTPRNCFIXED.PRNCDUE_NMONTH,
+										DPDEPTPRNCFIXED.PRNCDUE_DATE,DPDEPTMASTER.DEPTCLOSE_STATUS,DPDEPTPRNCFIXED.PRNC_AMT,DPDEPTPRNCFIXED.PRNCDUE_DATE,
+										DPDEPTTYPE.DEPTTYPE_DESC,DPDEPTMASTER.DEPTACCOUNT_NO,DPDEPTTYPE.DEPTTYPE_CODE
+										ORDER BY DPDEPTPRNCFIXED.PRNCDUE_DATE ASC");
+		$getAccount->execute([
+				':member_no' => $member_no,
+				':datenow' => $date_now
+			]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept);
 			$arrayHeaderAcc = array();
-			if($dataComing["channel"] == 'web'){
-				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
-					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
-				}else{
-					$arrGroupAccount["COVER_IMG"] = null;
-				}
-			}
-			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE deptaccount_no = :account_no");
-			$fetchAlias->execute([
-				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
-			]);
-			$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
-			if(isset($rowAlias["path_alias_img"])){
-				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
-				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
-				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["path_alias_img"].'?v='.$rowAlias["update_date"];
-			}else{
-				$arrAccount["ALIAS_PATH_IMG"] = null;
-				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
-			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
-			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$formatDeptHidden);
-			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccount["DEPTACCOUNT_NAME"]));
-			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
-			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
-			$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
+			$arrAccount["PRNC_DATE"] = $lib->convertdate($rowAccount["PRNC_DATE"],'d M Y');
+			$arrAccount["DEPTACCOUNT_NAME"] = $rowAccount["DEPTACCOUNT_NAME"];
+			$arrAccount["MEMBER_NO"] = $rowAccount["MEMBER_NO"];
+			$arrAccount["DEPTPASSBOOK_NO"] = $rowAccount["DEPTPASSBOOK_NO"];
+			$arrAccount["INTEREST_RATE"] =  number_format($rowAccount["INTEREST_RATE"],3);
+			$arrAccount["PRNCDUE_NMONTH"] = $rowAccount["PRNCDUE_NMONTH"];
+			$arrAccount["PRNCDUE_DATE"] = $lib->convertdate($rowAccount["PRNCDUE_DATE"],'d M Y');
+			$arrAccount["PRNC_AMT"] = number_format($rowAccount["PRNC_AMT"],2);
+			$arrAccount["INT_AMT"] = number_format($rowAccount["INT_AMT"],2);
 			$arrGroupAccount['TYPE_ACCOUNT'] = $rowAccount["DEPTTYPE_DESC"];
 			$arrGroupAccount['DEPT_TYPE_CODE'] = $rowAccount["DEPTTYPE_CODE"];
 			if(array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT')) === False){

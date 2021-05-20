@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_ename,mb.member_date
 												,mb.addr_mobilephone as MEM_TELMOBILE,mb.addr_email as email FROM mbmembmaster mb 
 												LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.resign_status = '0'");
+												WHERE mb.member_status = 1  ");
 		$fetchUserNotRegis->execute();
 		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
 			if(!in_array($rowUserNotRegis["MEMBER_NO"],$arrayUserRegister)){
