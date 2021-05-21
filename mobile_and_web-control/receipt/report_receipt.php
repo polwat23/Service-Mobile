@@ -92,7 +92,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$arrGroupDetail = array();
 		$intinPeriod = 0;
 		$shareinPeriod = 0;
-		$contract_no = null;
 		$share_stk = null;
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
@@ -100,19 +99,33 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$shareinPeriod += $rowDetail["ITEM_PAYMENT"];
 				$share_stk = $rowDetail["ITEM_BALANCE"];
-				
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$intinPeriod += $rowDetail["INT_BALANCE"];
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
-				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+				$getLoanPeriod = $conoracle->prepare("SELECT PERIOD_PAYAMT FROM lncontmaster WHERE loancontract_no = :loancontract_no");
+				$getLoanPeriod->execute([':loancontract_no' => $rowDetail["PAY_ACCOUNT"]]);
+				$rowLoan = $getLoanPeriod->fetch(PDO::FETCH_ASSOC);
+				$arrDetail["PERIOD"] = $rowDetail["PERIOD"].' / '.$rowLoan["PERIOD_PAYAMT"];
 				
-				$getLoanGrp = $conoracle->prepare("SELECT LOANPERMGRP_CODE FROM lnloantype WHERE loantype_code = :loantype_code");
-				$getLoanGrp->execute([':loantype_code' => $rowDetail["LOANTYPE_CODE"]]);
+				$getLoanGrp = $conoracle->prepare("SELECT
+													PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME
+													FROM
+													LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
+													LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
+													LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
+													LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
+													WHERE
+													LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
+													AND LCC.LOANCOLLTYPE_CODE = '01'
+													AND LCC.REF_COLLNO = :member_no
+													AND LNTYPE.LOANPERMGRP_CODE = '20'");
+				$getLoanGrp->execute([':member_no' => $member_no]);
 				$rowLoanGrp = $getLoanGrp->fetch(PDO::FETCH_ASSOC);
-				if($rowLoanGrp["LOANPERMGRP_CODE"] == '20'){
-					$contract_no = $rowDetail["PAY_ACCOUNT"];
+				if(isset($rowLoanGrp["PRENAME_DESC"]) && $rowLoanGrp["PRENAME_DESC"] != ""){
+					$header["collname"][] = $rowLoanGrp["PRENAME_DESC"].$rowLoanGrp["MEMB_NAME"].' '.$rowLoanGrp["MEMB_SURNAME"];
 				}
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
@@ -121,12 +134,18 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
+				$getBalance = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$getBalance->execute([':deptaccount_no' => $rowDetail["PAY_ACCOUNT"]]);
+				$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
+				$arrDetail["ITEM_BALANCE"] = number_format($rowBalance["PRNCBAL"],2);
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
@@ -135,24 +154,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			
 			$arrGroupDetail[] = $arrDetail;
 
 				
-		}
-		
-		if(isset($contract_no)){
-			$fethLoan = $conoracle->prepare("SELECT MP.PRENAME_DESC||MB.MEMB_NAME|| ' '||MB.MEMB_SURNAME AS  COLLNAME
-											FROM MBMEMBMASTER MB  LEFT JOIN LNCONTCOLL LN  ON LN.REF_COLLNO = MB.MEMBER_NO 
-											LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE 
-											WHERE LN.LOANCONTRACT_NO = :loancontract_no");
-			$fethLoan->execute([
-				':loancontract_no' =>$contract_no
-			]);
-			
-			while($rowLoan = $fethLoan->fetch(PDO::FETCH_ASSOC)){
-				$header["collname"][] = $rowLoan["COLLNAME"];
-			}
 		}
 		
 		$header["share_atk"]  = number_format($share_stk,2);
