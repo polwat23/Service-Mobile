@@ -110,23 +110,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$rowLoan = $getLoanPeriod->fetch(PDO::FETCH_ASSOC);
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"].' / '.$rowLoan["PERIOD_PAYAMT"];
 				
-				$getLoanGrp = $conoracle->prepare("SELECT
-													PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME
-													FROM
-													LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
-													LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
-													LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
-													LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
-													WHERE
-													LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
-													AND LCC.LOANCOLLTYPE_CODE = '01'
-													AND LCC.REF_COLLNO = :member_no
-													AND LNTYPE.LOANPERMGRP_CODE = '20'");
-				$getLoanGrp->execute([':member_no' => $member_no]);
-				$rowLoanGrp = $getLoanGrp->fetch(PDO::FETCH_ASSOC);
-				if(isset($rowLoanGrp["PRENAME_DESC"]) && $rowLoanGrp["PRENAME_DESC"] != ""){
-					$header["collname"][] = $rowLoanGrp["PRENAME_DESC"].$rowLoanGrp["MEMB_NAME"].' '.$rowLoanGrp["MEMB_SURNAME"];
-				}
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
@@ -159,7 +142,27 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 
 				
 		}
-		
+		$getLoanGrp = $conoracle->prepare("SELECT
+											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,MEMB.MEMBER_NO
+											FROM
+											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
+											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
+											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
+											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
+											WHERE
+											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
+											AND LCC.LOANCOLLTYPE_CODE = '01'
+											AND LCC.REF_COLLNO = :member_no
+											AND LNTYPE.LOANPERMGRP_CODE = '20'");
+		$getLoanGrp->execute([':member_no' => $member_no]);
+		while($rowLoanGrp = $getLoanGrp->fetch(PDO::FETCH_ASSOC)){
+			if(isset($rowLoanGrp["PRENAME_DESC"]) && $rowLoanGrp["PRENAME_DESC"] != ""){
+				if(!in_array($rowLoanGrp["MEMBER_NO"],$header["member_no_check"])){
+					$header["collname"][] = $rowLoanGrp["PRENAME_DESC"].$rowLoanGrp["MEMB_NAME"].' '.$rowLoanGrp["MEMB_SURNAME"];
+					$header["member_no_check"][] = $rowLoanGrp["MEMBER_NO"];
+				}
+			}
+		}
 		$header["share_atk"]  = number_format($share_stk,2);
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 															kpd.RECEIPT_NO,
