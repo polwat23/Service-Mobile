@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrayResult = array();
+		;
 		$arrayGroupLoan = array();
 		$getUcollwho = $conoracle->prepare("SELECT
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,

@@ -22,8 +22,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
 				$slipSalary = null;
 				$citizenCopy = null;
+				$houseRegisCopy = null;
 				$fullPathSalary = null;
 				$fullPathCitizen = null;
+				$fullPathHouseRegis = null;
 				$directory = null;
 				if(isset($dataComing["upload_slip_salary"]) && $dataComing["upload_slip_salary"] != ""){
 					$subpath = 'salary';
@@ -125,7 +127,59 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						}
 					}
 				}
-				$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mc.MEMBGROUP_DESC as GROUPWORK,mb.salary_amount,
+				if(isset($dataComing["upload_house_regis_copy"]) && $dataComing["upload_house_regis_copy"] != ""){
+					$subpath = 'house_regis';
+					$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+					$data_Img = explode(',',$dataComing["upload_house_regis_copy"]);
+					$info_img = explode('/',$data_Img[0]);
+					$ext_img = str_replace('base64','',$info_img[1]);
+					if(!file_exists($destination)){
+						mkdir($destination, 0777, true);
+					}
+					if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+						$createImage = $lib->base64_to_img($dataComing["upload_house_regis_copy"],$reqloan_doc.$subpath,$destination,null);
+					}else if($ext_img == 'pdf'){
+						$createImage = $lib->base64_to_pdf($dataComing["upload_house_regis_copy"],$reqloan_doc.$subpath,$destination);
+					}
+					if($createImage == 'oversize'){
+						unlink($fullPathSalary);
+						unlink($fullPathCitizen);
+						rmdir($directory);
+						$arrayResult['RESPONSE_CODE'] = "WS0008";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}else{
+						if($createImage){
+							$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+							$fullPathHouseRegis = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$createImage["normal_path"];
+							$houseRegisCopy = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$createImage["normal_path"];
+							$getControlFolderHouseRegis = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+							$getControlFolderHouseRegis->execute([':menu_component' => $subpath]);
+							$rowControlHouseRegis = $getControlFolderHouseRegis->fetch(PDO::FETCH_ASSOC);
+							$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+																	VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
+							$insertDocMaster->execute([
+								':doc_no' => $reqloan_doc.$subpath,
+								':docgrp_no' => $rowControlHouseRegis["docgrp_no"],
+								':doc_filename' => $reqloan_doc.$subpath,
+								':doc_type' => $ext_img,
+								':doc_address' => $houseRegisCopy,
+								':member_no' => $payload["member_no"]
+							]);
+							$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+																	VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
+							$insertDocList->execute([
+								':doc_no' => $reqloan_doc.$subpath,
+								':member_no' => $payload["member_no"],
+								':file_name' => $createImage["normal_path"],
+								':id_userlogin' => $payload["id_userlogin"]
+							]);
+						}
+					}
+				}
+				$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mc.MEMBGROUP_DESC as GROUPWORK,mb.salary_amount,mb.card_person,
 														(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
 														FROM mbmembmaster mb LEFT JOIN 
 														mbucfprename mp ON mb.prename_code = mp.prename_code
@@ -143,9 +197,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$getDeptATM->execute([':member_no' => $member_no]);
 				$rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_coop,objective,option_pay,pay_date,channel)
+																		int_rate_at_req,salary_at_req,salary_img,citizen_img,house_regis_img,id_userlogin,contractdoc_url,deptaccount_no_coop,objective,option_pay,pay_date,channel)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_coop,:objective,:option_pay,:pay_date,:channel)");
+																		,:salary,:salary_img,:citizen_img,:house_regis_img,:id_userlogin,:contractdoc_url,:deptaccount_no_coop,:objective,:option_pay,:pay_date,:channel)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -158,6 +212,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':salary' => $rowData["SALARY_AMOUNT"],
 					':salary_img' => $slipSalary,
 					':citizen_img' => $citizenCopy,
+					':house_regis_img' => $houseRegisCopy,
 					':id_userlogin' => $payload["id_userlogin"],
 					':contractdoc_url' => $pathFile,
 					':deptaccount_no_coop' => $rowDept["DEPTACCOUNT_NO"],
@@ -186,6 +241,14 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["pay_date"] = $lib->convertdate(date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d')))),'d M Y');
 					$arrData["objective"] = $dataComing["objective"];
 					$arrData["tel"] = $rowTel["phone_number"];
+					$arrData["card_person"] = $rowData["CARD_PERSON"];
+					if($dataComing["option_paytype"] == '0'){
+						$arrData["option_pay"] = "คงต้น";
+					}else if($dataComing["option_paytype"] == '2'){
+						$arrData["option_pay"] = "ชำระแค่ดอกเบี้ย";
+					}else{
+						$arrData["option_pay"] = "คงยอด";
+					}
 					$arrData["dept_no"] = $lib->formataccount($rowDept["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 					if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 						include('form_request_loan_'.$dataComing["loantype_code"].'.php');
@@ -239,6 +302,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$conmysql->rollback();
 					unlink($fullPathSalary);
 					unlink($fullPathCitizen);
+					unlink($fullPathHouseRegis);
 					rmdir($directory);
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [

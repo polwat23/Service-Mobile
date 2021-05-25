@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
 			$oldBal = 0;
+			$period_payment = 0;
 			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
 				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
 			}else{
@@ -30,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
 				if($dataComing["option_paytype"] == "0"){
-					$typeCalDate = $func->getConstant("process_keep_forward");
+					$typeCalDate = $func->getConstant("cal_start_pay_date");
 					$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
 					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
 					if($typeCalDate == "next"){
@@ -38,26 +39,30 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					}else{
 						$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 					}
-					$period_payment = ($dataComing["request_amt"] / $dataComing["period"]) + (($dataComing["request_amt"] * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
-					$period_payment = floor($period_payment - ($period_payment % 100));
-				}else{
+					$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);
+					$module = 100 - ($period_payment % 100);
+					if($module < 100){
+						$period_payment = floor($period_payment + $module);
+					}
+				}else if($dataComing["option_paytype"] == "1"){
 					$period = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
 					$int_rate = ($rowIntRate["INTEREST_RATE"] / 100);
-					$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
-					$period_payment = ($dataComing["request_amt"] * ($int_rate / 12) / (1 - ($payment_per_period)));
+					$typeCalDate = $func->getConstant("cal_start_pay_date");
+					$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
+					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
+					if($typeCalDate == "next"){
+						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
+					}else{
+						$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+					}
 					$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
 					$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 					$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
-					$modFactor = -$rowPayRound["PAYROUND_FACTOR"] ?? 5;
-					$roundMod = fmod($period_payment,abs($modFactor));
-					if($modFactor > 0){
-						if($roundMod > 0){
-							$period_payment = $period_payment - $roundMod + abs($modFactor);
-						}
-					}else if($modFactor < 0){
-						if($roundMod > 0){
-							$period_payment = $period_payment - $roundMod;
-						}
+					$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
+					$period_payment = ($dataComing["request_amt"] * ($int_rate / 12) / (1 - ($payment_per_period)));
+					$module = 100 - ($period_payment % 100);
+					if($module < 100){
+						$period_payment = floor($period_payment + $module);
 					}
 				}
 			}
@@ -71,6 +76,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$maxloan_amt = 0;
 			$oldBal = 0;
 			$loanRequest = TRUE;
+			$period_payment = 0;
 			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
 				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
 			}else{
@@ -106,7 +112,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
 					$arrGrpObj[] = $arrObj;
 				}
-				$typeCalDate = $func->getConstant("process_keep_forward");
+				$typeCalDate = $func->getConstant("cal_start_pay_date");
 				if($max_period == 0){
 					$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 															ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
@@ -114,6 +120,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 															ORDER BY lnt.loantype_code");
 					$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 					$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
+					$period = $max_period == 0 ? (string)$rowMaxPeriod["MAX_PERIOD"] : (string)$max_period;
+					$int_rate = ($rowIntRate["INTEREST_RATE"] / 100);
+					$typeCalDate = $func->getConstant("cal_start_pay_date");
 					$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
 					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
 					if($typeCalDate == "next"){
@@ -121,17 +130,25 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					}else{
 						$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 					}
-					$period = $max_period == 0 ? (string)$rowMaxPeriod["MAX_PERIOD"] : (string)$max_period;
-					
-					$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]) + (($maxloan_amt * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
-					$period_payment = floor($period_payment - ($period_payment % 100));
+					$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
+					$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
+					$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
+					$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
+					$period_payment = ($request_amt * ($int_rate / 12) / (1 - ($payment_per_period)));
+					$module = 100 - ($period_payment % 100);
+					if($module < 100){
+						$period_payment = floor($period_payment + $module);
+					}
 				}
 				if($dataComing["loantype_code"] == '12'){
 					$arrPayEqual["VALUE"] = "2";
 					$arrPayEqual["DESC"] = "ชำระแค่ดอกเบี้ย";
+					$arrPayEqual["DISABLE_SIMULATE"] = TRUE;
 					$arrGrpPayType[] = $arrPayEqual;
 					$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "2";
 					$arrayResult["DISABLE_PERIOD"] = TRUE;
+					$arrayResult["REQ_HOUSE_REG"] = FALSE;
+					$arrayResult["IS_UPLOAD_HOUSE_REG"] = FALSE;
 				}else{
 					$arrPayPrin["VALUE"] = "0";
 					$arrPayPrin["DESC"] = "คงต้น";
@@ -139,7 +156,18 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrPayEqual["VALUE"] = "1";
 					$arrPayEqual["DESC"] = "คงยอด";
 					$arrGrpPayType[] = $arrPayEqual;
-					$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "0";
+					if($dataComing["loantype_code"] == '25'){
+						$arrPayEqual["VALUE"] = "2";
+						$arrPayEqual["DESC"] = "ชำระแค่ดอกเบี้ย";
+						$arrPayEqual["DISABLE_SIMULATE"] = TRUE;
+						$arrGrpPayType[] = $arrPayEqual;
+						$arrayResult["REQ_HOUSE_REG"] = TRUE;
+						$arrayResult["IS_UPLOAD_HOUSE_REG"] = TRUE;
+					}else{					
+						$arrayResult["REQ_HOUSE_REG"] = FALSE;
+						$arrayResult["IS_UPLOAD_HOUSE_REG"] = FALSE;
+					}
+					$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "1";
 				}
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/loan_termanduse.html";
 				//$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;

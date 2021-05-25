@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
-		$arrayResult = array();
+		;
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmloan');
 		$arrayResult['LIMIT_DURATION'] = $limit;
