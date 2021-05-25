@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		//$limit = $func->getConstant('limit_ticket');
 		//$arrayResult['LIMIT_TICKET'] = $limit;
 		//$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
-		$date_now = date('Y-m-d');
+		$date_now = $dataComing["date"] ??  $date_now = date('Y-m-d');
 		
 		$getSumAllAccount = $conoracle->prepare("SELECT SUM( A.PRNC_AMT)  as  SUM_BALANCE  FROM DPDEPTPRNCFIXED A, DPDEPTMASTER B 
 												WHERE   A.DEPTACCOUNT_NO = B.DEPTACCOUNT_NO 
@@ -76,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["INTEREST_RATE"] = number_format($rowAccount["INTEREST_RATE"],2);
 			$arrAccount["PRNCDUE_DATE"] = $lib->convertdate($rowAccount["PRNCDUE_DATE"],'d M Y');
-			$arrAccount["PRNCDUE_NMONTH"] = $rowAccount["DEPTTYPE_DESC"];
+			$arrAccount["PRNCDUE_NMONTH"] = $rowAccount["PRNCDUE_NMONTH"];
 			$arrAccount["INT_AMT"] = number_format($rowAccount["INT_AMT"],2);
 			$arrGroupAccount['TYPE_ACCOUNT'] = $rowAccount["DEPTTYPE_DESC"];
 			if(array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT')) === False){

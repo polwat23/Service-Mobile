@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayData = array();
 		$arrayDocData = array();
 		$year = date(Y) +543;
-		$getSharemasterinfo = $conmysql->prepare("SELECT (new_share_stk) as SHARE_AMT FROM gcmembereditdata WHERE TRIM(member_no) = :member_no");
+		$getSharemasterinfo = $conmysql->prepare("SELECT (share_amt) as SHARE_AMT FROM gcmembonlineregis WHERE TRIM(member_no) = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $payload["ref_memno"]]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
@@ -29,16 +29,52 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayDocData[] = $arrayDoc;
 		}
 		
-		$mdInfo = $conoracle->prepare("SELECT  MB.BOARD_NAME as MD_NAME,  MY.MEMBERSHIP_AMT as MD_COUNT, BDRANK_CODE as MD_TYPE
-									FROM MBMEMBDETYEARBOARD MB LEFT JOIN MBMEMBDETYEARBIZ MY ON MB.MEMBER_NO = MY.MEMBER_NO AND MB.BIZ_YEAR  = MY.BIZ_YEAR
-									WHERE  MB.MEMBER_NO = :member_no  AND MB.BIZ_YEAR = :year");
-		$mdInfo->execute([':member_no' => $payload["ref_memno"] ,':year' => '2561']);
+		$mdInfo = $conoracle->prepare("SELECT  MB.BOARD_NAME as MD_NAME,  MY.MEMBERSHIP_AMT as MD_COUNT, BDRANK_CODE as MD_TYPE,MB.ADD_NO as ADDR_NO,
+										MB.ADDR_MOO as ADDR_MOO,MB.ADDR_SOI as ADDR_SOI,MB.ADDR_ROAD as ADDR_ROAD,MB.ADDR_DISTRICT AS DISTRICT_CODE,MB.ADDR_TAMBOL AS TAMBOL_CODE,
+										MB.ADDR_PROVINCE AS PROVINCE_CODE,MBT.TAMBOL_DESC AS TAMBOL_REG_DESC,MBD.DISTRICT_DESC AS DISTRICT_REG_DESC,MBP.PROVINCE_DESC AS PROVINCE_REG_DESC,											
+										MBT.TAMBOL_DESC AS TAMBOL_DESC,MBD.DISTRICT_DESC AS DISTRICT_DESC,MBP.PROVINCE_DESC AS PROVINCE_DESC,MB.BOARD_TEL,MB.BOARD_AGE,MB.BOARD_EMAIL,MB.PERSON_ID
+										FROM MBMEMBDETYEARBOARD MB LEFT JOIN MBMEMBDETYEARBIZ MY ON MB.MEMBER_NO = MY.MEMBER_NO AND MB.BIZ_YEAR  = MY.BIZ_YEAR
+										LEFT JOIN MBUCFTAMBOL MBT ON MB.ADDR_TAMBOL = MBT.TAMBOL_CODE
+										LEFT JOIN MBUCFDISTRICT MBD ON MB.ADDR_DISTRICT = MBD.DISTRICT_CODE
+										LEFT JOIN MBUCFPROVINCE MBP ON MB.ADDR_PROVINCE = MBP.PROVINCE_CODE
+										WHERE  MB.MEMBER_NO = :member_no  AND MB.BIZ_YEAR = :year");
+		$mdInfo->execute([':member_no' => $payload["ref_memno"] ,':year' => $year]);
 		while($rowUser = $mdInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayMd = array();
+			$address = (isset($rowUser["ADDR_NO"]) ? $rowUser["ADDR_NO"] : null);
+			if(isset($rowUser["PROVINCE_CODE"]) && $rowUser["PROVINCE_CODE"] == '10'){
+				$address .= (isset($rowUser["ADDR_MOO"]) ? ' ม.'.$rowUser["ADDR_MOO"] : null);
+				$address .= (isset($rowUser["ADDR_SOI"]) ? ' ซอย'.$rowUser["ADDR_SOI"] : null);
+				$address .= (isset($rowUser["ADDR_ROAD"]) ? ' ถนน'.$rowUser["ADDR_ROAD"] : null);
+				$address .= (isset($rowUser["TAMBOL_REG_DESC"]) ? ' แขวง'.$rowUser["TAMBOL_REG_DESC"] : null);
+				$address .= (isset($rowUser["DISTRICT_REG_DESC"]) ? ' เขต'.$rowUser["DISTRICT_REG_DESC"] : null);
+				$address .= (isset($rowUser["PROVINCE_REG_DESC"]) ? ' '.$rowUser["PROVINCE_REG_DESC"] : null);
+			}else{
+				$address .= (isset($rowUser["ADDR_MOO"]) ? ' ม.'.$rowUser["ADDR_MOO"] : null);
+				$address .= (isset($rowUser["ADDR_SOI"]) ? ' ซอย'.$rowUser["ADDR_SOI"] : null);
+				$address .= (isset($rowUser["ADDR_ROAD"]) ? ' ถนน'.$rowUser["ADDR_ROAD"] : null);
+				$address .= (isset($rowUser["TAMBOL_REG_DESC"]) ? ' ต.'.$rowUser["TAMBOL_REG_DESC"] : null);
+				$address .= (isset($rowUser["DISTRICT_REG_DESC"]) ? ' อ.'.$rowUser["DISTRICT_REG_DESC"] : null);
+				$address .= (isset($rowUser["PROVINCE_REG_DESC"]) ? ' จ.'.$rowUser["PROVINCE_REG_DESC"] : null);
+			}
+			$arrayMd["BOARD_TEL"] = $rowUser["BOARD_TEL"];
+			$arrayMd["BOARD_AGE"] = $rowUser["BOARD_AGE"];
+			$arrayMd["BOARD_EMAIL"] = $rowUser["BOARD_EMAIL"];
+			$arrayMd["PERSON_ID"] = $rowUser["PERSON_ID"];
+			$arrayMd["ADDR_NO"] = $rowUser["ADDR_NO"];
+			$arrayMd["ADDR_MOO"] = $rowUser["ADDR_MOO"];
+			$arrayMd["ADDR_SOI"] = $rowUser["ADDR_SOI"];
+			$arrayMd["ADDR_ROAD"] = $rowUser["ADDR_ROAD"];
+			$arrayMd["DISTRICT_CODE"] = $rowUser["DISTRICT_CODE"];
+			$arrayMd["TAMBOL_CODE"] = $rowUser["TAMBOL_CODE"];
+			$arrayMd["PROVINCE_CODE"] = $rowUser["PROVINCE_CODE"];
 			$arrayMd["MD_NAME"] = $rowUser["MD_NAME"];
 			$arrayMd["MD_TYPE"] = $rowUser["MD_TYPE"];
 			$arrayMd["MD_COUNT"] = $rowUser["MD_COUNT"];
-			if($rowUser["MD_TYPE"] == "01"){			//ประธาน
+			$arrayMd["ADDRESS"] = $address;
+			
+			
+			if($rowUser["MD_TYPE"] == "01"){  //ประธาน
 				$arrayChairman[] = $arrayMd;
 			}else if($rowUser["MD_TYPE"] == "09"){	//ผู้จัดการ
 				$arrayManager[] = $arrayMd;
@@ -177,7 +213,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayResult["COUNTRY"] = $arrayDataGeo;
 		$arrayResult['DATA'] = $arrayData;
-		$arrayResult['$year'] = $arrayMd["MD_NAME"]; 
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

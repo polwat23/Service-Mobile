@@ -27,6 +27,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup["tax_id"] = "เลขประจำตัวผู้เสียภาษีอากร";
 		$arrayGroup["accyearclose_date"] = "วันสิ้นปีทางบัญชี";
 		$arrayGroup["share_stk"] = "ทุนเรือนหุ้น";
+		
+		$arrayGroup["BOARD"] = "คณะกรรมการ";
+		$arrayGroup["BUSINESS"] = "ผู้ตรวจสอบกิจการ";
+		$arrayGroup["COOP_OFFICER"] = "จำนวนเจ้าหน้าที่";
+		$arrayGroup["MEMBER_COUNT"] = "จำนวนสมาชิก";
+		
 		$arrayResult["EDIT_MEMBER_LABEL"] = $arrayGroup;
 
 		$arrayResult["RESULT"] = TRUE;

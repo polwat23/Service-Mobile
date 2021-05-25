@@ -41,10 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrOldAddress["addr_postcode"] = $rowMember["ADDR_POSTCODE"] == null ? "" : $rowMember["ADDR_POSTCODE"];
 		$arrOldAddress["tambol_code"] = $rowMember["TAMBOL_CODE"] == null ? "" : $rowMember["TAMBOL_CODE"];
 		
-		$shareInfo = $conmysql->prepare("SELECT (Old_share_stk) as SHARE_AMT FROM gcmembereditdata WHERE TRIM(member_no) = :member_no");
-		$shareInfo->execute([':member_no' => $member_no]);
-		$rowShare = $shareInfo->fetch(PDO::FETCH_ASSOC);
-		
+	
 		//profile สหกรณฺ์
 		$member_info = $conoracle->prepare("SELECT 
 											MB.ADDR_EMAIL AS ADDR_EMAIL,
@@ -71,10 +68,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 
 		$insertChangeData = $conmysql->prepare("INSERT INTO gcmembereditdata(member_no,old_data,incoming_data,old_email, new_email, old_tel, new_tel, old_fax, new_fax, old_website, new_website,
 												old_coopregis_date, new_coopregis_date, old_accyearclose_date, new_accyearclose_date, old_coopregis_no, new_coopregis_no, 
-												old_memb_regno, new_memb_regno, old_tax_id, new_tax_id, old_share_stk, new_share_stk, inputgroup_type,username)
+												old_memb_regno, new_memb_regno, old_tax_id, new_tax_id,inputgroup_type,username)
 												VALUES(:member_no,:old_address,:address,:old_email,:new_email,:old_tel,:new_tel,:old_fax,:new_fax,:old_website,:new_website,
 											   :old_coopregis_date,:new_coopregis_date, :old_accyearclose_date, :new_accyearclose_date,:old_coopregis_no,:new_coopregis_no,
-											   :old_memb_regno,:new_memb_regno,:old_tax_id,:new_tax_id,:old_share_stk,:new_share_stk,:inputgroup_type,:username)");
+											   :old_memb_regno,:new_memb_regno,:old_tax_id,:new_tax_id,:inputgroup_type,:username)");
 		if($insertChangeData->execute([
 			':member_no' => $member_no,
 			':old_address' => json_encode($arrOldAddress),
@@ -97,8 +94,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':new_memb_regno' => $dataComing["memb_regno"],
 			':old_tax_id' => $rowMember_info["TAX_ID"],
 			':new_tax_id' => $dataComing["tax_id"],
-			':old_share_stk' => $rowShare["SHARE_AMT"],
-			':new_share_stk' => $dataComing["share"],
 			':inputgroup_type' => $inputgroup_type,
 			':username'=> $payload["member_no"]
 		])){

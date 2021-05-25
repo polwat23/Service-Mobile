@@ -4,13 +4,36 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','reportmembereditdata')){
 		$arrayGroup = array();
-		$arrGroupUserAcount = array();
+		$fetchUserManager= $conmysql->prepare("SELECT id_editdata,member_no, old_data as old_data_manger , incoming_data,update_date,username from gcmanagement ");
+		$fetchUserManager->execute();
+		while($rowUserManager = $fetchUserManager->fetch(PDO::FETCH_ASSOC)){
+			$arrGroupUserAcount = array();
+			$arrGroupUserAcount["ID_EDITDATA"] = $rowUserManager["id_editdata"];
+			$arrGroupUserAcount["INPUTGROUP_TYPE"] = "editBoard";
+			$arrGroupUserAcount["INCOMING_DATA_JSON"] = json_decode(($rowUserManager["incoming_data"]), true);
+			$arrGroupUserAcount["OLD_DATA_JSON"] = json_decode(($rowUserManager["old_data_manger"]), true);
+			$arrGroupUserAcount["EDIT_DATE"] = $lib->convertdate($rowUserManager["update_date"],'d m Y H-i-s',true);
+			$arrGroupUserAcount["MEMBER_NO"] = $rowUserManager["member_no"];
 
+			$fetchName = $conmysql->prepare("SELECT member_no,ref_memno,acc_name,acc_surname,phone_number FROM gcmemberaccount WHERE  member_no = :member_no AND ref_memno = :ref_memno");
+			$fetchName->execute([':member_no' => $rowUserManager["username"],
+								 ':ref_memno' => $rowUserManager["member_no"]
+							]);
+			while($rowContName = $fetchName->fetch(PDO::FETCH_ASSOC)){
+				$arrGroupUserAcount["NAME"] = $rowContName["acc_name"].' '.$rowContName["acc_surname"];
+				$arrGroupUserAcount["PHONE_NUMBER"] = $rowContName["phone_number"];
+			}
+			
+			$arrayGroup[] = $arrGroupUserAcount;
+			
+		}
+		
 		$fetchUserAccount = $conmysql->prepare("SELECT id_editdata, member_no, edit_date, old_data, incoming_data,update_date,inputgroup_type,old_email,new_email,old_tel,new_tel,old_website,new_website,old_coopregis_date,new_coopregis_date,
 												old_accyearclose_date,new_accyearclose_date,old_coopregis_no,new_coopregis_no,old_memb_regno,new_memb_regno,old_tax_id,new_tax_id,old_share_stk,new_share_stk,username
 											FROM gcmembereditdata WHERE is_updateoncore = '0'");
 		$fetchUserAccount->execute();
 		while($rowUser = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
+			$arrGroupUserAcount = array();
 			$arrGroupUserAcount["ID_EDITDATA"] = $rowUser["id_editdata"];
 			$arrGroupUserAcount["MEMBER_NO"] = $rowUser["member_no"];
 			$arrGroupUserAcount["USERNAME"] = $rowUser["username"];
@@ -18,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupUserAcount["OLD_DATA_JSON"] = json_decode(($rowUser["old_data"]), true);
 			$arrGroupUserAcount["INCOMING_DATA_JSON"] = json_decode(($rowUser["incoming_data"]), true);
 			$arrGroupUserAcount["UPDATE_DATE"] = $lib->convertdate($rowUser["update_date"],'d m Y H-i-s',true);
-			$arrGroupUserAcount["INPUTGROUP_TYPE"] = $rowUser["inputgroup_type"];
+			$arrGroupUserAcount["INPUTGROUP_TYPE"] = "editCoop";
 			$arrGroupUserAcount["OLD_DATA_JSON"]["email"] = $rowUser["old_email"];
 			$arrGroupUserAcount["INCOMING_DATA_JSON"]["email"] = $rowUser["new_email"];
 			$arrGroupUserAcount["OLD_DATA_JSON"]["tel"] = $rowUser["old_tel"];

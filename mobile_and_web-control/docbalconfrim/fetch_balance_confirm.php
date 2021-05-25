@@ -8,16 +8,17 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocBalanceConfirm')){
 		$member_no = $configAS[$payload["ref_memno"]] ?? $payload["ref_memno"];
-		$date_now = date('Y-m-d');
+		$date_now = $lib->convertdate($dataComing["date_now"],'y-n-d');
 		$Contractno = null;
 		$sum_dept = 0;
 		$sum_tiker = 0;
 		$sum_share = 0;
+		
 		$arrayContractCheckGrp = array();  //เช็คยืนยันยอดเงินกู้
-		$fetchContractTypeCheck = $conmysql->prepare("SELECT CONTRACT_NO FROM gcconstantcontractno WHERE IS_CONFIRMBALANCE ='1' AND member_no = :member_no");
+		$fetchContractTypeCheck = $conmysql->prepare("SELECT balance_status FROM gcconstantbalanceconfirm WHERE member_no = :member_no");
 		$fetchContractTypeCheck->execute([':member_no' => $member_no]);
 		$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
-		$Contractno  = $rowContractnoCheck["CONTRACT_NO"] ;
+		$Contractno  = $rowContractnoCheck["balance_status"] ;
 		
 		$arrayDepttypeCheckGrp = array();//เช็คยืนยันยอดเงินฝาก
 		$fetchdeptTypeCheck = $conmysql->prepare("SELECT DEPTACCOUNT_NO FROM gcconstantdeposit WHERE IS_CLOSESTATUS ='1' AND member_no = :member_no");
@@ -39,60 +40,57 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrHeader["addr_phone"] = $rowBalMaster["ADDR_PHONE"];
 		$arrHeader["member_no"] = $member_no;
 		$arrHeader["date_confirm"] = $date_now;
-		$rowBalMaster["BALANCE_DATE"] = $date_now;
 		
-		if($Contractno != "1"){
-			$getBalanceLoan = $conoracle->prepare("select cmconfirmbalance.member_no,
-													'สัญญาเลขที่ '||cmconfirmbalance.bizzaccount_no as bizzaccount_no,
-													cmconfirmbalance.balance_value as BALANCE_AMT,
-													cmconfirmbalance.intarrear_amt as intarrear_amt,
-													cmconfirmbalance.bfintarrear_amt as bfintarrear_amt
-													from	cmconfirmbalance,lccfloantype
-													where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
-													and 	( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
-													and		(cmconfirmbalance.confirmbal_date)	= to_date(:balance_date,'YYYY-MM-DD') 
-													and		( cmconfirmbalance.bizz_system		= 'LON' )
-													and 	( cmconfirmbalance.member_no = :member_no )
-													and 	( select count(*) from 	cmconfirmbalance,lccfloantype
-													where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
-													and 	( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
-													and		(cmconfirmbalance.confirmbal_date)	= to_date(:balance_date,'YYYY-MM-DD') 
-													and		( cmconfirmbalance.bizz_system		= 'LON' )
-													and 	( cmconfirmbalance.member_no =   :member_no  ) ) <= 3
-													union all
-													select
-													cmconfirmbalance.member_no,
-													'จำนวน '||to_char(count(cmconfirmbalance.bizzaccount_no))||'  สัญญา ' as bizzaccount_no,
-													sum(cmconfirmbalance.balance_value) as BALANCE_AMT,
-													sum(cmconfirmbalance.intarrear_amt) as intarrear_amt,
-													sum(cmconfirmbalance.bfintarrear_amt) as bfintarrear_amt
-													from	cmconfirmbalance, lccfloantype
-													where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
-													and		( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
-													and		(cmconfirmbalance.confirmbal_date)= to_date(:balance_date,'YYYY-MM-DD') 
-													and		( cmconfirmbalance.bizz_system	= 'LON' )
-													and 	( cmconfirmbalance.member_no = :member_no  )
-													and 	( select count(*)  from 	cmconfirmbalance,lccfloantype
-													where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
-													and 	( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
-													and		(cmconfirmbalance.confirmbal_date)	= to_date(:balance_date,'YYYY-MM-DD') 
-													and		( cmconfirmbalance.bizz_system	= 'LON' )
-													and 	( cmconfirmbalance.member_no =  :member_no ) ) > 3
-													group by 	cmconfirmbalance.member_no");
-			$getBalanceLoan->execute([':member_no' => '100989',
-									  ':balance_date' => '2020-06-30'
-			]);
-			$sum_balance = 0;
-			while($rowBalDetailLoan = $getBalanceLoan->fetch(PDO::FETCH_ASSOC)){
-				$arrBalDetail = array();
-				$arrBalDetail["INTARREAR_AMT"] = $rowBalDetailLoan["INTARREAR_AMT"];
-				$arrBalDetail["BALANCE_AMT"] = $rowBalDetailLoan["BALANCE_AMT"];
-				$arrBalDetail["BFINTARREAR_AMT"] = $rowBalDetailLoan["BFINTARREAR_AMT"];
-				$arrBalDetail["BIZZACCOUNT_NO"] = $rowBalDetailLoan["BIZZACCOUNT_NO"];
-				$sum_balance += $rowBalDetailLoan["BALANCE_AMT"];
-				$arrDetail[] = $arrBalDetail;
-				
-			}
+		$getBalanceLoan = $conoracle->prepare("select cmconfirmbalance.member_no,
+												'สัญญาเลขที่ '||cmconfirmbalance.bizzaccount_no as bizzaccount_no,
+												cmconfirmbalance.balance_value as BALANCE_AMT,
+												cmconfirmbalance.intarrear_amt as intarrear_amt,
+												cmconfirmbalance.bfintarrear_amt as bfintarrear_amt
+												from	cmconfirmbalance,lccfloantype
+												where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
+												and 	( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
+												and		(cmconfirmbalance.confirmbal_date)	= to_date(:balance_date,'YYYY-MM-DD') 
+												and		( cmconfirmbalance.bizz_system		= 'LON' )
+												and 	( cmconfirmbalance.member_no = :member_no )
+												and 	( select count(*) from 	cmconfirmbalance,lccfloantype
+												where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
+												and 	( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
+												and		(cmconfirmbalance.confirmbal_date)	= to_date(:balance_date,'YYYY-MM-DD') 
+												and		( cmconfirmbalance.bizz_system		= 'LON' )
+												and 	( cmconfirmbalance.member_no =   :member_no  ) ) <= 3
+												union all
+												select
+												cmconfirmbalance.member_no,
+												'จำนวน '||to_char(count(cmconfirmbalance.bizzaccount_no))||'  สัญญา ' as bizzaccount_no,
+												sum(cmconfirmbalance.balance_value) as BALANCE_AMT,
+												sum(cmconfirmbalance.intarrear_amt) as intarrear_amt,
+												sum(cmconfirmbalance.bfintarrear_amt) as bfintarrear_amt
+												from	cmconfirmbalance, lccfloantype
+												where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
+												and		( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
+												and		(cmconfirmbalance.confirmbal_date)= to_date(:balance_date,'YYYY-MM-DD') 
+												and		( cmconfirmbalance.bizz_system	= 'LON' )
+												and 	( cmconfirmbalance.member_no = :member_no  )
+												and 	( select count(*)  from 	cmconfirmbalance,lccfloantype
+												where	( lccfloantype.branch_id = cmconfirmbalance.bizzbranch_id )
+												and 	( lccfloantype.loantype_code = cmconfirmbalance.bizzacctype_code )
+												and		(cmconfirmbalance.confirmbal_date)	= to_date(:balance_date,'YYYY-MM-DD') 
+												and		( cmconfirmbalance.bizz_system	= 'LON' )
+												and 	( cmconfirmbalance.member_no =  :member_no ) ) > 3
+												group by 	cmconfirmbalance.member_no");
+		$getBalanceLoan->execute([':member_no' => $member_no,
+								  ':balance_date' =>  $date_now
+		]);
+		$sum_balance = 0;
+		while($rowBalDetailLoan = $getBalanceLoan->fetch(PDO::FETCH_ASSOC)){
+			$arrBalDetail = array();
+			$arrBalDetail["INTARREAR_AMT"] = $rowBalDetailLoan["INTARREAR_AMT"];
+			$arrBalDetail["BALANCE_AMT"] = $rowBalDetailLoan["BALANCE_AMT"];
+			$arrBalDetail["BFINTARREAR_AMT"] = $rowBalDetailLoan["BFINTARREAR_AMT"];
+			$arrBalDetail["BIZZACCOUNT_NO"] = $rowBalDetailLoan["BIZZACCOUNT_NO"];
+			$sum_balance += $rowBalDetailLoan["BALANCE_AMT"];
+			$arrDetail[] = $arrBalDetail;
+			
 		}
 		
 		$getBalanceDetail = $conoracle->prepare("select	 a.member_no ,a.confirmbal_date,
@@ -108,8 +106,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											".(count($arrayDepttypeCheckGrp) > 0 ? ("and a.BIZZACCOUNT_NO NOT IN('".implode("','",$arrayDepttypeCheckGrp)."')") : null)."
 											group by	a.member_no, a.confirmbal_date
 											order by a.member_no");											
-		$getBalanceDetail->execute([':member_no' => '101039',
-									':balance_date' => '2020-06-30'
+		$getBalanceDetail->execute([':member_no' => $member_no,
+									':balance_date' => $date_now
 		]);
 		
 		while($rowBalDept = $getBalanceDetail->fetch(PDO::FETCH_ASSOC)){
@@ -141,7 +139,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$sum_tiker = number_format($sum_tiker,2);
 		$sum_share = number_format($sum_share,2);
 		if(isset($rowBalMaster["MEMB_NAME"]) && sizeof($arrDetail) > 0 || $arrDetailDept > 0 ){
-			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail,$sum_balance,$arrDetailDept,$sum_dept,$sum_tiker,$sum_share);
+			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail,$sum_balance,$arrDetailDept,$sum_dept,$sum_tiker,$sum_share,$Contractno);
 			if($arrayPDF["RESULT"]){
 				$arrayResult['DATA_CONFIRM'] = "ข้าพเจ้า ".$arrHeader["full_name"]." เลขที่สหกรณ์ ".$member_no." ตามที่ทาง 
 				 ชุมนุมสหกรณ์ออมทรัพย์แห่งประเทศไทย  จํากัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($date_now)),'d m Y').
@@ -190,7 +188,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	
 }
 
-function GeneratePdfDoc($arrHeader,$arrDetail,$sum_balance,$arrDetailDept,$sum_dept,$sum_tiker,$sum_share) {
+function GeneratePdfDoc($arrHeader,$arrDetail,$sum_balance,$arrDetailDept,$sum_dept,$sum_tiker,$sum_share,$Contractno) {
 	$html = '<style>
 				@font-face {
 				  font-family: THSarabun;
@@ -282,29 +280,39 @@ function GeneratePdfDoc($arrHeader,$arrDetail,$sum_balance,$arrDetailDept,$sum_d
 	
 	$n = 0;	
 	if($arrDetail[0]["BALANCE_AMT"] > 0){
-		$n++;
-		$html .= '<tr>
-					<td class="text-left"  style="width:30%;">'.$n.' . เงินกู้  เป็นเงิน </td>  
-					<td style="width:30%;"></td>  
-					<td class="text-right" style="width:30%;" > '.$sum_balance.'</td>
-				 </tr>';
+		if($Contractno == "1"){
+			$n++;
+			$html .= '<tr>
+						<td class="text-left"  style="width:30%;">'.$n.' . เงินกู้  เป็นเงิน </td>  
+						<td style="width:30%;"></td>  
+						<td class="text-right" style="width:30%;" >**ให้ติดต่อเจ้าหน้าที่สหกรณ์**</td>
+					 </tr>
+				';
+		}else{
+			$n++;
+			$html .= '<tr>
+						<td class="text-left"  style="width:30%;">'.$n.' . เงินกู้  เป็นเงิน </td>  
+						<td style="width:30%;">รวมทั้งหมด</td>  
+						<td class="text-right" style="width:30%;" > '.$sum_balance.'</td>
+					 </tr>';
+		
+			for($i = 0;$i < sizeof($arrDetail);$i++){
+				$html .= '
+					<tr>
+					  <td class="text-left" style="padding-left:40px;">'.$arrDetail[$i]["BIZZACCOUNT_NO"].'</td>  
+					  <td class="text-left" > เงินต้น </td>   
+					  <td class="text-right"> '.$arrDetail[$i]["BALANCE_AMT"].'</td>
+					</tr>
+					<tr>
+						<td></td>  
+						<td class="text-left"  style="width:40%;"> ดอกเบี้ยค้างชำระ </td>  
+						<td class="text-right">'.$arrDetail[$i]["INTARREAR_AMT"].'</td>
+					</tr>
+				';
+			}
+		}	
 	}
-	if($arrDetail[0]["BALANCE_AMT"] > 0){
-		for($i = 0;$i < sizeof($arrDetail);$i++){
-			$html .= '
-				<tr>
-				  <td class="text-left" style="padding-left:40px;">'.$arrDetail[$i]["BIZZACCOUNT_NO"].'</td>  
-				  <td class="text-left" > เงินต้น </td>   
-				  <td class="text-right"> '.$arrDetail[$i]["BALANCE_AMT"].'</td>
-				</tr>
-				<tr>
-					<td></td>  
-					<td class="text-left"  style="width:40%;"> ดอกเบี้ยค้างชำระ </td>  
-					<td class="text-right">'.$arrDetail[$i]["INTARREAR_AMT"].'</td>
-				</tr>
-			  ';
-		}
-	}
+	
 	if($sum_share > 0){
 		$n++;
 		for($i = 0;$i < sizeof($arrDetailDept);$i++){	

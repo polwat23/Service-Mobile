@@ -7,7 +7,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	
 		$getSharemasterinfo = $conoracle->prepare("SELECT MB.MEMBER_NO,   
 												MP.PRENAME_DESC||MB.MEMB_NAME ||' '|| MP.SUFFNAME_DESC AS COOP_NAME,   
-												(SHR.SHARESTK_AMT  * SHY.UNITSHARE_VALUE) AS  SHARESTK_AMT, SHR.SHRPAR_STKCHKVALUE,SHR.SHRPAR_STKBIZVALUE,
+												(SHR.SHARESTK_AMT  * SHY.UNITSHARE_VALUE) AS  SHARESTK_AMT, 
+												SHR.SHRPAR_STKCHKVALUE,
+												SHR.SHRPAR_STKBIZVALUE,
 												SHR .SHRPAR_VALUE,
 												(CASE WHEN SHR.SHRPAR_STATUS = 0 THEN 'พอดีเกณฑ์'
 													WHEN SHR.SHRPAR_STATUS = -1 THEN 'ต่ำกว่าเกณฑ์' 
@@ -25,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupStm = array();
 			$arrayResult['MEMBER_NO'] = $rowMastershare["MEMBER_NO"];
 			$arrayResult['COOP_NAME'] = $rowMastershare["COOP_NAME"];
-			$arrayResult['SHARESTK_AMT'] = number_format($rowMastershare["SHARESTK_AMT"] * 10,2);
+			$arrayResult['SHARESTK_AMT'] = number_format($rowMastershare["SHARESTK_AMT"],2);
 			$arrayResult['SHRPAR_STKCHKVALUE'] = number_format($rowMastershare["SHRPAR_STKCHKVALUE"],2);
 			$arrayResult['SHRPAR_VALUE'] = number_format($rowMastershare["SHRPAR_VALUE"],2);
 			$arrayResult['SHRPAR_AMT'] = number_format($rowMastershare["SHRPAR_AMT"],2);

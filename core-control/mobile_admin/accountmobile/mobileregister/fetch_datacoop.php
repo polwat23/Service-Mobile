@@ -18,24 +18,31 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			require_once('../../../../include/exit_footer.php');
 		}
 		
-		$fetchAccount = $conmysql->prepare("SELECT member_no, prename_desc, memb_name, prename_edesc, memb_ename, remark ,service_status
-										FROM gcmembonlineregis 
-										WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and member_no = :member_no" : null).
-										(isset($dataComing["memb_name"]) && $dataComing["memb_name"] != '' ? " and TRIM(memb_name) LIKE :memb_name" : null));
-		$fetchAccount->execute($arrayExecute);
-		while($rowUser = $fetchAccount->fetch(PDO::FETCH_ASSOC)){
-			$arrUserAcount = array();
-			$arrUserAcount["REF_MEMNO"] = $rowUser["member_no"];
-			$arrUserAcount["PRENAME_DESC"] = $rowUser["prename_desc"];
-			$arrUserAcount["PRENAME_EDESC"] = $rowUser["prename_edesc"];
-			$arrUserAcount["MEMB_NAME"] = $rowUser["memb_name"];
-			$arrUserAcount["MEMB_ENAME"] = $rowUser["memb_ename"];
-			$arrUserAcount["REMARK"] = $rowUser["remark"];
-			$arrUserAcount["SERVICE_STATUS"] = $rowUser["service_status"];
-			$arrUserAcount["CHECK_REGIS"] = true;
-			$arrRegisterCoop[] = $rowUser["member_no"];
-			$arrayAccount[] = $arrUserAcount;
-		}
+		if(isset($dataComing["member_no"])){
+			$fetchAccount = $conmysql->prepare("SELECT member_no, prename_desc, memb_name, prename_edesc, memb_ename, remark ,service_status
+											FROM gcmembonlineregis 
+											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and member_no = :member_no" : null).
+											(isset($dataComing["memb_name"]) && $dataComing["memb_name"] != '' ? " and TRIM(memb_name) LIKE :memb_name" : null));
+			$fetchAccount->execute($arrayExecute);
+			while($rowUser = $fetchAccount->fetch(PDO::FETCH_ASSOC)){
+				$arrUserAcount = array();
+				$arrUserAcount["REF_MEMNO"] = $rowUser["member_no"];
+				$arrUserAcount["PRENAME_DESC"] = $rowUser["prename_desc"];
+				$arrUserAcount["PRENAME_EDESC"] = $rowUser["prename_edesc"];
+				$arrUserAcount["MEMB_NAME"] = $rowUser["memb_name"];
+				$arrUserAcount["MEMB_ENAME"] = $rowUser["memb_ename"];
+				$arrUserAcount["REMARK"] = $rowUser["remark"];
+				$arrUserAcount["SERVICE_STATUS"] = $rowUser["service_status"];
+				$arrUserAcount["CHECK_REGIS"] = true;
+				
+				$fetchContractTypeCheck = $conmysql->prepare("SELECT BALANCE_STATUS FROM gcconstantbalanceconfirm WHERE member_no = :member_no");
+				$fetchContractTypeCheck->execute([':member_no' => $dataComing["member_no"]]);
+				$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
+				$arrUserAcount["BALANCE_STATUS"] = $rowContractnoCheck["BALANCE_STATUS"] ?? 0;
+				
+				$arrRegisterCoop[] = $rowUser["member_no"];
+				$arrayAccount[] = $arrUserAcount;
+			}
 		
 			$fetchRegister = $conoracle->prepare("select mb.member_no,
                             mp.prename_desc,
@@ -60,11 +67,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayAccount[] = $arrGroupRegis;
 			}
 			$arrayResult["REGISTER_DATA"] = $arrayAccount;	
-			$arrayResult["REGISTE"]	 = $fetchRegister	;	
-			$arrayResult["arrRegisterCoop"]	 = count($arrRegisterCoop);
+			$arrayResult["arrRegisterCoop"]	 = $arrUserAcount["BALANCE_STATUS"];
 
-		$arrayResult["RESULT"] = TRUE;
-		require_once('../../../../include/exit_footer.php');
+			$arrayResult["RESULT"] = TRUE;
+			require_once('../../../../include/exit_footer.php');
+			
+		}else{
+			$arrayResult['RESPONSE'] = "ไม่พบสหกรณ์ กรุณาลงทะเบียน";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../../../include/exit_footer.php');
+		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
