@@ -84,124 +84,146 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
 	// Complete Argument
 	if(isset($headers["Authorization"]) && strlen($headers["Authorization"]) > 15){
-		if($lib->checkCompleteArgument(['channel','refresh_token','unique_id'],$dataComing)){
-			$author_token = $headers["Authorization"];
-			if(substr($author_token,0,6) === 'Bearer'){
-				$access_token = substr($author_token,7);
-				$jwt = new Jwt($access_token, $config["SECRET_KEY_JWT"]);
-				$parse_token = new Parse($jwt, new Validate(), new Encode());
-				try{
-					$parsed_token = $parse_token->validate()
-						->validateExpiration()
-						->parse();
-					$payload = $parsed_token->getPayload();
-					if(!$lib->checkCompleteArgument(['id_userlogin','member_no','exp','id_token','user_type'],$payload)){
-						$arrayResult['RESPONSE_CODE'] = "WS4004";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(400);
-						require_once(__DIR__.'/../include/exit_footer.php');
-						
-					}
-					$rowLogin = $func->checkLogin($payload["id_token"]);
-					if(!$rowLogin["RETURN"]){
-						if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
-							$func->revoke_alltoken($payload["id_token"],'-9',true);
-						}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
-							$func->revoke_alltoken($payload["id_token"],'-8',true);
-						}else if($rowLogin["IS_LOGIN"] == '-7'){
-							$func->revoke_alltoken($payload["id_token"],'-7',true);
-						}else if($rowLogin["IS_LOGIN"] == '-5'){
-							$func->revoke_alltoken($payload["id_token"],'-6',true);
+		if(empty($headers["transaction_scheduler"])){
+			if($lib->checkCompleteArgument(['channel','refresh_token','unique_id'],$dataComing)){
+				$author_token = $headers["Authorization"];
+				if(substr($author_token,0,6) === 'Bearer'){
+					$access_token = substr($author_token,7);
+					$jwt = new Jwt($access_token, $config["SECRET_KEY_JWT"]);
+					$parse_token = new Parse($jwt, new Validate(), new Encode());
+					try{
+						$parsed_token = $parse_token->validate()
+							->validateExpiration()
+							->parse();
+						$payload = $parsed_token->getPayload();
+						if(!$lib->checkCompleteArgument(['id_userlogin','member_no','exp','id_token','user_type'],$payload)){
+							$arrayResult['RESPONSE_CODE'] = "WS4004";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							http_response_code(400);
+							require_once(__DIR__.'/../include/exit_footer.php');
+							
 						}
-						$arrayResult['RESPONSE_CODE'] = "WS0010";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						require_once(__DIR__.'/../include/exit_footer.php');
-						
-					}
-					$rowStatus = $func->checkAccStatus($payload["member_no"]);
-					if(!$rowStatus){
-						$func->revoke_alltoken($payload["id_token"],'-88');
-						$arrayResult['RESPONSE_CODE'] = "WS0010";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT-88'][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						require_once(__DIR__.'/../include/exit_footer.php');
-						
-					}
-				}catch (ValidateException $e) {
-					$errorCode = $e->getCode();
-					if($errorCode === 3){
-						$arrayResult['RESPONSE_CODE'] = "WS0034";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						require_once(__DIR__.'/../include/exit_footer.php');
-						
-					}else if($errorCode === 4){
-						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
-							$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
-							if(!$skip_autoload){
-								if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
-								&& $dataComing["menu_component"] != 'Landing' && $dataComing["menu_component"] != 'Event'  && $dataComing["menu_component"] != 'UpdateFCMToken' && $payload["user_type"] != '9'){
-									$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
-									if($is_refreshToken_arr){
-										$arrayResult['RESPONSE_CODE'] = "WS0046";
-										$arrayResult['RESPONSE_MESSAGE'] = "";
-										$arrayResult['RESULT'] = FALSE;
-										http_response_code(401);
-										require_once(__DIR__.'/../include/exit_footer.php');
-										
-									}else{
-										$rowLogin = $func->checkLogin($payload["id_token"]);
-										if(!$rowLogin["RETURN"]){
-											if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
-												$func->revoke_alltoken($payload["id_token"],'-9',true);
-											}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
-												$func->revoke_alltoken($payload["id_token"],'-8',true);
-											}else if($rowLogin["IS_LOGIN"] == '-7'){
-												$func->revoke_alltoken($payload["id_token"],'-7',true);
-											}else if($rowLogin["IS_LOGIN"] == '-5'){
-												$func->revoke_alltoken($payload["id_token"],'-6',true);
-											}
-											$arrayResult['RESPONSE_CODE'] = "WS0010";
-											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
-											$arrayResult['RESULT'] = FALSE;
-											http_response_code(401);
-											require_once(__DIR__.'/../include/exit_footer.php');
-											
-										}else{
-											$arrayResult['RESPONSE_CODE'] = "WS0032";
-											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-											$arrayResult['RESULT'] = FALSE;
-											http_response_code(401);
-											require_once(__DIR__.'/../include/exit_footer.php');
-											
-										}
-									}
-								}
+						$rowLogin = $func->checkLogin($payload["id_token"]);
+						if(!$rowLogin["RETURN"]){
+							if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
+								$func->revoke_alltoken($payload["id_token"],'-9',true);
+							}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
+								$func->revoke_alltoken($payload["id_token"],'-8',true);
+							}else if($rowLogin["IS_LOGIN"] == '-7'){
+								$func->revoke_alltoken($payload["id_token"],'-7',true);
+							}else if($rowLogin["IS_LOGIN"] == '-5'){
+								$func->revoke_alltoken($payload["id_token"],'-6',true);
 							}
-						}else{
-							$arrayResult['RESPONSE_CODE'] = "WS0053";
-							$arrayResult['RESPONSE_MESSAGE'] = str_replace('${TIMEOUT}',intval($func->getConstant("limit_session_timeout"))/60,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+							$arrayResult['RESPONSE_CODE'] = "WS0010";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							http_response_code(401);
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0014";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
-						require_once(__DIR__.'/../include/exit_footer.php');
-						
+						$rowStatus = $func->checkAccStatus($payload["member_no"]);
+						if(!$rowStatus){
+							$func->revoke_alltoken($payload["id_token"],'-88');
+							$arrayResult['RESPONSE_CODE'] = "WS0010";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT-88'][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							http_response_code(401);
+							require_once(__DIR__.'/../include/exit_footer.php');
+							
+						}
+						if($payload["exp"] <= time() + ($func->getConstant('limit_session_timeout') / 2)){
+							$regen_token = $auth->refresh_accesstoken($dataComing["refresh_token"],
+							$dataComing["unique_id"],$conmysql,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+							if(!$regen_token){
+								$arrayResult['RESPONSE_CODE'] = "WS0014";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								http_response_code(401);
+								require_once('/../include/exit_footer.php');
+							}
+							$arrayResult['NEW_TOKEN'] = $regen_token["ACCESS_TOKEN"];
+						}
+
+					}catch (ValidateException $e) {
+						$errorCode = $e->getCode();
+						if($errorCode === 3){
+							$arrayResult['RESPONSE_CODE'] = "WS0034";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							http_response_code(401);
+							require_once(__DIR__.'/../include/exit_footer.php');
+							
+						}else if($errorCode === 4){
+							if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
+								$payload = $lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]);
+								if(!$skip_autoload){
+									if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
+									&& $dataComing["menu_component"] != 'Landing' && $dataComing["menu_component"] != 'Event'  && $dataComing["menu_component"] != 'UpdateFCMToken' && $payload["user_type"] != '9'){
+										$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
+										if($is_refreshToken_arr){
+											$arrayResult['RESPONSE_CODE'] = "WS0046";
+											$arrayResult['RESPONSE_MESSAGE'] = "";
+											$arrayResult['RESULT'] = FALSE;
+											http_response_code(401);
+											require_once(__DIR__.'/../include/exit_footer.php');
+											
+										}else{
+											$rowLogin = $func->checkLogin($payload["id_token"]);
+											if(!$rowLogin["RETURN"]){
+												if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {
+													$func->revoke_alltoken($payload["id_token"],'-9',true);
+												}else if($rowLogin["IS_LOGIN"] == '-8' || $rowLogin["IS_LOGIN"] == '-99'){
+													$func->revoke_alltoken($payload["id_token"],'-8',true);
+												}else if($rowLogin["IS_LOGIN"] == '-7'){
+													$func->revoke_alltoken($payload["id_token"],'-7',true);
+												}else if($rowLogin["IS_LOGIN"] == '-5'){
+													$func->revoke_alltoken($payload["id_token"],'-6',true);
+												}
+												$arrayResult['RESPONSE_CODE'] = "WS0010";
+												$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0]['LOGOUT'.$rowLogin["IS_LOGIN"]][0][$lang_locale];
+												$arrayResult['RESULT'] = FALSE;
+												http_response_code(401);
+												require_once(__DIR__.'/../include/exit_footer.php');
+												
+											}else{
+												$arrayResult['RESPONSE_CODE'] = "WS0032";
+												$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+												$arrayResult['RESULT'] = FALSE;
+												http_response_code(401);
+												require_once(__DIR__.'/../include/exit_footer.php');
+												
+											}
+										}
+									}
+								}
+							}else{
+								$arrayResult['RESPONSE_CODE'] = "WS0053";
+								$arrayResult['RESPONSE_MESSAGE'] = str_replace('${TIMEOUT}',intval($func->getConstant("limit_session_timeout"))/60,$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+								$arrayResult['RESULT'] = FALSE;
+								http_response_code(401);
+								require_once(__DIR__.'/../include/exit_footer.php');
+								
+							}
+						}else{
+							$arrayResult['RESPONSE_CODE'] = "WS0014";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							http_response_code(401);
+							require_once(__DIR__.'/../include/exit_footer.php');
+							
+						}
 					}
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS0031";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(400);
+					require_once(__DIR__.'/../include/exit_footer.php');
+					
 				}
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0031";
+				$arrayResult['RESPONSE_CODE'] = "WS4004";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				http_response_code(400);
@@ -209,12 +231,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS4004";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			http_response_code(400);
-			require_once(__DIR__.'/../include/exit_footer.php');
-			
+			$author_token = $headers["Authorization"];
+			$access_token = substr($author_token,7);
+			$jwt = new Jwt($access_token, $config["SECRET_KEY_JWT"]);
+			$parse_token = new Parse($jwt, new Validate(), new Encode());
+			$parsed_token = $parse_token->validate()
+				->validateExpiration()
+				->parse();
+			$payload = $parsed_token->getPayload();
 		}
 	}else{
 		$anonymous = true;
