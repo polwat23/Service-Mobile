@@ -1,23 +1,23 @@
 <?php
 use Dompdf\Dompdf;
 
-$dompdf = new DOMPDF();
 function GeneratePDFContract($data,$lib) {
 	$html = '<!DOCTYPE html>
             <head>
             <style>
 			@font-face {
-			  font-family: THSarabun;
-			  src: url(../../resource/fonts/THSarabun.ttf);
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
 			* {
-			  font-family: THSarabun;
+			  font-family: TH Niramit AS;
 			}
+
             .piccenter {
                 text-align:center;
                 margin-top:-30px;
@@ -61,49 +61,49 @@ function GeneratePDFContract($data,$lib) {
                 z-index:2;
             }
             #req_no {
-				margin-top:182px;
+				margin-top:170px;
 				left:560px;
 		    }
 		    #date {
-				margin-top:215px;
+				margin-top:198px;
 				left:550px;
 		    }
             #name {
-				margin-top:292px;
+				margin-top:270px;
 				left:150px;
 		    }
 		    #member_no {
-				margin-top:292px;
+				margin-top:270px;
 				left:550px;
 		    }
             #position {
-				margin-top:322px;
+				margin-top:298px;
 				left:240px;
 				width: 100px;
 		    }
 		    #work_at {
-				margin-top:322px;
+				margin-top:298px;
 				left:520px;
 				width: 250px;
 		    }
 		    #position_group {
-				margin-top:352px;
+				margin-top:325px;
 				left:125px;
 		    }
 		    #salary {
-				margin-top:352px;
+				margin-top:325px;
 				left:540px;
 		    }
 		    #loan_amt {
-				margin-top:412px;
+				margin-top:378px;
 				left:320px;
 		    }
 		    #loan_amt_desc {
-				margin-top:412px;
+				margin-top:378px;
 				left:480px;
 		    }
 		    #objective {
-				margin-top:441px;
+				margin-top:405px;
 				left:230px;
 		    }
             #period_payment {
@@ -120,15 +120,15 @@ function GeneratePDFContract($data,$lib) {
 				left:140px;
 		    }
 		    #namesecon {
-				margin-top:650px;
+				margin-top:624px;
 				left:540px;
 		    }
 		    #tel {
-				margin-top:679px;
+				margin-top:652px;
 				left:540px;
 		    }
 		    #dept_no {
-				margin-top:790px;
+				margin-top:755px;
 				left:520px;
 		    }
             </style>
@@ -165,20 +165,21 @@ function GeneratePDFContract($data,$lib) {
             <br>
             <div class="left">
                 เรียน&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;คณะกรรมการดำเนินการสหกรณ์ออมทรัพย์ครูกาญจนบุรี จำกัด<br>
-                <div class="tabline">ข้าพเจ้า...........................................................................................
-                สมาชิกเลขทะเบียนที่........................................................</div>
-                รับราชการหรือทำงานประจำในตำแหน่ง......................................................
-                โรงเรียน/สถานที่ทำงาน....................................................
-                อำเภอ/หน่วยงาน..............................................................
-                จังหวัดกาญจนบุรี ได้รับเงินเดือนจำนวน...............................................บาท
-                ขอเสนอคำขอกู้เงินฉุกเฉินปันผลดำรงชีพออนไลน์ดังต่อไปนี้<br>
-                <div class="tabline">ข้อ 1. ข้าพเจ้าขอกู้เงินตามโครงการนี้ จำนวน..........................................บาท 
-                (..................................................................)</div>
-                โดยจะนำไปใช้เพื่อการดังนี้ .....................................................................................................................................................................
-                <br>
+                <div class="tabline">ข้าพเจ้า.................................................................................
+			สมาชิกเลขทะเบียนที่.................................................</div>
+			รับราชการหรือทำงานประจำในตำแหน่ง.............................................
+			โรงเรียน/สถานที่ทำงาน..............................................
+			อำเภอ/หน่วยงาน......................................................
+			จังหวัดกาญจนบุรี ได้รับเงินเดือนจำนวน......................................บาท
+			ขอเสนอคำขอกู้เงินฉุกเฉินปันผลดำรงชีพออนไลน์ดังต่อไปนี้<br>
+                
+               <div class="tabline">ข้อ 1. ข้าพเจ้าขอกู้เงินสหกรณ์ ฯ จำนวน.......................................บาท 
+			(.................................................................)</div>
+			โดยจะนำไปใช้เพื่อการดังนี้ .................................................................................................................................................
+			<br>
                 <div class="tabline">ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้ายินยอมชำระดอกเบี้ยเป็นรายเดือนทุกสิ้นเดือน และงวดสุดท้ายชำระเงินต้นพร้อม</div>
                 ดอกเบี้ยโดยหักจากเงินปันผลและเฉลี่ยคืนของปีที่อนุมัติให้กู้&nbsp;หรือส่งหัก ณ ที่จ่ายต้นสังกัดเงินต้นพร้อมดอกเบี้ยในคราวถัดไป<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ข้าพเจ้าผู้กู้ได้อ่านและรับทราบข้อกำหนดและเงื่อนไขในการใช้บริการขอกู้ฉุกเฉินปันผลดำรงชีพออนไลน์ของสหกรณ์ตาม "ข้อกำหนดและเงือนไขในการใช้บริการขอกู้ฉุกเฉินปันผลดำรงชีพออนไลน์ต่อท้ายสัญญา" ในวันที่ทำคำขอนี้แล้วและตกลงยินยอม
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ข้าพเจ้าผู้กู้ได้อ่านและรับทราบข้อกำหนดและเงื่อนไขในการใช้บริการขอกู้ฉุกเฉินปันผลดำรงชีพออนไลน์ของสหกรณ์ตาม "ข้อกำหนดและเงือนไขในการใช้บริการขอกู้ฉุกเฉินปันผลดำรงชีพออนไลน์ต่อท้ายสัญญา" ในวันที่ทำคำขอนี้แล้วและ ตกลงยินยอม
 		ผูกพันและรับปฏิบัติตามข้อ กำหนดและเงื่อนไขดังกล่าวหากข้าพเจ้าไม่ปฏิบัติตามข้อกำหนดและเงื่อนไขดังกล่าวจนเป็นเหตุ ให้เกิดความเสียหายใด ๆ ข้าพเจ้า ยินยอมรับผิดชอบทั้งสิ้น
             </div>
             <div class="right">
@@ -187,15 +188,15 @@ function GeneratePDFContract($data,$lib) {
             </div>
             <br>
             <div class="left">
-                <b>สำหรับเจ้าหน้าที่ :: </b> ยอดอนุมัติ.....................................................บาท&nbsp;&nbsp;&nbsp;  
-                หักหนี้เดิมชำระ..............................................................บาท
+                <b>สำหรับเจ้าหน้าที่ :: </b> ยอดอนุมัติ.............................................บาท&nbsp;&nbsp;&nbsp;  
+                หักหนี้เดิมชำระ....................................................บาท
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                คงเหลือจ่ายจริง............................................บาท
-                &nbsp;&nbsp;&nbsp;ทำรายการเมื่อวันที่.............../............................../...............
+                คงเหลือจ่ายจริง........................................บาท
+                &nbsp;&nbsp;&nbsp;ทำรายการเมื่อวันที่............./........................../............
             </div>
             <div class="checkboxreport"></div>
             <div class="leftBehide">
-                โอนเข้าบัญชีเงินฝากออมทรัพย์ ATM (088 เล่มฟ้า) เลขที่...........................................................................
+                โอนเข้าบัญชีเงินฝากออมทรัพย์ ATM (088 เล่มฟ้า) เลขที่................................................................
             </div>
             <br>
             <div class="left">
@@ -204,15 +205,15 @@ function GeneratePDFContract($data,$lib) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>จ่ายเงินถูกต้องแล้ว</b>
-                ..............................................................เจ้าหน้าที่
+                ........................................................เจ้าหน้าที่
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                ..............................................................เจ้าหน้าที่การเงิน
-                ...............................................................
+                .........................................................เจ้าหน้าที่การเงิน
+                ........................................................
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                ..............................................................
+                ..........................................................
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>เห็นควรอนุมัติ</b>
@@ -221,13 +222,18 @@ function GeneratePDFContract($data,$lib) {
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>อนุมัติ</b>
-                ..............................................................หัวหน้าสินเชื่อ/รองผู้จัดการ
+                ........................................................หัวหน้าสินเชื่อ/รองผู้จัดการ
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                ..............................................................ผู้จัดการ
+                ........................................................ผู้จัดการ
             </div>
             </body>
             </html>';
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
