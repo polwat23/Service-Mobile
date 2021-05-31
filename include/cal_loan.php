@@ -37,7 +37,7 @@ class CalculateLoan {
 		}
 		if($calInt){
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
-			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'ynd'));
+			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y n d',false,true));
 			$yearTo = date('Y');
 			$roundLoop = 0;
 			$yearDiff = $yearTo - $yearFrom;
@@ -134,9 +134,7 @@ class CalculateLoan {
 				}else{
 					$prn_bal = $amt_transfer;
 				}
-				if($constLoanContract["INTEREST_METHOD"] != '2'){
-					$interest += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
-				}
+				$interest += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
 			}
 			$interest = $this->lib->roundDecimal($interest,$constLoan["RDINTSATANG_TYPE"]) + $constLoanContract["INTEREST_ARREAR"];
 		}
@@ -146,7 +144,7 @@ class CalculateLoan {
 		$getAccYear = $this->conms->prepare("SELECT ACCOUNT_YEAR FROM CMACCOUNTYEAR WHERE TRUNC(SYSDATE) BETWEEN TRUNC(ACCSTART_DATE) AND TRUNC(ACCEND_DATE)");
 		$getAccYear->execute();
 		$rowAccYear = $getAccYear->fetch(\PDO::FETCH_ASSOC);
-		$getIntAccum = $this->conms->prepare("SELECT NVL(SUM(LNS.INTEREST_PAYMENT),0) AS INT_ACCUM FROM LNCONTMASTER LNM 
+		$getIntAccum = $this->conms->prepare("SELECT ISNULL(SUM(LNS.INTEREST_PAYMENT),0) AS INT_ACCUM FROM LNCONTMASTER LNM 
 												LEFT JOIN LNCONTSTATEMENT LNS ON LNM.LOANCONTRACT_NO = LNS.LOANCONTRACT_NO,CMACCOUNTYEAR CMY
 												WHERE LNM.MEMBER_NO = :member_no AND CMY.ACCOUNT_YEAR = :account_year AND TRUNC(ENTRY_DATE) >= TRUNC(ACCSTART_DATE) 
 												AND TRUNC(ENTRY_DATE) <= TRUNC(ACCEND_DATE)");
@@ -161,7 +159,7 @@ class CalculateLoan {
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
 		$constLoan = $this->getLoanConstant();
 		$yearFrom = date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"]));
-		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'ynd'));
+		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'y n d',false,true));
 		$yearTo = date('Y');
 		$yearDiff = $yearFrom - $yearTo;
 		if($yearDiff > 0){
@@ -253,9 +251,7 @@ class CalculateLoan {
 				$yearDiffTemp++;
 			}
 			$prn_bal = $amt_transfer;
-			if($constLoanContract["INTEREST_METHOD"] != '2'){
-				$int_return += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
-			}
+			$int_return += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
 		}
 		if($constLoanContract["PXAFTERMTHKEEP_TYPE"] != '1'){
 			$int_return = $int_return + $interest;
@@ -264,11 +260,11 @@ class CalculateLoan {
 		return $int_return;
 	}
 	private function getRateInt($inttabcode,$date){
-		$contLoan = $this->conms->prepare("SELECT INTEREST_RATE,TO_CHAR(EXPIRE_DATE,'YYYY-MM-DD') as EXPIRE_DATE
-											,TO_CHAR(EFFECTIVE_DATE,'YYYY-MM-DD') as EFFECTIVE_DATE
+		$contLoan = $this->conms->prepare("SELECT INTEREST_RATE,CONVERT(VARCHAR(10),EXPIRE_DATE,120) as EXPIRE_DATE
+											,CONVERT(VARCHAR(10),EFFECTIVE_DATE,120) as EFFECTIVE_DATE
 											FROM lncfloanintratedet
 											WHERE LOANINTRATE_CODE = :inttabcode
-											and '".$date."' BETWEEN TO_CHAR(EFFECTIVE_DATE,'YYYY-MM-DD') and TO_CHAR(EXPIRE_DATE,'YYYY-MM-DD')");
+											and '".$date."' BETWEEN CONVERT(VARCHAR(10),EFFECTIVE_DATE,120) and CONVERT(VARCHAR(10),EXPIRE_DATE,120)");
 		$contLoan->execute([
 			':inttabcode' => $inttabcode
 		]);
@@ -277,7 +273,7 @@ class CalculateLoan {
 	}
 	private function checkChangeRateInt($inttabcode,$date){
 		$change_rate = FALSE;
-		$contLoan = $this->conms->prepare("SELECT TO_CHAR(EFFECTIVE_DATE,'YYYYMMDD') as EFFECTIVE_DATE
+		$contLoan = $this->conms->prepare("SELECT CONVERT(VARCHAR(8),EFFECTIVE_DATE,112)as EFFECTIVE_DATE
 											FROM lncfloanintratedet
 											WHERE LOANINTRATE_CODE = :inttabcode");
 		$contLoan->execute([
@@ -304,7 +300,7 @@ class CalculateLoan {
 		$contLoan = $this->conms->prepare("SELECT LNM.LOANAPPROVE_AMT,LNM.PRINCIPAL_BALANCE,LNM.PERIOD_PAYMENT,LNM.PERIOD_PAYAMT,LNM.LAST_PERIODPAY,
 											LNM.LOANTYPE_CODE,(LNM.INTEREST_ARREAR - (LNM.RKEEP_INTEREST - LNM.NKEEP_INTEREST)) as INTEREST_ARREAR,LNM.INTEREST_ARREAR as INTEREST_ARREAR_SRC
 											,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
-											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
+											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
 											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
 											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE

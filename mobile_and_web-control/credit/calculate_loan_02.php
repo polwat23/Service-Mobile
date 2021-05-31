@@ -13,8 +13,14 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 	$getShareBF = $conmssql->prepare("SELECT (SHARESTK_AMT * 10) AS SHARESTK_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT FROM shsharemaster WHERE member_no = :member_no");
 	$getShareBF->execute([':member_no' => $member_no]);
 	$rowShareBF = $getShareBF->fetch(PDO::FETCH_ASSOC);
-	$maxloan_amt = $rowShareBF["SHARESTK_AMT"];
-	
+	$getFundColl = $conmssql->prepare("SELECT SUM(EST_PRICE) as FUND_AMT FROM LNCOLLMASTER WHERE COLLMAST_TYPE = '05' AND MEMBER_NO = :member_no");
+	$getFundColl->execute([':member_no' => $member_no]);
+	$rowFund = $getFundColl->fetch(PDO::FETCH_ASSOC);
+	$maxloan_amt = $rowShareBF["SHARESTK_AMT"] + $rowFund["FUND_AMT"];
+	$getMthOther = $conmssql->prepare("SELECT SUM(mthother_amt) as MTHOTHER_AMT FROM mbmembmthother WHERE member_no = :member_no and sign_flag = '-1'");
+	$getMthOther->execute([':member_no' => $member_no]);
+	$rowOther = $getMthOther->fetch(PDO::FETCH_ASSOC);
+	$maxloan_amt -= $rowOther["MTHOTHER_AMT"];
 	//ดึงข้อมูลสัญญาเดิม
 	$getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY, lt.LOANGROUP_CODE
 										FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
@@ -32,25 +38,17 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 		$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"];
 		$oldBal += $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		$arrOldContract[] = $arrContract;
-		$canRequest = TRUE;
-	}else{
-		$canRequest = TRUE;
 	}
 	
 	//คำนวนรายการหัก + ขอกู้ต้องไม่เกิน 60% ของเงินเดือน
-	$getSumPayBal = $conmssql->prepare("select TOP 1 receive_amt from kptempreceive where member_no = :member_no ORDER BY recv_period DESC");
-	$getSumPayBal->execute([
-		':member_no' => $member_no
-	]);
-	$rowSumPayBal = $getSumPayBal->fetch(PDO::FETCH_ASSOC);
-	$sumPay = $rowSumPayBal["RECEIVE_AMT"];
-	$salaryBal = ($rowMember["SALARY_AMOUNT"]*0.6) - $sumPay;
-	if($maxloan_amt > $salaryBal){
-		$maxloan_amt = $salaryBal;
+	if(($rowMember["SALARY_AMOUNT"]*0.6) > $maxloan_amt){
+		$canRequest = FALSE;
+		$error_desc = "ไม่สามารถกู้ได้ เนื่องจากท่านมีรายการหักเกิน 60% ของเงินเดือน";
+	}else{
+		$canRequest = TRUE;
 	}
 	
 	$maxloan_amt = intval($maxloan_amt - ($maxloan_amt % 100));
 	$receive_net = $maxloan_amt;
 	
-	$canRequest = TRUE;
 ?>

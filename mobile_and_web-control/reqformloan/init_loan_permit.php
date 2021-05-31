@@ -18,6 +18,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
+			if(!$canRequest){
+				$arrayResult['RESPONSE_CODE'] = "WS0084";
+				$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 			if($dataComing["recv_acc"] == '0'){
 				$arrGrpBank = array();
 				$getBank = $conmssql->prepare("SELECT (BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
@@ -111,6 +117,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
+			if(!$canRequest){
+				$arrayResult['RESPONSE_CODE'] = "WS0084";
+				$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 			if($maxloan_amt <= 0){
 				$arrayResult['RESPONSE_CODE'] = "WS0084";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -130,8 +142,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}
 			
 			$getMaxPeriod = $conmssql->prepare("SELECT MAX_PERIOD 
-															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
-															WHERE :request_amt_1 >= lnd.MONEY_FROM and :request_amt_2 < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
+												FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
+												WHERE :request_amt_1 >= lnd.MONEY_FROM and :request_amt_2 < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
 			$getMaxPeriod->execute([
 				':request_amt_1' => $maxloan_amt,
 				':request_amt_2' => $maxloan_amt,
