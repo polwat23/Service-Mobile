@@ -111,7 +111,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
 															VALUES(:ref_no,:slip_type,:from_account,:destination,'9',:amount,:fee_amt,
-															:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:etn_refno,:id_userlogin,:ref_source,:bank_code)");
+															:amount_receive,'1',:operate_date,'1',:member_no,:slip_no,:etn_refno,:id_userlogin,:ref_source,:bank_code)");
 				if($insertTransactionLog->execute($arrExecute)){
 				}else{
 					$message_error = "ไม่สามารถ Insert ลงตาราง gctransaction ได้"."\n"."Query => ".$insertTransactionLog->queryString."\n".json_encode($arrExecute);

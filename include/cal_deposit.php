@@ -731,6 +731,7 @@ class CalculateDep {
 		$getLastDpSlipNo->execute([':component' => $component]);
 		$rowLastSlip = $getLastDpSlipNo->fetch(\PDO::FETCH_ASSOC);
 		$deptslip_no = '';
+		$lastdocument_no = $rowLastSlip["LAST_DOCUMENTNO"];
 		$countPrefix = substr_count($rowLastSlip["DOCUMENT_FORMAT"],'P',0);
 		$countYear = substr_count($rowLastSlip["DOCUMENT_FORMAT"],'Y',0);
 		$countRunning = substr_count($rowLastSlip["DOCUMENT_FORMAT"],'R',0);
@@ -741,11 +742,17 @@ class CalculateDep {
 		asort($arrPosString);
 		foreach($arrPosString as $key => $value){
 			if($key == 'P'){
-				$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				if($countPrefix > 0){
+					$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				}
 			}else if($key == 'Y'){
-				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				if($countYear > 0){
+					$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				}
 			}else if($key == 'R'){
-				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+				if($countRunning > 0){
+					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+				}
 			}
 		}
 		$arrayResult["SLIP_NO"] = $deptslip_no;
@@ -753,7 +760,7 @@ class CalculateDep {
 		return $arrayResult;
 	}
 	public function getConstPayType($itemtype){
-		$getConstPay = $this->conora->prepare("SELECT group_itemtpe as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
+		$getConstPay = $this->conora->prepare("SELECT group_itemtype as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
 											FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
 		$getConstPay->execute([':itemtype' => $itemtype]);
 		$rowConstPay = $getConstPay->fetch(\PDO::FETCH_ASSOC);

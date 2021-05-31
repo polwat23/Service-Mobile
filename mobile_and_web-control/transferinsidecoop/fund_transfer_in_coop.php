@@ -6,8 +6,13 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
 		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
-		$itemtypeWithdraw = 'WTX';
-		$itemtypeDepositDest = 'DTX';
+		if($dataComing["menu_component"] == 'TransferSelfDepInsideCoop'){
+			$itemtypeWithdraw = 'WMS';
+			$itemtypeDepositDest = 'DMS';
+		}else{
+			$itemtypeWithdraw = 'WOT';
+			$itemtypeDepositDest = 'DOT';
+		}
 		$ref_no = time().$lib->randomText('all',3);
 		$dateOper = date('c');
 		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
