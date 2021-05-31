@@ -98,6 +98,7 @@
 	"WS0081" : [{"th" : "สหกรณ์ได้ทำการตรวจสอบเอกสารขอทุนเรียบร้อยแล้ว สามารถติดตามประกาศผลการขอรับทุกได้ที่ ${URL_COOP}","en" : "The cooperative has check your document of request you can follow the result of request on ${URL_COOP}"}],
 	"WS0083" : [{"th" : "สหกรณ์ได้ลงรับใบคำขอของท่านแล้ว ทำให้ท่านไม่สามารถยกเลิกใบคำขอได้ หากต้องการยกเลิกให้ติดต่อสหกรณ์","en" : "The cooperative has accept your request which you cannot cancel request please contact cooperative"}],
 	"WS0084" : [{"th" : "ไม่สามารถยื่นกู้ได้เนื่องจากสิทธิ์การกู้ของท่านไม่เพียงพอ กรุณาตรวจสอบสิทธิ์การกู้ของท่านได้ที่เมนูสิทธิ์กู้โดยประมาณหรือติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot request loan because your loan rights amount not enough please check your rights in menu Loan Estimate or contact cooperative"}],
+	"WS0086" : [{"th" : "ไม่สามารถขอกู้ได้ เนื่องจากหนี้เดิมของท่านมีมากกว่าสิทธิ์กู้ของท่าน","en" : "Cannot request loan because old debt is more than your loan rights"}],	
 	"WS0087" : [{"th" : "ท่านยังไม่ได้ทำการลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ กรุณาไปลงทะเบียนขอกู้กับทางสหกรณ์ก่อนทำรายการ","en" : "You have not registered for request loan online please register for request loan online before transaction"}],
 	"WS0088" : [{"th" : "ไม่สามารถคำนวณงวดการกู้ของท่านได้ กรุณาติดต่อสหกรณ์","en" : "Cannot calculate period of loan please contact cooperative"}],
 	"WS0089" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากบัญชีของท่านได้ถูกปิดบัญชีไปแล้ว","en" : "Cannot transaction because your account was closed"}],

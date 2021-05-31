@@ -5,8 +5,16 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','period_payment','period','loanpermit_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		//get loangroup_code
+		$getLoanGroup = $conmssql->prepare("SELECT LOANGROUP_CODE FROM lnloantype WHERE loantype_code = :loantype_code");
+		$getLoanGroup->execute([
+			':loantype_code' => $dataComing["loantype_code"]
+		]);
+		$rowLoanGroup = $getLoanGroup->fetch(PDO::FETCH_ASSOC);
+		
 		$getDocSystemPrefix = $conmysql->prepare("SELECT prefix_docno FROM docsystemprefix WHERE menu_component = :menu_component and is_use = '1'");
 		$getDocSystemPrefix->execute([':menu_component' => $dataComing["menu_component"]]);
+		
 		if($getDocSystemPrefix->rowCount() > 0){
 			$rowDocPrefix = $getDocSystemPrefix->fetch(PDO::FETCH_ASSOC);
 			$reqloan_doc = null;
@@ -24,6 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$citizenCopy = null;
 				$fullPathSalary = null;
 				$fullPathCitizen = null;
+				$fullPathBookbank = null;
 				$directory = null;
 				if(isset($dataComing["upload_slip_salary"]) && $dataComing["upload_slip_salary"] != ""){
 					$subpath = 'salary';
@@ -89,8 +98,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						$createImage = $lib->base64_to_pdf($dataComing["upload_citizen_copy"],$subpath,$destination);
 					}
 					if($createImage == 'oversize'){
-						unlink($fullPathSalary);
-						rmdir($directory);
 						$arrayResult['RESPONSE_CODE'] = "WS0008";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
@@ -125,31 +132,128 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						}
 					}
 				}
-				
-				$fetchPrefix = $conmssql->prepare("SELECT prefix FROM lnloantype where loantype_code = :loantype_code");
-				$fetchPrefix->execute([
-					':loantype_code' => $dataComing["loantype_code"]
-				]);
-				$rowPrefix = $fetchPrefix->fetch(PDO::FETCH_ASSOC);
-				
-				$fetchData = $conmssql->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
-														md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,mb.membgroup_code 
-														FROM mbmembmaster mb LEFT JOIN 
-														mbucfprename mp ON mb.prename_code = mp.prename_code
-														LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
-														LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
-														LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-														WHERE mb.member_no = :member_no");
+				if(isset($dataComing["upload_bookbank"]) && $dataComing["upload_bookbank"] != ""){
+					$subpath = 'bookbank';
+					$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+					$data_Img = explode(',',$dataComing["upload_bookbank"]);
+					$info_img = explode('/',$data_Img[0]);
+					$ext_img = str_replace('base64','',$info_img[1]);
+					if(!file_exists($destination)){
+						mkdir($destination, 0777, true);
+					}
+					if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+						$createImage = $lib->base64_to_img($dataComing["upload_bookbank"],$subpath,$destination,null);
+					}else if($ext_img == 'pdf'){
+						$createImage = $lib->base64_to_pdf($dataComing["upload_bookbank"],$subpath,$destination);
+					}
+					if($createImage == 'oversize'){
+						$arrayResult['RESPONSE_CODE'] = "WS0008";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}else{
+						if($createImage){
+							$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+							$fullPathBookbank = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$createImage["normal_path"];
+							$bookbankCopy = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$createImage["normal_path"];
+							$getControlFolderBookBank = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+							$getControlFolderBookBank->execute([':menu_component' => $subpath]);
+							$rowControlBookBank = $getControlFolderBookBank->fetch(PDO::FETCH_ASSOC);
+							$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+																	VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
+							$insertDocMaster->execute([
+								':doc_no' => $reqloan_doc.$subpath,
+								':docgrp_no' => $rowControlBookBank["docgrp_no"],
+								':doc_filename' => $reqloan_doc.$subpath,
+								':doc_type' => $ext_img,
+								':doc_address' => $bookbankCopy,
+								':member_no' => $payload["member_no"]
+							]);
+							$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+																	VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
+							$insertDocList->execute([
+								':doc_no' => $reqloan_doc.$subpath,
+								':member_no' => $payload["member_no"],
+								':file_name' => $createImage["normal_path"],
+								':id_userlogin' => $payload["id_userlogin"]
+							]);
+						}
+					}
+				}
+				if(isset($dataComing["upload_bookcoop"]) && $dataComing["upload_bookcoop"] != ""){
+					$subpath = 'bookcoop';
+					$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+					$data_Img = explode(',',$dataComing["upload_bookcoop"]);
+					$info_img = explode('/',$data_Img[0]);
+					$ext_img = str_replace('base64','',$info_img[1]);
+					if(!file_exists($destination)){
+						mkdir($destination, 0777, true);
+					}
+					if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+						$createImage = $lib->base64_to_img($dataComing["upload_bookcoop"],$subpath,$destination,null);
+					}else if($ext_img == 'pdf'){
+						$createImage = $lib->base64_to_pdf($dataComing["upload_bookcoop"],$subpath,$destination);
+					}
+					if($createImage == 'oversize'){
+						$arrayResult['RESPONSE_CODE'] = "WS0008";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}else{
+						if($createImage){
+							$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+							$fullPathBookcoop = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$createImage["normal_path"];
+							$bookcoopCopy = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$createImage["normal_path"];
+							$getControlFolderBookCoop = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+							$getControlFolderBookCoop->execute([':menu_component' => $subpath]);
+							$rowControlBookCoop = $getControlFolderBookCoop->fetch(PDO::FETCH_ASSOC);
+							$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+																	VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
+							$insertDocMaster->execute([
+								':doc_no' => $reqloan_doc.$subpath,
+								':docgrp_no' => $rowControlBookCoop["docgrp_no"],
+								':doc_filename' => $reqloan_doc.$subpath,
+								':doc_type' => $ext_img,
+								':doc_address' => $bookcoopCopy,
+								':member_no' => $payload["member_no"]
+							]);
+							$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+																	VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
+							$insertDocList->execute([
+								':doc_no' => $reqloan_doc.$subpath,
+								':member_no' => $payload["member_no"],
+								':file_name' => $createImage["normal_path"],
+								':id_userlogin' => $payload["id_userlogin"]
+							]);
+						}
+					}
+				}
+				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MUP.POSITION_DESC,MG.MEMBGROUP_DESC,MB.SALARY_AMOUNT,
+														MD.DISTRICT_DESC,MBP.PROVINCE_DESC,(SH.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
+														FROM MBMEMBMASTER MB LEFT JOIN 
+														MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+														LEFT JOIN MBUCFMEMBGROUP MG ON MB.MEMBGROUP_CODE = MG.MEMBGROUP_CODE
+														LEFT JOIN MBUCFPOSITION MUP ON MB.POSITION_CODE = MUP.POSITION_CODE
+														LEFT JOIN MBUCFDISTRICT MD ON MG.DISTRICT_CODE = MD.DISTRICT_CODE
+														LEFT JOIN MBUCFPROVINCE MBP ON MB.PROVINCE_CODE = MBP.PROVINCE_CODE
+														LEFT JOIN SHSHAREMASTER SH ON MB.MEMBER_NO = SH.MEMBER_NO
+														WHERE MB.MEMBER_NO = :member_no");
 				$fetchData->execute([
 					':member_no' => $member_no
 				]);
 				$rowData = $fetchData->fetch(PDO::FETCH_ASSOC);
+				$dataMobile = $conmysql->prepare("SELECT phone_number,email FROM gcmemberaccount WHERE member_no = :member_no");
+				$dataMobile->execute([':member_no' => $member_no]);
+				$rowDataM = $dataMobile->fetch(PDO::FETCH_ASSOC);
 				$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 				$conmysql->beginTransaction();
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank)
+																		int_rate_at_req,salary_at_req,salary_img,bookbank_img,bookcoop_img,id_userlogin,contractdoc_url,
+																		deptaccount_no_bank,bank_desc,deptaccount_no_coop,objective,extra_credit_project)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank)");
+																		,:salary,:salary_img,:bookbank_img,:bookcoop_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:bank_desc,:deptaccount_no_coop,:objective,:extra_credit_project)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -160,28 +264,44 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':loanpermit_amt' => $dataComing["loanpermit_amt"],
 					':int_rate' => $dataComing["int_rate"] / 100,
 					':salary' => $rowData["SALARY_AMOUNT"],
-					':salary_img' => $slipSalary,
-					':citizen_img' => $citizenCopy,
+					':salary_img' => $slipSalary ?? null ,
+					':bookbank_img' => $bookbankCopy ?? null,
+					':bookcoop_img' => $bookcoopCopy ?? null,
 					':id_userlogin' => $payload["id_userlogin"],
 					':contractdoc_url' => $pathFile,
 					':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? null,
+					':bank_desc' => $dataComing["bank"] ?? null,
+					':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
+					':objective' => $dataComing["objective"],
+					':extra_credit_project' => $dataComing["extra_credit_project"],
 				])){
 					$arrData = array();
 					$arrData["requestdoc_no"] = $reqloan_doc;
-					$arrData["loan_prefix"] = $rowPrefix["PREFIX"];
 					$arrData["full_name"] = $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 					$arrData["name"] = $rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 					$arrData["member_no"] = $payload["member_no"];
 					$arrData["position"] = $rowData["POSITION_DESC"];
 					$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
-					$arrData["pos_group_code"] = $rowData["MEMBGROUP_CODE"];
 					$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
+					$arrData["province_desc"] = $rowData["PROVINCE_DESC"];
 					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 					$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 					$arrData["request_amt"] = $dataComing["request_amt"];
-					$arrData["recv_account"] = $dataComing["deptaccount_no_bank"];
-					if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
-						include('form_request_loan_'.$dataComing["loantype_code"].'.php');
+					$arrData["objective"] = $dataComing["objective"];
+					$arrData["period"] = $dataComing["period"];
+					$arrData["tel"] = $rowDataM["phone_number"];
+					$arrData["email"] = $rowDataM["email"];
+					$arrData["deptaccount_no_bank"] = $dataComing["deptaccount_no_bank"] ?? null;
+					$arrData["bank_code"] = $dataComing["bank_code"];
+					$arrData["deptaccount_no_coop"] = $dataComing["deptaccount_no_coop"] ?? null;
+					$arrData["period_payment"] = $dataComing["period_payment"];
+					$arrData["extra_credit_project"] = isset($dataComing["extra_credit_project"]) && ($dataComing["extra_credit_project"] != "");
+					$arrData["memb_prename"] = $rowData["PRENAME_DESC"];
+					$arrData["memb_name"] = $rowData["MEMB_NAME"];
+					$arrData["memb_surname"] = $rowData["MEMB_SURNAME"];
+					$arrData["int_rate"] = $dataComing["int_rate"];
+					if(file_exists('form_request_loan_'.$rowLoanGroup["LOANGROUP_CODE"].'.php')){
+						include('form_request_loan_'.$rowLoanGroup["LOANGROUP_CODE"].'.php');
 						$arrayPDF = GeneratePDFContract($arrData,$lib);
 					}else{
 						$arrayPDF["RESULT"] = FALSE;
@@ -205,6 +325,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':id_userlogin' => $payload["id_userlogin"]
 						]);
 						$conmysql->commit();
+						$arrayResult['arrData'] = $arrData;
 						$arrayResult['REPORT_URL'] = $pathFile;
 						$arrayResult['APV_DOCNO'] = $reqloan_doc;
 						$arrayResult['RESULT'] = TRUE;
@@ -251,7 +372,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':citizen_img' => $citizenCopy,
 							':id_userlogin' => $payload["id_userlogin"],
 							':contractdoc_url' => $pathFile,
-							':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? "-",
+							':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? null,
+							':bank_desc' => $dataComing["bank"] ?? null,
+							':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
+							':objective' => $dataComing["objective"],
+							':extra_credit_project' => $dataComing["extra_credit_project"]
 						]),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
@@ -270,7 +395,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':citizen_img' => $citizenCopy,
 						':id_userlogin' => $payload["id_userlogin"],
 						':contractdoc_url' => $pathFile,
-						':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? "-",
+						':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? null,
+						':bank_desc' => $dataComing["bank"] ?? null,
+						':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
+						':objective' => $dataComing["objective"]
 					]);
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_CODE'] = "WS1036";
@@ -308,7 +436,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
