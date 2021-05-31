@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
 		$conoracle->beginTransaction();
-		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,'WTX',$dataComing["amt_transfer"],
+		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
 		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 		if($wtdResult["RESULT"]){

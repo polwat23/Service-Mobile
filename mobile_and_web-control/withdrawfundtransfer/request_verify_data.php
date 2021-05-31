@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
 													and member_no = :member_no and bindaccount_status = '1'");
 				$getDataUser->execute([
-					':deptaccount_no' => $deptaccount_no,
+					':deptaccount_no' => $payload["member_no"],
 					':member_no' => $payload["member_no"]
 				]);
 				$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);

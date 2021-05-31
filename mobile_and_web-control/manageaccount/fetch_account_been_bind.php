@@ -71,6 +71,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayBank["BANK_ACCOUNT_NAME"] = $rowRegis["bank_account_name_en"];
 				}
 			}
+			if($rowAllow["bank_code"] == '006'){
+				$arrayBank["NON_DIRECT"] = TRUE;
+			}
 			$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
 			$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
 			$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];

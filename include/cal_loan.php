@@ -15,20 +15,7 @@ class CalculateLoan {
 		$connection = new connection();
 		$this->lib = new library();
 		$this->con = $connection->connecttomysql();
-		//$this->conora = $connection->connecttooracle();
-		$dbuser = 'iscotest';
-		$dbpass = 'iscotest';
-		$dbname = "(DESCRIPTION =
-					(ADDRESS_LIST =
-					  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
-					)
-					(CONNECT_DATA =
-					  (SERVICE_NAME = gcoop)
-					)
-				  )";
-		$this->conora = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
-		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
-		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+		$this->conora = $connection->connecttooracle();
 	}
 	public function calculateInterest($loancontract_no,$amt_transfer=0){
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
