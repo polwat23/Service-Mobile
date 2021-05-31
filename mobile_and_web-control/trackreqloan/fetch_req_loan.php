@@ -5,9 +5,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestTrack')){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
-			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
-															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
+			$fetchReqLoan = $conmysql->prepare("SELECT rl.reqloan_doc,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,req_status,rl.loanpermit_amt,
+											rl.diff_old_contract,rl.receive_net,rl.bookbank_img,rl.bookcoop_img,rl.salary_img,rl.citizen_img,rl.remark,rl.approve_date,rl.contractdoc_url,
+											rl.int_rate_at_req,rl.salary_at_req,rl.request_date,rl.deptaccount_no_bank,rl.bank_desc,rl.deptaccount_no_coop,rl.objective,pay_date,ep.extra_credit_name as extra_credit_project
+											FROM gcreqloan  rl
+											LEFT JOIN gcconstantextracreditproject ep ON rl.extra_credit_project = ep.id_extra_credit
+											WHERE rl.member_no = :member_no and rl.req_status = :req_status ORDER BY rl.update_date DESC");
 			$fetchReqLoan->execute([
 				':member_no' => $payload["member_no"],
 				':req_status' => $dataComing["req_status"]
@@ -21,25 +24,38 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["request_amt"];
-				//$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
+				$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				$arrayReq["PERIOD"] = $rowReqLoan["period"];
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
 				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
+				$arrayReq["BOOKBANK_IMG"] = $rowReqLoan["bookbank_img"];
+				$arrayReq["BOOKCOOP_IMG"] = $rowReqLoan["bookcoop_img"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
-				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
+				$arrayReq["INT_RATE_AT_REQ"] = $rowReqLoan["int_rate_at_req"];
+				$arrayReq["SALARY_AT_REQ"] = $rowReqLoan["salary_at_req"];
+				$arrayReq["REQUEST_DATE"] = $rowReqLoan["request_date"];
+				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
+				$arrayReq["BANK_DESC"] = $rowReqLoan["bank_desc"];
+				$arrayReq["DEPTACCOUNT_NO_COOP"] = $rowReqLoan["deptaccount_no_coop"];
+				$arrayReq["OBJECTIVE"] = $rowReqLoan["objective"];
+				$arrayReq["PAY_DATE"] = $rowReqLoan["pay_date"];
+				$arrayReq["EXTRA_CREDIT_PROJECT"] = $rowReqLoan["extra_credit_project"];
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
-			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
-															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
+			$fetchReqLoan = $conmysql->prepare("SELECT rl.reqloan_doc,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,req_status,rl.loanpermit_amt,
+											rl.diff_old_contract,rl.receive_net,rl.bookbank_img,rl.bookcoop_img,rl.salary_img,rl.citizen_img,rl.remark,rl.approve_date,rl.contractdoc_url,
+											rl.int_rate_at_req,rl.salary_at_req,rl.request_date,rl.deptaccount_no_bank,rl.bank_desc,rl.deptaccount_no_coop,rl.objective,pay_date,ep.extra_credit_name as extra_credit_project
+											FROM gcreqloan  rl
+											LEFT JOIN gcconstantextracreditproject ep ON rl.extra_credit_project = ep.id_extra_credit
+											WHERE rl.member_no = :member_no ORDER BY rl.update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
 				$getLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
@@ -50,19 +66,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["request_amt"];
-				//$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
+				$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				$arrayReq["PERIOD"] = $rowReqLoan["period"];
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
 				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
+				$arrayReq["BOOKBANK_IMG"] = $rowReqLoan["bookbank_img"];
+				$arrayReq["BOOKCOOP_IMG"] = $rowReqLoan["bookcoop_img"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
-				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
+				$arrayReq["INT_RATE_AT_REQ"] = $rowReqLoan["int_rate_at_req"];
+				$arrayReq["SALARY_AT_REQ"] = $rowReqLoan["salary_at_req"];
+				$arrayReq["REQUEST_DATE"] = $rowReqLoan["request_date"];
+				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
+				$arrayReq["BANK_DESC"] = $rowReqLoan["bank_desc"];
+				$arrayReq["DEPTACCOUNT_NO_COOP"] = $rowReqLoan["deptaccount_no_coop"];
+				$arrayReq["OBJECTIVE"] = $rowReqLoan["objective"];
+				$arrayReq["PAY_DATE"] = $rowReqLoan["pay_date"];
+				$arrayReq["EXTRA_CREDIT_PROJECT"] = $rowReqLoan["extra_credit_project"];
 				$arrGrpReq[] = $arrayReq;
 			}
 		}
@@ -82,11 +108,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
+		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
+	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

@@ -18,10 +18,9 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				echo json_encode($arrayResult);
 				exit();
 			}
-		}else if($dataComing["req_status"] == '7' || $dataComing["req_status"] == '6' || $dataComing["req_status"] == '2' || $dataComing["req_status"] == '3' || $dataComing["req_status"] == '4'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = :req_status,remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
+		}else if($dataComing["req_status"] == '7'){
+			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '7',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
-				':req_status' => $dataComing["req_status"],
 				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
 				':reqloan_doc' => $dataComing["reqloan_doc"]

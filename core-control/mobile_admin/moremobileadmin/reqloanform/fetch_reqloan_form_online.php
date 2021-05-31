@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGrp = array();
 		$arrayType = array();
 		$arrayExecute = array();
-		$getLoanTypeDesc = $conmssql->prepare("SELECT LOANTYPE_DESC,LOANTYPE_CODE FROM lnloantype");
+		$getLoanTypeDesc = $conmssql->prepare("SELECT loantype_desc,loantype_code FROM lnloantype");
 		$getLoanTypeDesc->execute();
 		while($rowType = $getLoanTypeDesc->fetch(PDO::FETCH_ASSOC)){
 			$arrayType[$rowType["LOANTYPE_CODE"]] = $rowType["LOANTYPE_DESC"];
@@ -28,15 +28,19 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute[':end_date'] = $dataComing["end_date"];
 		}
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,bookbank_img,req_status,request_date,approve_date,contractdoc_url
-															FROM gcreqloan WHERE req_status = :req_status". 
+			$getAllReqDocno = $conmysql->prepare("SELECT rl.reqloan_doc,rl.member_no,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,rl.loanpermit_amt,rl.salary_img,rl.citizen_img,rl.bookbank_img,rl.req_status,
+															rl.request_date,rl.approve_date,rl.contractdoc_url,
+															ep.extra_credit_name as extra_credit_project
+															FROM gcreqloan rl
+															LEFT JOIN gcconstantextracreditproject ep ON rl.extra_credit_project = ep.id_extra_credit
+															WHERE rl.req_status = :req_status". 
 															($dataComing["is_filtered"] ? (
-															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
-															(isset($dataComing["filter_req_docno"]) && $dataComing["filter_req_docno"] != '' ? " and reqloan_doc = :filter_req_docno" : null).
-															(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') >= :start_date" : null).
-															(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') <= :end_date" : null)
+															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and rl.member_no = :filter_member_no" : null).
+															(isset($dataComing["filter_req_docno"]) && $dataComing["filter_req_docno"] != '' ? " and rl.reqloan_doc = :filter_req_docno" : null).
+															(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(rl.request_date,'%Y-%m-%d') >= :start_date" : null).
+															(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(rl.request_date,'%Y-%m-%d') <= :end_date" : null)
 															) 
-															: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= now()-interval 3 month"));
+															: " AND DATE_FORMAT(rl.request_date, '%Y-%m-%d') >= now()-interval 3 month"));
 			$getAllReqDocno->execute($dataComing["is_filtered"] ? $arrayExecute : [':req_status' => $dataComing["req_status"]]);
 			while($rowDocno = $getAllReqDocno->fetch(PDO::FETCH_ASSOC)){
 				$arrDocno = array();
@@ -58,11 +62,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrDocno["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
 				}
 			
-				if($rowDocno["loantype_code"] == '10'){
-					$arrDocno["IS_EMERLOAN"] = true;
-				}else{
-					$arrDocno["IS_EMERLOAN"] = false;
-				}
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
 				$arrDocno["LOANTYPE_DESC"] = $arrayType[$rowDocno["loantype_code"]];
 				$arrDocno["REQUEST_AMT"] = number_format($rowDocno["request_amt"],2);
@@ -78,37 +77,34 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["BOOKBANK_IMG"] = $rowDocno["bookbank_img"];
 				$arrDocno["CONTRACTDOC_URL"] = $rowDocno["contractdoc_url"];
 				$arrDocno["REQ_STATUS"]  = $rowDocno["req_status"];
+				$arrDocno["EXTRA_CREDIT_PROJECT"]  = $rowDocno["extra_credit_project"];
 				if($rowDocno["req_status"] == '8'){
-					$arrDocno["REQ_STATUS_DESC"] = "ส่งคำขอกู้";
+					$arrDocno["REQ_STATUS_DESC"] = "รอลงรับ";
 				}else if($rowDocno["req_status"] == '1'){
 					$arrDocno["REQ_STATUS_DESC"] = "อนุมัติ";
-				}else if($rowDocno["req_status"] == '2'){
-					$arrDocno["REQ_STATUS_DESC"] = "ผู้ค้ำประกันยืนยัน";
-				}else if($rowDocno["req_status"] == '6'){
-					$arrDocno["REQ_STATUS_DESC"] = "พิมพ์คำขอกู้";
-				}else if($rowDocno["req_status"] == '3'){
-					$arrDocno["REQ_STATUS_DESC"] = "ระบบตรวจสอบคำขอกู้ พิมพ์สัญญา";
-				}else if($rowDocno["req_status"] == '4'){
-					$arrDocno["REQ_STATUS_DESC"] = "รอเซ็นต์สัญญา/รอประกัน";
 				}else if($rowDocno["req_status"] == '-9'){
 					$arrDocno["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
 				}else if($rowDocno["req_status"] == '7'){
-					$arrDocno["REQ_STATUS_DESC"] = "รออนุมัติ";
+					$arrDocno["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
 				}else{
 					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิก";
 				}
 				$arrGrp[] = $arrDocno;
 			}
 		}else{
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,bookbank_img,req_status,request_date,approve_date,contractdoc_url
-															FROM gcreqloan WHERE 1=1". 
+			$getAllReqDocno = $conmysql->prepare("SELECT rl.reqloan_doc,rl.member_no,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,rl.loanpermit_amt,rl.salary_img,rl.citizen_img,rl.bookbank_img,rl.req_status,
+															rl.request_date,rl.approve_date,rl.contractdoc_url,
+															ep.extra_credit_name as extra_credit_project
+															FROM gcreqloan rl
+															LEFT JOIN gcconstantextracreditproject ep ON rl.extra_credit_project = ep.id_extra_credit
+															WHERE 1=1". 
 															($dataComing["is_filtered"] ? (
-															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
-															(isset($dataComing["filter_req_docno"]) && $dataComing["filter_req_docno"] != '' ? " and reqloan_doc = :filter_req_docno" : null).
-															(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') >= :start_date" : null).
-															(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') <= :end_date" : null)
+															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and rl.member_no = :filter_member_no" : null).
+															(isset($dataComing["filter_req_docno"]) && $dataComing["filter_req_docno"] != '' ? " and rl.reqloan_doc = :filter_req_docno" : null).
+															(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(rl.request_date,'%Y-%m-%d') >= :start_date" : null).
+															(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(rl.request_date,'%Y-%m-%d') <= :end_date" : null)
 															) 
-															: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= now()-interval 3 month"));
+															: " AND DATE_FORMAT(rl.request_date, '%Y-%m-%d') >= now()-interval 3 month"));
 			$getAllReqDocno->execute($dataComing["is_filtered"] ? $arrayExecute : []);
 			while($rowDocno = $getAllReqDocno->fetch(PDO::FETCH_ASSOC)){
 				$arrDocno = array();
@@ -129,11 +125,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrDocno["FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 					$arrDocno["MEMBGROUP_CODE"] = $rowMember["MEMBGROUP_CODE"];
 				}
-				if($rowDocno["loantype_code"] == '10'){
-					$arrDocno["IS_EMERLOAN"] = true;
-				}else{
-					$arrDocno["IS_EMERLOAN"] = false;
-				}
+				
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
 				$arrDocno["LOANTYPE_DESC"] = $arrayType[$rowDocno["loantype_code"]];
 				$arrDocno["REQUEST_AMT"] = number_format($rowDocno["request_amt"],2);
@@ -149,22 +141,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["BOOKBANK_IMG"] = $rowDocno["bookbank_img"];
 				$arrDocno["CONTRACTDOC_URL"] = $rowDocno["contractdoc_url"];
 				$arrDocno["REQ_STATUS"]  = $rowDocno["req_status"];
+				$arrDocno["EXTRA_CREDIT_PROJECT"]  = $rowDocno["extra_credit_project"];
 				if($rowDocno["req_status"] == '8'){
-					$arrDocno["REQ_STATUS_DESC"] = "ส่งคำขอกู้";
+					$arrDocno["REQ_STATUS_DESC"] = "รอลงรับ";
 				}else if($rowDocno["req_status"] == '1'){
 					$arrDocno["REQ_STATUS_DESC"] = "อนุมัติ";
-				}else if($rowDocno["req_status"] == '2'){
-					$arrDocno["REQ_STATUS_DESC"] = "ผู้ค้ำประกันยืนยัน";
-				}else if($rowDocno["req_status"] == '6'){
-					$arrDocno["REQ_STATUS_DESC"] = "พิมพ์คำขอกู้";
-				}else if($rowDocno["req_status"] == '3'){
-					$arrDocno["REQ_STATUS_DESC"] = "ระบบตรวจสอบคำขอกู้ พิมพ์สัญญา";
-				}else if($rowDocno["req_status"] == '4'){
-					$arrDocno["REQ_STATUS_DESC"] = "รอเซ็นต์สัญญา/รอประกัน";
 				}else if($rowDocno["req_status"] == '-9'){
 					$arrDocno["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
 				}else if($rowDocno["req_status"] == '7'){
-					$arrDocno["REQ_STATUS_DESC"] = "รออนุมัติ";
+					$arrDocno["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
 				}else{
 					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิก";
 				}
