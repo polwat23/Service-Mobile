@@ -107,18 +107,19 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	//style table
 	  $html = '<style>
 
-		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
+		   @font-face {
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
-		  * {
-			font-family: THSarabun;
-		  }
+			* {
+			  font-family: TH Niramit AS;
+			}
+
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -142,7 +143,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:#185F83;
+			background-color:#0C6DBF;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -165,21 +166,24 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding-top: 80px;
 		}
 		.frame-info-user {
-			padding: 10px -10px 10px 10px;
+			line-height: 22px;
+			padding: 10px -10px 10px 5px;
 			position: fixed;
 			left: 440px;
 			top: 30px;
-			width: 260px;
+			width: 270px;
 			height: 90px;
 			border: 0.5px #DDDDDD solid;
 			border-radius: 5px;
 		}
+
 		.label {
 			width: 30%;
 			padding: 0 5px;
 			font-size: 18px;
 		}
 		  </style>
+
 		';
 	//head table
 	$html .='
@@ -190,22 +194,22 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
 					สหกรณ์ออมทรัพย์ครูประจวบคีรีขันธ์
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:14px;line-height: 18px;">
 					PRACHUAP KHIRI KHAN TEACHER SAVING AND CREDIT COOPERATIVE, LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
 					<div style="display:flex;width: 100%;padding-top: -20px;">
 					<div class="label">เลขสมาชิก</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
+					<div style="padding-left: 100px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
 					</div>
 					<div style="display:flex;width: 100%;padding-top: -20px;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
+					<div style="padding-left: 100px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
 					</div>
 					<div style="display:flex;width: 100%">
 					<div class="label">ระหว่างวันที่</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DATE_BETWEEN_FORMAT"].'</div>
+					<div style="padding-left: 100px;font-weight: bold;font-size: 17px;">'.$arrayData["DATE_BETWEEN_FORMAT"].'</div>
 					</div>
 				</div>
 			   <div class="label-type">
@@ -217,7 +221,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:70px;">วัน เดือน ปี</th>
+		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
 		  <th>รายการ</th>
 		  <th>ฝาก</th>
 		  <th>ถอน</th>
@@ -290,13 +294,18 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;
