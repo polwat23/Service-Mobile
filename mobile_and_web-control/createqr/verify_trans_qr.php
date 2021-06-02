@@ -42,12 +42,17 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 				require_once('../../include/exit_footer.php');
 			}
 			if(($rowLoan["LOANTYPE_CODE"] == '12' || $rowLoan["LOANTYPE_CODE"] == '30') && $rowLoan["LAST_PERIODPAY"] < 24){
-				$fee_amt = $amt_prin * 0.02;
-				$arrOther = array();
-				$arrOther["LABEL"] = 'ค่าธรรมเนียมชำระก่อนกำหนด';
-				$arrOther["VALUE_TEXT_PROPS"] = ['color' => 'red'];
-				$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
-				$arrayResult["OTHER_INFO"][] = $arrOther;
+				$getMemberType = $conoracle->prepare("SELECT MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
+				$getMemberType->execute([':member_no' => $member_no]);
+				$rowMembType = $getMemberType->fetch(PDO::FETCH_ASSOC);
+				if(TRIM($rowMembType["MEMBGROUP_CODE"]) != '0110'){
+					$fee_amt = $amt_prin * 0.02;
+					$arrOther = array();
+					$arrOther["LABEL"] = 'ค่าธรรมเนียมชำระก่อนกำหนด';
+					$arrOther["VALUE_TEXT_PROPS"] = ['color' => 'red'];
+					$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
+					$arrayResult["OTHER_INFO"][] = $arrOther;
+				}
 			}
 		}
 		$arrayResult["RESULT"] = TRUE;
