@@ -374,7 +374,7 @@ class CalculateLoan {
 																	INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
 																	INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
 																	INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
-																	CONTRACT_STATUS = '0'
+																	CONTRACT_STATUS = '-1'
 																	WHERE loancontract_no = :loancontract_no");
 					}else{
 						$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
@@ -393,7 +393,7 @@ class CalculateLoan {
 																	INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
 																	INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
 																	INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
-																	CONTRACT_STATUS = '0'
+																	CONTRACT_STATUS = '-1'
 																	WHERE loancontract_no = :loancontract_no");
 					}else{
 						$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
