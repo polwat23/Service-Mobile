@@ -4,25 +4,25 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ScholarshipRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$conoracle->beginTransaction();
-		$clearUploadListDet = $conoracle->prepare("UPDATE asnreqschshiponlinedet set upload_status = 8, filename = '' WHERE scholarship_year = 
+		$conmssql->beginTransaction();
+		$clearUploadListDet = $conmssql->prepare("UPDATE asnreqschshiponlinedet set upload_status = 8, filename = '' WHERE scholarship_year = 
 																(EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :childcard_id");
 		if($clearUploadListDet->execute([
 			':member_no' => $member_no,
 			':childcard_id' => $dataComing["childcard_id"]
 		])){
-			$clearUploadList = $conoracle->prepare("UPDATE asnreqschshiponline set request_status = 8, resetlog_date = sysdate 
+			$clearUploadList = $conmssql->prepare("UPDATE asnreqschshiponline set request_status = 8, resetlog_date = sysdate 
 															WHERE scholarship_year = (EXTRACT(year from sysdate) +543) 
 															and member_no = :member_no and childcard_id = :childcard_id");
 			if($clearUploadList->execute([
 				':member_no' => $member_no,
 				':childcard_id' => $dataComing["childcard_id"]
 			])){
-				$conoracle->commit();
+				$conmssql->commit();
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$conoracle->rollback();
+				$conmssql->rollback();
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
 					":error_menu" => $filename,
@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				
 			}
 		}else{
-			$conoracle->rollback();
+			$conmssql->rollback();
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,

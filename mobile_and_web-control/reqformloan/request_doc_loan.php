@@ -132,9 +132,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				]);
 				$rowPrefix = $fetchPrefix->fetch(PDO::FETCH_ASSOC);
 				
-				$fetchData = $conmssql->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
-														md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,mb.membgroup_code 
-														FROM mbmembmaster mb LEFT JOIN 
+				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MB.POSITION_DESC,MG.MEMBGROUP_DESC,MB.SALARY_AMOUNT,
+														MD.DISTRICT_DESC,(SH.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,MB.MEMBGROUP_CODE,
+														SH.SHARESTK_AMT as SHARE_AMT,(SH.SHARESTK_AMT * 10) as SHARESTK_AMT
+														FROM mbmembmaster mb LEFT JOIN
 														mbucfprename mp ON mb.prename_code = mp.prename_code
 														LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
 														LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
@@ -145,10 +146,33 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				]);
 				$rowData = $fetchData->fetch(PDO::FETCH_ASSOC);
 				$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
+				$arrOldGrp = array();
+				$oldbal = 0;
+				$oldContract = $conmssql->prepare("SELECT lt.loantype_desc,ln.loancontract_no,ln.principal_balance,ln.loanapprove_date,
+													ISNULL(lo.loanobjective_desc,'อื่น ๆ ') as loanobjective_desc
+													FROM lncontmaster ln LEFT JOIN lnloantype lt ON ln.loantype_code = lt.loantype_code
+													LEFT JOIN lnucfloanobjective lo ON ln.loanobjective_code = lo.loanobjective_code and ln.loantype_code = lo.loantype_code
+													WHERE ln.member_no = :member_no and ln.contract_status > 0 and 
+													ln.contract_status <> 8 and ln.loantype_code = :loantype_code");
+				$oldContract->execute([
+					':member_no' => $member_no,
+					':loantype_code' => $dataComing["loantype_code"]
+				]);
+				while($rowOldContract = $oldContract->fetch(PDO::FETCH_ASSOC)){
+					$arrOld = array();
+					$arrOld["loantype_desc"] = $rowOldContract["loantype_desc"];
+					$arrOld["loancontract_no"] = $rowOldContract["loancontract_no"];
+					$arrOld["principal_balance"] = number_format($rowOldContract["principal_balance"],2);
+					$arrOld["loanapprove_date"] = $lib->convertdate($rowOldContract["loanapprove_date"],'d m Y');
+					$arrOld["loanobjective_desc"] = $rowOldContract["loanobjective_desc"];
+					$oldbal += $rowOldContract["principal_balance"] + $cal_loan->calculateInterest($rowOldContract["loancontract_no"]);
+					$arrOldGrp[] = $arrOld;
+				}
+				$arrData["old_contract"] = $arrOldGrp;
 				$conmysql->beginTransaction();
-				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
+				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,diff_old_contract,receive_net,
 																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank)
-																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
+																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:diff_old,:request_amt,:int_rate
 																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
@@ -158,6 +182,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':period_payment' => $dataComing["period_payment"],
 					':period' => $dataComing["period"],
 					':loanpermit_amt' => $dataComing["loanpermit_amt"],
+					':diff_old' => $oldbal,
 					':int_rate' => $dataComing["int_rate"] / 100,
 					':salary' => $rowData["SALARY_AMOUNT"],
 					':salary_img' => $slipSalary,
@@ -178,7 +203,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
 					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 					$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
+					$arrData["share_amt"] = number_format($rowData["SHARE_AMT"],2);
+					$arrData["sharestk_amt"] = number_format($rowData["SHARESTK_AMT"],2);
 					$arrData["request_amt"] = $dataComing["request_amt"];
+					$arrData["objective"] = $dataComing["objective"];
+					$arrData["period_payment"] = $dataComing["period_payment"];
+					$arrData["period"] = $dataComing["period"];
 					$arrData["recv_account"] = $dataComing["deptaccount_no_bank"];
 					if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 						include('form_request_loan_'.$dataComing["loantype_code"].'.php');
@@ -245,6 +275,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':period_payment' => $dataComing["period_payment"],
 							':period' => $dataComing["period"],
 							':loanpermit_amt' => $dataComing["loanpermit_amt"],
+							':diff_old' => $oldbal,
 							':int_rate' => $dataComing["int_rate"] / 100,
 							':salary' => $rowData["SALARY_AMOUNT"],
 							':salary_img' => $slipSalary,
@@ -264,6 +295,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':period_payment' => $dataComing["period_payment"],
 						':period' => $dataComing["period"],
 						':loanpermit_amt' => $dataComing["loanpermit_amt"],
+						':diff_old' => $oldbal,
 						':int_rate' => $dataComing["int_rate"] / 100,
 						':salary' => $rowData["SALARY_AMOUNT"],
 						':salary_img' => $slipSalary,
