@@ -109,17 +109,18 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	  $html = '<style>
 
 		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
-		  * {
-			font-family: THSarabun;
-		  }
+			* {
+			  font-family: TH Niramit AS;
+			}
+
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -166,6 +167,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding-top: 80px;
 		}
 		.frame-info-user {
+			line-height: 12px;
 			padding: 10px -10px 10px 10px;
 			position: fixed;
 			left: 440px;
@@ -175,6 +177,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			border: 0.5px #DDDDDD solid;
 			border-radius: 5px;
 		}
+
 		.label {
 			width: 30%;
 			padding: 0 5px;
@@ -218,7 +221,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:70px;">วัน เดือน ปี</th>
+		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
 		  <th>รายการ</th>
 		  <th>ฝาก</th>
 		  <th>ถอน</th>
@@ -291,6 +294,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
