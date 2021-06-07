@@ -14,10 +14,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAmtDiePerson->execute([':recv_period' => $rowKeeping["RECV_PERIOD"]]);
 			$rowdie = $getAmtDiePerson->fetch(PDO::FETCH_ASSOC);
 			$arrKeeping = array();
-			$arrKeeping["RECEIPT_NO"] = $rowKeeping["RECEIPT_NO"];
+			$arrKeeping["RECEIVE_NO"] = $rowKeeping["RECEIPT_NO"];
 			$arrKeeping["RECV_PEIORD_DESC"] = $lib->convertperiodkp(TRIM($rowKeeping["RECV_PERIOD"]));
 			$arrKeeping["RECV_PEIORD"] = $rowKeeping["RECV_PERIOD"];
-			$arrKeeping["DIE_AMT"] = $rowdie["DIE_AMT"].' คน';
+			$arrKeeping["DIE_AMT"] = $rowdie["DIE_AMT"].' ราย';
 			$arrKeeping["CREMATION_AMT"] = number_format($rowKeeping["CARCASS_AMT"],2);
 			$arrKeepingGrp[] = $arrKeeping;
 		}
@@ -34,10 +34,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAmtReceiptDiePerson->execute([':recv_period' => $rowReceipt["RECV_PERIOD"]]);
 			$rowReceiptdie = $getAmtReceiptDiePerson->fetch(PDO::FETCH_ASSOC);
 			$arrReceipt["RECEIPT_NO"] = $rowReceipt["RECEIPT_NO"];
-			$arrReceipt["RECV_PEIORD"] = $lib->convertperiodkp(TRIM($rowReceipt["RECV_PERIOD"]));
-			$arrReceipt["RECV_PEIORD_DESC"] = $rowReceipt["RECV_PERIOD"];
-			$arrReceipt["CARCASS_AMT"] = $rowReceipt["CARCASS_AMT"];
-			$arrReceipt["DIE_AMT"] = $rowReceiptdie["DIE_AMT"].' คน';
+			$arrReceipt["RECV_PEIORD_DESC"] = $lib->convertperiodkp(TRIM($rowReceipt["RECV_PERIOD"]));
+			$arrReceipt["RECV_PEIORD"] = $rowReceipt["RECV_PERIOD"];
+			$arrReceipt["CREMATION_AMT"] = number_format($rowReceipt["CARCASS_AMT"],2);
+			$arrReceipt["DIE_AMT"] = $rowReceiptdie["DIE_AMT"].' ราย';
 			$arrReceiptGrp[] = $arrReceipt;
 		}
 		$arrayResult["KEEPING"] = $arrKeepingGrp;

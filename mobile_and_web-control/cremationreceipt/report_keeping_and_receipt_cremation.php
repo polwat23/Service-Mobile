@@ -8,7 +8,7 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipCremation')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
-		$getKeepingData = $conoracle->prepare("SELECT OPERATE_DATE,MEMBGROUP_CODE,RECEIPT_NO,CARCASS_AMT,INS_AMT,FEE_YEAR,ADDADVANCE_AMT,WFMEMBER_NO 
+		$getKeepingData = $conoracle->prepare("SELECT STATUS_POST,OPERATE_DATE,MEMBGROUP_CODE,RECEIPT_NO,CARCASS_AMT,INS_AMT,FEE_YEAR,ADDADVANCE_AMT,WFMEMBER_NO 
 												FROM WFRECIEVEMONTH 
 												WHERE TRIM(MEMBER_NO) = :member_no AND RECV_PERIOD = :recv_period");
 		$getKeepingData->execute([
@@ -19,6 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["wcmember_no"] = $rowKeeping["WFMEMBER_NO"];
+		$header["status_post"] = $rowKeeping["STATUS_POST"];
 		$header["sumall_pay"] = $rowKeeping["CARCASS_AMT"] + $rowKeeping["INS_AMT"] + $rowKeeping["FEE_YEAR"] + $rowKeeping["ADDADVANCE_AMT"];
 		$header["receipt_no"] = TRIM($rowKeeping["RECEIPT_NO"]);
 		$fetchName = $conoracle->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC
@@ -134,7 +135,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
 			<div style="text-align: left;"><img src="../../resource/logo/logo_wc.gif" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
-	$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
+			if($header["status_post"] == '1'){
+				$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
+			}else{
+				$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>';
+			}
 	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สมาคมฌาปนกิจสงเคราะห์ สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษาธิการ จำกัด</p>
 			<p style="margin-top: -27px;font-size: 18px;">319 อาคารสมานฉันท์ ชั้น 3 กระทรวงศึกษาธิการ</p>
 			<p style="margin-top: -25px;font-size: 18px;">ถนนพิษณุโลก แขวงดุสิต เขตดุสิต กทม. 10300</p>
