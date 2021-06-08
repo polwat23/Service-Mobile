@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lsm.LOANITEMTYPE_CODE as TYPE_CODE,lit.LOANITEMTYPE_DESC AS TYPE_DESC,
 											lsm.slip_date as operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance,lsm.REF_SLIPNO as SLIP_NO
+											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance,lsm.REF_DOCNO as SLIP_NO
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
 											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and to_char(lsm.OPERATE_DATE,'YYYY-MM-DD')

@@ -5,6 +5,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing))
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WTX');
+		$dateOperC = date('c');
+		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($arrRightDep["RESULT"]){
@@ -33,17 +35,16 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no'],$dataComing))
 						$resultWS = $clientWS->__call("of_initslippayin_mobile", array($argumentWS));
 						if($resultWS->of_initslippayin_mobileResult == '1'){
 							$resultService = $resultWS->astr_lninitloans;
-							$arrayResult['RESULT'] = TRUE;
 							if($resultService->fee_amt > 0){
 								$arrayResult["RESPONSE_CODE"] = 'WS0105';
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
 								require_once('../../include/exit_footer.php');
-								//$arrayResult['FEE_AMT'] = $resultService->fee_amt;
 							}
 							if($resultService->fine_amt > 0){
 								$arrayResult['PENALTY_AMT'] = $resultService->fine_amt;
 							}
+							$arrayResult['RESULT'] = TRUE;
 							require_once('../../include/exit_footer.php');
 						}else{
 							$arrayStruc = [

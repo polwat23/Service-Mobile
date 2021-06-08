@@ -328,7 +328,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			
 		}
 	}else{
-		$checkMember = $conoracle->prepare("SELECT resign_status,mem_telmobile FROM mbmembmaster WHERE member_no = :member_no and TRIM(card_person) = :card_person");
+		$checkMember = $conoracle->prepare("SELECT resign_status,mem_telmobile,email FROM mbmembmaster WHERE member_no = :member_no and TRIM(card_person) = :card_person");
 		$checkMember->execute([
 			':member_no' => $member_no,
 			':card_person' => $dataComing["password"]
@@ -345,7 +345,9 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrayResult['MEMBER_NO'] = $member_no;
 				$arrayResult['TEL'] = $rowMember["MEM_TELMOBILE"];
 				$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
+				$arrayResult['EMAIL'] = $rowMember["EMAIL"];
 				$arrayResult['VERIFY'] = TRUE;
+				$arrayResult['USE_EMAIL_FROM_COOP'] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}

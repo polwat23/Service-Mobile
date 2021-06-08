@@ -75,7 +75,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['LOAN'] = $arrLoanGrp;
-				$arrayResult['IS_DEFAULT'] = FALSE;
+				$arrayResult['IS_DEFAULT'] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

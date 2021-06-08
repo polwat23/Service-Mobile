@@ -3,6 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
 												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
@@ -15,14 +16,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														FROM atmregistermobile atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
 														WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1' 
 														and atr.connect_status = '1'");
-				$getAccBankAllow->execute([':member_no' => $payload["member_no"]]);
+				$getAccBankAllow->execute([':member_no' => $member_no]);
 				$rowAccBank = $getAccBankAllow->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowAccBank["ACCOUNT_CODE"]) && $rowAccBank["ACCOUNT_CODE"] != ""){
 				}else{
 					$getAccBankAllowATM = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
 															FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
 															WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1'");
-					$getAccBankAllowATM->execute([':member_no' => $payload["member_no"]]);
+					$getAccBankAllowATM->execute([':member_no' => $member_no]);
 					$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] != ""){
 					}else{
