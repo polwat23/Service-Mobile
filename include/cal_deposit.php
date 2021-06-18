@@ -106,7 +106,7 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
 			$transfer_mode = "2";
 		}
-		$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
+		/*$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
 												LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
 												WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
 		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
@@ -116,7 +116,7 @@ class CalculateDep {
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
-			}
+			}*/
 			if(isset($bank_code)){
 				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
 														FROM gcbankconstantmapping gbm 
@@ -320,11 +320,11 @@ class CalculateDep {
 			}
 			$arrayResult['RESULT'] = TRUE;
 			return $arrayResult;
-		}else{
+		/*}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0023";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
-		}
+		}*/
 	}
 	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);

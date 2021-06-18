@@ -140,6 +140,124 @@ class CalculateLoan {
 		}
 		return $interest;
 	}
+	public function calculateInterestArr($loancontract_no,$amt_transfer=0){
+		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
+		$constLoan = $this->getLoanConstant();
+		$interest = 0;
+		if($constLoanContract["CHECK_KEEPING"] == '1'){
+			$calInt = TRUE;
+		}else{
+			if($constLoanContract["SPACE_KEEPING"] == 0){
+				$calInt = TRUE;
+			}else{
+				if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
+					$calInt = TRUE;
+				}else{
+					$calInt = TRUE;
+				}
+			}
+		}
+		if($calInt){
+			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
+			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y n d',false,true));
+			$yearTo = date('Y');
+			$roundLoop = 0;
+			$yearDiff = $yearTo - $yearFrom;
+			if($yearDiff > 0){
+				$roundLoop += 1;
+			}
+			if($changerateint){
+				$roundLoop += 1;
+			}
+			$yearDiffTemp = 0;
+			for($i = 0;$i <= $roundLoop;$i++){
+				if($constLoanContract["INT_CONTINTTYPE"] == '2'){
+					if($changerateint){
+						if($i == 0){
+							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+						}else{
+							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],date('Y-m-d'));
+						}
+					}else{
+						$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y-n-d'));
+					}
+					$intrate = $intrateData["INTEREST_RATE"];
+				}else if($constLoanContract["INT_CONTINTTYPE"] == '1'){
+					$intrate = $constLoanContract["INT_CONTINTRATE"];
+				}else if($constLoanContract["INT_CONTINTTYPE"] == '0'){
+					return 0;
+				}
+				$dayinyear = 0;
+				if($constLoan["DAYINYEAR"] > 0){
+					$dayinyear = $constLoan["DAYINYEAR"];
+				}else{
+					if($changerateint){
+						if($i == 0){
+							$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}else if($i == 1){
+							if($yearDiff > 0){
+								$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+							}else{
+								$dayinyear = $this->lib->getnumberofYear(date('Y'));
+							}
+						}else{
+							$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+1 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}
+					}else{
+						$dayinyear = $this->lib->getnumberofYear(date('Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+					}
+				}
+				if($changerateint){
+					if($i == 0){
+						$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						$dateTo = new \DateTime(date('d-m-Y',strtotime('+1 days',strtotime($intrateData["EXPIRE_DATE"]))));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}else if($i == 1){
+						if($yearDiff > 0){
+							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
+							$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+							$date_duration = $dateTo->diff($dateFrom);
+							$dayInterest = $date_duration->days;
+						}else{
+							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
+							$dateTo = new \DateTime(date('d-m-Y'));
+							$date_duration = $dateTo->diff($dateFrom);
+							$dayInterest = $date_duration->days;
+						}
+					}else{
+						$dateFrom = new \DateTime('01-01-'.date('Y'));
+						$dateTo = new \DateTime(date('d-m-Y'));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}
+				}else{
+					if($yearDiffTemp == 0 && $yearDiff > 0){
+						$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTCALINT_DATE"])));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}else{
+						if($yearDiffTemp > 0){
+							$dateFrom = new \DateTime('01-01-'.date('Y'));
+						}else{
+							$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
+						}
+						$dateTo = new \DateTime(date('d-m-Y'));
+						$date_duration = $dateTo->diff($dateFrom);
+						$dayInterest = $date_duration->days;
+					}
+				}
+				if(!$changerateint){
+					$yearDiffTemp++;
+				}
+				$prn_bal = $constLoanContract["PRINCIPAL_BALANCE"];
+				$interest += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
+			}
+			$interest = $this->lib->roundDecimal($interest,$constLoan["RDINTSATANG_TYPE"]) + $constLoanContract["INTEREST_ARREAR"];
+		}
+		return $interest;
+	}
 	public function calculateIntAccum($member_no){
 		$getAccYear = $this->conora->prepare("SELECT ACCOUNT_YEAR FROM CMACCOUNTYEAR WHERE TRUNC(SYSDATE) BETWEEN TRUNC(ACCSTART_DATE) AND TRUNC(ACCEND_DATE)");
 		$getAccYear->execute();
@@ -299,7 +417,7 @@ class CalculateLoan {
 	}
 
 	public function getContstantLoanContract($loancontract_no){
-		$contLoan = $this->conora->prepare("SELECT LNM.LOANAPPROVE_AMT,LNM.PRINCIPAL_BALANCE,LNM.PERIOD_PAYMENT,LNM.PERIOD_PAYAMT,LNM.LAST_PERIODPAY,
+		$contLoan = $this->conora->prepare("SELECT LNM.LOANAPPROVE_AMT,LNM.PRINCIPAL_BALANCE,LNM.PERIOD_PAYMENT,LNM.PERIOD_PAYAMT,LNM.LAST_PERIODPAY,LNM.WITHDRAWABLE_AMT,
 											LNM.LOANTYPE_CODE,LNM.INTEREST_ARREAR,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,lnt.LOANTYPE_DESC,
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
@@ -420,10 +538,7 @@ class CalculateLoan {
 					':loancontract_no' => $contract_no,
 					':lastperiod_pay' => $lastperiod,
 					':int_arr' => $intArr,
-					':int_accum' => $interest_accum + $interest,
-					':prinpay' => $prinPay,
 					':int_return' => $int_returnSrc,
-					':int_pay' => $interest,
 					':laststmno' => $dataCont["LAST_STM_NO"] + 1,
 				];
 				if($interestPeriod > 0){
@@ -432,18 +547,16 @@ class CalculateLoan {
 							$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
 																		PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																		LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
-																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																		INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																		INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno
+																		INTEREST_ARREAR = :int_arr,
+																		INTEREST_RETURN = :int_return,LAST_STM_NO = :laststmno
 																		WHERE loancontract_no = :loancontract_no");
 
 						}else{
 							$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
 																		PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																		LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
-																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																		INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																		INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
+																		INTEREST_ARREAR = :int_arr,
+																		INTEREST_RETURN = :int_return,LAST_STM_NO = :laststmno,
 																		CONTRACT_STATUS = '0'
 																		WHERE loancontract_no = :loancontract_no");
 						}
@@ -451,9 +564,8 @@ class CalculateLoan {
 						$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
 																	PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																	LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
-																	INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																	INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																	INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno
+																	INTEREST_ARREAR = :int_arr,
+																	INTEREST_RETURN = :int_return,LAST_STM_NO = :laststmno
 																	WHERE loancontract_no = :loancontract_no");
 					}
 				}else{
@@ -462,18 +574,16 @@ class CalculateLoan {
 							$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
 																		PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																		LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																		INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																		INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno
+																		INTEREST_ARREAR = :int_arr,
+																		INTEREST_RETURN = :int_return,LAST_STM_NO = :laststmno
 																		WHERE loancontract_no = :loancontract_no");
 
 						}else{							
 							$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
 																		PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																		LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																		INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																		INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
+																		INTEREST_ARREAR = :int_arr,
+																		INTEREST_RETURN = :int_return,LAST_STM_NO = :laststmno,
 																		CONTRACT_STATUS = '0'
 																		WHERE loancontract_no = :loancontract_no");
 						}
@@ -481,9 +591,8 @@ class CalculateLoan {
 						$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET 
 																	PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																	LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																	INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																	INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
-																	INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno
+																	INTEREST_ARREAR = :int_arr,
+																	INTEREST_RETURN = :int_return,LAST_STM_NO = :laststmno
 																	WHERE loancontract_no = :loancontract_no");
 					}
 				}
@@ -774,6 +883,240 @@ class CalculateLoan {
 			$arrayResult["RESPONSE_CODE"] = 'WS0066';
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
+		}
+	}
+	public function paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,$sliptype_code,$document_no,$operate_date,$loantype_code,$loancontract_no,$amt_transfer,$payload,$from_account_no){
+		$arrExecuteSlOutSlip = [
+			':coop_id' => $config["COOP_ID"],
+			':payoutslip_no' => $payoutslip_no,
+			':member_no' => $member_no,
+			':sliptype_code' => $sliptype_code,
+			':document_no' => $document_no,
+			':operate_date' => $operate_date,
+			':loantype_code' => $loantype_code,
+			':loancontract_no' => $loancontract_no,
+			':amt_transfer' => $amt_transfer
+		];
+		$insertSLSlipPayout = $conoracle->prepare("INSERT INTO slslipoayout(COOP_ID,PAYOUTSLIP_NO,MEMCOOP_ID,MEMBER_NO,SLIPTYPE_CODE,DOCUMENT_NO,SLIP_DATE,OPERATE_DATE,SHRLONTYPE_CODE,CONTCOOP_ID,
+													LOANCONTRACT_NO,PAYOUT_AMT,PAYOUTNET_AMT,SLIP_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,SYNC_NOTIFY_FLAG)
+													VALUES(:coop_id,:payoutslip_no,;coop_id,:member_no,:sliptype_code,:document_no,TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
+													:loantype_code,:coop_id,:loancontract_no,:amt_transfer,:amt_transfer,'1','MOBILE',SYSDATE,:coop_id,'1')");
+		if($insertSLSlipPayout->execute($arrExecuteSlOutSlip)){
+			$arrayResult['RESULT'] = TRUE;
+			return $arrayResult;
+		}else{
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $operate_date,
+				':deptaccount_no' => $from_account_no,
+				':amt_transfer' => $amt_transfer,
+				':status_flag' => '0',
+				':destination' => $payoutslip_no,
+				':response_code' => "WS0066",
+				':response_message' => 'Insert slslippayout ไม่ได้'.$insertSLSlipPayout->queryString."\n".json_encode($arrExecuteSlOutSlip)
+			];
+			$log->writeLog('repayloan',$arrayStruc);
+			$arrayResult["RESPONSE_CODE"] = 'WS0066';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+	}
+	public function paySlipLonOutExpense($conoracle,$config,$payoutslip_no,$bank_account_no,$amt_transfer,$vccid,$payload,$operate_date){
+		$arrExecuteSlOutExpenseSlip = [
+			':coop_id' => $config["COOP_ID"],
+			':payoutslip_no' => $payoutslip_no,
+			':bank_account_no' => $bank_account_no,
+			':amt_transfer' => $amt_transfer,
+			':vccid' => $vccid
+		];
+		$insertSLSlipPayOutExpense = $conoracle->prepare("INSERT INTO slslippayoutexpense(COOP_ID,PAYOUTSLIP_NO,SEQ_NO,MONEYTYPE_CODE,EXPENSE_BANK,EXPENSE_BRANCH,EXPENSE_ACCID,EXPENSE_AMT,
+														BANKFEE_AMT,TOFROM_ACCID)
+														VALUES(:coop_id,:payoutslip_no,'1','CBT','006','ฮฮฮ',:bank_account_no,:amt_transfer,:vccid)");
+		if($insertSLSlipPayOutExpense->execute($arrExecuteSlOutExpenseSlip)){
+			$arrayResult['RESULT'] = TRUE;
+			return $arrayResult;
+		}else{
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $operate_date,
+				':deptaccount_no' => $bank_account_no,
+				':amt_transfer' => $amt_transfer,
+				':status_flag' => '0',
+				':destination' => $payoutslip_no,
+				':response_code' => "WS0066",
+				':response_message' => 'Insert slslippayoutexpense ไม่ได้'.$insertSLSlipPayOutExpense->queryString."\n".json_encode($arrExecuteSlOutExpenseSlip)
+			];
+			$log->writeLog('repayloan',$arrayStruc);
+			$arrayResult["RESPONSE_CODE"] = 'WS0066';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+	}
+	public function receiveLoanOD($conoracle,$config,$contract_no,$dataCont,$slipdocno,$amt_transfer,$lnslip_no,$ref_no,$bank_account_no,$fee_amt,$payload,$app_version,$operate_date){
+		$interest = $this->calculateInterestArr($contract_no,$amt_transfer);
+		$interestFull = $interest;
+		$prinPay = 0;
+		$interestPeriod = $interest;
+		if($interestPeriod < 0){
+			$interestPeriod = 0;
+		}
+		if($interest > 0){
+			if($amt_transfer < $interest){
+				$interest = $amt_transfer;
+			}else{
+				$prinPay = $amt_transfer - $interest;
+			}
+			if($prinPay < 0){
+				$prinPay = 0;
+			}
+		}else{
+			$prinPay = $amt_transfer;
+		}
+		$int_returnSrc = 0;
+		$intArr = $dataCont["INTEREST_ARREAR"] + $interest;
+		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		$executeLnSTM = [
+			':coop_id' => $config["COOP_ID"],
+			':loancontract_no' => $contract_no,
+			':lastseq_no' => $dataCont["LAST_STM_NO"] + 1,
+			':stm_itemtype' => 'LRC',
+			':document_no' => $slipdocno,
+			':lastperiod' => $lastperiod,
+			':prin_pay' => $prinPay,
+			':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] + $prinPay,
+			':int_pay' => $interest,
+			':principal' => $dataCont["PRINCIPAL_BALANCE"],
+			':calint_from' => date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
+			':bfintarr' => $dataCont["INTEREST_ARREAR"],
+			':int_arr' => $intArr,
+			':int_return' => $int_returnSrc,
+			':moneytype_code' => 'TRN',
+			':ref_slipno' => $lnslip_no,
+			':bfint_return' => $dataCont["INTEREST_RETURN"],
+			':int_period' => $interestPeriod
+		];
+		if($interestPeriod > 0){
+			$insertSTMLoan = $conoracle->prepare("INSERT INTO lncontstatement(COOP_ID,LOANCONTRACT_NO,SEQ_NO,LOANITEMTYPE_CODE,SLIP_DATE,
+													OPERATE_DATE,ACCOUNT_DATE,REF_DOCNO,PERIOD,PRINCIPAL_PAYMENT,INTEREST_PAYMENT,PRINCIPAL_BALANCE,
+													PRNCALINT_AMT,CALINT_FROM,CALINT_TO,BFINTARREAR_AMT,INTEREST_PERIOD,INTEREST_ARREAR,
+													INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
+													BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
+													VALUES(:coop_id,:loancontract_no,:lastseq_no,:stm_itemtype,TRUNC(SYSDATE),TRUNC(SYSDATE),
+													TRUNC(SYSDATE),:document_no,:lastperiod,:prin_pay,:int_pay,:prin_bal,:principal,
+													TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),
+													TRUNC(SYSDATE),:bfintarr,:int_period,:int_arr,
+													:int_return,:moneytype_code,1,'MOBILE',TRUNC(SYSDATE),:coop_id,:ref_slipno,:bfint_return,TRUNC(SYSDATE),'1')");
+		}else{
+			$insertSTMLoan = $conoracle->prepare("INSERT INTO lncontstatement(COOP_ID,LOANCONTRACT_NO,SEQ_NO,LOANITEMTYPE_CODE,SLIP_DATE,
+													OPERATE_DATE,ACCOUNT_DATE,REF_DOCNO,PERIOD,PRINCIPAL_PAYMENT,INTEREST_PAYMENT,PRINCIPAL_BALANCE,
+													PRNCALINT_AMT,CALINT_FROM,CALINT_TO,BFINTARREAR_AMT,INTEREST_PERIOD,INTEREST_ARREAR,
+													INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
+													BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
+													VALUES(:coop_id,:loancontract_no,:lastseq_no,:stm_itemtype,TRUNC(SYSDATE),TRUNC(SYSDATE),
+													TRUNC(SYSDATE),:document_no,:lastperiod,:prin_pay,:int_pay,:prin_bal,:principal,
+													TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss'))
+													,:bfintarr,:int_period,:int_arr,
+													:int_return,:moneytype_code,1,'MOBILE',TRUNC(SYSDATE),:coop_id,:ref_slipno,:bfint_return,TRUNC(SYSDATE),'1')");
+		}
+		if($insertSTMLoan->execute($executeLnSTM)){
+			$executeLnMaster = [
+				':withdrawable_amt' => $dataCont["WITHDRAWABLE_AMT"] - $prinPay,
+				':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] + $prinPay,
+				':loancontract_no' => $contract_no,
+				':lastperiod_pay' => $lastperiod,
+				':int_arr' => $intArr,
+				':int_return' => $int_returnSrc,
+				':laststmno' => $dataCont["LAST_STM_NO"] + 1,
+			];
+			if($interestPeriod > 0){
+				$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = :withdrawable_amt,
+															PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
+															LASTPAYMENT_DATE = TRUNC(SYSDATE),LASTCALINT_DATE = TRUNC(SYSDATE),
+															INTEREST_ARREAR = :int_arr,LAST_STM_NO = :laststmno
+															WHERE loancontract_no = :loancontract_no");
+			}else{
+				$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = :withdrawable_amt,
+															PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
+															LASTPAYMENT_DATE = TRUNC(SYSDATE),
+															INTEREST_ARREAR = :int_arr,LAST_STM_NO = :laststmno
+															WHERE loancontract_no = :loancontract_no");
+			}
+			if($updateLnContmaster->execute($executeLnMaster)){
+				if($interestPeriod > 0){
+					$insertTransLog = $this->con->prepare("INSERT INTO gcrepayloan(ref_no,from_account,loancontract_no,source_type,amount,fee_amt,penalty_amt,principal
+															,interest,interest_return,interest_arrear,bfinterest_return,bfinterest_arrear,member_no,id_userlogin,
+															app_version,is_offset,bfkeeping,calint_to)
+															VALUES(:ref_no,:from_account,:loancontract_no,'1',:amount,:fee_amt,:penalty_amt,:principal,:interest,
+															:interest_return,:interest_arrear,:bfinterest_return,:bfinterest_arrear,:member_no,:id_userlogin,
+															:app_version,:is_offset,:bfkeeping,NOW())");
+					$insertTransLog->execute([
+						':ref_no' => $ref_no,
+						':from_account' => $bank_account_no,
+						':loancontract_no' => $contract_no,
+						':amount' => $amt_transfer,
+						':fee_amt' => $fee_amt,
+						':penalty_amt' => 0,
+						':principal' => $prinPay,
+						':interest' => $interest,
+						':interest_return' => $int_returnSrc,
+						':interest_arrear' => $intArr,
+						':bfinterest_return' => $dataCont["INTEREST_RETURN"],
+						':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':app_version' => $app_version,
+						':is_offset' => ($dataCont["RKEEP_PRINCIPAL"] == 0 && $dataCont["PRINCIPAL_BALANCE"] - $prinPay == 0) ? '2' : '1',
+						':bfkeeping' => $dataCont["RKEEP_PRINCIPAL"]
+					]);
+				}else{
+					$insertTransLog = $this->con->prepare("INSERT INTO gcrepayloan(ref_no,from_account,loancontract_no,source_type,amount,fee_amt,penalty_amt,principal
+															,interest,interest_return,interest_arrear,bfinterest_return,bfinterest_arrear,member_no,id_userlogin,
+															app_version,is_offset,bfkeeping,calint_to)
+															VALUES(:ref_no,:from_account,:loancontract_no,'1',:amount,:fee_amt,:penalty_amt,:principal,:interest,
+															:interest_return,:interest_arrear,:bfinterest_return,:bfinterest_arrear,:member_no,:id_userlogin,
+															:app_version,:is_offset,:bfkeeping,:calint_from)");
+					$insertTransLog->execute([
+						':ref_no' => $ref_no,
+						':from_account' => $bank_account_no,
+						':loancontract_no' => $contract_no,
+						':amount' => $amt_transfer,
+						':fee_amt' => $fee_amt,
+						':penalty_amt' => $penalty_amt,
+						':principal' => $prinPay,
+						':interest' => $interest,
+						':interest_return' => $int_returnSrc,
+						':interest_arrear' => $intArr,
+						':bfinterest_return' => $dataCont["INTEREST_RETURN"],
+						':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':app_version' => $app_version,
+						':is_offset' => ($dataCont["RKEEP_PRINCIPAL"] == 0 && $dataCont["PRINCIPAL_BALANCE"] - $prinPay == 0) ? '2' : '1',
+						':bfkeeping' => $dataCont["RKEEP_PRINCIPAL"],
+						':calint_from' => date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"]))
+					]);
+				}
+				$arrayResult['RESULT'] = TRUE;
+				return $arrayResult;
+			}else{
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $operate_date,
+					':deptaccount_no' => $from_account_no,
+					':amt_transfer' => $amt_transfer,
+					':status_flag' => '0',
+					':destination' => $contract_no,
+					':response_code' => "WS0066",
+					':response_message' => 'UPDATE lncontmaster ไม่ได้'.$updateLnContmaster->queryString."\n".json_encode($executeLnMaster)
+				];
+				$log->writeLog('repayloan',$arrayStruc);
+				$arrayResult["RESPONSE_CODE"] = 'WS0066';
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
 		}
 	}
 }
