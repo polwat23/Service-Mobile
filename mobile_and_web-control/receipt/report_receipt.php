@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once('../autoload.php');
 
 use Dompdf\Dompdf;
@@ -210,17 +210,17 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">63 หมู่ 4 ต.หนองหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.สันทราย จ.เชียงใหม่ 50290</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-878077 , 053-873000</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">สำนักงานอัยการสูงสุด อาคารถนนรัชดาภิเษก ชั้นที่ 3 </p>
+				<p style="margin-top: -25px;font-size: 18px;">จอมพล เขตจตุจักร กรุงเทพฯ</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 02-512-8237 , 02-512-8296</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
 				</div>
 			</div>
