@@ -115,7 +115,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYAMT"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"]." ( ".$rowDetail["PAY_ACCOUNT"]." )";
 			}
