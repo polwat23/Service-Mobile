@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -138,17 +138,18 @@ function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
 				@font-face {
-				  font-family: THSarabun;
-				  src: url(../../resource/fonts/THSarabun.ttf);
+				  font-family: TH Niramit AS;
+				  src: url(../../resource/fonts/TH Niramit AS.ttf);
 				}
 				@font-face {
-					font-family: "THSarabun";
-					src: url(../../resource/fonts/THSarabun Bold.ttf);
+					font-family: TH Niramit AS;
+					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 					font-weight: bold;
 				}
 				* {
-				  font-family: THSarabun;
+				  font-family: TH Niramit AS;
 				}
+
 				body {
 				  padding: 0 30px;
 				}
@@ -160,11 +161,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูหนองคาย จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">143 ถ.ประจักษ์ ต.ในเมือง อ.เมือง</p>
-				<p style="margin-top: -25px;font-size: 18px;">จังหวัดหนองคาย 43000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 042-411-334</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.nktsc.org</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์เครดิตยูเนี่ยนมหาวิทยาลัยราชภัฏสวนสุนันทา จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1 แขวงดุสิต  เขตดุสิต</p>
+				<p style="margin-top: -25px;font-size: 18px;">กทม</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 02-160-1328 หรือ 080-629-7221</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cdu.ssru.ac.th</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -275,7 +276,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();

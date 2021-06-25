@@ -1,22 +1,15 @@
-@echo off
+::@echo off
 
 
-del C:\Mobile\service-nkt\external_service\backupDB_nkt.zip
+del C:\Mobile\Service-MHD-Test\external_service\backupDB_mhd.zip
 
-cd C:\Program Files\MariaDB 10.4\bin
+cd C:\Program Files\MariaDB 10.4\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@MUsaving2020 mobile_mhd_test > C:\Mobile\Service-MHD-Test\external_service\backupDB_mhd.sql
 
-C:
+"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\Service-MHD-Test\external_service\backupDB_mhd.zip C:\Mobile\Service-MHD-Test\external_service\backupDB_mhd.sql
 
-mysqldump.exe -hlocalhost -P3306 -u root -p@NKT2020 mobile_nkt > C:\Mobile\service-nkt\external_service\backupDB_nkt.sql
+del C:\Mobile\Service-MHD-Test\external_service\backupDB_mhd.sql
 
-"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\service-nkt\external_service\backupDB_nkt.zip C:\Mobile\service-nkt\external_service\backupDB_nkt.sql
+ftp -i -s:C:\Mobile\Service-MHD-Test\external_service\ftp_upload.bat
 
-del C:\Mobile\service-nkt\external_service\backupDB_nkt.sql
+del C:\Mobile\Service-MHD-Test\external_service\backupDB_mhd.zip
 
-cd C:\Program Files (x86)\WinSCP
-
-C:
-
-winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put C:\Mobile\service-nkt\external_service\backupDB_nkt.zip" "exit"
-
-del C:\Mobile\service-nkt\external_service\backupDB_nkt.zip
