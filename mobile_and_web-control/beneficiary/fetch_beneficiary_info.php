@@ -13,10 +13,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrBenefit = array();
 			$arrBenefit["FULL_NAME"] = $rowBenefit["GAIN_NAME"];
 			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
+			$arrBenefit["RELATION"] = $rowBenefit["REMARK"];
 			$arrBenefit["TYPE_PERCENT"] = 'text';
-			$arrBenefit["PERCENT_TEXT"] = $rowBenefit["REMARK"];
-			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
+			//$arrBenefit["PERCENT_TEXT"] = $rowBenefit["REMARK"];
+			//$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
