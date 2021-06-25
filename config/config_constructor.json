@@ -9,7 +9,7 @@
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
 	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=063001;coop_control=063001;",
 	"FIREBASE_API_KEY" : "",
-	"FIREBASE_SERVER_KEY" : "",
+	"FIREBASE_SERVER_KEY" : "AAAAvvxJ9z0:APA91bG-BQbWCv_fMMuYntWcO52K_DzZqUTch34WLUZawpnrDI9a5vDwxy-ATe-YMJOvwZ9u7QlgTCoZbTJJT3v0DYOi0PTAfHE3PmX62ibatDopZSsO8f9OobbQRGVgA0FJ0HKH88HF",
 	"SECRET_KEY_JWT" : "SSRU!/-Gcoop+Connect^063001*!&",
 	"SECRET_KEY_CORE" : "SSRU!/+Control-BackOffice^063001*!&",
 	"SIGNATURE_KEY_VERIFY_API" : "PTTGcoop+-API_LB-WITH-!KBank!-^063001*!&",
@@ -23,7 +23,7 @@
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
-	"HW_APPID" : "102964653",
-    "HW_APPSECRET": "e0933f2bfcf5cc1bb251b7628ae33c2d66d140161b648138f9b38ac9d0b443fe",
+	"HW_APPID" : "104377743",
+    "HW_APPSECRET": "084d1bae5fb370803f03c42270a05b49be445b09833aad9c711417974ee7f7d9",
 	"PORT_MAILSERVER" : "587"
 }
