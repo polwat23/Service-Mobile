@@ -234,8 +234,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">งวดที่</div>
+			<div style="width: 400px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
+			<div style="width: 50px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 405px;padding-top: 1px;">งวดที่</div>
 			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
 			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
 			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
@@ -246,15 +246,15 @@ function GenerateReport($dataReport,$header,$lib){
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
+			<div style="width: 400px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
 			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 400px;text-align: left;font-size: 18px; white-space: nowrap;">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 50px;text-align: center;font-size: 18px;margin-left: 405px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
@@ -272,10 +272,10 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>';
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 400px;text-align: left;font-size: 18px; white-space: nowrap;">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 50px;text-align: center;font-size: 18px;margin-left: 405px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">

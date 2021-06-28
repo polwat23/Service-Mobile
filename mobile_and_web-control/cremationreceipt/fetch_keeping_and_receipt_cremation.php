@@ -6,7 +6,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrKeepingGrp = array();
 		$arrReceiptGrp = array();
-		$getKeepingData = $conoracle->prepare("SELECT RECEIPT_NO,CARCASS_AMT,RECV_PERIOD FROM WFRECIEVEMONTH WHERE TRIM(MEMBER_NO) = :member_no AND STATUS_POST = '0'");
+		$arrSpecialGrp = array();
+		$getKeepingData = $conoracle->prepare("SELECT RECEIPT_NO,CARCASS_AMT,RECV_PERIOD FROM WFRECIEVEMONTH WHERE TRIM(MEMBER_NO) = :member_no AND STATUS_POST = '0'
+											ORDER BY RECV_PERIOD DESC");
 		$getKeepingData->execute([':member_no' => $member_no]);
 		while($rowKeeping = $getKeepingData->fetch(PDO::FETCH_ASSOC)){
 			$getAmtDiePerson = $conoracle->prepare("SELECT COUNT(wfaccount_name) AS DIE_AMT FROM WFDEPTMASTER 
@@ -40,6 +42,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrReceipt["DIE_AMT"] = $rowReceiptdie["DIE_AMT"].' ราย';
 			$arrReceiptGrp[] = $arrReceipt;
 		}
+		$getReceiptSpecial = $conoracle->prepare("SELECT wfd.DEPTSLIP_AMT,wfd.DEPTSLIP_NO,wfd.DEPTSLIP_DATE
+												FROM wfdeptslip wfd LEFT JOIN wfdeptmaster wfm ON wfd.DEPTACCOUNT_NO = wfm.DEPTACCOUNT_NO 
+												WHERE TRIM(wfm.member_no) = :member_no");
+		$getReceiptSpecial->execute([':member_no' => $member_no]);
+		while($rowReceiptSpecial = $getReceiptSpecial->fetch(PDO::FETCH_ASSOC)){
+			$arrayReceiptSpe = array();
+			$arrayReceiptSpe["RECEIPT_NO"] = TRIM($rowReceiptSpecial["DEPTSLIP_NO"]);
+			$arrayReceiptSpe["IS_EXTRA"] = TRUE;
+			$arrayReceiptSpe["CREMATION_AMT"] = number_format($rowReceiptSpecial["DEPTSLIP_AMT"],2);
+			$arrayReceiptSpe["RECV_PEIORD_DESC"] = $lib->convertdate($rowReceiptSpecial["DEPTSLIP_DATE"],'d m Y');
+			$arrSpecialGrp[] = $arrayReceiptSpe;
+		}
+		
+		$arrayResult["RECEIPT_EXTRA"] = $arrSpecialGrp;
 		$arrayResult["KEEPING"] = $arrKeepingGrp;
 		$arrayResult["RECEIPT"] = $arrReceiptGrp;
 		$arrayResult['RESULT'] = TRUE;
