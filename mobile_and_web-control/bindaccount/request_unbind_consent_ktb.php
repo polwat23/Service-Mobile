@@ -40,6 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				$log->writeLog('unbindaccount',$arrayStruc);
 				$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/ktb/revoke_register_account ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 				$lib->sendLineNotify($message_error);
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

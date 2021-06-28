@@ -24,17 +24,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				while($rowCanReceive = $checkCanReceive->fetch(PDO::FETCH_ASSOC)){
 					$arrDepttypeAllow[] = $rowCanReceive["dept_type_code"];
 				}
-				$getAccountinTrans = $conoracle->prepare("SELECT DEPTACCOUNT_NO,DEPTACCOUNT_NAME,PRNCBAL FROM dpdeptmaster 
-															WHERE member_no = :member_no and deptclose_status <> 1 and depttype_code IN('".implode("','",$arrDepttypeAllow)."')");
-				$getAccountinTrans->execute([':member_no' => $member_no]);
-				while($rowAccTrans = $getAccountinTrans->fetch(PDO::FETCH_ASSOC)){
-					$arrAccTrans = array();
-					$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($rowAccTrans["DEPTACCOUNT_NO"],$formatDept);
-					$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$hiddenFormat);
-					$arrAccTrans["ACCOUNT_NAME"] = TRIM($rowAccTrans["DEPTACCOUNT_NAME"]);
-					$arrAccTrans["PRIN_BAL"] = $rowAccTrans["PRNCBAL"];
-					$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
-					$arrGrpAcc[] = $arrAccTrans;
+				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
+				$arrDataAPI["MemberID"] = substr($member_no,-6);
+				$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
+				$arrResponseAPI = json_decode($arrResponseAPI);
+				if($arrResponseAPI->responseCode == "200"){
+					foreach($arrResponseAPI->accountDetail as $accData){
+						if(in_array($accData->accountType, $arrDepttypeAllow) && $accData->accountStatus == "0"){
+							$arrAccTrans = array();
+							$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$formatDept);
+							$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$hiddenFormat);
+							$arrAccTrans["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
+							$arrAccTrans["PRIN_BAL"] = $accData->accountBalance;
+							$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
+							$arrGrpAcc[] = $arrAccTrans;
+						}
+					}
 				}
 			}else if($rowTypeQR["trans_code_qr"] == '02'){
 				$checkCanGen = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_qrpayment = '1'");

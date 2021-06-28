@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 			if($insertDeptAllow->execute([
 				':deptaccount_no' => $dataComing["deptaccount_no"],
 				':member_no' => $payload["member_no"],
-				':limit_transaction_amt' => $func->getConstant("limit_withdraw"),
+				':limit_transaction_amt' => 500000.00,//$func->getConstant("limit_withdraw"),
 				':id_accountconstant' => $dataComing["id_accountconstant"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountcon
 				
 			}
 		}else{
-			$limit_trans = $func->getConstant("limit_withdraw");
+			$limit_trans = 500000.00;
 			$bulkInsertData = array();
 			foreach($dataComing["deptaccount_no"] as  $key => $deptaccount_no){
 				$bulkInsertData[] = "('".$deptaccount_no."','".$payload["member_no"]."','".$limit_trans."',".$dataComing["id_accountconstant"][$key].")";

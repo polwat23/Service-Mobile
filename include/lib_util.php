@@ -89,6 +89,8 @@ class library {
 			return (($date_duration->y)*12)+($date_duration->m);			
 		}else if($format == "d"){
 			return $date_duration->days;			
+		}else if($format == "y"){
+			return $date_duration->y;
 		}     
 	}
 	public function formatcitizen($idcard,$separate=" "){

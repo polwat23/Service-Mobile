@@ -72,8 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					require_once('../include/exit_footer.php');
 				}
 			}
-			$qrTransferAmtFormat = number_format($qrTransferAmt, 2, '.', '');
-			$qrTransferFeeFormat = number_format($qrTransferFee, 2, '.', '');
+			$qrTransferAmtFormat = number_format($qrTransferAmt, 2, '', '');
+			$qrTransferFeeFormat = number_format($qrTransferFee, 2, '', '');
 			$stringQRGenerate = "|".($dataComing["biller_id"] ?? $config["CROSSBANK_TAX_SUFFIX"])."\r\n".$dataComing["member_no"]."\r\n".$randQrRef."\r\n".str_replace('.','',$qrTransferAmtFormat)."\r\n".str_replace('.','',$qrTransferFeeFormat);
 			$qrCode = new QrCode($stringQRGenerate);
 			header('Content-Type: '.$qrCode->getContentType());
