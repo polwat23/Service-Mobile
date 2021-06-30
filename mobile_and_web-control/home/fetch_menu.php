@@ -6,7 +6,7 @@ if(!$anonymous){
 	$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 	$user_type = $payload["user_type"];
 	$permission = array();
-	$arrayResult = array();
+	
 	$arrayAllMenu = array();
 	$arrayMenuSetting = array();
 	switch($user_type){
