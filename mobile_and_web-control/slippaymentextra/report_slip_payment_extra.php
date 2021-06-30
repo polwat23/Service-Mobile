@@ -9,7 +9,8 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipExtraPayment')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrGroupDetail = array();
-		$getHeaderSlip = $conoracle->prepare("SELECT SLIP_DATE,SLIP_AMT FROM CMSHRLONSLIP WHERE slip_no = :slip_no");
+		$getHeaderSlip = $conoracle->prepare("SELECT SLIP_DATE,SLIP_AMT,SLIP_NO 
+											FROM CMSHRLONSLIP WHERE TRIM(DOCUMENT_NO) = :slip_no");
 		$getHeaderSlip->execute([':slip_no' => $dataComing["slip_no"]]);
 		$rowSlip = $getHeaderSlip->fetch(PDO::FETCH_ASSOC);
 		$fetchName = $conoracle->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,mbg.MEMBGROUP_CODE
@@ -40,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 											cld.PERIOD,cld.PRINCIPAL_PAYAMT,cld.INTEREST_PAYAMT,cld.ITEM_PAYAMT
 											FROM CMSHRLONSLIPDET cld LEFT JOIN lnloantype lt ON cld.shrlontype_code = lt.loantype_code 
 											WHERE TRIM(cld.slip_no) = :slip_no");
-		$detailReceipt->execute([':slip_no' => $dataComing["slip_no"]]);
+		$detailReceipt->execute([':slip_no' => $rowSlip["SLIP_NO"]]);
 		while($rowDetail = $detailReceipt->fetch(PDO::FETCH_ASSOC)){
 			$arrayData = array();
 			$arrayData["PAY_ACCOUNT"] = $rowDetail["LOANCONTRACT_NO"];
@@ -157,7 +158,7 @@ function GenerateReport($dataReport,$header,$lib){
 	$html .= '
 	<div style="margin-top:20px;">
 		<div style="position:absolute;">
-			<div style=" text-align: left; position:absolute; top:0; left:10"><img src="../../resource/logo/logo.jpg" alt="" width="60" height="0"></div>
+			<div style=" text-align: left; position:absolute; top:0; left:10"><img src="../../resource/logo/logo.jpg" alt="" width="60"></div>
 		</div>
 		<div style="font-size: 22px;font-weight: bold; text-align:right; margin-right:30px; height: 45px;  padding-top:15px;">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษาธิการ จํากัด</div>
 	</div>
@@ -165,7 +166,7 @@ function GenerateReport($dataReport,$header,$lib){
 		<table>
 			<tr>
 				<th>เลขที่ใบรับเงิน</th>
-				<th>เลขที่ใบเสร็จรับเงิน</th>
+				<th>วันที่ออกใบเสร็จรับเงิน</th>
 			</tr>
 			<tr>
 				<td>'.$header["slip_no"].'</td>
@@ -251,7 +252,7 @@ function GenerateReport($dataReport,$header,$lib){
 					<div style="margin-left:250px">ลงซื่อ</div>
 					<div style="margin-left:435px">ผู้จัดการ</div>
 				</div>
-				<div style="position: absolute;  top:-10px; right:-20px">
+				<div style="position: absolute;  top:-15px; right:-20px">
 					<img src="../../resource/utility_icon/signature/manager.png" width="80" height="50" >
 				</div>
 			</div>

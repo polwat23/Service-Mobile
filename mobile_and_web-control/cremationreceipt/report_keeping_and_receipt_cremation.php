@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$sqlGetMembGrp->execute([':MEMBGRP' => $rowReceiptData["MEMBGROUP_CODE"]]);
 			$rowMembGrp = $sqlGetMembGrp->fetch(PDO::FETCH_ASSOC);
 			$header["member_group"] = $rowMembGrp["MEMBGROUP_CODE_STR"];
-			$header["slip_date"] = $lib->convertdate($rowReceiptData["DEPTSLIP_DATE"],'d m Y');
+			$header["slip_date"] = $lib->convertdate($rowReceiptData["DEPTSLIP_DATE"],'d/n/Y');
 			$getDetailSlipDet = $conoracle->prepare("SELECT SUM( CASE WHEN DEPTITEMTYPE_CODE = 'FEE' THEN PRNCSLIP_AMT ELSE 0.00 END ) AS REGISTER_FEE,
 													  SUM( CASE WHEN DEPTITEMTYPE_CODE = 'WPF' THEN PRNCSLIP_AMT ELSE 0.00 END ) AS FUTURE_FEE,
 													  SUM( CASE WHEN DEPTITEMTYPE_CODE = 'WFY' THEN PRNCSLIP_AMT ELSE 0.00 END ) AS MA_FEE,
@@ -209,9 +209,9 @@ function GenerateReportExtra($dataReport,$header,$lib){
 				  </table>
 		</div>
 		<div style="font-size: 22px;font-weight: bold; text-align:center; margin-center:30px; margin-top:10px;">สมาคมฌาปนกิจสงเคราะห์</div>
-		<div style="font-size: 22px;font-weight: bold; text-align:center;">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษาธิการ</div>
-		<div style="text-align:center;">319 อาคารสมาฉันท์ ชั้น 3 ภายในกระทรวงศึกษาธิการ แขวงดุสิต กรุงเทพฯ 10300 </div>
-		<div style="text-align:center;">โทร. 02-6287500-3, 02-2825609 โทรสาร 02-6287504-5 </div>
+		<div style="font-size: 22px;font-weight: bold; text-align:center;">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษาธิการ จำกัด</div>
+		<div style="text-align:center;">319 อาคารสมานฉันท์ ชั้น 3 ถนนพิษณุโลก แขวงดุสิต เขตดุสิต กรุงเทพฯ 10300</div>
+		<div style="text-align:center;">โทรศัพท์ : 0-2628-7500-3, 098-8309-093 โทรสาร : 0-2628-7504-5 www.moecoop.com</div>
 		<div style="font-size: 22px;font-weight: bold; text-align:center; margin-top:10px;">ใบเสร็จรับเงิน</div>
 			<table style="width: 100%;">
 				<tbody>
@@ -227,7 +227,7 @@ function GenerateReportExtra($dataReport,$header,$lib){
 				<tr>
 					<td style="width: 60px; font-size: 18px;  ">ได้รับเงินจาก </td>
 					<td style="width: 200px;" class="text-color">' .$header["full_name"]. '</td>
-					<td style="width: 30px;font-size: 18px;">สังกัด</td>
+					<td style="width: 30px;font-size: 18px;">สังกัด &nbsp;</td>
 					<td style="width: 220px;" class="text-color">' . $header["member_group"] . '</td>
 					<td style="width: 10px;">&nbsp;</td>
 					<td style="width: 80px;font-size: 18px;">เลขที่สมาชิก</td>
