@@ -148,7 +148,7 @@ function GenerateReport($dataReport,$header,$lib){
 				font-weight:bold;
 			}
 			.detail-color{
-				color:#7A7878;
+				color:#000000;
 			}
 			</style>';
 	//ขนาดของใบเสร็จ
@@ -247,13 +247,13 @@ function GenerateReport($dataReport,$header,$lib){
 			(ใบรับเงินฉบับนี้จะสมบูรณ์เมื่อได้รับเงินจากสมาชิกเข้าบัญชีเรียบร้อยแล้ว)
 		</div>
 		<div>
-			<div style="position:absolute;  left:120px; top:530px">
+			<div style="position:absolute;  left:120px; top:540px">
 				<div style="display:flex;">
 					<div style="margin-left:250px">ลงซื่อ</div>
 					<div style="margin-left:435px">ผู้จัดการ</div>
 				</div>
 				<div style="position: absolute;  top:-15px; right:-20px">
-					<img src="../../resource/utility_icon/signature/manager.png" width="80" height="50" >
+					<img src="../../resource/utility_icon/signature/manager.png" width="100">
 				</div>
 			</div>
 		</div>

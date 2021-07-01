@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
+																kpd.RECEIPT_DATE,
 																kpd.INTEREST_ACCUM
 																FROM kptempreceive kpd
 																WHERE TRIM(kpd.member_no) = :member_no and kpd.recv_period = :recv_period
@@ -89,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D/n/Y');
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["RECEIPT_DATE"],'D/n/Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
