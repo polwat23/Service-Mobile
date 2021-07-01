@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-		$getKpSlipNo = $conoracle->prepare("SELECT KEEPING_STATUS,RECEIPT_NO,OPERATE_DATE,INTEREST_ACCUM from kpmastreceive 
+		$getKpSlipNo = $conoracle->prepare("SELECT KEEPING_STATUS,RECEIPT_NO,RECEIPT_DATE,INTEREST_ACCUM from kpmastreceive 
 											where TRIM(member_no) = :member_no and recv_period = :recv_period
 											and TRIM(ref_membno) = :ref_membno");
 		$getKpSlipNo->execute([
@@ -118,7 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKp["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKp["OPERATE_DATE"],'D/n/Y');
+		$header["operate_date"] = $lib->convertdate($rowKp["RECEIPT_DATE"],'D/n/Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
