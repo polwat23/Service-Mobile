@@ -9,8 +9,8 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipExtraPayment')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrGroupDetail = array();
-		$getHeaderSlip = $conoracle->prepare("SELECT SLIP_DATE,SLIP_AMT,SLIP_NO 
-											FROM CMSHRLONSLIP WHERE TRIM(DOCUMENT_NO) = :slip_no");
+		$getHeaderSlip = $conoracle->prepare("SELECT SLIP_DATE,SLIP_AMT,TRIM(DOCUMENT_NO) as DOCUMENT_NO
+											FROM CMSHRLONSLIP WHERE TRIM(SLIP_NO) = :slip_no");
 		$getHeaderSlip->execute([':slip_no' => $dataComing["slip_no"]]);
 		$rowSlip = $getHeaderSlip->fetch(PDO::FETCH_ASSOC);
 		$fetchName = $conoracle->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,mbg.MEMBGROUP_CODE
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		$header["member_group"] = $rowMembGrp["MEMBGROUP_CODE_STR"];
 		$header["member_no"] = $member_no;
 		$header["slip_date"] = $lib->convertdate($rowSlip["SLIP_DATE"],'d/n/Y');
-		$header["slip_no"] = $dataComing["slip_no"];
+		$header["slip_no"] = $rowSlip["DOCUMENT_NO"];
 		$header["slip_amt"] = $rowSlip["SLIP_AMT"];
 		$detailReceipt = $conoracle->prepare("SELECT cld.LOANCONTRACT_NO,
 											CASE cld.SLIPITEMTYPE_CODE 

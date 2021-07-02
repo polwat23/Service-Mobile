@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowMonth = $getMonthSlip->fetch(PDO::FETCH_ASSOC)){
 				$arrayMonth = array();
 				$arrayMonth["MONTH"] = $thaimonth[$rowMonth["EACH_MONTH"]];
-				$getListSlip = $conoracle->prepare("SELECT DOCUMENT_NO FROM CMSHRLONSLIP 
+				$getListSlip = $conoracle->prepare("SELECT SLIP_NO FROM CMSHRLONSLIP 
 													WHERE TRIM(member_no) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year 
 													and EXTRACT(MONTH FROM SLIP_DATE) = :month");
 				$getListSlip->execute([
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				]);
 				while($rowListSlip = $getListSlip->fetch(PDO::FETCH_ASSOC)){
 					$arraySlip = array();
-					$arraySlip["SLIP_NO"] = TRIM($rowListSlip["DOCUMENT_NO"]);
+					$arraySlip["SLIP_NO"] = TRIM($rowListSlip["SLIP_NO"]);
 					$arrayMonth["SLIP"][] = $arraySlip;
 				}
 				$arrayYear["MONTH"][] = $arrayMonth;
