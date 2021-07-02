@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrp = array();
 		$limit_show_slip_extra = $func->getConstant("limit_show_slip_extra");
 		$getListCountSlip = $conoracle->prepare("SELECT * FROM (SELECT EXTRACT(YEAR FROM SLIP_DATE) AS EACH_YEAR,COUNT(SLIP_NO) AS C_SLIP 
-										FROM CMSHRLONSLIP WHERE TRIM(MEMBER_NO) = :member_no GROUP BY EXTRACT(YEAR FROM SLIP_DATE) 
+										FROM CMSHRLONSLIP WHERE TRIM(MEMBER_NO) = :member_no and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX' ) 
+										GROUP BY EXTRACT(YEAR FROM SLIP_DATE) 
 										ORDER BY EXTRACT(YEAR FROM SLIP_DATE) DESC) WHERE rownum <= :limit_show_slip_extra");
 		$getListCountSlip->execute([
 			':member_no' => $member_no,
@@ -20,6 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayYear["COUNT"] = $rowListCountSlip["C_SLIP"];
 			$getMonthSlip = $conoracle->prepare("SELECT EXTRACT(MONTH FROM SLIP_DATE) AS EACH_MONTH
 												FROM CMSHRLONSLIP WHERE TRIM(MEMBER_NO) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year
+												and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX' ) 
 												GROUP BY EXTRACT(MONTH FROM SLIP_DATE) ORDER BY EXTRACT(MONTH FROM SLIP_DATE) ASC");
 			$getMonthSlip->execute([
 				':member_no' => $member_no,
@@ -30,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayMonth["MONTH"] = $thaimonth[$rowMonth["EACH_MONTH"]];
 				$getListSlip = $conoracle->prepare("SELECT DOCUMENT_NO FROM CMSHRLONSLIP 
 													WHERE TRIM(member_no) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year 
-													and EXTRACT(MONTH FROM SLIP_DATE) = :month");
+													and EXTRACT(MONTH FROM SLIP_DATE) = :month and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX' ) ");
 				$getListSlip->execute([
 					':member_no' => $member_no,
 					':year' => $rowListCountSlip["EACH_YEAR"],
