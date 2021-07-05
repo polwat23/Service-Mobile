@@ -191,10 +191,13 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด
+					สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Nakhon Sawan General Education Saving and Credit Co.,LTD
+					TAK SAVING AND CREDIT COOPERATIVE FOR OFFICIALS
+			   </div>
+			   <div style=" position: fixed;top:28px; left: 60px;font-size:20px">
+					IN MINISTRY OF EDUCATION LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
