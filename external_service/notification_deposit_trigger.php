@@ -10,28 +10,26 @@ $lib = new library();
 $func = new functions();
 
 $arrayStmItem = array();
-$getStmItemTypeAllow = $conmysql->prepare("SELECT loan_itemtype_code FROM smsconstantloan WHERE allow_smsconstantloan = '1'");
+$getStmItemTypeAllow = $conmysql->prepare("SELECT dept_itemtype_code FROM smsconstantdept WHERE allow_smsconstantdept = '1'");
 $getStmItemTypeAllow->execute();
 while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
-	$arrayStmItem[] = "'".$rowStmItemType["loan_itemtype_code"]."'";
+	$arrayStmItem[] = "'".$rowStmItemType["dept_itemtype_code"]."'";
 }
-$templateMessage = $func->getTemplateSystem('LoanInfo',1);
-$fetchDataSTM = $conmssql->prepare("SELECT LUT.LOANITEMTYPE_DESC,LCN.LOANCONTRACT_NO,LCN.OPERATE_DATE,LCM.MEMBER_NO,LCN.SEQ_NO,
-									LCN.PRINCIPAL_PAYMENT,LCN.INTEREST_PAYMENT,LCN.PRINCIPAL_BALANCE
-									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
-									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
-									WHERE lcn.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (lcn.sync_notify_flag IS NULL OR lcn.sync_notify_flag = '0') and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
+$formatDept = $func->getConstant('hidden_dep');
+$templateMessage = $func->getTemplateSystem('DepositInfo',1);
+$fetchDataSTM = $conmssql->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,dm.MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO
+									FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
+									LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no and dsm.coop_id = dm.coop_id
+									WHERE dsm.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (dsm.sync_notify_flag IS NULL OR dsm.sync_notify_flag = '0') and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
 			$dataMerge = array();
-			$dataMerge["LOANCONTRACT_NO"] = $rowSTM["LOANCONTRACT_NO"];
-			$dataMerge["PRINCIPAL_PAYMENT"] = number_format($rowSTM["PRINCIPAL_PAYMENT"],2);
-			$dataMerge["INTEREST_PAYMENT"] = number_format($rowSTM["INTEREST_PAYMENT"],2);
-			$dataMerge["PRINCIPAL_BALANCE"] = number_format($rowSTM["PRINCIPAL_BALANCE"],2);
-			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["LOANITEMTYPE_DESC"];
+			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
+			$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
+			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 			$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
 			$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
 			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -46,9 +44,9 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conmssql->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
+				$updateSyncFlag = $conmssql->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
-					':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
+					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
 				]);
 			}
@@ -57,11 +55,9 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	foreach($arrToken["LIST_SEND_HW"] as $dest){
 		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
 			$dataMerge = array();
-			$dataMerge["LOANCONTRACT_NO"] = $rowSTM["LOANCONTRACT_NO"];
-			$dataMerge["PRINCIPAL_PAYMENT"] = number_format($rowSTM["PRINCIPAL_PAYMENT"],2);
-			$dataMerge["INTEREST_PAYMENT"] = number_format($rowSTM["INTEREST_PAYMENT"],2);
-			$dataMerge["PRINCIPAL_BALANCE"] = number_format($rowSTM["PRINCIPAL_BALANCE"],2);
-			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["LOANITEMTYPE_DESC"];
+			$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
+			$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
+			$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 			$dataMerge["DATETIME"] = isset($rowSTM["OPERATE_DATE"]) && $rowSTM["OPERATE_DATE"] != '' ? 
 			$lib->convertdate($rowSTM["OPERATE_DATE"],'D m Y') : $lib->convertdate(date('Y-m-d H:i:s'),'D m Y');
 			$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -76,9 +72,9 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conmssql->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
+				$updateSyncFlag = $conmssql->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
-					':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
+					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
 				]);
 			}

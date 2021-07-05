@@ -160,11 +160,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ จ. 55/96-98 ถ.ดาวดึงส์</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต ปากน้ำโพ อ.เมือง จ.นครสวรรค์</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5622-2046</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">8/8 ถนนเทศบาล 7 ชุมชนเฉลิมพระเกียรติ</p>
+				<p style="margin-top: -25px;font-size: 18px;">ต.ระแหง อ.เมือง จังหวัด ตาก 63000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-893-077,055-896-076</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">web.takesc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -270,9 +270,13 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-20px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
+			<div style="font-size: 18px;margin-left: 600px;margin-top:-90px;">
+			.....................................
+			<p style="margin-left: 30px;">ผู้จัดการ</p></div>
+			<div style="font-size: 18px;margin-left: 800px;margin-top:-90px;">
+			.....................................
+			<p style="margin-left: 20px;">เจ้าหน้าที่รับเงิน</p></div>
+
 			';
 
 	$dompdf = new Dompdf([

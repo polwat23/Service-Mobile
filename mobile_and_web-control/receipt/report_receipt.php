@@ -215,11 +215,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สามัญศึกษานครสวรรค์ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ จ. 55/96-98 ถ.ดาวดึงส์</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต ปากน้ำโพ อ.เมือง จ.นครสวรรค์</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5622-2046</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">8/8 ถนนเทศบาล 7 ชุมชนเฉลิมพระเกียรติ</p>
+				<p style="margin-top: -25px;font-size: 18px;">ต.ระแหง อ.เมือง จังหวัด ตาก 63000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-893-077,055-896-076</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">web.takesc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -324,11 +324,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/receive_money.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/mg.png" width="80" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 750px;display:flex;">
+			<img src="../../resource/utility_icon/signature/fn.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
 	$dompdf = new Dompdf([
