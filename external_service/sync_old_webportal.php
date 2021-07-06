@@ -28,7 +28,7 @@ try{
 $dbhost2 = "127.0.0.1";
 $dbuser2 = "root";
 $dbpass2 = "@STK2021";
-$dbname2 = "mobile_stk_temp";
+$dbname2 = "mobile_temp";
 try{
 	$conmysql2 = new PDO("mysql:dbname={$dbname2};host={$dbhost2}", $dbuser2, $dbpass2);
 	$conmysql2->exec("set names utf8mb4");
@@ -80,7 +80,11 @@ try{
 	if(sizeof($insertTOSRN) > 0){
 		$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,temppass_is_md5)
 												VALUES".implode(',',$insertTOSRN));
-		$insert->execute();
+		if($insert->execute()){
+		}else{
+			echo $insert->queryString;
+		}
+		
 	}
 	echo 'done !!';
 
