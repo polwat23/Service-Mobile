@@ -196,7 +196,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
 					TAK SAVING AND CREDIT COOPERATIVE FOR OFFICIALS
 			   </div>
-			   <div style=" position: fixed;top:28px; left: 60px;font-size:20px">
+			   <div style=" position: fixed;top:43px; left: 60px;font-size:20px">
 					IN MINISTRY OF EDUCATION LIMITED
 			   </div>
 			   </div>
