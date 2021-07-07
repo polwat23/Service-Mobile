@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logwithdrawonline')){
 		$arrayGroup = array();
-		$fetLogTransection = $conmysql->prepare("SELECT
+		$fetLogTransection = $conoracle->prepare("SELECT
 													trans.ref_no,
 													trans.member_no,
 													trans.transaction_type_code,

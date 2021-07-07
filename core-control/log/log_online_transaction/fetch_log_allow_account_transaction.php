@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logallowacctransation')){
 		$arrayGroup = array();
-		$fetLogAllowAccountTransation = $conmysql->prepare("
+		$fetLogAllowAccountTransation = $conoracle->prepare("
 															SELECT
 																alow.id_userallowacctran,
 																alow.member_no,

@@ -34,40 +34,40 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 			}
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conoracle->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and date_format(operate_date,'%Y') >= :start_date" : null)."
+														"and TO_CHAR(operate_date,'YYYY') >= :start_date" : null)."
 														".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(operate_date,'%Y') <= :end_date" : null)." 
+														"and TO_CHAR(operate_date,'YYYY') <= :end_date" : null)." 
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no <= :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
-			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+			}else if($dataComing["date_type"] == 'month'){ 
+				$fetchReconcile = $conoracle->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and date_format(operate_date,'%Y-%m') >= :start_date" : null)."
+														"and TO_CHAR(operate_date,'YYYY-MM') >= :start_date" : null)."
 														".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(operate_date,'%Y-%m') <= :end_date" : null)." 
+														"and TO_CHAR(operate_date,'YYYY-MM') <= :end_date" : null)." 
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no <= :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
-			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+			}else if($dataComing["date_type"] == 'day'){ 
+				$fetchReconcile = $conoracle->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and date_format(operate_date,'%Y-%m-%d') >= :start_date" : null)."
+														"and TO_CHAR(operate_date,'YYYY-MM-DD') >= :start_date" : null)."
 														".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(operate_date,'%Y-%m-%d') <= :end_date" : null)." 
+														"and TO_CHAR(operate_date,'YYYY-MM-DD') <= :end_date" : null)." 
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no <= :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
@@ -81,7 +81,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 			}
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conoracle->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -90,7 +90,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conoracle->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -99,7 +99,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conoracle->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
 														WHERE transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
@@ -115,27 +115,27 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$formatDept = $func->getConstant('dep_format');
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrayRecon = array();
-			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["transaction_type_code"];
-			$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$formatDept);
-			$arrayRecon["FROM_ACCOUNT"] = $rowRecon["from_account"];
+			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["TRANSACTION_TYPE_CODE"];
+			$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["FROM_ACCOUNT"],$formatDept);
+			$arrayRecon["FROM_ACCOUNT"] = $rowRecon["FROM_ACCOUNT"];
 			if($rowRecon["transfer_mode"] == '1'){
-				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$formatDept);
+				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["DESTINATION"],$formatDept);
 			}else{
-				$arrayRecon["DESTINATION_FORMAT"] = $rowRecon["destination"];
+				$arrayRecon["DESTINATION_FORMAT"] = $rowRecon["DESTINATION"];
 			}
-			$arrayRecon["REF_NO"] = $rowRecon["ref_no"];
-			$arrayRecon["DESTINATION"] = $rowRecon["destination"];
-			$arrayRecon["TRANS_FLAG"] = $rowRecon["trans_flag"];
-			$arrayRecon["OPERATE_DATE"] = $lib->convertdate($rowRecon["operate_date"],'d m Y',true);
-			$arrayRecon["AMOUNT"] = number_format($rowRecon["amount"],2);
-			$arrayRecon["PENALTY_AMT"] = number_format($rowRecon["penalty_amt"],2);
-			$arrayRecon["FEE_AMT"] = number_format($rowRecon["fee_amt"],2);
-			$arrayRecon["RESULT_TRANSACTION"] = $rowRecon["result_transaction"];
-			$arrayRecon["MEMBER_NO"] = $rowRecon["member_no"];
-			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["amount_receive"],2);
+			$arrayRecon["REF_NO"] = $rowRecon["REF_NO"];
+			$arrayRecon["DESTINATION"] = $rowRecon["DESTINATION"];
+			$arrayRecon["TRANS_FLAG"] = $rowRecon["TRANS_FLAG"];
+			$arrayRecon["OPERATE_DATE"] = $lib->convertdate($rowRecon["OPERATE_DATE"],'d m Y',true);
+			$arrayRecon["AMOUNT"] = number_format($rowRecon["AMOUNT"],2);
+			$arrayRecon["PENALTY_AMT"] = number_format($rowRecon["PENALTY_AMT"],2);
+			$arrayRecon["FEE_AMT"] = number_format($rowRecon["FEE_AMT"],2);
+			$arrayRecon["RESULT_TRANSACTION"] = $rowRecon["RESULT_TRANSACTION"];
+			$arrayRecon["MEMBER_NO"] = $rowRecon["MEMBER_NO"];
+			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["AMOUNT_RECEIVE"],2);
 			
-			if( $rowRecon["result_transaction"]=='1'){
-				$summary += $rowRecon["amount_receive"];
+			if( $rowRecon["RESULT_TRANSACTION"]=='1'){
+				$summary += $rowRecon["AMOUNT_RECEIVE"];
 			}else{
 				$summary += 0;
 			}

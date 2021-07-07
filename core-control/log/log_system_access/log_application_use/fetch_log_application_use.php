@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logapplicationuse')){
 		$arrayGroup = array();
-		$fetchApplicationUseLog = $conmysql->prepare("SELECT
+		$fetchApplicationUseLog = $conoracle->prepare("SELECT
 																					l.id_loguseapp,
 																					l.member_no,
 																					l.id_userlogin,

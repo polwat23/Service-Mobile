@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
+		$getMemoDP = $conoracle->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
 											WHERE deptaccount_no = :account_no");
 		$getMemoDP->execute([
 			':account_no' => $account_no
@@ -77,12 +77,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
 			$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
-			if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no')) === False){
+			if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'SEQ_NO')) === False){
 				$arrSTM["MEMO_TEXT"] = null;
 				$arrSTM["MEMO_ICON_PATH"] = null;
 			}else{
-				$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
-				$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
+				$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'SEQ_NO'))]["MEMO_TEXT"] ?? null;
+				$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'SEQ_NO'))]["MEMO_ICON_PATH"] ?? null;
 			}
 			$arrayGroupSTM[] = $arrSTM;
 		}

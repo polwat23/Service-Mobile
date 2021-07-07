@@ -21,19 +21,19 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-	$conmysql->beginTransaction();
-	$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,password = :password,temppass = null,account_status = '1'
+	$conoracle->beginTransaction();
+	$changePassword = $conoracle->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,password = :password,temppass = null,account_status = '1'
 											WHERE member_no = :member_no");
 	if($changePassword->execute([
 		':password' => $password,
 		':member_no' => $member_no
 	])){
 		if($func->logoutAll(null,$dataComing["member_no"],'-9')){
-			$conmysql->commit();
+			$conoracle->commit();
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$conmysql->rollback();
+			$conoracle->rollback();
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','password','member_no'],
 			
 		}
 	}else{
-		$conmysql->rollback();
+		$conoracle->rollback();
 		$filename = basename(__FILE__, '.php');
 		$logStruc = [
 			":error_menu" => $filename,

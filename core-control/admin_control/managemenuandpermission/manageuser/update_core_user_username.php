@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','newusername'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managecoreusers')){
-		$updaeusername = $conmysql->prepare("UPDATE coreuser 
+		$updaeusername = $conoracle->prepare("UPDATE coreuser 
 										  SET username = :newusername
 								          WHERE  username = :username;");
 		if($updaeusername->execute([

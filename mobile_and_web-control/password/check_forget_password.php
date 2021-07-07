@@ -20,14 +20,14 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT account_status,user_type FROM gcmemberaccount 
+	$checkMember = $conoracle->prepare("SELECT account_status,user_type FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkMember->execute([
 		':member_no' => $member_no
 	]);
 	if($checkMember->rowCount() > 0){
 		$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
-		if($rowChkMemb["account_status"] == '-8'){
+		if($rowChkMemb["ACCOUNT_STATUS"] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 			require_once('../../include/exit_footer.php');
 			
 		}
-		if($rowChkMemb['user_type'] == '0' || $rowChkMemb['user_type'] == '1'){
+		if($rowChkMemb['USER_TYPE'] == '0' || $rowChkMemb['USER_TYPE'] == '1'){
 			$arrayResult['IS_OTP'] = TRUE;
 		}
 		$arrayResult['TEL'] = $rowMemb["MEM_TELMOBILE"];

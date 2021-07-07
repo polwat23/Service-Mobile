@@ -20,12 +20,12 @@ if($lib->checkCompleteArgument(['api_token'],$dataComing)){
 		
 	}
 		
-	$getBackground = $conmysql->prepare("SELECT image FROM gcconstantbackground WHERE is_use = '1'");
+	$getBackground = $conoracle->prepare("SELECT image FROM gcconstantbackground WHERE is_use = '1'");
 	$getBackground->execute();
 		if($getBackground->rowCount() > 0){
 			$rowInfo = $getBackground->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowInfo["image"])){
-				$arrayResult['IMAGE'] = $config["URL_SERVICE"].$rowInfo["image"];
+			if(isset($rowInfo["IMAGE"])){
+				$arrayResult['IMAGE'] = $config["URL_SERVICE"].$rowInfo["IMAGE"];
 			}else {
 				$arrayResult['IMAGE'] = null;
 			}

@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logdepttransbankerror')){
 		$arrayGroup = array();
-		$fetchTranfertError = $conmysql->prepare("SELECT
+		$fetchTranfertError = $conoracle->prepare("SELECT
 													db.id_deptransbankerr,
 													db.member_no,
 													db.transaction_date,

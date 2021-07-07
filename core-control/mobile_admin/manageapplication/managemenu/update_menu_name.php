@@ -5,10 +5,10 @@ if($lib->checkCompleteArgument(['unique_id','menu_name','id_menu','menu_language
 	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
 		
 		if($dataComing["menu_language"] == "en"){
-			$updatemenu = $conmysql->prepare("UPDATE gcmenu SET menu_name_en = :menu_name
+			$updatemenu = $conoracle->prepare("UPDATE gcmenu SET menu_name_en = :menu_name
 									 WHERE id_menu = :id_menu");
 		}else{
-			$updatemenu = $conmysql->prepare("UPDATE gcmenu SET menu_name = :menu_name
+			$updatemenu = $conoracle->prepare("UPDATE gcmenu SET menu_name = :menu_name
 									 WHERE id_menu = :id_menu");
 		}					 
 									 

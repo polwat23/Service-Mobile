@@ -4,7 +4,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 	if($dataComing["priority"] == 'ask'){
-		$insertResponseAnn = $conmysql->prepare("INSERT INTO logacceptannounce(member_no,id_announce,status_accept,id_userlogin)
+		$insertResponseAnn = $conoracle->prepare("INSERT INTO logacceptannounce(member_no,id_announce,status_accept,id_userlogin)
 																		VALUES(:member_no,:id_announce,:status_accept,:id_userlogin)");
 		if($insertResponseAnn->execute([
 			':member_no' => $payload["member_no"],
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['id_announce'],$dataComing)){
 			
 		}
 	}else{
-		$insertResponseAnn = $conmysql->prepare("INSERT INTO logacceptannounce(member_no,id_announce,id_userlogin)
+		$insertResponseAnn = $conoracle->prepare("INSERT INTO logacceptannounce(member_no,id_announce,id_userlogin)
 																		VALUES(:member_no,:id_announce,:id_userlogin)");
 		if($insertResponseAnn->execute([
 			':member_no' => $payload["member_no"],

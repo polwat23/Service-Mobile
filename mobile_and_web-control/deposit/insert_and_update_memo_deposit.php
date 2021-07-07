@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$updateMemoDept = $conmysql->prepare("UPDATE gcmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
+		$updateMemoDept = $conoracle->prepare("UPDATE gcmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
 												WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 		if($updateMemoDept->execute([
 			':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
@@ -34,9 +34,11 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$insertMemoDept = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,memo_icon_path,deptaccount_no,seq_no) 
-													VALUES(:memo_text,:memo_icon_path,:deptaccount_no,:seq_no)");
+			$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+			$insertMemoDept = $conoracle->prepare("INSERT INTO gcmemodept(id_memo,memo_text,memo_icon_path,deptaccount_no,seq_no) 
+													VALUES(:id_memo,:memo_text,:memo_icon_path,:deptaccount_no,:seq_no)");
 			if($insertMemoDept->execute([
+				':id_memo' => $id_memo,
 				':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
 				':memo_icon_path' => $dataComing["memo_icon_path"] == "" ? null : $dataComing["memo_icon_path"],
 				':deptaccount_no' => $account_no,
@@ -54,6 +56,7 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 				];
 				$log->writeLog('errorusage',$logStruc);
 				$message_error = "เพิ่มบันทึกช่วยจำไม่ได้เพราะ Insert ลงตาราง gcmemodept ไม่ได้ "."\n"."Query => ".$insertMemoDept->queryString."\n"."Param =>".json_encode([
+					':id_memo' => $id_memo,
 					':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
 					':memo_icon_path' => $dataComing["memo_icon_path"] == "" ? null : $dataComing["memo_icon_path"],
 					':deptaccount_no' => $account_no,

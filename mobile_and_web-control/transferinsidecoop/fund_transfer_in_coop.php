@@ -64,19 +64,21 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
 					$fetchSeqno->execute([':deptslip_no' => $responseSoap->ref_slipno]);
 					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-														VALUES(:remark,:deptaccount_no,:seq_no)");
+					$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+					$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo ,memo_text,deptaccount_no,seq_no)
+														VALUES(:id_memo,:remark,:deptaccount_no,:seq_no)");
 					$insertRemark->execute([
+						':id_memo' => $id_memo,
 						':remark' => $dataComing["remark"],
 						':deptaccount_no' => $from_account_no,
 						':seq_no' => $rowSeqno["SEQ_NO"]
 					]);
 					$arrayResult['TRANSACTION_NO'] = $ref_no;
 					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	ref_no_1,id_userlogin,ref_no_source)
-																	VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',:operate_date,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+																	VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,
 						':from_account' => $from_account_no,

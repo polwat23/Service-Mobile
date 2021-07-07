@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
 			}
 			$arrayResult['DATA'] = $arrayData;
 			$arrayResult['COLUMN'] = $arrColumn;
-			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['RESULT'] = $dataComing["query_message_spc_"];
 			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE'] = "คำสั่งนี้ ไม่ได้รับอนุญาตให้ใช้งานได้";

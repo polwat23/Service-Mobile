@@ -11,6 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 			$structureReqLoan["member_no"] = $member_no;
 			$structureReqLoan["loantype_code"] = $dataComing["loantype_code"];
 			$structureReqLoan["operate_date"] = date("c");
+			$id_reqloan = $func->getMaxTable('id_reqloan' , 'logreqloan');
 			try {
 				$argumentWS = [
 					"as_wspass" => $config["WS_STRC_DB"],
@@ -63,9 +64,11 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 						$receive_net = $dataComing["request_amt"] - $diff_old_contract;
 						$resultWS = $clientWS->__call("of_saveloanmobile_atm_ivr", array($argumentWS));
 						$responseSoapSave = $resultWS->of_saveloanmobile_atm_ivrResult;
-						$insertReqLoan = $conmysql->prepare("INSERT INTO logreqloan(member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
-															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
+						
+						$insertReqLoan = $conoracle->prepare("INSERT INTO logreqloan(id_reqloan,member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
+															VALUES(:id_reqloan,:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
+							':id_reqloan' => $id_reqloan,
 							':member_no' => $payload["member_no"],
 							':loantype_code' => $dataComing["loantype_code"],
 							':request_amt' => $dataComing["request_amt"],
@@ -152,9 +155,10 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 						];
 						$log->writeLog('errorusage',$logStruc);
-						$insertReqLoan = $conmysql->prepare("INSERT INTO logreqloan(member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
-															VALUES(:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
+						$insertReqLoan = $conoracle->prepare("INSERT INTO logreqloan(id_reqloan,member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
+															VALUES(:id_reqloan,:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
+							':id_reqloan' => $id_reqloan,
 							':member_no' => $payload["member_no"],
 							':loantype_code' => $dataComing["loantype_code"],
 							':request_amt' => $dataComing["request_amt"],

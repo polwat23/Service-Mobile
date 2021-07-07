@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu')){
-		$updateConstants = $conmysql->prepare("UPDATE gcmenuconstantmapping
+		$updateConstants = $conoracle->prepare("UPDATE gcmenuconstantmapping
 		SET is_use = '0'
 		WHERE id_constantmapping = :id_constantmapping");
 		if($updateConstants->execute([

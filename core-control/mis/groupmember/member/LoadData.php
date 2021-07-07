@@ -11,7 +11,7 @@ exit();
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
 		$arrayGroup = array();
-		$fetchUserAccount = $conmysql->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status, user_type
+		$fetchUserAccount = $conoracle->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status, user_type
 												FROM gcmemberaccount WHERE user_type IN('0','1')");
 		$fetchUserAccount->execute();
 		while($rowUserlogin = $fetchUserAccount->fetch()){

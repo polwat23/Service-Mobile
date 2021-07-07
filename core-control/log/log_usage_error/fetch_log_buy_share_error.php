@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logbuyshareerror')){
 		$arrayGroup = array();
-		$fetchLogShare = $conmysql->prepare("SELECT
+		$fetchLogShare = $conoracle->prepare("SELECT
 														s.id_buyshare,
 														s.member_no,
 														s.transaction_date,

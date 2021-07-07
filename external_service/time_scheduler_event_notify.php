@@ -14,7 +14,7 @@ $config = json_decode($jsonConfig,true);
 
 $dateNow = date("YmdHi");
 
-$getNotifyWaitforSend = $conmysql->prepare("SELECT is_import,create_by,id_sendahead,send_topic,send_message,destination,CASE destination_revoke WHEN '' THEN NULL ELSE destination_revoke END as destination_revoke
+$getNotifyWaitforSend = $conoracle->prepare("SELECT is_import,create_by,id_sendahead,send_topic,send_message,destination,CASE destination_revoke WHEN '' THEN NULL ELSE destination_revoke END as destination_revoke
 										,id_smsquery,id_smstemplate,send_platform,send_image
 										FROM smssendahead WHERE is_use = '1' and :datenow >= DATE_FORMAT(send_date,'%Y%m%d%H%i')");
 $getNotifyWaitforSend->execute([':datenow' => $dateNow]);
@@ -92,7 +92,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 		}else{
 			if(isset($rowNoti["id_smsquery"])){
 				if($rowNoti["destination"] != 'all'){
-					$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target,is_stampflag,stamp_table,where_stamp,set_column
+					$getQuery = $conoracle->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target,is_stampflag,stamp_table,where_stamp,set_column
 													FROM smsquery WHERE id_smsquery = :id_query");
 					$getQuery->execute([':id_query' => $rowNoti["id_smsquery"]]);
 					if($getQuery->rowCount() > 0){
@@ -302,7 +302,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						}
 					}
 				}else{
-					$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+					$getQuery = $conoracle->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
 					$getQuery->execute([':id_query' => $rowNoti["id_smsquery"]]);
 					if($getQuery->rowCount() > 0){
 						$blukInsert = array();
@@ -589,7 +589,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 		}else{
 			if(isset($rowNoti["id_smsquery"])){
 				if($rowNoti["destination"] != 'all'){
-					$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+					$getQuery = $conoracle->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
 					$getQuery->execute([':id_query' => $rowNoti["id_smsquery"]]);
 					if($getQuery->rowCount() > 0){
 						$arrGRPAll = array();
@@ -745,7 +745,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 						}
 					}
 				}else{
-					$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+					$getQuery = $conoracle->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
 					$getQuery->execute([':id_query' => $rowNoti["id_smsquery"]]);
 					if($getQuery->rowCount() > 0){
 						$arrGRPAll = array();
@@ -879,7 +879,7 @@ while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 			}
 		}
 	}
-	$updateSentNoti = $conmysql->prepare("UPDATE smssendahead SET is_use = '-9' WHERE id_sendahead = :id_sendahead");
+	$updateSentNoti = $conoracle->prepare("UPDATE smssendahead SET is_use = '-9' WHERE id_sendahead = :id_sendahead");
 	$updateSentNoti->execute([':id_sendahead' => $rowNoti["id_sendahead"]]);
 }
 ?>

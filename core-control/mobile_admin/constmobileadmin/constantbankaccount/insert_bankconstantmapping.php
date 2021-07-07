@@ -3,14 +3,17 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("INSERT INTO gcbankconstantmapping
-		(bank_code, id_bankconstant)
-		VALUES (:bank_code, :id_bankconstant)");
+		$id_bankconstantmapping = $func->getMaxTable('id_bankconstantmapping' , 'gcbankconstantmapping');
+		$updateConstants = $conoracle->prepare("INSERT INTO gcbankconstantmapping
+		(id_bankconstantmapping,bank_code, id_bankconstant)
+		VALUES (:id_bankconstantmapping, :bank_code, :id_bankconstant)");
 		if($updateConstants->execute([
+			':id_bankconstantmapping' => $id_bankconstantmapping,
 			':bank_code' => $dataComing["bank_code"],
 			':id_bankconstant' => $dataComing["id_bankconstant"]
 		])){
 			$arrayStruc = [
+					':menu_name' => $id_bankconstantmapping,
 					':menu_name' => "constantbankaccount",
 					':username' => $payload["username"],
 					':use_list' =>"insert gcbankconstantmapping",

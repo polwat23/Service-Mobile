@@ -6,14 +6,15 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
-		$check_account = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
+		$check_account = $conoracle->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
 											and bindaccount_status IN('0','1')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
 			':id_bindaccount' => $dataComing["id_bindaccount"],
 			':member_no' => $payload["member_no"]
 		]);
-		if($check_account->rowCount() > 0){
+		$rowAccount = $check_account->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowAccount["ID_BINDACCOUNT"])){
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['exp'] = time() + 60;
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
@@ -21,15 +22,15 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$conmysql->beginTransaction();
-			$updateUnBindAccount = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW() WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
+			$conoracle->beginTransaction();
+			$updateUnBindAccount = $conoracle->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW() WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
 			if($updateUnBindAccount->execute([
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
 				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_unbind_espa_id',$arrSendData);
 				if(!$responseAPI){
-					$conmysql->rollback();
+					$conoracle->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS0029";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -38,11 +39,11 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				}
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
-					$conmysql->commit();
+					$conoracle->commit();
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
-					$conmysql->rollback();
+					$conoracle->rollback();
 					$text = '#Unbind #WS0040: '.date("Y-m-d H:i:s").' > '.json_encode($arrResponse).' | '.json_encode($arrPayloadverify);
 					file_put_contents(__DIR__.'/../../log/unbind_error.txt', $text . PHP_EOL, FILE_APPEND);
 					$arrayResult['RESPONSE_CODE'] = "WS0040";
@@ -52,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 					
 				}			
 			}else{
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$arrExecute = [
 					':sigma_key' => $dataComing["sigma_key"],
 					':id_bindaccount' => $dataComing["id_bindaccount"]

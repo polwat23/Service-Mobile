@@ -20,9 +20,11 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 								</html>';
 		}
 
-		$insertTaskEvent = $conmysql->prepare("INSERT INTO `gctaskevent`(`task_topic`, `task_detail`, `start_date`, `end_date`,`event_start_time`,`event_end_time`,`is_settime`,`is_notify`,`is_notify_before`,`create_by`,event_html) 
-							VALUES (:task_topic,:task_detail,:start_date,:end_date,:event_start_time,:event_end_time,:is_settime,:is_notify,:is_notify_before,:create_by,:event_html)");
+		$id_task = $func->getMaxTable('id_task' , 'gctaskevent');
+		$insertTaskEvent = $conoracle->prepare("INSERT INTO gctaskevent(id_task ,task_topic, task_detail, start_date, end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before,create_by,event_html ) 
+							VALUES (:id_task,:task_topic,:task_detail,to_date(:start_date,'yyyy-mm-dd'),to_date(:end_date,'yyyy-mm-dd'),:event_start_time,:event_end_time,:is_settime,:is_notify,:is_notify_before,:create_by,:event_html)");
 		if($insertTaskEvent->execute([
+			':id_task' => $id_task,
 			':task_topic' => $dataComing["task_topic"],
 			':task_detail' => $dataComing["task_detail"],
 			':start_date' => $dataComing["start_date"],
@@ -38,7 +40,20 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มกิจกรรมได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = [
+			':id_task' => $id_task,
+			':task_topic' => $dataComing["task_topic"],
+			':task_detail' => $dataComing["task_detail"],
+			':start_date' => $dataComing["start_date"],
+			':end_date'=> $dataComing["end_date"],
+			':event_start_time'=> $dataComing["start_time"] == '' ? null : $dataComing["start_time"],
+			':event_end_time'=> $dataComing["end_time"] == '' ? null : $dataComing["end_time"],
+			':is_settime'=> $dataComing["is_settime"],
+			':is_notify'=> $dataComing["is_notify"],
+			':is_notify_before'=> $dataComing["is_notify_before"],
+			':create_by'=> $dataComing["create_by"],
+			':event_html'=>$detail_html ?? null
+		];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}

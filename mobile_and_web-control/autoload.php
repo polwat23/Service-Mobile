@@ -71,13 +71,7 @@ $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
-if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
-	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
-	$lib->sendLineNotify($message_error);
-	http_response_code(500);
-	
-}
-if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"] == '1'){
+if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
 	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
 	$lib->sendLineNotify($message_error);
 	$func->MaintenanceMenu("System");
@@ -151,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							if(!$skip_autoload){
 								if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
 								&& $dataComing["menu_component"] != 'Landing' && $dataComing["menu_component"] != 'Event'  && $dataComing["menu_component"] != 'UpdateFCMToken' && $payload["user_type"] != '9'){
-									$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
+									$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conoracle);
 									if($is_refreshToken_arr){
 										$arrayResult['RESPONSE_CODE'] = "WS0046";
 										$arrayResult['RESPONSE_MESSAGE'] = "";

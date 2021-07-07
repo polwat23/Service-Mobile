@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['list_reconcile'],$payload)){
 		,'".$list_reconcile['RESPONSE_CODE']."','".$list_reconcile['RESPONSE_DESC']."','".$list_reconcile['TRANSREF_NO']."','".$list_reconcile['SYS_REF_NO']."'
 		,'".$list_reconcile['CHANNEL_ID']."','".$list_reconcile['FILLER']."')";
 		if(sizeof($arrImp) == 1000){
-			$insertImpReconcile = $conmysql->prepare("INSERT INTO reconcilewithdrawktb(processing_date, processing_time, transaction_type,
+			$insertImpReconcile = $conoracle->prepare("INSERT INTO reconcilewithdrawktb(processing_date, processing_time, transaction_type,
 													credit_amount, fee_amount, net_amount, payer_account_no, payee_account_no, payee_account_bank_code, reference1, 
 													reference2, effective_date, response_code, response_desc, transref_no, sys_ref_no, channel_id, filler)
 													VALUES".implode(',',$arrImp));
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['list_reconcile'],$payload)){
 		}
 	}
 	if(sizeof($arrImp) > 0){
-		$insertImpReconcile = $conmysql->prepare("INSERT INTO reconcilewithdrawktb(processing_date, processing_time, transaction_type,
+		$insertImpReconcile = $conoracle->prepare("INSERT INTO reconcilewithdrawktb(processing_date, processing_time, transaction_type,
 												credit_amount, fee_amount, net_amount, payer_account_no, payee_account_no, payee_account_bank_code, reference1, 
 												reference2, effective_date, response_code, response_desc, transref_no, sys_ref_no, channel_id, filler)
 												VALUES".implode(',',$arrImp));

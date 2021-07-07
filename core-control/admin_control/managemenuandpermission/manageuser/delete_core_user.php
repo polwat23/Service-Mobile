@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managecoreusers')){
-		$deletecoreuser = $conmysql->prepare("UPDATE coreuser SET user_status = '-9'
+		$deletecoreuser = $conoracle->prepare("UPDATE coreuser SET user_status = '-9'
 										  WHERE username=:username");
 		if($deletecoreuser->execute([
 			':username' => $dataComing["username"]

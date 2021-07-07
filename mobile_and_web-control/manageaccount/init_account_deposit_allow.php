@@ -7,17 +7,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDeptAllowed = array();
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
-		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
+		$getDeptTypeAllow = $conoracle->prepare("SELECT dept_type_code FROM gcconstantaccountdept
 												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'
 												OR allow_buy_share = '1' OR allow_pay_loan = '1'");
 		$getDeptTypeAllow->execute();
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
-			$arrDeptAllowed[] = "'".$rowDeptAllow["dept_type_code"]."'";
+			$arrDeptAllowed[] = "'".$rowDeptAllow["DEPT_TYPE_CODE"]."'";
 		}
-		$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
+		$InitDeptAccountAllowed = $conoracle->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 		$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
 		while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
-			$arrAccAllowed[] = "'".$rowAccountAllowed["deptaccount_no"]."'";
+			$arrAccAllowed[] = "'".$rowAccountAllowed["DEPTACCOUNT_NO"]."'";
 		}
 		if(sizeof($arrAccAllowed) > 0){
 			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);
 		while($rowAccIncoop = $getAccountAllinCoop->fetch(PDO::FETCH_ASSOC)){
-			$getIDDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside,allow_deposit_inside,
+			$getIDDeptTypeAllow = $conoracle->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside,allow_deposit_inside,
 													allow_buy_share,allow_pay_loan,id_accountconstant FROM gcconstantaccountdept
 													WHERE dept_type_code = :depttype_code and 
 													(allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'
@@ -41,21 +41,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getIDDeptTypeAllow->execute([
 				':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
 			]);
-			if($getIDDeptTypeAllow->rowCount() > 0){
-				$rowDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
-				if($rowDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowDeptTypeAllow["allow_withdraw_inside"] == '1' && 
-				$rowDeptTypeAllow["allow_deposit_outside"] == '0' && $rowDeptTypeAllow["allow_deposit_inside"] == '1'){
-					if($rowDeptTypeAllow["allow_buy_share"] == '1' && $rowDeptTypeAllow["allow_pay_loan"] == '1'){
+			$rowDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowDeptTypeAllow["ID_ACCOUNTCONSTANT"])){
+				if($rowDeptTypeAllow["ALLOW_WITHDRAW_OUTSIDE"] == '0' && $rowDeptTypeAllow["ALLOW_WITHDRAW_INSIDE"] == '1' && 
+				$rowDeptTypeAllow["ALLOW_DEPOSIT_OUTSIDE"] == '0' && $rowDeptTypeAllow["ALLOW_DEPOSIT_INSIDE"] == '1'){
+					if($rowDeptTypeAllow["ALLOW_BUY_SHARE"] == '1' && $rowDeptTypeAllow["ALLOW_PAY_LOAN"] == '1'){
 						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_ALL_FLAG_ON'][0][$lang_locale];
-					}else if($rowDeptTypeAllow["allow_buy_share"] == '1' && $rowDeptTypeAllow["allow_pay_loan"] == '0'){
+					}else if($rowDeptTypeAllow["ALLOW_BUY_SHARE"] == '1' && $rowDeptTypeAllow["ALLOW_PAY_LOAN"] == '0'){
 						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_BUY_SHARE_FLAG_ON'][0][$lang_locale];
-					}else if($rowDeptTypeAllow["allow_buy_share"] == '0' && $rowDeptTypeAllow["allow_pay_loan"] == '1'){
+					}else if($rowDeptTypeAllow["ALLOW_BUY_SHARE"] == '0' && $rowDeptTypeAllow["ALLOW_PAY_LOAN"] == '1'){
 						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_PAY_LOAN_FLAG_ON'][0][$lang_locale];
 					}else{
 						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
 					}
-				}else if($rowDeptTypeAllow["allow_withdraw_outside"] == '1' && $rowDeptTypeAllow["allow_deposit_outside"] == '1'){
-					if($rowDeptTypeAllow["allow_deposit_inside"] == '0' && $rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
+				}else if($rowDeptTypeAllow["ALLOW_WITHDRAW_OUTSIDE"] == '1' && $rowDeptTypeAllow["ALLOW_DEPOSIT_OUTSIDE"] == '1'){
+					if($rowDeptTypeAllow["ALLOW_DEPOSIT_INSIDE"] == '0' && $rowDeptTypeAllow["ALLOW_WITHDRAW_INSIDE"] == '0'){
 						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_OUTSIDE_FLAG_ON'][0][$lang_locale];
 					}else{
 						$arrAccInCoop["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_FLAG_ON'][0][$lang_locale];
@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrAccInCoop["DEPT_TYPE_IMG"] = null;
 				}
-				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowDeptTypeAllow["id_accountconstant"];
+				$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowDeptTypeAllow["ID_ACCOUNTCONSTANT"];
 				$arrAllowAccGroup[] = $arrAccInCoop;
 			}
 		}

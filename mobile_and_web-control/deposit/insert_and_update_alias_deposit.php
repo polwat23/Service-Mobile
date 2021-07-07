@@ -54,16 +54,20 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrExecute["alias_name"] = $dataComing["alias_name_emoji_"];
 		}
 		$arrExecute["deptaccount_no"] = $account_no;
-		$updateMemoDept = $conmysql->prepare("UPDATE gcdeptalias SET update_date = NOW(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
+		$updateMemoDept = $conoracle->prepare("UPDATE gcdeptalias SET update_date = SYSDATE,".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
 												".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
 												WHERE deptaccount_no = :deptaccount_no");
-		if($updateMemoDept->execute($arrExecute) && $updateMemoDept->rowCount() > 0){
+			
+		if($updateMemoDept->execute($arrExecute)){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$insertMemoDept = $conmysql->prepare("INSERT INTO gcdeptalias(alias_name,path_alias_img,deptaccount_no)
-													VALUES(:alias_name,:path_alias_img,:deptaccount_no)");
+			
+			$id_acc_alias  = $func->getMaxTable('id_acc_alias' , 'gcdeptalias');
+			$insertMemoDept = $conoracle->prepare("INSERT INTO gcdeptalias(id_acc_alias,alias_name,path_alias_img,deptaccount_no)
+													VALUES(:id_acc_alias , :alias_name,:path_alias_img,:deptaccount_no)");
 			if($insertMemoDept->execute([
+				':id_acc_alias' => $id_acc_alias,
 				':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],
 				':path_alias_img' => $path_alias_img ?? null,
 				':deptaccount_no' => $account_no

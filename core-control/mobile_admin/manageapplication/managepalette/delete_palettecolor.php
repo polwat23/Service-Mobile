@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_palette'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managepalette')){
-		$updatePalette = $conmysql->prepare("UPDATE gcpalettecolor SET is_use = '-9' WHERE id_palette = :id_palette");
+		$updatePalette = $conoracle->prepare("UPDATE gcpalettecolor SET is_use = '-9' WHERE id_palette = :id_palette");
 		if($updatePalette->execute([
 			':id_palette' => $dataComing["id_palette"]
 		])){

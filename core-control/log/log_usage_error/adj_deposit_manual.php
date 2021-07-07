@@ -3,7 +3,7 @@ require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_depttran'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logdepositerror')){
-		$fetchLogDepositError = $conmysql->prepare("SELECT  
+		$fetchLogDepositError = $conoracle->prepare("SELECT  
 															tb.member_no,
 															tb.transaction_date,
 															tb.SIGMA_KEY,

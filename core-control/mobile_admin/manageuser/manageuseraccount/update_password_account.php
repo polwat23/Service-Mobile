@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		]);
 		$rowcitizenid = $fetchCitizenID->fetch(PDO::FETCH_ASSOC);
 		$new_password = $rowcitizenid["CARD_PERSON"];
-		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :newpassword,account_status = '-9',counter_wrongpass = 0 WHERE member_no = :member_no");
+		$repassword = $conoracle->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :newpassword,account_status = '-9',counter_wrongpass = 0 WHERE member_no = :member_no");
 		if($repassword->execute([
 				':newpassword' => password_hash($new_password,PASSWORD_DEFAULT),
 				':member_no' => $dataComing["member_no"]

@@ -3,10 +3,12 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu')){
-		$updateConstants = $conmysql->prepare("INSERT INTO gcmenuconstantmapping
-		(menu_component, id_bankconstant)
-		VALUES (:menu_component, :id_bankconstant)");
+		$id_constantmapping = $func->getMaxTable('id_constantmapping' , 'gcmenuconstantmapping');
+		$updateConstants = $conoracle->prepare("INSERT INTO gcmenuconstantmapping
+		(id_constantmapping ,menu_component, id_bankconstant)
+		VALUES (:id_constantmapping, :menu_component, :id_bankconstant)");
 		if($updateConstants->execute([
+			':id_constantmapping' => $id_constantmapping,
 			':menu_component' => $dataComing["menu_component"],
 			':id_bankconstant' => $dataComing["id_bankconstant"]
 		])){

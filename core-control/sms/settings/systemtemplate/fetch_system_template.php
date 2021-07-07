@@ -4,24 +4,25 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managesystemtemplate')){
 		$arrGroupSysTemplate = array();
-		$fetchSysTemplate = $conmysql->prepare("SELECT component_system,subject,body,id_systemplate,is_use FROM smssystemtemplate WHERE is_use <> '-9'");
+		$fetchSysTemplate = $conoracle->prepare("SELECT component_system,subject,body,id_systemplate,is_use FROM smssystemtemplate WHERE is_use <> '-9'");
 		$fetchSysTemplate->execute();
-		if($fetchSysTemplate->rowCount() > 0){
-			while($rowSysTemplate = $fetchSysTemplate->fetch(PDO::FETCH_ASSOC)){
-				$arraySysTem = array();
-				$arraySysTem["COMPONENT"] = $rowSysTemplate["component_system"];
-				$arraySysTem["SUBJECT"] = $rowSysTemplate["subject"];
-				$arraySysTem["BODY"] = $rowSysTemplate["body"];
-				$arraySysTem["IS_USE"] = $rowSysTemplate["is_use"];
-				$arraySysTem["ID_SYSTEMPLATE"] = $rowSysTemplate["id_systemplate"];
-				$arrGroupSysTemplate[] = $arraySysTem;
-			}
-			$arrayResult['SYSTEM_TEMPLATE'] = $arrGroupSysTemplate;
+		
+		while($rowSysTemplate = $fetchSysTemplate->fetch(PDO::FETCH_ASSOC)){
+			$arraySysTem = array();
+			$arraySysTem["COMPONENT"] = $rowSysTemplate["COMPONENT_SYSTEM"];
+			$arraySysTem["SUBJECT"] = $rowSysTemplate["SUBJECT"];
+			$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
+			$arraySysTem["IS_USE"] = $rowSysTemplate["IS_USE"];
+			$arraySysTem["ID_SYSTEMPLATE"] = $rowSysTemplate["ID_SYSTEMPLATE"];
+			$arrGroupSysTemplate[] = $arraySysTem;
+		}
+		$arrayResult['SYSTEM_TEMPLATE'] = $arrGroupSysTemplate;
+		
+		if(sizeof($arrGroupSysTemplate) > 0){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{
 			http_response_code(204);
-			
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;

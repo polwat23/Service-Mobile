@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8 and ln.principal_balance > 0");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
-			$getLoanConstant = $conmysql->prepare("SELECT loantype_alias_name FROM gcconstanttypeloan WHERE loantype_code = :loantype_code");
+			$getLoanConstant = $conoracle->prepare("SELECT loantype_alias_name FROM gcconstanttypeloan WHERE loantype_code = :loantype_code");
 			$getLoanConstant->execute([':loantype_code' => $rowContract["LOANTYPE_CODE"]]);
 			$rowLoanCont = $getLoanConstant->fetch(PDO::FETCH_ASSOC);
 			$arrGroupContract = array();
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupContract["LOAN_TYPE_IMG"] = null;
 			}
 			$arrGroupContract['TYPE_LOAN_CODE'] = $rowContract["LOANTYPE_CODE"];
-			$arrGroupContract['TYPE_LOAN'] = $rowLoanCont["loantype_alias_name"] ?? $rowContract["LOAN_TYPE"];
+			$arrGroupContract['TYPE_LOAN'] = $rowLoanCont["LOANTYPE_ALIAS_NAME"] ?? $rowContract["LOAN_TYPE"];
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;
 				$arrAllLoan[] = $arrGroupContract;

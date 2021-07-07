@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','destination','flag_trans'],$da
 			$checkAccDes = $conoracle->prepare("SELECT deptaccount_no FROM dpdeptmaster WHERE deptaccount_no = :destination");
 			$checkAccDes->execute([':destination' => $dataComing["destination"]]);
 			$rowAccDes = $checkAccDes->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowAccDes["deptaccount_no"])){
+			if(isset($rowAccDes["DEPTACCOUNT_NO"])){
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

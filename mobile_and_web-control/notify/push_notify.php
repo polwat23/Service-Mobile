@@ -2,8 +2,8 @@
 require_once('../autoload.php');
 
 if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isset($dataComing["name_template"]) && isset($dataComing["payload"])){
-	$conmysql_nottest = $con->connecttomysql();
-	$template = $func->getTemplate($dataComing["name_template"],$conmysql);
+	$conoracle_nottest = $con->connecttomysql();
+	$template = $func->getTemplate($dataComing["name_template"],$conoracle);
 	$arraySuccess = array();
 	$arrayFalse = array();
 	if($dataComing["type_history"] == '2'){
@@ -14,7 +14,7 @@ if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isse
 					$arrSendData["title"] = $arrayDataSend["SUBJECT"];
 					$arrSendData["detail"] = $arrayDataSend["BODY"];
 					$arrSendData["member_no"] = $data["member_no"];
-					if($func->insertHistory($arrSendData,$dataComing["type_history"],$conmysql)){
+					if($func->insertHistory($arrSendData,$dataComing["type_history"],$conoracle)){
 						$arraySuccess[] = $arrSendData;
 					}else{
 						$arrayFalse[] = $arrSendData;
@@ -36,17 +36,17 @@ if(isset($dataComing["type_send"]) && isset($dataComing["type_history"]) && isse
 					$member_no_text .= ',"'.$member_no.'"';
 				}
 			}
-			$getAPI = $conmysql->prepare("SELECT mdt.id_api
+			$getAPI = $conoracle->prepare("SELECT mdt.id_api
 											FROM mdbuserlogin mul LEFT JOIN gctoken mdt ON mul.id_token = mdt.id_token
 											WHERE mul.member_no IN(".$member_no_text.") and mul.receive_notify_news = '1' and mul.channel = 'mobile' 
 											and mdt.rt_is_revoke = 0");
 			$getAPI->execute();
 			if($getAPI->rowCount() > 0){
 				while($rowAPI = $getAPI->fetch()){
-					$getToken = $conmysql_nottest->prepare("SELECT fcm_token FROM gcapikey WHERE id_api = :id_api and is_revoke = 0");
-					$getToken->execute([':id_api' => $rowAPI["id_api"]]);
+					$getToken = $conoracle_nottest->prepare("SELECT fcm_token FROM gcapikey WHERE id_api = :id_api and is_revoke = 0");
+					$getToken->execute([':id_api' => $rowAPI["ID_API"]]);
 					$rowToken = $getToken->fetch();
-					$arrayToken[] = $rowToken["fcm_token"];
+					$arrayToken[] = $rowToken["FCM_TOKEN"];
 				}
 				$arrayPayload["TO"] = $arrayToken;
 				$arrayPayload["PAYLOAD"] = $arrayMessage;

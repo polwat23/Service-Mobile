@@ -8,14 +8,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccFav = array();
 		$arrLoanGrp = array();
 		$arrayAcc = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+		$fetchAccAllowTrans = $conoracle->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_pay_loan = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
-		if($fetchAccAllowTrans->rowCount() > 0){
-			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
-			}
+		
+		while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
+			$arrayAcc[] = "'".$rowAccAllow["DEPTACCOUNT_NO"]."'";
+		}
+
+		if(sizeof($arrayAcc) > 0){
+			
 			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal as prncbal,dpm.depttype_code
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.acccont_type = '01' and dpm.deptclose_status = 0
@@ -38,15 +41,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
-			$getAccFav = $conmysql->prepare("SELECT gts.destination,gfl.name_fav
+			$getAccFav = $conoracle->prepare("SELECT gts.destination,gfl.name_fav
 												FROM gcfavoritelist gfl LEFT JOIN gctransaction gts ON gfl.ref_no = gts.ref_no
 												and gfl.member_no = gts.member_no
 												WHERE gfl.member_no = :member_no and gfl.is_use = '1' and gts.destination_type = '3'");
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
 				$arrAccFav = array();
-				$arrAccFav["DESTINATION"] = $rowAccFav["destination"];
-				$arrAccFav["NAME_FAV"] = $rowAccFav["name_fav"];
+				$arrAccFav["DESTINATION"] = $rowAccFav["DESTINATION"];
+				$arrAccFav["NAME_FAV"] = $rowAccFav["NAME_FAV"];
 				$arrGroupAccFav[] = $arrAccFav;
 			}
 			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.interest_arrear,lnm.intpayable_amt,lnm.principal_balance,
@@ -61,10 +64,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrLoan["LOAN_TYPE_IMG"] = null;
 				}
-				$getLoanConstant = $conmysql->prepare("SELECT loantype_alias_name FROM gcconstanttypeloan WHERE loantype_code = :loantype_code");
+				$getLoanConstant = $conoracle->prepare("SELECT loantype_alias_name FROM gcconstanttypeloan WHERE loantype_code = :loantype_code");
 				$getLoanConstant->execute([':loantype_code' => $rowLoan["LOANTYPE_CODE"]]);
 				$rowLoanCont = $getLoanConstant->fetch(PDO::FETCH_ASSOC);
-				$arrLoan["LOAN_TYPE"] = $rowLoanCont["loantype_alias_name"] ?? $rowLoan["LOANTYPE_DESC"];
+				$arrLoan["LOAN_TYPE"] = $rowLoanCont["LOANTYPE_ALIAS_NAME"] ?? $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
@@ -89,8 +92,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0023";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			require_once('../../include/exit_footer.php');		
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

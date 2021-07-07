@@ -8,34 +8,34 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$MonthNow = date("Ym");
 		$dateNow = date('d/m/Y');
 		$arrSMSCont = array();
-		$getSMSConstant = $conmysql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
+		$getSMSConstant = $conoracle->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 		$getSMSConstant->execute();
 		while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
-			$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
+			$arrSMSCont[$rowSMSConstant["SMSCS_NAME"]] = $rowSMSConstant["SMSCS_VALUE"];
 		}
 		$bulkInsert = array();
-		$fetchSmsTranWassent = $conmysql->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
+		$fetchSmsTranWassent = $conoracle->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
 												sc.smscsp_pay_type,sc.accrued_amt
 												FROM smstranwassent sm LEFT JOIN smsconstantperson sc ON sm.deptaccount_no = sc.smscsp_account
 												WHERE sm.process_flag = '0' and sm.is_receive = '1' GROUP BY sm.member_no,sm.deptaccount_no");
 		$fetchSmsTranWassent->execute();
 		while($rowSmsTranWassent = $fetchSmsTranWassent->fetch(PDO::FETCH_ASSOC)){
-			if($rowSmsTranWassent["smscsp_pay_type"] == '0'){
-				$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["round_send"];
+			if($rowSmsTranWassent["SMSCSP_PAY_TYPE"] == '0'){
+				$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["ROUND_SEND"];
 			}else{
-				if($MonthNow > $rowSmsTranWassent["request_flat_date"]){
+				if($MonthNow > $rowSmsTranWassent["REQUEST_FLAT_DATE"]){
 					$FeeNet = $arrSMSCont["flat_price_in_month"];
 				}else{
-					$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["round_send"];
+					$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["ROUND_SEND"];
 				}
 			}
-			$fee_amt = $FeeNet + $rowSmsTranWassent["accrued_amt"];
+			$fee_amt = $FeeNet + $rowSmsTranWassent["ACCRUED_AMT"];
 			$getSeqNo = $conoracle->prepare("SELECT MAX(seq_no) as MAX_SEQNO FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no");
-			$getSeqNo->execute([':deptaccount_no' => $rowSmsTranWassent["deptaccount_no"]]);
+			$getSeqNo->execute([':deptaccount_no' => $rowSmsTranWassent["DEPTACCOUNT_NO"]]);
 			$rowSeqNo = $getSeqNo->fetch(PDO::FETCH_ASSOC);
 			$lastSeqNo = $rowSeqNo["MAX_SEQNO"] + 1;
 			$bulkInsert[] = "INTO dpdepttran (coop_id,deptaccount_no,seq_no,system_code,tran_date,tran_status,member_no,deptitem_amt,ref_coopid) 
-			VALUES('".$config["COOP_ID"]."','".$rowSmsTranWassent["deptaccount_no"]."',".$lastSeqNo.",'SMS',TO_DATE('".$dateNow."','DD-MM-YYYY'),0,'".$rowSmsTranWassent["member_no"]."',".$fee_amt.",'".$config["COOP_ID"]."')";
+			VALUES('".$config["COOP_ID"]."','".$rowSmsTranWassent["DEPTACCOUNT_NO"]."',".$lastSeqNo.",'SMS',TO_DATE('".$dateNow."','DD-MM-YYYY'),0,'".$rowSmsTranWassent["MEMBER_NO"]."',".$fee_amt.",'".$config["COOP_ID"]."')";
 			if(sizeof($bulkInsert) == 1000){
 				$insertDeptTran = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)."
 													SELECT * FROM dual");

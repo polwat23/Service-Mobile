@@ -5,10 +5,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrLoanAllow = array();
-		$getLoanCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
+		$getLoanCredit = $conoracle->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
 		$getLoanCredit->execute();
 		while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
-			$arrLoanAllow[] = "'".$rowCreditAllow["loantype_code"]."'";
+			$arrLoanAllow[] = "'".$rowCreditAllow["LOANTYPE_CODE"]."'";
 		}
 		$arrCreditGrp = array();
 		$checkMembtype = $conoracle->prepare("SELECT lt.loantype_desc,lt.loantype_code FROM lnloantype lt 

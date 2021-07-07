@@ -6,9 +6,9 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 		$arrayGroup = array();
 		$arrayCheckReconcile = array();
 		$arrayMember = array();
-		$fetchTrans = $conmysql->prepare("SELECT ref_no,from_account,destination,amount,fee_amt,penalty_amt,amount_receive,operate_date,member_no
+		$fetchTrans = $conoracle->prepare("SELECT ref_no,from_account,destination,amount,fee_amt,penalty_amt,amount_receive,operate_date,member_no
 											FROM gctransaction 
-											WHERE date(operate_date) = :operate_date AND result_transaction = '1' AND trans_flag = '-1' AND transfer_mode = '9'");
+											WHERE operate_date = TO_DATE(:operate_date,'yyyy/mm/dd') AND result_transaction = '1' AND trans_flag = '-1' AND transfer_mode = '9'");
 		$fetchTrans->execute([
 			':operate_date' => $dataComing['operate_date']
 		]);
@@ -16,34 +16,34 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 		$arrayGroup["BANK_RECONCILE"] = array();
 		while($rowTrans = $fetchTrans->fetch()){
 			$arrTrans = array();
-			$arrTrans["REF_NO"] = $rowTrans["ref_no"];
-			$arrTrans["FROM_ACCOUNT"] = $rowTrans["from_account"];
-			$arrTrans["DESTINATION"] = $lib->formataccount($rowTrans["destination"],$func->getConstant('dep_format'));
-			$arrTrans["AMOUNT"] = number_format($rowTrans["amount"],2);
-			$arrTrans["FEE_AMT"] = number_format($rowTrans["fee_amt"],2);
-			$arrTrans["PENALTY_AMT"] = number_format($rowTrans["penalty_amt"],2);
-			$arrTrans["AMOUNT_RECEIVE"] = number_format($rowTrans["amount_receive"],2);
-			$arrTrans["OPERATE_DATE"] = $lib->convertdate($rowTrans["operate_date"],'d m Y',true);
-			$arrTrans["MEMBER_NO"] = $rowTrans["member_no"];
-			$arrTrans["NET_AMOUNT"] = number_format($rowTrans["amount"]+$rowTrans["fee_amt"],2);
-			$arrTrans["SIMULATE_KEY"] = $rowTrans["destination"].str_replace(".","",$rowTrans["amount"]);
-			$arrTrans["SIMULATE_TIME"] = date_format(date_create($rowTrans["operate_date"]),"YmdHi.s");
+			$arrTrans["REF_NO"] = $rowTrans["REF_NO"];
+			$arrTrans["FROM_ACCOUNT"] = $rowTrans["FROM_ACCOUNT"];
+			$arrTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format'));
+			$arrTrans["AMOUNT"] = number_format($rowTrans["AMOUNT"],2);
+			$arrTrans["FEE_AMT"] = number_format($rowTrans["FEE_AMT"],2);
+			$arrTrans["PENALTY_AMT"] = number_format($rowTrans["PENALTY_AMT"],2);
+			$arrTrans["AMOUNT_RECEIVE"] = number_format($rowTrans["AMOUNT_RECEIVE"],2);
+			$arrTrans["OPERATE_DATE"] = $lib->convertdate($rowTrans["OPERATE_DATE"],'d m Y',true);
+			$arrTrans["MEMBER_NO"] = $rowTrans["MEMBER_NO"];
+			$arrTrans["NET_AMOUNT"] = number_format($rowTrans["AMOUNT"]+$rowTrans["FEE_AMT"],2);
+			$arrTrans["SIMULATE_KEY"] = $rowTrans["DESTINATION"].str_replace(".","",$rowTrans["AMOUNT"]);
+			$arrTrans["SIMULATE_TIME"] = date_format(date_create($rowTrans["OPERATE_DATE"]),"YmdHi.s");
 			
 			//get member name
 			if(isset($arrayMember[$rowTrans["member_no"]])){
-				$arrTrans["MEMBER_FULLNAME"] = $arrayMember[$rowTrans["member_no"]]["PRENAME_SHORT"].$arrayMember[$rowTrans["member_no"]]["MEMB_NAME"]." ".$arrayMember[$rowTrans["member_no"]]["MEMB_SURNAME"];
+				$arrTrans["MEMBER_FULLNAME"] = $arrayMember[$rowTrans["MEMBER_NO"]]["PRENAME_SHORT"].$arrayMember[$rowTrans["MEMBER_NO"]]["MEMB_NAME"]." ".$arrayMember[$rowTrans["MEMBER_NO"]]["MEMB_SURNAME"];
 			}else{
 				$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.member_no
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											WHERE mb.member_no = :member_no");
 				$fetchMember->execute([
-					":member_no" => $rowTrans["member_no"]
+					":member_no" => $rowTrans["MEMBER_NO"]
 				]);
 				while($rowMember = $fetchMember->fetch(PDO::FETCH_ASSOC)){
-					$arrayMember[$rowTrans["member_no"]] = array();
-					$arrayMember[$rowTrans["member_no"]]["PRENAME_SHORT"] = $rowMember["PRENAME_SHORT"];
-					$arrayMember[$rowTrans["member_no"]]["MEMB_NAME"] = $rowMember["MEMB_NAME"];
-					$arrayMember[$rowTrans["member_no"]]["MEMB_SURNAME"] = $rowMember["MEMB_SURNAME"];
+					$arrayMember[$rowTrans["MEMBER_NO"]] = array();
+					$arrayMember[$rowTrans["MEMBER_NO"]]["PRENAME_SHORT"] = $rowMember["PRENAME_SHORT"];
+					$arrayMember[$rowTrans["MEMBER_NO"]]["MEMB_NAME"] = $rowMember["MEMB_NAME"];
+					$arrayMember[$rowTrans["MEMBER_NO"]]["MEMB_SURNAME"] = $rowMember["MEMB_SURNAME"];
 					$arrTrans["MEMBER_FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
 				}
 			}
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 			$arrayGroup["COOP_RECONCILE"][] = $arrTrans;
 		}
 		
-		$fetchReconcile = $conmysql->prepare("SELECT id_wtdreconcile, import_date, processing_date, processing_time, transaction_type, 
+		$fetchReconcile = $conoracle->prepare("SELECT id_wtdreconcile, import_date, processing_date, processing_time, transaction_type, 
 										credit_amount, fee_amount, net_amount, payer_account_no, payee_account_no, payee_account_bank_code, 
 										reference1, reference2, effective_date, response_code, response_desc, transref_no, sys_ref_no, channel_id, filler 
 										FROM reconcilewithdrawktb 
@@ -62,26 +62,26 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 		
 		while($rowReconcile = $fetchReconcile->fetch()){
 			$arrTrans = array();
-			$arrTrans["ID_WTDRECONCILE"] = $rowReconcile["id_wtdreconcile"];
-			$arrTrans["IMPORT_DATE"] = $rowReconcile["import_date"];
-			$arrTrans["PROCESSING_DATE"] = $rowReconcile["processing_date"];
-			$arrTrans["PROCESSING_TIME"] = $rowReconcile["processing_time"];
-			$arrTrans["TRANSACTION_TYPE"] = $rowReconcile["transaction_type"];
-			$arrTrans["CREDIT_AMOUNT"] = $rowReconcile["credit_amount"];
-			$arrTrans["FEE_AMOUNT"] = $rowReconcile["fee_amount"];
-			$arrTrans["NET_AMOUNT"] = $rowReconcile["net_amount"];
-			$arrTrans["PAYER_ACCOUNT_NO"] = $rowReconcile["payer_account_no"];
-			$arrTrans["PAYEE_ACCOUNT_NO"] = $rowReconcile["payee_account_no"];
-			$arrTrans["PAYEE_ACCOUNT_BANK_CODE"] = $rowReconcile["payee_account_bank_code"];
-			$arrTrans["REFERENCE1"] = $rowReconcile["reference1"];
-			$arrTrans["REFERENCE2"] = $rowReconcile["reference2"];
-			$arrTrans["EFFECTIVE_DATE"] = $rowReconcile["effective_date"];
-			$arrTrans["RESPONSE_CODE"] = $rowReconcile["response_code"];
-			$arrTrans["RESPONSE_DESC"] = $rowReconcile["response_desc"];
-			$arrTrans["TRANSREF_NO"] = $rowReconcile["transref_no"];
-			$arrTrans["SYS_REF_NO"] = $rowReconcile["sys_ref_no"];
-			$arrTrans["CHANNEL_ID"] = $rowReconcile["channel_id"];
-			$arrTrans["FILLER"] = $rowReconcile["filler"];
+			$arrTrans["ID_WTDRECONCILE"] = $rowReconcile["ID_WTDRECONCILE"];
+			$arrTrans["IMPORT_DATE"] = $rowReconcile["IMPORT_DATE"];
+			$arrTrans["PROCESSING_DATE"] = $rowReconcile["PROCESSING_DATE"];
+			$arrTrans["PROCESSING_TIME"] = $rowReconcile["PROCESSING_TIME"];
+			$arrTrans["TRANSACTION_TYPE"] = $rowReconcile["TRANSACTION_TYPE"];
+			$arrTrans["CREDIT_AMOUNT"] = $rowReconcile["CREDIT_AMOUNT"];
+			$arrTrans["FEE_AMOUNT"] = $rowReconcile["FEE_AMOUNT"];
+			$arrTrans["NET_AMOUNT"] = $rowReconcile["NET_AMOUNT"];
+			$arrTrans["PAYER_ACCOUNT_NO"] = $rowReconcile["PAYER_ACCOUNT_NO"];
+			$arrTrans["PAYEE_ACCOUNT_NO"] = $rowReconcile["PAYEE_ACCOUNT_NO"];
+			$arrTrans["PAYEE_ACCOUNT_BANK_CODE"] = $rowReconcile["PAYEE_ACCOUNT_BANK_CODE"];
+			$arrTrans["REFERENCE1"] = $rowReconcile["REFERENCE1"];
+			$arrTrans["REFERENCE2"] = $rowReconcile["REFERENCE2"];
+			$arrTrans["EFFECTIVE_DATE"] = $rowReconcile["EFFECTIVE_DATE"];
+			$arrTrans["RESPONSE_CODE"] = $rowReconcile["RESPONSE_CODE"];
+			$arrTrans["RESPONSE_DESC"] = $rowReconcile["RESPONSE_DESC"];
+			$arrTrans["TRANSREF_NO"] = $rowReconcile["TRANSREF_NO"];
+			$arrTrans["SYS_REF_NO"] = $rowReconcile["SYS_REF_NO"];
+			$arrTrans["CHANNEL_ID"] = $rowReconcile["CHANNEL_ID"];
+			$arrTrans["FILLER"] = $rowReconcile["FILLER"];
 			$arrayGroup["BANK_RECONCILE"][] = $arrTrans;
 		}
 		

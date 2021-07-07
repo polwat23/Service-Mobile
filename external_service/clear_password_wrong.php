@@ -9,6 +9,6 @@ use Component\functions;
 $lib = new library();
 $func = new functions();
 
-$updateWrongCounter = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0 WHERE counter_wrongpass > 0");
+$updateWrongCounter = $conoracle->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0 WHERE counter_wrongpass > 0");
 $updateWrongCounter->execute();
 ?>

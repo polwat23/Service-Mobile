@@ -5,22 +5,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','calendarcoop')){
 		$arrayGroup = array();
 		
-		$fetchCalendar= $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before,event_html
+		$fetchCalendar= $conoracle->prepare("SELECT id_task,task_topic,task_detail,TO_CHAR(start_date,'YYYY-MM-DD') as start_date,
+												TO_CHAR(end_date,'YYYY-MM-DD') as end_date, event_start_time,event_end_time,is_settime,is_notify,is_notify_before,event_html
 												FROM gctaskevent");
 		$fetchCalendar->execute();
 		while($rowCalendar = $fetchCalendar->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_TASK"] = $rowCalendar["id_task"];
-			$arrConstans["TASK_TOPIC"] = $rowCalendar["task_topic"];
-			$arrConstans["TASK_DETAIL"] = $rowCalendar["task_detail"];
-			$arrConstans["EVENT_HTML"] = $rowCalendar["event_html"];
-			$arrConstans["START_DATE"] = $rowCalendar["start_date"];
-			$arrConstans["END_DATE"] = $rowCalendar["end_date"];
-			$arrConstans["START_TIME"] = $rowCalendar["event_start_time"];
-			$arrConstans["END_TIME"] = $rowCalendar["event_end_time"];
-			$arrConstans["IS_SETTIME"] = $rowCalendar["is_settime"] == 1 ? true : false;
-			$arrConstans["IS_NOTIFY"] = $rowCalendar["is_notify"] == 1 ? true : false;
-			$arrConstans["IS_NOTIFY_BEFORE"] = $rowCalendar["is_notify_before"] == 1 ? true : false;
+			$arrConstans["ID_TASK"] = $rowCalendar["ID_TASK"];
+			$arrConstans["TASK_TOPIC"] = $rowCalendar["TASK_TOPIC"];
+			$arrConstans["TASK_DETAIL"] = $rowCalendar["TASK_DETAIL"] ?? "";
+			$arrConstans["EVENT_HTML"] = stream_get_contents($rowCalendar["EVENT_HTML"]);
+			$arrConstans["START_DATE"] = $rowCalendar["START_DATE"];
+			$arrConstans["END_DATE"] = $rowCalendar["END_DATE"];
+			$arrConstans["START_TIME"] = $rowCalendar["EVENT_START_TIME"];
+			$arrConstans["END_TIME"] = $rowCalendar["EVENT_END_TIME"];
+			$arrConstans["IS_SETTIME"] = $rowCalendar["IS_SETTIME"] == 1 ? true : false;
+			$arrConstans["IS_NOTIFY"] = $rowCalendar["IS_NOTIFY"] == 1 ? true : false;
+			$arrConstans["IS_NOTIFY_BEFORE"] = $rowCalendar["IS_NOTIFY_BEFORE"] == 1 ? true : false;
 			$arrayGroup[] = $arrConstans;
 		}
 		

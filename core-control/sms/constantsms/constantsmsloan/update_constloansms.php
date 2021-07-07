@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','constantsmsloan')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 																		id_smsconstantloan,
 																		loan_itemtype_code,
 																		allow_smsconstantloan,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTLOAN"] = $rowMenuMobile["id_smsconstantloan"];
-			$arrConstans["LOANITEMTYPE_CODE"] = $rowMenuMobile["loan_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTLOAN"] = $rowMenuMobile["allow_smsconstantloan"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTLOAN"] = $rowMenuMobile["ID_SMSCONSTANTLOAN"];
+			$arrConstans["LOANITEMTYPE_CODE"] = $rowMenuMobile["LOAN_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTLOAN"] = $rowMenuMobile["ALLOW_SMSCONSTANTLOAN"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT LOANITEMTYPE_CODE,LOANITEMTYPE_DESC FROM LNUCFLOANITEMTYPE ORDER BY LOANITEMTYPE_CODE ASC");
@@ -49,10 +49,11 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$id_smsconstantloan = $func->getMaxTable('id_smsconstantloan' , 'smsconstantloan');
+						$insertBulkCont[] = "('".$id_smsconstantloan."','".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."','".$value_diff["ALLOW_NOTIFY"]."')";
 						$insertBulkContLog[]='LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN ='.$value_diff["ALLOW_SMSCONSTANTLOAN"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN, allow_notify = :ALLOW_NOTIFY WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
+						$updateConst = $conoracle->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN, allow_notify = :ALLOW_NOTIFY WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTLOAN' => $value_diff["ALLOW_SMSCONSTANTLOAN"],
 							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
@@ -61,7 +62,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN='.$value_diff["ALLOW_SMSCONSTANTLOAN"].' ALLOW_NOTIFY='.$value_diff["ALLOW_NOTIFY"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantloan(loan_itemtype_code,allow_smsconstantloan,allow_notify)
+				$insertConst = $conoracle->prepare("INSERT smsconstantloan(id_smsconstantloan, loan_itemtype_code,allow_smsconstantloan,allow_notify)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

@@ -5,42 +5,42 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageahead')){
 		$arrGroupSendAhead = array();
 		if(isset($dataComing["id_sendahead"])){
-			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_topic,send_message,destination,
+			$fetchGroup = $conoracle->prepare("SELECT id_sendahead,send_topic,send_message,destination,
 												send_date,send_platform,send_image,create_by,is_import
 												FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
 			$fetchGroup->execute([':id_sendahead' => $dataComing["id_sendahead"]]);
 			while($rowSendAhead = $fetchGroup->fetch(PDO::FETCH_ASSOC)){
-				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
-				$arrGroupSendAhead["SEND_TOPIC"] = $rowSendAhead["send_topic"];
-				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
-				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y H i s',true);
-				$arrGroupSendAhead["SEND_DATE_NOT_FORMAT"] = $rowSendAhead["send_date"];
-				if($rowSendAhead["is_import"] == '0'){
-					$arrGroupSendAhead["DESTINATION"] = explode(',',$rowSendAhead["destination"]);
+				$arrGroupSendAhead["ID_SENDAHEAD"] = $rowSendAhead["ID_SENDAHEAD"];
+				$arrGroupSendAhead["SEND_TOPIC"] = $rowSendAhead["SEND_TOPIC"];
+				$arrGroupSendAhead["SEND_MESSAGE"] = $rowSendAhead["SEND_MESSAGE"];
+				$arrGroupSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["SEND_DATE"],'D m Y H i s',true);
+				$arrGroupSendAhead["SEND_DATE_NOT_FORMAT"] = $rowSendAhead["SEND_DATE"];
+				if($rowSendAhead["IS_IMPORT"] == '0'){
+					$arrGroupSendAhead["DESTINATION"] = explode(',',$rowSendAhead["DESTINATION"]);
 				}else{
-					$arrGroupSendAhead["DESTINATION"] = json_decode($rowSendAhead["destination"]);
+					$arrGroupSendAhead["DESTINATION"] = json_decode($rowSendAhead["DESTINATION"]);
 				}
-				$arrGroupSendAhead["IS_IMPORT"] = $rowSendAhead["is_import"];
-				$arrGroupSendAhead["SEND_PLATFORM"] = $rowSendAhead["send_platform"];
-				$arrGroupSendAhead["CREATE_BY"] = $rowSendAhead["create_by"];
-				$arrGroupSendAhead["SEND_IMAGE"] = isset($rowSendAhead["send_image"]) ? $config["URL_SERVICE"].$rowSendAhead["send_image"] : null;
+				$arrGroupSendAhead["IS_IMPORT"] = $rowSendAhead["IS_IMPORT"];
+				$arrGroupSendAhead["SEND_PLATFORM"] = $rowSendAhead["SEND_PLATFORM"];
+				$arrGroupSendAhead["CREATE_BY"] = $rowSendAhead["CREATE_BY"];
+				$arrGroupSendAhead["SEND_IMAGE"] = isset($rowSendAhead["SEND_IMAGE"]) ? $config["URL_SERVICE"].$rowSendAhead["SEND_IMAGE"] : null;
 			}
 		}else{
-			$fetchSendAhead = $conmysql->prepare("SELECT id_sendahead,send_message,destination,send_date,create_by,is_import
+			$fetchSendAhead = $conoracle->prepare("SELECT id_sendahead,send_message,destination,send_date,create_by,is_import
 													FROM smssendahead WHERE is_use = '1'");
 			$fetchSendAhead->execute();
 			while($rowSendAhead = $fetchSendAhead->fetch(PDO::FETCH_ASSOC)){
 				$arrSendAhead = array();
-				$arrSendAhead["ID_SENDAHEAD"] = $rowSendAhead["id_sendahead"];
-				$arrSendAhead["SEND_MESSAGE"] = $rowSendAhead["send_message"];
-				$arrSendAhead["CREATE_BY"] = $rowSendAhead["create_by"];
-				$arrSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["send_date"],'D m Y H i s',true);
-				if($rowSendAhead["is_import"] == '0'){
-					$arrSendAhead["DESTINATION"] = explode(',',$rowSendAhead["destination"]);
+				$arrSendAhead["ID_SENDAHEAD"] = $rowSendAhead["ID_SENDAHEAD"];
+				$arrSendAhead["SEND_MESSAGE"] = $rowSendAhead["SEND_MESSAGE"];
+				$arrSendAhead["CREATE_BY"] = $rowSendAhead["CREATE_BY"];
+				$arrSendAhead["SEND_DATE"] = $lib->convertdate($rowSendAhead["SEND_DATE"],'D m Y H i s',true);
+				if($rowSendAhead["IS_IMPORT"] == '0'){
+					$arrSendAhead["DESTINATION"] = explode(',',$rowSendAhead["DESTINATION"]);
 				}else{
-					$arrSendAhead["DESTINATION"] = json_decode($rowSendAhead["destination"]);
+					$arrSendAhead["DESTINATION"] = json_decode($rowSendAhead["DESTINATION"]);
 				}
-				$arrSendAhead["IS_IMPORT"] = $rowSendAhead["is_import"];
+				$arrSendAhead["IS_IMPORT"] = $rowSendAhead["IS_IMPORT"];
 				$arrGroupSendAhead[] = $arrSendAhead;
 			}
 		}

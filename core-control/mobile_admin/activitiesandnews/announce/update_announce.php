@@ -41,12 +41,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 									</html>';
 		}
 		
-		$update_announce = $conmysql->prepare("UPDATE  gcannounce SET
+		$update_announce = $conoracle->prepare("UPDATE  gcannounce SET
 																		announce_cover = :announce_cover, 
 																		announce_title = :announce_title,
 																		announce_detail = :announce_detail,
-																		effect_date = :effect_date,
-																		due_date =:due_date,
+																		effect_date =  TO_DATE(:effect_date,'YYYY-MM-DD hh24:mi:ss'),
+																		due_date = TO_DATE(:due_date,'YYYY-MM-DD hh24:mi:ss'),
 																		username = :username,
 																		is_update = '1',
 																		is_show_between_due = :is_show_between_due,
@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		cancel_text = :cancel_text,
 																		check_text = :check_text,
 																		announce_html = :announce_html
-																	WHERE id_announce = :id_announce");
+																		WHERE id_announce = :id_announce");
 		if($update_announce->execute([
 			':id_announce' =>  $dataComing["id_announce"],
 			':announce_title' =>  $dataComing["announce_title"],

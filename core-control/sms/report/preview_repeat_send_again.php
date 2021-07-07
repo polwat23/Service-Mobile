@@ -3,18 +3,18 @@ require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 	if($dataComing["menu_component"] == 'reportsmssuccess'){
-		$getMessageLog = $conmysql->prepare("SELECT sms_message,member_no,tel_mobile
+		$getMessageLog = $conoracle->prepare("SELECT sms_message,member_no,tel_mobile
 											FROM smslogwassent WHERE id_logsent = :id_logsent");
 		$getMessageLog->execute([':id_logsent' => $dataComing["id_logsent"]]);
 		$rowMessage = $getMessageLog->fetch(PDO::FETCH_ASSOC);
 		$arrDestGRP = array();
 		$arrayTel = array();
-		if(isset($rowMessage["member_no"]) && $rowMessage["member_no"] != ""){
-			$arrayTel = $func->getSMSPerson('person',$rowMessage["member_no"]);
+		if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
+			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"]);
 		}else{
 			$destination_temp = array();
 			$destination_temp["MEMBER_NO"] = null;
-			$destination_temp["TEL"] = $rowMessage["tel_mobile"];
+			$destination_temp["TEL"] = $rowMessage["TEL_MOBILE"];
 			$arrDestGRP[] = $destination_temp;
 		}
 		if(isset($arrDestGRP)){
@@ -29,15 +29,15 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 				$arrGroupSuccess["REF"] = $dest["MEMBER_NO"] ?? $dest["TEL"];
 				$arrGroupSuccess["TEL"] = $lib->formatphone(substr($dest["TEL"],0,10),'-');
-				$arrGroupSuccess["MESSAGE"] = ($rowMessage["sms_message"] ?? "-");
-				$arrGroupSuccess["REF_MESSAGE"] = $rowMessage["sms_message"];
+				$arrGroupSuccess["MESSAGE"] = ($rowMessage["SMS_MESSAGE"] ?? "-");
+				$arrGroupSuccess["REF_MESSAGE"] = $rowMessage["SMS_MESSAGE"];
 				$arrGroupAllSuccess[] = $arrGroupSuccess;
 			}else{
 				$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 				$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
 				$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
-				$arrGroupCheckSend["MESSAGE"] = ($rowMessage["sms_message"] ?? "-");
-				$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["sms_message"];
+				$arrGroupCheckSend["MESSAGE"] = ($rowMessage["SMS_MESSAGE"] ?? "-");
+				$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["SMS_MESSAGE"];
 				$arrGroupAllFailed[] = $arrGroupCheckSend;
 			}
 		}
@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$arrGroupCheckSend["DESTINATION"] = $target["TEL"];
 			$arrGroupCheckSend["REF"] = $target["TEL"];
 			$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขปลายทางได้";
-			$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["sms_message"];
+			$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["SMS_MESSAGE"];
 			$arrGroupAllFailed[] = $arrGroupCheckSend;
 		}
 		$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -53,15 +53,15 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../include/exit_footer.php');
 	}else if($dataComing["menu_component"] == 'reportsmsnotsuccess'){
-		$getMessageLog = $conmysql->prepare("SELECT topic,message,member_no,send_platform,tel_mobile
+		$getMessageLog = $conoracle->prepare("SELECT topic,message,member_no,send_platform,tel_mobile
 											FROM smswasnotsent WHERE id_smsnotsent = :id_smsnotsent");
 		$getMessageLog->execute([':id_smsnotsent' => $dataComing["id_smsnotsent"]]);
 		$rowMessage = $getMessageLog->fetch(PDO::FETCH_ASSOC);
-		if($rowMessage["send_platform"] == 'sms'){
+		if($rowMessage["SEND_PLATFORM"] == 'sms'){
 			$arrDestGRP = array();
 			$arrayTel = array();
-			if(isset($rowMessage["member_no"]) && $rowMessage["member_no"] != ""){
-				$arrayTel = $func->getSMSPerson('person',$rowMessage["member_no"]);
+			if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
+				$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"]);
 			}else{
 				$destination_temp = array();
 				$destination_temp["MEMBER_NO"] = null;
@@ -80,15 +80,15 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 					$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 					$arrGroupSuccess["REF"] = $dest["MEMBER_NO"] ?? $dest["TEL"];
 					$arrGroupSuccess["TEL"] = $lib->formatphone(substr($dest["TEL"],0,10),'-');
-					$arrGroupSuccess["MESSAGE"] = ($rowMessage["message"] ?? "-");
-					$arrGroupSuccess["REF_MESSAGE"] = $rowMessage["message"];
+					$arrGroupSuccess["MESSAGE"] = ($rowMessage["MESSAGE"] ?? "-");
+					$arrGroupSuccess["REF_MESSAGE"] = $rowMessage["MESSAGE"];
 					$arrGroupAllSuccess[] = $arrGroupSuccess;
 				}else{
 					$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 					$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
 					$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
-					$arrGroupCheckSend["MESSAGE"] = ($rowMessage["message"] ?? "-");
-					$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["message"];
+					$arrGroupCheckSend["MESSAGE"] = ($rowMessage["MESSAGE"] ?? "-");
+					$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["MESSAGE"];
 					$arrGroupAllFailed[] = $arrGroupCheckSend;
 				}
 			}
@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				$arrGroupCheckSend["DESTINATION"] = $target["TEL"];
 				$arrGroupCheckSend["REF"] = $target["TEL"];
 				$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขปลายทางได้";
-				$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["message"];
+				$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["MESSAGE"];
 				$arrGroupAllFailed[] = $arrGroupCheckSend;
 			}
 			$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -105,24 +105,24 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			require_once('../../../include/exit_footer.php');
 		}else{
 			$destination = array();
-			$arrToken = $func->getFCMToken('person',$rowMessage["member_no"]);
+			$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"]);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 					if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["REF"] = $dest["MEMBER_NO"];
-						$arrGroupSuccess["MESSAGE"] = $rowMessage["message"].'^'.$rowMessage["topic"];
+						$arrGroupSuccess["MESSAGE"] = $rowMessage["MESSAGE"].'^'.$rowMessage["TOPIC"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
-						$arrGroupCheckSend["MESSAGE"] = $rowMessage["message"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+						$arrGroupCheckSend["MESSAGE"] = $rowMessage["MESSAGE"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
 				}else{
 					$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 					$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
-					$arrGroupCheckSend["MESSAGE"] = $rowMessage["message"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+					$arrGroupCheckSend["MESSAGE"] = $rowMessage["MESSAGE"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
 					$arrGroupAllFailed[] = $arrGroupCheckSend;
 				}
 			}
@@ -130,7 +130,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			foreach($arrDiff as $memb_diff){
 				$arrGroupCheckSend["DESTINATION"] = $memb_diff;
 				$arrGroupCheckSend["REF"] = $memb_diff;
-				$arrGroupCheckSend["MESSAGE"] = $rowMessage["message"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+				$arrGroupCheckSend["MESSAGE"] = $rowMessage["MESSAGE"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
 				$arrGroupAllFailed[] = $arrGroupCheckSend;
 			}
 			$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -139,29 +139,29 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			require_once('../../../include/exit_footer.php');
 		}
 	}else if($dataComing["menu_component"] == 'reportnotifysuccess'){
-		$getMessageLog = $conmysql->prepare("SELECT his_title,his_detail,member_no
+		$getMessageLog = $conoracle->prepare("SELECT his_title,his_detail,member_no
 											FROM gchistory WHERE id_history = :id_history");
 		$getMessageLog->execute([':id_history' => $dataComing["id_history"]]);
 		$rowMessage = $getMessageLog->fetch(PDO::FETCH_ASSOC);
 		$destination = array();
-		$arrToken = $func->getFCMToken('person',$rowMessage["member_no"]);
+		$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"]);
 		foreach($arrToken["LIST_SEND"] as $dest){
 			if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 				if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 					$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 					$arrGroupSuccess["REF"] = $dest["MEMBER_NO"];
-					$arrGroupSuccess["MESSAGE"] = $rowMessage["his_detail"].'^'.$rowMessage["his_title"];
+					$arrGroupSuccess["MESSAGE"] = $rowMessage["HIS_DETAIL"].'^'.$rowMessage["HIS_TITLE"];
 					$arrGroupAllSuccess[] = $arrGroupSuccess;
 				}else{
 					$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 					$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
-					$arrGroupCheckSend["MESSAGE"] = $rowMessage["his_detail"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
+					$arrGroupCheckSend["MESSAGE"] = $rowMessage["HIS_DETAIL"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
 					$arrGroupAllFailed[] = $arrGroupCheckSend;
 				}
 			}else{
 				$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 				$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
-				$arrGroupCheckSend["MESSAGE"] = $rowMessage["his_detail"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+				$arrGroupCheckSend["MESSAGE"] = $rowMessage["HIS_DETAIL"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
 				$arrGroupAllFailed[] = $arrGroupCheckSend;
 			}
 		}
@@ -169,7 +169,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		foreach($arrDiff as $memb_diff){
 			$arrGroupCheckSend["DESTINATION"] = $memb_diff;
 			$arrGroupCheckSend["REF"] = $memb_diff;
-			$arrGroupCheckSend["MESSAGE"] = $rowMessage["his_detail"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
+			$arrGroupCheckSend["MESSAGE"] = $rowMessage["HIS_DETAIL"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
 			$arrGroupAllFailed[] = $arrGroupCheckSend;
 		}
 		$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
@@ -177,18 +177,18 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../include/exit_footer.php');
 	}else if($dataComing["menu_component"] == 'reportsmstranwassent'){
-		$getMessageLog = $conmysql->prepare("SELECT sms_message,member_no,tel_mobile
+		$getMessageLog = $conoracle->prepare("SELECT sms_message,member_no,tel_mobile
 											FROM smstranwassent WHERE id_smssent = :id_smssent");
 		$getMessageLog->execute([':id_smssent' => $dataComing["id_smssent"]]);
 		$rowMessage = $getMessageLog->fetch(PDO::FETCH_ASSOC);
 		$arrDestGRP = array();
 		$arrayTel = array();
-		if(isset($rowMessage["member_no"]) && $rowMessage["member_no"] != ""){
-			$arrayTel = $func->getSMSPerson('person',$rowMessage["member_no"]);
+		if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
+			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"]);
 		}else{
 			$destination_temp = array();
 			$destination_temp["MEMBER_NO"] = null;
-			$destination_temp["TEL"] = $rowMessage["tel_mobile"];
+			$destination_temp["TEL"] = $rowMessage["TEL_MOBILE"];
 			$arrDestGRP[] = $destination_temp;
 		}
 		if(isset($arrDestGRP)){
@@ -203,15 +203,15 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 				$arrGroupSuccess["REF"] = $dest["MEMBER_NO"] ?? $dest["TEL"];
 				$arrGroupSuccess["TEL"] = $lib->formatphone(substr($dest["TEL"],0,10),'-');
-				$arrGroupSuccess["MESSAGE"] = ($rowMessage["sms_message"] ?? "-");
-				$arrGroupSuccess["REF_MESSAGE"] = $rowMessage["sms_message"];
+				$arrGroupSuccess["MESSAGE"] = ($rowMessage["SMS_MESSAGE"] ?? "-");
+				$arrGroupSuccess["REF_MESSAGE"] = $rowMessage["SMS_MESSAGE"];
 				$arrGroupAllSuccess[] = $arrGroupSuccess;
 			}else{
 				$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 				$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
 				$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
-				$arrGroupCheckSend["MESSAGE"] = ($rowMessage["sms_message"] ?? "-");
-				$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["sms_message"];
+				$arrGroupCheckSend["MESSAGE"] = ($rowMessage["SMS_MESSAGE"] ?? "-");
+				$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["SMS_MESSAGE"];
 				$arrGroupAllFailed[] = $arrGroupCheckSend;
 			}
 		}
@@ -219,7 +219,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$arrGroupCheckSend["DESTINATION"] = $target["TEL"];
 			$arrGroupCheckSend["REF"] = $target["TEL"];
 			$arrGroupCheckSend["MESSAGE"] = "ไม่สามารถระบุเลขปลายทางได้";
-			$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["sms_message"];
+			$arrGroupCheckSend["REF_MESSAGE"] = $rowMessage["SMS_MESSAGE"];
 			$arrGroupAllFailed[] = $arrGroupCheckSend;
 		}
 		$arrayResult['SUCCESS'] = $arrGroupAllSuccess;

@@ -40,8 +40,9 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 							  </body>
 								</html>';
 		}
-		
-		$insert_announce = $conmysql->prepare("INSERT INTO gcannounce(
+		$id_announce  = $func->getMaxTable('id_announce' , 'gcannounce');
+		$insert_announce = $conoracle->prepare("INSERT INTO gcannounce(
+																	id_announce,
 																	announce_cover,
 																	announce_title,
 																	announce_detail,
@@ -57,11 +58,12 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	is_show_between_due,
 																	announce_html)
 																VALUES(
+																	:id_announce,
 																	:announce_cover,
 																	:announce_title,
 																	:announce_detail,
-																	:effect_date,
-																	:due_date,
+																	TO_DATE(:effect_date,'yyyy/mm/dd hh24:mi:ss'),
+																	TO_DATE(:due_date,'yyyy/mm/dd hh24:mi:ss'),
 																	:priority,
 																	:flag_granted,
 																	:is_check,
@@ -72,6 +74,7 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	:is_show_between_due,
 																	:detail_html)");
 		if($insert_announce->execute([
+			':id_announce' =>  $id_announce,
 			':announce_title' =>  $dataComing["announce_title"],
 			':announce_detail' => $dataComing["announce_detail"],
 			':effect_date' =>  $dataComing["effect_date"],	

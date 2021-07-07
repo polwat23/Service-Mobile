@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logunbindaccount')){
 		$arrayGroup = array();
-		$fetchLogBindAccount = $conmysql->prepare("SELECT
+		$fetchLogBindAccount = $conoracle->prepare("SELECT
 																				unbin.id_logunbindaccount,
 																				unbin.member_no,
 																				unbin.id_userlogin,
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$formatDept = $func->getConstant('dep_format');
 		while($rowLogBindAccount = $fetchLogBindAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccount = array();
-			$fetchBinAccountCoopNo = $conmysql->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank FROM gcbindaccount WHERE id_bindaccount = '$rowLogBindAccount[id_bindaccount]' ");
+			$fetchBinAccountCoopNo = $conoracle->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank FROM gcbindaccount WHERE id_bindaccount = '$rowLogBindAccount[id_bindaccount]' ");
 			$fetchBinAccountCoopNo -> execute();
 			$coop_no=$fetchBinAccountCoopNo-> fetch(PDO::FETCH_ASSOC);
 			

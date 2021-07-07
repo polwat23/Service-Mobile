@@ -3,9 +3,11 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','group_name','group_member'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managegroup')){
-		$insertSmsGroup = $conmysql->prepare("INSERT INTO smsgroupmember(group_name,group_member)
-												VALUES(:group_name,:group_member)");
+		$id_groupmember  = $func->getMaxTable('id_groupmember' , 'smsgroupmember');
+		$insertSmsGroup = $conoracle->prepare("INSERT INTO smsgroupmember(id_groupmember,group_name,group_member)
+												VALUES(:id_groupmember,:group_name,:group_member)");
 		if($insertSmsGroup->execute([
+			':id_groupmember' => $id_groupmember,
 			':group_name' => $dataComing["group_name"],
 			':group_member'=> $dataComing["group_member"]
 		])){

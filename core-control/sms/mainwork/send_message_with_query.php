@@ -5,10 +5,11 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
 		if($dataComing["channel_send"] == "mobile_app"){
-			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,is_stampflag,stamp_table,where_stamp,target_field,condition_target,set_column
+			$getQuery = $conoracle->prepare("SELECT id_smsquery,sms_query,column_selected,is_bind_param,is_stampflag,stamp_table,where_stamp,target_field,condition_target,set_column
 											FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
-			if($getQuery->rowCount() > 0){
+			$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowQuery["ID_SMSQUERY"]))
 				if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 					$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
 					$file_name = $lib->randomText('all',6);
@@ -32,10 +33,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				}
 				$blukInsert = array();
 				$blukInsertNot = array();
-				$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
-				$arrColumn = explode(',',$rowQuery["column_selected"]);
-				if($rowQuery["is_bind_param"] == '0'){
-					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+				$arrColumn = explode(',',$rowQuery["COLUMN_SELECTED"]);
+				if($rowQuery["IS_BIND_PARAM"] == '0'){
+					$queryTarget = $conoracle->prepare($rowQuery['SMS_QUERY']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrGroupMessage = array();
@@ -46,8 +46,8 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 						}
 						$arrMessageMerge = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
-						if(!in_array($rowTarget[$rowQuery["target_field"]]."_".$arrMessageMerge["BODY"],$dataComing["destination_revoke"])){
-							$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["target_field"]]);
+						if(!in_array($rowTarget[$rowQuery["TARGET_FIELD"]]."_".$arrMessageMerge["BODY"],$dataComing["destination_revoke"])){
+							$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
 							if(isset($arrToken["LIST_SEND"][0]["TOKEN"]) && $arrToken["LIST_SEND"][0]["TOKEN"] != ""){
 								if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_TRANSACTION"] == "1"){
 									$arrPayloadNotify["TO"] = array($arrToken["LIST_SEND"][0]["TOKEN"]);
@@ -60,13 +60,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 									$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 									$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 									if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-										if($rowQuery["is_stampflag"] == '1'){
+										if($rowQuery["IS_STAMPFLAG"] == '1'){
 											$arrayExecute = array();
-											preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+											preg_match_all('/\\:(.*?)\\s/',$rowQuery["WHERE_STAMP"],$arrayRawExecute);
 											foreach($arrayRawExecute[1] as $execute){
 												$arrayExecute[$execute] = $rowTarget[$execute];
 											}
-											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["STAMP_TABLE"]." SET ".$rowQuery["SET_COLUMN"]." WHERE ".$rowQuery["WHERE_STAMP"]);
 											$updateFlagStamp->execute($arrayExecute);
 										}
 										$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -106,13 +106,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 										$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 										if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
-											if($rowQuery["is_stampflag"] == '1'){
+											if($rowQuery["IS_STAMPFLAG"] == '1'){
 												$arrayExecute = array();
-												preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+												preg_match_all('/\\:(.*?)\\s/',$rowQuery["WHERE_STAMP"],$arrayRawExecute);
 												foreach($arrayRawExecute[1] as $execute){
 													$arrayExecute[$execute] = $rowTarget[$execute];
 												}
-												$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+												$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["STAMP_TABLE"]." SET ".$rowQuery["SET_COLUMN"]." WHERE ".$rowQuery["WHERE_STAMP"]);
 												$updateFlagStamp->execute($arrayExecute);
 											}
 											$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -140,7 +140,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										}
 									}
 								}else{
-									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["target_field"]]."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+									$blukInsertNot[] = "('".$arrMessageMerge["BODY"]."','".$rowTarget[$rowQuery["TARGET_FIELD"]]."','".$dataComing["channel_send"]."',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsertNot) == 1000){
 										$func->logSMSWasNotSent($blukInsertNot);
 										unset($blukInsertNot);
@@ -165,25 +165,25 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					$arrayResult["RESULT"] = TRUE;
 					require_once('../../../include/exit_footer.php');
 				}else{
-					$query = $rowQuery['sms_query'];
+					$query = $rowQuery['SMS_QUERY'];
 					if(stripos($query,'WHERE') === FALSE){
 						if(stripos($query,'GROUP BY') !== FALSE){
 							$arrQuery = explode('GROUP BY',$query);
-							$query = $arrQuery[0]." WHERE ".$rowQuery["condition_target"]." GROUP BY ".$arrQuery[1];
+							$query = $arrQuery[0]." WHERE ".$rowQuery["CONDITION_TARGET"]." GROUP BY ".$arrQuery[1];
 						}else{
-							$query .= " WHERE ".$rowQuery["condition_target"];
+							$query .= " WHERE ".$rowQuery["CONDITION_TARGET"];
 						}
 					}else{
 						if(stripos($query,'GROUP BY') !== FALSE){
 							$arrQuery = explode('GROUP BY',$query);
-							$query = $arrQuery[0]." and ".$rowQuery["condition_target"]." GROUP BY ".$arrQuery[1];
+							$query = $arrQuery[0]." and ".$rowQuery["CONDITION_TARGET"]." GROUP BY ".$arrQuery[1];
 						}else{
-							$query .= " and ".$rowQuery["condition_target"];
+							$query .= " and ".$rowQuery["CONDITION_TARGET"];
 						}
 					}
-					$condition = explode(':',$rowQuery["condition_target"]);
+					$condition = explode(':',$rowQuery["CONDITION_TARGET"]);
 					foreach($dataComing["destination"] as $target){
-						if($condition[1] == $rowQuery["target_field"]){
+						if($condition[1] == $rowQuery["TARGET_FIELD"]){
 							if(strlen($target) <= 8){
 								$target = strtolower($lib->mb_str_pad($target));
 							}else{
@@ -196,7 +196,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$condition[1] => $target]);
 						$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
-						if(isset($rowTarget[$rowQuery["target_field"]])){
+						if(isset($rowTarget[$rowQuery["TARGET_FIELD"]])){
 							$arrGroupMessage = array();
 							$arrDestination = array();
 							$arrMemberNoDestination = array();
@@ -206,10 +206,10 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							}
 							$arrMessageMerge = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 							if(!in_array($target.'_'.$arrMessageMerge["BODY"],$dataComing["destination_revoke"])){
-								if($condition[1] == $rowQuery["target_field"]){
+								if($condition[1] == $rowQuery["TARGET_FIELD"]){
 									$arrToken = $func->getFCMToken('person',$target);
 								}else{
-									$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["target_field"]]);
+									$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
 								}
 								if(sizeof($arrToken["MEMBER_NO"]) > 0){
 									if(isset($arrToken["LIST_SEND"][0]["TOKEN"]) && $arrToken["LIST_SEND"][0]["TOKEN"] != ""){
@@ -224,13 +224,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 											$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 											if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
-												if($rowQuery["is_stampflag"] == '1'){
+												if($rowQuery["IS_STAMPFLAG"] == '1'){
 													$arrayExecute = array();
-													preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+													preg_match_all('/\\:(.*?)\\s/',$rowQuery["WHERE_STAMP"],$arrayRawExecute);
 													foreach($arrayRawExecute[1] as $execute){
 														$arrayExecute[$execute] = $rowTarget[$execute];
 													}
-													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["STAMP_TABLE"]." SET ".$rowQuery["SET_COLUMN"]." WHERE ".$rowQuery["WHERE_STAMP"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
 												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -270,13 +270,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 												$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 												if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
-													if($rowQuery["is_stampflag"] == '1'){
+													if($rowQuery["IS_STAMPFLAG"] == '1'){
 														$arrayExecute = array();
-														preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+														preg_match_all('/\\:(.*?)\\s/',$rowQuery["WHERE_STAMP"],$arrayRawExecute);
 														foreach($arrayRawExecute[1] as $execute){
 															$arrayExecute[$execute] = $rowTarget[$execute];
 														}
-														$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+														$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["STAMP_TABLE"]." SET ".$rowQuery["SET_COLUMN"]." WHERE ".$rowQuery["WHERE_STAMP"]);
 														$updateFlagStamp->execute($arrayExecute);
 													}
 													$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -344,17 +344,17 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				require_once('../../../include/exit_footer.php');
 			}
 		}else{
-			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,is_stampflag,stamp_table,where_stamp,set_column,condition_target 
+			$getQuery = $conoracle->prepare("SELECT id_smsquery, sms_query,column_selected,is_bind_param,target_field,is_stampflag,stamp_table,where_stamp,set_column,condition_target 
 											FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
-			if($getQuery->rowCount() > 0){
+			$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowQuery["ID_SMSQUERY"])){
 				$arrGRPAll = array();
 				$arrayMerge = array();
 				$bulkInsert = array();
-				$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
-				$arrColumn = explode(',',$rowQuery["column_selected"]);
-				if($rowQuery["is_bind_param"] == '0'){
-					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
+				$arrColumn = explode(',',$rowQuery["COLUMN_SELECTED"]);
+				if($rowQuery["IS_BIND_PARAM"] == '0'){
+					$queryTarget = $conoracle->prepare($rowQuery['SMS_QUERY']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrTarget = array();
@@ -362,19 +362,19 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 						}
 						$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
-						if(!in_array($rowTarget[$rowQuery["target_field"]]."_".$arrMessage["BODY"],$dataComing["destination_revoke"])){
-							$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["target_field"]]);
+						if(!in_array($rowTarget[$rowQuery["TARGET_FIELD"]]."_".$arrMessage["BODY"],$dataComing["destination_revoke"])){
+							$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
 							if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
 								$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 								$arraySendSMS = $lib->sendSMS($arrayDest);
 								if($arraySendSMS["RESULT"]){
-									if($rowQuery["is_stampflag"] == '1'){
+									if($rowQuery["IS_STAMPFLAG"] == '1'){
 										$arrayExecute = array();
-										preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+										preg_match_all('/\\:(.*?)\\s/',$rowQuery["WHERE_STAMP"],$arrayRawExecute);
 										foreach($arrayRawExecute[1] as $execute){
 											$arrayExecute[$execute] = $rowTarget[$execute];
 										}
-										$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+										$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["STAMP_TABLE"]." SET ".$rowQuery["SET_COLUMN"]." WHERE ".$rowQuery["WHERE_STAMP"]);
 										$updateFlagStamp->execute($arrayExecute);
 									}
 									$arrayMerge[] = $arrayTel[0];
@@ -412,25 +412,25 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 					require_once('../../../include/exit_footer.php');
 				}else{
-					$query = $rowQuery['sms_query'];
+					$query = $rowQuery['SMS_QUERY'];
 					if(stripos($query,'WHERE') === FALSE){
 						if(stripos($query,'GROUP BY') !== FALSE){
 							$arrQuery = explode('GROUP BY',$query);
-							$query = $arrQuery[0]." WHERE ".$rowQuery["condition_target"]." GROUP BY ".$arrQuery[1];
+							$query = $arrQuery[0]." WHERE ".$rowQuery["CONDITION_TARGET"]." GROUP BY ".$arrQuery[1];
 						}else{
-							$query .= " WHERE ".$rowQuery["condition_target"];
+							$query .= " WHERE ".$rowQuery["CONDITION_TARGET"];
 						}
 					}else{
 						if(stripos($query,'GROUP BY') !== FALSE){
 							$arrQuery = explode('GROUP BY',$query);
-							$query = $arrQuery[0]." and ".$rowQuery["condition_target"]." GROUP BY ".$arrQuery[1];
+							$query = $arrQuery[0]." and ".$rowQuery["CONDITION_TARGET"]." GROUP BY ".$arrQuery[1];
 						}else{
-							$query .= " and ".$rowQuery["condition_target"];
+							$query .= " and ".$rowQuery["CONDITION_TARGET"];
 						}
 					}
-					$condition = explode(':',$rowQuery["condition_target"]);
+					$condition = explode(':',$rowQuery["CONDITION_TARGET"]);
 					foreach($dataComing["destination"] as $target){
-						if($condition[1] == $rowQuery["target_field"]){
+						if($condition[1] == $rowQuery["TARGET_FIELD"]){
 							if(strlen($target) <= 8){
 								$destination = strtolower($lib->mb_str_pad($target));
 							}else{
@@ -443,7 +443,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$condition[1] => $destination]);
 						$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
-						if(isset($rowTarget[$rowQuery["target_field"]])){
+						if(isset($rowTarget[$rowQuery["TARGET_FIELD"]])){
 							$arrGroupCheckSend = array();
 							$arrGroupMessage = array();
 							$arrTarget = array();
@@ -452,22 +452,22 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							}
 							$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
 							if(!in_array($destination.'_'.$arrMessage["BODY"],$dataComing["destination_revoke"])){
-								if($condition[1] == $rowQuery["target_field"]){
+								if($condition[1] == $rowQuery["TARGET_FIELD"]){
 									$arrayTel = $func->getSMSPerson('person',$destination);
 								}else{
-									$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["target_field"]]);
+									$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
 								}
 								if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
 									$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 									$arraySendSMS = $lib->sendSMS($arrayDest);
 									if($arraySendSMS["RESULT"]){
-										if($rowQuery["is_stampflag"] == '1'){
+										if($rowQuery["IS_STAMPFLAG"] == '1'){
 											$arrayExecute = array();
-											preg_match_all('/\\:(.*?)\\s/',$rowQuery["where_stamp"],$arrayRawExecute);
+											preg_match_all('/\\:(.*?)\\s/',$rowQuery["WHERE_STAMP"],$arrayRawExecute);
 											foreach($arrayRawExecute[1] as $execute){
 												$arrayExecute[$execute] = $rowTarget[$execute];
 											}
-											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["STAMP_TABLE"]." SET ".$rowQuery["SET_COLUMN"]." WHERE ".$rowQuery["WHERE_STAMP"]);
 											$updateFlagStamp->execute($arrayExecute);
 										}
 										$arrayMerge[] = $arrayTel[0];

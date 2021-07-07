@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','constantsmswelfare')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 																		id_smsconstantwelfare,
 																		welfare_itemtype_code,
 																		allow_smsconstantwelfare,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTWELFARE"] = $rowMenuMobile["id_smsconstantwelfare"];
-			$arrConstans["ITEM_CODE"] = $rowMenuMobile["welfare_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTWELFARE"] = $rowMenuMobile["allow_smsconstantwelfare"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTWELFARE"] = $rowMenuMobile["ID_SMSCONSTANTWELFARE"];
+			$arrConstans["ITEM_CODE"] = $rowMenuMobile["WELFARE_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTWELFARE"] = $rowMenuMobile["ALLOW_SMSCONSTANTWELFARE"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT ITEM_CODE,ITEM_DESC FROM ASSUCFASSITEMCODE ORDER BY ITEM_CODE ASC");

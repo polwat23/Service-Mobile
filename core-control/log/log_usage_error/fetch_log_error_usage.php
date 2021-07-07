@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logerrorusage')){
 		$arrayGroup = array();
-		$fetchLogError = $conmysql->prepare("SELECT error_menu,
+		$fetchLogError = $conoracle->prepare("SELECT error_menu,
 															error_code,
 															error_desc,
 															error_date,

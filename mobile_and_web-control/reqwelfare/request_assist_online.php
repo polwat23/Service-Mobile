@@ -6,13 +6,13 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$insertBulkColumn = array();
 		$insertBulkData = array();
-		$getColumnFormat = $conmysql->prepare("SELECT input_name
+		$getColumnFormat = $conoracle->prepare("SELECT input_name
 												FROM gcformatreqwelfare
 												WHERE id_const_welfare = :id_const_welfare and is_use = '1'");
 		$getColumnFormat->execute([':id_const_welfare' => $dataComing["id_const_welfare"]]);
 		while($rowColumn = $getColumnFormat->fetch(PDO::FETCH_ASSOC)){
-			$insertBulkColumn[] = $rowColumn["input_name"];
-			$insertBulkData[] = ':'.$rowColumn["input_name"];
+			$insertBulkColumn[] = $rowColumn["INPUT_NAME"];
+			$insertBulkData[] = ':'.$rowColumn["INPUT_NAME"];
 		}
 		$insertBulkColumn[] = "member_no";
 		$insertBulkColumn[] = "assisttype_code";

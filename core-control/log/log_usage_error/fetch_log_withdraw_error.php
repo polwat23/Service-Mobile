@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logwithdrawerror')){
 		$arrayGroup = array();
-		$fetchLogWithdrawError = $conmysql->prepare("SELECT wd.id_withdrawtransbankerr,
+		$fetchLogWithdrawError = $conoracle->prepare("SELECT wd.id_withdrawtransbankerr,
 														wd.member_no,
 														wd.transaction_date,
 														wd.amt_transfer,

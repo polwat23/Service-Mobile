@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
 		
-		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET pin = null
+		$repassword = $conoracle->prepare("UPDATE gcmemberaccount SET pin = null
 										WHERE member_no = :member_no");
 		if($repassword->execute([
 				':member_no' => $dataComing["member_no"]

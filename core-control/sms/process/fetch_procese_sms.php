@@ -8,43 +8,43 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$sumFee = 0;
 		$sumRound = 0;
 		$arrSMSCont = array();
-		$getSMSConstant = $conmysql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
+		$getSMSConstant = $conoracle->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 		$getSMSConstant->execute();
 		while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
-			$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
+			$arrSMSCont[$rowSMSConstant["SMSCS_NAME"]] = $rowSMSConstant["SMSCS_VALUE"];
 		}
-		$fetchSmsTranWassent = $conmysql->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
+		$fetchSmsTranWassent = $conoracle->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
 												sc.smscsp_pay_type,sc.accrued_amt
 												FROM smstranwassent sm LEFT JOIN smsconstantperson sc ON sm.deptaccount_no = sc.smscsp_account
 												WHERE sm.process_flag = '0' and sm.is_receive = '1' GROUP BY sm.member_no,sm.deptaccount_no");
 		$fetchSmsTranWassent->execute();
 		while($rowSmsTranWassent = $fetchSmsTranWassent->fetch(PDO::FETCH_ASSOC)){
-			if($rowSmsTranWassent["smscsp_pay_type"] == '0'){
-				$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["round_send"];
+			if($rowSmsTranWassent["SMSCSP_PAY_TYPE"] == '0'){
+				$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["ROUND_SEND"];
 			}else{
-				if($MonthNow > $rowSmsTranWassent["request_flat_date"]){
+				if($MonthNow > $rowSmsTranWassent["REQUEST_FLAT_DATE"]){
 					$FeeNet = $arrSMSCont["flat_price_in_month"];
 				}else{
-					$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["round_send"];
+					$FeeNet = $arrSMSCont["sms_fee_amt_per_trans"] * $rowSmsTranWassent["ROUND_SEND"];
 				}
 			}
 			$arrGroupSmsTranWassent = array();
-			$arrGroupSmsTranWassent["MEMBER_NO"] = $rowSmsTranWassent["member_no"];
-			$arrGroupSmsTranWassent["ACCRUED_AMT"] = $rowSmsTranWassent["accrued_amt"];
-			$arrGroupSmsTranWassent["PROCESS_ROUND"] = number_format($rowSmsTranWassent["round_send"],0);
-			$arrGroupSmsTranWassent["DEPTACCOUNT_NO"] = $lib->formataccount($rowSmsTranWassent["deptaccount_no"],$func->getConstant('dep_format'));
-			if($rowSmsTranWassent["smscsp_pay_type"] == '1'){
-				if($MonthNow > $rowSmsTranWassent["request_flat_date"]){
+			$arrGroupSmsTranWassent["MEMBER_NO"] = $rowSmsTranWassent["MEMBER_NO"];
+			$arrGroupSmsTranWassent["ACCRUED_AMT"] = $rowSmsTranWassent["ACCRUED_AMT"];
+			$arrGroupSmsTranWassent["PROCESS_ROUND"] = number_format($rowSmsTranWassent["ROUND_SEND"],0);
+			$arrGroupSmsTranWassent["DEPTACCOUNT_NO"] = $lib->formataccount($rowSmsTranWassent["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			if($rowSmsTranWassent["SMSCSP_PAY_TYPE"] == '1'){
+				if($MonthNow > $rowSmsTranWassent["REQUEST_FLAT_DATE"]){
 					$arrGroupSmsTranWassent["PAY_TYPE"] = '1';
 				}else{
 					$arrGroupSmsTranWassent["PAY_TYPE"] = '0';
 				}
 			}else{
-				$arrGroupSmsTranWassent["PAY_TYPE"] = $rowSmsTranWassent["smscsp_pay_type"];
+				$arrGroupSmsTranWassent["PAY_TYPE"] = $rowSmsTranWassent["SMSCSP_PAY_TYPE"];
 			}
 			$arrGroupSmsTranWassent["FEE_FORMAT"] = number_format($FeeNet,2);
-			$sumFee += $FeeNet + $rowSmsTranWassent["accrued_amt"];
-			$sumRound += $rowSmsTranWassent["round_send"];
+			$sumFee += $FeeNet + $rowSmsTranWassent["ACCRUED_AMT"];
+			$sumRound += $rowSmsTranWassent["ROUND_SEND"];
 			$arrayGroup[] = $arrGroupSmsTranWassent;
 		}
 		$arrayResult["SUM_FEE"] = number_format($sumFee,2);

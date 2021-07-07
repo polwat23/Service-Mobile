@@ -6,10 +6,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroupWeb = array();
 		$arrayGroupMobile = array();
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
-			FROM gcuserlogin
-				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH)
-				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
+		$fetchUserlogin = $conoracle->prepare("SELECT COUNT(MEMBER_NO) as C_NAME, TO_CHAR(login_date,'MM') as MONTH, TO_CHAR(login_date,'YYYY') as YEAR
+										FROM gcuserlogin
+										WHERE TO_CHAR(login_date,'YYYY-MM-DD')  BETWEEN TO_CHAR(ADD_MONTHS(sysdate, -6),'YYYY-MM-DD') and  TO_CHAR(sysdate,'YYYY-MM-DD')
+										GROUP BY login_date
+										ORDER BY login_date ASC ");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
@@ -19,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup[] = $arrGroupRootUserlogin;
 		}
 		
-		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
+		$fetchUserloginWeb = $conoracle->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
 				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH) AND channel = 'web'
 				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
@@ -32,7 +33,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroupWeb[] = $arrGroupRootUserlogin;
 		}
 		
-		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
+		$fetchUserloginMobile = $conoracle->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
 				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH) AND channel = 'mobile_app'
 				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");

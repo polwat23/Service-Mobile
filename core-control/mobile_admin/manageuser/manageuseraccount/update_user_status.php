@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 								WHERE member_no = :member_no';
 			$list_name = "lock account";
 		}
-		$updateStatus = $conmysql->prepare($queryString);
+		$updateStatus = $conoracle->prepare($queryString);
 		if($updateStatus->execute([
 			':account_status' => $dataComing["account_status"],
 			':member_no' => $dataComing["member_no"]

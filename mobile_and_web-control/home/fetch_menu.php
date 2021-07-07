@@ -66,19 +66,19 @@ if(!$anonymous){
 	}else{
 		if(isset($dataComing["menu_parent"])){
 			if($user_type == '5' || $user_type == '9'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+				$fetch_menu = $conoracle->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conoracle->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
 												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conoracle->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent 
@@ -91,26 +91,26 @@ if(!$anonymous){
 			]);
 			while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["channel"] == 'mobile_app'){
-					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
+					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["MENU_VERSION"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
-						$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
-						$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-						$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
-						$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-						$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-						$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-						$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+						$arrMenu["ID_MENU"] = (int) $rowMenu["ID_MENU"];
+						$arrMenu["MENU_NAME"] = $rowMenu["MENU_NAME"];
+						$arrMenu["MENU_NAME_EN"] = $rowMenu["MENU_NAME_EN"];
+						$arrMenu["MENU_ICON_PATH"] = $rowMenu["MENU_ICON_PATH"];
+						$arrMenu["MENU_COMPONENT"] = $rowMenu["MENU_COMPONENT"];
+						$arrMenu["MENU_STATUS"] = $rowMenu["MENU_STATUS"];
+						$arrMenu["MENU_VERSION"] = $rowMenu["MENU_VERSION"];
 						$arrayAllMenu[] = $arrMenu;
 					}
 				}else{
 					$arrMenu = array();
-					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
-					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
-					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+					$arrMenu["ID_MENU"] = (int) $rowMenu["ID_MENU"];
+					$arrMenu["MENU_NAME"] = $rowMenu["MENU_NAME"];
+					$arrMenu["MENU_NAME_EN"] = $rowMenu["MENU_NAME_EN"];
+					$arrMenu["MENU_ICON_PATH"] = $rowMenu["MENU_ICON_PATH"];
+					$arrMenu["MENU_COMPONENT"] = $rowMenu["MENU_COMPONENT"];
+					$arrMenu["MENU_STATUS"] = $rowMenu["MENU_STATUS"];
+					$arrMenu["MENU_VERSION"] = $rowMenu["MENU_VERSION"];
 					$arrayAllMenu[] = $arrMenu;
 				}
 			}
@@ -141,19 +141,19 @@ if(!$anonymous){
 			$arrayMenuTransactionInside = array();
 			$arrayMenuTransactionOutside = array();
 			if($user_type == '5' || $user_type == '9'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
+				$fetch_menu = $conoracle->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).")
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conoracle->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).")
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
 												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conoracle->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") 
@@ -165,40 +165,40 @@ if(!$anonymous){
 			]);
 			while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["channel"] == 'mobile_app'){
-					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"]) || $user_type == '5' || $user_type == '9'){
+					if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["MENU_VERSION"]) || $user_type == '5' || $user_type == '9'){
 						$arrMenu = array();
-						$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
-						$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-						$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
-						$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-						$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-						$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-						$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
-						if($rowMenu["menu_parent"] == '0'){
-							$arrayGroupMenu["ID_PARENT"] = $rowMenu["menu_parent"];
+						$arrMenu["ID_MENU"] = (int) $rowMenu["ID_MENU"];
+						$arrMenu["MENU_NAME"] = $rowMenu["MENU_NAME"];
+						$arrMenu["MENU_NAME_EN"] = $rowMenu["MENU_NAME_EN"];
+						$arrMenu["MENU_ICON_PATH"] = $rowMenu["MENU_ICON_PATH"];
+						$arrMenu["MENU_COMPONENT"] = $rowMenu["MENU_COMPONENT"];
+						$arrMenu["MENU_STATUS"] = $rowMenu["MENU_STATUS"];
+						$arrMenu["MENU_VERSION"] = $rowMenu["MENU_VERSION"];
+						if($rowMenu["MENU_PARENT"] == '0'){
+							$arrayGroupMenu["ID_PARENT"] = $rowMenu["MENU_PARENT"];
 							$arrayGroupMenu["MENU"][] = $arrMenu;
-						}else if($rowMenu["menu_parent"] == '24'){
+						}else if($rowMenu["MENU_PARENT"] == '24'){
 							$arrayMenuSetting[] = $arrMenu;
-						}else if($rowMenu["menu_parent"] == '18'){
-							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
-							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
+						}else if($rowMenu["MENU_PARENT"] == '18'){
+							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["MENU_PARENT"];
+							$getMenuParentStatus = $conoracle->prepare("SELECT MENU_STATUS FROM gcmenu WHERE id_menu = 18");
 							$getMenuParentStatus->execute();
 							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
-							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
+							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["MENU_STATUS"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
-						}else if($rowMenu["menu_parent"] == '56'){
+						}else if($rowMenu["MENU_PARENT"] == '56'){
 							$arrayMenuTransactionInside[] = $arrMenu;
-						}else if($rowMenu["menu_parent"] == '57'){
+						}else if($rowMenu["MENU_PARENT"] == '57'){
 							$arrayMenuTransactionOutside[] = $arrMenu;
 						}
-						if($rowMenu["menu_component"] == "DepositInfo"){
+						if($rowMenu["MENU_COMPONENT"] == "DepositInfo"){
 							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 							$fetchMenuDep->execute([':member_no' => $member_no]);
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							$arrMenuDep["LAST_STATEMENT"] = TRUE;
-						}else if($rowMenu["menu_component"] == "LoanInfo"){
+						}else if($rowMenu["MENU_COMPONENT"] == "LoanInfo"){
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
 																WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8 and PRINCIPAL_BALANCE > 0");
 							$fetchMenuLoan->execute([':member_no' => $member_no]);
@@ -206,7 +206,7 @@ if(!$anonymous){
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-						}else if($rowMenu["menu_component"] == "ShareInfo"){
+						}else if($rowMenu["MENU_COMPONENT"] == "ShareInfo"){
 							$fetchMenuSHR = $conoracle->prepare("SELECT (SHARESTK_AMT*10) as SHARE_BALANCE FROM shsharemaster WHERE member_no = :member_no");
 							$fetchMenuSHR->execute([':member_no' => $member_no]);
 							$rowMenuSHR = $fetchMenuSHR->fetch(PDO::FETCH_ASSOC);
@@ -215,22 +215,22 @@ if(!$anonymous){
 					}
 				}else{
 					$arrMenu = array();
-					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
-					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
-					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
-					if($rowMenu["menu_parent"] == '0'){
+					$arrMenu["ID_MENU"] = (int) $rowMenu["ID_MENU"];
+					$arrMenu["MENU_NAME"] = $rowMenu["MENU_NAME"];
+					$arrMenu["MENU_NAME_EN"] = $rowMenu["MENU_NAME_EN"];
+					$arrMenu["MENU_ICON_PATH"] = $rowMenu["MENU_ICON_PATH"];
+					$arrMenu["MENU_COMPONENT"] = $rowMenu["MENU_COMPONENT"];
+					$arrMenu["MENU_STATUS"] = $rowMenu["MENU_STATUS"];
+					$arrMenu["MENU_VERSION"] = $rowMenu["MENU_VERSION"];
+					if($rowMenu["MENU_PARENT"] == '0'){
 						$arrayAllMenu[] = $arrMenu;
-					}else if($rowMenu["menu_parent"] == '24'){
+					}else if($rowMenu["MENU_PARENT"] == '24'){
 						$arrayMenuSetting[] = $arrMenu;
-					}else if($rowMenu["menu_parent"] == '18'){
+					}else if($rowMenu["MENU_PARENT"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
-					}else if($rowMenu["menu_parent"] == '56'){
+					}else if($rowMenu["MENU_PARENT"] == '56'){
 						$arrayMenuTransactionInside[] = $arrMenu;
-					}else if($rowMenu["menu_parent"] == '57'){
+					}else if($rowMenu["MENU_PARENT"] == '57'){
 						$arrayMenuTransactionOutside[] = $arrMenu;
 					}
 					if($rowMenu["menu_component"] == "DepositInfo"){
@@ -265,14 +265,14 @@ if(!$anonymous){
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
-			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
+			$fetchMenuFav = $conoracle->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
 			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
-				$arrFavMenu["NAME_FAV"] = $rowMenuFav["name_fav"];
-				$arrFavMenu["FAV_REFNO"] = $rowMenuFav["fav_refno"];
-				$arrFavMenu["FLAG_TRANS"] = $rowMenuFav["flag_trans"];
-				$arrFavMenu["DESTINATION"] = $rowMenuFav["destination"];
+				$arrFavMenu["NAME_FAV"] = $rowMenuFav["NAME_FAV"];
+				$arrFavMenu["FAV_REFNO"] = $rowMenuFav["FAV_REFNO"];
+				$arrFavMenu["FLAG_TRANS"] = $rowMenuFav["FLAG_TRANS"];
+				$arrFavMenu["DESTINATION"] = $rowMenuFav["DESTINATION"];
 				$arrFavMenuGroup[] = $arrFavMenu;
 			}
 			if(sizeof($arrayAllMenu) > 0 || sizeof($arrayMenuSetting) > 0){
@@ -296,10 +296,10 @@ if(!$anonymous){
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 					$arrayResult['MENU_SHARE'] = $arrMenuSHR;
 				}
-				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
+				$fetchLimitTrans = $conoracle->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
-				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
+				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["LIMIT_AMOUNT_TRANSACTION"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -329,33 +329,33 @@ if(!$anonymous){
 			
 		}
 		$arrayAllMenu = array();
-		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+		$fetch_menu = $conoracle->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_parent IN ('-1','-2') and (menu_channel = :channel OR menu_channel = 'both')");
 		$fetch_menu->execute([
 			':channel' => $arrPayload["PAYLOAD"]["channel"]
 		]);
 		while($rowMenu = $fetch_menu->fetch(PDO::FETCH_ASSOC)){
 			if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-				if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["menu_version"])){
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= preg_replace('/\./','',$rowMenu["MENU_VERSION"])){
 					$arrMenu = array();
-					$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
-					$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
-					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-					$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+					$arrMenu["ID_MENU"] = (int) $rowMenu["ID_MENU"];
+					$arrMenu["MENU_NAME"] = $rowMenu["MENU_NAME"];
+					$arrMenu["MENU_NAME_EN"] = $rowMenu["MENU_NAME_EN"];
+					$arrMenu["MENU_ICON_PATH"] = $rowMenu["MENU_ICON_PATH"];
+					$arrMenu["MENU_COMPONENT"] = $rowMenu["MENU_COMPONENT"];
+					$arrMenu["MENU_STATUS"] = $rowMenu["MENU_STATUS"];
+					$arrMenu["MENU_VERSION"] = $rowMenu["MENU_VERSION"];
 					$arrayAllMenu[] = $arrMenu;
 				}
 			}else{
 				$arrMenu = array();
-				$arrMenu["ID_MENU"] = (int) $rowMenu["id_menu"];
-				$arrMenu["MENU_NAME"] = $rowMenu["menu_name"];
-				$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
-				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
-				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-				$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
-				$arrMenu["MENU_VERSION"] = $rowMenu["menu_version"];
+				$arrMenu["ID_MENU"] = (int) $rowMenu["ID_MENU"];
+				$arrMenu["MENU_NAME"] = $rowMenu["MENU_NAME"];
+				$arrMenu["MENU_NAME_EN"] = $rowMenu["MENU_NAME_EN"];
+				$arrMenu["MENU_ICON_PATH"] = $rowMenu["MENU_ICON_PATH"];
+				$arrMenu["MENU_COMPONENT"] = $rowMenu["MENU_COMPONENT"];
+				$arrMenu["MENU_STATUS"] = $rowMenu["MENU_STATUS"];
+				$arrMenu["MENU_VERSION"] = $rowMenu["MENU_VERSION"];
 				$arrayAllMenu[] = $arrMenu;
 			}
 		}

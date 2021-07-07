@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
-		$update_email = $conmysql->prepare("UPDATE gcmemberaccount 
+		$update_email = $conoracle->prepare("UPDATE gcmemberaccount 
 																SET email = :new_email
 																WHERE  member_no = :member_no;");
 		if($update_email->execute([

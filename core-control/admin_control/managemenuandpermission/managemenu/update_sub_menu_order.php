@@ -3,22 +3,22 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
-		$conmysql->beginTransaction();
+		$conoracle->beginTransaction();
 		foreach($dataComing["menu_list"] as $menu_list){
-			$updatemenu = $conmysql->prepare("UPDATE coresubmenu SET menu_order = :menu_order
+			$updatemenu = $conoracle->prepare("UPDATE coresubmenu SET menu_order = :menu_order
 										 WHERE id_submenu = :id_submenu");
 			if($updatemenu->execute([
 				':menu_order' => $menu_list["order"],
 				':id_submenu' => $menu_list["menu_id"]
 			])){
 			}else{
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถจัดเรียงเมนูได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
 			}
 		}
-		$conmysql->commit();
+		$conoracle->commit();
 		$arrayStruc = [
 			':menu_name' => "managemenu",
 			':username' => $payload["username"],

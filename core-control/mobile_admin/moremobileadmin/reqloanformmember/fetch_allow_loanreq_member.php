@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["UPDATE_USERNAME"] = null;
 			$arrayGroup["IS_ALLOW"] = 0;
 			
-			$fetchAllow = $conmysql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
+			$fetchAllow = $conoracle->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
 											FROM gcallowmemberreqloan WHERE member_no = :member_no");
 			$fetchAllow->execute([
 				':member_no' => $rowMember["MEMBER_NO"]
@@ -49,10 +49,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			
 			while($rowAllow = $fetchAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrayReport = array();
-				$arrayGroup["CREATE_DATE"] = $rowAllow["create_date"] ?? null;
-				$arrayGroup["UPDATE_DATE"] = $rowAllow["update_date"] ?? null;
-				$arrayGroup["UPDATE_USERNAME"] = $rowAllow["update_username"] ?? null;
-				$arrayGroup["IS_ALLOW"] = $rowAllow["is_allow"] ?? 0;
+				$arrayGroup["CREATE_DATE"] = $rowAllow["CREATE_DATE"] ?? null;
+				$arrayGroup["UPDATE_DATE"] = $rowAllow["UPDATE_DATE"] ?? null;
+				$arrayGroup["UPDATE_USERNAME"] = $rowAllow["UPDATE_USERNAME"] ?? null;
+				$arrayGroup["IS_ALLOW"] = $rowAllow["IS_ALLOW"] ?? 0;
 			}
 			
 			$arrayGroupAll[] = $arrayGroup;

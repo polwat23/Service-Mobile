@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','channel'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		$updatAvatar = $conmysql->prepare("UPDATE gcmemberaccount SET path_avatar = null,upload_from_channel = :channel,upload_date = NOW()
+		$updatAvatar = $conoracle->prepare("UPDATE gcmemberaccount SET path_avatar = null,upload_from_channel = :channel,upload_date = NOW()
 												WHERE member_no = :member_no");
 		if($updatAvatar->execute([
 			':channel' => $dataComing["channel"],

@@ -29,24 +29,26 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 				if($responseSh->msg_output == '0000'){
 					$fetchSeqno = $conoracle->prepare("SELECT MAX(SEQ_NO) as SEQ_NO FROM dpdeptstatement 
 													WHERE deptaccount_no = :deptaccount_no and deptitem_amt = :slip_amt
-													and to_char(operate_date,'YYYY-MM-DD') = :slip_date");
+													and TO_DATE(operate_date,'YYYY-MM-DD') = :slip_date");
 					$fetchSeqno->execute([
 						':deptaccount_no' => $responseSh->deptaccount_no,
 						':slip_amt' => $responseSh->slip_amt,
 						':slip_date' => $lib->convertdate($responseSh->slip_date,'y-n-d')
 					]);
 					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-														VALUES(:remark,:deptaccount_no,:seq_no)");
+					$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+					$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo,memo_text,deptaccount_no,seq_no)
+														VALUES(:id_memo , :remark,:deptaccount_no,:seq_no)");
 					$insertRemark->execute([
+						':id_memo' => $id_memo,
 						':remark' => $dataComing["remark"],
 						':deptaccount_no' => $from_account_no,
 						':seq_no' => $rowSeqno["SEQ_NO"]
 					]);
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
+					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 																,amount,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																id_userlogin,ref_no_source)
-																VALUES(:ref_no,'WTX',:from_account,'2',:member_no,'3',:amount,:amount,'-1',:operate_date,'1',:member_no,
+																VALUES(:ref_no,'WTX',:from_account,'2',:member_no,'3',:amount,:amount,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'1',:member_no,
 																:id_userlogin,:ref_no_source)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,

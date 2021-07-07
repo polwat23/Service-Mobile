@@ -3,7 +3,10 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','input_name','label_text'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
-		$updaeusername = $conmysql->prepare("INSERT INTO gcformatreqwelfare (
+		
+		$id_format_req_welfare  = $func->getMaxTable('id_format_req_welfare' , 'gcformatreqwelfare');	
+		$updaeusername = $conoracle->prepare("INSERT INTO gcformatreqwelfare (
+										id_format_req_welfare,
 										id_const_welfare, 
 										input_type, 
 										input_length, 
@@ -13,7 +16,7 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','inp
 										default_value, 
 										input_format,
 										is_required) 
-										VALUES (
+										VALUES (:id_format_req_welfare,
 										:id_const_welfare,
 										:input_type,
 										:input_length,
@@ -24,6 +27,7 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','inp
 										:input_format,
 										:is_required)");
 		if($updaeusername->execute([
+			':id_format_req_welfare' => $id_format_req_welfare,
 			':id_const_welfare' => $dataComing["id_const_welfare"],
 			':input_type' => $dataComing["input_type"],
 			':input_length' => $dataComing["input_length_spc_"],

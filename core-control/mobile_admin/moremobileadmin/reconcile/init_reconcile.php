@@ -5,13 +5,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','reconcile')){
 		$arrayBank = array();
 		
-		$fetchBankList = $conmysql->prepare("SELECT bank_code,bank_short_name,bank_logo_path FROM csbankdisplay");
+		$fetchBankList = $conoracle->prepare("SELECT bank_code,bank_short_name,bank_logo_path FROM csbankdisplay");
 		$fetchBankList->execute();
 		while($rowBank = $fetchBankList->fetch(PDO::FETCH_ASSOC)){
 			$itemBank = array();
-			$itemBank["BANK_CODE"] = $rowBank["bank_code"];
-			$itemBank["BANK_NAME"] = $rowBank["bank_short_name"];
-			$itemBank["BANK_LOGO_PATH"] = $rowBank["bank_logo_path"];
+			$itemBank["BANK_CODE"] = $rowBank["BANK_CODE"];
+			$itemBank["BANK_NAME"] = $rowBank["BANK_SHORT_NAME"];
+			$itemBank["BANK_LOGO_PATH"] = $rowBank["BANK_LOGO_PATH"];
 			$arrayBank[] = $itemBank;
 		}
 		

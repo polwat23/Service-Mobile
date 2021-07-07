@@ -3,12 +3,15 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountconstant'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$insertDeptAllow = $conmysql->prepare("INSERT INTO gcuserallowacctransaction(deptaccount_no,member_no,id_accountconstant) 
-												VALUES(:deptaccount_no,:member_no,:id_accountconstant)");
+		$id_userallowacctran  = $func->getMaxTable('id_userallowacctran' , 'gcuserallowacctransaction');	
+		$insertDeptAllow = $conoracle->prepare("INSERT INTO gcuserallowacctransaction(id_userallowacctran,deptaccount_no,member_no,id_accountconstant) 
+												VALUES(:id_userallowacctran,:deptaccount_no,:member_no,:id_accountconstant)");
 		if($insertDeptAllow->execute([
 			':deptaccount_no' => $dataComing["deptaccount_no"],
 			':member_no' => $payload["member_no"],
-			':id_accountconstant' => $dataComing["id_accountconstant"]
+			':id_accountconstant' => $dataComing["id_accountconstant"],
+			':id_userallowacctran' => $id_userallowacctran
+			
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

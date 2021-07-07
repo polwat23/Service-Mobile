@@ -3,11 +3,11 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$getLoanCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_estimate_creditloan = '1'");
+		$getLoanCredit = $conoracle->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_estimate_creditloan = '1'");
 		$arrLoanAllow = array();
 		$getLoanCredit->execute();
 		while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
-			$arrLoanAllow[] = "'".$rowCreditAllow["loantype_code"]."'";
+			$arrLoanAllow[] = "'".$rowCreditAllow["LOANTYPE_CODE"]."'";
 		}
 		$fetchIntrate = $conoracle->prepare("select lir.interest_rate as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
 												ON lp.inttabrate_code = lir.loanintrate_code where lp.loantype_code IN(".implode(',',$arrLoanAllow).") and

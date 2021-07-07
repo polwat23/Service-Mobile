@@ -5,13 +5,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
 		$arrayResult = array();
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$memberInfoMobile = $conmysql->prepare("SELECT email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+		$memberInfoMobile = $conoracle->prepare("SELECT email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
-		if($memberInfoMobile->rowCount() > 0){
-			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowInfoMobile["path_avatar"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
-				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+		$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowInfoMobile["MEMBER_NO"])){		
+			if(isset($rowInfoMobile["PATH_AVATAR"])){
+				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].stream_get_contents($rowInfoMobile["PATH_AVATAR"]);
+				$explodePathAvatar = explode('.',stream_get_contents($rowInfoMobile["PATH_AVATAR"]));
 				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			}else{
 				$arrayResult["AVATAR_PATH"] = null;

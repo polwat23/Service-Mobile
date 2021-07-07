@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 																		id_accountconstant,
 																		dept_type_code,
 																		member_cate_code,
@@ -21,15 +21,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_ACCCONSTANT"] = $rowMenuMobile["id_accountconstant"];
-			$arrConstans["DEPTTYPE_CODE"] = $rowMenuMobile["dept_type_code"];
-			$arrConstans["MEMBER_TYPE_CODE"] = $rowMenuMobile["member_cate_code"];
-			$arrConstans["ALLOW_DEPOSIT_INSIDE"] = $rowMenuMobile["allow_deposit_inside"];
-			$arrConstans["ALLOW_WITHDRAW_INSIDE"] = $rowMenuMobile["allow_withdraw_inside"];
-			$arrConstans["ALLOW_DEPOSIT_OUTSIDE"] = $rowMenuMobile["allow_deposit_outside"];
-			$arrConstans["ALLOW_WITHDRAW_OUTSIDE"] = $rowMenuMobile["allow_withdraw_outside"];
-			$arrConstans["ALLOW_BUY_SHARE"] = $rowMenuMobile["allow_buy_share"];
-			$arrConstans["ALLOW_PAY_LOAN"] = $rowMenuMobile["allow_pay_loan"];
+			$arrConstans["ID_ACCCONSTANT"] = $rowMenuMobile["ID_ACCOUNTCONSTANT"];
+			$arrConstans["DEPTTYPE_CODE"] = $rowMenuMobile["DEPT_TYPE_CODE"];
+			$arrConstans["MEMBER_TYPE_CODE"] = $rowMenuMobile["MEMBER_CATE_CODE"];
+			$arrConstans["ALLOW_DEPOSIT_INSIDE"] = $rowMenuMobile["ALLOW_DEPOSIT_INSIDE"];
+			$arrConstans["ALLOW_WITHDRAW_INSIDE"] = $rowMenuMobile["ALLOW_WITHDRAW_INSIDE"];
+			$arrConstans["ALLOW_DEPOSIT_OUTSIDE"] = $rowMenuMobile["ALLOW_DEPOSIT_OUTSIDE"];
+			$arrConstans["ALLOW_WITHDRAW_OUTSIDE"] = $rowMenuMobile["ALLOW_WITHDRAW_OUTSIDE"];
+			$arrConstans["ALLOW_BUY_SHARE"] = $rowMenuMobile["ALLOW_BUY_SHARE"];
+			$arrConstans["ALLOW_PAY_LOAN"] = $rowMenuMobile["ALLOW_PAY_LOAN"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");

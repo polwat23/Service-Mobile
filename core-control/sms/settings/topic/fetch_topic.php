@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managetopic')){
-		$fetchTopic = $conmysql->prepare("SELECT sm.menu_name,sm.id_submenu,smt.id_smstemplate,cpm.username,stm.smstemplate_name
+		$fetchTopic = $conoracle->prepare("SELECT sm.menu_name,sm.id_submenu,smt.id_smstemplate,cpm.username,stm.smstemplate_name
 											FROM coresubmenu sm LEFT JOIN smstopicmatchtemplate smt ON sm.id_submenu = smt.id_submenu
 											LEFT JOIN smstemplate stm ON smt.id_smstemplate = stm.id_smstemplate
                                             LEFT JOIN corepermissionsubmenu smp ON sm.id_submenu = smp.id_submenu and smp.is_use = '1'
@@ -13,15 +13,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrAllTopic = array();
 		while($rowTopic = $fetchTopic->fetch(PDO::FETCH_ASSOC)){
 			$arrayTopic = array();
-			$arrayTopic["TOPIC_NAME"] = $rowTopic["menu_name"];
-			$arrayTopic["ID_SUBMENU"] = $rowTopic["id_submenu"];
-			$arrayTopic["SMSTEMPLATE_NAME"] = $rowTopic["smstemplate_name"];
-			$arrayTopic["ID_SMSTEMPLATE"] = $rowTopic["id_smstemplate"];
-			if(array_search($rowTopic["id_submenu"],array_column($arrAllTopic,"ID_SUBMENU")) === FALSE){
-				($arrayTopic["USER_CONTROL"])[] = $rowTopic["username"];
+			$arrayTopic["TOPIC_NAME"] = $rowTopic["MENU_NAME"];
+			$arrayTopic["ID_SUBMENU"] = $rowTopic["ID_SUBMENU"];
+			$arrayTopic["SMSTEMPLATE_NAME"] = $rowTopic["SMSTEMPLATE_NAME"];
+			$arrayTopic["ID_SMSTEMPLATE"] = $rowTopic["ID_SMSTEMPLATE"];
+			if(array_search($rowTopic["ID_SUBMENU"],array_column($arrAllTopic,"ID_SUBMENU")) === FALSE){
+				($arrayTopic["USER_CONTROL"])[] = $rowTopic["USERNAME"];
 				$arrAllTopic[] = $arrayTopic;
 			}else{
-				($arrAllTopic[array_search($rowTopic["id_submenu"],array_column($arrAllTopic,"ID_SUBMENU"))]["USER_CONTROL"])[] = $rowTopic["username"];
+				($arrAllTopic[array_search($rowTopic["ID_SUBMENU"],array_column($arrAllTopic,"ID_SUBMENU"))]["USER_CONTROL"])[] = $rowTopic["USERNAME"];
 			}
 		}
 		$arrayResult['TOPIC'] = $arrAllTopic;

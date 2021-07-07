@@ -3,13 +3,15 @@
 namespace ControlLog;
 
 use Connection\connection;
+use Component\functions;
 
 class insertLog {
 	private $con;
-		
+	private $func;
 		function __construct() {
+			$this->func = new functions();
 			$connection = new connection();
-			$this->con = $connection->connecttomysql();
+			$this->con = $connection->connecttooracle();
 		}
 		
 		public function writeLog($type_log,$log_struc,$is_catch=false) {
@@ -154,8 +156,9 @@ class insertLog {
 			$insertLog->execute($log_struc);
 		}
 		private function logErrorUsage($log_struc){
-			$insertLog = $this->con->prepare("INSERT INTO logerrorusageapplication(error_menu,error_code,error_desc,error_device) 
-												VALUES(:error_menu,:error_code,:error_desc,:error_device)");
+			$id_errorusage = $this->func->getMaxTable('id_errorusage' , 'logerrorusageapplication');
+			$insertLog = $this->con->prepare("INSERT INTO logerrorusageapplication(id_errorusage,error_menu,error_code,error_desc,error_device) 
+												VALUES(".$id_errorusage.",:error_menu,:error_code,:error_desc,:error_device)");
 			$insertLog->execute($log_struc);
 		}
 		private function logBuyShare($log_struc){
@@ -165,11 +168,12 @@ class insertLog {
 											:destination,:response_code,:response_message)");
 			$insertLog->execute($log_struc);
 		}
-		private function logRepayLoan($log_struc){
-			$insertLog = $this->con->prepare("INSERT INTO logrepayloan(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
+		private function logRepayLoan($log_struc){			
+			$id_logrepaylon = $this->func->getMaxTable('id_repayloan' , 'logrepayloan');
+			$insertLog = $this->con->prepare("INSERT INTO logrepayloan(id_repayloan,member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
 											,destination,response_code,response_message) 
-											VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:status_flag,
-											:destination,:response_code,:response_message)");
+											VALUES(".$id_logrepaylon.",:member_no,:id_userlogin,TO_DATE(:operate_date,'yyyy-mm-dd hh24:mi:ss'),:deptaccount_no,:amt_transfer,:status_flag,
+											:destination, :response_code, :response_message)");
 			$insertLog->execute($log_struc);
 		}
 		private function logEditSMS($log_struc){

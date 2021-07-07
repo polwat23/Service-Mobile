@@ -8,7 +8,7 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchMail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
+		$fetchMail = $conoracle->prepare("SELECT  email FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchMail->execute([':member_no' => $payload["member_no"]]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
@@ -54,19 +54,20 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$arrayDataTemplate["ACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 		$template = $func->getTemplateSystem('DepositStatement');
 		$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-		$arrMailStatus = $lib->sendMail($rowMail["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,$arrayAttach);
+		$arrMailStatus = $lib->sendMail($rowMail["EMAIL"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,$arrayAttach);
 		if($arrMailStatus["RESULT"]){
 			foreach($arrayAttach as $path){
 				unlink($path);
 			}
 			$arrayResult['RESULT'] = TRUE;
+			
 			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0019",
-				":error_desc" => "ส่งเมลไม่ได้ ".$rowMail["email"]."\n"."Error => ".$arrMailStatus["MESSAGE_ERROR"],
+				":error_desc" => "ส่งเมลไม่ได้ ".$rowMail["EMAIL"]."\n"."Error => ".$arrMailStatus["MESSAGE_ERROR"],
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);

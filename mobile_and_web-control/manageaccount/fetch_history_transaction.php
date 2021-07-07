@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 		}else{
 			$old_ref_no = isset($dataComing["ref_no"]) ? "and ref_no < ".$dataComing["ref_no"] : "and ref_no < 99999999999999999";
 		}
-		$fetchTransList = $conmysql->prepare("SELECT REF_NO,TRANSFER_MODE,DESTINATION,DESTINATION_TYPE,AMOUNT_RECEIVE,OPERATE_DATE,FEE_AMT,PENALTY_AMT,TRANS_FLAG
+		$fetchTransList = $conoracle->prepare("SELECT REF_NO,TRANSFER_MODE,DESTINATION,DESTINATION_TYPE,AMOUNT_RECEIVE,OPERATE_DATE,FEE_AMT,PENALTY_AMT,TRANS_FLAG
 															FROM gctransaction WHERE member_no = :member_no and from_account = :deptaccount_no and result_transaction <> '-9' ".$old_ref_no."
 															ORDER BY ref_no DESC LIMIT ".$rownum);
 		$fetchTransList->execute([
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 			':deptaccount_no' => preg_replace('/-/','',$dataComing["deptaccount_no"])
 		]);
 		if($dataComing["source_type"] == "coop"){
-			$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account,bank_format_account_hide FROM csbankdisplay WHERE bank_code = '004' ");
+			$fetchFormatAccBank = $conoracle->prepare("SELECT bank_format_account,bank_format_account_hide FROM csbankdisplay WHERE bank_code = '004' ");
 			$fetchFormatAccBank->execute();
 			$rowBankDS = $fetchFormatAccBank->fetch(PDO::FETCH_ASSOC);
 		}
@@ -61,8 +61,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
 					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
-					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["bank_format_account"]);
-					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["bank_format_account_hide"]);
+					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["BANK_FORMAT_ACCOUNT"]);
+					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["BANK_FORMAT_ACCOUNT_HIDE"]);
 				}else if($rowTrans["DESTINATION_TYPE"] == "3"){
 					$fetchNameLoanDes = $conoracle->prepare("SELECT lnt.loantype_desc FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code
 																	WHERE lnm.loancontract_no = :loancontract_no");

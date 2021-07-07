@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingMemberInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrConstInfo = array();
-		$getConstInfo = $conmysql->prepare("SELECT const_code,save_tablecore FROM gcconstantchangeinfo");
+		$getConstInfo = $conoracle->prepare("SELECT const_code,save_tablecore FROM gcconstantchangeinfo");
 		$getConstInfo->execute();
 		while($rowConst = $getConstInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrConstInfo[$rowConst["const_code"]] = $rowConst["save_tablecore"];
@@ -15,17 +15,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT_EMAIL'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$getOldEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
+				$getOldEmail = $conoracle->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
 				$getOldEmail->execute([':member_no' => $payload["member_no"]]);
 				$rowEmail = $getOldEmail->fetch(PDO::FETCH_ASSOC);
-				$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
+				$updateEmail = $conoracle->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
 				if($updateEmail->execute([
 					':email' => $dataComing["email"],
 					':member_no' => $payload["member_no"]
 				])){
 					$logStruc = [
 						":member_no" => $payload["member_no"],
-						":old_data" => $rowEmail["email"] ?? "-",
+						":old_data" => $rowEmail["EMAIL"] ?? "-",
 						":new_data" => $dataComing["email"] ?? "-",
 						":data_type" => "email",
 						":id_userlogin" => $payload["id_userlogin"]
@@ -58,17 +58,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$getOldTel = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+				$getOldTel = $conoracle->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
 				$getOldTel->execute([':member_no' => $payload["member_no"]]);
 				$rowTel = $getOldTel->fetch(PDO::FETCH_ASSOC);
-				$updateTel = $conmysql->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE member_no = :member_no");
+				$updateTel = $conoracle->prepare("UPDATE gcmemberaccount SET phone_number = :phone_number WHERE member_no = :member_no");
 				if($updateTel->execute([
 					':phone_number' => $dataComing["tel"],
 					':member_no' => $payload["member_no"]
 				])){
 					$logStruc = [
 						":member_no" => $payload["member_no"],
-						":old_data" => $rowTel["phone_number"] ?? "-",
+						":old_data" => $rowTel["PHONE_NUMBER"] ?? "-",
 						":new_data" => $dataComing["tel"] ?? "-",
 						":data_type" => "tel",
 						":id_userlogin" => $payload["id_userlogin"]

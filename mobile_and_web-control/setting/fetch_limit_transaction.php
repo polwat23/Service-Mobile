@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayLimitGrp = array();
 		foreach($config["LIMIT_TRANSACTION"] as $limit_trans){
 			if($limit_trans["IS_USE"] === "true"){
-				$getLimitWithdraw = $conmysql->prepare("SELECT ".$limit_trans["LIMIT_NAME"]." FROM gcmemberaccount WHERE member_no = :member_no");
+				$getLimitWithdraw = $conoracle->prepare("SELECT ".$limit_trans["LIMIT_NAME"]." FROM gcmemberaccount WHERE member_no = :member_no");
 				$getLimitWithdraw->execute([':member_no' => $payload["member_no"]]);
 				$rowLimitTransaction = $getLimitWithdraw->fetch(PDO::FETCH_ASSOC);
 				$limit_coop = $func->getConstant($limit_trans["LIMIT_NAME"]);

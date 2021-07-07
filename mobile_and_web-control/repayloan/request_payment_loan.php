@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$ref_no = time().$lib->randomText('all',3);
+		
 		try {
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
 			try {
@@ -65,17 +66,19 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						$responseSaveLN = $resultWSLN->astr_lnsave;
 						if($responseSaveLN->msg_output == '0000'){
 							$fetchSeqno = $conoracle->prepare("SELECT MAX(SEQ_NO) as SEQ_NO FROM dpdeptstatement 
-															WHERE deptaccount_no = :deptaccount_no and deptitem_amt = :slip_amt
-															and to_char(operate_date,'YYYY-MM-DD') = :slip_date");
+															WHERE   = :deptaccount_no and deptitem_amt = :slip_amt
+															and TO_DATE(operate_date,'YYYY-MM-DD') = :slip_date");
 							$fetchSeqno->execute([
 								':deptaccount_no' => $responseSaveLN->deptaccount_no,
 								':slip_amt' => $responseSaveLN->slip_amt,
 								':slip_date' => $lib->convertdate($responseSaveLN->slip_date,'y-n-d')
 							]);
 							$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-							$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-																VALUES(:remark,:deptaccount_no,:seq_no)");
+							$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+							$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo ,memo_text,deptaccount_no,seq_no)
+																VALUES(:id_memo ,:remark,:deptaccount_no,:seq_no)");
 							$insertRemark->execute([
+								':id_memo' =>  $id_memo,
 								':remark' => $dataComing["remark"],
 								':deptaccount_no' => $from_account_no,
 								':seq_no' => $rowSeqno["SEQ_NO"]
@@ -86,10 +89,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							$arrayResult['PRIN_PAYMENT_FORMAT'] = number_format($responseSaveLN->principal_payment,2);
 							$arrayResult['TRANSACTION_NO'] = $ref_no;
 							$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
-							$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
+							$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 																			,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																			ref_no_1,id_userlogin,ref_no_source)
-																			VALUES(:ref_no,'WTX',:from_account,'3',:destination,'2',:amount,:penalty_amt,:amount,'-1',:operate_date,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+																			VALUES(:ref_no,'WTX',:from_account,'3',:destination,'2',:amount,:penalty_amt,:amount,'-1',TO_DATE(:operate_date,'yyyy-mm-dd hh24:mi:ss'),'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
 							$insertTransactionLog->execute([
 								':ref_no' => $ref_no,
 								':from_account' => $from_account_no,
@@ -190,7 +193,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 								':response_code' => "WS0066",
 								':response_message' => $responseSaveLN->msg_output
 							];
-							$log->writeLog('repayloan',$arrayStruc);
+							//.$log->writeLog('repayloan',$arrayStruc);
 							$arrayResult["RESPONSE_CODE"] = 'WS0066';
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
@@ -209,7 +212,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							':response_code' => "WS0066",
 							':response_message' => json_encode($resultWSLN)
 						];
-						$log->writeLog('repayloan',$arrayStruc);
+						//$log->writeLog('repayloan',$arrayStruc);
 						$arrayResult["RESPONSE_CODE"] = 'WS0066';
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
@@ -227,7 +230,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						':response_code' => "WS0066",
 						':response_message' => json_encode($resultWS)
 					];
-					$log->writeLog('repayloan',$arrayStruc);
+					//$log->writeLog('repayloan',$arrayStruc);
 					$arrayResult["RESPONSE_CODE"] = 'WS0066';
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -245,7 +248,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					':response_code' => "WS0066",
 					':response_message' => json_encode($e)
 				];
-				$log->writeLog('repayloan',$arrayStruc);
+				//$log->writeLog('repayloan',$arrayStruc);
 				$arrayResult["RESPONSE_CODE"] = 'WS0066';
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

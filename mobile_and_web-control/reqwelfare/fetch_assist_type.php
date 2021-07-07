@@ -19,14 +19,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowNameWelfare = $getNameWelfare->fetch(PDO::FETCH_ASSOC)){
 			$arrayWef[$rowNameWelfare["ASSISTTYPE_CODE"]] = $rowNameWelfare["ASSISTTYPE_DESC"];
 		}
-		$fetchAssistType = $conmysql->prepare("SELECT id_const_welfare,welfare_type_code,member_cate_code FROM gcconstantwelfare 
+		$fetchAssistType = $conoracle->prepare("SELECT id_const_welfare,welfare_type_code,member_cate_code FROM gcconstantwelfare 
 											WHERE is_use = '1' and (member_cate_code = :cate_code OR member_cate_code = 'AL')");
 		$fetchAssistType->execute([':cate_code' => $rowTypeMember["MEMBCAT_CODE"]]);
 		while($rowAssistType = $fetchAssistType->fetch(PDO::FETCH_ASSOC)){
 			$arrAssist = array();
-			$arrAssist["ID_CONST_WELFARE"] = $rowAssistType["id_const_welfare"];
-			$arrAssist["WELFARE_DESC"] = $arrayWef[$rowAssistType["welfare_type_code"]];
-			$arrAssist["ASSISTTYPE_CODE"] = $rowAssistType["welfare_type_code"];
+			$arrAssist["ID_CONST_WELFARE"] = $rowAssistType["ID_CONST_WELFARE"];
+			$arrAssist["WELFARE_DESC"] = $arrayWef[$rowAssistType["WELFARE_TYPE_CODE"]];
+			$arrAssist["ASSISTTYPE_CODE"] = $rowAssistType["WELFARE_TYPE_CODE"];
 			$arrAssistGrp[] = $arrAssist;
 		}
 		$arrayResult['WELFARE_TYPE'] = $arrAssistGrp;

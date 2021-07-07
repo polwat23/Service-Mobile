@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_name','id_submenu'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managemenu')){
-		$updatemenu = $conmysql->prepare("UPDATE coresubmenu SET menu_name = :menu_name
+		$updatemenu = $conoracle->prepare("UPDATE coresubmenu SET menu_name = :menu_name
 									 WHERE id_submenu = :id_submenu");
 		if($updatemenu->execute([
 			':menu_name' => $dataComing["menu_name"],
