@@ -1,19 +1,16 @@
 {
-	"NAME_APP" : "STK Saving",
-	"COOP_KEY" : "stk-test",
-	"COOP_ID" : "040001",
-	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
-	"APP_ID" : "com.stksaving.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/STKSAVING-TEST/",
-	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
-	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
-	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=049001;coop_control=049001;",
+	"NAME_APP" : "AGO Saving",
+	"COOP_KEY" : "ago-test",
+	"COOP_ID" : "069001",
+	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
+	"APP_ID" : "com.ago.mobile",
+	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/AGOCOOP-TEST/",
 	"FIREBASE_API_KEY" : "",
-	"FIREBASE_SERVER_KEY" : "AAAAQn7Bn3A:APA91bFqpLpE9CaPfBLAyip1WVzQaWl-HUnEYCTyxbQtS_TYu3NlvsDy5kIWRXNgdSeqQhh37WQ6R75FNrvul8foMH0Ld52IqsXeLte_CqAh33XmrdV1fCniKDoFa-7SE2kPgh-M_AXQ",
-	"SECRET_KEY_JWT" : "STK!/-Gcoop+Connect^040001*!&",
-	"SECRET_KEY_CORE" : "STK!/+Control-BackOffice^040000*!&",
-	"SIGNATURE_KEY_VERIFY_API" : "NSTHGcoop+-API_LB-WITH-!KBank!-^049001*!&",
-	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-049001-NSTH-Test",
+	"FIREBASE_SERVER_KEY" : "",
+	"SECRET_KEY_JWT" : "AGO!/-Gcoop+Connect^069001*!&",
+	"SECRET_KEY_CORE" : "AGO!/+Control-BackOffice^069001*!&",
+	"SIGNATURE_KEY_VERIFY_API" : "AGOGcoop+-API_LB-WITH-!Bank!-^069001*!&",
+	"VERIFY_KEY_EXTERNAL" : "API-Server+*_For-External-!Coop+ForConsent-069001-AGO",
 	"DEFAULT_BANNER_COLOR_DEG" : "90",
 	"DEFAULT_BANNER_COLOR_MAIN" : "#8e9eab",
 	"DEFAULT_BANNER_COLOR_SECON" : "#eef2f3",
@@ -22,26 +19,8 @@
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
-	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
-	"HW_APPID" : "104484033",
-    "HW_APPSECRET": "217f94f6a3d1be44afeec0ff861f5cc09ef225074094236b3f370fdb631f6d57",
-	"PORT_MAILSERVER" : "587",
-	"LIMIT_TRANSACTION" : {
-		"0" : {
-			"LIMIT_NAME" : "limit_amount_transaction_incoop",
-			"LIMIT_TYPE_TH" : "ธุรกรรมภายใน",
-			"LIMIT_TYPE_EN" : "Transaction in Coop",
-			"LIMIT_AMOUNT" : "2000000",
-			"LIMIT_AMOUNT_COOP" : "2000000",
-			"IS_USE" : "false"
-		},
-		"1" : {
-			"LIMIT_NAME" : "limit_amount_transaction",
-			"LIMIT_TYPE_TH" : "ธุรกรรมภายนอก",
-			"LIMIT_TYPE_EN" : "Transaction in Bank",
-			"LIMIT_AMOUNT" : "2000000",
-			"LIMIT_AMOUNT_COOP" : "2000000",
-			"IS_USE" : "true"
-		}
-	}
+	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
+	"HW_APPID" : "103399457",
+    "HW_APPSECRET": "46d84fcb3382675767c321a0d3fc2873ca31a1897df5b371e618125363262260",
+	"PORT_MAILSERVER" : "587"
 }

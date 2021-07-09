@@ -10,9 +10,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];
 		}
 		$arrayGroup = array();
-		$fetchUserNotRegis = $conmssql->prepare("SELECT mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.MEMBER_DATE
-												,mb.addr_mobilephone as MEM_TELMOBILE FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.resign_status = '0'");
+		$fetchUserNotRegis = $conmssql->prepare("
+SELECT mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.MEMBER_DATE,mb.MEM_TELMOBILE as MEM_TELMOBILE 
+FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+WHERE mb.resign_status = '0';");
 		$fetchUserNotRegis->execute();
 		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
 			if(!in_array($rowUserNotRegis["MEMBER_NO"],$arrayUserRegister)){

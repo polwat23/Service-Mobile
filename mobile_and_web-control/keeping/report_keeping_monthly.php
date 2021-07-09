@@ -157,14 +157,14 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">8/8 ถนนเทศบาล 7 ชุมชนเฉลิมพระเกียรติ</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต.ระแหง อ.เมือง จังหวัด ตาก 63000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-893-077,055-896-076</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">web.takesc.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">สำนักงานอัยการสูงสุด เลขที่ 51 อาคารถนนรัชดาภิเษก ชั้นที่ 3 </p>
+				<p style="margin-top: -25px;font-size: 18px;"> แขวงจอมพล เขตจตุจักร กรุงเทพฯ 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 02-512-8237, 081-934-8872, 080-626-1265</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.agocoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">

@@ -215,11 +215,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">8/8 ถนนเทศบาล 7 ชุมชนเฉลิมพระเกียรติ</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต.ระแหง อ.เมือง จังหวัด ตาก 63000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-893-077,055-896-076</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">web.takesc.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">สำนักงานอัยการสูงสุด เลขที่ 51 อาคารถนนรัชดาภิเษก ชั้นที่ 3 </p>
+				<p style="margin-top: -25px;font-size: 18px;"> แขวงจอมพล เขตจตุจักร กรุงเทพฯ 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. โทร. 02-512-8237, 081-934-8872, 080-626-1265</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.agocoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
