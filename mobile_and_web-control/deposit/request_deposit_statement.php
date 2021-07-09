@@ -189,15 +189,15 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด
+					 		สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษาจังหวัดลำปาง จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					TAK SAVING AND CREDIT COOPERATIVE FOR OFFICIALS
+				LAMPANG PROVINCIAL GENERAL EDUCATIN TECHER 
 			   </div>
 			   <div style=" position: fixed;top:43px; left: 60px;font-size:20px">
-					IN MINISTRY OF EDUCATION LIMITED
+							SAVING AND CREDIT COOPERATIVE LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">

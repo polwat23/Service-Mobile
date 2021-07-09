@@ -16,8 +16,8 @@ $arrGrp = array();
 
 $dbhost = "127.0.0.1";
 $dbuser = "root";
-$dbpass = "@STK2021";
-$dbname = "mobile_stk";
+$dbpass = "@SLP2021";
+$dbname = "mobile_slp";
 try{
 	$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
 	$conmysql->exec("set names utf8mb4");
@@ -27,8 +27,8 @@ try{
 }
 $dbhost2 = "127.0.0.1";
 $dbuser2 = "root";
-$dbpass2 = "@STK2021";
-$dbname2 = "mobile_temp";
+$dbpass2 = "@SLP2021";
+$dbname2 = "mobile_slp_old";
 try{
 	$conmysql2 = new PDO("mysql:dbname={$dbname2};host={$dbhost2}", $dbuser2, $dbpass2);
 	$conmysql2->exec("set names utf8mb4");
