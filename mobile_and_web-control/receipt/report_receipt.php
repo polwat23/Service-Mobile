@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once('../autoload.php');
 
 use Dompdf\Dompdf;
@@ -116,9 +116,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
-			if($rowDetail["ITEM_BALANCE"] > 0){
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
-			}
+			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conmssql->prepare("SELECT 
@@ -210,7 +208,7 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
@@ -218,10 +216,10 @@ function GenerateReport($dataReport,$header,$lib){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
 	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">สำนักงานอัยการสูงสุด อาคารถนนรัชดาภิเษก ชั้นที่ 3 </p>
-				<p style="margin-top: -25px;font-size: 18px;">จอมพล เขตจตุจักร กรุงเทพฯ</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 02-512-8237 , 02-512-8296</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+				<p style="margin-top: -27px;font-size: 18px;">สำนักงานอัยการสูงสุด เลขที่ 51 อาคารถนนรัชดาภิเษก ชั้นที่ 3 </p>
+				<p style="margin-top: -25px;font-size: 18px;"> แขวงจอมพล เขตจตุจักร กรุงเทพฯ 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. โทร. 02-512-8237, 081-934-8872, 080-626-1265</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.agocoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -326,11 +324,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.jpg" width="130" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/mg.png" width="80" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 750px;display:flex;">
+			<img src="../../resource/utility_icon/signature/fn.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 740px;margin-top:-60px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
 	$dompdf = new Dompdf([

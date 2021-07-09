@@ -1,8 +1,9 @@
-﻿<?php
+<?php
 require_once('../autoload.php');
 
 use Dompdf\Dompdf;
 
+$dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
@@ -102,11 +103,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-
+	$dompdf = new DOMPDF();
 	//style table
 	  $html = '<style>
 
-		   @font-face {
+		  @font-face {
 			  font-family: TH Niramit AS;
 			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
@@ -118,7 +119,6 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			* {
 			  font-family: TH Niramit AS;
 			}
-
 
 		  body {
 			margin-top: 3.6cm;
@@ -189,12 +189,15 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
+			   <div style="padding:0px; margin-top:17px"><img src="../../resource/logo/logo.png" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-						สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด
+					สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-						THE OFFICE OF THE ATTORNEY GENERAL SAVINGS CO-OPERATIVE LTD.
+					THE OFFICE OF THE ATTORNEY GENERAL SAVINGS
+			   </div>
+			   <div style=" position: fixed;top:43px; left: 60px;font-size:20px">
+					 CO-OPERATIVE LTD.
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -298,6 +301,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
+
 
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);

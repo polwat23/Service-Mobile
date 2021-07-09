@@ -65,9 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			if($rowDetail["ITEM_BALANCE"] > 0){
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
-			}
+			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
@@ -159,14 +157,14 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">63 หมู่ 4 ต.หนองหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.สันทราย จ.เชียงใหม่ 50290</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-878077 , 053-873000</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">สำนักงานอัยการสูงสุด เลขที่ 51 อาคารถนนรัชดาภิเษก ชั้นที่ 3 </p>
+				<p style="margin-top: -25px;font-size: 18px;"> แขวงจอมพล เขตจตุจักร กรุงเทพฯ 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 02-512-8237, 081-934-8872, 080-626-1265</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.agocoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -272,12 +270,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-20px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
+			<div style="font-size: 18px;margin-left: 600px;margin-top:-90px;">
+			.....................................
+			<p style="margin-left: 30px;">ผู้จัดการ</p></div>
+			<div style="font-size: 18px;margin-left: 800px;margin-top:-90px;">
+			.....................................
+			<p style="margin-left: 20px;">เจ้าหน้าที่รับเงิน</p></div>
+
 			';
 
-	
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),

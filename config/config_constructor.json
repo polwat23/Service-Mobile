@@ -1,4 +1,4 @@
-﻿{
+{
 	"NAME_APP" : "AGO Saving",
 	"COOP_KEY" : "ago",
 	"COOP_ID" : "069001",
@@ -22,23 +22,5 @@
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
 	"HW_APPID" : "103399457",
     "HW_APPSECRET": "46d84fcb3382675767c321a0d3fc2873ca31a1897df5b371e618125363262260",
-	"PORT_MAILSERVER" : "587",
-	"LIMIT_TRANSACTION" : {
-		"0" : {
-			"LIMIT_NAME" : "limit_amount_transaction_incoop",
-			"LIMIT_TYPE_TH" : "ธุรกรรมภายใน",
-			"LIMIT_TYPE_EN" : "Transaction in Coop",
-			"LIMIT_AMOUNT" : "2000000",
-			"LIMIT_AMOUNT_COOP" : "2000000",
-			"IS_USE" : "false"
-		},
-		"1" : {
-			"LIMIT_NAME" : "limit_amount_transaction",
-			"LIMIT_TYPE_TH" : "ธุรกรรมภายนอก",
-			"LIMIT_TYPE_EN" : "Transaction in Bank",
-			"LIMIT_AMOUNT" : "2000000",
-			"LIMIT_AMOUNT_COOP" : "2000000",
-			"IS_USE" : "true"
-		}
-	}
+	"PORT_MAILSERVER" : "587"
 }
