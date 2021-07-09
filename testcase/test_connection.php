@@ -22,7 +22,7 @@ $con = new connection();
 $basetest = json_decode(isset($headers["basetest"]) ? $headers["basetest"] : false);
 $conmysql = $con->connecttomysql($basetest);
 $conoracle = $con->connecttooracle($basetest);
-$conmongo = $con->connecttomongo($basetest);
+//$conmongo = $con->connecttomongo($basetest);
 
 // Test MariaDB
 $testMariaDB = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = 'dev@mode'");
@@ -34,9 +34,9 @@ if($testMariaDB->rowCount() > 0){
 }
 
 // Test Oracle
-$testOraclw = $conoracle->prepare("SELECT COOP_ID FROM cmucfcoopbranch");
-$testOraclw->execute();
-$rowtest = $testOraclw->fetch();
+//$testOraclw = $conoracle->prepare("SELECT COOP_ID FROM cmucfcoopbranch");
+//$testOraclw->execute();
+//$rowtest = $testOraclw->fetch();
 if(isset($rowtest["COOP_ID"])){
 	$arrResult["ORACLE"] = 'ORACLE is Connected 🟢';
 }else{
@@ -44,11 +44,16 @@ if(isset($rowtest["COOP_ID"])){
 }
 
 // Test MongoDB
-$statusId = $conmongo->GCLOGUSERACCESSAFTERLOGIN->getCollectionName();
+//$statusId = $conmongo->GCLOGUSERACCESSAFTERLOGIN->getCollectionName();
 if(isset($statusId)){
-	$arrResult["MONGODB"] = 'MONGODB is Connected 🟢';
+	$arrResult["MONGODB"] = 'MONGODB is Connected �';
 }else{
 	$arrResult["MONGODB"] = 'MONGODB is Disconnect 🟠';
 }
 echo json_encode($arrResult);
+
+
+
+
+
 ?>

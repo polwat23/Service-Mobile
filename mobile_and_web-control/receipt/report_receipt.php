@@ -208,18 +208,18 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการกระทรวงศึกษา จังหวัดตาก จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">8/8 ถนนเทศบาล 7 ชุมชนเฉลิมพระเกียรติ</p>
-				<p style="margin-top: -25px;font-size: 18px;">ต.ระแหง อ.เมือง จังหวัด ตาก 63000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 055-893-077,055-896-076</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">web.takesc.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษาจังหวัดลำปาง จำกัด</p>
+					<p style="margin-top: -27px;font-size: 18px;">เลขที่ 941 ถนนวชิราวุธดำเนิน  ต.พระบาท </p>
+					<p style="margin-top: -25px;font-size: 18px;">อ.เมือง จ.ลำปาง 52000</p>
+					<p style="margin-top: -25px;font-size: 18px;">โทร.  054-228-407 , 081-961-3481 ,099-272-4130</p>
+					<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.lpgesc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
