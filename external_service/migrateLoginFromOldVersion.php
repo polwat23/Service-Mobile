@@ -44,7 +44,7 @@ $jwt_token = new Token();
 
 $conmysql = $con->connecttomysql();
 $conoldmysql = $con->connecttooldmysql();
-$conoracle = $con->connecttooracle();
+$conmssql = $con->connecttosqlserver();
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],$dataComing)){
@@ -75,7 +75,7 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 	if($checkUserLogonStatus->rowCount() > 0){
 		$logon_result = $checkUserLogonStatus->fetch(PDO::FETCH_ASSOC);
 		if($logon_result['status'] == '1') {
-			$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+			$checkResign = $conmssql->prepare("SELECT RESIGN_STATUS FROM mbmembmaster WHERE member_no = :member_no");
 			$checkResign->execute([':member_no' => $member_no]);
 			$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 			if($rowResign["RESIGN_STATUS"] == '1'){
