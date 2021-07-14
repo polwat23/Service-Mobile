@@ -5,9 +5,10 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','auth_code','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$conmysql->beginTransaction();
+		$coop_account_no = $payload["member_no"];
 		$updateBindAcc = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '1',bind_date = NOW() WHERE sigma_key = :sigma_key");
 		if($updateBindAcc->execute([':sigma_key' => $dataComing["sigma_key"]])){
-			$coop_account_no = $payload["member_no"];
+			
 			$arrPayloadverify = array();
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
 			$arrPayloadverify['auth_code'] = $dataComing["auth_code"];
@@ -84,7 +85,7 @@ if($lib->checkCompleteArgument(['menu_component','auth_code','sigma_key'],$dataC
 				':id_userlogin' => $payload["id_userlogin"],
 				':bind_status' => '-9',
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $arrResponse->RESPONSE_MESSAGE,
+				':response_message' => $updateBindAcc->queryString.' / '.json_encode([':sigma_key' => $dataComing["sigma_key"]]),
 				':coop_account_no' => $coop_account_no,
 				':query_flag' => '1'
 			];

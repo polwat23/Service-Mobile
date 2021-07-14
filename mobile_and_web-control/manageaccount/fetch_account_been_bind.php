@@ -40,6 +40,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
 			$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 			$arrAccount["BANK_CODE"] = $rowAccountBind["bank_code"];
+			if($rowAccountBind["bank_code"] == '006'){
+				$arrAccount["NON_DIRECT"] = TRUE;
+			}
 			$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
 			$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
 			$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
@@ -72,16 +75,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 			if($rowAllow["bank_code"] == '006'){
-				$arrayBank["NON_DIRECT"] = TRUE;
+				if ($payload["member_no"] == '00009885' || $payload["member_no"] == '00013298' || $payload["member_no"] == '00004538' || $payload["member_no"] == '00013942') {
+					$arrayBank["NON_DIRECT"] = TRUE;
+					$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
+					$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
+					$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
+					$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
+					$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
+					$arrPic = explode('.',$rowAllow["bank_logo_path"]);
+					$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
+					$arrayBankGrp[] = $arrayBank;
+				}
+			}else {
+				$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
+				$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
+				$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
+				$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
+				$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
+				$arrPic = explode('.',$rowAllow["bank_logo_path"]);
+				$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
+				$arrayBankGrp[] = $arrayBank;
 			}
-			$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
-			$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
-			$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
-			$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
-			$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
-			$arrPic = explode('.',$rowAllow["bank_logo_path"]);
-			$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
-			$arrayBankGrp[] = $arrayBank;
 		}
 		$arrayResult['BANK_LIST'] = $arrayBankGrp;
 		$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
