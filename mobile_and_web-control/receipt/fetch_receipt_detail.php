@@ -26,7 +26,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
+													NVL(kpd.interest_payment,0) AS INT_BALANCE,
+													TRIM(lt.loantype_code) as LOANTYPE_CODE
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -41,11 +42,15 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
-				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+				$getLoanPeriod = $conoracle->prepare("SELECT PERIOD_PAYAMT FROM lncontmaster WHERE loancontract_no = :loancontract_no");
+				$getLoanPeriod->execute([':loancontract_no' => $rowDetail["PAY_ACCOUNT"]]);
+				$rowLoan = $getLoanPeriod->fetch(PDO::FETCH_ASSOC);
+				$arrDetail["PERIOD"] = $rowDetail["PERIOD"].' / '.$rowLoan["PERIOD_PAYAMT"];
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
@@ -53,19 +58,24 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
+				$getBalance = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$getBalance->execute([':deptaccount_no' => $rowDetail["PAY_ACCOUNT"]]);
+				$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
+				$arrDetail["ITEM_BALANCE"] = number_format($rowBalance["PRNCBAL"],2);
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 			$arrGroupDetail[] = $arrDetail;
 		}

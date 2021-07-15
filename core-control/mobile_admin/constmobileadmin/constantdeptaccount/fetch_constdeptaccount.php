@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		allow_withdraw_inside,
 																		allow_deposit_outside,
 																		allow_withdraw_outside,
-																		allow_payloan
+																		allow_pay_loan
 																	FROM
 																		gcconstantaccountdept
 																	ORDER BY dept_type_code ASC");
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ALLOW_WITHDRAW_INSIDE"] = $rowMenuMobile["allow_withdraw_inside"];
 			$arrConstans["ALLOW_DEPOSIT_OUTSIDE"] = $rowMenuMobile["allow_deposit_outside"];
 			$arrConstans["ALLOW_WITHDRAW_OUTSIDE"] = $rowMenuMobile["allow_withdraw_outside"];
-			$arrConstans["ALLOW_PAYLOAN"] = $rowMenuMobile["allow_payloan"];
+			$arrConstans["ALLOW_PAYLOAN"] = $rowMenuMobile["allow_pay_loan"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
