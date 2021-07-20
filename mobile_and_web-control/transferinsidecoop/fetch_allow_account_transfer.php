@@ -29,29 +29,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':dept_type_code' => $rowDataAccAll["DEPTTYPE_CODE"]
 				]);
 				$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
-				if(in_array($rowDataAccAll["DEPTACCOUNT_NO"],$arrayDept)){
-					$arrAccAllow = array();
-					if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png')){
-						$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png?v='.date('Ym');
-					}else{
-						$arrAccAllow["DEPT_TYPE_IMG"] = null;
-					}
-					$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
-					$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
-					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
-					$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-					$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
-					if($rowDataAccAll["SEQUEST_STATUS"] == '1'){
-						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"] - $rowDataAccAll["CHECKPEND_AMT"];
-					}else{
-						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["MINPRNCBAL"];
-					}
-					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
-					$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAll["PRNCBAL"],2);
-					$arrGroupAccAllow[] = $arrAccAllow;
+				$arrAccAllow = array();
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png')){
+					$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrAccAllow["DEPT_TYPE_IMG"] = null;
 				}
+				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
+				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
+				$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
+				$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+				if($rowDataAccAll["SEQUEST_STATUS"] == '1'){
+					$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"] - $rowDataAccAll["CHECKPEND_AMT"];
+				}else{
+					$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["MINPRNCBAL"];
+				}
+				$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
+				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAll["PRNCBAL"],2);
+				$arrGroupAccAllow[] = $arrAccAllow;
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
 				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");

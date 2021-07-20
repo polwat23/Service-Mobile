@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ScholarshipRequest')){
 		$arrFileUploaded = array();
 		$arrUploadFiles = array();
-		$checkFileUpload = $conoracle->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
+		$checkFileUpload = $conmssql->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
 															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status <> 8 order by seq_no");
 		$checkFileUpload->execute([':child_id' => $dataComing["childcard_id"]]);
 		while($rowFileUpload = $checkFileUpload->fetch(PDO::FETCH_ASSOC)){
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				$arrUploadFiles[] = $arrayUpload;
 			}
 		}
-		$getUploadFiles = $conoracle->prepare("SELECT 5 as seq_no, 'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
+		$getUploadFiles = $conmssql->prepare("SELECT 5 as seq_no, 'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
 																		FROM ASNREQSCHOLARSHIP 
 																		WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +542) and APPROVE_STATUS = 1 and 
 																		school_level in ('13', '26', '33', '43', '53', '62') and
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				$arrUploadFiles[] = $arrayUpload;
 			}
 		}
-		$getFileUploadWaitforSend = $conoracle->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
+		$getFileUploadWaitforSend = $conmssql->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
 																		WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status = 8 order by seq_no");
 		$getFileUploadWaitforSend->execute([':child_id' => $dataComing["childcard_id"]]);
 		while($rowFileWait = $getFileUploadWaitforSend->fetch(PDO::FETCH_ASSOC)){

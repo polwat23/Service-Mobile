@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SuspendingDebt')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayLoanPause = array();
-		$getLoanPause = $conoracle->prepare("SELECT A.MORATORIUM_DOCNO, A.LOANCONTRACT_NO,
+		$getLoanPause = $conmssql->prepare("SELECT A.MORATORIUM_DOCNO, A.LOANCONTRACT_NO,
 															(CASE WHEN A.REQUEST_DATE <= TO_DATE('27042020','DDMMYYYY') THEN 1 ELSE 2 END) AS REGIS_ROUND , 
 															A.REQUEST_STATUS
 															FROM LNREQMORATORIUM A, LNCONTMASTER B 
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getLoanPause->execute([':member_no' => $member_no]);
 		while($rowLoanPuase = $getLoanPause->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();
-			$getInfoLoan = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.principal_balance as LOAN_BALANCE,
+			$getInfoLoan = $conmssql->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.principal_balance as LOAN_BALANCE,
 											ln.loanapprove_amt as APPROVE_AMT,ln.period_payment,ln.period_payamt as PERIOD,
 											ln.LAST_PERIODPAY as LAST_PERIOD
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 

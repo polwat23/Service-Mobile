@@ -106,6 +106,16 @@
 	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัติบัญชี จำนวนที่อายัติ ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
 	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เ เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
 	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
+	"WS0098" : [{"th" : "ยอดทำรายการมากกว่า หนี้คงเหลือของท่าน กรุณาตรวจสอบข้อมูลอีกครั้งก่อนทำรายการ","en" : "Your transfer amount more than loan balance please recheck before transaction"}],
+	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
+	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
+	"WS0101" : [{"th" : "จำนวนครั้งในการทำรายการต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of day over than the cooperative is define"}],
+	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
+	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
+	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
+	"WS0110" : [{"th" : "ประเภทสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member type is not allowed to payment monthly special"}],
+	"WS0111" : [{"th" : "กลุ่มสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member group is not allowed to payment monthly special"}],
+	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -141,6 +151,7 @@
 	"WS1036" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นใบคำขอกู้ออนไลน์ได้ กรุณาติดต่อสหกรณ์ #WS1036","en" : "Something was wronged that cannot request loan online please contact cooperative #WS1036"}],
 	"WS1037" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกใบคำขอกู้ได้ กรุณาติดต่อสหกรณ์ #WS1037","en" : "Something was wronged that cannot cancel request loan online please contact cooperative #WS1037"}],
 	"WS1039" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขที่อยู่ได้ กรุณาติดต่อสหกรณ์ #WS1039","en" : "Something was wronged that cannot change adress please contact cooperative #WS1039"}],
+	"WS1040" : [{"th" : "เกิดข้อผิดพลาดไม่สามารถรับเงินกู้ได้ กรุณาติดต่อสหกรณ์ #WS1040","en" : "Something was wronged that cannot receive loan please contact cooperative #WS1040"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
@@ -229,5 +240,6 @@
 			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
 		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
-		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}]
+		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
+		"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}]
 }

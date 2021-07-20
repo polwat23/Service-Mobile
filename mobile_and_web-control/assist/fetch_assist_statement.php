@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$fetchAccountReceive = $conoracle->prepare("SELECT cb.BANK_DESC,cbb.BRANCH_NAME,acm.EXPENSE_ACCID,cb.ACCOUNT_FORMAT FROM asscontmaster acm 
+		$fetchAccountReceive = $conmssql->prepare("SELECT cb.BANK_DESC,cbb.BRANCH_NAME,acm.EXPENSE_ACCID,cb.ACCOUNT_FORMAT FROM asscontmaster acm 
 													LEFT JOIN cmucfbank cb ON acm.EXPENSE_BANK = cb.BANK_CODE
 													LEFT JOIN cmucfbankbranch cbb ON acm.EXPENSE_BANK = cbb.BANK_CODE and acm.EXPENSE_BRANCH = cbb.BRANCH_ID
 													WHERE acm.asscontract_no = :asscontract_no and acm.asscont_status = 1");
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		]);
 		$rowAccountRCV = $fetchAccountReceive->fetch(PDO::FETCH_ASSOC);
 		$accAssRcv = $lib->formataccount($rowAccountRCV["EXPENSE_ACCID"],$rowAccountRCV["ACCOUNT_FORMAT"]);
-		$fetchAssStatement = $conoracle->prepare("SELECT atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
+		$fetchAssStatement = $conmssql->prepare("SELECT atc.SIGN_FLAG,atc.ITEM_DESC,astm.SLIP_DATE,astm.PAY_BALANCE
 													FROM asscontmaster asm LEFT JOIN asscontstatement astm 
 													ON asm.ASSCONTRACT_NO = astm.ASSCONTRACT_NO LEFT JOIN assucfassitemcode atc
 													ON astm.ITEM_CODE = atc.ITEM_CODE LEFT JOIN CMUCFMONEYTYPE cmt ON astm.MONEYTYPE_CODE = cmt.MONEYTYPE_CODE 
