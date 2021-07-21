@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 			if($dataComing["date_type"] == 'year'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
+														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,bank_code
 														FROM gctransaction
 														WHERE transfer_mode = '9'  and result_transaction = '1'
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -36,12 +36,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code in('".implode("','",$dataComing["bank"])."')" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
 														"and trans_flag = :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
+														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,bank_code
 														FROM gctransaction
 														WHERE transfer_mode = '9'  and  result_transaction = '1'
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -52,12 +54,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code in('".implode("','",$dataComing["bank"])."')" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
 														"and trans_flag = :trans_flag " : null)."".
 														" ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
+														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,bank_code
 														FROM gctransaction
 														WHERE transfer_mode = '9'  and  result_transaction = '1'
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -68,6 +72,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code in('".implode("','",$dataComing["bank"])."')" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
 														"and trans_flag = :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
@@ -85,41 +91,57 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 
 			if($dataComing["date_type"] == 'year'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
+														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,bank_code
 														FROM gctransaction
 														WHERE transfer_mode = '9' and  result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code in('".implode("','",$dataComing["bank"])."')" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
 														"and trans_flag = :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
+														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,bank_code
 														FROM gctransaction
 														WHERE transfer_mode = '9' and  result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)." 
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code in('".implode("','",$dataComing["bank"])."')" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
 														"and trans_flag =  :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
-														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
+														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,bank_code
 														FROM gctransaction
 														WHERE transfer_mode = '9'  result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
 														"and member_no = :member_no" : null)."
+														".(isset($dataComing["bank"]) && $dataComing["bank"] != "" ? 
+														"and bank_code in('".implode("','",$dataComing["bank"])."')" : null)."
 														".(isset($dataComing["trans_flag"]) && $dataComing["trans_flag"] != "" ? 
 														"and trans_flag =  :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}
+		}
+		$arrGroupBank = array();
+		$fetchBank = $conoracle->prepare("select bank_code, bank_desc,bank_shortname from cmucfbank where bank_code in(025,006)");
+		$fetchBank->execute();
+		while($rowBank = $fetchBank->fetch(PDO::FETCH_ASSOC)){
+			$arrBank = array();
+			$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
+			$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
+			$arrBank["BANK_SHORTNAME"] = $rowBank["BANK_SHORTNAME"];
+			$arrGroupBank[] = $arrBank;
 		}
 		$fetchReconcile->execute($arrayExecute);
 		$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = '004'");
@@ -152,6 +174,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon["FEE_AMT"] = number_format($rowRecon["fee_amt"],2);
 			$arrayRecon["RESULT_TRANSACTION"] = $rowRecon["result_transaction"];
 			$arrayRecon["MEMBER_NO"] = $rowRecon["member_no"];
+			$arrayRecon["BANK_CODE"] = $rowRecon["bank_code"];
 			$arrayRecon["RECEIVE_AMT"] = number_format($rowRecon["amount_receive"],2);
 			
 			$summary += $rowRecon["amount_receive"];
@@ -164,6 +187,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		
 		$arrayResult['SUMMARY'] = $summary;
+		$arrayResult['BANK'] = $arrGroupBank;
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['SUMMARYDEPOSIT'] = $summaryDeposit;
 		$arrayResult['SUMMARYDEPOSIT_FORMAT'] = number_format($summaryDeposit,2);

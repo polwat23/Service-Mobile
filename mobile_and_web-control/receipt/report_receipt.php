@@ -135,6 +135,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
+		$header["recv_period_raw"] = TRIM($dataComing["recv_period"]);
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKp["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKp["OPERATE_DATE"],'D m Y');
@@ -322,14 +323,24 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			</div>';
+	if($header["recv_period_raw"] >= '256405'){
+		$html .= '<div style="width:200px;margin-left: 750px;display:flex;">
+			<img src="../../resource/utility_icon/signature/mg_temp.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
+			</div>
+			<div style="font-size: 18px;margin-left: 750px;margin-top:-50px;">นายวินัย ชื่นจิตต์</div>
+			<div style="font-size: 18px;margin-left: 725px;">กรรมการทำหน้าที่ผู้จัดการ</div>
+			';
+	}else{
+		$html .= '<div style="width:200px;margin-left: 750px;display:flex;">
 			<img src="../../resource/utility_icon/signature/mg.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 750px;margin-top:-50px;">นางสาวกัลยาณี เสมา</div>
 			<div style="font-size: 18px;margin-left: 780px;">ผู้จัดการ</div>
 			';
+	}
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),

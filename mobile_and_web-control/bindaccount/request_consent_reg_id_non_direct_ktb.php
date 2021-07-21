@@ -15,13 +15,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 		$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 		$conmysql->beginTransaction();
-		$insertBindAcc = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_bank,
+		$insertBindAcc = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,deptaccount_no_bank,
 											citizen_id,bank_account_name,bank_account_name_en,bank_code,bind_date,bindaccount_status,id_token)
-											VALUES(:sigma_key,:member_no,:deptaccount_no_bank,
+											VALUES(:sigma_key,:member_no,:deptaccount_no_coop,:deptaccount_no_bank,
 											:citizen_id,:bank_account_name,:bank_account_name_en,:bank_code,NOW(),'1',:id_token)");
 		if($insertBindAcc->execute([
 			':sigma_key' => $sigma_key,
 			':member_no' => $payload["member_no"],
+			':deptaccount_no_coop' => $payload["member_no"],
 			':deptaccount_no_bank' => $bankaccount_no,
 			':citizen_id' => $dataComing["citizen_id"],
 			':bank_account_name' => $account_name_th,

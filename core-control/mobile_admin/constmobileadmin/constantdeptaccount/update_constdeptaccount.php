@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["DEPTTYPE_CODE"]."','".$value_diff["MEMBER_TYPE_CODE"]."','".$value_diff["ALLOW_DEPOSIT_INSIDE"]."','".$value_diff["ALLOW_WITHDRAW_INSIDE"]."','".$value_diff["ALLOW_DEPOSIT_OUTSIDE"]."','".$value_diff["ALLOW_WITHDRAW_OUTSIDE"]."','".$value_diff["ALLOW_PAYLOAD"]."')";
+						$insertBulkCont[] = "('".$value_diff["DEPTTYPE_CODE"]."','".$value_diff["MEMBER_TYPE_CODE"]."','".$value_diff["ALLOW_DEPOSIT_INSIDE"]."','".$value_diff["ALLOW_WITHDRAW_INSIDE"]."','".$value_diff["ALLOW_DEPOSIT_OUTSIDE"]."','".$value_diff["ALLOW_WITHDRAW_OUTSIDE"]."','".$value_diff["ALLOW_PAYLOAN"]."')";
 						$insertBulkContLog[]='DEPTTYPE_CODE=> '.$value_diff["DEPTTYPE_CODE"].' MEMBER_TYPE_CODE ='.$value_diff["MEMBER_TYPE_CODE"].' ALLOW_DEPOSIT_INSIDE ='.$value_diff["ALLOW_DEPOSIT_INSIDE"].' ALLOW_WITHDRAW_INSIDE ='.$value_diff["ALLOW_WITHDRAW_INSIDE"].' ALLOW_DEPOSIT_OUTSIDE ='.$value_diff["ALLOW_DEPOSIT_OUTSIDE"].' ALLOW_WITHDRAW_OUTSIDE ='.$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAYLOAN ='.$value_diff["ALLOW_PAYLOAN"];
 					}else{
 						$updateConst = $conmysql->prepare("UPDATE gcconstantaccountdept 
