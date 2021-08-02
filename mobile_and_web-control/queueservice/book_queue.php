@@ -79,7 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','queue_id'],$dataComing)){
 			}
 		}else{
 			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = "WS0086";
+			$arrayResult['RESPONSE_CODE'] = "WS0116";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');

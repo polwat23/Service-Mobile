@@ -3,17 +3,20 @@ ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
+header('Content-Type: application/json;charset=utf-8');
 
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'./autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/lib_line.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
 use Utility\Library;
+use Line\libraryLine;
 use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
@@ -23,6 +26,7 @@ use WebPConvert\WebPConvert;
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
+$lineLib = new libraryLine();
 $auth = new Authorization();
 $func = new functions();
 $log = new insertLog();
@@ -52,6 +56,6 @@ $user_id = $dataComing["events"][0]["source"]["userId"];
 $reply_token = $dataComing["events"][0]["replyToken"];
 $messageType = $arrMessage["type"];
 $message = $arrMessage["text"];
+//file_put_contents(__DIR__.'/../log/lineincome.txt', json_encode($dataComing["events"][0]) . PHP_EOL, FILE_APPEND);
 require_once(__DIR__.'./mappingwordingline.php');
-file_put_contents(__DIR__.'/../log/lineincome.txt', json_encode($dataComing["events"][0]) . PHP_EOL, FILE_APPEND);
 ?>

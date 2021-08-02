@@ -90,8 +90,8 @@
     'bold' => $fontDir . '/sarabun_bold_8002da720a723a51fc6b04f830bbe807',
   ),
   'th niramit as' => array(
-    'normal' => $fontDir . '/th_niramit_as_normal_43ed3fd99fc479c40f2ce28c0ad7eec7',
-    'bold' => $fontDir . '/th_niramit_as_bold_e643b57efffc2d7409d9712f3533f9bf',
+    'normal' => $fontDir . '/th_niramit_as_normal_3f365adc52b9578c47ef6e4fb1ae1972',
+    'bold' => $fontDir . '/th_niramit_as_bold_f8367cb45bd5c223c28b8ffbe9b9ab18',
     'italic' => $fontDir . '/th_niramit_as_italic_0e136a0cfd67d06fa5ddf5389959fd58',
   ),
 ) ?>

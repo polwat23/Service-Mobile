@@ -8,8 +8,8 @@ $con = new connection();
 $conmysql = $con->connecttomysql();
 $checkSystem = $conmysql->prepare("SELECT menu_status FROM gcmenu									
 									WHERE menu_parent = '-1'
-									and (menu_channel = :channel OR menu_channel = 'both')");
-$checkSystem->execute([':channel' => 'line']);
+									and (line_open = '1' OR menu_channel = 'both')");
+$checkSystem->execute();
 if($checkSystem->rowCount() > 0){
 	$rowSystem = $checkSystem->fetch(PDO::FETCH_ASSOC);
 	if($rowSystem["menu_status"] == '1'){
