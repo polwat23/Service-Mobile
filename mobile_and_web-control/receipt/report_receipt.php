@@ -8,8 +8,8 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$recv_year = substr("256405",0,4) - 543;
-		$revc_period_raw = $recv_year.substr("256405",-2,2);
+		$recv_year = substr(trim($dataComing["recv_period"]),0,4) - 543;
+		$revc_period_raw = $recv_year.substr(trim($dataComing["recv_period"]),-2,2);
 		$header = array();
 		$fetchName = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MBG.MEMBGROUP_DESC,MBG.MEMBGROUP_CODE
 												FROM MBMEMBMASTER MB LEFT JOIN 

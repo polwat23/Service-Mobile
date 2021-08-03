@@ -51,11 +51,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		if($rowCountFee["C_TRANS"] + 1 > 1){
 			$depositMoney = $cal_dep->DepositMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataDeposit["itemtype_dep"],
 			$amt_transfer,$rowDataDeposit["fee_deposit"],$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
-			$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"]);
+			$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"]);
 		}else{
 			$depositMoney = $cal_dep->DepositMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataDeposit["itemtype_dep"],
 			$amt_transfer,0,$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
-			$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"]);
+			$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"]);
 		}
 		if($depositMoney["RESULT"]){
 			if($coop_account_no == $rowDataDeposit["account_payfee"]){

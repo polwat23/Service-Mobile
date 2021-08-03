@@ -26,7 +26,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
 			$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
 			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			if($payload["member_no"] == 'etnmode3'){
+				$arrayResult['CITIZEN_ID'] = '1119900057012';
+			}else{
+				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

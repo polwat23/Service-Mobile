@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
 		$pay_date = date("Y-m-t", strtotime($request_date));
 		$payment_sumbalance = (float) preg_replace('/,/','',$dataComing['payment_sumbalance']);
-		$int_rate = $dataComing["int_rate"]/100;
+		$int_rate = $dataComing["int_rate"] == '0' ? 0 : $dataComing["int_rate"]/100;
 		$calint_type = $dataComing["calint_type"];
 		$arrPayment = array();
 		$lastDateofMonth = strtotime(date('M Y',strtotime($pay_date)));
@@ -50,8 +50,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 						$lastDate = date('Y-m-t',strtotime("+".($period)." months",$lastDateofMonth));
 						$dayOfMonth = date('d',strtotime($lastDate));
 					}
-					
-					$intPerPeroid = ($amt * ($int_rate) * $dayOfMonth) / $dayinYear;
+					if($int_rate == 0){
+						$intPerPeroid = 0;
+					}else{
+						$intPerPeroid = ($amt * ($int_rate) * $dayOfMonth) / $dayinYear;
+					}
 
 					if ($amt < $paymentPerPeriod) {
 						$princPerPeriod = $amt;
@@ -71,9 +74,12 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 			if($calint_type === "1"){ // 
 				$pay_period = $payment_sumbalance / $period;
 			}else{ 
-				$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
-				$pay_period = ($payment_sumbalance * ($int_rate / 12) / (1 - ($payment_per_period)));
-				
+				if($int_rate == 0){
+					$pay_period = $payment_sumbalance / $period;
+				}else{
+					$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
+					$pay_period = ($payment_sumbalance * ($int_rate / 12) / (1 - ($payment_per_period)));
+				}
 				$modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
 				$roundMod = fmod($pay_period,abs($modFactor));
 				if($modFactor > 0){
@@ -107,7 +113,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}else{
 					$dayinYear = $rowConstant["DAYINYEAR"];
 				}
-				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+				if($int_rate == 0){
+					$period_int = 0;
+				}else{
+					$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+				}
 				if (($payment_sumbalance) < $pay_period) {
 					$prn_amount = $payment_sumbalance;
 				}else{
@@ -140,7 +150,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}else{
 					$dayinYear = $rowConstant["DAYINYEAR"];
 				}
-				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+				if($int_rate == 0){
+					$period_int = 0;
+				}else{
+					$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+				}
 				$prn_amount = $pay_period - $period_int;
 				
 				
