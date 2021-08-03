@@ -65,11 +65,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$rowCollAsset = $whocolluAsset->fetch(PDO::FETCH_ASSOC);
 					$arrGroupAllMember["COLL_DOCNO"] = $rowCollAsset["COLLMAST_NO"];
 					if(isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != ""){
-						$address =  isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != "" ? "â©¹´àÅ¢·Õè ".$rowCollAsset["COLLMAST_REFNO"] : "";
-						$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " ºéÒ¹àÅ¢·Õè ".$rowCollAsset["LAND_LANDNO"] : "";
-						$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " µ.".$rowCollAsset["POS_TUMBOL"] : "";
-						$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " Í.".$rowCollAsset["DISTRIC_DESC"] : "";
-						$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " ¨.".$rowCollAsset["PROVINCE_DESC"] : "";
+						$address =  isset($rowCollAsset["COLLMAST_REFNO"]) && $rowCollAsset["COLLMAST_REFNO"] != "" ? "à¹‚à¸‰à¸™à¸”à¹€à¸¥à¸‚à¸—à¸µà¹ˆ ".$rowCollAsset["COLLMAST_REFNO"] : "";
+						$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " à¸šà¹‰à¸²à¸™à¹€à¸¥à¸‚à¸—à¸µà¹ˆ ".$rowCollAsset["LAND_LANDNO"] : "";
+						$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " à¸•.".$rowCollAsset["POS_TUMBOL"] : "";
+						$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " à¸­.".$rowCollAsset["DISTRIC_DESC"] : "";
+						$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " à¸ˆ.".$rowCollAsset["PROVINCE_DESC"] : "";
 						$arrGroupAllMember["DESCRIPTION"] = $address;
 					}else{
 						$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
@@ -154,11 +154,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							if(isset($rowColl["DESCRIPTION"]) && $rowColl["DESCRIPTION"] != ""){
 								$arrGroupAllMember['DESCRIPTION'] = $rowColl["DESCRIPTION"];
 							}else{
-								$address =  isset($rowColl["REF_COLLNO"]) && $rowColl["REF_COLLNO"] != "" ? "â©¹´àÅ¢·Õè ".TRIM($rowColl["REF_COLLNO"]) : "";
-								$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " ºéÒ¹àÅ¢·Õè ".$rowCollAsset["LAND_LANDNO"] : "";
-								$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " µ.".$rowCollAsset["POS_TUMBOL"] : "";
-								$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " Í.".$rowCollAsset["DISTRIC_DESC"] : "";
-								$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " ¨.".$rowCollAsset["PROVINCE_DESC"] : "";
+								$address =  isset($rowColl["REF_COLLNO"]) && $rowColl["REF_COLLNO"] != "" ? "à¹‚à¸‰à¸™à¸”à¹€à¸¥à¸‚à¸—à¸µà¹ˆ ".TRIM($rowColl["REF_COLLNO"]) : "";
+								//$address .= isset($rowCollAsset["LAND_LANDNO"]) && $rowCollAsset["LAND_LANDNO"] != "" ? " à¸šà¹‰à¸²à¸™à¹€à¸¥à¸‚à¸—à¸µà¹ˆ ".$rowCollAsset["LAND_LANDNO"] : "";
+								$address .= isset($rowCollAsset["POS_TUMBOL"]) && $rowCollAsset["POS_TUMBOL"] != "" ? " à¸•.".$rowCollAsset["POS_TUMBOL"] : "";
+								$address .= isset($rowCollAsset["DISTRIC_DESC"]) && $rowCollAsset["DISTRIC_DESC"] != "" ? " à¸­.".$rowCollAsset["DISTRIC_DESC"] : "";
+								$address .= isset($rowCollAsset["PROVINCE_DESC"]) && $rowCollAsset["PROVINCE_DESC"] != "" ? " à¸ˆ.".$rowCollAsset["PROVINCE_DESC"] : "";
 								$arrGroupAllMember["DESCRIPTION"] = $address;
 							}
 						}
@@ -192,11 +192,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
+		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
+	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
