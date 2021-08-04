@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':max_recv' => $rowLastRecv["MAX_RECV"]
 		]);
 		$rowBeenPay = $checkHasBeenPay->fetch(PDO::FETCH_ASSOC);
-		$max_recv = (int) substr($rowLastRecv["MAX_RECV"],4);
+		$max_recv = (int) substr($rowLastRecv["MAX_RECV"],4,2);
 		if($keep_forward == '1'){
 			if($MonthForCheck < $max_recv){
 				http_response_code(204);
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
-		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
+		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM(substr($rowLastRecv["MAX_RECV"],0,6)));
 		$getPaymentDetail = $conoracle->prepare("SELECT 
 																	CASE kut.system_code 
 																	WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 

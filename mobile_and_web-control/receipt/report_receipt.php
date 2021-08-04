@@ -163,7 +163,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				}
 			}
 		}
-		$header["share_atk"]  = number_format($share_stk,2);
+		$header["share_stk"]  = number_format($share_stk,2);
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 															kpd.RECEIPT_NO,
 															kpd.OPERATE_DATE,
@@ -297,7 +297,7 @@ function GenerateReport($dataReport,$header,$lib,$current_coopid=null){
 						<td style="width: 50px;font-size: 18px; ">ทุนเรือนหุ้นยกมา :</td>
 						<td style="width: 100px;">'.$header["sharestkbf_value"].'</td>
 						<td style="width: 50px;font-size: 18px;">ทุนเรือนหุ้นสะสม :</td>
-						<td style="width: 100px; solid;">' . $header["share_atk"] . '</td>
+						<td style="width: 100px; solid;">' . $header["share_stk"] . '</td>
 					</tr>
 				</tbody>
 			</table>

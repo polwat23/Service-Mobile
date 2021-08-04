@@ -187,11 +187,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
-			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:70px "></div>
+			   <div style=" position: fixed;top:2px; left:75px; font-size:20px; font-weight:bold;">
 					สหกรณ์ออมทรัพย์ไทยน้ำทิพย์ จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
+			   <div style=" position: fixed;top:25px; left: 75px;font-size:20px">
 					THAINAMTHIP SAVING AND CREDIT CO-OPERATIVE LIMITED
 			   </div>
 			   </div>

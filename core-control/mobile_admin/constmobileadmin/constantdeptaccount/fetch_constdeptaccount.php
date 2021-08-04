@@ -13,7 +13,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		allow_withdraw_inside,
 																		allow_deposit_outside,
 																		allow_withdraw_outside,
-																		allow_payloan
+																		allow_pay_loan,
+																		allow_buyshare
 																	FROM
 																		gcconstantaccountdept
 																	ORDER BY dept_type_code ASC");
@@ -27,7 +28,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ALLOW_WITHDRAW_INSIDE"] = $rowMenuMobile["allow_withdraw_inside"];
 			$arrConstans["ALLOW_DEPOSIT_OUTSIDE"] = $rowMenuMobile["allow_deposit_outside"];
 			$arrConstans["ALLOW_WITHDRAW_OUTSIDE"] = $rowMenuMobile["allow_withdraw_outside"];
-			$arrConstans["ALLOW_PAYLOAN"] = $rowMenuMobile["allow_payloan"];
+			$arrConstans["ALLOW_PAYLOAN"] = $rowMenuMobile["allow_pay_loan"];
+			$arrConstans["ALLOW_BUYSHARE"] = $rowMenuMobile["allow_buyshare"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
@@ -40,6 +42,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$arrayDepttype["ALLOW_DEPOSIT_OUTSIDE"] = '0';
 						$arrayDepttype["ALLOW_WITHDRAW_OUTSIDE"] = '0';
 						$arrayDepttype["ALLOW_PAYLOAN"] = '0';
+						$arrayDepttype["ALLOW_BUYSHARE"] = '0';
 						$arrayDepttype["MEMBER_TYPE_CODE"] = 'AL';
 				}else{
 					$arrayDepttype["ALLOW_DEPOSIT_INSIDE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_DEPOSIT_INSIDE"];
@@ -47,6 +50,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrayDepttype["ALLOW_DEPOSIT_OUTSIDE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_DEPOSIT_OUTSIDE"];
 					$arrayDepttype["ALLOW_WITHDRAW_OUTSIDE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_WITHDRAW_OUTSIDE"];
 					$arrayDepttype["ALLOW_PAYLOAN"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_PAYLOAN"];
+					$arrayDepttype["ALLOW_BUYSHARE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ALLOW_BUYSHARE"];
 					$arrayDepttype["MEMBER_TYPE_CODE"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["MEMBER_TYPE_CODE"];
 					//$arrayDepttype["ID_ACCCONSTANT"] = $arrayChkG[array_search($rowDepttype["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE'))]["ID_ACCCONSTANT"];
 				}

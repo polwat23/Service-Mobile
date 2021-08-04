@@ -86,8 +86,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTK_VALUE"] + $shareinPeriod,2);
-		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"] + $intinPeriod,2);
+		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTK_VALUE"],2);
+		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -162,13 +162,12 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="100"  /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ไทยน้ำทิพย์ จำกัด</p>
 				<p style="margin-top: -27px;font-size: 18px;">416   ถนนรามคำแหง   แขวงหัวหมาก   เขต บางกะปิ   กทม  10240 </p>
-				<p style="margin-top: -25px;font-size: 18px;">02-3740252-60</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">http://www.thainamthip.co.th/</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร 02-3740252-60 ต่อ 7370 - 7373 Fax. 02-3742115</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -277,15 +276,17 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบเรียกเก็บเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			</div>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 800px;display:flex;">
+			<img src="../../resource/utility_icon/signature/fin.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-40px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-150px;">
-			.........................................................
-			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-110px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 760px;margin-top:-90px;">เจ้าหน้าที่บัญชีและประมวลผล</div>
 			';
 
 	$dompdf = new Dompdf([
