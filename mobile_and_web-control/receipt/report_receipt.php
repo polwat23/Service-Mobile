@@ -232,7 +232,8 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 
 				body {
-				  padding: 0 30px;
+				  padding: 0px;
+				  font-size:x-small;
 				}
 				.sub-table div{
 					padding : 5px;
@@ -263,9 +264,10 @@ function GenerateReport($dataReport,$header,$lib){
 					color: #70ad47;
 				}
 			</style>
+		<div style="width:12.5cm; height:14cm; border:1px solid #eee;">
 			<div>
 				 <div style="text-align: center;">
-					<div style="display: inline-block;vertical-align: top;position: absolute;left: 40px;">
+					<div style="display: inline-block;vertical-align: top;position: absolute;left: 10px;">
 						<img src="../../resource/logo/logo_slip.jpg" style="width:80px" />
 					</div>
 					<div style="display: inline-block;">
@@ -283,7 +285,7 @@ function GenerateReport($dataReport,$header,$lib){
 				</div>
 			</div>
 			<div style="padding-top: 30px;">
-				<div style="display: inline-block;width: 55%;padding-right: 10px;">
+				<div style="display: inline-block;width: 55%; margin-right:1px;">
 					<div>
 						<table class="theme-table">
 							<tr>
@@ -305,7 +307,7 @@ function GenerateReport($dataReport,$header,$lib){
 						</table>
 					</div>
 				</div>
-				<div style="display: inline-block;width: 42%;padding-left: 4px">
+				<div style="display: inline-block;width: 43.3%;padding-left: 4px">
 					<div>
 						<table class="theme-table">
 							<tr>
@@ -329,7 +331,7 @@ function GenerateReport($dataReport,$header,$lib){
 				</div>
             </div>';
 				// Detail
-	$html .= ' <div style="margin-top: 16px;">
+	$html .= ' <div style=" margin-top:-10px;">
 				<div style="position: relative;">
 					<table class="theme-table-bordered" style="width: 100%">
                     <tr>
@@ -344,7 +346,7 @@ function GenerateReport($dataReport,$header,$lib){
 	
 		$html .= '
 				<tr>
-					<td style="white-space: nowrap;padding-right: 10px;font-size: small;">'.($dataReport[$i]["CONTRACT_NO"] ? ($dataReport[$i]["CONTRACT_NO"].' '): '').''.$dataReport[$i]["TYPE_DESC"].'</td>
+					<td style="white-space: nowrap;padding-right: 10px;">'.($dataReport[$i]["CONTRACT_NO"] ? ($dataReport[$i]["CONTRACT_NO"].' '): '').''.$dataReport[$i]["TYPE_DESC"].'</td>
 					<td style="padding-right: 10px;padding-left: 10px;text-align: center;">'.($dataReport[$i]["PERIOD"] ?? null).'</td>
 					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["PRN_BALANCE"].'</td>
 					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["INT_BALANCE"].'</td>
@@ -357,7 +359,7 @@ function GenerateReport($dataReport,$header,$lib){
 	}
 	$html .= '
 				<tr>
-					<td style="white-space: nowrap;padding-right: 10px;font-size: small;">&nbsp;</td>
+					<td style="white-space: nowrap;padding-right: 10px;">&nbsp;</td>
 					<td style="padding-right: 10px;padding-left: 10px;text-align: center;">&nbsp;</td>
 					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
 					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
@@ -370,12 +372,13 @@ function GenerateReport($dataReport,$header,$lib){
 					<td style="padding-right: 10px;padding-left: 10px;"></td>
 				</tr>
 				</table>
-				<img src="../../resource/logo/logo_slip.jpg" style="width:90px;position: absolute;opacity: 0.1;left: 50%;top: '.((sizeof($dataReport)/2)*32+50).'px; transform: translate(-50%, -50%);" />
+				<img src="../../resource/logo/logo_slip.jpg" style="width:90px;position: absolute;opacity: 0.1;left: 50%;top: '.((sizeof($dataReport)/2)*32+50).'px; transform: translate(-50%, -50%); " />
 			</div>';
 			// Footer
 	$html .= '<div class="theme-color" style="margin-top: 16px;position: relative;white-space: nowrap;">
-						ผู้จัดการ / เหรัญญิก ................................................................................ เจ้าหน้าที่ผู้รับเงิน ...............................................................................
-					<img src="../../resource/utility_icon/signature/mg.jpg" height="28" style="margin-top:10px;position: absolute;left: 150px;top: -22px"/>
+						ผู้จัดการ / เหรัญญิก ................................................................................ เจ้าหน้าที่ผู้รับเงิน ............................................................................
+					<img src="../../resource/utility_icon/signature/mg.jpg" height="20" style="margin-top:10px;position: absolute;left: 90px;top: -20px;"/>
+					<img src="../../resource/utility_icon/signature/mg_temp.jpg" height="20" style="margin-top:10px;position: absolute;left: 330px;top: -20px;"/>
                 </div>
                 <div style="margin-top: 12px; border: 2px solid #70ad47; background-color: #c5e0b3;border-radius: 10px;height: 70px;">
 
@@ -383,7 +386,8 @@ function GenerateReport($dataReport,$header,$lib){
                 <div class="theme-color" style="margin-top: 24px;font-weight: bold;text-align: center;">
                     ใบรับเงินประจำเดือนจะสมบูรณ์ต่อเมื่อสหกรณ์ได้รับเงินที่เรียกเก็บครบถ้วนแล้ว
                 </div>
-            </div>';
+            </div>
+	</div>';
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
@@ -391,7 +395,7 @@ function GenerateReport($dataReport,$header,$lib){
 		'isRemoteEnabled' => true
 	]);
 
-	$dompdf->set_paper('A4');
+	$dompdf->set_paper('A4','landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathfile = __DIR__.'/../../resource/pdf/keeping_monthly';
