@@ -90,6 +90,7 @@
 	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
+	"WS0075" : [{"th" : "ไม่สามาถซื้อหุ้นได้เนื่องจากเหตุผลบางประการ กรุณาติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot buy shares because something was wronged please contact cooperative for more information"}],
 	"WS0076" : [{"th" : "สหกรณ์กำลังตรวจสอบเอกสารการขอทุนของท่าน ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has been considering your request. You can track request in Welfare request menu"}],
 	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามผลการขอทุนได้ที่เมนูสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can follow the result of request in Welfare menu"}],
 	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
@@ -107,6 +108,15 @@
 	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
 	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
 	"WS0098" : [{"th" : "ยอดทำรายการมากกว่า หนี้คงเหลือของท่าน กรุณาตรวจสอบข้อมูลอีกครั้งก่อนทำรายการ","en" : "Your transfer amount more than loan balance please recheck before transaction"}],
+	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
+	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
+	"WS0101" : [{"th" : "จำนวนครั้งในการทำรายการต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of day over than the cooperative is define"}],
+	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
+	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
+	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
+	"WS0110" : [{"th" : "ประเภทสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member type is not allowed to payment monthly special"}],
+	"WS0111" : [{"th" : "กลุ่มสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member group is not allowed to payment monthly special"}],
+	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -199,6 +209,7 @@
 		"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมภายในเท่านั้น","en" : "Only transaction inside"}],
 		"ALLOW_TRANS_ALL_MENU" : [{"th" : "สามารถทำธุรกรรมได้ทั้งภายในและธนาคาร","en" : "Can transaction inside and transaction with bank"}],
 		"CAUTION_LOANREQUEST" : [{"th" : "ไม่สามารถขอกู้ได้ เนื่องจากหนี้เดิมของท่านมีมากกว่าสิทธิ์กู้ของท่าน ท่านต้องการทำรายการต่อไป ?","en" : "Cannot request loan because old debt is more than your loan rights. Do you want to continue ?"}],
+		"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
 		"BUTTON_TEXT" : [{
 			"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
 			"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
@@ -223,6 +234,11 @@
 			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
 			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
 			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+		}],
+		"BUY_SHARES_ERR" : [{
+			"0001" : [{"th" : "ไม่สามารถถือหุ้นเกิน ${MAXHOLD_AMT} ได้","en" : "Cannot hold shares over ${MAXHOLD_AMT}"}],
+			"0002" : [{"th" : "ไม่สามารถซื้อหุ้นต่อครั้งเกิน ${MAXSHAREPX_AMT} ได้","en" : "Cannot buy shares per times over ${MAXSHAREPX_AMT}"}],
+			"0003" : [{"th" : "ขั้นต่ำที่สามารถซื้อได้คือ ${SHAREROUND_FACTOR} บาท","en" : "Minimum can buy is ${SHAREROUND_FACTOR} baht"}]
 		}],
 		"REQ_HAVE_OLD_CONTRACT" : [{"th" : "ท่านมีสัญญาเงินกู้ประเภทนี้อยู่แล้วไม่สามารถกู้ซ้ำได้","en" : "Your have contract already exist cannot request repeat"}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
