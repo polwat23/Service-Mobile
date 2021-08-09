@@ -107,6 +107,12 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		if($amt_transfer < 1000){
+			$arrayResult['RESPONSE_CODE'] = "WS0056";
+			$arrayResult['MINDEPT_AMT'] = 1000;
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
 			$transfer_mode = "1";

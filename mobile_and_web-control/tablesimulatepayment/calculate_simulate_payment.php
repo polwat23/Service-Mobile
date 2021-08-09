@@ -115,6 +115,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 				$periodPayment = $prn_amount + $period_int;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
+				$sumInt += $period_int;
+				$sumPayment += $periodPayment;
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
 				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
