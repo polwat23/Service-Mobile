@@ -109,7 +109,7 @@ class CalculateDep {
 		}
 		if($amt_transfer < 1000){
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
-			$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
+			$arrayResult['MINDEPT_AMT'] = 1000;
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
