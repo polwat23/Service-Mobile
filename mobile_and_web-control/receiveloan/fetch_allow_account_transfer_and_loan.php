@@ -28,11 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccAllow["DEPTACCOUNT_NO_FORMAT"],$formatDeptHidden);
 				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
 				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-				if($rowDataAccAllow["SEQUEST_STATUS"] == '1'){
-					$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"] - $rowDataAccAllow["SEQUEST_AMOUNT"] - $rowDataAccAllow["MINPRNCBAL"];
-				}else{
-					$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"] - $rowDataAccAllow["MINPRNCBAL"];
-				}
+				$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
 				$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
@@ -82,6 +78,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 					$arrayResult['LOAN'] = $arrLoanGrp;
 					$arrayResult['IS_FEE_INFO'] = TRUE;
+					$arrayResult['STEP_AMOUNT_DIGIT'] = 100;
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{

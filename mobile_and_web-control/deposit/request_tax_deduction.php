@@ -169,6 +169,12 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 				
 			}
+		}else{
+				$arrayResult['RESPONSE_CODE'] = "WS1042";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -322,14 +328,14 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		</div>
 	';
 
-	$html .= '
+	/*$html .= '
 	 <div  style="position: absolute; right: -18px; top: 30px;" >
 		เล่มที่........................... 
 	 </div>
 	 <div style="position: absolute; right: -18px; top: 52px;">
 		เลขที่........................... 
 	 </div>
-	';
+	';*/
 
 
 	$html .= '

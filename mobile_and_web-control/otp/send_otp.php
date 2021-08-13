@@ -57,7 +57,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 			}else{
 				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
-						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log','system',null)";
+						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log'".json_encode($arraySendSMS).",'system',null)";
 				$func->logSMSWasNotSent($bulkInsert);
 				unset($bulkInsert);
 				$bulkInsert = array();

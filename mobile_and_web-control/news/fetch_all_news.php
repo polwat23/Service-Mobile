@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayNews["NEWS_HTML"] = $rowNews["news_html"];
 			$arrayNews["IMAGE_HEADER"] = $rowNews["path_img_header"];
 			$arrayNews["UPDATE_DATE"] = $lib->convertdate($rowNews["update_date"],'D m Y',true);
+			$arrayNews["UPDATE_RAW"] = $rowNews["update_date"];
 			$arrayNews["ID_NEWS"] = $rowNews["id_news"];
 			$arrayNews["CREATE_BY"] = $rowNews["create_by"];
 			$arrayNews["LINK_NEWS_MORE"] = $rowNews["link_news_more"];

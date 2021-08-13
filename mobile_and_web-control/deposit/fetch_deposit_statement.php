@@ -30,8 +30,9 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getAccount = $conoracle->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
-											WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+		$getAccount = $conoracle->prepare("SELECT dm.prncbal as BALANCE,dp.deptgroup_code FROM dpdeptmaster dm 
+														left join dpdepttype dp on dp.depttype_code = dm.depttype_code
+														WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
 		$getAccount->execute([
 			':account_no' => $account_no
 		]);
@@ -103,7 +104,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
-		$arrayResult["REQUEST_TAX"] = TRUE;
+		if($rowAccount["DEPTGROUP_CODE"] == '01'){
+			$arrayResult["REQUEST_TAX"] = TRUE;
+		}else{
+			$arrayResult["REQUEST_TAX"] = FALSE;
+		}
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

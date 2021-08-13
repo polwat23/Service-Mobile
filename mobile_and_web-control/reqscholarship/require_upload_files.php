@@ -14,21 +14,11 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 		$arrayFileManda = [
 			(object) [
 				'seq_no' => 1,
-				'document_desc' => 'หน้าปกสมุดผลการศึกษา ระบุข้อมูลชื่อบุตร ชื่อโรงเรียนและชั้นปีการศึกษา (ถ้ามี)',
-				'mandatory' => '0',
+				'document_desc' => 'ใบเสร็จค่าเทอม',
+				'mandatory' => '1',
 			],
 			(object) [
 				'seq_no' => 2,
-				'document_desc' => 'ผลการศึกษา ปีการศึกษา '.(date('Y') + 542).' (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0 ร. มส. มผ. I หรือ F',
-				'mandatory' => '1',
-			],
-			(object) [
-				'seq_no' => 3,
-				'document_desc' => 'ผลการศึกษา ปีการศึกษา '.(date('Y') + 542).' (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0 ร. มส. มผ. I หรือ F',
-				'mandatory' => '1',
-			],
-			(object) [
-				'seq_no' => 4,
 				'document_desc' => 'เอกสารอื่นๆ (ถ้ามี)',
 				'mandatory' => '0',
 			]

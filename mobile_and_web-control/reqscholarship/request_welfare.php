@@ -60,16 +60,26 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				}
 			}else{
 				$conoracle->beginTransaction();
+				$getChildName = $conoracle->prepare("SELECT CHILD_NAME,CHILD_SURNAME FROM asnreqschshiponline 
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and member_no = :member_no and CHILDCARD_ID = :child_id and REQUEST_STATUS IN(8,9)");
+				$getChildName->execute([
+					':member_no' => $member_no,
+					':child_id' => $dataComing["childcard_id"]
+				]);
+				$rowChildName = $getChildName->fetch(PDO::FETCH_ASSOC);
+			
 				$delOldSchShip = $conoracle->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status IN(8,9)");
 				$delOldSchShip->execute([
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
 				]);
-				$insertSchShipOnline = $conoracle->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status)
-																				VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,8)");
+				$insertSchShipOnline = $conoracle->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status, child_name, child_surname)
+																				VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,8, :child_name, :child_surname)");
 				if($insertSchShipOnline->execute([
 					':member_no' => $member_no,
-					':child_id' => $dataComing["childcard_id"]
+					':child_id' => $dataComing["childcard_id"],
+					':child_name' => $rowChildName["CHILD_NAME"],
+					':child_surname' => $rowChildName["CHILD_SURNAME"]
 				])){
 					foreach($dataComing["upload_list"] as $list){
 						if(isset($list["upload_base64"]) && $list["upload_base64"] != ""){

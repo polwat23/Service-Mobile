@@ -43,11 +43,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					if(isset($rowDataAcc["DEPTTYPE_DESC"])){
 						$arrAccBind["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
 						$arrAccBind["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-						if($rowDataAcc["SEQUEST_STATUS"] == '1'){
-							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAcc["SEQUEST_AMOUNT"] - $rowDataAcc["MINPRNCBAL"];
-						}else{
-							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAcc["MINPRNCBAL"];
-						}
+						$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"];
 						$arrAccBind["BALANCE_FORMAT"] = number_format($arrAccBind["BALANCE"],2);
 						$arrGroupAccBind[] = $arrAccBind;
 					}

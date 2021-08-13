@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogTransfer["DEVICE_NAME"] = $rowLogTransfer["device_name"];
 			$arrLogTransfer["TRANSACTION_TYPE_CODE"] = $rowLogTransfer["transaction_type_code"];
 			$arrLogTransfer["FROM_ACCOUNT"] = $rowLogTransfer["from_account"];
-			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransfer["from_account"],$formatDept);
+			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $rowLogTransfer["transfer_mode"] != "4" ? $lib->formataccount($rowLogTransfer["from_account"],$formatDept) : $rowLogTransfer["from_account"];
 			$arrLogTransfer["DESTINATION_TYPE"] = $rowLogTransfer["destination_type"];
 			$arrLogTransfer["DESTINATION"] = $rowLogTransfer["destination"];
 			$arrLogTransfer["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransfer["destination"],$formatDept);

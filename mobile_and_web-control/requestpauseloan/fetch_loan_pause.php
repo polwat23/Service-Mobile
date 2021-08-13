@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 															WHERE 
 															B.CONTRACT_STATUS = 1 AND
 															A.REQUEST_STATUS IN (1, -1) AND
-															A.COOP_ID = '000000' AND A.MEMBER_NO = :member_no");
+															A.COOP_ID = '000000' AND A.MEMBER_NO = :member_no and request_date between to_date('01012021','ddmmyyyy') and to_date('26032021','ddmmyyyy')");
 		$getLoanPause->execute([':member_no' => $member_no]);
 		while($rowLoanPuase = $getLoanPause->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();

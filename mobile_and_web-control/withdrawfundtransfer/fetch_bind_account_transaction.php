@@ -48,6 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}else{
 							$arrAccBind["BALANCE"] = $rowDataAcc["PRNCBAL"] - $rowDataAcc["MINPRNCBAL"];
 						}
+						$arrAccBind["BALANCE_DEST"] = number_format($rowDataAcc["PRNCBAL"],2);
 						$arrAccBind["BALANCE_FORMAT"] = number_format($arrAccBind["BALANCE"],2);
 						$arrGroupAccBind[] = $arrAccBind;
 					}

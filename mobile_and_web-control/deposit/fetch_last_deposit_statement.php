@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
+		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,dt.DEPTGROUP_CODE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
 												LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
@@ -114,7 +114,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
-		$arrayResult["REQUEST_TAX"] = TRUE;
+		if($rowStm["DEPTGROUP_CODE"] == '01'){
+			$arrayResult["REQUEST_TAX"] = TRUE;
+		}else{
+			$arrayResult["REQUEST_TAX"] = FALSE;
+		}
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
