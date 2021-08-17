@@ -16,11 +16,57 @@ if($TextTemplate->rowCount() > 0){
 		$rowDataTemplate = $getDataTemplate->fetch(PDO::FETCH_ASSOC);
 		$dataTemplate = $lineLib->mergeImageMessage($rowDataTemplate["image_url"]);
 		$arrPostData['messages'][0] = $dataTemplate;
+	}else if($rowTemplate["type_message"] == 'location'){
+		$getDataTemplate = $conmysql->prepare("SELECT title, address, latitude,longtitude FROM ".$rowTableName["table_name"]." WHERE ".$rowTableName["condition_key"]." = :id_ref and is_use = '1'");
+		$getDataTemplate->execute([':id_ref' => $rowTemplate["id_ref"]]);
+		$rowDataTemplate = $getDataTemplate->fetch(PDO::FETCH_ASSOC);
+		$dataTemplate = $lineLib->mergeLocationMessage($rowDataTemplate["title"],$rowDataTemplate["address"],$rowDataTemplate["latitude"],$rowDataTemplate["longtitude"]);
+		$arrPostData['messages'][0] = $dataTemplate;
+	}else if($rowTemplate["type_message"] == 'text'){
+		$getDataTemplate = $conmysql->prepare("SELECT text_message  FROM ".$rowTableName["table_name"]." WHERE ".$rowTableName["condition_key"]." = :id_ref and is_use = '1'");
+		$getDataTemplate->execute([':id_ref' => $rowTemplate["id_ref"]]);
+		$rowDataTemplate = $getDataTemplate->fetch(PDO::FETCH_ASSOC);
+		$dataTemplate = $lineLib->mergeTextMessage($rowDataTemplate["text_message"]);
+		$arrPostData['messages'][0] = $dataTemplate;
+	}else if($rowTemplate["type_message"] == 'action'){
+		
+		$getDataTemplate = $conmysql->prepare("SELECT type,text,url,area_x,area_y,width,height,label,data,mode,initial,max,min  FROM ".$rowTableName["table_name"]." WHERE ".$rowTableName["condition_key"]." = :id_ref and is_use = '1'");
+		$getDataTemplate->execute([':id_ref' => $rowTemplate["id_ref"]]);
+		$rowDataTemplate = $getDataTemplate->fetch(PDO::FETCH_ASSOC);
+		if($rowDataTemplate["type"]=='message'){
+			$dataTemplate = $lineLib->mergeMessageAction($rowDataTemplate["text"],$rowDataTemplate["label"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else if($rowDataTemplate["type"]=='uri'){
+			$dataTemplate = $lineLib->mergeUrlAction($rowDataTemplate["url"],$rowDataTemplate["label"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else if($rowDataTemplate["type"]=='datetime_picker'){
+			$dataTemplate = $lineLib->mergeDetetimePickerAction($rowDataTemplate["label"],$rowDataTemplate["data"],$rowDataTemplate["mode"],$rowDataTemplate["initial"],$rowDataTemplate["max"],$rowDataTemplate["min"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else if($rowDataTemplate["type"]=='camera'){
+			$dataTemplate = $lineLib->mergeCameraAction($rowDataTemplate["text"],$rowDataTemplate["label"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else if($rowDataTemplate["type"]=='camera_roll'){
+			$dataTemplate = $lineLib->mergeCameraRollAction($rowDataTemplate["text"],$rowDataTemplate["label"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else if($rowDataTemplate["type"]=='postback'){
+			$dataTemplate = $lineLib->mergePostbackAction($rowDataTemplate["text"],$rowDataTemplate["label"],$rowDataTemplate["data"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else if($rowDataTemplate["type"]=='location'){
+			$dataTemplate = $lineLib->mergeLocationAction($rowDataTemplate["text"],$rowDataTemplate["label"]);
+			$arrPostData['messages'][0] = $dataTemplate;
+		}else {
+			file_put_contents(__DIR__.'/../log/response.txt', json_encode($rowDataTemplate) . PHP_EOL, FILE_APPEND);
+			$dataTemplate = $lineLib->mergeTextMessage("ลง else");
+			$arrPostData['messages'][0] = $dataTemplate;
+		}
 	}
+	
 }else{
 	$messageErr = $func->getMsgLine('1');
 	$dataTemplate = $lineLib->mergeTextMessage($messageErr);
 	$arrPostData['messages'][0] = $dataTemplate;
+	
+	file_put_contents(__DIR__.'/../log/response.txt', json_encode($message) . PHP_EOL, FILE_APPEND);
 }
 require_once(__DIR__.'./replyresponse.php');
 ?>

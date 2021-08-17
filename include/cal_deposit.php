@@ -767,7 +767,7 @@ class CalculateDep {
 		return $rowConstPay;
 	}
 	public function DepositMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_dpt,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$from_account_no,$payload,$deptslip,$lib,$max_seqno,$menu_component,$ref_no,$is_transfer=false,$slipWithdraw=null,$bank_code=null){
+	$operate_date,$config,$log,$from_account_no,$payload,$deptslip,$lib,$max_seqno,$menu_component,$ref_no,$is_transfer=false,$slipWithdraw=null,$bank_code=null,$entry_id){
 		$constToAcc = $this->getConstantAcc($deptaccount_no);
 		$rowDepPayDest = $this->getConstPayType($itemtype_dpt);
 		if($constToAcc["LIMITDEPT_FLAG"] == '1' && $amt_transfer > $constToAcc["LIMITDEPT_AMT"]){
@@ -894,7 +894,8 @@ class CalculateDep {
 			':laststmno' => $lastStmDestNo,
 			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
 			':acc_id' => $tofrom_accid,
-			':refer_deptslip_no' => $slipWithdraw ?? null
+			':refer_deptslip_no' => $slipWithdraw ?? null,
+			':entry_id' => $entry_id
 		];
 		$insertDpSlipDest = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 											deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
@@ -904,9 +905,9 @@ class CalculateDep {
 											POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 											TELLER_FLAG,OPERATE_TIME) 
 											VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
-											:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+											:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
 											TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,0,:acc_id,1,:refer_deptslip_no,0,0,
-											:slip_amt,1,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
+											:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 		if($insertDpSlipDest->execute($arrExecuteDest)){
 			$arrExecuteStmDest = [
 				':coop_id' => $config["COOP_ID"],
@@ -919,11 +920,12 @@ class CalculateDep {
 				':entry_date' => $operate_date,
 				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
 				':cash_type' => $rowDepPayDest["MONEYTYPE_SUPPORT"],
-				':deptslip_no' => $deptslip_no
+				':deptslip_no' => $deptslip_no,
+				':entry_id' => $entry_id
 			];
 			$insertStatementDest = $conoracle->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
 													CALINT_FROM,CALINT_TO,CASH_TYPE,OPERATE_TIME,DEPTSLIP_NO,SYNC_NOTIFY_FLAG)
-													VALUES(:coop_id,:to_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+													VALUES(:coop_id,:to_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
 													TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),:cash_type,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:deptslip_no,'1')");
 			if($insertStatementDest->execute($arrExecuteStmDest)){
 				$arrUpdateMasterDest = [
@@ -1071,7 +1073,7 @@ class CalculateDep {
 		}
 	}
 	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc){
+	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$entry_id){
 		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
@@ -1105,7 +1107,8 @@ class CalculateDep {
 			':laststmno' => $lastStmSrcNo,
 			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 			':acc_id' => $tofrom_accid,
-			':penalty_amt' => $penalty_amt
+			':penalty_amt' => $penalty_amt,
+			':entry_id' => $entry_id
 		];
 		if($penalty_amt > 0){
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
@@ -1116,7 +1119,7 @@ class CalculateDep {
 								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
 								VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
-								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
 								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,:penalty_amt,0,0,:acc_id,2,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 		}else{
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
@@ -1127,7 +1130,7 @@ class CalculateDep {
 								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
 								VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
-								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
 								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,:penalty_amt,0,0,:acc_id,1,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 		}
 		$insertDpSlip = $conoracle->prepare($insertDpSlipSQL);
@@ -1144,11 +1147,12 @@ class CalculateDep {
 				':entry_date' => $operate_date,
 				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 				':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
-				':deptslip_no' => $deptslip_no
+				':deptslip_no' => $deptslip_no,
+				':entry_id' => $entry_id
 			];
 			$insertStatement = $conoracle->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
 													CALINT_FROM,CALINT_TO,CASH_TYPE,OPERATE_TIME,DEPTSLIP_NO,SYNC_NOTIFY_FLAG)
-													VALUES(:coop_id,:from_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+													VALUES(:coop_id,:from_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
 													TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),:cash_type,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:deptslip_no,'1')");
 			if($insertStatement->execute($arrExecuteStm)){
 				if($penalty_amt > 0){
@@ -1171,7 +1175,8 @@ class CalculateDep {
 						':laststmno' => $lastStmSrcNo,
 						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 						':acc_id' => $rowMapAccFee["ACCOUNT_ID"],
-						':refer_deptslip_no' => $deptslip_no
+						':refer_deptslip_no' => $deptslip_no,
+						':entry_id' => $entry_id
 					];
 					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 																deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
@@ -1181,7 +1186,7 @@ class CalculateDep {
 																POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 																TELLER_FLAG,OPERATE_TIME) 
 																VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
-																:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+																:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
 																TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,0,:acc_id,2,:refer_deptslip_no,0,0,:slip_amt,'DEP',0,0,0,1,1,1,0,1,1,
 																TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 					if($insertDpSlipPenalty->execute($arrExecutePenalty)){
@@ -1196,11 +1201,12 @@ class CalculateDep {
 							':entry_date' => $operate_date,
 							':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
 							':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
-							':deptslip_no' => $deptslip_noPenalty
+							':deptslip_no' => $deptslip_noPenalty,
+							':entry_id' => $entry_id
 						];
 						$insertStatementPenalty = $conoracle->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
 																CALINT_FROM,CALINT_TO,CASH_TYPE,OPERATE_TIME,DEPTSLIP_NO,SYNC_NOTIFY_FLAG)
-																VALUES(:coop_id,:from_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,'mobile',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+																VALUES(:coop_id,:from_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,:entry_id,TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
 																TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),:cash_type,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:deptslip_no,'1')");
 						if($insertStatementPenalty->execute($arrExecuteStmPenalty)){
 							$deptslip_no += 1;

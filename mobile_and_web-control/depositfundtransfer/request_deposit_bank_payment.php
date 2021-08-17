@@ -27,6 +27,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$vccAccID = $func->getConstant('map_account_id_bay');
 		}else if($rowDataDeposit["bank_code"] == '006'){
 			$vccAccID = $func->getConstant('map_account_id_ktb');
+		}else if($rowDataDeposit["bank_code"] == '004'){
+			$vccAccID = $func->getConstant('map_account_id_kbank');
 		}
 		$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
@@ -38,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$getlastseq_noDest = $cal_dep->getLastSeqNo($coop_account_no);
 		$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$coop_account_no,$vccAccID,'DTB',
 		$amt_transfer,0,$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
-		$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,$rowDataDeposit["bank_code"]);
+		$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,false,null,$rowDataDeposit["bank_code"],'KBANK');
 		if($depositMoney["RESULT"]){
 			$arrSendData = array();
 			$arrVerifyToken['exp'] = time() + 300;

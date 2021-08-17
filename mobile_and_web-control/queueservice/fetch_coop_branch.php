@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$checkNotLoan = TRUE;
 		$checkLoan = $conoracle->prepare("SELECT LOANCONTRACT_NO FROM LNCONTMASTER 
 															WHERE CONTRACT_STATUS = 1 AND 
-															LOANTYPE_CODE IN ('23','26','31','33') AND MEMBER_NO = :member_no");
+															LOANTYPE_CODE IN ('23','26','31','33','25') AND MEMBER_NO = :member_no");
 		$checkLoan->execute([':member_no' => $member_no]);
 		while($rowLoan = $checkLoan->fetch(PDO::FETCH_ASSOC)){
 			$checkPause = $conoracle->prepare("SELECT LOANCONTRACT_NO FROM lnreqmoratorium WHERE loancontract_no = :contract_no and request_status = '1' 

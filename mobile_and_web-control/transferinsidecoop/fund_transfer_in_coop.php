@@ -42,12 +42,12 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 			$conoracle->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
-			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,'mobile');
 			if($wtdResult["RESULT"]){
 				$getlastseq_noDest = $cal_dep->getLastSeqNo($to_account_no);
 				$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$to_account_no,$srcvcid["ACCOUNT_ID"],$itemtypeDepositDest,
 				$dataComing["amt_transfer"],0,$dateOperC,$config,$log,$from_account_no,$payload,$deptslip_noDest,$lib,
-				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,$wtdResult["DEPTSLIP_NO"]);
+				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,$wtdResult["DEPTSLIP_NO"],null,'mobile');
 				if($depositMoney["RESULT"]){
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 														VALUES(:remark,:deptaccount_no,:seq_no)");

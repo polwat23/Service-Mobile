@@ -120,6 +120,7 @@
 	"WS0117" : [{"th" : "ไม่พบสัญญาที่สามารถพักชำระหนี้","en" : "Not found loan contract that can moratorium"}],
 	"WS0118" : [{"th" : "ไม่สามารถจองคิวยกเลิกพักชำระหนี้ได้ เนื่องจากท่านไม่มีการพักชำระหนี้","en" : "Cannot reserve the queue for cancel moratorium because you have no moratorium"}],
 	"WS0119" : [{"th" : "ไม่พบสัญญาที่สามารถยกเลิกพักชำระหนี้","en" : "Not found loan contract that can cancel moratorium"}],
+	"WS0121" : [{"th" : "เลขบัตรประจำตัวประชาชนนี้ไม่สามารถเพิ่มได้อีก กรุณาตรวจสอบและลองใหม่อีกครั้ง","en" : "This ID card number cannot be added any more. Please check and try again."}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],

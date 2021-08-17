@@ -40,6 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$etnrefbank_no = null;
 		$vccAccID = null;
 		if($rowDataWithdraw["bank_code"] == '004'){
+			$vccAccID = $func->getConstant('map_account_id_kbank');
 			$arrVerifyToken["tran_id"] = $dataComing["tran_id"];
 			$arrVerifyToken["kbank_ref_no"] = $dataComing["kbank_ref_no"];
 			$arrVerifyToken['citizen_id_enc'] = $dataComing["citizen_id_enc"];
@@ -75,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$conoracle->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
-		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,'KBANK');
 		if($wtdResult["RESULT"]){
 			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);

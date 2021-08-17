@@ -60,16 +60,35 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				}
 			}else{
 				$conoracle->beginTransaction();
+				$getChildName = $conoracle->prepare("SELECT CHILD_NAME,CHILD_SURNAME FROM asnreqschshiponline 
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and member_no = :member_no and CHILDCARD_ID = :child_id and REQUEST_STATUS IN(8,9)");
+				$getChildName->execute([
+					':member_no' => $member_no,
+					':child_id' => $dataComing["childcard_id"]
+				]);
+				$rowChildName = $getChildName->fetch(PDO::FETCH_ASSOC);
+				
+				$getChildName2 = $conoracle->prepare("SELECT asch.childcard_id as CHILDCARD_ID, mp.prename_desc||asch.child_name as CHILD_NAME, asch.child_surname  as CHILD_SURNAME
+															FROM ASNREQSCHOLARSHIP asch LEFT JOIN mbucfprename mp ON  asch.childprename_code = mp.prename_code
+															WHERE asch.approve_status = 1 and asch.scholarship_year = (EXTRACT(year from sysdate) +542) and asch.member_no = :member_no and childcard_id = :childcard_id");
+				$getChildName2->execute([
+					':member_no' => $member_no,
+					':childcard_id' => $dataComing["childcard_id"]
+				]);
+				$rowChildName2 = $getChildName2->fetch(PDO::FETCH_ASSOC);
+			
 				$delOldSchShip = $conoracle->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status IN(8,9)");
 				$delOldSchShip->execute([
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
 				]);
-				$insertSchShipOnline = $conoracle->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status)
-																				VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,8)");
+				$insertSchShipOnline = $conoracle->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status, child_name, child_surname)
+																				VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,8, :child_name, :child_surname)");
 				if($insertSchShipOnline->execute([
 					':member_no' => $member_no,
-					':child_id' => $dataComing["childcard_id"]
+					':child_id' => $dataComing["childcard_id"],
+					':child_name' => ($rowChildName["CHILD_NAME"] != "" && isset($rowChildName["CHILD_NAME"])) ? $rowChildName["CHILD_NAME"] : $rowChildName2["CHILD_NAME"],
+					':child_surname' => ($rowChildName["CHILD_SURNAME"] != "" && isset($rowChildName["CHILD_SURNAME"])) ? $rowChildName["CHILD_SURNAME"] : $rowChildName2["CHILD_SURNAME"],
 				])){
 					foreach($dataComing["upload_list"] as $list){
 						if(isset($list["upload_base64"]) && $list["upload_base64"] != ""){
@@ -396,9 +415,11 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไม่สามารถ Insert ลง asnreqschshiponline ได้ "."\n".$insertSchShipOnline->queryString."\n".json_encode([
+					$message_error = "1ไม่สามารถ Insert ลง asnreqschshiponline ได้ "."\n".$insertSchShipOnline->queryString."\n".json_encode([
 						':member_no' => $member_no,
-						':child_id' => $dataComing["childcard_id"]
+						':child_id' => $dataComing["childcard_id"],
+						':child_name' => ($rowChildName["CHILD_NAME"] != "" && isset($rowChildName["CHILD_NAME"])) ? $rowChildName["CHILD_NAME"] : $rowChildName2["CHILD_NAME"],
+						':child_surname' => ($rowChildName["CHILD_SURNAME"] != "" && isset($rowChildName["CHILD_SURNAME"])) ? $rowChildName["CHILD_SURNAME"] : $rowChildName2["CHILD_SURNAME"],
 					]);
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_CODE'] = "WS1032";
