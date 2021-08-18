@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 		]);
 		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 		$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
-		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename
+		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename,gc.account_payfee
 												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
 												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
 		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
@@ -92,6 +92,12 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					}
 				}else if($rowBankDisplay["bank_code"] == '006'){
 					if($rowBankDisplay["fee_deposit"] > 0){
+						/*$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],$rowDataDeposit["itemtype_wtd"],$fee_amt);
+						if($arrInitDep["RESULT"]){
+							$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["bank_code"]);
+							if($arrRightDep["RESULT"]){
+							}
+						}*/
 						$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 					}

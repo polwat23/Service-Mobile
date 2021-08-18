@@ -331,7 +331,7 @@ class CalculateLoan {
 		return $constLoanContractCont;
 	}
 	public function repayLoan($conoracle,$contract_no,$amt_transfer,$penalty_amt,$config,$slipdocno,$operate_date,
-	$tofrom_accid,$slipwtd,$log,$lib,$payload,$from_account_no,$lnslip_no,$member_no,$ref_no,$app_version,$fee_amt=0){
+	$tofrom_accid,$slipwtd,$log,$lib,$payload,$from_account_no,$lnslip_no,$member_no,$ref_no,$app_version,$fee_amt=0,$is_paymonth=false){
 		$dataCont = $this->getContstantLoanContract($contract_no);
 		$int_return = $dataCont["INTEREST_RETURN"];
 		if($amt_transfer > $dataCont["INTEREST_ARREAR"]){
@@ -365,7 +365,11 @@ class CalculateLoan {
 				$int_returnFull = $int_returnSrc;
 			}
 		}
-		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		if($is_paymonth){
+			$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		}else{
+			$lastperiod = $dataCont["LAST_PERIODPAY"];
+		}
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$updateInterestAccum = $conoracle->prepare("UPDATE mbmembmaster SET ACCUM_INTEREST = :int_accum WHERE member_no = :member_no");
 		if($updateInterestAccum->execute([
@@ -704,8 +708,12 @@ class CalculateLoan {
 	}
 	public function paySlipLonDet($conoracle,$dataCont,$amt_transfer,$config,$operate_date,
 	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$contract_no,$prinPay=0,$interest=0
-	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1){
-		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1,$is_paymonth=false){
+		if($is_paymonth){
+			$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		}else{
+			$lastperiod = $dataCont["LAST_PERIODPAY"];
+		}
 		$executeSlDet = [
 			':coop_id' => $config["COOP_ID"], 
 			':payinslip_no' => $payinslip_no,
