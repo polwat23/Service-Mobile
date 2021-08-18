@@ -133,11 +133,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','depta
 									}
 									$paykeepingdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$rowKPDetail["ITEM_PAYMENT"],$config,$dateOperC,$log,$payload,
 									$from_account_no,$payinslip_no,'LON',$rowKPDetail["SHRLONTYPE_CODE"],$rowKPDetail["DESTINATION"],$prinPay,$interest,
-									$intarrear,$int_returnSrc,$interestPeriod,$rowKPDetail["SLIP_SEQ_NO"]);
+									$intarrear,$int_returnSrc,$interestPeriod,$rowKPDetail["SLIP_SEQ_NO"],true);
 									if($paykeepingdet["RESULT"]){
 										$ref_noLN = time().$lib->randomText('all',3);
 										$repayloan = $cal_loan->repayLoan($conoracle,$rowKPDetail["DESTINATION"],$rowKPDetail["ITEM_PAYMENT"],0,$config,$payinslipdoc_no,$dateOperC,
-										$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_noLN,$dataComing["app_version"]);
+										$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_noLN,$dataComing["app_version"],0,true);
 										if($repayloan["RESULT"]){
 										}else{
 											$conoracle->rollback();

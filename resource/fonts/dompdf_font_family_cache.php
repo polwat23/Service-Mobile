@@ -78,7 +78,7 @@
     'normal' => $rootDir . '/lib/fonts/DejaVuSerif',
   ),
   'th niramit as' => array(
-    'normal' => $fontDir . '/th_niramit_as_normal_e48a5e45c256a00ae2e796b9b822682f',
-    'bold' => $fontDir . '/th_niramit_as_bold_831b411546070337a80cdf0ce6b6f549',
+    'normal' => $fontDir . '/th_niramit_as_normal_a0c75e3c86b697b6ed32ce77ead367dc',
+    'bold' => $fontDir . '/th_niramit_as_bold_f70e1b7e3331daba9e0630eee11d9ad2',
   ),
 ) ?>
