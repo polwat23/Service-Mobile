@@ -5,7 +5,8 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','penalty_amt','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.link_withdraw_coopdirect,csb.bank_short_ename
+		$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
+												csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
@@ -19,6 +20,17 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$penalty_include = $func->getConstant("include_penalty");
 		$fee_amt = 0;
+		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
+													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
+		$getTransactionForFee->execute([
+			':member_no' => $payload["member_no"]
+		]);
+		$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
+		if($rowCountFee["C_TRANS"] + 1 > 2){
+			$dataComing["fee_amt"] = $dataComing["fee_amt"];
+		}else{
+			$dataComing["fee_amt"] = 0;
+		}
 		if($rowDataWithdraw["bank_code"] == '025'){
 			$fee_amt = $dataComing["penalty_amt"];
 		}else{
@@ -63,21 +75,78 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrSendData["app_id"] = $config["APP_ID"];
 		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
-		if($fee_amt > 0){
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-		}else{
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		}
+		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
 		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
 		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
+		$from_account_no = $rowDataWithdraw["account_payfee"];
+		$constFromAccFee = $cal_dep->getConstantAcc($from_account_no);
+		$vccamtPenalty = $func->getConstant("accidfee_receive");
+		$vccamtPenaltyPromo = $func->getConstant("accidfee_promotion");
+		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataDeposit["account_payfee"]);
 		$conmssql->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
-		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
-		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$rowCountFee["C_TRANS"] + 1);
 		if($wtdResult["RESULT"]){
 			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
+			if($coop_account_no == $from_account_no){
+				$constFromAccFee = $wtdResult["DATA_CONT"];
+			}else{
+				$wtdResult["MAX_SEQNO"] = $getlastseqFeeAcc["MAX_SEQ_NO"];
+			}
+			if($fee_amt > 0){
+				$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
+				$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1);
+				if($penaltyWtd["RESULT"]){
+					
+				}else{
+					$conmssql->rollback();
+					$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayStruc = [
+						':member_no' => $payload["member_no"],
+						':id_userlogin' => $payload["id_userlogin"],
+						':operate_date' => $dateOper,
+						':amt_transfer' => $dataComing["amt_transfer"],
+						':penalty_amt' => $dataComing["penalty_amt"],
+						':fee_amt' => $fee_amt,
+						':deptaccount_no' => $coop_account_no,
+						':response_code' => $arrayResult['RESPONSE_CODE'],
+						':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
+					];
+					$log->writeLog('withdrawtrans',$arrayStruc);
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
+			}else{
+				if($rowCountFee["C_TRANS"] + 1 > 2){
+				}else{
+					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyPromo,'FWM',
+					$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1);
+					if($penaltyWtdPromo["RESULT"]){
+						
+					}else{
+						$conmssql->rollback();
+						$arrayResult['RESPONSE_CODE'] = $penaltyWtdPromo["RESPONSE_CODE"];
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':operate_date' => $dateOper,
+							':amt_transfer' => $dataComing["amt_transfer"],
+							':penalty_amt' => $dataComing["penalty_amt"],
+							':fee_amt' => $fee_amt,
+							':deptaccount_no' => $coop_account_no,
+							':response_code' => $arrayResult['RESPONSE_CODE'],
+							':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtdPromo["ACTION"]
+						];
+						$log->writeLog('withdrawtrans',$arrayStruc);
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
+				}
+			}
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
 				$conmssql->rollback();
@@ -88,7 +157,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':operate_date' => $dateOper,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],
-					':fee_amt' => $dataComing["fee_amt"],
+					':fee_amt' => $fee_amt,
 					':deptaccount_no' => $coop_account_no,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
@@ -120,7 +189,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':amount' => $dataComing["amt_transfer"],
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
-					':amount_receive' => $amt_transfer,
+					':amount_receive' => $dataComing["amt_transfer"],
 					':oper_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,

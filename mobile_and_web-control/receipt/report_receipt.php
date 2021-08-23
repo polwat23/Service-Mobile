@@ -8,6 +8,8 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$recv_year = substr(trim($dataComing["recv_period"]),0,4) - 543;
+		$revc_period_raw = $recv_year.substr(trim($dataComing["recv_period"]),-2,2);
 		$header = array();
 		$fetchName = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MBG.MEMBGROUP_DESC,MBG.MEMBGROUP_CODE
 												FROM MBMEMBMASTER MB LEFT JOIN 
@@ -18,8 +20,17 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
-		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
+		
+		
+		$fetchIntAccum = $conmssql->prepare("SELECT INTEREST_ACCUM FROM KPMASTRECEIVE WHERE MEMBER_NO = :member_no AND RECV_PERIOD = :recv_period");
+		$fetchIntAccum->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowIntAccum = $fetchIntAccum->fetch(PDO::FETCH_ASSOC);
+		
+		$header["fullname"] = $rowName["PRENAME_DESC"].' '.$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+		$header["member_group"] = $rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conmssql->prepare("SELECT 
 																		CASE kut.system_code 
@@ -37,6 +48,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
 																		kpd.PERIOD,
+																		kpd.SEQ_NO,
 																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -70,6 +82,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
 																		kpd.PERIOD,
+																		kpd.SEQ_NO,
 																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -86,25 +99,39 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			]);
 		}
 		$arrGroupDetail = array();
+		$sum_int = 0;
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+				$arrDetail["CONTRACT_NO"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
+					$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 				}else{
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
+					$sum_int += ($rowDetail["INT_BALANCE"] ?? 0);
 				}
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
+			
+				$getAccDetail = $conmssql->prepare("select PRNCBAL from dpdeptstatement 
+												where  deptaccount_no = :deptaccount_no and 
+												deptitemtype_code = 'DTM' and CONVERT(varchar(6),operate_date,112) = :operate_date");
+				$getAccDetail->execute([
+					':deptaccount_no' => $rowDetail["PAY_ACCOUNT"],
+					':operate_date' => $revc_period_raw
+				]);
+				$rowAccDetail = $getAccDetail->fetch(PDO::FETCH_ASSOC);
+			
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
+				$rowDetail["ITEM_BALANCE"] = $rowAccDetail["PRNCBAL"];
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
@@ -132,11 +159,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
+		
+		$header["interest_accum"] = number_format((($rowIntAccum["INTEREST_ACCUM"] ?? 0) + $sum_int),2);
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D/n/Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
@@ -203,135 +232,162 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 
 				body {
-				  padding: 0 30px;
+				  padding: 0px;
+				  font-size:x-small;
 				}
 				.sub-table div{
 					padding : 5px;
 				}
+				.theme-color {
+					color: #70ad47;
+				}
+
+				.theme-table {
+					border-spacing: 0;
+					border: 2px solid #70ad47;
+					border-radius: 10px;
+					width: 100%
+				}
+
+				.theme-table-bordered,
+				.theme-table-bordered th,
+				.theme-table-bordered td {
+					border: 2px solid #70ad47;
+					border-collapse: collapse;
+				}
+				.theme-table-bordered th {
+					border: 2px solid #70ad47;
+					background-color: #c5e0b3;
+					font-weight: bold;
+					border-collapse: collapse;
+					height: 40px;
+					color: #70ad47;
+				}
 			</style>
-			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
-				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
-	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
-		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
-	}else{
-		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
-	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">63 หมู่ 4 ต.หนองหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.สันทราย จ.เชียงใหม่ 50290</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-878077 , 053-873000</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+		<div style="width:12.5cm; height:14cm;">
+			<div>
+				 <div style="text-align: center;">
+					<div style="display: inline-block;vertical-align: top;position: absolute;left: 10px;">
+						<img src="../../resource/logo/logo_slip.jpg" style="width:80px" />
+					</div>
+					<div style="display: inline-block;">
+						<div style="text-align:center;">
+							<div class="theme-color" style="font-weight: bold;font-size: 14pt;padding-top: 12px;">
+								สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จำกัด
+							</div>
+						</div>
+						<div style="text-align:center;">
+							<div class="theme-color" style="font-weight: bold;font-size: 14pt;padding-top: 12px;">
+								ใบรับเงิน
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-			<div style="margin: 25px 0 10px 0;">
-			<table style="width: 100%;">
-			<tbody>
-			<tr>
-			<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
-			<td style="width: 350px;">'.$header["member_no"].'</td>
-			<td style="width: 50px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
-			<td style="width: 101px;">'.$header["receipt_no"].'</td>
-			</tr>
-			<tr>
-			<td style="width: 50px;font-size: 18px;">งวด :</td>
-			<td style="width: 350px;">'.$header["recv_period"].'</td>
-			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
-			<td style="width: 101px;">'.$header["operate_date"].'</td>
-			</tr>
-			<tr>
-			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
-			<td style="width: 350px;">'.$header["fullname"].'</td>
-			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
-			<td style="width: 101px;">'.$header["member_group"].'</td>
-			</tr>
-			</tbody>
-			</table>
-			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
-			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
-			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">งวดที่</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
-			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
-			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
-			</div>';
+			<div style="padding-top: 30px;">
+				<div style="display: inline-block;width: 55%; margin-right:1px;">
+					<div>
+						<table class="theme-table">
+							<tr>
+								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
+									เลขที่</td>
+								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["receipt_no"].'</td>
+							</tr>
+							<tr>
+								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
+									ได้รับเงินจาก</td>
+								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["fullname"].'</td>
+							</tr>
+							<tr>
+								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;">
+									หน่วยงาน</td>
+								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["member_group"].'
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div style="display: inline-block;width: 43.3%;padding-left: 4px">
+					<div>
+						<table class="theme-table">
+							<tr>
+								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
+									วันที่</td>
+								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["operate_date"].'</td>
+							</tr>
+							<tr>
+								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
+									เลขทะเบียน</td>
+								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["member_no"].'</td>
+							</tr>
+							<tr>
+								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;">
+									ดอกเบี้ยสะสม</td>
+								<td style="width: 100%;text-align: right;padding-right: 10px;padding-left: 10px;">'.$header["interest_accum"].'
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+            </div>';
 				// Detail
-	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
+	$html .= ' <div style=" margin-top:-10px;">
+				<div style="position: relative;">
+					<table class="theme-table-bordered" style="width: 100%">
+                    <tr>
+                        <th>รายการ/สัญญา</th>
+                        <th>งวดที่</th>
+                        <th>เงินต้น</th>
+                        <th>ดอกเบี้ย</th>
+                        <th>จำนวนเงิน</th>
+                        <th>ยอดคงเหลือ</th>
+                    </tr>';
 	for($i = 0;$i < sizeof($dataReport); $i++){
-		if($i == 0){
-			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
-			<div style="width: 350px;text-align: left;font-size: 18px">
-			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
-			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
-			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
-			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
-			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
-			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
-			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
-			</div>
-			</div>';
-		}else{
-			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
-			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
-			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
-			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
-			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
-			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
-			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
-			</div>
-			</div>';
-		}
+	
+		$html .= '
+				<tr>
+					<td style="white-space: nowrap;padding-right: 10px;">'.($dataReport[$i]["CONTRACT_NO"] ? ($dataReport[$i]["CONTRACT_NO"].' '): '').''.$dataReport[$i]["TYPE_DESC"].'</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: center;">'.($dataReport[$i]["PERIOD"] ?? null).'</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["PRN_BALANCE"].'</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["INT_BALANCE"].'</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["ITEM_PAYMENT"].'</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["ITEM_BALANCE"].'</td>
+				</tr>'
+				;
+					
 		$sumBalance += $dataReport[$i]["ITEM_PAYMENT_NOTFORMAT"];
 	}
-	$html .= '</div>';
+	$html .= '
+				<tr>
+					<td style="white-space: nowrap;padding-right: 10px;">&nbsp;</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: center;">&nbsp;</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
+				</tr>
+				<tr>
+					<td colspan="4" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;">'.$lib->baht_text($sumBalance).'</td>
+					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.number_format($sumBalance, 2).'</td>
+					<td style="padding-right: 10px;padding-left: 10px;"></td>
+				</tr>
+				</table>
+				<img src="../../resource/logo/logo_slip.jpg" style="width:90px;position: absolute;opacity: 0.1;left: 50%;top: '.((sizeof($dataReport)/2)*32+50).'px; transform: translate(-50%, -50%); " />
+			</div>';
 			// Footer
-	$html .= '<div style="display:flex;width: 100%;height: 40px" class="sub-table">
-			<div style="border-top: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;border-right : 0.5px solid black;padding-top: 0px;height:30px;margin-left: 580px">
-			รวมเงิน
-			</div>
-			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
-			</div>
-			</div>
-			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
-			</div>
-			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.jpg" width="130" height="50" style="margin-top:10px;"/>
-			</div>
-			</div>
-			<div style="font-size: 18px;margin-left: 740px;margin-top:-60px;">ผู้จัดการ</div>
-			';
+	$html .= '<div class="theme-color" style="margin-top: 16px;position: relative;white-space: nowrap;">
+						ผู้จัดการ / เหรัญญิก ................................................................................ เจ้าหน้าที่ผู้รับเงิน ............................................................................
+					<img src="../../resource/utility_icon/signature/mg.jpg" height="20" style="margin-top:10px;position: absolute;left: 90px;top: -20px;"/>
+					<img src="../../resource/utility_icon/signature/mg_temp.jpg" height="22" style="margin-top:10px;position: absolute;left: 330px;top: -22px;"/>
+                </div>
+                <div style="margin-top: 12px; border: 2px solid #70ad47; background-color: #c5e0b3;border-radius: 10px;height: 70px;">
+
+                </div>
+                <div class="theme-color" style="margin-top: 24px;font-weight: bold;text-align: center;">
+                    ใบรับเงินประจำเดือนจะสมบูรณ์ต่อเมื่อสหกรณ์ได้รับเงินที่เรียกเก็บครบถ้วนแล้ว
+                </div>
+            </div>
+	</div>';
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
@@ -339,7 +395,7 @@ function GenerateReport($dataReport,$header,$lib){
 		'isRemoteEnabled' => true
 	]);
 
-	$dompdf->set_paper('A4', 'landscape');
+	$dompdf->set_paper('A4','landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathfile = __DIR__.'/../../resource/pdf/keeping_monthly';

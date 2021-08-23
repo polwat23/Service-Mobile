@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
 													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
-													gba.bank_account_name,gba.bank_account_name_en,csb.bank_short_ename,csb.bank_code
+													gba.bank_account_name,gba.bank_account_name_en,csb.bank_short_ename,csb.bank_code,gba.account_payfee
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 													LEFT JOIN gcpalettecolor gpl ON csb.id_palette = gpl.id_palette and gpl.is_use = '1'
 													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9')");
@@ -41,6 +41,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 			$arrAccount["BANK_CODE"] = $rowAccountBind["bank_code"];
 			$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
+			if(isset($rowAccountBind["account_payfee"])){
+				$arrAccount["DEPTACCOUNT_NO_PAYFEE"] = $lib->formataccount($rowAccountBind["account_payfee"],$func->getConstant('dep_format'));
+			}
 			$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
 			$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
 			$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];

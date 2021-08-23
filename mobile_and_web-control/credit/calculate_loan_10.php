@@ -8,12 +8,12 @@ $maxloan_amt = 0;
 $oldBal = 0;
 $receive_net = 0;
 $maxloanpermit_amt = 100000;
-$max_period = 18;
+$max_period = 12;
 $canRequest = FALSE;
 $getSalary = $conmssql->prepare("SELECT SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
 $getSalary->execute([':member_no' => $member_no]);
 $rowSalary = $getSalary->fetch(PDO::FETCH_ASSOC);
-$maxloan_amt = $rowSalary["SALARY_AMOUNT"] * 2;
+$maxloan_amt = $rowSalary["SALARY_AMOUNT"] * 3;
 if($maxloan_amt > $maxloanpermit_amt){
 	$maxloan_amt = $maxloanpermit_amt;
 }

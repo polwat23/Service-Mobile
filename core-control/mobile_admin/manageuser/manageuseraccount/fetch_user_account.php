@@ -4,11 +4,21 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
 		$arrayGroup = array();
+		$arrayMembName = array();
+		$fetchUser= $conmssql->prepare("select  mb.member_no ,mp.prename_desc,mb.memb_name,mb.memb_surname 
+										from mbmembmaster mb left join mbucfprename mp ON mb.prename_code = mp.prename_code ");
+		$fetchUser->execute();
+		while($rowUser = $fetchUser->fetch(PDO::FETCH_ASSOC)){
+		
+			$arrayMembName[$rowUser["member_no"]] = $rowUser["prename_desc"].''.$rowUser["memb_name"].' '.$rowUser["memb_surname"];
+		}
+		
 		$fetchUserAccount = $conmysql->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status, user_type
 												FROM gcmemberaccount WHERE user_type IN('0','1') ORDER BY register_date DESC");
 		$fetchUserAccount->execute();
 		while($rowUserlogin = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupUserAcount = array();
+			$arrGroupUserAcount["FULL_NAME"] = $arrayMembName[$rowUserlogin["member_no"]];
 			$arrGroupUserAcount["MEMBER_NO"] = $rowUserlogin["member_no"];
 			$arrGroupUserAcount["TEL"] = $lib->formatphone($rowUserlogin["phone_number"]);
 			$arrGroupUserAcount["EMAIL"] = $rowUserlogin["email"];
@@ -18,6 +28,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupUserAcount["ACCOUTTYPE"] = $rowUserlogin["user_type"];
 			$arrayGroup[] = $arrGroupUserAcount;
 		}
+		
 		$arrayResult["USER_ACCOUNT"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');

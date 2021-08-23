@@ -12,11 +12,42 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
 			$period_payment = $dataComing["request_amt"] / $dataComing["period"];
-			$mod = $period_payment % 10;
-			if($mod > 0){
-				$period_payment = (int)($period_payment + (10 - ($period_payment % 10)));
-			}else{
-				$period_payment = (int)$period_payment;
+			$fetchLoanIntRate = $conmssql->prepare("SELECT lnd.interest_rate FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
+														WHERE lnt.loantype_code = :loantype_code and GETDATE() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
+			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
+			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
+			if($dataComing["option_paytype"] == "0"){
+				$typeCalDate = $func->getConstant("cal_start_pay_date");
+				$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
+				$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
+				if($typeCalDate == "next"){
+					$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
+				}else{
+					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+				}
+				$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);
+				$module = 10 - ($period_payment % 10);
+				if($module < 10){
+					$period_payment = floor($period_payment + $module);
+				}
+			}else if($dataComing["option_paytype"] == "1"){
+				$period = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
+				$int_rate = ($rowIntRate["interest_rate"] / 100);
+				$typeCalDate = $func->getConstant("cal_start_pay_date");
+				$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
+				$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
+				if($typeCalDate == "next"){
+					$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
+				}else{
+					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+				}
+				$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
+				$period_payment = ($dataComing["request_amt"] * ($int_rate / 12) / (1 - ($payment_per_period)));
+				$module = 10 - ($period_payment % 10);
+				if($module < 10){
+					$period_payment = floor($period_payment + $module);
+				}
 			}
 			$receive_net = $dataComing["request_amt"] - $oldBal;
 			if($receive_net < 0){
@@ -28,6 +59,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				$arrayResult["RECEIVE_NET"] = $receive_net;
 			}
+			
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			if($dataComing["loantype_code"] != '23'){
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -66,7 +98,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
 				$arrGrpObj[] = $arrObj;
 			}
-			$getMaxPeriod = $conmssql->prepare("SELECT MAX_PERIOD 
+			$getMaxPeriod = $conmssql->prepare("SELECT max_period 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
 															WHERE :request_amt_from >= lnd.MONEY_FROM and :request_amt_to < lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
 			$getMaxPeriod->execute([
@@ -75,36 +107,76 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				':loantype_code' => $dataComing["loantype_code"]
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
-			$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
-			$mod = $period_payment % 10;
-			if($mod > 0){
-				$period_payment = (int)($period_payment + (10 - ($period_payment % 10)));
+			if(isset($rowMaxPeriod["max_period"])){
+				$fetchLoanIntRate = $conmssql->prepare("SELECT lnd.interest_rate FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
+														WHERE lnt.loantype_code = :loantype_code and GETDATE() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
+				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
+				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
+				$period = $rowMaxPeriod["max_period"];
+				$int_rate = ($rowIntRate["interest_rate"] / 100);
+				$typeCalDate = $func->getConstant("cal_start_pay_date");
+				$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
+				$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
+				if($typeCalDate == "next"){
+					$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
+				}else{
+					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+				}
+				$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);
+				$module = 10 - ($period_payment % 10);
+				if($module < 10){
+					$period_payment = floor($period_payment + $module);
+				}
+				/*$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
+				$period_payment = ($request_amt * ($int_rate / 12) / (1 - ($payment_per_period)));
+				$module = 10 - ($period_payment % 10);
+				if($module < 10){
+					$period_payment = floor($period_payment + $module);
+				}*/
+
+
+				$typeCalDate = $func->getConstant("cal_start_pay_date");
+				
+				$arrPayPrin["VALUE"] = "0";
+				$arrPayPrin["DESC"] = "คงต้น";
+				$arrGrpPayType[] = $arrPayPrin;
+				/*$arrPayEqual["VALUE"] = "1";
+				$arrPayEqual["DESC"] = "คงยอด";
+				$arrGrpPayType[] = $arrPayEqual;*/
+				$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "0";
+				
+				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
+				$arrayResult["RECEIVE_NET"] = $receive_net;
+				$arrayResult["REQUEST_AMT"] = $request_amt;
+				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
+				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["max_period"];
+				$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
+				
+				if($dataComing["loantype_code"] != '23'){
+					$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+				}
+				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
+				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
+				$arrayResult["REQ_SALARY"] = TRUE; 
+				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
+				$arrayResult["REQ_CITIZEN"] = FALSE;
+				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
+				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
+				$arrayResult["IS_UPLOAD_SALARY"] = TRUE; 
+				$arrayResult["IS_REMAIN_SALARY"] = TRUE;
+				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
+				$arrayResult["BANK_ACCOUNT_REMARK"] = null;
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
 			}else{
-				$period_payment = (int)$period_payment;
+				$arrayResult['RESPONSE_CODE'] = "WS0088";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
 			}
-			
-			$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
-			$arrayResult["RECEIVE_NET"] = $receive_net;
-			$arrayResult["REQUEST_AMT"] = $request_amt;
-			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
-			if($dataComing["loantype_code"] != '23'){
-				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			}
-			$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
-			$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-			$arrayResult["REQ_SALARY"] = TRUE;
-			$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
-			$arrayResult["REQ_CITIZEN"] = FALSE;
-			$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
-			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-			$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
-			$arrayResult["IS_REMAIN_SALARY"] = TRUE;
-			$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
-			$arrayResult["BANK_ACCOUNT_REMARK"] = null;
-			$arrayResult['OBJECTIVE'] = $arrGrpObj;
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

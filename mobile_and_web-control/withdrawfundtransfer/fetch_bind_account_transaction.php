@@ -39,24 +39,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$dep_format = $func->getConstant('dep_format');
 				$dep_formathide = $func->getConstant('hidden_dep');
 				while($rowAccCoop = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
-					$checkSeqAmt = $cal_dep->getSequestAmt($rowAccCoop["deptaccount_no"]);
-					if($checkSeqAmt["CAN_WITHDRAW"]){
-						$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
-															DPM.PRNCBAL,DPT.MINPRNCBAL
-															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-															WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
-						$getDataAcc->execute([':deptaccount_no' => $rowAccCoop["deptaccount_no"]]);
-						$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-						if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-							$arrAccCoop = array();
-							$arrAccCoop["DEPTACCOUNT_NO"] = $rowAccCoop["deptaccount_no"];
-							$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccCoop["deptaccount_no"],$dep_format);
-							$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
-							$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
-							$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-							$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowAccCoop["deptaccount_no"]) - $checkSeqAmt["SEQUEST_AMOUNT"];
-							$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-							$arrGroupAccBind["COOP"][] = $arrAccCoop;
+					$checkAccJoint = $conmysql->prepare("SELECT deptaccount_no FROM gcdeptaccountjoint WHERE deptaccount_no = :deptaccount_no and is_joint = '1'");
+					$checkAccJoint->execute([':deptaccount_no' => TRIM($rowAccCoop["deptaccount_no"])]);
+					if($checkAccJoint->rowCount() > 0){
+					}else{
+						$checkSeqAmt = $cal_dep->getSequestAmt($rowAccCoop["deptaccount_no"]);
+						if($checkSeqAmt["CAN_WITHDRAW"]){
+							$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
+																DPM.PRNCBAL,DPT.MINPRNCBAL
+																FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+																WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0 and dpm.depttype_code IN('10')");
+							$getDataAcc->execute([':deptaccount_no' => $rowAccCoop["deptaccount_no"]]);
+							$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
+							if(isset($rowDataAcc["DEPTTYPE_DESC"])){
+								$arrAccCoop = array();
+								$arrAccCoop["DEPTACCOUNT_NO"] = $rowAccCoop["deptaccount_no"];
+								$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccCoop["deptaccount_no"],$dep_format);
+								$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
+								$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
+								$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+								$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowAccCoop["deptaccount_no"]) - $checkSeqAmt["SEQUEST_AMOUNT"];
+								$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
+								$arrGroupAccBind["COOP"][] = $arrAccCoop;
+							}
 						}
 					}
 				}
@@ -93,11 +98,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
+		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
+	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
