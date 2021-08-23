@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLastStmAcc = $conmssql->prepare("SELECT TOP 1 dps.DEPTACCOUNT_NO,dt.depttype_desc,dpm.DEPTACCOUNT_NAME,dpm.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
-												LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
+												LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code and dt.MEMBCAT_CODE = '10'
 												WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);

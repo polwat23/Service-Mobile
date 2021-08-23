@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAllowAccGroup = array();
 		
 		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
-												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1' OR allow_deposit_outside = '1' OR allow_deposit_inside = '1'");
+												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1'");
 		$getDeptTypeAllow->execute();
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrDeptAllowed[] = "'".$rowDeptAllow["dept_type_code"]."'";
@@ -17,17 +17,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 		$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
 		while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
-			$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
+			$arrAccAllowed[] = "'".$rowAccountAllowed["deptaccount_no"]."'";
 		}
 		if(sizeof($arrAccAllowed) > 0){
 			$getAccountAllinCoop = $conmssql->prepare("SELECT DPM.DEPTACCOUNT_NO,RTRIM(LTRIM(DPM.DEPTACCOUNT_NAME)) AS DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpt.MEMBCAT_CODE = '10'
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
 														and dpm.member_no = :member_no and dpm.deptclose_status = 0 ORDER BY dpm.deptaccount_no");
 		}else{
 			$getAccountAllinCoop = $conmssql->prepare("SELECT DPM.DEPTACCOUNT_NO,RTRIM(LTRIM(DPM.DEPTACCOUNT_NAME)) AS DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpt.MEMBCAT_CODE = '10'
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.member_no = :member_no and dpm.deptclose_status = 0 ORDER BY dpm.deptaccount_no");
 

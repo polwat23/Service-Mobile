@@ -159,13 +159,13 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">63 หมู่ 4 ต.หนองหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.สันทราย จ.เชียงใหม่ 50290</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 053-878077 , 053-873000</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขจังหวัดน่าน จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">480 หมู่ 5 ต.ผาสิงห์</p>
+				<p style="margin-top: -25px;font-size: 18px;">อ.เมืองน่าน จ.น่าน 55000 </p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร.  054-718846  , 088-5530032</p>
 				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
 				</div>
 			</div>
