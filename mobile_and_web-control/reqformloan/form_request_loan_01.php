@@ -48,7 +48,7 @@ function GeneratePDFContract($data,$lib) {
         <img src="../../resource/logo/logo.jpg" style="width:80px;position: absolute;left: 170px;top: 8px;" />
         <div style="display: flex;text-align: center;">
             <div style="text-align:center;width:100%;padding: 30px 0;">
-                <div style="font-weight: bold;font-size: 16pt;">
+                <div style="font-size: 16pt;">
                     คำขอและหนังสือกู้เงินเพื่อเหตุฉุกเฉิน
                 </div>
             </div>
@@ -123,8 +123,7 @@ function GeneratePDFContract($data,$lib) {
                 </span>
             </div>
             <div class="line-margin" style="font-weight: bold;">
-						ขอเสนอคำขอและหนังสือกู้เงินเพื่อเหตุฉุกเฉิน เพื่อคณะกรรมการดำเนินการสหกรณ์ฯ โปรดพิจารณาดังนี้
-						จำกัด</span>
+						ขอเสนอคำขอและหนังสือกู้เงินเพื่อเหตุฉุกเฉิน เพื่อคณะกรรมการดำเนินการสหกรณ์ฯ โปรดพิจารณาดังนี้</span>
             </div>
             <div class="line-margin" style="margin-top: 8px;">
                 <span style="display: inline-block; padding-right: 4px;">ข้อ 1. ข้าพเจ้าขอกู้เงินสหกรณ์ฯจำนวน</span>
@@ -284,13 +283,13 @@ function GeneratePDFContract($data,$lib) {
                         <div class="line-margin">
                             <span style="display: inline-block; padding-right: 4px;padding-left: 18px;">PF.+ หุ้น ณ
                                 ปัจจุบัน</span>
-                            <span style="display: inline-block; padding-left: 8px;"><span style="position: absolute;padding-left: 5px;">'.$data["share_bf"].'
+                            <span style="display: inline-block; padding-left: 8px;"><span style="position: absolute;padding-left: 5px;">'.$data["share_fund_amt"].'
 							</span>..........................................บาท</span>
                         </div>
                         <div class="line-margin">
                             <span
-                                style="display: inline-block; padding-right: 4px;padding-left: 18px;">รวมเงินกู้ทุกประเภท
-                                ณ ปัจจุบัน.............................บาท</span>
+                                style="display: inline-block;padding-left: 18px;">รวมเงินกู้ทุกประเภท
+                                ณ ปัจจุบัน</span><span style="display: inline-block;"><span style="position: absolute;padding-left: 5px;">'.number_format($data["old_groupbal_01"] + $data["old_groupbal_02"],2).'</span>.............................บาท</span>
                         </div>
                     </div>
                     <div style="border-bottom: 1px solid #000000;width: 100%;">
@@ -381,7 +380,7 @@ function GeneratePDFContract($data,$lib) {
                         </div>
                     </div>
                     <div style="border-bottom: 1px solid #000000;width: 100%;">
-                        <div style="font-weight: bold;padding-left: 4px;color: red;margin-right: 8px;font-size: 17pt;padding: 4px 0">
+                        <div style="font-weight: bold;padding-left: 4px;color: red;margin-right: 8px;font-size: 17pt;padding: 4px 0;visibility: hidden;">
                             <span>ผู้รับเงิน......................................(กรุณาเซ็นชื่อ)</span>
                         </div>
                     </div>
@@ -392,9 +391,8 @@ function GeneratePDFContract($data,$lib) {
                     </div>
                 </div>
             </div>
-            <!-- footer -->
+            <!-- footer
             <div style="width: 100%;padding-top: 8px;">
-                <!-- Left -->
                 <div style="display: inline-block; vertical-align: top; width: 46%;">
                     <div class="line-margin">
                         <span>ชื่อ............................................................ผู้กู้</span>
@@ -411,7 +409,6 @@ function GeneratePDFContract($data,$lib) {
                             ไม่ต้องเซ็นชื่อพยาน<span>
                     </div>
                 </div>
-                <!-- Right -->
                 <div
                     style="display: inline-block; vertical-align: top;width: 54%;margin-left: -5px;margin-right: -2px;">
                     <div class="line-margin">
@@ -427,52 +424,33 @@ function GeneratePDFContract($data,$lib) {
                     </div>
                 </div>
             </div>
-            <!-- footer 3 -->
-			<div style="padding-right: 10px;position: absolute; bottom: 0;padding-bottom: 2px;width: 100%;">
-				<!-- footer 2 -->
-				<div style="width: 100%;background-color: yellow;padding-top: 5px;padding-left: 4px;padding-bottom: 4px;">
-					<!-- Left -->
+            footer 3 -->
+			<div style="padding-right: 10px;position: relative; bottom: 0;padding-bottom: 2px;width: 100%;padding-top: 4px;">
+				<!-- footer 2
+				<div style="width: 100%;background-color: orange;padding-top: 5px;padding-left: 4px;padding-bottom: 4px;">
 					<div style="display: inline-block; vertical-align: top;">
 						<div>
 							<span style="font-weight: bold;text-decoration: underline;">หมายเหตุ</span>
 						</div>
 					</div>
-					<!-- Right -->
 					<div style="display: inline-block; vertical-align: top;">
 						<div style="font-weight: bold;color: red;">
 							<div style="display: inline-block; vertical-align: top;padding-left: 8px;">
 								<div>
-									ฝั่งอมตะซิตี้
+									ส่งเอกสารภายในวันพุธ  ได้รับเงินวันศุกร์
 								</div>
 								<div>
-									ฝั่งนวนคร
-								</div>
-							</div>
-							<div class="line-margin" style="display: inline-block; vertical-align: top;padding-left: 8px;">
-								<div>
-									ส่งเอกสารภายในวันอังคาร
-								</div>
-								<div>
-									ส่งเอกสารภายในวันพุธ
-								</div>
-							</div>
-							<div class="line-margin" style="display: inline-block; vertical-align: top;padding-left: 8px;">
-								<div>
-									ได้รับเงินวันศุกร์
-								</div>
-								<div>
-									ได้รับเงินวันศุกร์
+									<br>
 								</div>
 							</div>
 						</div>
 						<div class="line-margin" style="font-weight: bold;">
-							(กรุณากรอกส่วนที่ 3 เพื่อสะดวกต่อการโอนเงินเข้าบัญชี (หากไม่ไช่บัญชีเงินเดือน
-							กรุณาแนบหน้าสมุดบัญชีมาด้วย)
+							<br>
 						</div>
 					</div>
-				</div>
+				</div>  -->
 				<div
-					style="border-top: solid 2px #000000;border-left: solid 2px #000000;border-right: solid 2px #000000;padding-left: 8px;">
+					style="border-top: solid 2px #000000;border-left: solid 2px #000000;border-right: solid 2px #000000;border-bottom: solid 2px #000000;padding-left: 8px;">
 					หนังสือกู้เลขที่ ฉ.......................................
 				</div>
             </div>

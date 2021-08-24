@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_status','id_menu'],$dataComing
 				$arrayResult['RESPONSE'] = "ไม่สามารถเปลี่ยนสถานะเมนูได้ กรุณาติดต่อผู้พัฒนา #close";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}else{
 			$updatemenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1', menu_channel = :menu_channel
@@ -29,16 +30,19 @@ if($lib->checkCompleteArgument(['unique_id','menu_status','id_menu'],$dataComing
 				$arrayResult['RESPONSE'] = "ไม่สามารถเปลี่ยนสถานะเมนูได้ กรุณาติดต่อผู้พัฒนา #channel";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

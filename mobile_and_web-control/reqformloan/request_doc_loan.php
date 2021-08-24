@@ -247,13 +247,36 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$dataMobile = $conmysql->prepare("SELECT phone_number,email FROM gcmemberaccount WHERE member_no = :member_no");
 				$dataMobile->execute([':member_no' => $member_no]);
 				$rowDataM = $dataMobile->fetch(PDO::FETCH_ASSOC);
+				$getFundColl = $conmssql->prepare("SELECT SUM(EST_PRICE) as FUND_AMT FROM LNCOLLMASTER WHERE COLLMAST_TYPE = '05' AND MEMBER_NO = :member_no");
+				$getFundColl->execute([':member_no' => $member_no]);
+				$rowFund = $getFundColl->fetch(PDO::FETCH_ASSOC);
+				//ดึงข้อมูลสัญญาเดิม
+				$getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY, lt.LOANGROUP_CODE, lm.LOANTYPE_CODE
+													FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
+													WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8");
+				$getOldContract->execute([
+					':member_no' => $member_no
+				]);
+				$oldGroupBal01 = 0;
+				$oldGroupBal02 = 0;
+				$oldGroupBal02LastPeriod = 0;
+				while($rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC)){
+					if($rowOldContract["LOANGROUP_CODE"] == "01"){
+						$oldGroupBal01 += $rowOldContract["PRINCIPAL_BALANCE"];
+					}else if($rowOldContract["LOANGROUP_CODE"] == "02"){
+						$oldGroupBal02LastPeriod = $rowOldContract["LAST_PERIODPAY"];
+						$oldGroupBal02 += $rowOldContract["PRINCIPAL_BALANCE"];
+					}
+				}
+
 				$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 				$conmysql->beginTransaction();
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
 																		int_rate_at_req,salary_at_req,salary_img,bookbank_img,bookcoop_img,id_userlogin,contractdoc_url,
-																		deptaccount_no_bank,bank_desc,deptaccount_no_coop,objective,extra_credit_project)
-																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																		,:salary,:salary_img,:bookbank_img,:bookcoop_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:bank_desc,:deptaccount_no_coop,:objective,:extra_credit_project)");
+																		deptaccount_no_bank,bank_desc,deptaccount_no_coop,objective,extra_credit_project,diff_old_contract,old_contract)
+																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:receive_net,:int_rate
+																		,:salary,:salary_img,:bookbank_img,:bookcoop_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:bank_desc,:deptaccount_no_coop,:objective,
+																		:extra_credit_project,:diff_old,:old_contract)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -262,6 +285,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':period_payment' => $dataComing["period_payment"],
 					':period' => $dataComing["period"],
 					':loanpermit_amt' => $dataComing["loanpermit_amt"],
+					':receive_net' => $dataComing["request_amt"] - ($dataComing["old_contract_balance"] ?? 0),
 					':int_rate' => $dataComing["int_rate"] / 100,
 					':salary' => $rowData["SALARY_AMOUNT"],
 					':salary_img' => $slipSalary ?? null ,
@@ -269,11 +293,13 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':bookcoop_img' => $bookcoopCopy ?? null,
 					':id_userlogin' => $payload["id_userlogin"],
 					':contractdoc_url' => $pathFile,
-					':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? null,
-					':bank_desc' => $dataComing["bank"] ?? null,
+					':deptaccount_no_bank' => $dataComing["expense_accid"] ?? null,
+					':bank_desc' => $dataComing["expense_bank_desc"] ?? null,
 					':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
 					':objective' => $dataComing["objective"],
-					':extra_credit_project' => $dataComing["extra_credit_project"],
+					':extra_credit_project' => $dataComing["extra_credit_project"] ?? null,
+					':diff_old' => $dataComing["old_contract_balance"] ?? null,
+					':old_contract' => $dataComing["old_contract_selected"] ?? null,
 				])){
 					$arrData = array();
 					$arrData["requestdoc_no"] = $reqloan_doc;
@@ -286,20 +312,27 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["province_desc"] = $rowData["PROVINCE_DESC"];
 					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 					$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
+					$arrData["fund_amt"] = number_format($rowData["rowFund"],2);
+					$arrData["share_fund_amt"] = number_format($rowData["SHAREBEGIN_AMT"] + $rowFund["rowFund"],2);
 					$arrData["request_amt"] = $dataComing["request_amt"];
 					$arrData["objective"] = $dataComing["objective"];
 					$arrData["period"] = $dataComing["period"];
 					$arrData["tel"] = $rowDataM["phone_number"];
 					$arrData["email"] = $rowDataM["email"];
-					$arrData["deptaccount_no_bank"] = $dataComing["deptaccount_no_bank"] ?? null;
-					$arrData["bank_code"] = $dataComing["bank_code"];
+					$arrData["deptaccount_no_bank"] = $dataComing["expense_accid"] ?? null;
+					$arrData["bank_code"] = $dataComing["expense_bank"];
 					$arrData["deptaccount_no_coop"] = $dataComing["deptaccount_no_coop"] ?? null;
 					$arrData["period_payment"] = $dataComing["period_payment"];
 					$arrData["extra_credit_project"] = isset($dataComing["extra_credit_project"]) && ($dataComing["extra_credit_project"] != "");
 					$arrData["memb_prename"] = $rowData["PRENAME_DESC"];
 					$arrData["memb_name"] = $rowData["MEMB_NAME"];
 					$arrData["memb_surname"] = $rowData["MEMB_SURNAME"];
+					$arrData["old_groupbal_01"] = $oldGroupBal01;
+					$arrData["old_groupbal_02"] = $oldGroupBal02;
+					$arrData["old_groupbal_02_period"] = $oldGroupBal02LastPeriod;
 					$arrData["int_rate"] = $dataComing["int_rate"];
+					$arrData["old_contract_selected"] = $dataComing["old_contract_selected"];
+					
 					if(file_exists('form_request_loan_'.$rowLoanGroup["LOANGROUP_CODE"].'.php')){
 						include('form_request_loan_'.$rowLoanGroup["LOANGROUP_CODE"].'.php');
 						$arrayPDF = GeneratePDFContract($arrData,$lib);
@@ -326,7 +359,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						]);
 						$conmysql->commit();
 						$arrayResult['arrData'] = $arrData;
-						$arrayResult['REPORT_URL'] = $pathFile;
+						//$arrayResult['REPORT_URL'] = $pathFile;
 						$arrayResult['APV_DOCNO'] = $reqloan_doc;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
@@ -366,6 +399,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':period_payment' => $dataComing["period_payment"],
 							':period' => $dataComing["period"],
 							':loanpermit_amt' => $dataComing["loanpermit_amt"],
+							':receive_net' => $dataComing["request_amt"] - ($dataComing["old_contract_balance"] ?? 0),
 							':int_rate' => $dataComing["int_rate"] / 100,
 							':salary' => $rowData["SALARY_AMOUNT"],
 							':salary_img' => $slipSalary,
@@ -376,7 +410,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':bank_desc' => $dataComing["bank"] ?? null,
 							':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
 							':objective' => $dataComing["objective"],
-							':extra_credit_project' => $dataComing["extra_credit_project"]
+							':extra_credit_project' => $dataComing["extra_credit_project"],
+							':diff_old' => $dataComing["old_contract_balance"] ?? null,
+							':old_contract' => $dataComing["old_contract_selected"] ?? null,
 						]),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
@@ -389,6 +425,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':period_payment' => $dataComing["period_payment"],
 						':period' => $dataComing["period"],
 						':loanpermit_amt' => $dataComing["loanpermit_amt"],
+						':receive_net' => $dataComing["request_amt"] - ($dataComing["old_contract_balance"] ?? 0),
 						':int_rate' => $dataComing["int_rate"] / 100,
 						':salary' => $rowData["SALARY_AMOUNT"],
 						':salary_img' => $slipSalary,
@@ -398,7 +435,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':deptaccount_no_bank' => $dataComing["deptaccount_no_bank"] ?? null,
 						':bank_desc' => $dataComing["bank"] ?? null,
 						':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
-						':objective' => $dataComing["objective"]
+						':objective' => $dataComing["objective"],
+						':expense_bank' => $dataComing["expense_bank"],
+						':expense_code' => $dataComing["expense_code"],
+						':expense_accid' => $dataComing["expense_accid"],
+						':diff_old' => $dataComing["old_contract_balance"] ?? null,
+						':old_contract' => $dataComing["old_contract_selected"] ?? null,
 					]);
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_CODE'] = "WS1036";

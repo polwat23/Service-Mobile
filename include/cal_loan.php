@@ -21,19 +21,28 @@ class CalculateLoan {
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
 		$constLoan = $this->getLoanConstant();
 		$interest = 0;
-		if($constLoanContract["CHECK_KEEPING"] == '1'){
-			$calInt = TRUE;
-		}else{
-			if($constLoanContract["SPACE_KEEPING"] == 0){
+		
+		$getLoanPayDate = $this->con->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND CURDATE() < loanpaydate ORDER BY loanpaydate ASC LIMIT 1");
+		$getLoanPayDate->execute();
+		$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
+		if(isset($rowLoanPayDate['loanpaydate']) && $rowLoanPayDate['loanpaydate'] != ''){
+			if($constLoanContract["CHECK_KEEPING"] == '1'){
 				$calInt = TRUE;
 			}else{
-				if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
-					$calInt = FALSE;
-					$interest = $constLoanContract["INTEREST_ARREAR"];
-				}else{
+				if($constLoanContract["SPACE_KEEPING"] == 0){
 					$calInt = TRUE;
+				}else{
+					if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
+						$calInt = FALSE;
+						$interest = $constLoanContract["INTEREST_ARREAR"];
+					}else{
+						$calInt = TRUE;
+					}
 				}
 			}
+		}else{
+			$calInt = FALSE;
+			$interest = $constLoanContract["INTEREST_ARREAR"];
 		}
 		if($calInt){
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
@@ -99,13 +108,15 @@ class CalculateLoan {
 							$dayInterest = $date_duration->days;
 						}else{
 							$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
-							$dateTo = new \DateTime(date('d-m-Y'));
+							//$dateTo = new \DateTime(date('d-m-Y'));
+							$dateTo = new \DateTime($rowLoanPayDate['loanpaydate']);
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
 						}
 					}else{
 						$dateFrom = new \DateTime('01-01-'.date('Y'));
-						$dateTo = new \DateTime(date('d-m-Y'));
+						//$dateTo = new \DateTime(date('d-m-Y'));
+						$dateTo = new \DateTime($rowLoanPayDate['loanpaydate']);
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
 					}
@@ -121,7 +132,8 @@ class CalculateLoan {
 						}else{
 							$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
 						}
-						$dateTo = new \DateTime(date('d-m-Y'));
+						//$dateTo = new \DateTime(date('d-m-Y'));
+						$dateTo = new \DateTime($rowLoanPayDate['loanpaydate']);
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
 					}
