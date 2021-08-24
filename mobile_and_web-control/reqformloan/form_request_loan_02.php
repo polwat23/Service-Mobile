@@ -196,20 +196,19 @@ function GeneratePDFContract($data,$lib) {
             </div>
             <div  class="line-margin" style="margin-top: 4px;">
                 <span class="padding-text" style="display: inline-block;">ข้อ 3.</span>
-                <span class="padding-text" style="display: inline-block;transform: translateY(2px);"><input type="checkbox" /></span>
+                <span class="padding-text" style="display: inline-block;transform: translateY(2px);">'.((isset($data["old_contract_selected"]) && $data["old_contract_selected"] != "") ? '<input type="checkbox" checked />' : '<input type="checkbox" />').'</span>
                 <span class="padding-text" style="display: inline-block; padding-right: 55px;">ข้าพเจ้า<span
                         style="font-weight: bold;text-decoration: underline;">ต้องการ</span>ที่จะให้ทางสหกรณ์ฯ
                     Refinance‎ สัญญาเลขที่</span>
                 <span class="padding-text" style="display: inline-block;width: 200px;padding-left: 4px;padding-right: 4px; border: 1px dashed blue;">
 						'.'&nbsp;'.'
 						<span style="position: absolute;width: 130px;">
-							'.$data["contract_no"].'
+							'.$data["old_contract_selected"].'
 						</span>
                 </span>
             </div>
             <div class="line-margin">
-                <span class="padding-text" style="display: inline-block;transform: translateY(2px);padding-left: 32px;"><input
-                        type="checkbox" /></span>
+                <span class="padding-text" style="display: inline-block;transform: translateY(2px);padding-left: 32px;">'.((isset($data["old_contract_selected"]) && $data["old_contract_selected"] != "") ? '<input type="checkbox" />' : '<input type="checkbox" checked/>').'</span>
                 <span class="padding-text" style="display: inline-block; padding-right: 4px;">ข้าพเจ้า<span
                         style="font-weight: bold;text-decoration: underline;">ต้องการ</span>ที่จะเปิดสัญญาเงินกู้ในข้อ
                     1. ใหม่</span>
@@ -245,61 +244,35 @@ function GeneratePDFContract($data,$lib) {
 							'.$data["deptaccount_no_bank"].'
 						</span>
 					</span>
-					<span class="padding-text" style="display: inline-block; padding-right: 4px;">หากไม่ใช่บัญชีเงินเดือน กรุณาแนบหน้า
-						Bookbank (ต้องเป็นบัญชีผู้กู้)</span>
+					<span class="padding-text" style="display: inline-block; padding-right: 4px;">โอนเข้าบัญชีเงินเดือน</span>
 			</div>
             <div class="line-margin" style="padding-left: 56px;">
 				<span class="padding-text" style="display: inline-block;transform: translateY(2px);">'.($data["bank_code"] == "014" ? '<input type="checkbox" checked />' : '<input type="checkbox" />').'</span>
 				<span class="padding-text" style="display: inline-block; padding-right: 4px;">ธนาคารไทยพาณิชย์</span>
 			</div>
-			<div style="height: 550px;">
+			<div style="height: 4px;">
 			</div>
-			<div style="position: absolute; bottom: 0px;">
+			<div>
             <div style="width: 100%; display: table;">
                 <!-- Left -->
                 <div style="display: table-cell; vertical-align: top; border-right: 1px solid #000000; width: 55%;">
                     <div style="border-bottom: 1px solid #000000;border-top: 1px solid #000000; border-left: 1px solid #000000; width: 100%;">
                         <div style="font-weight: bold;padding-left: 2px;background-color: yellow;margin-top: 1px;">
-                            <span style="text-decoration: underline;">กรุณากรอกข้อมูลตรวจสอบหลักฐานก่อนการยื่นกู้</span>
-							<span style="color: red;text-decoration: underline;"> (สำหรับสมาชิก) </span>
+                            <span style="text-decoration: underline;">กู้เกินทุนเรือนหุ้นหรือเกินเงินออมต้องเปิดบัญชีค้ำเงินกู้</span>
                         </div>
-                        <div style="padding-left: 5px;">
-                            <span style="display: inline-block;"><span
-                                    style="font-weight: bold;text-decoration: underline;">กรณีที่ 1 </span>
-                                กู้ไม่เกินทุนเรือนหุ้นหรือไม่เกินเงินออม</span>
-                        </div>
-						<div style="padding-top: 6px;">
-							<div style="padding-left: 5px;">
-									<div>
-										<span style="display: inline-block;padding-right: 150px;">
-											1. คำขอกู้เงินสามัญ 1 ชุด
-										</span>
-										<span style="display: inline-block;transform: translateY(2px);"><input
-												type="checkbox" /></span>
-										<span style="display: inline-block; padding-left: 16px;">ครบถ้วน</span>
-									</div>
-									<div>
-										<span style="display: inline-block;">
-											2. สำเนาบัตรประชาชนผู้กู้ 1 ใบ (ต้องแนบทุกครั้ง)
-										</span>
-										<span style="display: inline-block;transform: translateY(2px);margin-left: 32px;"><input
-												type="checkbox" /></span>
-										<span style="display: inline-block; padding-left: 16px;">ครบถ้วน</span>
-									</div>
+						<div style="padding-top: 32px;padding-bottom: 32px;">
+							<div>
+								เปิดบํญชีค้ำเงินกู้  2,000  บาท  สหกรณ์จะแจ้งตอนเซ็นสัญญาเงินกู้
 							</div>
                         </div>
-                        <div style="padding-left: 5px;">
-                            <span style="display: inline-block;"><span style="font-weight: bold;text-decoration: underline;">กรณีที่ 2 </span>
-                                กู้เกินทุนเรือนหุ้นหรือเกินเงินออมต้องเปิดบัญชีค้ำเงินกู้</span>
-                        </div>
                         <div style="display: table;width: 100%;">
-                            <div style="display: table-cell;width: 50%;border-right: 1px solid #5B9BD5;">
+                            <div style="display: table-cell;width: 50%;border-right: 1px solid #5B9BD5;padding-bottom: 28px;">
                                 <div class="line-margin" style="text-align: center;border-top: 1px solid #5B9BD5;border-bottom: 1px solid #5B9BD5;">
                                     ไม่เคยเปิดบัญชี
                                 </div>
                                 <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
                                     <div style="display: inline-block;width: 90%;">
-                                        1. คำขอกู้เงินสามัญ 1 ชุด
+                                        1. สำเนาบัตรประชาชนผู้กู้ 3 ใบ
                                     </div>
                                     <div style="display: inline-block;width: 10%;text-align: right;">
                                         <input type="checkbox" style="transform: translateY(3px);" />
@@ -307,7 +280,7 @@ function GeneratePDFContract($data,$lib) {
                                 </div>
                                 <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
                                     <div style="display: inline-block;width: 90%;">
-                                        2. สำเนาบัตรประชาชนผู้กู้ 3 ใบ
+                                        2. เงินเปิดบัญชี    2,000  บาท 
                                     </div>
                                     <div style="display: inline-block;width: 10%;text-align: right;">
                                         <input type="checkbox" style="transform: translateY(3px);" />
@@ -315,22 +288,14 @@ function GeneratePDFContract($data,$lib) {
                                 </div>
                                 <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
                                     <div style="display: inline-block;width: 90%;">
-                                        3. เงินเปิดบัญชี 2,000 บาท
+                                        3. สำเนาทะเบียนบ้านผู้กู้ 1 ใบ 
                                     </div>
                                     <div style="display: inline-block;width: 10%;text-align: right;">
                                         <input type="checkbox" style="transform: translateY(3px);" />
                                     </div>
                                 </div>
                                 <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
-                                    <div style="display: inline-block;width: 90%;">
-                                        4. สำเนาทะเบียนบ้านผู้กู้ 1 ใบ
-                                    </div>
-                                    <div style="display: inline-block;width: 10%;text-align: right;">
-                                        <input type="checkbox" style="transform: translateY(3px);" />
-                                    </div>
-                                </div>
-                                <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
-                                    (เปิดบัญชีวันเซ็นสัญญา)
+                                     (แจ้งให้ส่งตอนเซ็นสัญญาเงินกู้)
                                 </div>
                             </div>
                             <div style="display: table-cell;width: 50%;margin-right: 3px;margin-left: -4px;">
@@ -339,15 +304,7 @@ function GeneratePDFContract($data,$lib) {
                                 </div>
                                 <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
                                     <div style="display: inline-block;width: 80%;">
-											1. คำขอกู้สามัญ 1 ชุด
-                                    </div>
-                                    <div style="display: inline-block;width: 20%;text-align: right;">
-                                        <input type="checkbox" style="transform: translateY(3px);" />
-                                    </div>
-                                </div>
-                                <div class="line-margin" style="white-space: nowrap;padding-left: 5px;">
-                                    <div style="display: inline-block;width: 80%;">
-											2.สำเนาบัตรประชาชนผู้กู้ 1ใบ
+											1. สำเนาบัตรประชาชนผู้กู้ 1ใบ
                                     </div>
                                     <div style="display: inline-block;width: 20%;text-align: right;">
                                         <input type="checkbox" style="transform: translateY(3px);" />
@@ -356,7 +313,7 @@ function GeneratePDFContract($data,$lib) {
                             </div>
                         </div>
                     </div>
-                    <div style="border-bottom: 1px solid #000000;border-left: 1px solid #000000;width: 100%;">
+                    <div style="border-bottom: 1px solid #000000;border-left: 1px solid #000000;width: 100%;padding-bottom: 4px;">
                         <div style="padding-left: 2px;background-color: yellow;">
                             <span style="font-weight: bold;color: red;text-decoration: underline;">กรุณากรอกข้อมูล (สำหรับสมาชิก)</span>
                         </div>
@@ -388,32 +345,15 @@ function GeneratePDFContract($data,$lib) {
                             และเอกสารประกอบการเข้าโครงการตามเงื่อนไขในหนังสือรับรองขอเข้าโครงการ
                         </div>
                     </div>
-                    <div style="width: 100%;">
-                        <div style="margin-top: 24px;">
-                            <span class="line-margin">ลงชื่อ............................................................ผู้กู้</span>
-                        </div>
-                        <div>
-                            <span class="line-margin">ตำแหน่ง......................................................</span>
-                        </div>   
-                        <div style="margin-top: 24px;">
-                            <span class="line-margin">ลงชื่อ............................................................พยาน (ผชส./บ.3 ขึ้นไป)</span>
-                        </div>
-                        <div>
-                            <span class="line-margin" style="padding-left: 16px;">(</span><span style="padding-left: 170px;">)</span>
-                        </div>
-                        <div class="line-margin" style="font-weight: bold;">
-                            หมายเหตุ  : ผู้กู้ระดับ ผชส. หรือ บ. 3 ขึ้นไป ไม่ต้องเซ็นชื่อพยาน
-                        </div>
-                    </div>
                 </div>
                 <!-- Right -->
                 <div
                     style="display: table-cell;margin-left: -4px;margin-right: -2px;width: 45%;">
-                    <div style="border-bottom: 1px solid #000000;border-top: 1px solid #000000;width: 100%;">
+                    <div style="border-bottom: 1px solid #000000;border-top: 1px solid #000000;width: 100%;padding-bottom: 55px;">
                         <div style="font-weight: bold;padding-left: 2px;">
                             <span style="text-decoration: underline;">ส่วนที่ 1</span> ข้อมูลประกอบการพิจารณาเงินกู้ (สำหรับเจ้าหน้าที่)
                         </div>
-                        <div>
+                        <div style="padding-left: 36px;">
                             <span class="line-margin" style="display: inline-block;">วงเงินที่ขอกู้
 								<span style="position: absolute;padding-left: 5px;">
 									'.number_format($data["request_amt"],2).'
@@ -429,15 +369,15 @@ function GeneratePDFContract($data,$lib) {
                         </div>
                         <div class="line-margin">
                             <div style="display: inline-block; padding-right: 2px;padding-left: 2px;width: 50%;">ทุนเรือนหุ้น</div>
-                            <div style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 685px;text-align: left;">
+                            <div style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 690px;text-align: left;">
 									'.$data["share_bf"].'
 								</span>
 							</div>
                         </div>
                         <div class="line-margin">
                             <div style="display: inline-block; padding-right: 2px;padding-left: 2px;width: 50%;">เงินสะสมกองทุนสำรองเลี้ยงชีพ </div>
-                            <div style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 685px;text-align: left;">
-								'.$data["share"].'
+                            <div style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 690px;text-align: left;">
+								'.$data["fund_amt"].'
 							</span></div>
                         </div>
                         <div class="line-margin">
@@ -447,63 +387,37 @@ function GeneratePDFContract($data,$lib) {
                         </div>
                         <div class="line-margin">
                             <span style="display: inline-block; padding-right: 2px;text-indent: 36px;width: 50%;">รวมหลักประกัน</span>
-                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 685px;text-align: left;">
-								'.$data["insure"].'
+                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 690px;text-align: left;">
+								'.$data["share_fund_amt"].'
 							</span></span>
                         </div>
                         <div class="line-margin">
                             <span style="display: inline-block; padding-right: 4px;padding-left: 36px;font-weight: bold;text-decoration: underline;">หนี้ค้างชำระของผู้กู้</span>
                         </div>
                         <div class="line-margin">
-                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;">1. เงินกู้ฉุกเฉิน ..........................บาท</span>
+                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;">1. เงินกู้ฉุกเฉิน </span>
+							<span style="display: inline-block;"><span style="position: absolute;padding-left: 5px;">
+							'.($data["old_groupbal_01"] > 0 ? number_format($data["old_groupbal_01"],2) : '-').'
+							</span>..........................บาท</span>
                         </div>
                         <div class="line-margin">
-                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;">2. เงินกู้สามัญชำระงวดที่ ..................คงเหลือ....................บาท</span>
+                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;">2. เงินกู้สามัญชำระงวดที่ </span>
+							<span style="display: inline-block;"><span style="position: absolute;padding-left: 5px;">
+									'.($data["old_groupbal_02"] > 0 ? $data["old_groupbal_02_period"] : '-').'
+							</span>..................คงเหลือ</span>
+							<span style="display: inline-block;"><span style="position: absolute;padding-left: 5px;">
+									'.($data["old_groupbal_02"] > 0 ? number_format($data["old_groupbal_02"],2) : '-').'
+							</span>.........................บาท</span>
                         </div>
-                        <div class="line-margin" style="padding-top: 35px;padding-bottom: 21px;">
-                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;width: 50%;">รวมหนี้ค้างชำระทั้งหมด</span>
-                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท</span>
-                        </div>
-                    </div>
-                    <div style="width: 100%;">
-                        <div style="font-weight: bold;padding-left: 2px;">
-                            <span style="text-decoration: underline;">ส่วนที่ 2</span> การพิจารณาของคณะกรรมการเงินกู้
-                        </div>
-                        <div>
-                            <span style="display: inline-block; padding-right: 4px;padding-left: 36px;font-weight: bold;text-decoration: underline;">ความเห็นคณะกรรมการเงินกู้</span>
-                        </div>
-                        <div style="padding-top: 8px">
-                            <span style="display: inline-block;transform: translateY(2px);padding-left: 36px;"><input
-                                    type="checkbox" /></span>
-                            <span style="display: inline-block; padding-left: 8px;">อนุมัติตามที่ขอ</span>
-                        </div>
-                        <div>
-                            <span style="display: inline-block;transform: translateY(2px);padding-left: 36px;"><input
-                                    type="checkbox" /></span>
-                            <span style="display: inline-block; padding-left: 8px;">อนุมัติในวงเงิน..........................บาท  โดยหักหนี้แล้ว
-                            </span>
-                        </div>
-                        <div>
-                            <span style="display: inline-block;transform: translateY(2px);padding-left: 36px;"><input
-                                    type="checkbox" /></span>
-                            <span style="display: inline-block; padding-left: 8px;">ไม่อนุมัติ</span>
-                            <span style="display: inline-block; padding-left: 16px;">เหตุผล.................................................</span>
-                        </div>
-                        <div style="margin-top: 24px;padding-left: 36px;">
-                            <span>ลงชื่อ............................................................ผู้อนุมัติ</span>
-                        </div>
-                        <div style="padding-left: 90px;font-weight: bold;">
-                            <span>ประธานคณะกรรมการเงินกู้</span>
-                        </div>
-                        <div style="font-weight: bold;padding-left: 2px;">
-                            ตามมติคณะกรรมการเงินกู้ครั้งที่.............  วันที่.............
+                        <div class="line-margin" style="padding-top: 24px;padding-bottom: 21px;">
+                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;">รวมหนี้ค้างชำระทั้งหมด</span><span style="display: inline-block;"><span style="position: absolute;padding-left: 5px;">'.number_format($data["old_groupbal_01"] + $data["old_groupbal_02"],2).'</span>.........................บาท</span>
                         </div>
                     </div>
                 </div>
             </div>
             </div>
             <!-- Page 2 -->
-            <div style="width: 100%;padding-top: 30px;">
+            <div style="width: 100%;padding-top: 30px;page-break-before: always;">
                 <div class="line-margin" style="font-weight: bold;">
                     คำยินยอมของคู่สมรส (ใช้เฉพาะกรณีที่ผู้ขอกู้มีคู่สมรส)
                 </div>
@@ -529,7 +443,7 @@ function GeneratePDFContract($data,$lib) {
                         style="display: inline-block;width: 155px;padding-left: 4px;padding-right: 4px; border: 1px dashed blue;margin-left: 8px;">
 						'.'&nbsp;'.'
 						<span style="position: absolute;width: 130px;">
-							'.$today.'
+						
 						</span>
                     </span>
                 </div>

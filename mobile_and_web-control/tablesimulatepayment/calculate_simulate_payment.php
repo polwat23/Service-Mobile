@@ -3,14 +3,14 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$request_date = $dataComing['request_date'];
+		$request_date = date("Y-m-d");
 		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
-		$pay_date = date("Y-m-t", strtotime($request_date));
+		$pay_date = date("Y-m-d", strtotime($dataComing['request_date']));
 		$payment_sumbalance = (float) preg_replace('/,/','',$dataComing['payment_sumbalance']);
 		$int_rate = $dataComing["int_rate"]/100;
 		$calint_type = $dataComing["calint_type"];
 		$arrPayment = array();
-		$lastDateofMonth = strtotime(date('M Y',strtotime($pay_date)));
+		$lastDateofMonth = strtotime(date("Y-m-d",strtotime($pay_date)));
 		$payment_per_period = 0;
 		$sumInt = 0;
 		$sumPayment = 0;
@@ -42,6 +42,26 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				while ($amt > 0) {
 					if($period == 0){
 						if($cal_start_pay_date == "next"){
+							//$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+							$dateFrom = new DateTime(date('d-m-Y',strtotime($request_date)));
+							$dateTo = new DateTime(date('d-m-Y',strtotime($pay_date)));
+							$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
+						}else{
+							//$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							$dateFrom = new DateTime(date('d-m-Y',strtotime($request_date)));
+							$dateTo = new DateTime(date('d-m-Y',strtotime($pay_date)));
+							$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
+						}
+						$lastDate = date('Y-m-d',strtotime("+".($period)." months",$lastDateofMonth));
+					}else {
+						$lastDate = date('Y-m-d',strtotime("+".($period)." months",strtotime(date("Y-m-d",strtotime($pay_date)))));
+						$dateFrom = new DateTime(date('Y-m-d',strtotime("+".($period-1)." months",strtotime(date("Y-m-d",strtotime($pay_date))))));
+						$dateTo = new DateTime(date('Y-m-d',strtotime("+".($period)." months",strtotime(date("Y-m-d",strtotime($pay_date))))));
+						$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
+						//$dayOfMonth = date('d',strtotime($lastDate));
+					}
+					/*if($period == 0){
+						if($cal_start_pay_date == "next"){
 							$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
 						}else{
 							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
@@ -49,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}else {
 						$lastDate = date('Y-m-t',strtotime("+".($period)." months",$lastDateofMonth));
 						$dayOfMonth = date('d',strtotime($lastDate));
-					}
+					}*/
 					
 					$intPerPeroid = ($amt * ($int_rate) * $dayOfMonth) / $dayinYear;
 
@@ -93,14 +113,23 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 			if($calint_type === "1"){ // 
 				if($i == 1){
 					if($cal_start_pay_date == "next"){
-						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+						//$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+						$dateFrom = new DateTime(date('d-m-Y',strtotime($request_date)));
+						$dateTo = new DateTime(date('d-m-Y',strtotime($pay_date)));
+						$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
 					}else{
-						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+						//$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+						$dateFrom = new DateTime(date('d-m-Y',strtotime($request_date)));
+						$dateTo = new DateTime(date('d-m-Y',strtotime($pay_date)));
+						$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
 					}
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
+					$lastDate = date('Y-m-d',strtotime("+".($i-1)." months",$lastDateofMonth));
 				}else {
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-					$dayOfMonth = date('d',strtotime($lastDate));
+					$lastDate = date('Y-m-d',strtotime("+".($i-1)." months",strtotime(date("Y-m-d",strtotime($pay_date)))));
+					$dateFrom = new DateTime(date('Y-m-d',strtotime("+".($i-2)." months",strtotime(date("Y-m-d",strtotime($pay_date))))));
+					$dateTo = new DateTime(date('Y-m-d',strtotime("+".($i-1)." months",strtotime(date("Y-m-d",strtotime($pay_date))))));
+					$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
+					//$dayOfMonth = date('d',strtotime($lastDate));
 				}
 				if($rowConstant["DAYINYEAR"] == 0){
 					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($lastDate)));
@@ -111,10 +140,12 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				if (($payment_sumbalance) < $pay_period) {
 					$prn_amount = $payment_sumbalance;
 				}else{
-					$prn_amount = $pay_period;
+					$prn_amount = ceil($pay_period);
 				}
 				$periodPayment = $prn_amount + $period_int;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
+				$sumInt += $period_int;
+				$sumPayment += $periodPayment;
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
 				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
@@ -126,14 +157,23 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 			}else if($calint_type === "2"){ // ʹ  + ͡ ҡѹء͹
 				if($i == 1){
 					if($cal_start_pay_date == "next"){
-						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+						//$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+						$dateFrom = new DateTime(date('d-m-Y',strtotime($request_date)));
+						$dateTo = new DateTime(date('d-m-Y',strtotime($pay_date)));
+						$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
 					}else{
-						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+						//$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+						$dateFrom = new DateTime(date('d-m-Y',strtotime($request_date)));
+						$dateTo = new DateTime(date('d-m-Y',strtotime($pay_date)));
+						$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
 					}
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
+					$lastDate = date('Y-m-d',strtotime("+".($i-1)." months",$lastDateofMonth));
 				}else {
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-					$dayOfMonth = date('d',strtotime($lastDate));
+					$lastDate = date('Y-m-d',strtotime("+".($i-1)." months",strtotime(date("Y-m-d",strtotime($pay_date)))));
+					$dateFrom = new DateTime(date('Y-m-d',strtotime("+".($i-2)." months",strtotime(date("Y-m-d",strtotime($pay_date))))));
+					$dateTo = new DateTime(date('Y-m-d',strtotime("+".($i-1)." months",strtotime(date("Y-m-d",strtotime($pay_date))))));
+					$dayOfMonth = $dateTo->diff($dateFrom)->format('%a');
+					//$dayOfMonth = date('d',strtotime($lastDate));
 				}
 				if($rowConstant["DAYINYEAR"] == 0){
 					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($lastDate)));

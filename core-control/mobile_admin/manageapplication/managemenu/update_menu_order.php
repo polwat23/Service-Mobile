@@ -17,19 +17,22 @@ if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
 				$arrayResult['RESPONSE'] = "ไม่สามารถจัดเรียงเมนูได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
+				
 			}
 		}
 		$conmysql->commit();
 		$arrayResult["RESULT"] = TRUE;
-		require_once('../../../../include/exit_footer.php');
+		require_once('../../../../include/exit_footer.php');	
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

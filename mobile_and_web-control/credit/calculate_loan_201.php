@@ -18,11 +18,9 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 	//ดึงข้อมูลสัญญาเดิม
 	$getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY 
 										FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
-										WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8 
-										and lm.loantype_code = :loantype_code");
+										WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8");
 	$getOldContract->execute([
 		':member_no' => $member_no,
-		':loantype_code' => $loantype_code
 	]);
 	$rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowOldContract["LOANCONTRACT_NO"]) && $rowOldContract["LOANCONTRACT_NO"] != ""){
@@ -30,7 +28,7 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 		$arrContract['LOANTYPE_DESC'] = $rowOldContract["LOANTYPE_DESC"];
 		$arrContract["CONTRACT_NO"] = $rowOldContract["LOANCONTRACT_NO"];
 		$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"];
-		$oldBal += $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
+		//$oldBal += $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		$arrOldContract[] = $arrContract;
 		$canRequest = TRUE;
 	}else{

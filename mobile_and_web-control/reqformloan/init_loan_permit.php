@@ -18,14 +18,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
-			if(!$canRequest){
-				$arrayResult['RESPONSE_CODE'] = "WS0084";
-				$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
+			
 			if($dataComing["recv_acc"] == '0'){
-				$arrGrpBank = array();
+				/*$arrGrpBank = array();
 				$getBank = $conmssql->prepare("SELECT (BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
 											WHERE bank_code IN('002','004','014') and USE_FLAG = '1' ORDER BY SETSORT ASC");
 				$getBank->execute();
@@ -34,16 +29,32 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
 					$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
 					$arrGrpBank[] = $arrBank;
-				}
+				}*/
+				//เลขบัญชีธนาคาร
+				$fetchBankInfo = $conmssql->prepare("SELECT mb.EXPENSE_BANK, mb.EXPENSE_CODE, mb.EXPENSE_ACCID,cmb.BANK_DESC FROM MBMEMBMASTER mb
+												LEFT JOIN cmucfbank cmb ON cmb.BANK_CODE = mb.EXPENSE_BANK
+												WHERE mb.MEMBER_NO = :member_no");
+				$fetchBankInfo->execute([':member_no' => $member_no]);
+				$rowBankInfo = $fetchBankInfo->fetch(PDO::FETCH_ASSOC);
+				$arrayResult["EXPENSE_BANK"] = $rowBankInfo["EXPENSE_BANK"];
+				$arrayResult["EXPENSE_BANK_DESC"] = $rowBankInfo["BANK_DESC"];
+				$arrayResult["EXPENSE_CODE"] = $rowBankInfo["EXPENSE_CODE"];
+				$arrayResult["EXPENSE_ACCID"] = $rowBankInfo["EXPENSE_ACCID"];
+				
 				$arrayResult['COOP_ACCOUNT'] = [];
 				$arrayResult["REQ_BOOKBANK"] = FALSE;
 				$arrayResult["REQ_BOOKCOOP"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
-				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
+				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
 				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
-				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
-				$arrayResult['BANK'] = $arrGrpBank;
+				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
+				//$arrayResult['BANK'] = $arrGrpBank;
 			}else if($dataComing["recv_acc"] == '1'){
+				$arrayResult["EXPENSE_BANK"] = "";
+				$arrayResult["EXPENSE_BANK_DESC"] = "";
+				$arrayResult["EXPENSE_CODE"] = "";
+				$arrayResult["EXPENSE_ACCID"] = "";
+				
 				$arrayResult["REQ_BOOKBANK"] = FALSE;
 				$arrayResult["REQ_BOOKCOOP"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
@@ -62,36 +73,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["IS_EXTRA_CREDIT"] = TRUE;
 				
 			if($rowLoanGroup["LOANGROUP_CODE"] == '02'){
-				
-				//ดึงวันที่จ่ายเงินกู้
-				$getDiffPayDate = $conmysql->prepare("SELECT DATEDIFF(loanpaydate,now()) as diff_loanpaydate,loanpaydate 
-												FROM gcconstantloanpaydate 
-												WHERE loanpaydate > now() AND is_use = '1' ORDER BY loanpaydate ASC LIMIT 1");
-				$getDiffPayDate->execute();
-				$rowDiffPayDate = $getDiffPayDate->fetch(PDO::FETCH_ASSOC);
-				if(isset($rowDiffPayDate["loanpaydate"]) && $rowDiffPayDate["loanpaydate"] != ""){
-					$get_paydate = $rowDiffPayDate["loanpaydate"];
-				}
-				
-				//คำนวณดอกเบี้ย
-				$fetchLoanIntRate = $conmssql->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
-													ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-													WHERE lnt.loantype_code = :loantype_code and GETDATE() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
-				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
-				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-				$typeCalDate = $func->getConstant("process_keep_forward");
-				$pay_date = $get_paydate ?? date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
-				$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
-				if($typeCalDate == "next"){
-					$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
-				}else{
-					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
-				}
-				$period_payment = ($dataComing["request_amt"] / $dataComing["period"]) + (($dataComing["request_amt"] * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
-				$period_payment = (int)$period_payment - ($period_payment % 100) + 100;
+				$period_payment = $dataComing["request_amt"] / $dataComing["period"];
 			}else{
 				$period_payment = $dataComing["request_amt"] / $dataComing["period"];
 			}
+			
 			$receive_net = $dataComing["request_amt"] - $oldBal;
 			if($receive_net < 0){
 				$arrayResult['RESPONSE_CODE'] = "WS0086";
@@ -100,12 +86,33 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 				
 			}else{
-				$arrayResult["RECEIVE_NET"] = $receive_net;
+				$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
 			}
+			$arrayResult["TEMP_PERMIT_AMT"] = $maxloan_amt;
 			$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
+			$arrayResult['OLD_GROUPBAL_01'] = $oldGroupBal01;
+			$arrayResult['OLD_GROUPBAL_02'] = $oldGroupBal02;
 			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = ceil($period_payment);
+			$arrayResult["__old_balance"] = (ceil($period_payment) + $sum_old_payment);
+			$arrayResult["__saraly_balance"] = ($rowMember["SALARY_AMOUNT"]*0.6);
+			
+			//คำนวนรายการหัก + ขอกู้ต้องไม่เกิน 60% ของเงินเดือน
+			if($rowLoanGroup["LOANGROUP_CODE"] == '02' && ((ceil($period_payment) + $sum_old_payment) > ($rowMember["SALARY_AMOUNT"]*0.6))){
+				$canRequest = FALSE;
+				$error_desc = "ไม่สามารถยื่นกู้ได้ เนื่องจากท่านมีรายการหักเกิน 60% ของเงินเดือน";
+			}else{
+				$canRequest = TRUE;
+			}
+			
+			if(!$canRequest){
+				$arrayResult['RESPONSE_CODE'] = "WS0084";
+				$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+			
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -117,15 +124,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
-			if(!$canRequest){
-				$arrayResult['RESPONSE_CODE'] = "WS0084";
-				$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
 			if($maxloan_amt <= 0){
+				$arrayResult["LOAN_PERMIT_AMT"] = 0;
+				$arrayResult["REQUEST_AMT"] = 0;
+				$arrayResult["MAX_PERIOD"] = 0;
 				$arrayResult['RESPONSE_CODE'] = "WS0084";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถยื่นกู้ได้ เนื่องจากท่านมีรายการหักเกิน 60% ของเงินเดือน";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
@@ -149,7 +153,17 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				':request_amt_2' => $maxloan_amt,
 				':loantype_code' => $dataComing["loantype_code"]
 			]);
-			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
+			$rowMaxPeriodMain = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
+			
+			$getMaxPeriodTemp = $conmssql->prepare("SELECT MAX_PERIOD 
+												FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
+												WHERE lnd.LOANTYPE_CODE = :loantype_code");
+			$getMaxPeriodTemp->execute([
+				':loantype_code' => $dataComing["loantype_code"]
+			]);
+			
+			$rowMaxPeriodTemp = $getMaxPeriodTemp->fetch(PDO::FETCH_ASSOC);
+			$rowMaxPeriod["MAX_PERIOD"] = $rowMaxPeriodMain["MAX_PERIOD"] ?? $rowMaxPeriodTemp["MAX_PERIOD"];
 			if(isset($rowMaxPeriod["MAX_PERIOD"])){
 				$getLoanObjective = $conmssql->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective");
 				$getLoanObjective->execute();
@@ -161,7 +175,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
 					$arrGrpObj[] = $arrObj;
 				}
-				$getBank = $conmssql->prepare("SELECT (BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
+				/*$getBank = $conmssql->prepare("SELECT (BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
 											WHERE bank_code IN('002','004','014') and USE_FLAG = '1' ORDER BY SETSORT ASC");
 				$getBank->execute();
 				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
@@ -169,60 +183,48 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
 					$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
 					$arrGrpBank[] = $arrBank;
-				}
+				}*/
 
 				//ดึงข้อมูลโครงการพิเศษ
 				$arrayGroupExtraCredit = array();
-				$fetchExtraCredit = $conmysql->prepare("SELECT id_extra_credit, extra_credit_name, extra_credit_desc FROM gcconstantextracreditproject WHERE is_use = '1' ORDER BY create_date DESC");
+				$fetchExtraCredit = $conmysql->prepare("SELECT id_extra_credit, extra_credit_name, extra_credit_desc, extra_credit_html, loantype_code FROM gcconstantextracreditproject WHERE is_use = '1'");
 				$fetchExtraCredit->execute();
 				while($rowExtraCredit = $fetchExtraCredit->fetch(PDO::FETCH_ASSOC)){
 					$arrExtraCredit = array();
 					$arrExtraCredit["ID_EXTRA_CREDIT"] = $rowExtraCredit["id_extra_credit"];
 					$arrExtraCredit["EXTRA_CREDIT_NAME"] = $rowExtraCredit["extra_credit_name"];
 					$arrExtraCredit["EXTRA_CREDIT_DESC"] = $rowExtraCredit["extra_credit_desc"];
+					$arrExtraCredit["EXTRA_CREDIT_HTML"] = $rowExtraCredit["extra_credit_html"];
+					$arrExtraCredit["LOANTYPE_CODE"] = $rowExtraCredit["loantype_code"];
 					$arrayGroupExtraCredit[] = $arrExtraCredit;
 				}
 				$arrayResult["IS_EXTRA_CREDIT"] = TRUE;
 				$arrayResult["EXTRA_CREDIT_LIST"] = $arrayGroupExtraCredit;
 					
 				if($rowLoanGroup["LOANGROUP_CODE"] == '02'){
-				
-					//ดึงวันที่จ่ายเงินกู้
-					$getDiffPayDate = $conmysql->prepare("SELECT DATEDIFF(loanpaydate,now()) as diff_loanpaydate,loanpaydate 
-													FROM gcconstantloanpaydate 
-													WHERE loanpaydate > now() AND is_use = '1' ORDER BY loanpaydate ASC LIMIT 1");
-					$getDiffPayDate->execute();
-					$rowDiffPayDate = $getDiffPayDate->fetch(PDO::FETCH_ASSOC);
-					if(isset($rowDiffPayDate["loanpaydate"]) && $rowDiffPayDate["loanpaydate"] != ""){
-						$get_paydate = $rowDiffPayDate["loanpaydate"];
-					}
-					
-					//คำนวณดอกเบี้ย
-					$fetchLoanIntRate = $conmssql->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
-														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-														WHERE lnt.loantype_code = :loantype_code and GETDATE() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
-					$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
-					$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-					$typeCalDate = $func->getConstant("process_keep_forward");
-					$pay_date = $get_paydate ?? date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
-					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
-					if($typeCalDate == "next"){
-						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
-					}else{
-						$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
-					}
-					$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]) + (($maxloan_amt * ($rowIntRate["INTEREST_RATE"] / 100) * $dayOfMonth) / $dayinYear);
-					$period_payment = (int)$period_payment - ($period_payment % 100) + 100;
+					$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
 				}else{
 					$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
 				}
+				
+				//เลขบัญชีธนาคาร
+				$fetchBankInfo = $conmssql->prepare("SELECT mb.EXPENSE_BANK, mb.EXPENSE_CODE, mb.EXPENSE_ACCID,cmb.BANK_DESC FROM MBMEMBMASTER mb
+												LEFT JOIN cmucfbank cmb ON cmb.BANK_CODE = mb.EXPENSE_BANK
+												WHERE mb.MEMBER_NO = :member_no");
+				$fetchBankInfo->execute([':member_no' => $member_no]);
+				$rowBankInfo = $fetchBankInfo->fetch(PDO::FETCH_ASSOC);
+				$arrayResult["EXPENSE_BANK"] = $rowBankInfo["EXPENSE_BANK"];
+				$arrayResult["EXPENSE_BANK_DESC"] = $rowBankInfo["BANK_DESC"];
+				$arrayResult["EXPENSE_CODE"] = $rowBankInfo["EXPENSE_CODE"];
+				$arrayResult["EXPENSE_ACCID"] = $rowBankInfo["EXPENSE_ACCID"];
+				
 				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 				$arrRecvBank["VALUE"] = "0";
 				$arrRecvBank["DESC"] = "โอนเข้าบัญชีธนาคาร";
 				$arrGrpReceive[] = $arrRecvBank;
-				$arrRecvCoop["VALUE"] = "1";
+				/*$arrRecvCoop["VALUE"] = "1";
 				$arrRecvCoop["DESC"] = "โอนเข้าบัญชีสหกรณ์";
-				$arrGrpReceive[] = $arrRecvCoop;
+				$arrGrpReceive[] = $arrRecvCoop;*/
 				$arrayResult["DEFAULT_RECV_ACC"] = "0";
 				$arrayResult["RECEIVE_NET"] = $receive_net - $oldBal;;
 				$arrayResult["REQUEST_AMT"] = $request_amt;
@@ -240,19 +242,41 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["REQ_OBJECTIVE"] = TRUE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-				$arrayResult["IS_BANK_ACCOUNT"] = TRUE;
+				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
 				$arrayResult["BANK_ACCOUNT_REMARK"] = 'หากไม่ใช่บัญชีเงินเดือน กรุณาแนบหน้า Bookbank (ต้องเป็นบัญชีผู้กู้)';
 				$arrayResult['OBJECTIVE'] = $arrGrpObj;
-				$arrayResult['BANK'] = $arrGrpBank;
+				$arrayResult['OLD_CONTRACT'] = $arrOldContract;
+				$arrayResult['OLD_GROUPBAL_01'] = $oldGroupBal01;
+				$arrayResult['OLD_GROUPBAL_02'] = $oldGroupBal02;
+				
+				//$arrayResult['BANK'] = $arrGrpBank;
+				//คำนวนรายการหัก + ขอกู้ต้องไม่เกิน 60% ของเงินเดือน
+				if($rowLoanGroup["LOANGROUP_CODE"] == '02' && ((ceil($period_payment) + $sum_old_payment) > ($rowMember["SALARY_AMOUNT"]*0.6))){
+					$canRequest = FALSE;
+					$error_desc = "ไม่สามารถยื่นกู้ได้ เนื่องจากท่านมีรายการหักเกิน 60% ของเงินเดือน";
+				}else{
+					$canRequest = TRUE;
+				}
 				if($dayremainEnd == 0){
 					$arrayResult["NOTE_DESC"] = "เงินต้นและดอกเบี้ยของท่าน ณ วันที่กู้จะถูกหักรวมกับยอดปันผล-เฉลี่ยคืนที่ท่านจะได้รับ";
 					$arrayResult["NOTE_DESC_COLOR"] = "red";
+				}
+				if(!$canRequest){
+					$arrayResult['RESPONSE_CODE'] = "WS0084";
+					$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
 				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0088";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESPONSE'] = [
+							':request_amt_1' => $maxloan_amt,
+							':request_amt_2' => $maxloan_amt,
+							':loantype_code' => $dataComing["loantype_code"]
+						];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				

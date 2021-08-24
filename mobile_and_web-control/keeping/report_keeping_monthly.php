@@ -139,17 +139,18 @@ function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
 				@font-face {
-				  font-family: THSarabun;
-				  src: url(../../resource/fonts/THSarabun.ttf);
+				  font-family: TH Niramit AS;
+				  src: url(../../resource/fonts/TH Niramit AS.ttf);
 				}
 				@font-face {
-					font-family: "THSarabun";
-					src: url(../../resource/fonts/THSarabun Bold.ttf);
+					font-family: TH Niramit AS;
+					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 					font-weight: bold;
 				}
 				* {
-				  font-family: THSarabun;
+				  font-family: TH Niramit AS;
 				}
+
 				body {
 				  padding: 0 30px;
 				}
@@ -268,7 +269,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br><br>
 			</div>
 			</div>
 			<div style="width:200px;margin-left: 680px;display:flex;">
@@ -278,7 +279,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();

@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrayResult = array();
+		
 		$arrayGroupLoan = array();
 		$getUcollwho = $conmssql->prepare("SELECT
 											RTRIM(LCC.LOANCONTRACT_NO) AS LOANCONTRACT_NO,
@@ -23,6 +23,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											AND LCC.LOANCOLLTYPE_CODE = '01'
 											AND LCC.REF_COLLNO = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
+		
+		$getRemark = $conmssql->prepare("SELECT REMARK FROM MBMEMBMASTER WHERE MEMBER_NO = :member_no");
+		$getRemark->execute([':member_no' => $member_no]);
+		$rowRemark = $getRemark->fetch(PDO::FETCH_ASSOC);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
@@ -37,6 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGroupLoan[] = $arrayColl;
 		}
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
+		$arrayResult['GUARANTEE_REMARK'] = $rowRemark["REMARK"] ? ('ธนาคารกรุงเทพ: '.$rowRemark["REMARK"]) : null;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

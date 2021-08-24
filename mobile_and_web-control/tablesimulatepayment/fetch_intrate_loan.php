@@ -3,8 +3,17 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
+		
+		$arrCanCal = array();
+		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
+		$fetchLoanCanCal->execute();
+		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
+			$arrCanCal[] = $rowCanCal["loantype_code"];
+		}
+	
 		$fetchIntrate = $conmssql->prepare("select lir.interest_rate as INTEREST_RATE,lp.LOANTYPE_DESC,lp.LOANTYPE_CODE from lnloantype lp LEFT JOIN lncfloanintratedet lir
-												ON lp.inttabrate_code = lir.loanintrate_code where GETDATE() 
+												ON lp.inttabrate_code = lir.loanintrate_code 
+												where lp.loantype_code IN(".implode(',',$arrCanCal).") AND GETDATE() 
 												BETWEEN CONVERT(varchar, lir.effective_date, 23) and CONVERT(varchar, lir.expire_date, 23)");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();
