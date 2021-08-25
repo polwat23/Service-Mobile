@@ -29,15 +29,18 @@ if($TextTemplate->rowCount() > 0){
 		$dataTemplate = $lineLib->mergeTextMessage($rowDataTemplate["text_message"]);
 		$arrPostData['messages'][0] = $dataTemplate;
 	}else if($rowTemplate["type_message"] == 'action'){
-		
-		$getDataTemplate = $conmysql->prepare("SELECT type,text,url,area_x,area_y,width,height,label,data,mode,initial,max,min  FROM ".$rowTableName["table_name"]." WHERE ".$rowTableName["condition_key"]." = :id_ref and is_use = '1'");
+		$getDataTemplate = $conmysql->prepare("SELECT 
+																			ac.type,ac.text,ac.url,ac.area_x,ac.area_y,ac.width,ac.height,ac.label,ac.data,ac.mode,ac.initial,ac.max,ac.min
+																		FROM lbquickmessage qc
+																		LEFT JOIN lbaction ac ON qc.id_action = ac.id_action 
+																		WHERE qc.id_quickmsg = :id_ref and qc.is_use = '1'");
 		$getDataTemplate->execute([':id_ref' => $rowTemplate["id_ref"]]);
 		$rowDataTemplate = $getDataTemplate->fetch(PDO::FETCH_ASSOC);
 		if($rowDataTemplate["type"]=='message'){
 			$dataTemplate = $lineLib->mergeMessageAction($rowDataTemplate["text"],$rowDataTemplate["label"]);
 			$arrPostData['messages'][0] = $dataTemplate;
 		}else if($rowDataTemplate["type"]=='uri'){
-			$dataTemplate = $lineLib->mergeUrlAction($rowDataTemplate["url"],$rowDataTemplate["label"]);
+			$dataTemplate = $lineLib->mergeUrlAction($rowDataTemplate["text"],$rowDataTemplate["url"],$rowDataTemplate["label"]);
 			$arrPostData['messages'][0] = $dataTemplate;
 		}else if($rowDataTemplate["type"]=='datetime_picker'){
 			$dataTemplate = $lineLib->mergeDetetimePickerAction($rowDataTemplate["label"],$rowDataTemplate["data"],$rowDataTemplate["mode"],$rowDataTemplate["initial"],$rowDataTemplate["max"],$rowDataTemplate["min"]);
@@ -56,16 +59,14 @@ if($TextTemplate->rowCount() > 0){
 			$arrPostData['messages'][0] = $dataTemplate;
 		}else {
 			file_put_contents(__DIR__.'/../log/response.txt', json_encode($rowDataTemplate) . PHP_EOL, FILE_APPEND);
-			$dataTemplate = $lineLib->mergeTextMessage("ลง else");
+			$dataTemplate = $lineLib->mergeTextMessage("ลง else".$rowTemplate["id_ref"].$rowDataTemplate["type"]);
 			$arrPostData['messages'][0] = $dataTemplate;
 		}
 	}
-	
 }else{
 	$messageErr = $func->getMsgLine('1');
 	$dataTemplate = $lineLib->mergeTextMessage($messageErr);
 	$arrPostData['messages'][0] = $dataTemplate;
-	
 	file_put_contents(__DIR__.'/../log/response.txt', json_encode($message) . PHP_EOL, FILE_APPEND);
 }
 require_once(__DIR__.'./replyresponse.php');

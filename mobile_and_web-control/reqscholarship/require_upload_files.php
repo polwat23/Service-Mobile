@@ -6,12 +6,22 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 		$arrFileUploaded = array();
 		$arrUploadFiles = array();
 		$arrChildCheck = array();
+		$arrKey = array();
+		$arrKeyData = array();
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$checkFileUpload = $conoracle->prepare("SELECT seq_no, document_desc FROM asnreqschshiponlinedet
 															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status <> 8 order by seq_no");
 		$checkFileUpload->execute([':child_id' => $dataComing["childcard_id"]]);
 		while($rowFileUpload = $checkFileUpload->fetch(PDO::FETCH_ASSOC)){
 			$arrFileUploaded[] = $rowFileUpload;
+		}
+		
+		$checkFileUploadOld = $conoracle->prepare("SELECT seq_no, document_desc,upload_status FROM asnreqschshiponlinedet
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id order by seq_no");
+		$checkFileUploadOld->execute([':child_id' => $dataComing["childcard_id"]]);
+		while($rowFileUploadOld = $checkFileUploadOld->fetch(PDO::FETCH_ASSOC)){
+			$arrKey[$rowFileUploadOld["SEQ_NO"]] = $rowFileUploadOld;
+			$arrKeyData[] = $rowFileUploadOld;
 		}
 		// old
 		$checkChildHave = $conoracle->prepare("SELECT asch.childcard_id as CHILDCARD_ID, mp.prename_desc||asch.child_name||'   '||asch.child_surname as CHILD_NAME
@@ -28,11 +38,16 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			$arrayFileManda = [
 				(object) [
 					'seq_no' => 1,
-					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 1 และภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
+					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 2,
+					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
+					'mandatory' => '0',
+				],
+				(object) [
+					'seq_no' => 3,
 					'document_desc' => 'เอกสารอื่นๆ (ถ้ามี)',
 					'mandatory' => '0',
 				]
@@ -41,45 +56,58 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			$arrayFileManda = [
 				(object) [
 					'seq_no' => 6,
-					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 1 และภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
+					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 7,
+					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
+					'mandatory' => '0',
+				],
+				(object) [
+					'seq_no' => 8,
 					'document_desc' => "สำเนาทะเบียนบ้านหรือสูติบัตรที่แสดงว่าเป็นบุตรโดยชอบด้วยกฎหมาย (ไม่รวมบุตรบุญธรรม)",
 					'mandatory' => '1',
 				],
 				(object) [
-					'seq_no' => 8,
+					'seq_no' => 9,
 					'document_desc' => "สำเนาบัตรประชาชน (ผู้ยื่นเรื่อง)",
 					'mandatory' => '1',
 				],
 				(object) [
-					'seq_no' => 9,
+					'seq_no' => 10,
 					'document_desc' => "สำเนาสมุดคู่บัญชีเงินฝากออมทรัพย์สหกรณ์ (แผ่นถัดจากหน้าปก)",
 					'mandatory' => '1',
+				],
+				(object) [
+					'seq_no' => 11,
+					'document_desc' => "เอกสารอื่นๆ (ถ้ามี)",
+					'mandatory' => '0',
 				]
 			];
 		}
 		foreach($arrayFileManda as $fileObj){
 			if(array_search($fileObj->seq_no,array_column($arrFileUploaded,'SEQ_NO')) === False){
+				$findData = $arrKey[$fileObj->seq_no]["DOCUMENT_DESC"];
 				$arrayUpload = array();
 				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$fileObj->seq_no;
 				$arrayUpload["UPLOAD_SEQ"] = $fileObj->seq_no;
-				$arrayUpload["UPLOAD_LABEL"] = $fileObj->document_desc;
+				$arrayUpload["UPLOAD_LABEL"] = $findData ?? $fileObj->document_desc;
 				$arrayUpload["IS_MANDATORY"] = $fileObj->mandatory;
 				$arrayUpload["IS_UPLOADED"] = 0;
 				$arrUploadFiles[] = $arrayUpload;
 			}else{
+				$findData = $arrKey[$fileObj->seq_no]["DOCUMENT_DESC"];
 				$arrayUpload = array();
 				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$fileObj->seq_no;
 				$arrayUpload["UPLOAD_SEQ"] = $fileObj->seq_no;
-				$arrayUpload["UPLOAD_LABEL"] = $fileObj->document_desc;
+				$arrayUpload["UPLOAD_LABEL"] = $findData ?? $fileObj->document_desc;
 				$arrayUpload["IS_MANDATORY"] = 0;
 				$arrayUpload["IS_UPLOADED"] = 1;
 				$arrUploadFiles[] = $arrayUpload;
 			}
 		}
+		
 		//new upload 
 		
 		/*$getUploadFiles = $conoracle->prepare("SELECT 5 as seq_no, 'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
@@ -121,6 +149,21 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				$arrUploadFiles[] = $arrayUpload;
 			}
 		}
+		
+		///ตรวจสอบว่าขาดไฟล์ไหน
+		foreach($arrKeyData as $arrKeyObj){
+			if(array_search($arrKeyObj["SEQ_NO"],array_column($arrUploadFiles,'UPLOAD_SEQ')) === False){
+				$arrayUpload = array();
+				$arrayUpload["UPLOAD_NAME"] = date('YmdHis').$arrKeyObj["SEQ_NO"];
+				$arrayUpload["UPLOAD_SEQ"] = $arrKeyObj["SEQ_NO"];
+				$arrayUpload["UPLOAD_LABEL"] = $arrKeyObj["DOCUMENT_DESC"];
+				$arrayUpload["IS_MANDATORY"] = 0;
+				$arrayUpload["IS_UPLOADED"] = $arrKeyObj["UPLOAD_STATUS"];
+				$arrUploadFiles[] = $arrayUpload;
+			}else{
+			}
+		}
+		
 		usort($arrUploadFiles, 'compare_seqno');
 		$checkReqStatus = $conoracle->prepare("SELECT CHILDCARD_ID,REQUEST_STATUS, CANCEL_REMARK FROM asnreqschshiponline 
 															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and REQUEST_STATUS <> 8");
@@ -132,6 +175,22 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			}
 			$arrayResult['REQUEST_STATUS'] = $rowReqStatus["REQUEST_STATUS"];
 		}
+		
+		//เอกสารยืนยันคำขอ
+		if(isset($dataComing["request_docno"])){
+			$getDocReq = $conoracle->prepare("SELECT ASNRS.ASNREQUEST_DOCNO, ASNRS.MEMBER_NO, ASNRS.SCHOLARSHIP_YEAR,  ASNRS.CHILD_NAME,  ASNRS.CHILD_SURNAME, CPRE.PRENAME_DESC,
+															ASNRS.CHILDBIRTH_DATE, ASNRS.CHILDCARD_ID, SLEV.LEVEL_DESC, ASNST.TYPE_DESC, ASNRS.SCHOOL_NAME
+															FROM ASNREQSCHOLARSHIP ASNRS 
+															LEFT JOIN MBUCFPRENAME CPRE ON CPRE.PRENAME_CODE = ASNRS.CHILDPRENAME_CODE
+															LEFT JOIN ASNUCFSCHOOLLEVEL SLEV ON SLEV.SCHOOL_LEVEL = ASNRS.SCHOOL_LEVEL
+															LEFT JOIN ASNUCFSCHOLARSHIPTYPE ASNST ON ASNST.SCHOLARSHIP_TYPE = ASNRS.SCHOLARSHIP_TYPE AND ASNST.COOP_ID = ASNRS.COOP_ID
+															WHERE ASNRS.ASNREQUEST_DOCNO = :request_docno");
+			$getDocReq->execute([':request_docno' => $dataComing["request_docno"]]);
+			$rowDocReq = $getDocReq->fetch(PDO::FETCH_ASSOC);
+			$arrayResult['REQ_DOC'] = $rowDocReq;
+		}
+		 
+		$arrayResult['arrKey'] = $arrKey;
 		$arrayResult['LIST_UPLOAD'] = $arrUploadFiles;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

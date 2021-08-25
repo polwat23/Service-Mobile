@@ -12,6 +12,14 @@ class libraryLine {
 		return $dataTemplate;
 	}
 	
+	public function stickerMessage($packageId,$stickerId){
+		$dataTemplate = array();
+		$dataTemplate["type"] = "sticker";
+		$dataTemplate["packageId"] = $packageId;
+		$dataTemplate["stickerId"] = $stickerId;
+		return $dataTemplate;
+	}
+	
 	public function mergeImageMessage($imageUrl){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "image";
@@ -19,6 +27,23 @@ class libraryLine {
 		$dataTemplate["previewImageUrl"] = $imageUrl;
 		return $dataTemplate;
 	}
+	
+	public function videoMessage($originalContentUrl,$previewImageUrl){
+		$dataTemplate = array();
+		$dataTemplate["type"] = "video";
+		$dataTemplate["originalContentUrl"] = $originalContentUrl;
+		$dataTemplate["previewImageUrl"] = $previewImageUrl;
+		return $dataTemplate;
+	}
+	
+	public function audioMessage($originalContentUrl,$duration){
+		$dataTemplate = array();
+		$dataTemplate["type"] = "audio";
+		$dataTemplate["originalContentUrl"] = $originalContentUrl;
+		$dataTemplate["duration"] = $duration;
+		return $dataTemplate;
+	}
+
 	
 	public function mergeLocationMessage($title,$address,$latitude,$longitude){
 		$dataTemplate = array();
@@ -30,7 +55,6 @@ class libraryLine {
 		return $dataTemplate;
 	}
 	
-		
 	public function mergeMessageAction($text,$label){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
@@ -81,7 +105,6 @@ class libraryLine {
 		return $dataTemplate;
 	}
 	
-	
 	public function mergePostbackAction($text,$label,$data){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
@@ -123,23 +146,17 @@ class libraryLine {
 		return $dataTemplate;
 	}
 	
-
-	public function mergeUrlAction($url,$label){
-		$dataTemplate = [];
-		$dataTemplate["type"] = "flex";
-		$dataTemplate["altText"] = "This is a Flex Message";
-		$dataTemplate["contents"]["type"] = "bubble";
-		$dataTemplate["contents"]["body"]["type"] = "box";
-		$dataTemplate["contents"]["body"]["layout"] = "horizontal";
-		$dataTemplate["contents"]["body"]["contents"][0]["type"] = "text";
-		$dataTemplate["contents"]["body"]["contents"][0]["text"] = $label;
-		$dataTemplate["contents"]["body"]["contents"][0]["action"]["type"] = "uri";
-		$dataTemplate["contents"]["body"]["contents"][0]["action"]["label"] = "action";
-		$dataTemplate["contents"]["body"]["contents"][0]["action"]["uri"] = $url;
-		$dataTemplate["contents"]["body"]["contents"][0]["wrap"] = true;
-		$dataTemplate["contents"]["body"]["contents"][0]["color"] = "#0EA7CA";
+	public function mergeUrlAction($text,$url,$label){
+		$dataTemplate = array();
+		$dataTemplate["type"] = "text";
+		$dataTemplate["text"] = $text;
+		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
+		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "uri";
+		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = $label??"label";
+		$dataTemplate["quickReply"]["items"][0]["action"]["uri"] = $url;
 		return $dataTemplate;
 	}
+	
 	
 	public function sendLineBot($message){
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');

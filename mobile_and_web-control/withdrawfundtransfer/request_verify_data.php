@@ -257,9 +257,9 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				require_once('../../include/exit_footer.php');
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
-			if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
-				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESPONSE_CODE'] = $arrInitDep["RESPONSE_CODE"];
+			if($arrInitDep["RESPONSE_CODE"] == 'WS0056'){
+				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrInitDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}

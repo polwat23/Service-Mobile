@@ -2,6 +2,8 @@
 require_once('../autoload.php');
 
 if($func->logout($payload["id_token"],'0')){
+	$updateFcmAfterLogout = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = null,hms_token = null WHERE member_no = :member_no");
+	$updateFcmAfterLogout->execute([':member_no' => $payload["member_no"]]);
 	$arrayResult['RESULT'] = TRUE;
 	require_once('../../include/exit_footer.php');
 }else{

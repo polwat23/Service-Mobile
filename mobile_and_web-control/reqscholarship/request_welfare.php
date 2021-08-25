@@ -415,7 +415,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "1ไม่สามารถ Insert ลง asnreqschshiponline ได้ "."\n".$insertSchShipOnline->queryString."\n".json_encode([
+					$message_error = "ไม่สามารถ Insert ลง asnreqschshiponline ได้ "."\n".$insertSchShipOnline->queryString."\n".json_encode([
 						':member_no' => $member_no,
 						':child_id' => $dataComing["childcard_id"],
 						':child_name' => ($rowChildName["CHILD_NAME"] != "" && isset($rowChildName["CHILD_NAME"])) ? $rowChildName["CHILD_NAME"] : $rowChildName2["CHILD_NAME"],
