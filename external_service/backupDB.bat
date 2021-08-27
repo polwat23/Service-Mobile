@@ -3,7 +3,7 @@
 
 del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip
 
-cd C:\Program Files\MariaDB 10.4\bin
+cd C:\Program Files\MariaDB 10.5\bin
 C:
 mysqldump.exe -hlocalhost -P3306 -u root -p@NSTH2020 mobile_nsth > D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
 
