@@ -23,15 +23,6 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$checkAccBankBeenbind = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
-			$checkAccBankBeenbind->execute([':member_no' => $payload["member_no"]]);
-			if($checkAccBankBeenbind->rowCount() > 0){
-				$arrayResult['RESPONSE_CODE'] = "WS0036";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
 			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '8'");
 			$checkBeenBindForPending->execute([
 				':member_no' => $payload["member_no"]
