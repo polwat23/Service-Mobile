@@ -216,8 +216,7 @@ function GenerateReport($dataReport,$header,$lib){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
 	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์เครดิตยูเนี่ยนมหาวิทยาลัยราชภัฏสวนสุนันทา จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1 แขวงดุสิต  เขตดุสิต</p>
-			<p style="margin-top: -25px;font-size: 18px;">กทม </p>
+			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1 แขวงดุสิต  เขตดุสิต กทม</p>
 			<p style="margin-top: -25px;font-size: 18px;">โทร : 02-160-1328 หรือ 080-629-7221</p>
 			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cdu.ssru.ac.th</p>
 			</div>
@@ -325,10 +324,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-45px;">ผู้จัดการ</div>
 			';
 
 	

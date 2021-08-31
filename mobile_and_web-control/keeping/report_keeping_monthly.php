@@ -273,7 +273,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
 			.........................................................
-			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
+			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
 			';
 
 	$dompdf = new Dompdf([
