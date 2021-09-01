@@ -209,17 +209,17 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)</p>
-			<p style="margin-top: -27px;font-size: 18px;">461 หมู่ 5 ถ.พหลโยธิน ต.น้ำรึม อ.เมือง จ.ตาก 63000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 055-511-061,055-541-554</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.taktcoop1.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูลำปาง จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">20 ถนน ทิพย์ช้าง ตำบลหัวเวียง อำเภอเมืองลำปาง ลำปาง 52000</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร. 054218943</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.lptcoop.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -328,7 +328,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<img src="../../resource/utility_icon/signature/mg.gif" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 620px;margin-top:-40px;">(น.ส.สุนันทนา  ขันธเลิศ)</div>
+			<div style="font-size: 18px;margin-left: 620px;margin-top:-40px;">(.............)</div>
 			<div style="font-size: 18px;margin-left: 655px;margin-top:0px;">ผู้จัดการ</div>
 			';
 
