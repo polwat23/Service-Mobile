@@ -37,9 +37,28 @@ class insertLog {
 				$this->logEditSMS($log_struc);
 			}else if($type_log == 'editinfo'){
 				$this->logEditInfo($log_struc);
+			}else if($type_log == 'repayloan'){
+				$this->logRepayLoan($log_struc);
+			}else if($type_log == 'buyshare'){
+				$this->logBuyShare($log_struc);
 			}
 		}
-		
+		private function logBuyShare($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logbuyshare(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
+											,destination,response_code,response_message) 
+											VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:status_flag,
+											:destination,:response_code,:response_message)");
+			$insertLog->execute($log_struc);
+		}
+
+		private function logRepayLoan($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logrepayloan(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
+											,destination,response_code,response_message) 
+											VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:status_flag,
+											:destination,:response_code,:response_message)");
+			$insertLog->execute($log_struc);
+		}
+
 		private function logUseApplication($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO loguseapplication(member_no,id_userlogin,access_date,ip_address) 
 												VALUES(:member_no,:id_userlogin,NOW(),:ip_address)");
@@ -115,14 +134,14 @@ class insertLog {
 		}
 		private function logTransferInsideCoop($log_struc){
 			if(isset($log_struc[":penalty_amt"])){
-				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,penalty_amt,type_request,transfer_flag
+				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,deptaccount_no,amt_transfer,penalty_amt,type_request,transfer_flag
 													,destination,response_code,response_message) 
-													VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:penalty_amt,:type_request,:transfer_flag,
+													VALUES(:member_no,:id_userlogin,:deptaccount_no,:amt_transfer,:penalty_amt,:type_request,:transfer_flag,
 													:destination,:response_code,:response_message)");
 			}else{
-				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,type_request,transfer_flag
+				$insertLog = $this->con->prepare("INSERT INTO logtransferinsidecoop(member_no,id_userlogin,deptaccount_no,amt_transfer,type_request,transfer_flag
 													,destination,response_code,response_message) 
-													VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:type_request,:transfer_flag,
+													VALUES(:member_no,:id_userlogin,:deptaccount_no,:amt_transfer,:type_request,:transfer_flag,
 													:destination,:response_code,:response_message)");
 
 			}

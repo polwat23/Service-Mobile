@@ -45,6 +45,7 @@ require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/cal_deposit.php');
+require_once(__DIR__.'/../include/cal_loan.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
 
@@ -54,6 +55,7 @@ use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
 use CalculateDeposit\CalculateDep;
+use CalculateLoan\CalculateLoan;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
@@ -67,6 +69,7 @@ $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
 $cal_dep = new CalculateDep();
+$cal_loan = new CalculateLoan();
 $log = new insertLog();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
@@ -140,6 +143,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							http_response_code(401);
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
+						}
+						if($payload["exp"] <= time() + ($func->getConstant('limit_session_timeout') / 2)){
+							$regen_token = $auth->refresh_accesstoken($dataComing["refresh_token"],
+							$dataComing["unique_id"],$conmysql,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+							if(!$regen_token){
+								$arrayResult['RESPONSE_CODE'] = "WS0014";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								http_response_code(401);
+								require_once('/../include/exit_footer.php');
+							}
+							$arrayResult['NEW_TOKEN'] = $regen_token["ACCESS_TOKEN"];
 						}
 					}catch (ValidateException $e) {
 						$errorCode = $e->getCode();

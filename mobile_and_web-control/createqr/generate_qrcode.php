@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												VALUES (:qrgenerate,:member_no,:generate_date,:expire_date,:id_userlogin,:app_version)");
 		if($insertQrMaster->execute([
 			':qrgenerate' => $randQrRef,
-			':member_no' => $payload["member_no"],
+			':member_no' => $member_no,
 			':generate_date' => date_format($currentDate,"Y-m-d H:i:s"),
 			':expire_date' => $expireDate,
 			':id_userlogin' => $payload["id_userlogin"],
@@ -71,8 +71,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					exit();
 				}
 			}
-			
-			$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".$qrTransferAmt."\r\n".$qrTransferFee;
+			$qrTransferAmtFormat = number_format($qrTransferAmt, 2, '', '');
+			$qrTransferFeeFormat = number_format($qrTransferFee, 2, '', '');
+			$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".$qrTransferAmtFormat."\r\n".$qrTransferFeeFormat;
 			$qrCode = new QrCode($stringQRGenerate);
 			header('Content-Type: '.$qrCode->getContentType());
 			$qrCode->writeString();

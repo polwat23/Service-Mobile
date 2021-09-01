@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit
+		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,gc.bank_account_name
 												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
 												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
 		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
-						$arrayResult['FEE_AMT'] = $arrResponse->FEE_AMT;
+						$arrayResult['FEE_AMT'] = $rowDataDeposit["fee_deposit"];
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 						$arrayResult['SOURCE_REFNO'] = $arrResponse->SOURCE_REFNO;
 						$arrayResult['ETN_REFNO'] = $arrResponse->ETN_REFNO;
@@ -114,6 +114,12 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					}
 					$arrayResult['BANK_ACCOUNT_ENC'] = $dataComing["bank_account_no"];
 					$arrayResult['ACCOUNT_NAME'] = $arrResponseAPI->toCOOPAccountName;
+					$arrayResult['RESULT'] = TRUE;
+				}else if($rowDataDeposit["bank_code"] == '014'){
+					$arrayResult['FEE_AMT'] = $rowDataDeposit["fee_deposit"];
+					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
+					$arrayResult['BANK_ACCOUNT_ENC'] = $dataComing["bank_account_no"];
+					$arrayResult['ACCOUNT_NAME'] = $rowDataDeposit["bank_account_name"];
 					$arrayResult['RESULT'] = TRUE;
 				}
 			}else{

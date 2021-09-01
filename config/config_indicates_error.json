@@ -100,9 +100,15 @@
 	"WS0084" : [{"th" : "ไม่สามารถยื่นกู้ได้เนื่องจากสิทธิ์การกู้ของท่านไม่เพียงพอ กรุณาตรวจสอบสิทธิ์การกู้ของท่านได้ที่เมนูสิทธิ์กู้โดยประมาณหรือติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot request loan because your loan rights amount not enough please check your rights in menu Loan Estimate or contact cooperative"}],
 	"WS0085" : [{"th" : "ท่านทำรายการเกินยอดสูงสุดต่อเดือนที่กำหนด ยอดทำรายการคงเหลือต่อเดือนคือ ${remain_amount_deposit_per_month} บาท","en" : "Money transactions amount per month over define, money transactions amount remain per month is ${remain_amount_deposit_per_month} Baht"}],
 	"WS0086" : [{"th" : "ไม่สามารถขอกู้ได้ เนื่องจากหนี้เดิมของท่านมีมากกว่าสิทธิ์กู้ของท่าน","en" : "Cannot request loan because old debt is more than your loan rights"}],
+	"WS0088" : [{"th" : "ไม่สามารถคำนวณงวดการกู้ของท่านได้ กรุณาติดต่อสหกรณ์","en" : "Cannot calculate period of loan please contact cooperative"}],
 	"WS0089" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากบัญชีของท่านได้ถูกปิดบัญชีไปแล้ว","en" : "Cannot transaction because your account was closed"}],
 	"WS0090" : [{"th" : "ประเภทบัญชีเงินฝากของท่านไม่สามารถทำรายการโอนเงินภายในสหกรณ์ได้","en" : "This deposit type not allow to transfer inside cooperative"}],
+	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัดบัญชี จำนวนที่อายัด ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
+	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากมีการอายัดบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
 	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
+	"WS0096" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากไม่สามารถระบุรหัสการทำรายการ กรุณาติดต่อสหกรณ์","en" : "Cannot transaction because unknown this transaction code please contact cooperative"}],
+	"WS0097" : [{"th" : "ขออภัยท่านได้ยืนยันยอดเรียบร้อยแล้ว ไม่สามารถยืนยันยอดซ้ำได้","en" : "Sorry, your balance has been confirmed. Can not repeat confirm"}],
+	"WS0098" : [{"th" : "ยอดทำรายการมากกว่า หนี้คงเหลือของท่าน กรุณาตรวจสอบข้อมูลอีกครั้งก่อนทำรายการ","en" : "Your transfer amount more than loan balance please recheck before transaction"}],
 	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
 	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
 	"WS0101" : [{"th" : "จำนวนครั้งในการทำรายการต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of day over than the cooperative is define"}],
@@ -112,7 +118,11 @@
 	"WS0107" : [{"th" : "ไม่พบรหัสรายการ QR ดังกล่าว กรุณาลองอีกครั้ง","en" : "Not found this transaction id please try again"}],
 	"WS0108" : [{"th" : "รายการนี้เสร็จสิ้นแล้ว ไม่สามารถทำรายการซ้ำได้","en" : "This transaction was completed cannot repeat transaction"}],
 	"WS0109" : [{"th" : "รายการหมดอายุ กรุณาสร้างรายการใหม่ที่แอปฯ สหกรณ์","en" : "Transaction has expired please create qr on cooperatives application"}],
-	"WS0097" : [{"th" : "ขออภัยท่านได้ยืนยันยอดเรียบร้อยแล้ว ไม่สามารถยืนยันยอดซ้ำได้","en" : "Sorry, your balance has been confirmed. Can not repeat confirm"}],
+	"WS0110" : [{"th" : "ประเภทสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member type is not allowed to payment monthly special"}],
+	"WS0111" : [{"th" : "กลุ่มสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member group is not allowed to payment monthly special"}],
+	"WS0112" : [{"th" : "ยอดทำรายการของท่านไม่ตรงกับที่ระบุใน QR","en" : "Transaction amount not match on the QR"}],
+	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
+	"WS0120" : [{"th" : "เงินเดือนคงเหลือของท่านไม่เพียงพอ","en" : "Salary remain is insufficient for installment"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
 	"WS1005" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเพิ่มบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1005","en" : "Something was wronged that cannot add memo please contact cooperative #WS1005"}],
@@ -194,6 +204,10 @@
 		"005" :
 			[{"th" : "ยอดคงเหลือในบัญชีธนาคารของท่านไม่พอหักเพื่อทำรายการฝาก กรุณาตรวจสอบยอดเงินก่อนทำรายการ","en" : "Balance of bank account  not enough for deposit to cooperative please check your balance before transaction"}]
 		}],
+	"SCB_ERR" : [{
+		"H340" : 
+			[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Insufficient Funds"}]
+	}],
 	"SAVING_EGAT_ERR" : [{
 		"401" : 
 			[{"th" : "ไม่พบบัญชีของสมาชิก","en" : "Not found account of member"}],
@@ -278,6 +292,11 @@
 		"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
 		"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
 		"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+	}],
+	"REQ_FLAG_DETAIL" : [{
+		"0" : [{"th" : "ต้องมีบัญชีเงินฝากสหกรณ์ประเภทออมทรัพย์","en" : "Must have saving account"}],
+		"1" : [{"th" : "ต้องเป็นสมาชิกอย่างน้อย 6 เดือนขึ้นไป","en" : "Must be a member more than 6 months"}],
+		"2" : [{"th" : "ประเภทสมาชิกของท่าน ไม่สามารถขอกู้ประเภทนี้ได้","en" : "Your member type cannot request loan"}]
 	}],
 	"REQ_HAVE_OLD_CONTRACT" : [{"th" : "ท่านมีสัญญาเงินกู้ประเภทนี้อยู่แล้วไม่สามารถกู้ซ้ำได้","en" : "Your have contract already exist cannot request repeat"}],
 	"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],

@@ -5,75 +5,56 @@ require_once(__DIR__.'/../../include/validate_input.php');
 $member_no = $member_no ?? $dataComing["member_no"];
 $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
+$receive_net = 0;
 $oldBal = 0;
 $request_amt = 0;
 $cal_remark = null;
-$getMemb = $conoracle->prepare("SELECT SALARY_AMOUNT,MEMBER_DATE,trunc(MONTHS_BETWEEN(ADD_MONTHS(birth_date, 720),sysdate),0) as REMAIN_PERIOD, TRIM(EMP_TYPE) as EMP_TYPE
-								FROM mbmembmaster WHERE member_no = :member_no");
-$getMemb->execute([':member_no' => $member_no]);
-$rowMemb = $getMemb->fetch(PDO::FETCH_ASSOC);
-$month_member = $lib->count_duration($rowMemb["MEMBER_DATE"],'m');
-$age_member = intval($month_member);
-if($age_member >= 6){
-	if($rowMemb["EMP_TYPE"] == '01' || $rowMemb["EMP_TYPE"] == '10' || $rowMemb["EMP_TYPE"] == '02' || $rowMemb["EMP_TYPE"] == '05' || $rowMemb["EMP_TYPE"] == '03' || $rowMemb["EMP_TYPE"] == '04' || $rowMemb["EMP_TYPE"] == '09'){
-		//เช็คสิทธิ์กู้  98 % ของค่าหุ้นสะสมที่ปลอดภาระผูกพัน ไม่เกิน 150,000 บาท
-		$getShareStk = $conoracle->prepare("SELECT (SHARESTK_AMT * 10) AS SHARESTK_AMT FROM SHSHAREMASTER WHERE MEMBER_NO = :member_no");
-		$getShareStk->execute([':member_no' => $member_no]);
-		$rowShareStk = $getShareStk->fetch(PDO::FETCH_ASSOC);
-		$getContColl = $conoracle->prepare("select sum(lc.coll_balance) as sumcoll_balance
-										from lncontcoll lc
-										join lncontmaster lm on lc.loancontract_no = lm.loancontract_no
-										where lc.loancolltype_code = '02' and lc.coll_status = '1' and lm.contract_status > 0 and lc.ref_collno = :member_no");
-		$getContColl->execute([':member_no' => $member_no]);
-		$rowContColl = $getContColl->fetch(PDO::FETCH_ASSOC);
-		$share_available = ($rowShareStk["SHARESTK_AMT"]) - ($rowContColl["SUMCOLL_BALANCE"] ?? 0);
-		
-		if($share_available > 150000){
-			$share_available = 150000;
-			$maxloan_amt = $share_available * 0.98;
-		} else {
-			$maxloan_amt = $share_available * 0.98;
-		}
-		
-		$getOldContract = $conoracle->prepare("SELECT ln.LOANCONTRACT_NO,ln.PRINCIPAL_BALANCE,lt.LOANTYPE_DESC,lt.LOANPAYMENT_TYPE
-											FROM lncontmaster ln LEFT JOIN lnloantype lt ON ln.loantype_code = lt.loantype_code
-											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8
-											and lt.loangroup_code = '02' and ln.loantype_code IN('16','10','11','12','13','14','15')");
-		$getOldContract->execute([':member_no' => $member_no]);
-		while($rowContDetail = $getOldContract->fetch(PDO::FETCH_ASSOC)){
-			$arrContract = array();
-			$arrContract['LOANTYPE_DESC'] = $rowContDetail["LOANTYPE_DESC"];
-			$arrContract['CONTRACT_NO'] = $rowContDetail["LOANCONTRACT_NO"];
-			$arrContract['BALANCE'] = $rowContDetail["PRINCIPAL_BALANCE"];
-			$oldBal += $rowContDetail["PRINCIPAL_BALANCE"];
-			$arrOldContract[] = $arrContract;
-		}
-		$getPeriod = $conoracle->prepare("SELECT MAX_PERIOD FROM LNLOANTYPEPERIOD 
-										WHERE LOANTYPE_CODE = :loantype_code");
-		$getPeriod->execute([':loantype_code' => $loantype_code]);
-		$rowPeriod = $getPeriod->fetch(PDO::FETCH_ASSOC);
-		$arrSubOther["LABEL"] = "งวดสูงสุด";
-		$max_period = $rowMemb["REMAIN_PERIOD"];
-		if($max_period > $rowPeriod["MAX_PERIOD"]){
-			$max_period = $rowPeriod["MAX_PERIOD"];
-		}
-		if($max_period < 0){
-			$max_period = 0;
-		}
-		$arrSubOther["VALUE"] = $max_period." งวด";
-		$arrOtherInfo[] = $arrSubOther;
-	}else{
+
+$getShareStk = $conoracle->prepare("SELECT (SHARESTK_AMT * 10) AS SHARESTK_AMT FROM SHSHAREMASTER WHERE MEMBER_NO = :member_no");
+$getShareStk->execute([':member_no' => $member_no]);
+$rowShareStk = $getShareStk->fetch(PDO::FETCH_ASSOC);
+$maxloan_amt = $rowShareStk["SHARESTK_AMT"] * 0.95;
+$getLoanOld2H = $conoracle->prepare("SELECT PRINCIPAL_BALANCE
+								FROM LNCONTMASTER
+								WHERE LOANTYPE_CODE = '2H' AND MEMBER_NO = :member_no 
+								AND CONTRACT_STATUS > '0' AND CONTRACT_STATUS <> '8'");
+$getLoanOld2H->execute([':member_no' => $member_no]);
+$rowLoan2H = $getLoanOld2H->fetch();
+$maxloan_amt -= $rowLoan2H["PRINCIPAL_BALANCE"];
+if($maxloan_amt > 150000){
+	$maxloan_amt = 150000;
+}
+$getLoanOld = $conoracle->prepare("SELECT LN.PRINCIPAL_BALANCE,LN.LOANCONTRACT_NO,LN.LAST_PERIODPAY,LN.LOANAPPROVE_AMT,LT.LOANTYPE_DESC
+								FROM LNCONTMASTER LN LEFT JOIN LNLOANTYPE LT ON LN.LOANTYPE_CODE = LT.LOANTYPE_CODE
+								WHERE LN.LOANTYPE_CODE IN('2J','10','11','12','13','14','15','16') AND LN.MEMBER_NO = :member_no 
+								AND LN.CONTRACT_STATUS > '0' AND LN.CONTRACT_STATUS <> '8'");
+$getLoanOld->execute([':member_no' => $member_no]);
+while($rowLoanold = $getLoanOld->fetch(PDO::FETCH_ASSOC)){
+	$interest = $cal_loan->calculateInterest($rowLoanold["LOANCONTRACT_NO"]);
+	$oldBal += $rowLoanold["PRINCIPAL_BALANCE"] + $interest;
+	$arrContract = array();
+	$arrContract["LOANTYPE_DESC"] = $rowLoanold["LOANTYPE_DESC"];
+	$arrContract["BALANCE"] = $rowLoanold["PRINCIPAL_BALANCE"] + $interest;
+	$arrOldContract[] = $arrContract;
+}
+$getLoanOld2J = $conoracle->prepare("SELECT LN.PRINCIPAL_BALANCE,LN.LOANCONTRACT_NO,LN.LAST_PERIODPAY,LN.LOANAPPROVE_AMT,LT.LOANTYPE_DESC
+								FROM LNCONTMASTER LN LEFT JOIN LNLOANTYPE LT ON LN.LOANTYPE_CODE = LT.LOANTYPE_CODE
+								WHERE LN.LOANTYPE_CODE IN('2J') AND LN.MEMBER_NO = :member_no 
+								AND LN.CONTRACT_STATUS > '0' AND LN.CONTRACT_STATUS <> '8'");
+$getLoanOld2J->execute([':member_no' => $member_no]);
+$rowLoanold2J = $getLoanOld2J->fetch(PDO::FETCH_ASSOC);
+if(isset($rowLoanold2J["LOANTYPE_DESC"]) && $rowLoanold2J["LOANTYPE_DESC"] != ""){
+	if($rowLoanold2J["LAST_PERIODPAY"] < 6 && ($rowLoanold2J["LOANAPPROVE_AMT"]  - ($rowLoanold2J["LOANAPPROVE_AMT"] * 0.10)) < $rowLoanold2J["PRINCIPAL_BALANCE"]){
 		$maxloan_amt = 0;
-		$arrSubOther["LABEL"] = "ประเภทสมาชิกของท่าน ไม่สามารถขอกู้ประเภทนี้ได้";
-		$cal_remark = "ประเภทสมาชิกของท่าน ไม่สามารถขอกู้ประเภทนี้ได้";
-		$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
-		$arrCollShould[] = $arrSubOther;
+		$cal_remark = "ยื่นขอกู้อีกครั้งได้ก็ต่อเมื่อท่านผ่อนชำระหนี้เดิมมาแล้ว 6 เดือนขึ้นไป หรือผ่อนชำระหนี้แล้วไม่น้อยกว่าร้อยละ 10 ของจำนวนเงินกู้";
 	}
-}else{
+}
+$maxloan_amt = $dataComing["request_amt"] ?? $maxloan_amt;
+if($oldBal > $maxloan_amt){
 	$maxloan_amt = 0;
-	$arrSubOther["LABEL"] = "ต้องเป็นสมาชิกอย่างน้อย 6 เดือนขึ้นไป";
-	$cal_remark = "ต้องเป็นสมาชิกอย่างน้อย 6 เดือนขึ้นไป";
-	$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
-	$arrCollShould[] = $arrSubOther;
+	$cal_remark = "หนี้เดิมของท่านมากกว่าสิทธิ์กู้ ท่านไม่สามารถขอกู้ได้ ณ ขณะนี้";
+}else{
+	$canRequest = true;
+	$receive_net = $maxloan_amt - $oldBal;
 }
 ?>

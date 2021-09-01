@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrayResult = array();
+		
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit');
 		$arrayResult['LIMIT_DURATION'] = $limit;

@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchQrgenerateList = $conmysql->prepare("SELECT qrm.qrcodegen_id,qrm.qrgenerate,qrm.member_no,qrm.generate_date,qrm.qrtransfer_amt,qrm.qrtransfer_fee,
 										qrm.expire_date,qrm.transfer_status,qrm.update_date,
 										qrd.trans_code_qr,qrd.ref_account,qrd.qrtransferdt_amt,qrd.qrtransferdt_fee,
-                                        qrc.trans_desc_qr
+                                        qrc.trans_desc_qr, qrd.trans_status
 										FROM gcqrcodegenmaster qrm
 										LEFT JOIN gcqrcodegendetail qrd ON qrd.qrgenerate = qrm.qrgenerate
 										LEFT JOIN gcconttypetransqrcode qrc ON qrd.trans_code_qr = qrc.trans_code_qr
@@ -31,6 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayQr["QRTRANSFERDT_AMT"] = number_format($rowQr["qrtransferdt_amt"],2);
 			$arrayQr["QRTRANSFERDT_FEE"] = number_format($rowQr["qrtransferdt_fee"],2);
 			$arrayQr["TRANS_DESC_QR"] = $rowQr["trans_desc_qr"];
+			$arrayQr["TRANS_STATUS"] = $rowQr["trans_status"];
 			
 			$arrayGrpAll[] = $arrayQr;
 		}

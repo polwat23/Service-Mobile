@@ -19,7 +19,7 @@ class library {
 		$data[8] = chr( ord( $data[8] ) & 0x3f | 0x80 );
 		return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
 	}
-	public function convertdate($date,$format="D m Y",$is_time=false){
+	public function convertdate($date,$format="D m Y",$is_time=false,$not_space=false){
 		if(isset($date)){
 			$date = preg_replace('|/|','-',$date);
 			$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
@@ -52,21 +52,41 @@ class library {
 							break;				
 					}
 				}else{
-					switch($value_format){
-						case "D" :
-						case "d" : $dateConverted .= $separate.$datearray[2];
-							break;
-						case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
-							break;
-						case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
-							break;
-						case "N" :
-						case "n" : $dateConverted .= $separate.$datearray[1];
-							break;
-						case "Y" : $dateConverted .= $separate.($datearray[0]+543);
-							break;
-						case "y" : $dateConverted .= $separate.($datearray[0]);
-							break;
+					if($not_space){
+						switch($value_format){
+							case "D" :
+							case "d" : $dateConverted .= $datearray[2];
+								break;
+							case "M" : $dateConverted .= $thaimonth[$datearray[1]*1];
+								break;
+							case "m" : $dateConverted .= $thaishort[$datearray[1]*1];
+								break;
+							case "N" :
+							case "n" : $dateConverted .= $datearray[1];
+								break;
+							case "Y" : $dateConverted .= ($datearray[0]+543);
+								break;
+							case "y" : $dateConverted .= ($datearray[0]);
+								break;
+						}
+
+					}else{
+						switch($value_format){
+							case "D" :
+							case "d" : $dateConverted .= $separate.$datearray[2];
+								break;
+							case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
+								break;
+							case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
+								break;
+							case "N" :
+							case "n" : $dateConverted .= $separate.$datearray[1];
+								break;
+							case "Y" : $dateConverted .= $separate.($datearray[0]+543);
+								break;
+							case "y" : $dateConverted .= $separate.($datearray[0]);
+								break;
+						}
 					}
 				}
 			}
@@ -258,7 +278,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'cloud2.gensoft.co.th';
+		$mailFunction->Host = 'zcs1.bestinternet.co.th'; //'mail.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -269,7 +289,7 @@ class library {
 		$mailFunction->Hostname = 'gensoft.co.th';
 		$mailFunction->Helo = 'Gensoft-Mail';
 		$mailFunction->Encoding = 'quoted-printable';
-		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
+		$mailFunction->setFrom("coop-noreply@gensoft.co.th", $json_data["NAME_APP"]); //setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
@@ -410,7 +430,7 @@ class library {
 			$data = [
 				"registration_ids" => $payload["TO"],
 				"priority" => "high",
-				//"content_available" => true,
+				"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -428,7 +448,7 @@ class library {
 			$data = [
 				"to" => $payload["TO"],
 				"priority" => "high",
-				//"content_available" => true,
+				"content_available" => true,
 				"notification" => [
 					"title" => $payload["PAYLOAD"]["SUBJECT"],
 					"body" => $payload["PAYLOAD"]["BODY"],
@@ -776,7 +796,7 @@ class library {
 				//ปัดที่ละสลึง
 				if ($fraction > 0.00 && $fraction <= 0.25) { $roundFrac = 0.25; }
 				if ($fraction > 0.25 && $fraction <= 0.50) { $roundFrac = 0.50; }
-				if ($fraction > 0.25 && $fraction <= 0.75) { $roundFrac = 0.75; }
+				if ($fraction > 0.50 && $fraction <= 0.75) { $roundFrac = 0.75; }
 				if ($fraction > 0.75 && $fraction <= 0.99) { $roundFrac = 1.00; }
 				break;
 			case 2:

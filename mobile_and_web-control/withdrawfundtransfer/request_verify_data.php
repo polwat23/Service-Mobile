@@ -188,6 +188,67 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						require_once('../../include/exit_footer.php');
 						
 					}
+				}else if($rowDataWithdraw["bank_code"] == '014'){
+					$arrSendData = array();
+					$arrVerifyToken = array();
+					$arrVerifyToken['exp'] = time() + 300;
+					$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
+					$arrVerifyToken['member_no'] = $payload["member_no"];
+					$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
+					$arrVerifyToken['amt_transfer'] = $amt_transfer;
+					$arrVerifyToken['fee_amt'] = $fee_amt;
+					$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
+					$arrSendData["verify_token"] = $verify_token;
+					$arrSendData["app_id"] = $config["APP_ID"];
+					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_inquirywithd_coopdirect"],$arrSendData);
+					if(!$responseAPI["RESULT"]){
+						$filename = basename(__FILE__, '.php');
+						$arrayResult['RESPONSE_CODE'] = "WS0027";
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':operate_date' => $dateOper,
+							':deptaccount_no' => $deptaccount_no,
+							':amt_transfer' => $amt_transfer,
+							':response_code' => $arrayResult['RESPONSE_CODE'],
+							':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
+						];
+						$log->writeLog('withdrawtrans',$arrayStruc);
+						$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
+						$lib->sendLineNotify($message_error);
+						$func->MaintenanceMenu($dataComing["menu_component"]);
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}
+					$arrResponse = json_decode($responseAPI);
+					if($arrResponse->RESULT){
+						if($fee_amt > 0){
+							$arrayResult['FEE_AMT'] = $fee_amt;
+							$arrayResult['FEE_AMT_FORMAT'] = number_format($fee_amt,2);
+						}
+					}else{
+						$arrayResult['RESPONSE_CODE'] = "WS0038";
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':operate_date' => $dateOper,
+							':deptaccount_no' => $deptaccount_no,
+							':amt_transfer' => $amt_transfer,
+							':response_code' => $arrResponse->RESPONSE_CODE,
+							':response_message' => $arrResponse->RESPONSE_MESSAGE
+						];
+						$log->writeLog('withdrawtrans',$arrayStruc);
+						if(isset($configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+						}else{
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						}
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}
 				}
 				$arrayResult['ACCOUNT_NAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 				if($arrResponseAPI->coopFee > 0){
@@ -198,6 +259,9 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$arrayResult['PENALTY_AMT'] = $arrResponseAPI->coopFee;
 					$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrResponseAPI->coopFee,2);
 				}
+				$arrayResult['TRAN_TIME'] = $arrResponse->TRAN_TIME;
+				$arrayResult['TOKEN_ID'] = $arrResponse->TOKEN_ID;
+				$arrayResult['TRAN_UNIQ'] = $arrResponse->TRAN_UNIQ;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

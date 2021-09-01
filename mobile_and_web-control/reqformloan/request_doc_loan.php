@@ -254,10 +254,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 				$conmysql->beginTransaction();
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																		int_rate_at_req,salary_at_req,salary_img,bookbank_img,bookcoop_img,id_userlogin,contractdoc_url,
+																		int_rate_at_req,salary_at_req,salary_img,citizen_img,bookbank_img,bookcoop_img,id_userlogin,contractdoc_url,
 																		deptaccount_no_bank,bank_desc,deptaccount_no_coop,objective)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																		,:salary,:salary_img,:bookbank_img,:bookcoop_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:bank_desc,:deptaccount_no_coop,:objective)");
+																		,:salary,:salary_img,:citizen_img,:bookbank_img,:bookcoop_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:bank_desc,:deptaccount_no_coop,:objective)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -268,7 +268,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':loanpermit_amt' => $dataComing["loanpermit_amt"],
 					':int_rate' => $dataComing["int_rate"] / 100,
 					':salary' => $rowData["SALARY_AMOUNT"],
-					':salary_img' => $slipSalary ?? null ,
+					':salary_img' => $slipSalary ?? null,
+					':citizen_img' => $citizenCopy ?? null,
 					':bookbank_img' => $bookbankCopy ?? null,
 					':bookcoop_img' => $bookcoopCopy ?? null,
 					':id_userlogin' => $payload["id_userlogin"],

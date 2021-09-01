@@ -66,6 +66,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccCoop["DEPT_TYPE"] = $accData->accountDesc;
 							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
 							$arrAccCoop["BALANCE_FORMAT"] = $accData->availableBalance;
+							$arrAccCoop["BALANCE_DEST"] = preg_replace('/,/', '', $accData->accountBalance);
 							$arrGroupAccBind["COOP"][] = $arrAccCoop;
 						}
 					}
