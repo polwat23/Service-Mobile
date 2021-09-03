@@ -39,7 +39,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAss["ASSISTTYPE_CODE"] = $rowAssType["ASSISTTYPE_CODE"];
 			$arrAss["ASSISTTYPE_DESC"] = $rowAssType["ASSISTTYPE_DESC"];
 			$arrAss["ASSCONTRACT_NO"] = TRIM($rowAssType["ASSIST_DOCNO"]);
-			$arrAss["RECEIVE_ASSIST"] = $rowAssType["MONEYTYPE_DESC"]." : ".TRIM($rowAssType["DEPTACCOUNT_NO"]);
+			$arrOther[0]["LABEL"] = "บัญชีรับสวัสดิการ";
+			$arrOther[0]["VALUE"] = $rowAssType["MONEYTYPE_DESC"]." : ".TRIM($rowAssType["DEPTACCOUNT_NO"]);
+			$arrAss["LIST_ASSIST"] = $arrOther;
 			$arrGroupAss[] = $arrAss;
 		}
 		$arrayResult["IS_STM"] = FALSE;
