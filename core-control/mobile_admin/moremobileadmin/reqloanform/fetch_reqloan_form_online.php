@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGrp = array();
 		$arrayType = array();
 		$arrayExecute = array();
-		$getLoanTypeDesc = $conmssql->prepare("SELECT loantype_desc,loantype_code FROM lnloantype");
+		$getLoanTypeDesc = $conmssql->prepare("SELECT LOANTYPE_DESC,LOANTYPE_CODE FROM LNLOANTYPE");
 		$getLoanTypeDesc->execute();
 		while($rowType = $getLoanTypeDesc->fetch(PDO::FETCH_ASSOC)){
 			$arrayType[$rowType["LOANTYPE_CODE"]] = $rowType["LOANTYPE_DESC"];
@@ -157,6 +157,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}
 		$arrayResult['REQ_LIST'] = $arrGrp;
+		$arrayResult['arrayType'] = $arrayType;
 		$arrayResult['REQ_MESSAGE'] = $dataComing["is_filtered"] ? null : "รายการใบคำขอกู้ 3 เดือนล่าสุด";
 		$arrayResult['RESULT'] = TRUE;
 		echo json_encode($arrayResult);

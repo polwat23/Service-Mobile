@@ -41,17 +41,18 @@ while($rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC)){
 		$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		$arrContract['BALANCE_AND_INTEREST'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		$arrOldContract[] = $arrContract;
-		$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
-	}else{
-		$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
 	}
 	
 	if(isset($dataComing["old_contract_selected"]) && $dataComing["old_contract_selected"] != ""){
 		if(strpos($dataComing["old_contract_selected"], $arrContract["CONTRACT_NO"]) < 0){
 			$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
+			$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
+		}else{
+			$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		}
 	}else{
 		$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
+		$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
 	}
 		
 	if($rowOldContract["LOANGROUP_CODE"] == "01"){

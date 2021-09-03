@@ -416,41 +416,6 @@ function GeneratePDFContract($data,$lib) {
                 </div>
             </div>
             </div>
-            <!-- Page 2 -->
-            <div style="width: 100%;padding-top: 30px;page-break-before: always;">
-                <div class="line-margin" style="font-weight: bold;">
-                    คำยินยอมของคู่สมรส (ใช้เฉพาะกรณีที่ผู้ขอกู้มีคู่สมรส)
-                </div>
-                <div class="line-margin" style="margin-top: 24px;">
-                    <span  style="display: inline-block;">ข้าพเจ้านาย/ นาง/นางสาว</span>
-                    <span
-                        style="display: inline-block;width: 140px;padding-left: 4px;padding-right: 4px; border: 1px dashed blue;margin-left: 16px;">
-						'.'&nbsp;'.'
-						<span style="position: absolute;width: 130px;">
-							'.$data["married"].'
-						</span>
-                    </span>
-                </div>
-                <div class="line-margin">
-                    ยินยอมให้ผู้กู้ กู้เงินจากสหกรณ์ออมทรัพย์พนักงานสยามคูโบต้า จำกัด ตามหนังสือขอกู้ข้างต้น
-                </div>
-                <div class="line-margin" style="padding-left: 55%;margin-top: 24px;">
-                    ลงชื่อ....................................................... คู่สมรส
-                </div>
-                <div class="line-margin" style="padding-left: 55%;">
-                    <span  style="display: inline-block;">วันที่</span>
-                    <span
-                        style="display: inline-block;width: 155px;padding-left: 4px;padding-right: 4px; border: 1px dashed blue;margin-left: 8px;">
-						'.'&nbsp;'.'
-						<span style="position: absolute;width: 130px;">
-						
-						</span>
-                    </span>
-                </div>
-                <div class="line-margin" style="margin-top: 24px;">
-                    *** โปรดแนบสำเนาบัตรประชาชนของคู่สมรส  พร้อมลงชื่อรับรองสำเนาถูกต้อง
-                </div>
-        </div>
     </div>
 	';
 	$dompdf = new Dompdf([

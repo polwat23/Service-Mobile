@@ -39,24 +39,26 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 			$contract_no = preg_replace('/\//','',$rowOldContract["LOANCONTRACT_NO"]);
 			$arrContract['LOANTYPE_DESC'] = $rowOldContract["LOANTYPE_DESC"];
 			$arrContract["CONTRACT_NO"] = $contract_no;
-			$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
-			$arrContract['BALANCE_AND_INTEREST'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
+			$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"];
+			$arrContract['BALANCE_AND_INTEREST'] = $rowOldContract["PRINCIPAL_BALANCE"] + round($cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]), 0, PHP_ROUND_HALF_DOWN);
+			//$arrContract['INTEREST'] = $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 			
 			if($rowOldContract["LAST_PERIODPAY"] <= 3){
 				$is_cant_refinance = true;
 			}
 			
 			$arrOldContract[] = $arrContract;
-			$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
-		}else{
-			$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
 		}
 		if(isset($dataComing["old_contract_selected"]) && $dataComing["old_contract_selected"] != ""){
 			if(strpos($dataComing["old_contract_selected"], $arrContract["CONTRACT_NO"]) < 0){
 				$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
+				$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
+			}else{
+				$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"] + round($cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]), 0, PHP_ROUND_HALF_DOWN);
 			}
 		}else{
 			$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
+			$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
 		}
 		
 		if($rowOldContract["LOANGROUP_CODE"] == "01"){
