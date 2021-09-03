@@ -77,5 +77,33 @@ class connection {
 			exit();
 		}
 	}
+	public function connecttooraclewc() {
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
+		$json_data = json_decode($json,true);
+		try{
+			$dbuser = $json_data["DBORACLEWC_USERNAME"];
+			$dbpass = $json_data["DBORACLEWC_PASSWORD"];
+			$dbname = "(DESCRIPTION =
+						(ADDRESS_LIST =
+						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLEWC_HOST"].")(PORT = ".$json_data["DBORACLEWC_PORT"]."))
+						)
+						(CONNECT_DATA =
+						  (".$json_data["DBORACLEWC_TYPESERVICE"]." = ".$json_data["DBORACLEWC_SERVICE"].")
+						)
+					  )";
+			$this->conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+			$this->conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+			$this->conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+			return $this->conoracle;
+		}catch(\Throwable $e){
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To Oracle";
+			return $arrayError;
+			http_response_code(200);
+			exit();
+		}
+	}
 }
 ?>
