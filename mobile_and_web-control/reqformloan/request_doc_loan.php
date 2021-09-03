@@ -230,8 +230,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						}
 					}
 				}
-				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MUP.POSITION_DESC,MG.MEMBGROUP_DESC,MB.SALARY_AMOUNT,
-														MD.DISTRICT_DESC,MBP.PROVINCE_DESC,(SH.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
+				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MUP.POSITION_DESC,MG.MEMBGROUP_DESC,MB.SALARY_AMOUNT,MB.SALARY_ID,
+														MD.DISTRICT_DESC,MBP.PROVINCE_DESC,(SH.SHARESTK_AMT * 10) AS SHARESTK_AMT
 														FROM MBMEMBMASTER MB LEFT JOIN 
 														MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
 														LEFT JOIN MBUCFMEMBGROUP MG ON MB.MEMBGROUP_CODE = MG.MEMBGROUP_CODE
@@ -310,10 +310,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
 					$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
 					$arrData["province_desc"] = $rowData["PROVINCE_DESC"];
+					$arrData["emp_no"] = $rowData["SALARY_ID"];
 					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
-					$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
-					$arrData["fund_amt"] = number_format($rowData["rowFund"],2);
-					$arrData["share_fund_amt"] = number_format($rowData["SHAREBEGIN_AMT"] + $rowFund["rowFund"],2);
+					$arrData["share_bf"] = number_format($rowData["SHARESTK_AMT"],2);
+					$arrData["fund_amt"] = number_format($rowFund["FUND_AMT"],2);
+					$arrData["share_fund_amt"] = number_format($rowData["SHARESTK_AMT"] + $rowFund["FUND_AMT"],2);
 					$arrData["request_amt"] = $dataComing["request_amt"];
 					$arrData["objective"] = $dataComing["objective"];
 					$arrData["period"] = $dataComing["period"];

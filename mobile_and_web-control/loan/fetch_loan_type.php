@@ -22,13 +22,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 			$arrContract = array();
 			$arrContract["CONTRACT_NO"] = $contract_no;
-			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"]+$cal_loan->calculateInterest($rowContract["LOANCONTRACT_NO"]),2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
 			$arrContract["LAST_OPERATE_DATE"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'y-n-d');
 			$arrContract["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowContract["LAST_OPERATE_DATE"],'D m Y');
 			$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 			$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 			$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+			$arrContract["INTEREST"] = number_format($cal_loan->calculateInterest($rowContract["LOANCONTRACT_NO"]),2);
 			$arrGroupContract['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;
