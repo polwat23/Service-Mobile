@@ -4,25 +4,24 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'InsureInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchinSureInfo = $conoracle->prepare("SELECT ism.INSMAIN_NO,ISM.PROTECT_AMT,ISM.INSURE_AMT,INM.AGENT_DESC as COMPANY_NAME
-												,ISC.INSTYPE_DESC,INM.PROTECTEND_DATE,INM.PROTECTSTART_DATE
-												FROM isinsuremaster ism LEFT JOIN isinsuremain inm ON ism.INSMAIN_NO = inm.INSMAIN_NO
-												LEFT JOIN iscfinstype isc ON ism.INSTYPE_CODE = isc.INSTYPE_CODE
-												WHERE ism.member_no = :member_no and ism.insure_status = '1' 
-												and trunc(sysdate) BETWEEN trunc(ism.PROTECTSTART_DATE) and trunc(ism.PROTECTEND_DATE)");
+		$fetchinSureInfo = $conoracle->prepare("SELECT INST.INSCOMPANY_NAME,INS.INSCOST_BLANCE,INS.LOANCONTRACT_NO,INS.EXPENSE_ACCID,
+												INS.STARTSAFE_DATE AS START_SAFE,
+												INS.ENDSAFE_DATE AS END_SAFE 
+												FROM INSGROUPMASTER INS 
+												LEFT JOIN INSURENCETYPE INST ON INS.INSTYPE_CODE = INST.INSTYPE_CODE 
+												where INS.member_no = :member_no and INS.ins_status = 1");
 		$fetchinSureInfo->execute([
 			':member_no' => $member_no
 		]);
 		$arrGroupAllIns = array();
 		while($rowInsure = $fetchinSureInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayInsure = array();
-			$arrayInsure["INSURE_NO"] = $rowInsure["INSMAIN_NO"];
-			$arrayInsure["PREMIUM_AMT"] = number_format($rowInsure["INSURE_AMT"],2);
-			$arrayInsure["PROTECT_AMT"] = number_format($rowInsure["PROTECT_AMT"],2);
-			$arrayInsure["STARTSAFE_DATE"] = $lib->convertdate($rowInsure["PROTECTSTART_DATE"],'D m Y');
-			$arrayInsure["ENDSAFE_DATE"] = $lib->convertdate($rowInsure["PROTECTEND_DATE"],'D m Y');
-			$arrayInsure["INSURE_TYPE"] = $rowInsure["INSTYPE_DESC"];
-			$arrayInsure["COMPANY_NAME"] = $rowInsure["COMPANY_NAME"];
+			$arrayInsure["COMPANY_NAME"] = "เลขที่ : ".$rowInsure["LOANCONTRACT_NO"];
+			$arrayInsure["DEPTACCOUNT_NO"] = $lib->formataccount($rowInsure["EXPENSE_ACCID"],$func->getConstant('dep_format'));
+			$arrayInsure["PROTECT_AMT"] = number_format($rowInsure["INSCOST_BLANCE"],2);
+			$arrayInsure["STARTSAFE_DATE"] = $lib->convertdate($rowInsure["START_SAFE"],'D m Y');
+			$arrayInsure["ENDSAFE_DATE"] = $lib->convertdate($rowInsure["END_SAFE"],'D m Y');
+			$arrayInsure["INSURE_TYPE"] = $rowInsure["INSCOMPANY_NAME"];
 			$arrayInsure["IS_STM"] = FALSE;
 			$arrGroupAllIns[] = $arrayInsure;
 		}
