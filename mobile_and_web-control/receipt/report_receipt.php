@@ -324,12 +324,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 650px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.gif" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 675px;display:flex;">
+			<img src="../../resource/utility_icon/signature/mg.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 620px;margin-top:-40px;">(.............)</div>
-			<div style="font-size: 18px;margin-left: 655px;margin-top:0px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 670px;margin-top:-40px;">(นายไมตรี  ทาปลูก)</div>
+			<div style="font-size: 18px;margin-left: 615px;margin-top:0px;">รองประธานกรรมการ ทำหน้าที่ผู้จัดการ</div>
 			';
 
 	$dompdf = new Dompdf([
