@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','destination'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GenerateQR')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if($dataComing["trans_code"] == '001'){
