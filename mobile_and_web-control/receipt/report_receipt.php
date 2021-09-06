@@ -196,17 +196,18 @@ function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
 			@font-face {
-				font-family: THSarabun;
-				src: url(../../resource/fonts/THSarabun.ttf);
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
 			* {
-			  font-family: THSarabun;
+			  font-family: TH Niramit AS;
 			}
+
 			body {
 			  padding: 0 30px;
 			}
@@ -226,7 +227,7 @@ function GenerateReport($dataReport,$header,$lib){
 	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมที่ดิน จำกัด</p>
 			<p style="margin-top: -27px;font-size: 18px;">117 หมู่ 9 ถนนติวานนท์ ตำบลบางพูด อำเภอปากเกร็ด จังหวัดนนทบุรี 11120</p>
 			<p style="margin-top: -25px;font-size: 18px;">โทรศัพท์ 0-2194-2377-79 โทรสาร 0-2194-2380</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.landcoop.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -348,7 +349,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
