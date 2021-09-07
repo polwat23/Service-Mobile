@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
 		$arrayGroup = array();
-		$fetchUser = $conmysql->prepare("SELECT coreuser.username,coreuser.id_section_system, coresectionsystem.section_system, coresectionsystem.system_assign ,coreuser.user_status
+		$fetchUser = $conmssql->prepare("SELECT coreuser.username,coreuser.id_section_system, coresectionsystem.section_system, coresectionsystem.system_assign ,coreuser.user_status
 											FROM coreuser
 											INNER JOIN coresectionsystem
 											ON coresectionsystem.id_section_system = coreuser.id_section_system WHERE coresectionsystem.id_section_system NOT IN('1','11')

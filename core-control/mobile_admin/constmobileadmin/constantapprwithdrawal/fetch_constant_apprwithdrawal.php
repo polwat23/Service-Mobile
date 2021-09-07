@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantapprwithdrawal')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT cawd.id_apprwd_constant, cawd.minimum_value, cawd.maximum_value, cawd.member_no,css.id_section_system,css.system_assign 
+		$fetchConstant = $conmssql->prepare("SELECT cawd.id_apprwd_constant, cawd.minimum_value, cawd.maximum_value, cawd.member_no,css.id_section_system,css.system_assign 
 															FROM gcconstantapprwithdrawal cawd 
 															LEFT JOIN coresectionsystem css ON css.id_section_system = cawd.id_section_system 
 															WHERE cawd.is_use = '1'");

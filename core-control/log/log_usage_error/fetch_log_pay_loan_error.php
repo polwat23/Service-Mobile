@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logrepayloanerror')){
 		$arrayGroup = array();
-		$fetchLogRepayLoan = $conmysql->prepare("SELECT
+		$fetchLogRepayLoan = $conmssql->prepare("SELECT
 												pay.id_repayloan,
 												pay.member_no,
 												pay.transaction_date,

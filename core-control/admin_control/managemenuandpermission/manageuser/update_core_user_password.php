@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','newpassword'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managecoreusers')){
-		$updatepassword = $conmysql->prepare("UPDATE coreuser 
+		$updatepassword = $conmssql->prepare("UPDATE coreuser 
 										  SET password = :newpassword
 								          WHERE  username = :username;");
 		$new_password = password_hash($dataComing["newpassword"], PASSWORD_DEFAULT);								  

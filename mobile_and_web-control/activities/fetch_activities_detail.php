@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','id_task'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Event')){
 		$arrayGroupNews = array();
-		$fetchEvent = $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
+		$fetchEvent = $conmssql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
 										date_format(event_start_time,'%H:%i') as event_start_time,
 										date_format(event_end_time,'%H:%i') as event_end_time,
 										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html

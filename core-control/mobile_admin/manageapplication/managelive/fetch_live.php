@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managelive')){
-		$fetchLive = $conmysql->prepare("SELECT id_live, live_url, live_title, update_date, is_use, update_by FROM gclive WHERE is_use <> '-9'");
+		$fetchLive = $conmssql->prepare("SELECT id_live, live_url, live_title, update_date, is_use, update_by FROM gclive WHERE is_use <> '-9'");
 								
 		$fetchLive->execute();
 		$arrayGroup = array();

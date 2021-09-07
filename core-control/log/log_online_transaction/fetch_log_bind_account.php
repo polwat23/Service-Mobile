@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logunbindaccount')){
 		$arrayGroup = array();
-		$fetchBindAccountLog = $conmysql->prepare("SELECT
+		$fetchBindAccountLog = $conmssql->prepare("SELECT
 																				bind.id_bindaccount,
 																				bind.sigma_key,
 																				bind.member_no,

@@ -54,14 +54,14 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrExecute["alias_name"] = $dataComing["alias_name_emoji_"];
 		}
 		$arrExecute["deptaccount_no"] = $account_no;
-		$updateMemoDept = $conmysql->prepare("UPDATE gcdeptalias SET update_date = NOW(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
+		$updateMemoDept = $conmssql->prepare("UPDATE gcdeptalias SET update_date = NOW(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
 												".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
 												WHERE deptaccount_no = :deptaccount_no");
 		if($updateMemoDept->execute($arrExecute) && $updateMemoDept->rowCount() > 0){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$insertMemoDept = $conmysql->prepare("INSERT INTO gcdeptalias(alias_name,path_alias_img,deptaccount_no)
+			$insertMemoDept = $conmssql->prepare("INSERT INTO gcdeptalias(alias_name,path_alias_img,deptaccount_no)
 													VALUES(:alias_name,:path_alias_img,:deptaccount_no)");
 			if($insertMemoDept->execute([
 				':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],

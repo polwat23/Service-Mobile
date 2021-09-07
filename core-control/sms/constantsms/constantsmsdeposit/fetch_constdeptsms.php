@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','constantsmsdeposit')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 																		id_smsconstantdept,
 																		dept_itemtype_code,
 																		allow_smsconstantdept

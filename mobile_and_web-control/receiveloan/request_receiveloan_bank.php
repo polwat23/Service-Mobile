@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanReceive')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
+		$fetchDataDeposit = $conmssql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
 												csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
+		$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
 													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 		$getTransactionForFee->execute([
 			':member_no' => $payload["member_no"]
@@ -173,7 +173,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$conmssql->commit();
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+					$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	coop_slip_no,id_userlogin,ref_no_source)
 																	VALUES(:ref_no,'DAP',:from_account,:destination,'9',:amount,:penalty_amt,:amount_receive,'-1',

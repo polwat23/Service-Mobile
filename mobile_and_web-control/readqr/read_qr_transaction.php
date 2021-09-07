@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'QRCodeScanner')){
-		$fetchDataTrans = $conmysql->prepare("SELECT from_account,destination_type,transfer_mode,amount,bank_code,
+		$fetchDataTrans = $conmssql->prepare("SELECT from_account,destination_type,transfer_mode,amount,bank_code,
 											fee_amt,operate_date,member_no,transaction_type_code,destination,penalty_amt
 											FROM gctransaction WHERE ref_no = :tran_id and result_transaction = '1'");
 		$fetchDataTrans->execute([':tran_id' => $dataComing["transaction_no"]]);
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 			if($rowDataTrans["transfer_mode"] == '1' || $rowDataTrans["transfer_mode"] == '2' || $rowDataTrans["transfer_mode"] == '3'
 			|| ($rowDataTrans["transfer_mode"] == '9' && substr($rowDataTrans["transaction_type_code"],0,1) == 'W')){
 				if(isset($rowDataTrans["bank_code"])){
-					$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.bank_account_name,csb.bank_logo_path,csb.bank_format_account,
+					$fetchAccountBeenBind = $conmssql->prepare("SELECT gba.bank_account_name,csb.bank_logo_path,csb.bank_format_account,
 																csb.bank_format_account_hide
 																FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 																WHERE gba.deptaccount_no_bank = :acc_bank and gba.bank_code = :bank_code 
@@ -69,7 +69,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 				}
 			}else{
 				if($rowDataTrans["transfer_mode"] == '9'){
-					$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.bank_account_name,csb.bank_logo_path,csb.bank_format_account,
+					$fetchAccountBeenBind = $conmssql->prepare("SELECT gba.bank_account_name,csb.bank_logo_path,csb.bank_format_account,
 																csb.bank_format_account_hide
 																FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 																WHERE gba.deptaccount_no_bank = :acc_bank and gba.bank_code = :bank_code 
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 			if($rowDataTrans["destination_type"] == '1'){
 				if(isset($rowDataTrans["bank_code"])){
 					if(substr($rowDataTrans["transaction_type_code"],0,1) == 'W'){
-						$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.bank_account_name,csb.bank_logo_path,csb.bank_format_account,
+						$fetchAccountBeenBind = $conmssql->prepare("SELECT gba.bank_account_name,csb.bank_logo_path,csb.bank_format_account,
 																	csb.bank_format_account_hide
 																	FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 																	WHERE gba.deptaccount_no_bank = :acc_bank and gba.bank_code = :bank_code 
@@ -159,7 +159,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 				$arrayResult['TO_ACCOUNT_NO_FORMAT_HIDE'] = $rowDataTrans["destination"];
 			}else if($rowDataTrans["destination_type"] == '3'){
 				if($rowDataTrans["transaction_type_code"] == 'WFS'){
-					$getDataPayLoan = $conmysql->prepare("SELECT loancontract_no,principal,interest
+					$getDataPayLoan = $conmssql->prepare("SELECT loancontract_no,principal,interest
 														FROM gcrepayloan WHERE ref_no = :ref_no");
 					$getDataPayLoan->execute([':ref_no' => $dataComing["transaction_no"]]);
 					$rowDataPay = $getDataPayLoan->fetch(PDO::FETCH_ASSOC);

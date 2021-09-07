@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
-		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
+		$fetchSlipTrans = $conmssql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
 		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
 		$arrSlipTrans = array();
 		$arrSlipStm = array();
@@ -83,7 +83,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
+		$getMemoDP = $conmssql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
 											WHERE deptaccount_no = :account_no");
 		$getMemoDP->execute([
 			':account_no' => $account_no

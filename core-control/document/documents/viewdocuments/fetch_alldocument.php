@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														AND is_use = '1' ";
 				$orderSelectDoc = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "docgrp_name")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
 				$selectDoccuments = $mainSelectDoc.$orderSelectDoc;
-				$fetchDocumentSystems = $conmysql->prepare($selectDoccuments);
+				$fetchDocumentSystems = $conmssql->prepare($selectDoccuments);
 				$fetchDocumentSystems->execute([
 					':docgrp_no' => $dataComing["docgrp_no"]
 				]);
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														WHERE doc_status = '1' AND docgrp_no = :docgrp_no ";
 				$orderSelectFile = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "doc_filename")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
 				$selectFiles = $mainSelectFile.$orderSelectFile;
-				$fetchDocument = $conmysql->prepare($selectFiles);
+				$fetchDocument = $conmssql->prepare($selectFiles);
 				$fetchDocument->execute([
 					':docgrp_no' => $dataComing["docgrp_no"]
 				]);
@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														AND is_use = '1' ";
 				$orderSelectDoc = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "docgrp_name")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
 				$selectDoccuments = $mainSelectDoc.$orderSelectDoc;
-				$fetchDocumentSystems = $conmysql->prepare($selectDoccuments);
+				$fetchDocumentSystems = $conmssql->prepare($selectDoccuments);
 				$fetchDocumentSystems->execute();
 				while($dataSystem = $fetchDocumentSystems->fetch(PDO::FETCH_ASSOC)){
 					$systemsArray = array();

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','loglogin')){
 		$arrayGroup = array();
-		$fetchfetchLoginLog = $conmysql->prepare("SELECT
+		$fetchfetchLoginLog = $conmssql->prepare("SELECT
 																				g.id_userlogin,
 																				g.member_no,
 																				g.device_name,

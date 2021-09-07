@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','managedocuments')){
 		$arrayDocument = array();
-		$fetchDocumentSystems = $conmysql->prepare("SELECT short_prefix, description, amount_prefix, prefix_data_type, 
+		$fetchDocumentSystems = $conmssql->prepare("SELECT short_prefix, description, amount_prefix, prefix_data_type, 
 												data_value_column,data_desc_column, connection_db,query_string, update_date
 												FROM doccontrolid
 												WHERE is_use = '1'");

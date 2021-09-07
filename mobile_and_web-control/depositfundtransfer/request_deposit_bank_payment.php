@@ -5,7 +5,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataDeposit = $conmysql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_dep,csb.itemtype_dep,csb.link_deposit_coopdirect,
+		$fetchDataDeposit = $conmssql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_dep,csb.itemtype_dep,csb.link_deposit_coopdirect,
 												csb.bank_short_ename,gba.account_payfee,csb.fee_deposit
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$getBalanceAccFee = $conmssql->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$getBalanceAccFee->execute([':deptaccount_no' => $rowDataDeposit["account_payfee"]]);
 		$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
+		$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
 													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 		$getTransactionForFee->execute([
 			':member_no' => $payload["member_no"]
@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 		$dataAccFee = $cal_dep->getConstantAcc($rowDataDeposit["account_payfee"]);
 		$conmssql->beginTransaction();
-		$conmysql->beginTransaction();
+		$conmssql->beginTransaction();
 		$getlastseq_noDest = $cal_dep->getLastSeqNo($coop_account_no);
 		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataDeposit["account_payfee"]);
 		if($rowCountFee["C_TRANS"] + 1 > 1){
@@ -67,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				if($rowDataDeposit["fee_deposit"] > 0){
 					if($rowBalFee["PRNCBAL"] - $rowDataDeposit["fee_deposit"] < $dataAccFee["MINPRNCBAL"]){
 						$conmssql->rollback();
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE_CODE'] = "WS0100";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
@@ -81,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						
 					}else{
 						$conmssql->rollback();
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayStruc = [
@@ -108,7 +108,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						
 					}else{
 						$conmssql->rollback();
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE_CODE'] = $penaltyWtdPromo["RESPONSE_CODE"];
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayStruc = [
@@ -145,7 +145,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataDeposit["link_deposit_coopdirect"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
 				$conmssql->rollback();
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$filename = basename(__FILE__, '.php');
 				$arrayResult['RESPONSE_CODE'] = "WS0027";
 				$arrayStruc = [
@@ -170,7 +170,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			if($arrResponse->RESULT){
 				$transaction_no = $arrResponse->TRANSACTION_NO;
 				$etn_ref = $arrResponse->EXTERNAL_REF;
-				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
+				$insertRemark = $conmssql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 													VALUES(:remark,:deptaccount_no,:seq_no)");
 				$insertRemark->execute([
 					':remark' => $dataComing["remark"],
@@ -193,7 +193,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':id_userlogin' => $payload["id_userlogin"],
 					':bank_code' => $rowDataDeposit["bank_code"]
 				];
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+				$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
 															VALUES(:ref_no,:slip_type,:from_account,:destination,'9',:amount,:fee_amt,
@@ -243,7 +243,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					}
 				}
 				$conmssql->commit();
-				$conmysql->commit();
+				$conmssql->commit();
 				$arrayResult['EXTERNAL_REF'] = $etn_ref;
 				$arrayResult['TRANSACTION_NO'] = $ref_no;
 				$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
@@ -251,7 +251,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				require_once('../../include/exit_footer.php');
 			}else{
 				$conmssql->rollback();
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0038";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
@@ -274,7 +274,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}
 		}else{
 			$conmssql->rollback();
-			$conmysql->rollback();
+			$conmssql->rollback();
 			$arrayResult['RESPONSE_CODE'] = $depositMoney["RESPONSE_CODE"];
 			if($depositMoney["RESPONSE_CODE"] == "WS0056"){
 				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($depositMoney["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);

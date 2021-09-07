@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','member_no','section','minimum_value','id_apprwd_constant'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantapprwithdrawal')){
 		if(isset($dataComing["minimum_value"]) || $dataComing["minimum_value"] != ''){
-			$updateConstants = $conmysql->prepare("UPDATE gcconstantapprwithdrawal SET minimum_value = :minimum_value, maximum_value = :maximum_value, member_no = :member_no, id_section_system = :id_section_system WHERE id_apprwd_constant = :id_apprwd_constant");
+			$updateConstants = $conmssql->prepare("UPDATE gcconstantapprwithdrawal SET minimum_value = :minimum_value, maximum_value = :maximum_value, member_no = :member_no, id_section_system = :id_section_system WHERE id_apprwd_constant = :id_apprwd_constant");
 			if($updateConstants->execute([
 				':minimum_value' => $dataComing["minimum_value"],
 				':maximum_value' => isset($dataComing["maximum_value"]) || $dataComing["maximum_value"] != '' ? $dataComing["maximum_value"]  :  null ,

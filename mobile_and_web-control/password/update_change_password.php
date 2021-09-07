@@ -4,19 +4,19 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingChangePassword')){
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-		$conmysql->beginTransaction();
-		$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1',temppass_is_md5 = '0'
+		$conmssql->beginTransaction();
+		$changePassword = $conmssql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1',temppass_is_md5 = '0'
 												WHERE member_no = :member_no");
 		if($changePassword->execute([
 			':password' => $password,
 			':member_no' => $payload["member_no"]
 		])){
 			if($func->logoutAll($payload["id_token"],$payload["member_no"],'-9')){
-				$conmysql->commit();
+				$conmssql->commit();
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
 					":error_menu" => $filename,
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 				
 			}
 		}else{
-			$conmysql->rollback();
+			$conmssql->rollback();
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,

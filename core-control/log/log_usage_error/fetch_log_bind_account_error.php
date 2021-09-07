@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logbindaccounterror')){
 		$arrayGroup = array();
-		$fetchLogBindAccountError = $conmysql->prepare("SELECT bind.id_logbindaccount,
+		$fetchLogBindAccountError = $conmssql->prepare("SELECT bind.id_logbindaccount,
 															bind.member_no,
 															bind.bind_status,
 															bind.attempt_bind_date,

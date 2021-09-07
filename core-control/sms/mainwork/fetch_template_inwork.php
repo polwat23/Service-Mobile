@@ -3,7 +3,7 @@ require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','page_name'],$dataComing)){
 	if($func->check_permission_core($payload,'sms',$dataComing["page_name"])){
-		$getTemplate = $conmysql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery,smu.menu_name,sq.is_bind_param,
+		$getTemplate = $conmssql->prepare("SELECT stp.id_smstemplate,stp.smstemplate_name,stp.smstemplate_body,sq.id_smsquery,smu.menu_name,sq.is_bind_param,
 											sq.condition_target,sq.target_field
 											FROM coresubmenu smu INNER JOIN smstopicmatchtemplate smt ON smu.id_submenu = smt.id_submenu
 											INNER JOIN smstemplate stp ON smt.id_smstemplate = stp.id_smstemplate 

@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_RECEIVE FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conmssql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_RECEIVE FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_RECEIVE"]."')";
 					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_RECEIVE ='.$value_diff["IS_RECEIVE"];
 				}else{
-					$updateConst = $conmysql->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST,IS_RECEIVE = :IS_RECEIVE WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
+					$updateConst = $conmssql->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST,IS_RECEIVE = :IS_RECEIVE WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
 					$updateConst->execute([
 						':IS_CREDITLOAN' => $value_diff["IS_CREDITLOAN"],
 						':IS_LOANREQUEST' => $value_diff["IS_LOANREQUEST"],
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_RECEIVE='.$value_diff["IS_RECEIVE"];
 				}
 			}
-			$insertConst = $conmysql->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_RECEIVE)
+			$insertConst = $conmssql->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_RECEIVE)
 															VALUES".implode(',',$insertBulkCont));
 			$insertConst->execute();
 			$arrayStruc = [

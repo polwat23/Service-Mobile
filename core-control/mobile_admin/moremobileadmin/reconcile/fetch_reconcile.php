@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmssql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode = '9'  and result_transaction = '1'
@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and trans_flag = :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmssql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode = '9'  and  result_transaction = '1'
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and trans_flag = :trans_flag " : null)."".
 														" ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmssql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode = '9'  and  result_transaction = '1'
@@ -84,7 +84,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 
 			if($dataComing["date_type"] == 'year'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmssql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode = '9' and  result_transaction = '1'
@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and trans_flag = :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmssql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode = '9' and  result_transaction = '1'
@@ -108,7 +108,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														"and trans_flag =  :trans_flag " : null)."".
 														"ORDER BY operate_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
+				$fetchReconcile = $conmssql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE transfer_mode = '9' and result_transaction = '1'
@@ -122,7 +122,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}
 		$fetchReconcile->execute($arrayExecute);
-		$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = '006'");
+		$fetchFormatAccBank = $conmssql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = '006'");
 		$fetchFormatAccBank->execute();
 		$rowFormatAcc = $fetchFormatAccBank->fetch();
 		$summary = 0;

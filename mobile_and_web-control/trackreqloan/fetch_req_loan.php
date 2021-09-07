@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestTrack')){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
-			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
+			$fetchReqLoan = $conmssql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
 															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
 															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
 			$fetchReqLoan->execute([
@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
-			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
+			$fetchReqLoan = $conmssql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
 															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
@@ -67,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		
-		$fetchReqStatus = $conmysql->prepare("SELECT id_reqstatus, req_value, req_desc
+		$fetchReqStatus = $conmssql->prepare("SELECT id_reqstatus, req_value, req_desc
 											FROM gcconstantreqstatus WHERE menu_component = 'LoanRequestTrack' AND is_use = '1'");
 		$fetchReqStatus->execute();
 		while($rowReqStatus = $fetchReqStatus->fetch(PDO::FETCH_ASSOC)){

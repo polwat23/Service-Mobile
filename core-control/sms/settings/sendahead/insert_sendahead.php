@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 			}
 		}
 		if(isset($dataComing["type_send"]) && $dataComing["type_send"] == "all"){
-			$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,
+			$insertSendAhead = $conmssql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,send_date,create_by,
 													id_smsquery,id_smstemplate,send_platform,send_image)
 													VALUES(:send_topic,:send_message,'all',:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 			if($insertSendAhead->execute([
@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 			}
 		}else{
 			if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != "" && sizeof($dataComing["message_importData"]) > 0){
-				$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,destination,destination_revoke,send_date,create_by,is_import,
+				$insertSendAhead = $conmssql->prepare("INSERT INTO smssendahead(send_topic,destination,destination_revoke,send_date,create_by,is_import,
 														id_smsquery,id_smstemplate,send_platform,send_image)
 														VALUES(:send_topic,:destination,:destination_revoke,:send_date,:username,'1',:id_smsquery,:id_template,:send_platform,:send_image)");
 				if($insertSendAhead->execute([
@@ -88,7 +88,7 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 				}
 			}else{
 				if(isset($id_smsquery)){
-					$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,destination_revoke,send_date,create_by,
+					$insertSendAhead = $conmssql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,destination_revoke,send_date,create_by,
 															id_smsquery,id_smstemplate,send_platform,send_image)
 															VALUES(:send_topic,:send_message,:destination,:destination_revoke,:send_date,:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 					if($insertSendAhead->execute([
@@ -112,7 +112,7 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 					}
 
 				}else{
-					$insertSendAhead = $conmysql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,destination_revoke,send_date,create_by,
+					$insertSendAhead = $conmssql->prepare("INSERT INTO smssendahead(send_topic,send_message,destination,destination_revoke,send_date,create_by,
 															id_smstemplate,send_platform,send_image)
 															VALUES(:send_topic,:send_message,:destination,:destination_revoke,:send_date,:username,:id_template,:send_platform,:send_image)");
 					if($insertSendAhead->execute([

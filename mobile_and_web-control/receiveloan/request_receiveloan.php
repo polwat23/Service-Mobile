@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,null);
 				if($depositMoney["RESULT"]){
 					$conmssql->commit();
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+					$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	coop_slip_no,id_userlogin,ref_no_source)
 																	VALUES(:ref_no,'DAP',:from_account,:destination,'4',:amount,:penalty_amt,:amount_receive,'1',

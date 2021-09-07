@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no 
+			$checkBeenBindForPending = $conmssql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no 
 														and bindaccount_status = '8' and bank_code = '006'");
 			$checkBeenBindForPending->execute([
 				':member_no' => $payload["member_no"]
@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 				while($rowAccPending = $checkBeenBindForPending->fetch(PDO::FETCH_ASSOC)){
 					$arrayAccPending[] = $rowAccPending["id_bindaccount"];
 				}
-				$deleteAccForPending = $conmysql->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
+				$deleteAccForPending = $conmssql->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
 				$deleteAccForPending->execute();
 			}
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -41,8 +41,8 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
-			$conmysql->beginTransaction();
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token,account_payfee) 
+			$conmssql->beginTransaction();
+			$insertPendingBindAccount = $conmssql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token,account_payfee) 
 															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:bank_account_name,:bank_account_name_en,'006',:id_token,:acc_payfee)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 				}
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
-					$conmysql->commit();
+					$conmssql->commit();
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
@@ -89,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
-					$conmysql->rollback();
+					$conmssql->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS0039";
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
@@ -107,7 +107,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 					
 				}
 			}else{
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS1022";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayStruc = [

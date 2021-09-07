@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												) 
 												: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= now()-interval 3 month");
 												
-		$getAllReqDocno = $conmysql->prepare("SELECT COUNT(reqloan_doc) AS COUNT_WAITING,
+		$getAllReqDocno = $conmssql->prepare("SELECT COUNT(reqloan_doc) AS COUNT_WAITING,
 															(SELECT COUNT(reqloan_doc) AS COUNT_PROCESSING FROM gcreqloan WHERE req_status = '7'".$filterQuery.") AS COUNT_PROCESSING,
 															(SELECT COUNT(reqloan_doc) AS COUNT_CANCEL FROM gcreqloan WHERE req_status = '9'".$filterQuery.") AS COUNT_CANCEL,
 															(SELECT COUNT(reqloan_doc) AS COUNT_DISAPPROVAL FROM gcreqloan WHERE req_status = '-9'".$filterQuery.") AS COUNT_DISAPPROVAL,

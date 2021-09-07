@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 									</html>';
 		}
 		
-		$update_announce = $conmysql->prepare("UPDATE  gcannounce SET
+		$update_announce = $conmssql->prepare("UPDATE  gcannounce SET
 																		announce_cover = :announce_cover, 
 																		announce_title = :announce_title,
 																		announce_detail = :announce_detail,

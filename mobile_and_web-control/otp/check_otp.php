@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		
 	}
 	$callfile_now = strtotime(date('Y-m-d H:i:s'));
-	$checkOTP = $conmysql->prepare("SELECT otp_status,expire_date FROM gcotp WHERE otp_password = :otp_pass and refno_otp = :ref_no");
+	$checkOTP = $conmssql->prepare("SELECT otp_status,expire_date FROM gcotp WHERE otp_password = :otp_pass and refno_otp = :ref_no");
 	$checkOTP->execute([
 		':otp_pass' => $dataComing["otp"],
 		':ref_no' => $dataComing["ref_no"]
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 				
 			}else if($rowOTP["otp_status"] == '0'){
-				$updateUseOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '1' WHERE refno_otp = :ref_no");
+				$updateUseOTP = $conmssql->prepare("UPDATE gcotp SET otp_status = '1' WHERE refno_otp = :ref_no");
 				$updateUseOTP->execute([':ref_no' => $dataComing["ref_no"]]);
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 				
 			}
 		}else{
-			$updateExpireOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-1' WHERE refno_otp = :ref_no");
+			$updateExpireOTP = $conmssql->prepare("UPDATE gcotp SET otp_status = '-1' WHERE refno_otp = :ref_no");
 			$updateExpireOTP->execute([':ref_no' => $dataComing["ref_no"]]);
 			$arrayResult['RESPONSE_CODE'] = "WS0013";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

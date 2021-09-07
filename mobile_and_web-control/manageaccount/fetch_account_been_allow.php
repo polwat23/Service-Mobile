@@ -4,12 +4,12 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$arrGroupAccAllow = array();
-		$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no,gat.is_use 
+		$fetchAccountBeenAllow = $conmssql->prepare("SELECT gat.deptaccount_no,gat.is_use 
 														FROM gcuserallowacctransaction gat
 														WHERE gat.member_no = :member_no and gat.is_use <> '-9'");
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
-			$checkBindAccount = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('1','0')");
+			$checkBindAccount = $conmssql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('1','0')");
 			$checkBindAccount->execute([':member_no' => $payload["member_no"]]);
 			$rowBindAcc = $checkBindAccount->fetch(PDO::FETCH_ASSOC);
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
-					$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
+					$getDeptTypeAllow = $conmssql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
 																			FROM gcconstantaccountdept
 																			WHERE dept_type_code = :depttype_code");
 					$getDeptTypeAllow->execute([

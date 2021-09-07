@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-$updateResetPin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = null WHERE member_no = :member_no");
+$updateResetPin = $conmssql->prepare("UPDATE gcmemberaccount SET pin = null WHERE member_no = :member_no");
 if($updateResetPin->execute([
 	':member_no' => $payload["member_no"]
 ])){

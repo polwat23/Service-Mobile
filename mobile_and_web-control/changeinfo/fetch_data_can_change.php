@@ -6,19 +6,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayConst = array();
 		$arrayDataGrp = array();
-		$getConstChangeInfo = $conmysql->prepare("SELECT const_code,is_change FROM gcconstantchangeinfo");
+		$getConstChangeInfo = $conmssql->prepare("SELECT const_code,is_change FROM gcconstantchangeinfo");
 		$getConstChangeInfo->execute();
 		while($rowConst = $getConstChangeInfo->fetch(PDO::FETCH_ASSOC)){
 			$arrayConst[$rowConst["const_code"]] = $rowConst["is_change"];
 		}
 		if($arrayConst["email"] == '1'){
-			$getEmail = $conmysql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
+			$getEmail = $conmssql->prepare("SELECT email FROM gcmemberaccount WHERE member_no = :member_no");
 			$getEmail->execute([':member_no' => $payload["member_no"]]);
 			$rowEmail = $getEmail->fetch(PDO::FETCH_ASSOC);
 			$arrayDataGrp["EMAIL"] = $rowEmail["email"];
 		}
 		if($arrayConst["tel"] == '1'){
-			$getPhone = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+			$getPhone = $conmssql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
 			$getPhone->execute([':member_no' => $payload["member_no"]]);
 			$rowPhone = $getPhone->fetch(PDO::FETCH_ASSOC);
 			$arrayDataGrp["PHONE_NUMBER"] = $rowPhone["phone_number"];

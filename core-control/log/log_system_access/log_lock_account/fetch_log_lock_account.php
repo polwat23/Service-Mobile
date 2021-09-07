@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','loglockaccount')){
 		$arrayGroup = array();
-		$fetchLogLockAccount = $conmysql->prepare("SELECT
+		$fetchLogLockAccount = $conmssql->prepare("SELECT
 																			member_no,
 																			device_name,
 																			unique_id,

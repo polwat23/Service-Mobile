@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_live','status'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managelive')){
-	$updatemenu = $conmysql->prepare("UPDATE  gclive  SET is_use = :status
+	$updatemenu = $conmssql->prepare("UPDATE  gclive  SET is_use = :status
 										  WHERE id_live=:id_live");
 		if($updatemenu->execute([
 			':status' => $dataComing["status"],

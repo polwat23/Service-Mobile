@@ -5,15 +5,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllAccount = array();
-		$getSumAllAccount = $conmssql->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no
-												and deptclose_status = 0");
+		$getSumAllAccount = $conmssql->prepare("select dpt.balance as SUM_BALANCE from codeposit_master dpm LEFT JOIN codeposit_transaction dpt ON dpm.lastseq = dpt.transaction_seq 
+												and dpm.deposit_id = dpt.deposit_id where  dpm.status  = 'A' and dpm.member_id = :member_no");
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
-		$getAccount = $conmssql->prepare("SELECT dp.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.prncbal as BALANCE,
-											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE DEPTACCOUNT_NO = dp.DEPTACCOUNT_NO) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.DEPTACCOUNT_NO ASC");
+		$getAccount = $conmssql->prepare("SELECT  dt.deposit_type as DEPTTYPE_CODE,dt.description as DEPTTYPE_DESC,dm.deposit_id as DEPTACCOUNT_NO,
+										dm.description as DEPTACCOUNT_NAME,dpt.balance as BALANCE,
+										(SELECT max(transaction_date) FROM codeposit_transaction WHERE deposit_id = dm.deposit_id) as LAST_OPERATE_DATE
+										FROM  codeposit_master dm  LEFT JOIN codeposit_type dt ON dm.deposit_type = dt.deposit_type
+										LEFT JOIN codeposit_transaction dpt ON dm.lastseq = dpt.transaction_seq  and dm.deposit_id = dpt.deposit_id
+										WHERE dm.member_id = :member_no and dm.status = 'A' order by dm.deposit_id ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
@@ -27,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccount["COVER_IMG"] = null;
 				}
 			}
-			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE DEPTACCOUNT_NO = :account_no");
+			$fetchAlias = $conmssql->prepare("SELECT alias_name,path_alias_img,CONVERT(char(10),update_date,20) as update_date FROM gcdeptalias WHERE DEPTACCOUNT_NO = :account_no");
 			$fetchAlias->execute([
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 			]);

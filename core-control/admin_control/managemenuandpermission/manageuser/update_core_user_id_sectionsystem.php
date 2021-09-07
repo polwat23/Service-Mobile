@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','id_section_system'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managecoreusers')){
-		$updateidsectionsystem = $conmysql->prepare("UPDATE coreuser 
+		$updateidsectionsystem = $conmssql->prepare("UPDATE coreuser 
 										  SET id_section_system = :id_section_system
 								          WHERE  username = :username;");
 		if($updateidsectionsystem->execute([

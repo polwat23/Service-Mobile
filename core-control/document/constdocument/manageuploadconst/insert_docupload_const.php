@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','manageuploadconst')){
-			$insertDocumentSystems = $conmysql->prepare("INSERT INTO docuploadconstant( upload_system, 
+			$insertDocumentSystems = $conmssql->prepare("INSERT INTO docuploadconstant( upload_system, 
 													upload_system_desc, menu_component) 
 													VALUES (:upload_system,:upload_system_desc,:menu_component)");
 			if($insertDocumentSystems->execute([

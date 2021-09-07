@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','managedoccontrolid')){
-			$insertDocumentSystems = $conmysql->prepare("UPDATE doccontrolid SET is_use = '0'
+			$insertDocumentSystems = $conmssql->prepare("UPDATE doccontrolid SET is_use = '0'
 													WHERE short_prefix = :short_prefix");
 			if($insertDocumentSystems->execute([
 				':short_prefix' =>  $dataComing["short_prefix"]

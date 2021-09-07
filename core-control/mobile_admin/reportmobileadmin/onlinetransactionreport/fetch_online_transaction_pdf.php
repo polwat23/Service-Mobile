@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute["member_no"] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 		}
 			
-		$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,transfer_mode,
+		$fetchReconcile = $conmssql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,transfer_mode,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
 														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type

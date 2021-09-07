@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','limit_amt','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$updateLimitTrans = $conmysql->prepare("UPDATE gcuserallowacctransaction SET limit_transaction_amt = :limit_amt 
+		$updateLimitTrans = $conmssql->prepare("UPDATE gcuserallowacctransaction SET limit_transaction_amt = :limit_amt 
 												WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
 		if($updateLimitTrans->execute([
 			':limit_amt' => $dataComing["limit_amt"],

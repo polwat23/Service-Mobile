@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkResign->execute([':member_no' => $payload["member_no"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 	if($rowResign["RESIGN_STATUS"] == '1'){
-		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
+		$updateStatus = $conmssql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
 		$updateStatus->execute([':member_no' => $payload["member_no"]]);
 		$arrayResult['RESPONSE_CODE'] = "WS0051";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	}
 	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
 		if($dataComing["is_root"] == "1"){
-			$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist,new_id_token,old_id_token)
+			$insertBlackList = $conmssql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist,new_id_token,old_id_token)
 												VALUES(:unique_id,:member_no,'1',:id_token,:id_token)");
 			if($insertBlackList->execute([
 				':unique_id' => $dataComing["unique_id"],
@@ -31,12 +31,12 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 				
 			}
 		}else{
-			$updateBlacklist = $conmysql->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
+			$updateBlacklist = $conmssql->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
 			$updateBlacklist->execute([':unique_id' => $dataComing["unique_id"]]);
 		}
 	}
 	if(isset($dataComing["flag"]) && $dataComing["flag"] == "TOUCH_ID"){
-		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
+		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmssql,
 		$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 		if(!$is_refreshToken_arr){
 			$arrayResult['RESPONSE_CODE'] = "WS0014";
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+	$checkPinNull = $conmssql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 	$rowPinNull = $checkPinNull->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowPinNull["pin"])){
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			}else{
 				$arrayResult['TEMP_PASSWORD'] = FALSE;
 			}
-			$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
+			$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmssql,
 			$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "WS0014";
@@ -138,7 +138,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			}
 		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
-		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
+		$updatePin = $conmssql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
 			':pin' => $pin,
 			':member_no' => $payload["member_no"]
@@ -148,7 +148,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			}else{
 				$arrayResult['TEMP_PASSWORD'] = FALSE;
 			}
-			$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
+			$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmssql,
 			$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
 				$arrayResult['RESPONSE_CODE'] = "WS0014";

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','member_no','section','minimum_value'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantapprwithdrawal')){
 		if(isset($dataComing["minimum_value"]) || $dataComing["minimum_value"] != ''){
-			$updateConstants = $conmysql->prepare("INSERT INTO gcconstantapprwithdrawal(minimum_value, maximum_value, member_no, id_section_system) 
+			$updateConstants = $conmssql->prepare("INSERT INTO gcconstantapprwithdrawal(minimum_value, maximum_value, member_no, id_section_system) 
 																	VALUES (:minimum_value,:maximum_value,:member_no,:id_section_system)");
 			if($updateConstants->execute([
 				':minimum_value' => $dataComing["minimum_value"],

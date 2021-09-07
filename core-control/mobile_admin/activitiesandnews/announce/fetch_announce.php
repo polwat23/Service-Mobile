@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute["end_date"] = $dataComing["end_date"];
 		}
 		$dateNow = date('YmdHis');
-		$fetchAnnounce = $conmysql->prepare("SELECT id_announce,
+		$fetchAnnounce = $conmssql->prepare("SELECT id_announce,
 													announce_cover,
 													announce_title,
 													announce_detail,

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','blacklistdevice')){
 		$arrayGroup = array();
-		$fetchUserAccount = $conmysql->prepare("SELECT gdb.id_blacklist,gdb.member_no,gdb.type_blacklist,gdb.blacklist_date,
+		$fetchUserAccount = $conmssql->prepare("SELECT gdb.id_blacklist,gdb.member_no,gdb.type_blacklist,gdb.blacklist_date,
 											(SELECT device_name from gctoken WHERE id_token = gdb.new_id_token) AS new_device,
 											(SELECT device_name from gctoken WHERE id_token = gdb.old_id_token) AS old_device
 											FROM gcdeviceblacklist gdb

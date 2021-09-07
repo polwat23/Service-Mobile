@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
 		$arrGroupDevice = array();
-		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
+		$fetchSettingDevice = $conmssql->prepare("SELECT device_name,channel,unique_id,login_date,id_token
 													FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
 													GROUP BY unique_id ORDER BY id_userlogin DESC");
 		$fetchSettingDevice->execute([':member_no' => $payload["member_no"]]);

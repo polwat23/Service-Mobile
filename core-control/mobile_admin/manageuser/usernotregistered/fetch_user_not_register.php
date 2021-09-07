@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','usernotregistered')){
 		$arrayUserRegister = array();
-		$fetchUserAccount = $conmysql->prepare("SELECT member_no FROM gcmemberaccount");
+		$fetchUserAccount = $conmssql->prepare("SELECT member_no FROM gcmemberaccount");
 		$fetchUserAccount->execute();
 		while($rowUserRegis = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];

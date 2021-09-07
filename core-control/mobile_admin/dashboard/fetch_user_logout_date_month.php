@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT
+		$fetchUserlogin = $conmssql->prepare("SELECT
 												DATE_FORMAT(login_date, '%m') AS MONTH,
 												DATE_FORMAT(login_date, '%Y') AS YEAR,
 												IFNULL((

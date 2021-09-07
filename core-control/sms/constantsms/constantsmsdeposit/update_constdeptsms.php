@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','constantsmsdeposit')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 																		id_smsconstantdept,
 																		dept_itemtype_code,
 																		allow_smsconstantdept
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$insertBulkCont[] = "('".$value_diff["DEPTITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTDEPT"]."')";
 						$insertBulkContLog[]='DEPTITEMTYPE_CODE=> '.$value_diff["DEPTITEMTYPE_CODE"].' ALLOW_SMSCONSTANTDEPT ='.$value_diff["ALLOW_SMSCONSTANTDEPT"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantdept SET allow_smsconstantdept = :ALLOW_SMSCONSTANTDEPT WHERE dept_itemtype_code = :DEPTITEMTYPE_CODE");
+						$updateConst = $conmssql->prepare("UPDATE smsconstantdept SET allow_smsconstantdept = :ALLOW_SMSCONSTANTDEPT WHERE dept_itemtype_code = :DEPTITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTDEPT' => $value_diff["ALLOW_SMSCONSTANTDEPT"],
 							':DEPTITEMTYPE_CODE' => $value_diff["DEPTITEMTYPE_CODE"]
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'DEPTITEMTYPE_CODE=> '.$value_diff["DEPTITEMTYPE_CODE"].' ALLOW_SMSCONSTANTDEPT='.$value_diff["ALLOW_SMSCONSTANTDEPT"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantdept(dept_itemtype_code,allow_smsconstantdept)
+				$insertConst = $conmssql->prepare("INSERT smsconstantdept(dept_itemtype_code,allow_smsconstantdept)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

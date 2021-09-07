@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageaccbeenbind')){
 		$arrayBindaccount = array();
-		$fetchBindAcount = $conmysql->prepare("SELECT 
+		$fetchBindAcount = $conmssql->prepare("SELECT 
 														gba.id_bindaccount,
 														gba.member_no,
 														gba.deptaccount_no_coop,

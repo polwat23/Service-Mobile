@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_RECEIVE FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conmssql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_RECEIVE FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;

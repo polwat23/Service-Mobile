@@ -72,8 +72,8 @@ $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
-if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
-	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
+if(is_array($conmssql) && $conmssql["RESULT"] == FALSE){
+	$message_error = $conmssql["MESSAGE"]." ".$conmssql["ERROR"];
 	$lib->sendLineNotify($message_error);
 	http_response_code(500);
 	
@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						}
 						if($payload["exp"] <= time() + ($func->getConstant('limit_session_timeout') / 2)){
 							$regen_token = $auth->refresh_accesstoken($dataComing["refresh_token"],
-							$dataComing["unique_id"],$conmysql,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+							$dataComing["unique_id"],$conmssql,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 							if(!$regen_token){
 								$arrayResult['RESPONSE_CODE'] = "WS0014";
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 								if(!$skip_autoload){
 									if($dataComing["menu_component"] != 'News' && $dataComing["menu_component"] != 'Pin' 
 									&& $dataComing["menu_component"] != 'Landing' && $dataComing["menu_component"] != 'Event'  && $dataComing["menu_component"] != 'UpdateFCMToken' && $payload["user_type"] != '9'){
-										$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmysql);
+										$is_refreshToken_arr = $auth->CheckPeriodRefreshToken($dataComing["refresh_token"],$dataComing["unique_id"],$payload["id_token"],$conmssql);
 										if($is_refreshToken_arr){
 											$arrayResult['RESPONSE_CODE'] = "WS0046";
 											$arrayResult['RESPONSE_MESSAGE'] = "";

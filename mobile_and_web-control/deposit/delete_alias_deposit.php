@@ -5,11 +5,11 @@ if($lib->checkCompleteArgument(['menu_component','type_alias','account_no'],$dat
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		if($dataComing["type_alias"] == 'alias_img'){
-			$DeleteAliasDept = $conmysql->prepare("UPDATE gcdeptalias SET path_alias_img = null WHERE deptaccount_no = :deptaccount_no");
+			$DeleteAliasDept = $conmssql->prepare("UPDATE gcdeptalias SET path_alias_img = null WHERE deptaccount_no = :deptaccount_no");
 		}else if($dataComing["type_alias"] == 'alias_name'){
-			$DeleteAliasDept = $conmysql->prepare("UPDATE gcdeptalias SET alias_name = null WHERE deptaccount_no = :deptaccount_no");
+			$DeleteAliasDept = $conmssql->prepare("UPDATE gcdeptalias SET alias_name = null WHERE deptaccount_no = :deptaccount_no");
 		}else{
-			$DeleteAliasDept = $conmysql->prepare("UPDATE gcdeptalias SET path_alias_img = null,alias_name = null WHERE deptaccount_no = :deptaccount_no");
+			$DeleteAliasDept = $conmssql->prepare("UPDATE gcdeptalias SET path_alias_img = null,alias_name = null WHERE deptaccount_no = :deptaccount_no");
 		}
 		if($DeleteAliasDept->execute([
 			':deptaccount_no' => $account_no,

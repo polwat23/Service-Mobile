@@ -4,14 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','email'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingMemberInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getConstInfo = $conmysql->prepare("SELECT save_tablecore FROM gcconstantchangeinfo WHERE const_code = 'email'");
+		$getConstInfo = $conmssql->prepare("SELECT save_tablecore FROM gcconstantchangeinfo WHERE const_code = 'email'");
 		$getConstInfo->execute();
 		$rowConst = $getConstInfo->fetch(PDO::FETCH_ASSOC);
 		if($rowConst["save_tablecore"] == '1'){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
+			$updateEmail = $conmssql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
 			if($updateEmail->execute([
 				':email' => $dataComing["email"],
 				':member_no' => $payload["member_no"]

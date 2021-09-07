@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("UPDATE gcbankconstantmapping
+		$updateConstants = $conmssql->prepare("UPDATE gcbankconstantmapping
 		SET is_use = '0'
 		WHERE id_bankconstantmapping = :id_bankconstantmapping");
 		if($updateConstants->execute([

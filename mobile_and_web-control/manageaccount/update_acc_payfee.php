@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','account_payfee','id_bindaccount'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$updateAccountPayfee = $conmysql->prepare("UPDATE gcbindaccount SET account_payfee = :account_payfee WHERE id_bindaccount = :id_bindaccount");
+		$updateAccountPayfee = $conmssql->prepare("UPDATE gcbindaccount SET account_payfee = :account_payfee WHERE id_bindaccount = :id_bindaccount");
 		if($updateAccountPayfee->execute([
 			':account_payfee' => preg_replace('/-/','',$dataComing["account_payfee"]),
 			':id_bindaccount' => $dataComing["id_bindaccount"]

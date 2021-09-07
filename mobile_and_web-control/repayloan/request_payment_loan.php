@@ -82,7 +82,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 			if($wtdResult["RESULT"]){
 				$payslip = $cal_loan->paySlip($conmssql,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
-				$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
+				$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmssql);
 				if($payslip["RESULT"]){
 					$payslipdet = $cal_loan->paySlipLonDet($conmssql,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
 					$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
@@ -93,14 +93,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 						$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$dataComing["app_version"]);
 						if($repayloan["RESULT"]){
 							$conmssql->commit();
-							$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
+							$insertRemark = $conmssql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 																VALUES(:remark,:deptaccount_no,:seq_no)");
 							$insertRemark->execute([
 								':remark' => $dataComing["remark"],
 								':deptaccount_no' => $from_account_no,
 								':seq_no' => $getlastseq_no["MAX_SEQ_NO"] + 1
 							]);
-							$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
+							$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
 																		destination,transfer_mode
 																		,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																		coop_slip_no,id_userlogin,ref_no_source)

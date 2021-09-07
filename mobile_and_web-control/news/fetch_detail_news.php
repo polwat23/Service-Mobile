@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
-		$fetchDetailNews = $conmysql->prepare("SELECT gn.update_date,gn.img_gallery_1,gn.img_gallery_2,gn.img_gallery_3,
+		$fetchDetailNews = $conmssql->prepare("SELECT gn.update_date,gn.img_gallery_1,gn.img_gallery_2,gn.img_gallery_3,
 											gn.img_gallery_4,gn.img_gallery_5,gn.news_title,gn.news_detail,gn.create_by,gn.link_news_more,gn.news_html,gn.file_upload
 											FROM gcnews gn
 											WHERE gn.id_news = :id_news and gn.is_use = '1'");

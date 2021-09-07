@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','constantsmsloan')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 																		id_smsconstantloan,
 																		loan_itemtype_code,
 																		allow_smsconstantloan
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$insertBulkCont[] = "('".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."')";
 						$insertBulkContLog[]='LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN ='.$value_diff["ALLOW_SMSCONSTANTLOAN"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
+						$updateConst = $conmssql->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTLOAN' => $value_diff["ALLOW_SMSCONSTANTLOAN"],
 							':LOANITEMTYPE_CODE' => $value_diff["LOANITEMTYPE_CODE"]
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN='.$value_diff["ALLOW_SMSCONSTANTLOAN"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantloan(loan_itemtype_code,allow_smsconstantloan)
+				$insertConst = $conmssql->prepare("INSERT smsconstantloan(loan_itemtype_code,allow_smsconstantloan)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

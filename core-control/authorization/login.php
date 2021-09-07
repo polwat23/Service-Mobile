@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['username','password','device_name','unique_id'],$dataComing)){
-	$checkPassword = $conmysql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
+	$checkPassword = $conmssql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
 										FROM coreuser cu LEFT JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
 										WHERE cu.username = :username and cu.user_status = '1'");
 	$checkPassword->execute([
@@ -17,10 +17,10 @@ if($lib->checkCompleteArgument(['username','password','device_name','unique_id']
 			$arrPayload['exp'] = time() + 21600;
 			$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
 			if($dataComing["username"] != 'dev@mode'){
-				$updateOldUser = $conmysql->prepare("UPDATE coreuserlogin SET is_login = '0' WHERE username = :username");
+				$updateOldUser = $conmssql->prepare("UPDATE coreuserlogin SET is_login = '0' WHERE username = :username");
 				$updateOldUser->execute([':username' => $dataComing["username"]]);
 			}
-			$insertLog = $conmysql->prepare("INSERT INTO coreuserlogin(username,unique_id,device_name,auth_token,logout_date)
+			$insertLog = $conmssql->prepare("INSERT INTO coreuserlogin(username,unique_id,device_name,auth_token,logout_date)
 											VALUES(:username,:unique_id,:device_name,:token,:logout_date)");
 			if($insertLog->execute([
 				':username' => $dataComing["username"],

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path FROM gcmenu mc
+		$fetchConstant = $conmssql->prepare("SELECT id_menu,menu_name,menu_icon_path FROM gcmenu mc
 										WHERE id_menu in (18,56,57) AND menu_status<> -9");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["PARENT_ICON_PATH"] = $rowAccount["menu_icon_path"];
 			$arrConstans["TRANSMENU"] = [];
 			
-			$fetchMenuTransaction = $conmysql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component FROM gcmenu mc
+			$fetchMenuTransaction = $conmssql->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component FROM gcmenu mc
 										WHERE menu_parent = :id_parent AND menu_status<> -9");
 			$fetchMenuTransaction->execute([
 				':id_parent' => $rowAccount["id_menu"]
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 				
 				$arrMenu["BANK_CONSTANT"] = array();
-				$fetchBankMapping = $conmysql->prepare("SELECT bc.id_bankconstant,
+				$fetchBankMapping = $conmssql->prepare("SELECT bc.id_bankconstant,
 												bc.transaction_cycle,
 												bc.max_numof_deposit,
 												bc.max_numof_withdraw,

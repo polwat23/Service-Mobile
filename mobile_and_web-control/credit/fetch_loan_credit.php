@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupCredit = array();
 		$arrCanCal = array();
 		$arrCanReq = array();
-		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
+		$fetchLoanCanCal = $conmssql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
 		$fetchLoanCanCal->execute();
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
 			$fetchLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			if($canRequest === TRUE){
 				$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
-				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
+				$CheckIsReq = $conmssql->prepare("SELECT reqloan_doc,req_status
 															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
 				$CheckIsReq->execute([
 					':loantype_code' => $rowCanCal["loantype_code"],

@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$updateMemoDept = $conmysql->prepare("UPDATE gcmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
+		$updateMemoDept = $conmssql->prepare("UPDATE gcmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
 												WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 		if($updateMemoDept->execute([
 			':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$insertMemoDept = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,memo_icon_path,deptaccount_no,seq_no) 
+			$insertMemoDept = $conmssql->prepare("INSERT INTO gcmemodept(memo_text,memo_icon_path,deptaccount_no,seq_no) 
 													VALUES(:memo_text,:memo_icon_path,:deptaccount_no,:seq_no)");
 			if($insertMemoDept->execute([
 				':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],

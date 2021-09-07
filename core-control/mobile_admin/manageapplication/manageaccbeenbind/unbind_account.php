@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','bindacc_status','id_bindaccount'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','manageuser')){
-		$updaeusername = $conmysql->prepare("UPDATE gcbindaccount 
+		$updaeusername = $conmssql->prepare("UPDATE gcbindaccount 
 										  SET bindaccount_status = :bindacc_status
 								          WHERE  id_bindaccount = :id_bindaccount;;");
 		if($updaeusername->execute([

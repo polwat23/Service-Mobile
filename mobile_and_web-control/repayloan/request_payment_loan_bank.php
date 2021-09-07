@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getBankDisplay = $conmysql->prepare("SELECT cs.link_deposit_coopdirect,cs.bank_short_ename,gc.bank_code,gc.account_payfee,
+		$getBankDisplay = $conmssql->prepare("SELECT cs.link_deposit_coopdirect,cs.bank_short_ename,gc.bank_code,gc.account_payfee,
 												cs.fee_deposit,cs.bank_short_ename,gc.deptaccount_no_bank
 												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
 												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$getBalanceAccFee->execute([':deptaccount_no' => $rowBankDisplay["account_payfee"]]);
 		$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
 		$dataAccFee = $cal_dep->getConstantAcc($rowBankDisplay["account_payfee"]);
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
+		$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
 													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 		$getTransactionForFee->execute([
 			':member_no' => $payload["member_no"]
@@ -85,9 +85,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowBankDisplay["account_payfee"]);
 		$conmssql->beginTransaction();
-		$conmysql->beginTransaction();
+		$conmssql->beginTransaction();
 		$payslip = $cal_loan->paySlip($conmssql,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
-		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
+		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmssql);
 		if($payslip["RESULT"]){
 			$payslipdet = $cal_loan->paySlipLonDet($conmssql,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
 			$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
@@ -101,7 +101,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 						if($rowBankDisplay["fee_deposit"] > 0){
 							if($rowBalFee["PRNCBAL"] - $rowBankDisplay["fee_deposit"] < $dataAccFee["MINPRNCBAL"]){
 								$conmssql->rollback();
-								$conmysql->rollback();
+								$conmssql->rollback();
 								$arrayResult['RESPONSE_CODE'] = "WS0100";
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
@@ -114,7 +114,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 								
 							}else{
 								$conmssql->rollback();
-								$conmysql->rollback();
+								$conmssql->rollback();
 								$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayStruc = [
@@ -140,7 +140,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 								
 							}else{
 								$conmssql->rollback();
-								$conmysql->rollback();
+								$conmssql->rollback();
 								$arrayResult['RESPONSE_CODE'] = $penaltyWtdPromo["RESPONSE_CODE"];
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayStruc = [
@@ -177,7 +177,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowBankDisplay["link_deposit_coopdirect"],$arrSendData);
 					if(!$responseAPI["RESULT"]){
 						$conmssql->rollback();
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$filename = basename(__FILE__, '.php');
 						$arrayResult['RESPONSE_CODE'] = "WS0027";
 						$arrayStruc = [
@@ -202,7 +202,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 					if($arrResponse->RESULT){
 						$transaction_no = $arrResponse->TRANSACTION_NO;
 						$etn_ref = $arrResponse->EXTERNAL_REF;
-						$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
+						$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,
 																	destination,transfer_mode
 																	,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	etn_refno,id_userlogin,ref_no_source,bank_code)
@@ -224,7 +224,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 							':bank_code' => $rowBankDisplay["bank_code"]
 						]);
 						$conmssql->commit();
-						$conmysql->commit();
+						$conmssql->commit();
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 						$dataMerge = array();
@@ -273,7 +273,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 						require_once('../../include/exit_footer.php');
 					}else{
 						$conmssql->rollback();
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE_CODE'] = "WS0038";
 						$arrayStruc = [
 							':member_no' => $payload["member_no"],
@@ -296,7 +296,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 					}
 				}else{
 					$conmssql->rollback();
-					$conmysql->rollback();
+					$conmssql->rollback();
 					$arrayResult['RESPONSE_CODE'] = $repayloan["RESPONSE_CODE"];
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
@@ -304,7 +304,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 				}
 			}else{
 				$conmssql->rollback();
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE_CODE'] = $payslipdet["RESPONSE_CODE"];
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -312,7 +312,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 			}
 		}else{
 			$conmssql->rollback();
-			$conmysql->rollback();
+			$conmssql->rollback();
 			$arrayResult['RESPONSE_CODE'] = $payslip["RESPONSE_CODE"];
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

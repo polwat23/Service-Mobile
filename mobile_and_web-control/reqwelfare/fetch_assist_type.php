@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchCateGrp = $conmssql->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchCateGrp->execute([':member_no' => $member_no]);
 		$rowCateGrp = $fetchCateGrp->fetch(PDO::FETCH_ASSOC);
-		$fetchAssistType = $conmysql->prepare("SELECT welfare_type_code,welfare_type_desc FROM gcconstantwelfare WHERE 
+		$fetchAssistType = $conmssql->prepare("SELECT welfare_type_code,welfare_type_desc FROM gcconstantwelfare WHERE 
 												(member_cate_code = :membcat_code OR member_cate_code = 'AL') and is_use = '1'");
 		$fetchAssistType->execute([':membcat_code' => $rowCateGrp["MEMBCAT_CODE"]]);
 		while($rowAssistType = $fetchAssistType->fetch(PDO::FETCH_ASSOC)){

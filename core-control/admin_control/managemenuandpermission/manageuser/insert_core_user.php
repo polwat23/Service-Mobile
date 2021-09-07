@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','password','id_section_system'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managecoreusers')){
-		$updatemenu = $conmysql->prepare("INSERT INTO coreuser (username, password, id_section_system) 
+		$updatemenu = $conmssql->prepare("INSERT INTO coreuser (username, password, id_section_system) 
 										 VALUES(:username,:password,:id_section_system)");
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		if($updatemenu->execute([

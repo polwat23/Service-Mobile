@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','manageuploadconst')){
 		$arrayGroup = array();
-		$fetchDocUploadConst = $conmysql->prepare("SELECT id_upload, upload_system,upload_system_desc, menu_component 
+		$fetchDocUploadConst = $conmssql->prepare("SELECT id_upload, upload_system,upload_system_desc, menu_component 
 													FROM docuploadconstant WHERE is_use = '1'");
 		$fetchDocUploadConst->execute();
 		while($rowConst = $fetchDocUploadConst->fetch(PDO::FETCH_ASSOC)){

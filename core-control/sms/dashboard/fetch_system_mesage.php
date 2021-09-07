@@ -4,7 +4,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms',null)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
-		$fetchSMSsystemSend = $conmysql->prepare("SELECT
+		$fetchSMSsystemSend = $conmssql->prepare("SELECT
 													COUNT(MEMBER_NO) AS C_NAME,
 													DATE_FORMAT(receive_date, '%m') AS MONTH
 												FROM

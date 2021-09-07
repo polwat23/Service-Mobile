@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','live_url','live_title'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managelive')){
 		
-		$fetchBG = $conmysql->prepare("SELECT id_live, live_url,live_title, update_date, is_use, update_by FROM gclive");
+		$fetchBG = $conmssql->prepare("SELECT id_live, live_url,live_title, update_date, is_use, update_by FROM gclive");
 								
 		$fetchBG->execute();
 		$arrayGroup = array();
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id','live_url','live_title'],$dataComing
 		}
 		
 		if(count($arrayGroup) > 0){
-			$insertIntoInfo = $conmysql->prepare("UPDATE gclive SET live_url = :live_url,live_title = :live_title, update_by = :username WHERE id_live = :id_live");
+			$insertIntoInfo = $conmssql->prepare("UPDATE gclive SET live_url = :live_url,live_title = :live_title, update_by = :username WHERE id_live = :id_live");
 			if($insertIntoInfo->execute([
 				':live_url' => $dataComing["live_url"],
 				'live_title' => $dataComing["live_title"],
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','live_url','live_title'],$dataComing
 				require_once('../../../../include/exit_footer.php');
 			}
 		}else{
-			$insert_news = $conmysql->prepare("INSERT INTO gclive(live_url,live_title,update_by) VALUES (:live_url,:live_title,:username)");
+			$insert_news = $conmssql->prepare("INSERT INTO gclive(live_url,live_title,update_by) VALUES (:live_url,:live_title,:username)");
 			if($insert_news->execute([
 					':live_url' => $dataComing["live_url"],
 					'live_title' => $dataComing["live_title"],

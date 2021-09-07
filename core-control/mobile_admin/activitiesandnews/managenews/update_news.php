@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managenews')){
-		$conmysql->beginTransaction();
+		$conmssql->beginTransaction();
 		$pathImg1 = null;
 		$pathImg2 = null;
 		$pathImg3 = null;
@@ -169,7 +169,7 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 									</html>';
 		}
 
-		$update_news= $conmysql->prepare("UPDATE gcnews SET 
+		$update_news= $conmssql->prepare("UPDATE gcnews SET 
 												news_title = :news_title,
 												news_detail = :news_detail,
 												path_img_header=:path_img_header,
@@ -214,24 +214,24 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 							$pathFile = $pathFile."?".$random_text;
 						}
 						//update file sql
-						$update_news= $conmysql->prepare("UPDATE gcnews SET 
+						$update_news= $conmssql->prepare("UPDATE gcnews SET 
 															file_upload = :path_file
 													  WHERE id_news = :id_news");
 						if($update_news->execute([
 							':id_news' =>  $last_id,
 							':path_file' => $pathFile ?? null
 						])){
-							$conmysql->commit();
+							$conmssql->commit();
 							$arrayResult["RESULT"] = TRUE;
 							require_once('../../../../include/exit_footer.php');
 						}else{
-							$conmysql->rollback();
+							$conmssql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../../../include/exit_footer.php');
 						}
 			
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['DATA'] = [
 							':id_news' =>  $last_id,
 							':path_file' => $pathFile ?? null
@@ -239,31 +239,31 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else if($dataComing["is_delete_file"] == "1"){
 					//update file sql
-					$update_news= $conmysql->prepare("UPDATE gcnews SET 
+					$update_news= $conmssql->prepare("UPDATE gcnews SET 
 														file_upload = :path_file
 												  WHERE id_news = :id_news");
 					if($update_news->execute([
 						':id_news' =>  $last_id,
 						':path_file' => null
 					])){
-						$conmysql->commit();
+						$conmssql->commit();
 						$arrayResult["RESULT"] = TRUE;
 						require_once('../../../../include/exit_footer.php');
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถลบไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
-					$conmysql->commit();
+					$conmssql->commit();
 					$arrayResult["RESULT"] = TRUE;
 					require_once('../../../../include/exit_footer.php');
 				}

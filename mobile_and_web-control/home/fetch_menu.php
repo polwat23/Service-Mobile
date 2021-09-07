@@ -106,19 +106,19 @@ if(!$anonymous){
 	}else{
 		if(isset($dataComing["menu_parent"])){
 			if($user_type == '5' || $user_type == '9'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+				$fetch_menu = $conmssql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") and menu_parent = :menu_parent
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conmssql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
 												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conmssql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent 
@@ -174,19 +174,19 @@ if(!$anonymous){
 			$arrayGroupMenu = array();
 			$arrayMenuTransaction = array();
 			if($user_type == '5' || $user_type == '9'){
-				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
+				$fetch_menu = $conmssql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") 
 												and (menu_channel = :channel OR 1=1)
 												ORDER BY menu_order ASC");
 			}else if($user_type == '1'){
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conmssql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).")
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
 												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
-				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
+				$fetch_menu = $conmssql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") 
@@ -214,7 +214,7 @@ if(!$anonymous){
 							$arrayMenuSetting[] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
-							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
+							$getMenuParentStatus = $conmssql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
 							$getMenuParentStatus->execute();
 							$rowStatus = $getMenuParentStatus->fetch(PDO::FETCH_ASSOC);
 							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
@@ -380,7 +380,7 @@ if(!$anonymous){
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
-			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
+			$fetchMenuFav = $conmssql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
 			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
@@ -405,7 +405,7 @@ if(!$anonymous){
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep ?? [];
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan ?? [];
 				}
-				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
+				$fetchLimitTrans = $conmssql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
@@ -438,7 +438,7 @@ if(!$anonymous){
 			
 		}
 		$arrayAllMenu = array();
-		$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
+		$fetch_menu = $conmssql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_status,menu_version FROM gcmenu 
 											WHERE menu_parent IN ('-1','-2') and (menu_channel = :channel OR menu_channel = 'both')");
 		$fetch_menu->execute([
 			':channel' => $arrPayload["PAYLOAD"]["channel"]

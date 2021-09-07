@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
+	$insertAccount = $conmssql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
 										VALUES(:member_no,:password,:phone,:email,:channel)");
 	if($insertAccount->execute([
 		':member_no' => $dataComing["member_no"],

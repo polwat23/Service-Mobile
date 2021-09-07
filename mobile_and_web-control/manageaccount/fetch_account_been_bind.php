@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
-		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
+		$fetchAccountBeenBind = $conmssql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
 													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
 													gba.bank_account_name,gba.bank_account_name_en,csb.bank_short_ename,csb.bank_code,gba.account_payfee
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
@@ -51,13 +51,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrBindAccount[] = $arrAccount;
 		}
 		$arrayBankGrp = array();
-		$getBankAllow = $conmysql->prepare("SELECT bank_code,bank_name,bank_short_name,bank_short_ename,bank_logo_path
+		$getBankAllow = $conmssql->prepare("SELECT bank_code,bank_name,bank_short_name,bank_short_ename,bank_logo_path
 											FROM csbankdisplay");
 		$getBankAllow->execute();
 		while($rowAllow = $getBankAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrayBank = array();
 			$arrayBank["IS_BIND"] = FALSE;
-			$checkRegis = $conmysql->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank,bank_account_name,bank_account_name_en FROM gcbindaccount 
+			$checkRegis = $conmssql->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank,bank_account_name,bank_account_name_en FROM gcbindaccount 
 											WHERE bank_code = :bank_code and member_no = :member_no and bindaccount_status = '1'");
 			$checkRegis->execute([
 				':bank_code' => $rowAllow["bank_code"],

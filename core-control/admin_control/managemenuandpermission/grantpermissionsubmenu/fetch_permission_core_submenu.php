@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','username'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
 		$arrayGroup = array();
-		$fetchMenuMobile = $conmysql->prepare("SELECT cpsm.id_submenu,cpm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN corepermissionsubmenu cpsm 
+		$fetchMenuMobile = $conmssql->prepare("SELECT cpsm.id_submenu,cpm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN corepermissionsubmenu cpsm 
 												ON cpm.id_permission_menu = cpsm.id_permission_menu WHERE cpsm.is_use = '1' and cpm.is_use = '1' and cpm.username = :username");
 		$fetchMenuMobile->execute([
 			':username' => $dataComing["username"]

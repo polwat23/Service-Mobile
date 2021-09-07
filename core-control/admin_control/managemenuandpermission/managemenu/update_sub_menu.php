@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_status','id_submenu'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
-		$updatemenu = $conmysql->prepare("UPDATE coresubmenu SET menu_status = :menu_status
+		$updatemenu = $conmssql->prepare("UPDATE coresubmenu SET menu_status = :menu_status
 									 WHERE id_submenu = :id_submenu");
 		if($updatemenu->execute([
 			':menu_status' => $dataComing["menu_status"],

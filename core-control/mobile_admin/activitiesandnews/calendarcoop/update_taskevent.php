@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 								</html>';
 		}
 
-		$UpdateTaskEvent = $conmysql->prepare("UPDATE gctaskevent SET task_topic = :task_topic, task_detail = :task_detail, start_date = :start_date, end_date = :end_date,
+		$UpdateTaskEvent = $conmssql->prepare("UPDATE gctaskevent SET task_topic = :task_topic, task_detail = :task_detail, start_date = :start_date, end_date = :end_date,
 											event_start_time = :event_start_time,event_end_time = :event_end_time ,is_settime = :is_settime,create_by = :create_by,
 											is_notify = :is_notify,is_notify_before = :is_notify_before, event_html = :event_html
 											WHERE id_task = :id_task");

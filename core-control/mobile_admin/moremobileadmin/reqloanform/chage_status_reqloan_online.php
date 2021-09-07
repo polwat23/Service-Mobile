@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','loanrequestform')){
 		if($dataComing["req_status"] == '1'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '1',remark = :remark,approve_date = NOW(),username = :username WHERE reqloan_doc = :reqloan_doc");
+			$approveReqLoan = $conmssql->prepare("UPDATE gcreqloan SET req_status = '1',remark = :remark,approve_date = NOW(),username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
 				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				exit();
 			}
 		}else if($dataComing["req_status"] == '7' || $dataComing["req_status"] == '6' || $dataComing["req_status"] == '2' || $dataComing["req_status"] == '3' || $dataComing["req_status"] == '4'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = :req_status,remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
+			$approveReqLoan = $conmssql->prepare("UPDATE gcreqloan SET req_status = :req_status,remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
 				':req_status' => $dataComing["req_status"],
 				':remark' => $dataComing["remark"] ?? null,
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				exit();
 			}
 		}else if($dataComing["req_status"] == '-9'){
-			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '-9',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
+			$approveReqLoan = $conmssql->prepare("UPDATE gcreqloan SET req_status = '-9',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
 				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],
@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				exit();
 			}
 		}
-		$getDataReqDoc = $conmysql->prepare("SELECT member_no FROM gcreqloan WHERE reqloan_doc = :reqloan_doc");
+		$getDataReqDoc = $conmssql->prepare("SELECT member_no FROM gcreqloan WHERE reqloan_doc = :reqloan_doc");
 		$getDataReqDoc->execute([':reqloan_doc' => $dataComing["reqloan_doc"]]);
 		$rowDataReq = $getDataReqDoc->fetch(PDO::FETCH_ASSOC);
 		$arrToken = $func->getFCMToken('person',$rowDataReq["member_no"]);

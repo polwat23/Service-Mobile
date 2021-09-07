@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("INSERT INTO gcbankconstant
+		$updateConstants = $conmssql->prepare("INSERT INTO gcbankconstant
 		(transaction_cycle,
 		max_numof_deposit,
 		max_numof_withdraw,

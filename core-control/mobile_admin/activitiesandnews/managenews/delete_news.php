@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managenews')){
-	$updatemenu = $conmysql->prepare("UPDATE  gcnews  SET is_use = '-9'
+	$updatemenu = $conmssql->prepare("UPDATE  gcnews  SET is_use = '-9'
 										  WHERE id_news=:id_news");
 		if($updatemenu->execute([
 			':id_news' => $dataComing["id_news"]

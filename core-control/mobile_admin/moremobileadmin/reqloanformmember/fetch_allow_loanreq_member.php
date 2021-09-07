@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["UPDATE_USERNAME"] = null;
 			$arrayGroup["IS_ALLOW"] = 0;
 			
-			$fetchAllow = $conmysql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
+			$fetchAllow = $conmssql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
 											FROM gcallowmemberreqloan WHERE member_no = :member_no");
 			$fetchAllow->execute([
 				':member_no' => $rowMember["MEMBER_NO"]

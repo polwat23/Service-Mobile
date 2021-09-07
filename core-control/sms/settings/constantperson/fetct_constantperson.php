@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		//fetch smsConstantWithdraw
 		$smsConstantMinWithdraw = 500;
 		
-		$fetchConstant = $conmysql->prepare('SELECT id_smscsperson as id_constantperson,smscsp_account as account,smscsp_mindeposit as mindeposit,
+		$fetchConstant = $conmssql->prepare('SELECT id_smscsperson as id_constantperson,smscsp_account as account,smscsp_mindeposit as mindeposit,
 												smscsp_minwithdraw as minwithdraw,is_use,is_mindeposit, is_minwithdraw,smscsp_pay_type as pay_type
 												FROM smsconstantperson WHERE smscsp_account in ('.implode(',',$dataComing["acc_list"]).') ORDER BY smscsp_account ASC');
 		$fetchConstant->execute();

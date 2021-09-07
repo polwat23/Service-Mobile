@@ -3,13 +3,13 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
-		$fetchDataDeposit = $conmysql->prepare("SELECT csb.itemtype_wtd,csb.link_inquirywithd_coopdirect,gba.bank_code,csb.fee_withdraw,csb.bank_short_ename,gba.account_payfee
+		$fetchDataDeposit = $conmssql->prepare("SELECT csb.itemtype_wtd,csb.link_inquirywithd_coopdirect,gba.bank_code,csb.fee_withdraw,csb.bank_short_ename,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
 		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
+		$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
 													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 		$getTransactionForFee->execute([
 			':member_no' => $payload["member_no"]
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["bank_code"]);
 			if($arrRightDep["RESULT"]){
 				$amt_transfer = $dataComing["amt_transfer"];
-				$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
+				$getDataUser = $conmssql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
 													and member_no = :member_no and bindaccount_status = '1'");
 				$getDataUser->execute([
 					':deptaccount_no' => $deptaccount_no,

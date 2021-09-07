@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageconstperson')){
 		$arrayGroup = array();
 		//fetch smsConstantDept
-		$fetchConstant = $conmysql->prepare("SELECT id_smscsperson as id_constantperson,smscsp_member as member_no,smscsp_mindeposit as mindeposit,
+		$fetchConstant = $conmssql->prepare("SELECT id_smscsperson as id_constantperson,smscsp_member as member_no,smscsp_mindeposit as mindeposit,
 												smscsp_minwithdraw as minwithdraw,is_use
 												FROM smsconstantperson");
 		$fetchConstant->execute();

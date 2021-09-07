@@ -3,9 +3,9 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
-		$conmysql->beginTransaction();
+		$conmssql->beginTransaction();
 		foreach($dataComing["menu_list"] as $menu_list){
-			$updatemenu = $conmysql->prepare("UPDATE gcmenu SET menu_order = :menu_order
+			$updatemenu = $conmssql->prepare("UPDATE gcmenu SET menu_order = :menu_order
 										 WHERE id_menu = :id_menu");
 			if($updatemenu->execute([
 				':menu_order' => $menu_list["order"],
@@ -13,13 +13,13 @@ if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
 			])){
 				continue;
 			}else{
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถจัดเรียงเมนูได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
 			}
 		}
-		$conmysql->commit();
+		$conmssql->commit();
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

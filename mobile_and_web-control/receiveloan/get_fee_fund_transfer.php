@@ -51,13 +51,13 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 					$arrOther["VALUE"] = number_format($interest,2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
 				}
-				$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
+				$fetchDataDeposit = $conmssql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
 														csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
 														FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 														WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
 				$fetchDataDeposit->execute([':member_no' => $payload["member_no"]]);
 				$rowDataWithdraw = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
-				$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
+				$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
 															transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 				$getTransactionForFee->execute([
 					':member_no' => $payload["member_no"]

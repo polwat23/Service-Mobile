@@ -15,7 +15,7 @@ if(isset($dataComing["firsttime"]) && $dataComing["firsttime"] == '1'){
 }else{
 	$firstapp = '-1';
 }
-$fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,announce_detail,announce_html,effect_date,id_announce,flag_granted,due_date,is_check,check_text,accept_text,cancel_text
+$fetchAnn = $conmssql->prepare("SELECT priority,announce_cover,announce_title,announce_detail,announce_html,effect_date,id_announce,flag_granted,due_date,is_check,check_text,accept_text,cancel_text
 												FROM gcannounce 
 												WHERE effect_date IS NOT NULL and 
 												((CASE WHEN priority = 'high' OR priority = 'ask'
@@ -29,7 +29,7 @@ $fetchAnn->execute([
 	':flag_granted' => $flag_granted
 ]);
 while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
-	$checkAcceptAnn = $conmysql->prepare("SELECT id_accept_ann FROM logacceptannounce WHERE member_no = :member_no and id_announce = :id_announce");
+	$checkAcceptAnn = $conmssql->prepare("SELECT id_accept_ann FROM logacceptannounce WHERE member_no = :member_no and id_announce = :id_announce");
 	$checkAcceptAnn->execute([
 		':member_no' => $payload["member_no"],
 		':id_announce' => $rowAnn["id_announce"]

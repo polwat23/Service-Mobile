@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								
 				$orderSelectFile = "ORDER BY ".($dataComing["sorting_value"] == "CREATE_DATE" ? "create_date" : "doc_filename")." ".($dataComing["sorting_order"] == "asc" ? "asc" : "desc");
 				$selectFiles = $mainSelectFile.$orderSelectFile;
-				$fetchDocument = $conmysql->prepare($selectFiles);
+				$fetchDocument = $conmssql->prepare($selectFiles);
 				$fetchDocument->execute($arrayExecute);
 				
 				while($dataDoc = $fetchDocument->fetch(PDO::FETCH_ASSOC)){

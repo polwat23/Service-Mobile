@@ -30,15 +30,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getAccount = $conmssql->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
-											WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+		$getAccount = $conmssql->prepare("SELECT dt.balance  as BALANCE FROM codeposit_master dm  
+											LEFT JOIN codeposit_transaction dt ON dm.lastseq = dt.transaction_seq  and dm.deposit_id = dt.deposit_id
+											WHERE dm.status = 'A' and dm.deposit_id  = :account_no");
 		$getAccount->execute([
 			':account_no' => $account_no
 		]);
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
-		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
+		$fetchSlipTrans = $conmssql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
 		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
 		$arrSlipTrans = array();
 		$arrSlipStm = array();
@@ -74,7 +75,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
+		$getMemoDP = $conmssql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
 											WHERE deptaccount_no = :account_no");
 		$getMemoDP->execute([
 			':account_no' => $account_no

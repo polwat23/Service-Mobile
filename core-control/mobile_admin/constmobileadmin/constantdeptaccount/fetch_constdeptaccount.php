@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 																		id_accountconstant,
 																		dept_type_code,
 																		member_cate_code,

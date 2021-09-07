@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
 		$arrayGroup = array();
-		$fetchUser = $conmysql->prepare("SELECT  id_section_system, section_system, system_assign
+		$fetchUser = $conmssql->prepare("SELECT  id_section_system, section_system, system_assign
 										 FROM  coresectionsystem
 										 WHERE is_use ='1' and section_system <> 'root'");
 		$fetchUser->execute();

@@ -8,13 +8,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccAllowed = array();
 		$arrAllowAccGroup = array();
 		
-		$getDeptTypeAllow = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
+		$getDeptTypeAllow = $conmssql->prepare("SELECT dept_type_code FROM gcconstantaccountdept
 												WHERE allow_withdraw_outside = '1' OR allow_withdraw_inside = '1'");
 		$getDeptTypeAllow->execute();
 		while($rowDeptAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrDeptAllowed[] = "'".$rowDeptAllow["dept_type_code"]."'";
 		}
-		$InitDeptAccountAllowed = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
+		$InitDeptAccountAllowed = $conmssql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE member_no = :member_no and is_use <> '-9'");
 		$InitDeptAccountAllowed->execute([':member_no' => $payload["member_no"]]);
 		while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
 			$arrAccAllowed[] = "'".$rowAccountAllowed["deptaccount_no"]."'";
@@ -39,14 +39,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 			$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowAccIncoop["DEPTACCOUNT_NAME"]));
 			$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
-			$getIDDeptTypeAllow = $conmysql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
+			$getIDDeptTypeAllow = $conmssql->prepare("SELECT id_accountconstant FROM gcconstantaccountdept
 													WHERE dept_type_code = :depttype_code");
 			$getIDDeptTypeAllow->execute([
 				':depttype_code' => $rowAccIncoop["DEPTTYPE_CODE"]
 			]);
 			$rowIDDeptTypeAllow = $getIDDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
 			$arrAccInCoop["ID_ACCOUNTCONSTANT"] = $rowIDDeptTypeAllow["id_accountconstant"];
-			$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
+			$getDeptTypeAllow = $conmssql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
 																	FROM gcconstantaccountdept
 																	WHERE dept_type_code = :depttype_code");
 			$getDeptTypeAllow->execute([

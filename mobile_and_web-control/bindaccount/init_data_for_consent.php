@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
-			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+			$fetchConstantAllowDept = $conmssql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 															WHERE gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
 				}
 				$arrAccBeenBind = array();
-				$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
+				$InitDeptAccountBeenBind = $conmssql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 					$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
@@ -51,7 +51,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				}
 				if(sizeof($arrayGroupAccount) > 0){
 					$arrayResult['ACCOUNT'] = $arrayGroupAccount;
-					$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
+					$getFormatBank = $conmssql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
 					$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
 					$rowFormatBank = $getFormatBank->fetch(PDO::FETCH_ASSOC);
 					$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? $config["ACCOUNT_BANK_FORMAT"];

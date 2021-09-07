@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
-		$check_account = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
+		$check_account = $conmssql->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
 											and bindaccount_status IN('0','1')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$arrSendData["app_id"] = $config["APP_ID"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/ktb/revoke_register_account',$arrSendData);
 			if(!$responseAPI["RESULT"]){
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0029";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],

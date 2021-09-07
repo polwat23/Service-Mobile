@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['password'],$dataComing)){
-	$getOldPassword = $conmysql->prepare("SELECT password,temppass,account_status,temppass_is_md5 FROM gcmemberaccount 
+	$getOldPassword = $conmssql->prepare("SELECT password,temppass,account_status,temppass_is_md5 FROM gcmemberaccount 
 											WHERE member_no = :member_no");
 	$getOldPassword->execute([':member_no' => $payload["member_no"]]);
 	if($getOldPassword->rowCount() > 0){

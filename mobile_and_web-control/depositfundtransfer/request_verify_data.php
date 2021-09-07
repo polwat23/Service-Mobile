@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 		]);
 		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 		$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
-		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename,gc.deptaccount_no_bank,gc.account_payfee
+		$getBankDisplay = $conmssql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename,gc.deptaccount_no_bank,gc.account_payfee
 												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
 												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
 		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
@@ -91,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 						require_once('../../include/exit_footer.php');
 					}
 				}else if($rowBankDisplay["bank_code"] == '006'){
-					$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
+					$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
 																transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 					$getTransactionForFee->execute([
 						':member_no' => $payload["member_no"]

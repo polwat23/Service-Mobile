@@ -5,10 +5,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageconstperson')){
 		//edit list
 		if($dataComing["edit_list"]){
-			$conmysql->beginTransaction();
+			$conmssql->beginTransaction();
 			foreach($dataComing["edit_list"] as $update_list){
 				if($update_list["PAY_TYPE"] == '1'){
-					$updatelist = $conmysql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
+					$updatelist = $conmssql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
 											is_mindeposit = :is_mindeposit,is_minwithdraw = :is_minwithdraw,smscsp_pay_type = :pay_type,request_flat_date = :effect_date
 											 WHERE smscsp_account = :account_no");
 					if($updatelist->execute([
@@ -22,13 +22,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					])){
 						continue;
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขรายการได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
-					$updatelist = $conmysql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
+					$updatelist = $conmssql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
 											is_mindeposit = :is_mindeposit,is_minwithdraw = :is_minwithdraw,smscsp_pay_type = :pay_type,request_flat_date = null
 											 WHERE smscsp_account = :account_no");
 					if($updatelist->execute([
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					])){
 						continue;
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขรายการได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
@@ -49,12 +49,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				}
 				
 			}
-			$conmysql->commit();
+			$conmssql->commit();
 		}
 		
 		//insert list
 		if($dataComing["insert_list"]){
-			$conmysql->beginTransaction();
+			$conmssql->beginTransaction();
 			$bulkInsert = array();
 			foreach($dataComing["insert_list"] as $insert_list){
 				if($insert_list["PAY_TYPE"] == '1'){
@@ -70,15 +70,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 
 				}
 			}
-			$insertlist = $conmysql->prepare("INSERT INTO smsconstantperson (smscsp_account,smscsp_member_no,smscsp_mindeposit,smscsp_minwithdraw,
+			$insertlist = $conmssql->prepare("INSERT INTO smsconstantperson (smscsp_account,smscsp_member_no,smscsp_mindeposit,smscsp_minwithdraw,
 												is_mindeposit,is_minwithdraw,smscsp_pay_type,request_flat_date) 
 												VALUES".implode(',',$bulkInsert)." ON DUPLICATE KEY UPDATE
 												smscsp_mindeposit = VALUES(smscsp_mindeposit), smscsp_minwithdraw = VALUES(smscsp_minwithdraw), 
 												is_use = '1',smscsp_pay_type = VALUES(smscsp_pay_type),request_flat_date = VALUES(request_flat_date)");
 			if($insertlist->execute()){
-				$conmysql->commit();
+				$conmssql->commit();
 			}else{
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มรายการได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
@@ -87,9 +87,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		//delete list
 		if($dataComing["delete_list"]){
-			$conmysql->beginTransaction();
+			$conmssql->beginTransaction();
 			foreach($dataComing["delete_list"] as $delete_list){
-				$deletelist = $conmysql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
+				$deletelist = $conmssql->prepare("UPDATE smsconstantperson SET smscsp_mindeposit = :mindeposit, smscsp_minwithdraw = :minwithdraw,
 										is_mindeposit = :is_mindeposit,is_minwithdraw = :is_minwithdraw,smscsp_pay_type = :pay_type,is_use = '0',request_flat_date = null
 										 WHERE smscsp_account = :account_no");
 				if($deletelist->execute([
@@ -102,13 +102,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				])){
 					continue;
 				}else{
-					$conmysql->rollback();
+					$conmssql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขรายการได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../../../include/exit_footer.php');
 				}
 			}
-			$conmysql->commit();
+			$conmssql->commit();
 		}
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');

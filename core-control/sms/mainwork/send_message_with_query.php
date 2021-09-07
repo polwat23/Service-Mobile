@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
 		if($dataComing["channel_send"] == "mobile_app"){
-			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,is_stampflag,stamp_table,where_stamp,target_field,condition_target,set_column
+			$getQuery = $conmssql->prepare("SELECT sms_query,column_selected,is_bind_param,is_stampflag,stamp_table,where_stamp,target_field,condition_target,set_column
 											FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
 			if($getQuery->rowCount() > 0){
@@ -344,7 +344,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				require_once('../../../include/exit_footer.php');
 			}
 		}else{
-			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,is_stampflag,stamp_table,where_stamp,set_column,condition_target 
+			$getQuery = $conmssql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,is_stampflag,stamp_table,where_stamp,set_column,condition_target 
 											FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
 			if($getQuery->rowCount() > 0){

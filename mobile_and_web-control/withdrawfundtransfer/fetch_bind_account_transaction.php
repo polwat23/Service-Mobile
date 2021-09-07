@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$arrGroupAccBind = array();
-		$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount, gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
+		$fetchBindAccount = $conmssql->prepare("SELECT gba.id_bindaccount, gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
 												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1' ORDER BY gba.deptaccount_no_coop");
@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrGroupAccBind["BIND"][] = $arrAccBind;
 			}
-			$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no 
+			$fetchAccountBeenAllow = $conmssql->prepare("SELECT gat.deptaccount_no 
 												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 												gat.id_accountconstant = gct.id_accountconstant
 												WHERE gct.allow_withdraw_outside = '1' and gat.member_no = :member_no and gat.is_use = '1'");

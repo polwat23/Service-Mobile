@@ -6,12 +6,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupMonth = array();
 		
 		//web
-		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login_web FROM gcuserlogin WHERE is_login = '1' AND channel = 'web'");
+		$fetchUserloginWeb = $conmssql->prepare("SELECT COUNT(member_no) AS c_user_login_web FROM gcuserlogin WHERE is_login = '1' AND channel = 'web'");
 		$fetchUserloginWeb->execute();
 	    $rowUserloginWeb = $fetchUserloginWeb->fetch(PDO::FETCH_ASSOC);
 		
 		//mobile_app
-		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(member_no) AS c_user_login_mobile FROM gcuserlogin WHERE is_login = '1' AND channel = 'mobile_app'");
+		$fetchUserloginMobile = $conmssql->prepare("SELECT COUNT(member_no) AS c_user_login_mobile FROM gcuserlogin WHERE is_login = '1' AND channel = 'mobile_app'");
 		$fetchUserloginMobile->execute();
 	    $rowUserloginMobile = $fetchUserloginMobile->fetch(PDO::FETCH_ASSOC);
 		
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserNotRegis->execute();
 		$rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC);
 		
-		$fetchUserRegis = $conmysql->prepare("SELECT COUNT(member_no) AS c_userregit FROM gcmemberaccount WHERE member_no NOT IN('dev@mode','etnmode1','etnmode2','etnmode3','etnmode4','salemode')");									
+		$fetchUserRegis = $conmssql->prepare("SELECT COUNT(member_no) AS c_userregit FROM gcmemberaccount WHERE member_no NOT IN('dev@mode','etnmode1','etnmode2','etnmode3','etnmode4','salemode')");									
 		$fetchUserRegis->execute();
 		$rowUserRegis = $fetchUserRegis->fetch(PDO::FETCH_ASSOC);
 		

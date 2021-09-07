@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT account_status,email FROM gcmemberaccount 
+	$checkMember = $conmssql->prepare("SELECT account_status,email FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkMember->execute([
 		':member_no' => $member_no
@@ -58,8 +58,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		$arrayDataTemplate["TEMP_PASSWORD"] = $temp_pass;
 		$arrayDataTemplate["DEVICE_NAME"] = $arrPayload["PAYLOAD"]["device_name"];
 		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
-		$conmysql->beginTransaction();
-		$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0,temppass_is_md5 = '0'
+		$conmssql->beginTransaction();
+		$updateTemppass = $conmssql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0,temppass_is_md5 = '0'
 											WHERE member_no = :member_no");
 		if($updateTemppass->execute([
 			':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),
@@ -68,7 +68,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
 			$arrMailStatus = $lib->sendMail($dataComing["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);
 			if($arrMailStatus["RESULT"]){
-				$conmysql->commit();
+				$conmssql->commit();
 				if($func->logoutAll(null,$member_no,'-9')){
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
@@ -98,7 +98,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 				];
 				$log->writeLog('errorusage',$logStruc);
-				$conmysql->rollback();
+				$conmssql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0019";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 				
 			}
 		}else{
-			$conmysql->rollback();
+			$conmssql->rollback();
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,

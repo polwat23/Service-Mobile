@@ -3,7 +3,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send','id_query'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
 		if($dataComing["channel_send"] == "mobile_app"){
-			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+			$getQuery = $conmssql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
 			if($getQuery->rowCount() > 0){
 				if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
@@ -189,7 +189,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				require_once('../../../include/exit_footer.php');
 			}
 		}else{
-			$getQuery = $conmysql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+			$getQuery = $conmssql->prepare("SELECT sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
 			if($getQuery->rowCount() > 0){
 				$arrGroupAllSuccess = array();

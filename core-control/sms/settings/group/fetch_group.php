@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managegroup')){
 		$arrGroupAll = array();
 		if(isset($dataComing["id_group"])){
-			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
+			$fetchGroup = $conmssql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1' and id_groupmember = :id_group");
 			$fetchGroup->execute([':id_group' => $dataComing["id_group"]]);
 			$rowGroup = $fetchGroup->fetch(PDO::FETCH_ASSOC);
@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupAll["GROUP_NAME"] = $rowGroup["group_name"];
 			$arrGroupAll["GROUP_MEMBER"] = explode(',',$rowGroup["group_member"]);
 		}else{
-			$fetchGroup = $conmysql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
+			$fetchGroup = $conmssql->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1'");
 			$fetchGroup->execute();
 			while($rowGroup = $fetchGroup->fetch(PDO::FETCH_ASSOC)){

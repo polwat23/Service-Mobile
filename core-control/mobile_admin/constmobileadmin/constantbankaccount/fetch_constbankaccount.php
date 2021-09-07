@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 										bank.bank_code,
 										bank.bank_name,
 										bank.bank_short_name,
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["FEE_WITHDRAW"] = $rowAccount["fee_withdraw"];
 			
 			$arrConstans["BANK_CONSTANT"] = [];
-			$fetchBankMapping = $conmysql->prepare("SELECT bc.id_bankconstant,
+			$fetchBankMapping = $conmssql->prepare("SELECT bc.id_bankconstant,
 											bc.transaction_cycle,
 											bc.max_numof_deposit,
 											bc.max_numof_withdraw,

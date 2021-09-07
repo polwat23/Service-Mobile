@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','manageahead')){
 		$arrGroupSendAhead = array();
 		if(isset($dataComing["id_sendahead"])){
-			$fetchGroup = $conmysql->prepare("SELECT id_sendahead,send_topic,send_message,destination,
+			$fetchGroup = $conmssql->prepare("SELECT id_sendahead,send_topic,send_message,destination,
 												send_date,send_platform,send_image,create_by,is_import
 												FROM smssendahead WHERE is_use = '1' and id_sendahead = :id_sendahead");
 			$fetchGroup->execute([':id_sendahead' => $dataComing["id_sendahead"]]);
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGroupSendAhead["SEND_IMAGE"] = isset($rowSendAhead["send_image"]) ? $config["URL_SERVICE"].$rowSendAhead["send_image"] : null;
 			}
 		}else{
-			$fetchSendAhead = $conmysql->prepare("SELECT id_sendahead,send_message,destination,send_date,create_by,is_import
+			$fetchSendAhead = $conmssql->prepare("SELECT id_sendahead,send_message,destination,send_date,create_by,is_import
 													FROM smssendahead WHERE is_use = '1'");
 			$fetchSendAhead->execute();
 			while($rowSendAhead = $fetchSendAhead->fetch(PDO::FETCH_ASSOC)){

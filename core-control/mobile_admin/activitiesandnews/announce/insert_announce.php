@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 								</html>';
 		}
 		
-		$insert_announce = $conmysql->prepare("INSERT INTO gcannounce(
+		$insert_announce = $conmssql->prepare("INSERT INTO gcannounce(
 																	announce_cover,
 																	announce_title,
 																	announce_detail,

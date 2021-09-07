@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','constantsmsshare')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 																		id_smsconstantshare,
 																		share_itemtype_code,
 																		allow_smsconstantshare
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$insertBulkCont[] = "('".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTSHARE"]."')";
 						$insertBulkContLog[]='SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE ='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
+						$updateConst = $conmssql->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTSHARE' => $value_diff["ALLOW_SMSCONSTANTSHARE"],
 							':SHRITEMTYPE_CODE' => $value_diff["SHRITEMTYPE_CODE"]
@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantshare(share_itemtype_code,allow_smsconstantshare)
+				$insertConst = $conmssql->prepare("INSERT smsconstantshare(share_itemtype_code,allow_smsconstantshare)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

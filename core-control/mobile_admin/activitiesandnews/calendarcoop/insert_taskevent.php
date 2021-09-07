@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 								</html>';
 		}
 
-		$insertTaskEvent = $conmysql->prepare("INSERT INTO `gctaskevent`(`task_topic`, `task_detail`, `start_date`, `end_date`,`event_start_time`,`event_end_time`,`is_settime`,`is_notify`,`is_notify_before`,`create_by`,event_html) 
+		$insertTaskEvent = $conmssql->prepare("INSERT INTO `gctaskevent`(`task_topic`, `task_detail`, `start_date`, `end_date`,`event_start_time`,`event_end_time`,`is_settime`,`is_notify`,`is_notify_before`,`create_by`,event_html) 
 							VALUES (:task_topic,:task_detail,:start_date,:end_date,:event_start_time,:event_end_time,:is_settime,:is_notify,:is_notify_before,:create_by,:event_html)");
 		if($insertTaskEvent->execute([
 			':task_topic' => $dataComing["task_topic"],

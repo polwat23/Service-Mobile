@@ -4,12 +4,12 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		/*$checkisReq = $conmysql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
+		/*$checkisReq = $conmssql->prepare("SELECT member_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
 		$checkisReq->execute([':member_no' => $payload["member_no"]]);
 		if($checkisReq->rowCount() > 0){*/
 			$arrGrpLoan = array();
 			$arrCanCal = array();
-			$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
+			$fetchLoanCanCal = $conmssql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
 			$fetchLoanCanCal->execute();
 			while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
 				$arrCanCal[] = $rowCanCal["loantype_code"];
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchLoanIntRate->execute();
 			while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
 				$arrayDetailLoan = array();
-				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
+				$CheckIsReq = $conmssql->prepare("SELECT reqloan_doc,req_status
 															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9','1')");
 				$CheckIsReq->execute([
 					':loantype_code' => $rowIntRate["LOANTYPE_CODE"],

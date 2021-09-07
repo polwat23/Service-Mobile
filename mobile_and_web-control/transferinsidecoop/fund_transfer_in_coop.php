@@ -92,7 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$dataComing["amt_transfer"],0,$dateOperC,$config,$log,$from_account_no,$payload,$deptslip_noDest,$lib,
 				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,$wtdResult["DEPTSLIP_NO"]);
 				if($depositMoney["RESULT"]){
-					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
+					$insertRemark = $conmssql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 														VALUES(:remark,:deptaccount_no,:seq_no)");
 					$insertRemark->execute([
 						':remark' => $dataComing["remark"],
@@ -138,7 +138,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							}
 						}
 					}
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+					$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																coop_slip_no,id_userlogin,ref_no_source)
 																VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,

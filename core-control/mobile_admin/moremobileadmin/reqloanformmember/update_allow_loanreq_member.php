@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','loanrequestformmember')){
 		$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-		$fetchAllow = $conmysql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
+		$fetchAllow = $conmssql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
 											FROM gcallowmemberreqloan WHERE member_no = :member_no");
 		$fetchAllow->execute([
 				':member_no' => $member_no
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		}
 		
 		if(count($arrayGroup) > 0){
-			$insertIntoInfo = $conmysql->prepare("UPDATE gcallowmemberreqloan SET is_allow=:is_allow,update_username=:username WHERE member_no = :member_no");
+			$insertIntoInfo = $conmssql->prepare("UPDATE gcallowmemberreqloan SET is_allow=:is_allow,update_username=:username WHERE member_no = :member_no");
 			if($insertIntoInfo->execute([
 				':is_allow' => $dataComing["is_allow"],
 				':username' => $payload["username"],
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 				require_once('../../../../include/exit_footer.php');
 			}
 		}else{
-				$insertIntoInfo = $conmysql->prepare("INSERT INTO gcallowmemberreqloan(member_no,is_allow,update_username) VALUES (:member_no,:is_allow,:username)");
+				$insertIntoInfo = $conmssql->prepare("INSERT INTO gcallowmemberreqloan(member_no,is_allow,update_username) VALUES (:member_no,:is_allow,:username)");
 				if($insertIntoInfo->execute([
 						':member_no' => $member_no,
 						':is_allow' => $dataComing["is_allow"],

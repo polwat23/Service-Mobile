@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','managemenu')){
 		$arrayGroup = array();
-		$fetchMenuMobile = $conmysql->prepare("SELECT id_coremenu, coremenu_name
+		$fetchMenuMobile = $conmssql->prepare("SELECT id_coremenu, coremenu_name
 												FROM coremenu
 												WHERE coremenu_status <>'-9'
 												ORDER BY coremenu_order ASC");

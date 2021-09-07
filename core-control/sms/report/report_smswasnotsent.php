@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != ''){
 			$arrayExecute["is_sendahead"] = $dataComing["is_sendahead"];
 		}
-		$fetchReport = $conmysql->prepare("SELECT message,member_no,tel_mobile,send_date,send_by,cause_notsent
+		$fetchReport = $conmssql->prepare("SELECT message,member_no,tel_mobile,send_date,send_by,cause_notsent
 											FROM smswasnotsent WHERE 1=1
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."

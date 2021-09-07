@@ -5,7 +5,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','period_payment','period','loanpermit_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getDocSystemPrefix = $conmysql->prepare("SELECT prefix_docno FROM docsystemprefix WHERE menu_component = :menu_component and is_use = '1'");
+		$getDocSystemPrefix = $conmssql->prepare("SELECT prefix_docno FROM docsystemprefix WHERE menu_component = :menu_component and is_use = '1'");
 		$getDocSystemPrefix->execute([':menu_component' => $dataComing["menu_component"]]);
 		if($getDocSystemPrefix->rowCount() > 0){
 			$rowDocPrefix = $getDocSystemPrefix->fetch(PDO::FETCH_ASSOC);
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$reqloan_doc .= $arrPrefixRaw[$prefix];
 			}
 			if(isset($reqloan_doc) && $reqloan_doc != ""){
-				$getControlDoc = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+				$getControlDoc = $conmssql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
 				$getControlDoc->execute([':menu_component' => $dataComing["menu_component"]]);
 				$rowConDoc = $getControlDoc->fetch(PDO::FETCH_ASSOC);
 				$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
@@ -50,10 +50,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
 							$fullPathSalary = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$createImage["normal_path"];
 							$slipSalary = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$createImage["normal_path"];
-							$getControlFolderSalary = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+							$getControlFolderSalary = $conmssql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
 							$getControlFolderSalary->execute([':menu_component' => $subpath]);
 							$rowControlSalary = $getControlFolderSalary->fetch(PDO::FETCH_ASSOC);
-							$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+							$insertDocMaster = $conmssql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 																	VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
 							$insertDocMaster->execute([
 								':doc_no' => $reqloan_doc.$subpath,
@@ -63,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 								':doc_address' => $slipSalary,
 								':member_no' => $payload["member_no"]
 							]);
-							$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+							$insertDocList = $conmssql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
 																	VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
 							$insertDocList->execute([
 								':doc_no' => $reqloan_doc.$subpath,
@@ -101,10 +101,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
 							$fullPathCitizen = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$createImage["normal_path"];
 							$citizenCopy = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$createImage["normal_path"];
-							$getControlFolderCitizen = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+							$getControlFolderCitizen = $conmssql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
 							$getControlFolderCitizen->execute([':menu_component' => $subpath]);
 							$rowControlCitizen = $getControlFolderCitizen->fetch(PDO::FETCH_ASSOC);
-							$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+							$insertDocMaster = $conmssql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 																	VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
 							$insertDocMaster->execute([
 								':doc_no' => $reqloan_doc.$subpath,
@@ -114,7 +114,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 								':doc_address' => $citizenCopy,
 								':member_no' => $payload["member_no"]
 							]);
-							$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+							$insertDocList = $conmssql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
 																	VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
 							$insertDocList->execute([
 								':doc_no' => $reqloan_doc.$subpath,
@@ -169,8 +169,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrOldGrp[] = $arrOld;
 				}
 				$arrData["old_contract"] = $arrOldGrp;
-				$conmysql->beginTransaction();
-				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,diff_old_contract,receive_net,
+				$conmssql->beginTransaction();
+				$InsertFormOnline = $conmssql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,diff_old_contract,receive_net,
 																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:diff_old,:request_amt,:int_rate
 																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank)");
@@ -217,7 +217,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						$arrayPDF["RESULT"] = FALSE;
 					}
 					if($arrayPDF["RESULT"]){
-						$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+						$insertDocMaster = $conmssql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 																VALUES(:doc_no,:docgrp_no,:doc_filename,'pdf',:doc_address,:member_no)");
 						$insertDocMaster->execute([
 							':doc_no' => $reqloan_doc,
@@ -226,7 +226,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':doc_address' => $pathFile,
 							':member_no' => $payload["member_no"]
 						]);
-						$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+						$insertDocList = $conmssql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
 																VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
 						$insertDocList->execute([
 							':doc_no' => $reqloan_doc,
@@ -234,14 +234,14 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':file_name' => $reqloan_doc.'.pdf',
 							':id_userlogin' => $payload["id_userlogin"]
 						]);
-						$conmysql->commit();
+						$conmssql->commit();
 						$arrayResult['REPORT_URL'] = $pathFile;
 						$arrayResult['APV_DOCNO'] = $reqloan_doc;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 						
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$filename = basename(__FILE__, '.php');
 						$logStruc = [
 							":error_menu" => $filename,
@@ -259,7 +259,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						
 					}
 				}else{
-					$conmysql->rollback();
+					$conmssql->rollback();
 					unlink($fullPathSalary);
 					unlink($fullPathCitizen);
 					rmdir($directory);

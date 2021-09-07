@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroupWeb = array();
 		$arrayGroupMobile = array();
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
+		$fetchUserlogin = $conmssql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
 				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH)
 				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup[] = $arrGroupRootUserlogin;
 		}
 		
-		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
+		$fetchUserloginWeb = $conmssql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
 				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH) AND channel = 'web'
 				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroupWeb[] = $arrGroupRootUserlogin;
 		}
 		
-		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
+		$fetchUserloginMobile = $conmssql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
 				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH) AND channel = 'mobile_app'
 				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");

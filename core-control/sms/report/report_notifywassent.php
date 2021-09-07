@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != ''){
 			$arrayExecute["is_sendahead"] = $dataComing["is_sendahead"];
 		}
-		$fetchReport = $conmysql->prepare("SELECT id_history, his_type, his_title, his_detail, his_path_image, his_read_status, his_del_status, member_no, receive_date, read_date, send_by, id_smstemplate, is_sendahead
+		$fetchReport = $conmssql->prepare("SELECT id_history, his_type, his_title, his_detail, his_path_image, his_read_status, his_del_status, member_no, receive_date, read_date, send_by, id_smstemplate, is_sendahead
 											FROM gchistory WHERE 1=1
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."

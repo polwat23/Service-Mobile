@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantapprwithdrawal')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT id_section_system, section_system, system_assign FROM coresectionsystem WHERE is_use = '1'");
+		$fetchConstant = $conmssql->prepare("SELECT id_section_system, section_system, system_assign FROM coresectionsystem WHERE is_use = '1'");
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();

@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrLoanGrp = array();
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+		$fetchAccAllowTrans = $conmssql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_pay_loan = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
@@ -63,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoanGrp[] = $arrLoan;
 			}
 			
-			$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'LPM' and is_use = '1'");
+			$getAccFav = $conmssql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'LPM' and is_use = '1'");
 			$getAccFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
@@ -80,7 +80,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAccFav[] = $arrFavMenu;
 			}
 			$arrGroupAccBind = array();
-			$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
+			$fetchBindAccount = $conmssql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
 													csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 													WHERE gba.member_no = :member_no and gba.bindaccount_status = '1' ORDER BY gba.deptaccount_no_coop");

@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		$arrGroupFavmenu = array();
-		$fetchFavMenu = $conmysql->prepare("SELECT gfl.fav_name,gpc.type_palette,gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.color_text
+		$fetchFavMenu = $conmssql->prepare("SELECT gfl.fav_name,gpc.type_palette,gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.color_text
 											FROM gcfavoritemenu gfm LEFT JOIN gcpalettecolor gpc ON gfm.id_palette = gpc.id_palette and gpc.is_use = '1'
 											LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno and gfl.is_use = '1'
 											WHERE gfl.member_no = :member_no ORDER BY gfm.seq_no ASC");

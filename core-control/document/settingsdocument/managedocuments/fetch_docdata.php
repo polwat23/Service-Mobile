@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id', 'doc_system'],$dataComing)){
 		if(false){
 		}else{
 			$arrayDocument = array();
-			$fetchDocumentSystems = $conmysql->prepare("SELECT doc_system, system_name, system_desc, docgrp_no_prefix, create_date, update_date 
+			$fetchDocumentSystems = $conmssql->prepare("SELECT doc_system, system_name, system_desc, docgrp_no_prefix, create_date, update_date 
 												FROM docsystem WHERE doc_system = :doc_system");
 			$fetchDocumentSystems->execute([
 				':doc_system' => $dataComing["doc_system"]

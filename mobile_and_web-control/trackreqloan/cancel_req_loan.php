@@ -3,11 +3,11 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','reqloan_doc'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestTrack')){
-		$getIsCancel = $conmysql->prepare("SELECT req_status FROM gcreqloan WHERE reqloan_doc  = :reqloan_doc");
+		$getIsCancel = $conmssql->prepare("SELECT req_status FROM gcreqloan WHERE reqloan_doc  = :reqloan_doc");
 		$getIsCancel->execute([':reqloan_doc' => $dataComing["reqloan_doc"]]);
 		$rowCancel = $getIsCancel->fetch(PDO::FETCH_ASSOC);
 		if($rowCancel["req_status"] == '8'){
-			$cancelReq = $conmysql->prepare("UPDATE gcreqloan SET req_status = '9' WHERE reqloan_doc  = :reqloan_doc");
+			$cancelReq = $conmssql->prepare("UPDATE gcreqloan SET req_status = '9' WHERE reqloan_doc  = :reqloan_doc");
 			if($cancelReq->execute([':reqloan_doc' => $dataComing["reqloan_doc"]])){
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

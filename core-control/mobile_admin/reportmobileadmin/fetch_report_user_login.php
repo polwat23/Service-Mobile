@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["end_date"] = $dataComing["end_date"];
 			}
 			if($dataComing["date_type"] == 'year'){
-				$fetchReportUserLogin = $conmysql->prepare("SELECT member_no, device_name, login_date, logout_date, id_token ,is_login
+				$fetchReportUserLogin = $conmssql->prepare("SELECT member_no, device_name, login_date, logout_date, id_token ,is_login
 														FROM  gcuserlogin 
 														WHERE is_login != '-55'
 															
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															"and date_format(login_date,'%Y') <= :end_date" : null). 
 													    " ORDER BY login_date DESC");
 			}else if($dataComing["date_type"] == 'month'){
-				$fetchReportUserLogin = $conmysql->prepare("SELECT member_no, device_name, login_date, logout_date, id_token ,is_login
+				$fetchReportUserLogin = $conmssql->prepare("SELECT member_no, device_name, login_date, logout_date, id_token ,is_login
 														FROM  gcuserlogin 
 														WHERE is_login != '-55'
 															".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															"and date_format(login_date,'%Y-%m') <= :end_date" : null)." 
 													    ORDER BY login_date DESC");
 			}else if($dataComing["date_type"] == 'day'){
-				$fetchReportUserLogin = $conmysql->prepare("SELECT member_no, device_name, login_date, logout_date, id_token ,is_login
+				$fetchReportUserLogin = $conmssql->prepare("SELECT member_no, device_name, login_date, logout_date, id_token ,is_login
 														FROM  gcuserlogin 
 														WHERE is_login != '-55'
 															".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 

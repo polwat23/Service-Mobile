@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
-		$readHistory = $conmysql->prepare("UPDATE gchistory SET his_read_status = '1' WHERE member_no = :member_no and his_type = :his_type");
+		$readHistory = $conmssql->prepare("UPDATE gchistory SET his_read_status = '1' WHERE member_no = :member_no and his_type = :his_type");
 		$readHistory->execute([
 			':member_no' => $payload["member_no"],
 			':his_type' => $dataComing["type_history"]

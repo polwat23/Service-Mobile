@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conmssql->prepare("SELECT
 																		id_accountconstant,
 																		dept_type_code,
 																		member_cate_code,
@@ -77,7 +77,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$insertBulkContLog[]='DEPTTYPE_CODE=> '.$value_diff["DEPTTYPE_CODE"].' MEMBER_TYPE_CODE ='.$value_diff["MEMBER_TYPE_CODE"].' ALLOW_DEPOSIT_INSIDE ='.$value_diff["ALLOW_DEPOSIT_INSIDE"].' ALLOW_WITHDRAW_INSIDE ='.$value_diff["ALLOW_WITHDRAW_INSIDE"].' ALLOW_DEPOSIT_OUTSIDE ='.$value_diff["ALLOW_DEPOSIT_OUTSIDE"].' ALLOW_WITHDRAW_OUTSIDE ='.
 						$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAYLOAN ='.$value_diff["ALLOW_PAYLOAN"].' ALLOW_BUYSHARE ='.$value_diff["ALLOW_BUYSHARE"].' ALLOW_RECEIVE_LOAN ='.$value_diff["ALLOW_RECEIVE_LOAN"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE gcconstantaccountdept 
+						$updateConst = $conmssql->prepare("UPDATE gcconstantaccountdept 
 																			SET member_cate_code = :MEMBER_TYPE_CODE,
 																			allow_deposit_inside = :ALLOW_DEPOSIT_INSIDE,
 																			allow_withdraw_inside = :ALLOW_WITHDRAW_INSIDE,
@@ -103,7 +103,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						' ALLOW_WITHDRAW_OUTSIDE='.$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAY_LOAN='.$value_diff["ALLOW_PAYLOAN"].' ALLOW_RECEIVE_LOAN='.$value_diff["ALLOW_RECEIVE_LOAN"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT gcconstantaccountdept(dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,allow_deposit_outside,allow_withdraw_outside,allow_pay_loan,allow_buyshare,allow_receive_loan)
+				$insertConst = $conmssql->prepare("INSERT gcconstantaccountdept(dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,allow_deposit_outside,allow_withdraw_outside,allow_pay_loan,allow_buyshare,allow_receive_loan)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

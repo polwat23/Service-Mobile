@@ -4,7 +4,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'log','logeditdocument')){
 		$arrayGroup = array();
-		$fetchLogAdminUsage = $conmysql->prepare("SELECT
+		$fetchLogAdminUsage = $conmssql->prepare("SELECT
 															admin.id_editdocument,
 															admin.menu_name,
 															admin.username,

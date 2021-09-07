@@ -2,10 +2,10 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
-	if($func->check_permission_core($payload,$dataComing["rootmenu"],null,$conmysql)){
+	if($func->check_permission_core($payload,$dataComing["rootmenu"],null,$conmssql)){
 		if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
 			$arrayGroup = array();
-			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
+			$fetchMenu = $conmssql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
 											ON css.id_coremenu = cm.id_coremenu
 											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' ORDER BY cm.coremenu_order,css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 				$arrGroupRootMenu = array();
 				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["menu_name"];
 				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
-				$fetchSubMenu = $conmysql->prepare("SELECT menu_name,page_name FROM coresubmenu
+				$fetchSubMenu = $conmssql->prepare("SELECT menu_name,page_name FROM coresubmenu
 													WHERE id_menuparent = :id_submenu and menu_status <> '-9'
 													ORDER BY menu_order ASC");
 				$fetchSubMenu->execute([
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayGroup = array();
-			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
+			$fetchMenu = $conmssql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
 											ON css.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
 											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status = '1' ORDER BY cm.coremenu_order,css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 				$arrGroupRootMenu = array();
 				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["menu_name"];
 				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
-				$fetchSubMenu = $conmysql->prepare("SELECT csm.menu_name,csm.page_name FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm 
+				$fetchSubMenu = $conmssql->prepare("SELECT csm.menu_name,csm.page_name FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm 
 													ON csm.id_submenu = cpsm.id_submenu and cpsm.is_use = '1'
 													LEFT JOIN corepermissionmenu cpm ON cpsm.id_permission_menu = cpm.id_permission_menu and cpm.is_use = '1'
 													LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'

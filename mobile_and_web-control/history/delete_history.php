@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','id_history'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
-		$deleteHistory = $conmysql->prepare("UPDATE gchistory SET his_del_status = '1' WHERE member_no = :member_no and id_history = :id_history");
+		$deleteHistory = $conmssql->prepare("UPDATE gchistory SET his_del_status = '1' WHERE member_no = :member_no and id_history = :id_history");
 		if($deleteHistory->execute([
 			':member_no' => $payload["member_no"],
 			':id_history' => $dataComing["id_history"]

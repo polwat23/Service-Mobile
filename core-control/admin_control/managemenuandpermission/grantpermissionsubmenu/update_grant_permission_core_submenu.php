@@ -3,13 +3,13 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_permission'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
-		$getIdCoreMenu = $conmysql->prepare("SELECT id_coremenu FROM coresubmenu WHERE id_submenu = :id_submenu");
+		$getIdCoreMenu = $conmssql->prepare("SELECT id_coremenu FROM coresubmenu WHERE id_submenu = :id_submenu");
 		$getIdCoreMenu->execute([
 			':id_submenu' => $dataComing["id_submenu"]
 		]);
 		if($getIdCoreMenu->rowCount() > 0){
 			$rowidcoremenu = $getIdCoreMenu->fetch(PDO::FETCH_ASSOC);
-			$checkPermissionCoremenu = $conmysql->prepare("SELECT id_permission_menu FROM corepermissionmenu 
+			$checkPermissionCoremenu = $conmssql->prepare("SELECT id_permission_menu FROM corepermissionmenu 
 															WHERE username = :username and is_use = '1' and id_coremenu = :id_coremenu");
 			$checkPermissionCoremenu->execute([
 				':username' => $dataComing["username"],
@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 			]);
 			if($checkPermissionCoremenu->rowCount() > 0){
 				$rowid_permission = $checkPermissionCoremenu->fetch(PDO::FETCH_ASSOC);
-				$checkSubmenuPermit = $conmysql->prepare("SELECT id_permission_submenu FROM corepermissionsubmenu
+				$checkSubmenuPermit = $conmssql->prepare("SELECT id_permission_submenu FROM corepermissionsubmenu
 															WHERE id_permission_menu = :id_permission_menu and id_submenu = :id_submenu and is_use <> '-9'");
 				$checkSubmenuPermit->execute([
 					':id_permission_menu' => $rowid_permission["id_permission_menu"],
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 				]);
 				if($checkSubmenuPermit->rowCount() > 0){
 					$rowid_permission_submenu = $checkSubmenuPermit->fetch(PDO::FETCH_ASSOC);
-					$UpdateSubmenuPermit = $conmysql->prepare("UPDATE corepermissionsubmenu SET is_use = :status_permission
+					$UpdateSubmenuPermit = $conmssql->prepare("UPDATE corepermissionsubmenu SET is_use = :status_permission
 																WHERE id_permission_submenu = :id_permission_submenu");
 					if($UpdateSubmenuPermit->execute([
 						':status_permission' => $dataComing["status_permission"],
@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
-					$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
+					$insertSubMenuPermit = $conmssql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
 																VALUES(:id_submenu,:id_permission_menu,:status_permission)");
 					if($insertSubMenuPermit->execute([
 						':id_submenu' => $dataComing["id_submenu"],
@@ -69,22 +69,22 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 					}
 				}
 			}else{
-				$conmysql->beginTransaction();
-				$insertPermitCoreMenu = $conmysql->prepare("INSERT INTO corepermissionmenu(id_coremenu,username)
+				$conmssql->beginTransaction();
+				$insertPermitCoreMenu = $conmssql->prepare("INSERT INTO corepermissionmenu(id_coremenu,username)
 															VALUES(:id_coremenu,:username)");
 				if($insertPermitCoreMenu->execute([
 					':id_coremenu' => $rowidcoremenu["id_coremenu"],
 					':username' => $dataComing["username"]
 				])){
-					$id_permission = $conmysql->lastInsertId();
-					$insertSubMenuPermit = $conmysql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
+					$id_permission = $conmssql->lastInsertId();
+					$insertSubMenuPermit = $conmssql->prepare("INSERT INTO corepermissionsubmenu(id_submenu,id_permission_menu,is_use)
 																VALUES(:id_submenu,:id_permission_menu,:status_permission)");
 					if($insertSubMenuPermit->execute([
 						':id_submenu' => $dataComing["id_submenu"],
 						':id_permission_menu' => $id_permission,
 						':status_permission' => $dataComing["status_permission"]
 					])){
-						$conmysql->commit();
+						$conmssql->commit();
 						$arrayStruc = [
 							':menu_name' => "permissionmenu",
 							':username' => $payload["username"],
@@ -95,13 +95,13 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../../../include/exit_footer.php');
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
-					$conmysql->rollback();
+					$conmssql->rollback();
 					$arrayResult['RESPONSE'] = "ไม่พบเมนูหลักของระบบ";
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../../../include/exit_footer.php');

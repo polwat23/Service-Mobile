@@ -5,7 +5,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','penalty_amt','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
+		$fetchDataDeposit = $conmssql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
 												csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$penalty_include = $func->getConstant("include_penalty");
 		$fee_amt = 0;
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
+		$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
 													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
 		$getTransactionForFee->execute([
 			':member_no' => $payload["member_no"]
@@ -174,7 +174,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
 				$conmssql->commit();
-				$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
+				$insertRemark = $conmssql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 													VALUES(:remark,:deptaccount_no,:seq_no)");
 				$insertRemark->execute([
 					':remark' => $dataComing["remark"],
@@ -199,7 +199,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':ref_no_source' => $refbank_no,
 					':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
 				];
-				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+				$insertTransactionLog = $conmssql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
 															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,

@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','managedoccontrolid')){
-		$checkControlID = $conmysql->prepare("SELECT short_prefix,is_use
+		$checkControlID = $conmssql->prepare("SELECT short_prefix,is_use
 												FROM doccontrolid
 												WHERE short_prefix = :short_prefix");
 		$checkControlID->execute([
@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if($checkControlID->rowCount() > 0){
 			$rowCheckControlID = $checkControlID->fetch(PDO::FETCH_ASSOC);
 			if($rowCheckControlID["is_use"] == '0'){
-				$insertDocumentSystems = $conmysql->prepare("UPDATE doccontrolid SET description = :description, amount_prefix = :amount_prefix, prefix_data_type = :prefix_data_type, 
+				$insertDocumentSystems = $conmssql->prepare("UPDATE doccontrolid SET description = :description, amount_prefix = :amount_prefix, prefix_data_type = :prefix_data_type, 
 													data_value_column = :data_value_column, data_desc_column = :data_desc_column, connection_db = :connection_db, query_string = :query_string
 													WHERE short_prefix = :short_prefix");
 				if($insertDocumentSystems->execute([
@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				require_once('../../../../include/exit_footer.php');
 			}
 		}else{
-			$insertDocumentSystems = $conmysql->prepare("INSERT INTO doccontrolid(short_prefix, description, amount_prefix, 
+			$insertDocumentSystems = $conmssql->prepare("INSERT INTO doccontrolid(short_prefix, description, amount_prefix, 
 													prefix_data_type, data_value_column, data_desc_column, connection_db, query_string) 
 													VALUES (:short_prefix, :description, :amount_prefix, 
 													:prefix_data_type, :data_value_column, :data_desc_column, :connection_db, :query_string)");

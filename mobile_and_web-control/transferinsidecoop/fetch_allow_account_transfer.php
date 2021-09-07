@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+		$fetchAccAllowTrans = $conmssql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and (gad.allow_deposit_inside = '1' OR gad.allow_withdraw_inside = '1')");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											ORDER BY dpm.deptaccount_no");
 			$getAllAcc->execute([':member_no' => $member_no]);
 			while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){
-				$fetchConstantAllowDept = $conmysql->prepare("SELECT allow_deposit_inside,allow_withdraw_inside FROM gcconstantaccountdept 
+				$fetchConstantAllowDept = $conmssql->prepare("SELECT allow_deposit_inside,allow_withdraw_inside FROM gcconstantaccountdept 
 															WHERE dept_type_code = :dept_type_code");
 				$fetchConstantAllowDept->execute([
 					':dept_type_code' => $rowDataAccAll["DEPTTYPE_CODE"]
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
-				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");
+				$getAccFav = $conmssql->prepare("SELECT fav_refno,name_fav,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN'");
 				$getAccFav->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
 					$arrFavMenu = array();

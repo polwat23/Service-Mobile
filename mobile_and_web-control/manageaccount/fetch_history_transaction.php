@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 		}else{
 			$old_ref_no = isset($dataComing["ref_no"]) ? "and ref_no < ".$dataComing["ref_no"] : "and ref_no < 99999999999999999";
 		}
-		$fetchTransList = $conmysql->prepare("SELECT REF_NO,TRANSFER_MODE,DESTINATION,DESTINATION_TYPE,AMOUNT_RECEIVE,OPERATE_DATE,FEE_AMT,PENALTY_AMT,TRANS_FLAG
+		$fetchTransList = $conmssql->prepare("SELECT REF_NO,TRANSFER_MODE,DESTINATION,DESTINATION_TYPE,AMOUNT_RECEIVE,OPERATE_DATE,FEE_AMT,PENALTY_AMT,TRANS_FLAG
 															FROM gctransaction WHERE member_no = :member_no and from_account = :deptaccount_no and result_transaction <> '-9' ".$old_ref_no."
 															ORDER BY ref_no DESC LIMIT ".$rownum);
 		$fetchTransList->execute([
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 			':deptaccount_no' => preg_replace('/-/','',$dataComing["deptaccount_no"])
 		]);
 		if($dataComing["source_type"] == "coop"){
-			$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account,bank_format_account_hide FROM csbankdisplay WHERE bank_code = '004' ");
+			$fetchFormatAccBank = $conmssql->prepare("SELECT bank_format_account,bank_format_account_hide FROM csbankdisplay WHERE bank_code = '004' ");
 			$fetchFormatAccBank->execute();
 			$rowBankDS = $fetchFormatAccBank->fetch(PDO::FETCH_ASSOC);
 		}

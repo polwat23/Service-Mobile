@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'settingsdocument','managedocuments')){
-		$checkFolder = $conmysql->prepare("SELECT docgrp_no,is_use,menu_component
+		$checkFolder = $conmssql->prepare("SELECT docgrp_no,is_use,menu_component
 												FROM docgroupcontrol
 												WHERE docgrp_no = :docgrp_no OR menu_component = :menu_component");
 		$checkFolder->execute([
@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if($checkFolder->rowCount() > 0){
 			$rowCheckFolder = $checkFolder->fetch(PDO::FETCH_ASSOC);
 			if($rowCheckFolder["is_use"] == '0'){
-				$deleteDocuments = $conmysql->prepare("UPDATE docgroupcontrol SET is_use = '1',create_date = NOW(),is_lock = '0',
+				$deleteDocuments = $conmssql->prepare("UPDATE docgroupcontrol SET is_use = '1',create_date = NOW(),is_lock = '0',
 													docgrp_name = :docgrp_name,docgrp_ref = :docgrp_ref,create_by = :create_by,
 													menu_component = :menu_component
 													WHERE is_use = '0' AND docgrp_no = :docgrp_no");
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				}
 			}
 		}else{
-			$insertDocumentSystems = $conmysql->prepare("INSERT INTO docgroupcontrol(docgrp_no, docgrp_name, 
+			$insertDocumentSystems = $conmssql->prepare("INSERT INTO docgroupcontrol(docgrp_no, docgrp_name, 
 												docgrp_ref, create_by, menu_component) 
 												VALUES (:docgrp_no, :docgrp_name,
 												:docgrp_ref, :create_by, :menu_component)");

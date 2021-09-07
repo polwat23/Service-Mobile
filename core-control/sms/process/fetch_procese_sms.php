@@ -8,12 +8,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$sumFee = 0;
 		$sumRound = 0;
 		$arrSMSCont = array();
-		$getSMSConstant = $conmysql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
+		$getSMSConstant = $conmssql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 		$getSMSConstant->execute();
 		while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
 		}
-		$fetchSmsTranWassent = $conmysql->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
+		$fetchSmsTranWassent = $conmssql->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
 												sc.smscsp_pay_type,sc.accrued_amt
 												FROM smstranwassent sm LEFT JOIN smsconstantperson sc ON sm.deptaccount_no = sc.smscsp_account
 												WHERE sm.process_flag = '0' and sm.is_receive = '1' GROUP BY sm.member_no,sm.deptaccount_no");

@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','bank_code','bank_name','bank_short_name','bank_format_account','bank_format_account_hide','id_palette'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("UPDATE csbankdisplay 
+		$updateConstants = $conmssql->prepare("UPDATE csbankdisplay 
 											   SET bank_name = :bank_name,
 												   bank_short_name = :bank_short_name,
 												   bank_format_account = :bank_format_account,

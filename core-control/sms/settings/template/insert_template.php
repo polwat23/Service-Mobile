@@ -4,11 +4,11 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managetemplate')){
 		$id_smsquery = null;
-		$conmysql->beginTransaction();
+		$conmssql->beginTransaction();
 		if(isset($dataComing["query_template_spc_"]) && isset($dataComing["column_selected"]) && sizeof($dataComing["column_selected"]) > 0){
 			if($dataComing["is_stampflag"] == '1'){
 				if(empty($dataComing["condition_target"])){
-					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,is_stampflag,stamp_table,where_stamp,set_column,create_by)
+					$insertSmsQuery = $conmssql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,is_stampflag,stamp_table,where_stamp,set_column,create_by)
 															VALUES(:sms_query,:column_selected,:target_field,'1',:stamp_table,:where_stamp,:set_column,:username)");
 					if($insertSmsQuery->execute([
 						':sms_query' => $dataComing["query_template_spc_"],
@@ -19,15 +19,15 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						':set_column' => $dataComing["set_column"],
 						':username' => $payload["username"]
 					])){
-						$id_smsquery = $conmysql->lastInsertId();
+						$id_smsquery = $conmssql->lastInsertId();
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
-					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_stampflag,stamp_table,where_stamp,set_column,is_bind_param,create_by)
+					$insertSmsQuery = $conmssql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_stampflag,stamp_table,where_stamp,set_column,is_bind_param,create_by)
 															VALUES(:sms_query,:column_selected,:target_field,:condition_target,'1',:stamp_table,:where_stamp,'1',:username)");
 					if($insertSmsQuery->execute([
 						':sms_query' => $dataComing["query_template_spc_"],
@@ -39,9 +39,9 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						':set_column' => $dataComing["set_column"],
 						':username' => $payload["username"]
 					])){
-						$id_smsquery = $conmysql->lastInsertId();
+						$id_smsquery = $conmssql->lastInsertId();
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 				}
 			}else{
 				if(empty($dataComing["condition_target"])){
-					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,create_by)
+					$insertSmsQuery = $conmssql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,create_by)
 															VALUES(:sms_query,:column_selected,:target_field,:username)");
 					if($insertSmsQuery->execute([
 						':sms_query' => $dataComing["query_template_spc_"],
@@ -57,15 +57,15 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						':target_field' => $dataComing["target_field"],
 						':username' => $payload["username"]
 					])){
-						$id_smsquery = $conmysql->lastInsertId();
+						$id_smsquery = $conmssql->lastInsertId();
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
 				}else{
-					$insertSmsQuery = $conmysql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
+					$insertSmsQuery = $conmssql->prepare("INSERT INTO smsquery(sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
 															VALUES(:sms_query,:column_selected,:target_field,:condition_target,'1',:username)");
 					if($insertSmsQuery->execute([
 						':sms_query' => $dataComing["query_template_spc_"],
@@ -74,9 +74,9 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 						':condition_target' => $dataComing["condition_target"],
 						':username' => $payload["username"]
 					])){
-						$id_smsquery = $conmysql->lastInsertId();
+						$id_smsquery = $conmssql->lastInsertId();
 					}else{
-						$conmysql->rollback();
+						$conmssql->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
@@ -84,7 +84,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 				}
 			}
 		}
-		$insertTemplate = $conmysql->prepare("INSERT INTO smstemplate(smstemplate_name,smstemplate_body,create_by,id_smsquery) 
+		$insertTemplate = $conmssql->prepare("INSERT INTO smstemplate(smstemplate_name,smstemplate_body,create_by,id_smsquery) 
 												VALUES(:smstemplate_name,:smstemplate_body,:username,:id_smsquery)");
 		if($insertTemplate->execute([
 			':smstemplate_name' => $dataComing["template_name"],
@@ -92,11 +92,11 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 			':username' => $payload["username"],
 			':id_smsquery' => $id_smsquery
 		])){
-			$conmysql->commit();
+			$conmssql->commit();
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{
-			$conmysql->rollback();
+			$conmssql->rollback();
 			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มเทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
