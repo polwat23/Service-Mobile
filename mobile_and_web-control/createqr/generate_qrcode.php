@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				if($insertQrDetail->execute([
 					':qrgenerate' => $randQrRef,
 					':trans_code_qr' => $transValue["trans_code"],
-					':ref_account' => $account_no,
+					':ref_account' => $account_no ?? null,
 					':qrtransferdt_amt' => $transValue["amt_transfer"],
 					':qrtransferdt_fee' => 0,
 				])){

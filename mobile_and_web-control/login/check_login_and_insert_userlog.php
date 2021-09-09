@@ -53,12 +53,18 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
-		if($rowResign["RESIGN_STATUS"] == '1'){
-			$arrayResult['RESPONSE_CODE'] = "WS0051";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+		$getMemberApprove = $conoracle->prepare("SELECT APPL_DOCNO FROM MBREQAPPL WHERE member_no = :member_no and APPL_STATUS = '8'");
+		$getMemberApprove->execute([':member_no' => $member_no]);
+		$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowMemberAcc["APPL_DOCNO"]) && $rowMemberAcc["APPL_DOCNO"] != ""){
+		}else{
+			if($rowResign["RESIGN_STATUS"] == '1'){
+				$arrayResult['RESPONSE_CODE'] = "WS0051";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
+			}
 		}
 		if($rowPassword['account_status'] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";

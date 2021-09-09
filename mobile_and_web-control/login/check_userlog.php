@@ -5,15 +5,21 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
 	$checkResign->execute([':member_no' => $payload["member_no"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
-	if($rowResign["RESIGN_STATUS"] == '1'){
-		$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
-		$updateStatus->execute([':member_no' => $payload["member_no"]]);
-		$arrayResult['RESPONSE_CODE'] = "WS0051";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(401);
-		require_once('../../include/exit_footer.php');
-		
+	$getMemberApprove = $conoracle->prepare("SELECT APPL_DOCNO FROM MBREQAPPL WHERE member_no = :member_no and APPL_STATUS = '8'");
+	$getMemberApprove->execute([':member_no' => $member_no]);
+	$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowMemberAcc["APPL_DOCNO"]) && $rowMemberAcc["APPL_DOCNO"] != ""){
+	}else{
+		if($rowResign["RESIGN_STATUS"] == '1'){
+			$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
+			$updateStatus->execute([':member_no' => $payload["member_no"]]);
+			$arrayResult['RESPONSE_CODE'] = "WS0051";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(401);
+			require_once('../../include/exit_footer.php');
+			
+		}
 	}
 	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
 		if($dataComing["is_root"] == "1"){
