@@ -96,6 +96,73 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 		}
+		if(isset($dataComing["address"]) && $dataComing["address"] != ""){
+			if($arrConstInfo["address"] == '1'){
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$memberInfo = $conoracle->prepare("SELECT 
+													mb.MEMB_ADDR as ADDR_NO, mb.SOI as ADDR_SOI,mb.MOOBAN as ADDR_MOO,mb.ROAD AS ADDR_ROAD,
+													mb.DISTRICT_CODE,
+													mb.PROVINCE_CODE,
+													mb.TAMBOL_CODE,
+													mb.MEMBADDR_FULL,
+													MBT.TAMBOL_DESC AS TAMBOL_DESC,
+													MBD.DISTRICT_DESC AS DISTRICT_DESC,
+													MBP.PROVINCE_DESC AS PROVINCE_DESC,
+													MBD.POSTCODE AS ADDR_POSTCODE
+													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
+													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
+													WHERE mb.member_no = :member_no");
+				$memberInfo->execute([':member_no' => $member_no]);
+				$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+				$arrOldAddress["addr_no"] = $rowMember["ADDR_NO"];
+				$arrOldAddress["addr_moo"] = $rowMember["ADDR_MOO"];
+				$arrOldAddress["addr_soi"] = $rowMember["ADDR_SOI"];
+				//$arrOldAddress["addr_village"] = $rowMember["ADDR_VILLAGE"];
+				$arrOldAddress["addr_road"] = $rowMember["ADDR_ROAD"];
+				$arrOldAddress["district_code"] = $rowMember["DISTRICT_CODE"];
+				$arrOldAddress["addr_postcode"] = $rowMember["ADDR_POSTCODE"];
+				$arrOldAddress["tambol_code"] = $rowMember["TAMBOL_CODE"];
+				$arrOldAddress["province_code"] = $rowMember["PROVINCE_CODE"];
+				$insertChangeData = $conmysql->prepare("INSERT INTO gcmembereditdata(member_no,old_data,incoming_data,inputgroup_type)
+														VALUES(:member_no,:old_address,:address,'address')");
+				if($insertChangeData->execute([
+					':member_no' => $payload["member_no"],
+					':old_address' => json_encode($arrOldAddress),
+					':address' => json_encode($dataComing["address"])
+				])){
+					//$message_error = "มีการแก้ไขข้อมูลที่อยู่ / เลขสมาชิก : ".$payload["member_no"]." สามารถตรวจสอบข้อมูลได้ที่ Mobile admin";
+					//$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_USER"]);
+					$arrayResult["RESULT_ADDRESS"] = TRUE;
+				}else{
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS1003",
+						":error_desc" => "แก้ไขที่อยู่ไม่ได้เพราะ insert ลงตาราง gcmembereditdata ไม่ได้"."\n"."Query => ".$insertChangeData->queryString."\n"."Param => ". json_encode([
+							':member_no' => $payload["member_no"],
+							':old_address' => json_encode($arrOldAddress),
+							':address' => json_encode($dataComing["address"])
+						]),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ insert ลง gcmembereditdata ไม่ได้"."\n"."Query => ".$insertChangeData->queryString."\n"."Param => ". json_encode([
+						':member_no' => $payload["member_no"],
+						':old_address' => json_encode($arrOldAddress),
+						':address' => json_encode($dataComing["address"])
+					]);
+					$lib->sendLineNotify($message_error);
+					$arrayResult["RESULT_ADDRESS"] = FALSE;
+				}
+			}
+		}
+
 		if(isset($arrayResult["RESULT_EMAIL"]) && !$arrayResult["RESULT_EMAIL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS1010";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -110,6 +177,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 			
 		}
+		if(isset($arrayResult["RESULT_ADDRESS"]) && !$arrayResult["RESULT_ADDRESS"]){
+			$arrayResult['RESPONSE_CODE'] = "WS1039";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

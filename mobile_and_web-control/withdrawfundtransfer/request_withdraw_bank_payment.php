@@ -46,6 +46,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
 			$refbank_no = $dataComing["SOURCE_REFNO"];
 			$etnrefbank_no = $dataComing["ETN_REFNO"];
+		}else if($rowDataWithdraw["bank_code"] == '014'){
+			$arrVerifyToken['transaction_time'] = $dataComing["TRAN_TIME"];
+			$arrVerifyToken['token_id'] = $dataComing["TOKEN_ID"];
+			$arrVerifyToken['tran_uniq'] = $dataComing["TRAN_UNIQ"];
 		}
 		$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;

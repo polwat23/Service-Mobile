@@ -28,6 +28,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		if($rowDataDeposit["bank_code"] == '025'){
 			$arrVerifyToken['etn_trans'] = $dataComing["ETN_REFNO"];
 			$arrVerifyToken['transaction_ref'] = $dataComing["SOURCE_REFNO"];
+		}else if($rowDataDeposit["bank_code"] == '014'){
+			$arrVerifyToken['bank_account_no'] = $rowDataDeposit["deptaccount_no_bank"];
 		}
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
@@ -68,7 +70,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrDataAPI["FromBankAccountNo"] = $bank_account_no;
 			$arrDataAPI["DepositAmount"] = $amt_transfer;
 			$arrDataAPI["UserRequestDate"] = $dateOperC;
-			$arrDataAPI["TransferFee"] = $dataComing["fee_amt"];
+			if($rowDataDeposit["bank_code"] == '014'){
+				$arrDataAPI["TransferFee"] = 0;
+			}else{
+				$arrDataAPI["TransferFee"] = $dataComing["fee_amt"];
+			}
 			$arrDataAPI["DepositBankRefCode"] = $transaction_no;
 			$arrDataAPI["Note"] = "Deposit Pre bank transfer";
 			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/DepositFromBankAccount",$arrDataAPI,$arrHeaderAPI);
@@ -331,7 +337,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':sigma_key' => $dataComing["sigma_key"],
 				':amt_transfer' => $amt_transfer,
 				':response_code' => $arrResponse->RESPONSE_CODE,
-				':response_message' => $arrResponse->RESPONSE_MESSAGE
+				':response_message' => json_encode($arrResponse->RESPONSE_MESSAGE)
 			];
 			$log->writeLog('deposittrans',$arrayStruc);
 			if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){

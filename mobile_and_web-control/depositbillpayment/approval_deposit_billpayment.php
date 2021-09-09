@@ -20,15 +20,15 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 															WHERE qrgenerate = :tran_id");
 						$getDetailTran->execute([':tran_id' => $dataComing["tran_id"]]);
 						while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
-							if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
+							if($rowDetail["trans_code_qr"] == '001'){ //ฝากเงิน
 								$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
 								$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","006");
 								if($arrRightDep["RESULT"]){
 									$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
 									$arrDataAPI["MemberID"] = substr($member_no,-6);
 									$arrDataAPI["ToCoopAccountNo"] = $deptaccount_no;
-									$arrDataAPI["FromBankCode"] = "006";
-									$arrDataAPI["FromBankAccountNo"] = $dataComing["bank_ref"];
+									$arrDataAPI["FromBankCode"] = $lib->mb_str_pad($dataComing["bank_code"],'3');
+									$arrDataAPI["FromBankAccountNo"] = $lib->mb_str_pad($dataComing["member_no"],'10');
 									$arrDataAPI["TransferFee"] = 0;
 									$arrDataAPI["DepositAmount"] = $rowDetail["qrtransferdt_amt"];
 									$arrDataAPI["UserRequestDate"] = date('c');
@@ -56,6 +56,17 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 									}
 									$arrResponseAPI = json_decode($arrResponseAPI);
 									if($arrResponseAPI->responseCode == "200"){
+									}else{
+										$arrayResult['RESPONSE_CODE'] = "WS0028";
+										if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
+											$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
+										}else{
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+										}
+										$arrayResult['RESULT'] = FALSE;
+										ob_flush();
+										echo json_encode($arrayResult);
+										exit();
 									}
 								}else{
 									$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
@@ -69,7 +80,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 									echo json_encode($arrayResult);
 									exit();
 								}
-							}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
+							}else if($rowDetail["trans_code_qr"] == '002'){ //ชำระหนี้
 								$fetchLoanRepay = $conoracle->prepare("SELECT PRINCIPAL_BALANCE,INTEREST_RETURN,RKEEP_PRINCIPAL
 																		FROM lncontmaster
 																		WHERE loancontract_no = :loancontract_no");

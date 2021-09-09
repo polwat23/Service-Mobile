@@ -14,8 +14,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrTypeQR["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 			$arrTypeQR["TRANS_DESC"] = $rowTypeQR["trans_desc_qr"];
 			$arrTypeQR["OPERATE_DESC"] = $rowTypeQR["operation_desc_".$lang_locale];
-			$arrayGrpTrans[] = $arrTypeQR;
-			if($rowTypeQR["trans_code_qr"] == '01'){
+			
+			if($rowTypeQR["trans_code_qr"] == '001'){
 				$formatDept = $func->getConstant('dep_format');
 				$hiddenFormat = $func->getConstant('hidden_dep');
 				$checkCanReceive = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept WHERE allow_deposit_outside = '1'");
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}
 					}
 				}
-			}else if($rowTypeQR["trans_code_qr"] == '02'){
+			}else if($rowTypeQR["trans_code_qr"] == '002'){
 				$checkCanGen = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_qrpayment = '1'");
 				$checkCanGen->execute();
 				$arrLoantypeAllow = array();
@@ -59,7 +59,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrContract = array();
 					$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 					$arrContract["ACCOUNT_NO"] = $contract_no;
-					$arrAccTrans["ACCOUNT_NO_HIDE"] = $contract_no;
+					$arrContract["ACCOUNT_NO_HIDE"] = $contract_no;
 					$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 					$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
 					$arrContract['ACCOUNT_NAME'] = $rowContract["LOAN_TYPE"];
@@ -67,7 +67,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrContract["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 					$arrGrpAcc[] = $arrContract;
 				}
+			}else{
+				$arrTypeQR["IS_DESTINATION"] = FALSE;
 			}
+			$arrayGrpTrans[] = $arrTypeQR;
 		}
 		$arrayResult["TYPE_TRANS"] = $arrayGrpTrans;
 		$arrayResult["CHOOSE_ACCOUNT"] = $arrGrpAcc;
