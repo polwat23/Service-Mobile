@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$period_payment = floor($period_payment + $module);
 				}
 			}else if($dataComing["option_paytype"] == "1"){
-				$period = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
+				$period = $dataComing["period"];
 				$int_rate = ($rowIntRate["interest_rate"] / 100);
 				$typeCalDate = $func->getConstant("cal_start_pay_date");
 				$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
@@ -123,27 +123,22 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}else{
 					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 				}
-				$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);
+				$period_payment = ($request_amt  / $period);
 				$module = 10 - ($period_payment % 10);
 				if($module < 10){
 					$period_payment = floor($period_payment + $module);
 				}
-				/*$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
-				$period_payment = ($request_amt * ($int_rate / 12) / (1 - ($payment_per_period)));
-				$module = 10 - ($period_payment % 10);
-				if($module < 10){
-					$period_payment = floor($period_payment + $module);
-				}*/
-
 
 				$typeCalDate = $func->getConstant("cal_start_pay_date");
 				
 				$arrPayPrin["VALUE"] = "0";
 				$arrPayPrin["DESC"] = "คงต้น";
 				$arrGrpPayType[] = $arrPayPrin;
-				/*$arrPayEqual["VALUE"] = "1";
-				$arrPayEqual["DESC"] = "คงยอด";
-				$arrGrpPayType[] = $arrPayEqual;*/
+				$arrPayEqual["VALUE"] = "1";
+				if($dataComing["loantype_code"] == '20'){
+					$arrPayEqual["DESC"] = "คงยอด";
+					$arrGrpPayType[] = $arrPayEqual;
+				}
 				$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "0";
 				
 				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
@@ -158,7 +153,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = TRUE; 
+				$arrayResult["REQ_SALARY"] = TRUE;  ///TRUE
 				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;

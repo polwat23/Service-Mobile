@@ -529,7 +529,7 @@ class CalculateLoan {
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
 											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
-											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE
+											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE,LNM.STARTCONT_DATE
 											FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE
 											WHERE lnm.loancontract_no = :contract_no and lnm.contract_status > 0 and lnm.contract_status <> 8");
 		$contLoan->execute([':contract_no' => $loancontract_no]);
@@ -930,9 +930,9 @@ class CalculateLoan {
 		$insertSLSlipDet = $conmssql->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
 												SHRLONTYPE_CODE,CONCOOP_ID,SLIPITEM_DESC,PERIOD,ITEM_PAYAMT,ITEM_BALANCE,
 												INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
-												BFPERIOD,BFSHRCONT_BALAMT)
+												BFPERIOD,BFSHRCONT_BALAMT,BFSHRCONT_STATUS,BFCONTLAW_STATUS)
 												VALUES(?,?,?,?,1,?,?,?,
-												0,?,?,0,0,?,?,?)");
+												0,?,?,0,0,?,?,?,1,1)");
 		if($insertSLSlipDet->execute($executeSlDet)){
 			$arrayResult['RESULT'] = TRUE;
 			return $arrayResult;
@@ -975,13 +975,13 @@ class CalculateLoan {
 			$insertSLSlipDet = $conmssql->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
 													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
 													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
-													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
+													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFSHRCONT_STATUS,BFCONTLAW_STATUS,BFCOUNTPAY_FLAG,
 													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
 													VALUES(?,?,?,?,1,?,?,?,?,?,?,?,0,?,?,?,
 													CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),?,?,
 													?,?,?,CONVERT(VARCHAR(10),?,20),
 													CONVERT(VARCHAR(10),?,20),
-													?,?,1,?,?,?,?,0)");
+													?,?,1,1,1,?,?,?,?,0)");
 		}else{
 			$executeSlDet = [
 				$config["COOP_ID"],$payinslip_no,$slipitemtype,$slipseq_no,$shrloantype_code,$config["COOP_ID"],
@@ -998,13 +998,13 @@ class CalculateLoan {
 			$insertSLSlipDet = $conmssql->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
 													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
 													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
-													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
+													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFSHRCONT_STATUS,BFCONTLAW_STATUS,BFCOUNTPAY_FLAG,
 													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
 													VALUES(?,?,?,?,1,?,?,?,?,?,?,?,0,?,?,?,
 													CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),?,20)
 													,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),
 													CONVERT(VARCHAR(10),?,20),
-													?,?,1,?,?,?,?,0)");
+													?,?,1,1,1,?,?,?,?,0)");
 
 		}
 		if($insertSLSlipDet->execute($executeSlDet)){
@@ -1149,21 +1149,39 @@ class CalculateLoan {
 				$dataCont["WITHDRAWABLE_AMT"] - $prinPay,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,$lastperiod,
 				$intArr,$dataCont["LAST_STM_NO"] + 1,floor($periodPayment),$contract_no
 			];
-			if($interestPeriod > 0){
-				$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
-															PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
-															LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),LASTCALINT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
-															INTEREST_ARREAR = ?,LAST_STM_NO = ?,PERIOD_PAYMENT = ?
-															WHERE loancontract_no = ?");
+			if(isset($dataCont["STARTCONT_DATE"]) && $dataCont["STARTCONT_DATE"] != ""){
+				if($intArr > 0){
+					$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
+																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),LASTCALINT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,PERIOD_PAYMENT = ?,LASTACCESS_DATE = CONVERT(VARCHAR(10),GETDATE(),20)
+																WHERE loancontract_no = ?");
+				}else{
+					$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
+																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),LASTCALINT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,PERIOD_PAYMENT = ?,LASTACCESS_DATE = CONVERT(VARCHAR(10),GETDATE(),20)
+																WHERE loancontract_no = ?");
+				}
 			}else{
-				$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
-															PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
-															LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
-															INTEREST_ARREAR = ?,LAST_STM_NO = ?,PERIOD_PAYMENT = ?
-															WHERE loancontract_no = ?");
+				if($intArr > 0){
+					$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
+																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																STARTCONT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
+																LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),LASTCALINT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,PERIOD_PAYMENT = ?,LASTACCESS_DATE = CONVERT(VARCHAR(10),GETDATE(),20)
+																WHERE loancontract_no = ?");
+				}else{
+					$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
+																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																STARTCONT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
+																LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),LASTCALINT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,PERIOD_PAYMENT = ?,LASTACCESS_DATE = CONVERT(VARCHAR(10),GETDATE(),20)
+																WHERE loancontract_no = ?");
+				}
 			}
 			if($updateLnContmaster->execute($executeLnMaster)){
-				if($interestPeriod > 0){
+				if($intArr > 0){
 					$insertTransLog = $this->con->prepare("INSERT INTO gcrepayloan(ref_no,from_account,loancontract_no,source_type,amount,fee_amt,penalty_amt,principal
 															,interest,interest_return,interest_arrear,bfinterest_return,bfinterest_arrear,member_no,id_userlogin,
 															app_version,is_offset,bfkeeping,calint_to)

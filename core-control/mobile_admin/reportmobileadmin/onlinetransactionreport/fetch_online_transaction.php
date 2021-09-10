@@ -21,6 +21,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayExecute["trrans_type"] = "9";
 			}else if($dataComing["trrans_type"] == "deposit"){
 				$arrayExecute["trrans_type"] = "9";
+			}else if($dataComing["trrans_type"] == "internal_tran"){
+				$arrayExecute["trrans_type"] != "9";
 			}else {
 				$arrayExecute["trrans_type"] = "-1";
 			}
@@ -45,7 +47,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
 														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
@@ -66,7 +72,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
 														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
@@ -87,7 +97,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
 														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
@@ -116,7 +130,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
 														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
@@ -133,7 +151,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
 														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
@@ -150,7 +172,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
 														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
@@ -219,6 +245,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['SUMMARY'] = $summary;
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['DEPT_TRANSACTION'] = $arrayGrpAll;
+		$arrayResult['fetchReconcile'] = $fetchReconcile;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{
