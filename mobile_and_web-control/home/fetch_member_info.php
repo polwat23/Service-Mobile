@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getSignature = $conoracle->prepare("SELECT 
 												STARTUP_DATE AS STARTUP_DATE,
 												REPLACE(PICTURE_PATH, 'X:\', '') as PICTURE_PATH
-												FROM MBMEMBPICDET WHERE MEMBER_NO = :member_no and picture_status = '1'");
+												FROM MBMEMBPICDET WHERE MEMBER_NO = :member_no and picture_status = '1' ORDER BY startup_date DESC ");
 			$getSignature->execute([':member_no' => $member_no]);
 			$rowSig = $getSignature->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowSig["PICTURE_PATH"]) && $rowSig["PICTURE_PATH"] != ""){
