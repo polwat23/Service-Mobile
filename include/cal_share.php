@@ -31,7 +31,7 @@ class CalculateShare {
 		return $rowCurrShare;
 	}
 	public function buyShare($conoracle,$member_no,$amt_transfer,$penalty_amt,$config,$shslip_docno,$operate_date,
-	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$shslip_no,$ref_no){
+	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$shslip_no,$ref_no,$is_paymonth=false){
 		$rowContShare = $this->getConstShare();
 		$dataShare = $this->getShareInfo($member_no);
 		$sharereq_value = $dataShare["SHARE_AMT"] + $amt_transfer;
@@ -46,18 +46,33 @@ class CalculateShare {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		$arrExecuteShStm = [
-			':coop_id' => $config["COOP_ID"],
-			':member_no' => $member_no,
-			':last_seq' => $dataShare["LAST_STM_NO"] + 1,
-			':ref_docno' => $shslip_docno,
-			':ref_slipno' => $shslip_no,
-			':itemtype' => 'SPX',
-			':period' => $dataShare["LAST_PERIOD"] + 1,
-			':share_amt' => $amt_transfer / 10,
-			':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
-			':moneytype_code' => 'TRN'
-		];
+		if($is_paymonth){
+			$arrExecuteShStm = [
+				':coop_id' => $config["COOP_ID"],
+				':member_no' => $member_no,
+				':last_seq' => $dataShare["LAST_STM_NO"] + 1,
+				':ref_docno' => $shslip_docno,
+				':ref_slipno' => $shslip_no,
+				':itemtype' => 'SPM',
+				':period' => $dataShare["LAST_PERIOD"] + 1,
+				':share_amt' => $amt_transfer / 10,
+				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
+				':moneytype_code' => 'TRN'
+			];
+		}else{
+			$arrExecuteShStm = [
+				':coop_id' => $config["COOP_ID"],
+				':member_no' => $member_no,
+				':last_seq' => $dataShare["LAST_STM_NO"] + 1,
+				':ref_docno' => $shslip_docno,
+				':ref_slipno' => $shslip_no,
+				':itemtype' => 'SPX',
+				':period' => $dataShare["LAST_PERIOD"] + 1,
+				':share_amt' => $amt_transfer / 10,
+				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
+				':moneytype_code' => 'TRN'
+			];
+		}
 		$insertSTMShare = $conoracle->prepare("INSERT INTO shsharestatement(COOP_ID,MEMBER_NO,SHARETYPE_CODE,SEQ_NO,SLIP_DATE,OPERATE_DATE,SHARE_DATE,ACCOUNT_DATE,
 												REF_DOCNO,REF_SLIPNO,SHRITEMTYPE_CODE,PERIOD,SHARE_AMOUNT,SHARESTK_AMT,MONEYTYPE_CODE,ENTRY_ID,ENTRY_DATE,SYNC_NOTIFY_FLAG)
 												VALUES(:coop_id,:member_no,'01',:last_seq,TRUNC(SYSDATE),TRUNC(SYSDATE),TRUNC(SYSDATE),TRUNC(SYSDATE),:ref_docno,:ref_slipno,

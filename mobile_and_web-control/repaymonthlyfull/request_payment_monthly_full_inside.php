@@ -1,5 +1,28 @@
 <?php
 require_once('../autoload.php');
+require_once('../../include/cal_deposit_test.php');
+require_once('../../include/cal_loan_test.php');
+
+use CalculateDepositTest\CalculateDepositTest;
+use CalculateLoanTest\CalculateLoanTest;
+
+$cal_dep = new CalculateDepositTest();
+$cal_loan = new CalculateLoanTest();
+
+$dbuser = "iscotest";
+$dbpass = "iscotest";
+$dbname = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = gcoop)
+			)
+		  )";
+$conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+
 
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PayMonthlyFull')){
@@ -160,7 +183,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','depta
 									$from_account_no,$payinslip_no,'SHR',$rowKPDetail["SHRLONTYPE_CODE"],'ค่าหุ้นรายเดือน',$rowKPDetail["SLIP_SEQ_NO"]);
 									if($paykeepingdet["RESULT"]){
 										$buyshare = $cal_share->buyShare($conoracle,$rowKPDetail["DESTINATION"],$rowKPDetail["ITEM_PAYMENT"],0,$config,$payinslipdoc_no,$dateOperC,
-										$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$ref_no);
+										$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$ref_no,true);
 										if($buyshare["RESULT"]){
 										}else{
 											$conoracle->rollback();
