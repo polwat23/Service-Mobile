@@ -2,12 +2,12 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingHideAccount')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingEnableViewBalance')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrAllAccount = array();
 		$arrAllLoan = array();
 		
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE
+		$getAccount = $conmssql->prepare("SELECT DP.DEPTTYPE_CODE,DT.DEPTTYPE_DESC,DP.DEPTACCOUNT_NO,DP.DEPTACCOUNT_NAME,DP.PRNCBAL as BALANCE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
 		$getAccount->execute([
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult['DEPOSIT'] = $arrAllAccount;
 		
-		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no
+		$getContract = $conmssql->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 		$getContract->execute([
@@ -55,11 +55,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_desc" => "??? Argument ???????? "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$message_error = "???? ".$filename." ??? Argument ????????????? "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
