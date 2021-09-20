@@ -4,7 +4,7 @@
 	"COOP_ID" : "059001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/kbank",
 	"APP_ID" : "com.nkh.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/NKHCOOP/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/NKHCOOP/",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
 	"WS_STRC_DB" : "Data Source=192.168.99.122:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=059001;coop_control=059001;",
