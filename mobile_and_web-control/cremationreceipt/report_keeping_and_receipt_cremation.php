@@ -225,13 +225,13 @@ function GenerateReportExtra($dataReport,$header,$lib){
 					<td class="text-color">' . $header["slip_date"] . '</td>
 				</tr>
 				<tr>
-					<td style="width: 60px; font-size: 18px;  ">ได้รับเงินจาก </td>
-					<td style="width: 200px;" class="text-color">' .$header["full_name"]. '</td>
-					<td style="width: 30px;font-size: 18px;">สังกัด &nbsp;</td>
-					<td style="width: 220px;" class="text-color">' . $header["member_group"] . '</td>
-					<td style="width: 10px;">&nbsp;</td>
-					<td style="width: 80px;font-size: 18px;">เลขที่สมาชิก</td>
-					<td class="text-color">' . $header["member_no"] . '</td>
+					<td style="width: 60px; font-size: 18px;vertical-align: baseline;">ได้รับเงินจาก </td>
+					<td style="width: 200px;vertical-align: baseline;" class="text-color">' .$header["full_name"]. '</td>
+					<td style="width: 30px;font-size: 18px;vertical-align: baseline;">สังกัด &nbsp;</td>
+					<td style="width: 220px;vertical-align: baseline;" class="text-color">' . $header["member_group"] . '</td>
+					<td style="width: 10px;vertical-align: baseline;">&nbsp;</td>
+					<td style="width: 80px;font-size: 18px;vertical-align: baseline;">เลขที่สมาชิก</td>
+					<td style="vertical-align: baseline;" class="text-color">' . $header["member_no"] . '</td>
 				</tr>
 				</tbody>
 			</table>
