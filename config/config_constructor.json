@@ -4,7 +4,7 @@
 	"COOP_ID" : "061001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/",
 	"APP_ID" : "com.mju.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/MJUCOOP/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/MJUCOOP/",
 	"FIREBASE_API_KEY" : "AIzaSyCynzLMpcoi1b-sed3q20vaXYK8uf2KgQI",
 	"FIREBASE_SERVER_KEY" : "AAAAeQjOOF8:APA91bGw1pNULIWzvxmpsc-sOKYT3917SSQ9seVsDOYE-GRFlTZMqXhKt9wc-63z1nk33HtLM1iYUYsrdDYAF8G2fkEJ8zbTgQ-ychBbtY3X5ifTT5g4O-NeGqDRafmd91G7huwrY1HB",
 	"SECRET_KEY_JWT" : "MJU!/-Gcoop+Connect^061001*!&",

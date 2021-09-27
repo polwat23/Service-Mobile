@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAllAcc = $conmssql->prepare("SELECT DPM.DEPTACCOUNT_NO,DPM.DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,DPM.PRNCBAL,
 											DPM.SEQUEST_AMOUNT,DPM.SEQUEST_STATUS,DPT.MINPRNCBAL,DPM.CHECKPEND_AMT
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no
+											WHERE dpm.deptaccount_no IN(".implode(',',$arrayDept).") and dpm.deptclose_status = '0' and dpm.member_no = :member_no
 											ORDER BY dpm.deptaccount_no");
 			$getAllAcc->execute([':member_no' => $member_no]);
 			while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){

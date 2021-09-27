@@ -9,12 +9,16 @@ use Component\functions;
 $lib = new library();
 $func = new functions();
 
-$templateMessage = $func->getTemplateSystem('ApproveLoanOD',1);
-$fetchDataSTM = $conmssql->prepare("SELECT LOANREQUEST_DOCNO,MEMBER_NO,APPROVE_DATE
-									FROM lnreqloan where loantype_code = '13'  and approve_date BETWEEN (GETDATE() - 2) and GETDATE() 
-									and loanrequest_status = '1' and sync_notify_flag IS NULL OR sync_notify_flag = '0' ");
+$fetchDataSTM = $conmssql->prepare("SELECT LOANREQUEST_DOCNO,MEMBER_NO,APPROVE_DATE,LOANTYPE_CODE
+									FROM lnreqloan where approve_date BETWEEN (GETDATE() - 2) and GETDATE() 
+									and loanrequest_status = '1' and (sync_notify_flag IS NULL OR sync_notify_flag = '0') ");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
+	if($rowSTM["LOANTYPE_CODE"] == '13'){
+		$templateMessage = $func->getTemplateSystem('ApproveLoan',1);
+	}else{
+		$templateMessage = $func->getTemplateSystem('ApproveLoan',2);
+	}
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){

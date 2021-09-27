@@ -1093,7 +1093,7 @@ class CalculateLoan {
 		$interest = $this->calculateInterestArr($contract_no,$amt_transfer);
 		$interestFull = $interest;
 		$prinPay = 0;
-		$interestPeriod = $interest;
+		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}

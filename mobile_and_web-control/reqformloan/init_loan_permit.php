@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}else{
 					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 				}
-				$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);
+				$period_payment = floor($dataComing["request_amt"] / $dataComing["period"]);
 				$module = 10 - ($period_payment % 10);
 				if($module < 10){
 					$period_payment = floor($period_payment + $module);
@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 				}
 				$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
-				$period_payment = ($dataComing["request_amt"] * ($int_rate / 12) / (1 - ($payment_per_period)));
+				$period_payment = floor($dataComing["request_amt"] * ($int_rate / 12) / (1 - ($payment_per_period)));
 				$module = 10 - ($period_payment % 10);
 				if($module < 10){
 					$period_payment = floor($period_payment + $module);
@@ -59,7 +59,14 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			}else{
 				$arrayResult["RECEIVE_NET"] = $receive_net;
 			}
-			
+			if($dataComing["remain_salary"] > 0){
+				if($period_payment - $dataComing["remain_salary"] < 3000){
+					$arrayResult['RESPONSE_CODE'] = "WS0120";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
+			}
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			if($dataComing["loantype_code"] != '23'){
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -123,7 +130,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}else{
 					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 				}
-				$period_payment = ($request_amt  / $period);
+				$period_payment = floor($request_amt  / $period);
 				$module = 10 - ($period_payment % 10);
 				if($module < 10){
 					$period_payment = floor($period_payment + $module);
@@ -153,7 +160,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = TRUE;  ///TRUE
+				$arrayResult["REQ_SALARY"] = TRUE;
 				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
