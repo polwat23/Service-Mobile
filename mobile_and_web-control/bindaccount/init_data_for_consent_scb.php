@@ -15,10 +15,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0003";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
+			$getMemberApprove = $conoracle->prepare("SELECT TRIM(CARD_PERSON) as CARD_PERSON FROM MBREQAPPL WHERE member_no = :member_no and APPL_STATUS = '8'");
+			$getMemberApprove->execute([':member_no' => $member_no]);
+			$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowMemberAcc["CARD_PERSON"]) && $rowMemberAcc["CARD_PERSON"] != ""){
+				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowMemberAcc["CARD_PERSON"]);
+				$arrayResult['CITIZEN_ID'] = $rowMemberAcc["CARD_PERSON"];
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0003";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 			
 		}
 	}else{

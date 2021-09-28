@@ -21,22 +21,28 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
-	$checkPhoneNumber = $conoracle->prepare("SELECT TRIM(mem_telmobile) as mem_telmobile FROM mbmembmaster WHERE member_no = :member_no");
-	$checkPhoneNumber->execute([':member_no' => $dataComing["member_no"]]);
-	$rowNumber = $checkPhoneNumber->fetch(PDO::FETCH_ASSOC);
-	if(empty($rowNumber["MEM_TELMOBILE"])){
-		$arrayResult['RESPONSE_CODE'] = "WS0017";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		require_once('../../include/exit_footer.php');
-		
-	}
-	if($rowNumber["MEM_TELMOBILE"] != $phone){
-		$arrayResult['RESPONSE_CODE'] = "WS0059";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		require_once('../../include/exit_footer.php');
-		
+	$getMemberApprove = $conoracle->prepare("SELECT APPL_DOCNO FROM MBREQAPPL WHERE member_no = :member_no and APPL_STATUS = '8'");
+	$getMemberApprove->execute([':member_no' => $dataComing["member_no"]]);
+	$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowMemberAcc["APPL_DOCNO"]) && $rowMemberAcc["APPL_DOCNO"] != ""){
+	}else{
+		$checkPhoneNumber = $conoracle->prepare("SELECT TRIM(mem_telmobile) as mem_telmobile FROM mbmembmaster WHERE member_no = :member_no");
+		$checkPhoneNumber->execute([':member_no' => $dataComing["member_no"]]);
+		$rowNumber = $checkPhoneNumber->fetch(PDO::FETCH_ASSOC);
+		if(empty($rowNumber["MEM_TELMOBILE"])){
+			$arrayResult['RESPONSE_CODE'] = "WS0017";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+		if($rowNumber["MEM_TELMOBILE"] != $phone){
+			$arrayResult['RESPONSE_CODE'] = "WS0059";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
 	}
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$conmysql->beginTransaction();
