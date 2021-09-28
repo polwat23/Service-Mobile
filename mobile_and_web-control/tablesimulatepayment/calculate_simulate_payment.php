@@ -69,7 +69,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 			$pay_period = $period_payment;
 		}else{
 			if($calint_type === "1"){ // 
-				$pay_period = $payment_sumbalance / $period;
+				$pay_period = ceil($payment_sumbalance / $period);
+				$module = 100 - ($pay_period % 100);
+				if($module < 100){
+					$pay_period = floor($pay_period + $module);
+				}
 			}else{ 
 				$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
 				$pay_period = ($payment_sumbalance * ($int_rate / 12) / (1 - ($payment_per_period)));
