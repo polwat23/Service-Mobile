@@ -202,7 +202,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrData["request_amt"] = $rowDocno["request_amt"];
 				$arrData["period_payment"] = $rowDocno["period_payment"];
 				$arrData["period"] = $rowDocno["period"];
-				$arrData["recv_account"] = $deptaccount_no_bank;
+				$arrData["recv_account"] = $rowDocno["deptaccount_no_bank"];
 				
 				$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$rowDocno["reqloan_doc"].'.pdf?v='.time();
 				if($rowDocno["loantype_code"] == '23'){
