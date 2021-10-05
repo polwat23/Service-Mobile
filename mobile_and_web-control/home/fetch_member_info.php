@@ -93,7 +93,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											FROM MBADDRESS MBA LEFT JOIN MBUCFDISTRICT MBD ON MBA.DISTICT_CODEC = MBD.DISTRICT_CODE
 											and MBA.PROVINCE_CODEC = MBD.PROVINCE_CODE
 											LEFT JOIN MBUCFPROVINCE MBP ON MBA.PROVINCE_CODEC = MBP.PROVINCE_CODE
-											WHERE MBA.member_no = :member_no");
+											WHERE TRIM(MBA.MEMBER_NO) = :member_no");
 			$getAddress->execute([':member_no' => $member_no]);
 			$rowAddress = $getAddress->fetch(PDO::FETCH_ASSOC);
 			$addressCurr = (isset($rowAddress["ADDR_NO"]) ? $rowAddress["ADDR_NO"] : null);
