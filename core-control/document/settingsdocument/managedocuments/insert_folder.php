@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if($checkFolder->rowCount() > 0){
 			$rowCheckFolder = $checkFolder->fetch(PDO::FETCH_ASSOC);
 			if($rowCheckFolder["is_use"] == '0'){
-				$deleteDocuments = $conmssql->prepare("UPDATE docgroupcontrol SET is_use = '1',create_date = NOW(),is_lock = '0',
+				$deleteDocuments = $conmssql->prepare("UPDATE docgroupcontrol SET is_use = '1',create_date = GETDATE(),is_lock = '0',
 													docgrp_name = :docgrp_name,docgrp_ref = :docgrp_ref,create_by = :create_by,
 													menu_component = :menu_component
 													WHERE is_use = '0' AND docgrp_no = :docgrp_no");

@@ -19,15 +19,17 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $dataComing["member_no"];
 	$checkLogin = $conmssql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
-	if($checkLogin->rowCount() > 0){
+	$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowPassword["user_type"])){
 		if($arrPayload["PAYLOAD"]["channel"] == "mobile_app" && isset($dataComing["is_root"])){
 			$checkBlackList = $conmssql->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1' and type_blacklist = '1'");
 			$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
-			if($checkBlackList->rowCount() > 0){
+			$rowBlackList= $checkBlackList->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowBlackList["type_blacklist"])){
 				$arrayResult['RESPONSE_CODE'] = "WS0069";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -49,11 +51,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				}
 			}
 		}
-		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conmssql->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign = $conmssqlcoop->prepare("SELECT status as resign_status FROM cocooptation WHERE member_id = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
-		if($rowResign["RESIGN_STATUS"] == '1'){
+		if($rowResign["resign_status"] == 'RE'){
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -84,17 +85,16 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					':member_no' => $member_no,
 					':channel' => $arrPayload["PAYLOAD"]["channel"]
 				]);
-				if($getMemberLogged->rowCount() > 0){
-					$arrayIdToken = array();
-					while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
-						$arrayIdToken[] = $rowIdToken["id_token"];
-					}
-					$updateLoggedOneDevice = $conmssql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
-																gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
-																gu.is_login = '-5',gu.logout_date = NOW()
-																WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
-					$updateLoggedOneDevice->execute();
+
+				$arrayIdToken = array();
+				while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
+					$arrayIdToken[] = $rowIdToken["id_token"];
 				}
+				$updateLoggedOneDevice = $conmssql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
+															gt.at_is_revoke = '-6',gt.rt_expire_date = GETDATE() ,gt.at_expire_date = GETDATE(),
+															gu.is_login = '-5',gu.logout_date = GETDATE()
+															WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
+				$updateLoggedOneDevice->execute();
 				$insertToken = $conmssql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
 													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
 				if($insertToken->execute([

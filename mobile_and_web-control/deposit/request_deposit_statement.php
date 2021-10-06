@@ -11,17 +11,18 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$fetchMail->execute([':member_no' => $payload["member_no"]]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
-		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getCardPerson = $conmssql->prepare("SELECT CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$account_no = $dataComing["account_no"];
+		$getCardPerson = $conmssqlcoop->prepare("SELECT id_number as CARD_PERSON FROM cocooptation WHERE member_id = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conmssql->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
-																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
-																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
-																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :dateafter, 23)
-																		ORDER BY dps.SEQ_NO DESC");
+			$fetchDataSTM = $conmssqlcoop->prepare("SELECT dt.transaction_description as TYPE_TRAN,dt.transaction_action as SIGN_FLAG ,stm.WITHDRAWAL , stm.DEPOSIT , stm.balance as PRNCBAL,
+														stm.transaction_date as OPERATE_DATE ,stm.transaction_seq as SEQ_NO
+														FROM codeposit_transaction stm LEFT JOIN  codeposit_transactiontype dt  ON stm.transaction_type = dt.transaction_type  and dt.transaction_subseq = 0
+														where  stm.deposit_id = :account_no and  stm.transaction_subseq = '0'
+														and dsm.transaction_date BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :dateafter, 23)
+														ORDER BY stm.transaction_seq DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
 				':datebefore' => $date_between[0],
@@ -32,15 +33,14 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				$arraySTM = array();
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
 				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
-				$arraySTM["DEPTSLIP_NO"] = $rowDataSTM["DEPTSLIP_NO"];
 				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
-				$arraySTM["TRAN_AMOUNT"] = $rowDataSTM["TRAN_AMOUNT"];
+				$arraySTM["TRAN_AMOUNT"] = number_format($rowDataSTM["WITHDRAWAL"] + $rowDataSTM["DEPOSIT"],2);
 				$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
 				$arraySTMGrp[] = $arraySTM;
 			}
 			$arrayData["STATEMENT"] = $arraySTMGrp;
 			$arrayData["MEMBER_NO"] = $payload["member_no"];
-			$arrayData["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
+			$arrayData["DEPTACCOUNT_NO"] = $account_no;
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
 			$arrayGenPDF = generatePDFSTM($dompdf,$arrayData,$lib,$passwordPDF);

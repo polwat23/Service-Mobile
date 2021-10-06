@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
-		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
+		$account_no = $dataComing["account_no"];
 		if(($dataComing["base64_img"] == "" || empty($dataComing["base64_img"])) && ($dataComing["alias_name_emoji_"] == "" || empty($dataComing["alias_name_emoji_"]))
 		&& $dataComing["alias_name_emoji_"] != "0"){
 			$filename = basename(__FILE__, '.php');
@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			];
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ ".json_encode($dataComing);
-			$lib->sendLineNotify($message_error);
+			//$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -54,10 +54,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrExecute["alias_name"] = $dataComing["alias_name_emoji_"];
 		}
 		$arrExecute["deptaccount_no"] = $account_no;
-		$updateMemoDept = $conmssql->prepare("UPDATE gcdeptalias SET update_date = NOW(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
+		$updateMemoDept = $conmssql->prepare("UPDATE gcdeptalias SET update_date = GETDATE(),".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
 												".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
 												WHERE deptaccount_no = :deptaccount_no");
-		if($updateMemoDept->execute($arrExecute) && $updateMemoDept->rowCount() > 0){
+		
+		if($updateMemoDept->execute($arrExecute)){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -79,12 +80,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 				];
 				$log->writeLog('errorusage',$logStruc);
-				$message_error = "เพิ่มชื่อเล่นบัญชีไม่ได้เพราะ Insert ลงตาราง gcdeptalias ไม่ได้ "."\n"."Query => ".$insertMemoDept->queryString."\n"." Param =>".json_encode([
-					':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],
-					':path_alias_img' => $path_alias_img ?? null,
-					':deptaccount_no' => $account_no
-				]);
-				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_CODE'] = "WS1027";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

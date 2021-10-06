@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') >= :start_date" : null).
 															(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') <= :end_date" : null)
 															) 
-															: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= now()-interval 3 month"));
+															: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= GETDATE()-interval 3 month"));
 			$getAllReqDocno->execute($dataComing["is_filtered"] ? $arrayExecute : [':req_status' => $dataComing["req_status"]]);
 			while($rowDocno = $getAllReqDocno->fetch(PDO::FETCH_ASSOC)){
 				$arrDocno = array();
@@ -108,7 +108,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') >= :start_date" : null).
 															(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') <= :end_date" : null)
 															) 
-															: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= now()-interval 3 month"));
+															: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= GETDATE()-interval 3 month"));
 			$getAllReqDocno->execute($dataComing["is_filtered"] ? $arrayExecute : []);
 			while($rowDocno = $getAllReqDocno->fetch(PDO::FETCH_ASSOC)){
 				$arrDocno = array();

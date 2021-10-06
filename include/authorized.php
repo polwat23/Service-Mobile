@@ -35,15 +35,15 @@ class Authorization {
 		}
 	}
 	public function CheckPeriodRefreshToken($refresh_token,$unique_id,$id_token,$con){
-		$checkRT = $con->prepare("SELECT DATE_FORMAT(rt_expire_date,'%Y-%m-%d') as rt_expire_date,rt_is_revoke FROM gctoken
+		$checkRT = $con->prepare("SELECT CONVERT(char(10),rt_expire_date,20) as rt_expire_date,rt_is_revoke,id_token FROM gctoken
 								WHERE refresh_token = :refresh_token and unique_id = :unique_id and id_token = :id_token");
 		$checkRT->execute([
 			':refresh_token' => $refresh_token,
 			':unique_id' => $unique_id,
 			':id_token' => $id_token
 		]);
-		if($checkRT->rowCount() > 0){
-			$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
+		$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
+		if(isset($rowToken["id_token"])){
 			if($rowToken["rt_is_revoke"] === '0'){
 				if(empty($rowToken["rt_expire_date"]) || ($rowToken["rt_expire_date"] > date('Y-m-d'))){
 					return true;
@@ -62,26 +62,26 @@ class Authorization {
 		}
 	}
 	public function refresh_accesstoken($refresh_token,$unique_id,$con,$payload,$jwt_token,$secret_key){
-		$checkRT = $con->prepare("SELECT DATE_FORMAT(rt_expire_date,'%Y-%m-%d') as rt_expire_date,rt_is_revoke FROM gctoken
+		$checkRT = $con->prepare("SELECT CONVERT(char(10),rt_expire_date,112) as rt_expire_date,rt_is_revoke,id_token FROM gctoken
 								WHERE refresh_token = :refresh_token and unique_id = :unique_id and id_token = :id_token");
 		$checkRT->execute([
 			':refresh_token' => $refresh_token,
 			':unique_id' => $unique_id,
 			':id_token' => $payload["id_token"]
 		]);
-		if($checkRT->rowCount() > 0){
+		$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
+		if(isset($rowToken["id_token"])){
 			$getLimit = $con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_session_timeout' and is_use = '1'");
 			$getLimit->execute();
 			
 			$rowLimit = $getLimit->fetch(\PDO::FETCH_ASSOC);
 
-			$rowToken = $checkRT->fetch(\PDO::FETCH_ASSOC);
 			if($rowToken["rt_is_revoke"] === '0'){
 				if(empty($rowToken["rt_expire_date"]) || ($rowToken["rt_expire_date"] > date('Y-m-d'))){
 					$payload["exp"] = time() + intval($rowLimit['constant_value']);
 					$payload["refresh_amount"] = $payload["refresh_amount"] + 1;
 					$new_access_token = $jwt_token->customPayload($payload, $secret_key);
-					$updateNewAT = $con->prepare("UPDATE gctoken SET access_token = :new_access_token,at_update_date = NOW()
+					$updateNewAT = $con->prepare("UPDATE gctoken SET access_token = :new_access_token,at_update_date = GETDATE()
 													WHERE id_token = :id_token");
 					if($updateNewAT->execute([
 						':new_access_token' => $new_access_token,

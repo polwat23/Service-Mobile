@@ -10,9 +10,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];
 		}
 		$arrayGroup = array();
-		$fetchUserNotRegis = $conmssql->prepare("SELECT mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.MEMBER_DATE
-												,mb.addr_mobilephone as MEM_TELMOBILE FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.resign_status = '0'");
+		$fetchUserNotRegis = $conmssqlcoop->prepare("SELECT co.member_id as MEMBER_NO  ,co.prefixname as PRENAME_DESC, co.firstname as MEMB_NAME ,co.lastname as MEMB_SURNAME ,
+													 co.EMAIL , co.telephone as PHONE_NUMBER , co.member_in as MEMBER_DATE
+													 FROM cocooptation co WHERE status ='AC'");
 		$fetchUserNotRegis->execute();
 		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
 			if(!in_array($rowUserNotRegis["MEMBER_NO"],$arrayUserRegister)){
@@ -20,8 +20,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayUserNotRegister["MEMBER_NO"] = $rowUserNotRegis["MEMBER_NO"];
 				$arrayUserNotRegister["NAME"] = $rowUserNotRegis["PRENAME_DESC"].$rowUserNotRegis["MEMB_NAME"]." ".$rowUserNotRegis["MEMB_SURNAME"];
 				$arrayUserNotRegister["MEMBER_DATE"] = $lib->convertdate($rowUserNotRegis["MEMBER_DATE"],'D m Y');
-				$arrayUserNotRegister["TEL"] = isset($rowUserNotRegis["MEM_TELMOBILE"]) ? $lib->formatphone(preg_replace('/[^0-9]/', '', $rowUserNotRegis["MEM_TELMOBILE"]),'-') : "-";
-				$arrayUserNotRegister["EMAIL"] = "-";
+				$arrayUserNotRegister["TEL"] = $rowUserNotRegis["PHONE_NUMBER"];
+				$arrayUserNotRegister["EMAIL"] =  $rowUserNotRegis["EMAIL"];
 				$arrayGroup[] = $arrayUserNotRegister;
 			}
 		}

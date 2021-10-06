@@ -5,7 +5,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
 		$arrayGroup = array();
 		$fetchUserAccount = $conmssql->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status, user_type
-												FROM gcmemberaccount WHERE user_type IN('0','1') ORDER BY register_date DESC");
+												FROM gcmemberaccount WHERE user_type IN('0','1') 
+												ORDER BY  member_no, register_date DESC");
 		$fetchUserAccount->execute();
 		while($rowUserlogin = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupUserAcount = array();

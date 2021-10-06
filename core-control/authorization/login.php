@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['username','password','device_name','unique_id']
 	$checkPassword->execute([
 		':username' => $dataComing["username"]
 	]);
-	if($checkPassword->rowCount() > 0){
-		$rowPassword = $checkPassword->fetch(PDO::FETCH_ASSOC);
+	$rowPassword = $checkPassword->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowPassword["password"])){		
 		if(password_verify($dataComing["password"], $rowPassword['password'])){
 			$arrPayload = array();
 			$arrPayload['section_system'] = $rowPassword['section_system'];

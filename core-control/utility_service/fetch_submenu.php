@@ -7,7 +7,8 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			$arrayGroup = array();
 			$fetchMenu = $conmssql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
 											ON css.id_coremenu = cm.id_coremenu
-											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' ORDER BY cm.coremenu_order,css.menu_order ASC");
+											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' 
+											ORDER BY cm.coremenu_order,css.menu_order ASC");
 			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
 			while($rowMenu = $fetchMenu->fetch()){
 				$arrGroupRootMenu = array();

@@ -14,7 +14,7 @@ class CalculateLoan {
 	function __construct() {
 		$connection = new connection();
 		$this->lib = new library();
-		$this->con = $connection->connecttomysql();
+		$this->con = $connection->connecttosqlserver();
 		$this->conms = $connection->connecttosqlserver();
 	}
 	public function calculateInterest($loancontract_no,$amt_transfer=0){
@@ -738,7 +738,7 @@ class CalculateLoan {
 																app_version,is_offset,bfkeeping,calint_to)
 																VALUES(:ref_no,:from_account,:loancontract_no,'1',:amount,:penalty_amt,:principal,:interest,
 																:interest_return,:interest_arrear,:bfinterest_return,:bfinterest_arrear,:member_no,:id_userlogin,
-																:app_version,:is_offset,:bfkeeping,NOW())");
+																:app_version,:is_offset,:bfkeeping,GETDATE())");
 						$insertTransLog->execute([
 							':ref_no' => $ref_no,
 							':from_account' => $from_account_no,
@@ -1128,7 +1128,7 @@ class CalculateLoan {
 															app_version,is_offset,bfkeeping,calint_to)
 															VALUES(:ref_no,:from_account,:loancontract_no,'1',:amount,:fee_amt,:penalty_amt,:principal,:interest,
 															:interest_return,:interest_arrear,:bfinterest_return,:bfinterest_arrear,:member_no,:id_userlogin,
-															:app_version,:is_offset,:bfkeeping,NOW())");
+															:app_version,:is_offset,:bfkeeping,GETDATE())");
 					$insertTransLog->execute([
 						':ref_no' => $ref_no,
 						':from_account' => $destination,

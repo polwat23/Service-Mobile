@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
 			$conmssql->beginTransaction();
-			$updateUnBindAccount = $conmssql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW() 
+			$updateUnBindAccount = $conmssql->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = GETDATE() 
 														WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount");
 			if($updateUnBindAccount->execute([
 				':sigma_key' => $dataComing["sigma_key"],

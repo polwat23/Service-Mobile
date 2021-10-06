@@ -14,7 +14,7 @@ class CalculateDep {
 	function __construct() {
 		$connection = new connection();
 		$this->lib = new library();
-		$this->con = $connection->connecttomysql();
+		$this->con = $connection->connecttosqlserver();
 		$this->conms = $connection->connecttosqlserver();
 	}
 	
@@ -141,7 +141,7 @@ class CalculateDep {
 						if($rowConstMapMenu["each_bank"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(GETDATE(),'%Y%M%D')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -150,7 +150,7 @@ class CalculateDep {
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D') and bank_code = :bank_code
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(GETDATE(),'%Y%M%D') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -173,7 +173,7 @@ class CalculateDep {
 						if($rowConstMapMenu["each_bank"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(GETDATE(),'%Y%M')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -182,7 +182,7 @@ class CalculateDep {
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M') and bank_code = :bank_code
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(GETDATE(),'%Y%M') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -205,7 +205,7 @@ class CalculateDep {
 						if($rowConstMapMenu["each_bank"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(GETDATE(),'%Y')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -214,7 +214,7 @@ class CalculateDep {
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y') and bank_code = :bank_code
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(GETDATE(),'%Y') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -258,7 +258,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(GETDATE(),'%Y%M%D')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
 							':deptaccount_no' => $deptaccount_no,
@@ -278,7 +278,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(GETDATE(),'%Y%M')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
 							':deptaccount_no' => $deptaccount_no,
@@ -298,7 +298,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(GETDATE(),'%Y')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
 							':deptaccount_no' => $deptaccount_no,
@@ -392,7 +392,7 @@ class CalculateDep {
 						if($rowConstMapMenu["each_bank"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(GETDATE(),'%Y%M%D')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -401,7 +401,7 @@ class CalculateDep {
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D') and bank_code = :bank_code
+																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(GETDATE(),'%Y%M%D') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -424,7 +424,7 @@ class CalculateDep {
 						if($rowConstMapMenu["each_bank"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(GETDATE(),'%Y%M')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -433,7 +433,7 @@ class CalculateDep {
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M') and bank_code = :bank_code
+																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(GETDATE(),'%Y%M') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -456,7 +456,7 @@ class CalculateDep {
 						if($rowConstMapMenu["each_bank"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(GETDATE(),'%Y')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -465,7 +465,7 @@ class CalculateDep {
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y') and bank_code = :bank_code
+																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(GETDATE(),'%Y') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
@@ -509,7 +509,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(GETDATE(),'%Y%M%D')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
 							':deptaccount_no' => $deptaccount_no,
@@ -529,7 +529,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(GETDATE(),'%Y%M')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
 							':deptaccount_no' => $deptaccount_no,
@@ -549,7 +549,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(GETDATE(),'%Y')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
 							':deptaccount_no' => $deptaccount_no,

@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','loanrequestform')){
 		if($dataComing["req_status"] == '1'){
-			$approveReqLoan = $conmssql->prepare("UPDATE gcreqloan SET req_status = '1',remark = :remark,approve_date = NOW(),username = :username WHERE reqloan_doc = :reqloan_doc");
+			$approveReqLoan = $conmssql->prepare("UPDATE gcreqloan SET req_status = '1',remark = :remark,approve_date = GETDATE(),username = :username WHERE reqloan_doc = :reqloan_doc");
 			if($approveReqLoan->execute([
 				':remark' => $dataComing["remark"] ?? null,
 				':username' => $payload["username"],

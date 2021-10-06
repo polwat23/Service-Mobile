@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') >= :start_date" : null).
 												(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') <= :end_date" : null)
 												) 
-												: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= now()-interval 3 month");
+												: " AND DATE_FORMAT(request_date, '%Y-%m-%d') >= GETDATE()-interval 3 month");
 												
 		$getAllReqDocno = $conmssql->prepare("SELECT COUNT(reqloan_doc) AS COUNT_WAITING,
 															(SELECT COUNT(reqloan_doc) AS COUNT_PROCESSING FROM gcreqloan WHERE req_status = '7'".$filterQuery.") AS COUNT_PROCESSING,

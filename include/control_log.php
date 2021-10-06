@@ -9,7 +9,7 @@ class insertLog {
 		
 		function __construct() {
 			$connection = new connection();
-			$this->con = $connection->connecttomysql();
+			$this->con = $connection->connecttosqlserver();
 		}
 		
 		public function writeLog($type_log,$log_struc,$is_catch=false) {
@@ -65,7 +65,7 @@ class insertLog {
 
 		private function logUseApplication($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO loguseapplication(member_no,id_userlogin,access_date,ip_address) 
-												VALUES(:member_no,:id_userlogin,NOW(),:ip_address)");
+												VALUES(:member_no,:id_userlogin,GETDATE(),:ip_address)");
 			$insertLog->execute($log_struc);
 		}
 		

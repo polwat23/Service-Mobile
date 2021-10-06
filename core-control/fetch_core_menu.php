@@ -34,7 +34,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													ON cpm.id_submenu = csm.id_submenu
 													WHERE cpm.id_permission_menu = :id_permission_menu and cpm.is_use = '1' and csm.menu_status = '1'");
 			$checkPermission->execute([':id_permission_menu' => $rowMenu["id_permission_menu"]]);
-			if($checkPermission->rowCount() > 0){
+			$rowcheckPermission = $checkPermission->fetch(PDO::FETCH_ASSOC);
+			if($rowcheckPermission["id_permission_submenu"]){
 				$arrMenu = array();
 				$arrMenu["MENU_NAME"] = $rowMenu["coremenu_name"];
 				$arrMenu["MENU_ICONPATH"] = $rowMenu["coremenu_iconpath"];

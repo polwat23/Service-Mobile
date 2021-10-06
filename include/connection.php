@@ -6,6 +6,7 @@ class connection {
 	public $conmysql;
 	public $conoracle;
 	public $conmssql;
+	public $conmssqlcoop;
 	
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
@@ -77,5 +78,27 @@ class connection {
 			exit();
 		}
 	}
+	public function connecttosqlservercoop() {
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
+		$json_data = json_decode($json,true);
+		$dbhost = $json_data["DBSQLSVRCOOP_HOST"];
+		$dbport = $json_data["DBSQLSVRCOOP_PORT"];
+		$dbuser = $json_data["DBSQLSVRCOOP_USERNAME"];
+		$dbpass = $json_data["DBSQLSVRCOOP_PASSWORD"];
+		$dbname = $json_data["DBSQLSVRCOOP_DATABASENAME"];
+		try{
+			$this->conmssqlcoop = new \PDO("sqlsrv:server=".$dbhost." ; Database = ".$dbname, $dbuser, $dbpass);
+			return $this->conmssqlcoop;
+		}catch(\Throwable $e){
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["INFO"] = $dbpass;
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To SQLServer";
+			return $arrayError;
+			http_response_code(200);
+			exit();
+		}
+	}	
 }
 ?>

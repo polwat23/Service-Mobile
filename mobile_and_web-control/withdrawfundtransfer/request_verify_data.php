@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$getTransactionForFee = $conmssql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
-													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
+													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(GETDATE())");
 		$getTransactionForFee->execute([
 			':member_no' => $payload["member_no"]
 		]);

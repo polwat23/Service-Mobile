@@ -5,17 +5,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllLoan = array();
-		$getSumAllContract = $conmssql->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE member_no = :member_no
-												and contract_status > 0 and contract_status <> 8");
+		$getSumAllContract = $conmssqlcoop->prepare("SELECT SUM(amount) as SUM_LOANBALANCE FROM coloanmember WHERE member_id = :member_no and status = 'A'");
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
-		$getContract = $conmssql->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,RTRIM(ln.LOANCONTRACT_NO) as LOANCONTRACT_NO,ln.principal_balance as LOAN_BALANCE,
-											ln.loanapprove_amt as APPROVE_AMT,ln.STARTCONT_DATE,ln.PERIOD_PAYMENT,ln.period_payamt as PERIOD,
-											ln.LAST_PERIODPAY as LAST_PERIOD,
-											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
-											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
+		$getContract = $conmssqlcoop->prepare("SELECT cd.description AS LOAN_TYPE , lm.doc_no AS LOANCONTRACT_NO, lm.amount AS APPROVE_AMT, (isnull(lm.amount,0) - isnull(lm.principal_actual,0)) as LOAN_BALANCE  ,  lm.principal_actual,	
+											(SELECT max(paydate)   FROM coreceipt WHERE loan_doc_no = lm.doc_no) as LAST_OPERATE_DATE,	
+											lm.startdate as STARTCONT_DATE,lm.totalseq as PERIOD, lm.amount_per_period as PERIOD_PAYMENT , lm.lastseq as LAST_PERIOD,
+											lm.HOLD , lm.HOLD_PRINCIPALONLY     	
+											FROM coloanmember lm LEFT JOIN cointerestrate_desc cd ON lm.Type = cd.Type	
+											where lm.status = 'A' AND lm.member_id = :member_no");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
@@ -29,7 +28,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 			$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 			$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+			if($rowContract["HOLD"] == "1"){
+				$arrContract["CONTRACT_STATUS"] = "พักชำระทั้งหมด";
+			}else if($rowContract["HOLD_PRINCIPALONLY"] == "1"){
+				$arrContract["CONTRACT_STATUS"] = "พักชำระเฉพาะเงินต้น";
+			}
+			
 			$arrGroupContract['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
+			
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;
 				$arrAllLoan[] = $arrGroupContract;

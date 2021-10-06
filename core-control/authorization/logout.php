@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','token'],$dataComing)){
-	$updateLogLogout = $conmssql->prepare("UPDATE coreuserlogin SET is_login = '0',logout_date = NOW() WHERE token = :token");
+	$updateLogLogout = $conmssql->prepare("UPDATE coreuserlogin SET is_login = '0',logout_date = GETDATE() WHERE token = :token");
 	$updateLogLogout->execute([
 		':token' => $dataComing["token"]
 	]);

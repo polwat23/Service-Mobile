@@ -6,22 +6,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		
 		$arrayGroupLoan = array();
-		$getUcollwho = $conmssql->prepare("SELECT
-											RTRIM(LCC.LOANCONTRACT_NO) AS LOANCONTRACT_NO,
-											LNTYPE.loantype_desc as TYPE_DESC,
-											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
-											LCM.MEMBER_NO AS MEMBER_NO,
-											ISNULL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT,
-											ISNULL(LCM.PRINCIPAL_BALANCE,0) as LOAN_BALANCE
-											FROM
-											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
-											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
-											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
-											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
-											WHERE
-											LCM.CONTRACT_STATUS > 0 and LCM.CONTRACT_STATUS <> 8
-											AND LCC.LOANCOLLTYPE_CODE = '01'
-											AND LCC.REF_COLLNO = :member_no");
+		$getUcollwho = $conmssqlcoop->prepare("select cl.doc_no  AS LOANCONTRACT_NO, 
+											lnr.description as TYPE_DESC,
+											cl.member_id_loan as MEMBER_NO,
+											lm.amount as LOANAPPROVE_AMT,
+											co.prefixname as PRENAME_DESC,
+											co.firstname  as MEMB_NAME, 
+											co.lastname as MEMB_SURNAME,
+											(isnull(lm.amount,0) - isnull(lm.principal_actual,0)) as LOAN_BALANCE 
+											from cocollateral cl   LEFT JOIN  coloanmember lm ON cl.doc_no = lm.doc_no  AND 
+											lm.doc_no = cl.doc_no 
+											LEFT JOIN cointerestrate_desc lnr ON lm.type = lnr.type 
+											LEFT JOIN cocooptation co ON cl.member_id_loan = co.member_id
+											where cl.member_id_col =  :member_no   and  lm.status ='A'
+											AND lm.Collateral_stock = 0 ");
 		$getUcollwho->execute([':member_no' => $member_no]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();

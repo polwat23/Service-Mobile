@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
-		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
+		$account_no = $dataComing["account_no"];
 		if(($dataComing["memo_text_emoji_"] == "" || empty($dataComing["memo_text_emoji_"])) && ($dataComing["memo_icon_path"] == "" || empty($dataComing["memo_icon_path"]))
 		&& $dataComing["memo_text_emoji_"] != "0"){
 			$arrayResult['RESPONSE_CODE'] = "WS4004";
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			':deptaccount_no' => $account_no,
 			':seq_no' => $dataComing["seq_no"]
 		]) && $updateMemoDept->rowCount() > 0){
-			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['RESULT'] = TRUE;		
 			require_once('../../include/exit_footer.php');
 		}else{
 			$insertMemoDept = $conmssql->prepare("INSERT INTO gcmemodept(memo_text,memo_icon_path,deptaccount_no,seq_no) 

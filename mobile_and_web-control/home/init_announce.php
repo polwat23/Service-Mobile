@@ -20,9 +20,9 @@ $fetchAnn = $conmssql->prepare("SELECT priority,announce_cover,announce_title,an
 												WHERE effect_date IS NOT NULL and 
 												((CASE WHEN priority = 'high' OR priority = 'ask'
 												THEN 
-													DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s')
+													DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(GETDATE(),'%Y-%m-%d %H:%i:%s')
 												ELSE   
-													DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') BETWEEN DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(due_date,'%Y-%m-%d %H:%i:%s')
+													DATE_FORMAT(GETDATE(),'%Y-%m-%d %H:%i:%s') BETWEEN DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(due_date,'%Y-%m-%d %H:%i:%s')
 												END ) OR first_time = :first_time) and flag_granted <> :flag_granted");
 $fetchAnn->execute([
 	':first_time' => $firstapp,

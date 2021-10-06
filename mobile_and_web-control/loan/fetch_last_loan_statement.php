@@ -11,13 +11,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conmssql->prepare("SELECT TOP 1 RTRIM(lnm.LOANCONTRACT_NO) as LOANCONTRACT_NO,lt.LOANTYPE_DESC AS LOAN_TYPE,lnm.principal_balance as LOAN_BALANCE,
-												lnm.loanapprove_amt as APPROVE_AMT,lnm.STARTCONT_DATE,lnm.PERIOD_PAYMENT,lnm.period_payamt as PERIOD,
-												LAST_PERIODPAY as LAST_PERIOD,lns.operate_date as LAST_OPERATE_DATE
-												from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
-												lnm.loancontract_no = lns.loancontract_no and lnm.coop_id = lns.coop_id LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-												WHERE lnm.member_no = :member_no and lnm.contract_status > 0 and lnm.contract_status <> 8
-												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC");
+		$fetchLastStmAcc = $conmssqlcoop->prepare("select TOP 1 lnm.doc_no AS LOANCONTRACT_NO ,  lt.description AS LOAN_TYPE,rec.principalbf AS LOAN_BALANCE,	
+														lnm.amount AS APPROVE_AMT,lnm.startdate AS STARTCONT_DATE,lnm.amount_per_period as PERIOD_PAYMENT,
+														lnm.totalseq as PERIOD, rec.paydate AS OPERATE_DATE , lnm.lastseq as LAST_PERIOD
+														from coloanmember lnm LEFT JOIN  coreceipt rec ON lnm.doc_no  = rec.loan_doc_no
+														LEFT JOIN cointerestrate_desc lt ON lnm.type = lt.type	
+														where lnm.member_id = :member_no  AND  lnm.status = 'A' ORDER BY rec.paydate DESC");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
@@ -34,26 +33,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO > 0";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and rec.LOAN_SEQ > ".$dataComing["old_seq_no"] : "and rec.LOAN_SEQ > 0";
 			}else{
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and rec.LOAN_SEQ < ".$dataComing["old_seq_no"] : "and rec.LOAN_SEQ < 999999";
 			}
 		}else{
 			$rownum = 999999;
-			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and rec.LOAN_SEQ < ".$dataComing["old_seq_no"] : "and rec.LOAN_SEQ < 999999";
 		}
-		$getStatement = $conmssql->prepare("SELECT TOP ".$rownum." lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.OPERATE_DATE,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as LOAN_BALANCE
-											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
-											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
-											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
-											BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :datenow, 23) ".$old_seq_no." 
-											ORDER BY lsm.SEQ_NO DESC");
-		$getStatement->execute([
-			':contract_no' => $contract_no,
-			':datebefore' => $date_before,
-			':datenow' => $date_now
-		]);
+		$getStatement = $conmssqlcoop->prepare("select TOP ".$rownum."  rct.description  AS TYPE_DESC,rec.paydate AS OPERATE_DATE,	
+													rec.principal AS PRN_PAYMENT,rec.loan_seq AS SEQ_NO,rec.interest AS INT_PAYMENT,rec.principalbf AS LOAN_BALANCE	
+													from coreceipt rec LEFT JOIN coreceipttype rct ON rec.type = rct.type	
+													where rec.loan_doc_no = ? and rec.paydate BETWEEN CONVERT(varchar, ? , 23) and CONVERT(varchar, ? , 23) ".$old_seq_no."	
+													ORDER BY rec.loan_seq DESC");
+		$getStatement->execute([$contract_no, $date_before,$date_now]);
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];

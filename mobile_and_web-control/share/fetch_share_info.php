@@ -1,16 +1,16 @@
 <?php
-require_once('../autoload.php');
+require_once('../autoload.php'); 
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getSharemasterinfo = $conmssql->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,SHAREBEGIN_AMT
-													FROM shsharemaster WHERE member_no = :member_no");
+		$getSharemasterinfo = $conmssqlcoop->prepare("SELECT (member_stock * 10) as SHARE_AMT, begin_value as PERIOD_SHARE_AMT
+															  FROM cocooptation WHERE member_id = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
-			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
+			//$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
 			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
 			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
 			$limit = $func->getConstant('limit_stmshare');
@@ -25,16 +25,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$date_now = date('Y-m-d');
 			}
-			$getShareStatement = $conmssql->prepare("SELECT stm.OPERATE_DATE,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
-														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.SHRITEMTYPE_DESC,stm.PERIOD,stm.REF_SLIPNO
-														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
-														WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.OPERATE_DATE
-														BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :datenow, 23) ORDER BY stm.seq_no DESC");
-			$getShareStatement->execute([
-				':member_no' => $member_no,
-				':datebefore' => $date_before,
-				':datenow' => $date_now
-			]);
+			$getShareStatement = $conmssqlcoop->prepare("SELECT stm.paydate as OPERATE_DATE,(stm.stock * 10) as PERIOD_SHARE_AMOUNT,
+														stm.stock_onhand as SUM_SHARE_AMT,crt.description as SHRITEMTYPE_DESC,stm.receipt_no as REF_SLIPNO
+														FROM coreceipt stm LEFT JOIN coReceiptType crt ON stm.type = crt.type
+														WHERE stm.member_id = ? and stm.type  = '10'  and stm.status ='2'
+														and stm.paydate BETWEEN CONVERT(varchar, ? , 23) and CONVERT(varchar, ? , 23) 
+														ORDER BY stm.paydate DESC");
+			$getShareStatement->execute([$member_no, $date_before,$date_now]);
 			while($rowStm = $getShareStatement->fetch(PDO::FETCH_ASSOC)){
 				$arrayStm = array();
 				$arrayStm["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
