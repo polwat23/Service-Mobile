@@ -1,22 +1,26 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','moratorium_docno'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Moratorium')){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Election')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$insertSchShipOnlineDoc = $conoracle->prepare("update lnreqmoratorium set request_status = '-9', cancel_id = :member_no, cancel_date = sysdate where coop_id = '000000' and MORATORIUM_DOCNO = :moratorium_docno");
-		if($insertSchShipOnlineDoc->execute([
-			':member_no' => $member_no,
-			':moratorium_docno' => $dataComing["moratorium_docno"]
-		])){
+		$checkElection = $conoracle->prepare("SELECT NVL(POST_NO,'-99') as POST_NO FROM MBMEMBELECTION WHERE ELECTION_YEAR = EXTRACT(YEAR FROM SYSDATE) + 543 AND MEMBER_NO = :member_no");
+		$checkElection->execute([':member_no' => $member_no]);
+		$rowElection = $checkElection->fetch(PDO::FETCH_ASSOC);
+		if($rowElection["POST_NO"] == '-99' || $payload["member_no"] == 'etnmode2'){
+			$arrOption = array();
+			$arrOption[0]["LABEL"] = "สรรหาบนระบบออนไลน์";
+			$arrOption[0]["VALUE"] = "3";
+			$arrayResult['OPTION_WISH'] = $arrOption;
+			$arrayResult['HEADER_ELECTION'] = "แจ้งความประสงค์ในการสรรหา";
 			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['REMARK'] = "เมื่อท่านสมาชิกลงทะเบียนการสรรหาทางอิเล็กทรอนิกส์ (E-VOTE) แล้ว ไม่สามารถเปลี่ยนเป็นวิธีการอื่นได้";
 			require_once('../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS1041";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESPONSE_CODE'] = "WS0000";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError["ELECTION"][0]["ELECTION_NOTFOUND"][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

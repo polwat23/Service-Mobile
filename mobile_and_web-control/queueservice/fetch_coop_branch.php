@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'QueueService')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$checkNotHavePause = FALSE;
+		$checkNotHavePause = TRUE;
 		$checkNotLoan = TRUE;
 		$checkLoan = $conoracle->prepare("SELECT LOANCONTRACT_NO FROM LNCONTMASTER 
 															WHERE CONTRACT_STATUS = 1 AND 
@@ -12,15 +12,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$checkLoan->execute([':member_no' => $member_no]);
 		while($rowLoan = $checkLoan->fetch(PDO::FETCH_ASSOC)){
 			$checkPause = $conoracle->prepare("SELECT LOANCONTRACT_NO FROM lnreqmoratorium WHERE loancontract_no = :contract_no and request_status = '1' 
-															and request_date between to_date('01012021','ddmmyyyy') and to_date('30042021','ddmmyyyy') ");
+															and request_date between to_date('01072021','ddmmyyyy') and to_date('31122021','ddmmyyyy') ");
 			$checkPause->execute([
 				':contract_no' => $rowLoan["LOANCONTRACT_NO"]
 			]);
 			$rowPause = $checkPause->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowPause["LOANCONTRACT_NO"]) && $rowPause["LOANCONTRACT_NO"] != ""){
-				$checkNotHavePause = TRUE;
-			}else{
 				$checkNotHavePause = FALSE;
+			}else{
+				$checkNotHavePause = TRUE;
 			}
 			$checkNotLoan = FALSE;
 		}

@@ -3,37 +3,25 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','reqloan_doc'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestTrack')){
-		$getIsCancel = $conmysql->prepare("SELECT req_status FROM gcreqloan WHERE reqloan_doc  = :reqloan_doc");
-		$getIsCancel->execute([':reqloan_doc' => $dataComing["reqloan_doc"]]);
-		$rowCancel = $getIsCancel->fetch(PDO::FETCH_ASSOC);
-		if($rowCancel["req_status"] == '8'){
-			$cancelReq = $conmysql->prepare("UPDATE gcreqloan SET req_status = '9' WHERE reqloan_doc  = :reqloan_doc");
-			if($cancelReq->execute([':reqloan_doc' => $dataComing["reqloan_doc"]])){
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$filename = basename(__FILE__, '.php');
-				$logStruc = [
-					":error_menu" => $filename,
-					":error_code" => "WS1037",
-					":error_desc" => "ยกเลิกใบคำขอกู้ไม่ได้เพราะไม่สามารถ Update ลง gcreqloan ได้"."\n"."Query => ".$cancelReq->queryString."\n"."Param => ". json_encode([':reqloan_doc' => $dataComing["reqloan_doc"]]),
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-				];
-				$log->writeLog('errorusage',$logStruc);
-				$message_error = "ยกเลิกใบคำขอกู้ไม่ได้เพราะไม่สามารถ Update ลง gcreqloan ได้"."\n"."Query => ".$cancelReq->queryString."\n"."Param => ". json_encode([':reqloan_doc' => $dataComing["reqloan_doc"]]);
-				$lib->sendLineNotify($message_error);
-				$arrayResult['RESPONSE_CODE'] = "WS1037";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
+		$cancelReq = $conoracle->prepare("UPDATE lnreqloan SET loanrequest_status = '-9',cancel_id = 'MobileApp',cancel_date = sysdate WHERE loanrequest_docno  = :reqloan_doc");
+		if($cancelReq->execute([':reqloan_doc' => $dataComing["reqloan_doc"]])){
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0083";
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1037",
+				":error_desc" => "ยกเลิกใบคำขอกู้ไม่ได้เพราะไม่สามารถ Update ลง gcreqloan ได้"."\n"."Query => ".$cancelReq->queryString."\n"."Param => ". json_encode([':reqloan_doc' => $dataComing["reqloan_doc"]]),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ยกเลิกใบคำขอกู้ไม่ได้เพราะไม่สามารถ Update ลง gcreqloan ได้"."\n"."Query => ".$cancelReq->queryString."\n"."Param => ". json_encode([':reqloan_doc' => $dataComing["reqloan_doc"]]);
+			$lib->sendLineNotify($message_error);
+			$arrayResult['RESPONSE_CODE'] = "WS1037";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

@@ -30,10 +30,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}else if($rowDataDeposit["bank_code"] == '004'){
 			$vccAccID = $func->getConstant('map_account_id_kbank');
 		}
-		$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNOMBA',$lib);
 		$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
 		$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNOMBA'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 		$conoracle->beginTransaction();
 		$conmysql->beginTransaction();

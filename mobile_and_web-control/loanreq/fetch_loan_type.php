@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowLoantype = $getLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();
 			$arrayLoan["LOANTYPE_CODE"] = $rowLoantype["loantype_code"];
-			$getLoanTypeData = $conoracle->prepare("SELECT ln.LOANTYPE_CODE,lnt.interest_rate,ln.LOANTYPE_DESC
+			$getLoanTypeData = $conoracle->prepare("SELECT ln.LOANTYPE_CODE,lnt.INTEREST_RATE*100 as INT_RATE,ln.LOANTYPE_DESC
 																		FROM lnloantype ln LEFT JOIN lncfloanintratedet lnt ON ln.inttabrate_code = lnt.loanintrate_code
 																		and sysdate BETWEEN lnt.effective_date and lnt.expire_date
 																		WHERE ln.loantype_code = :loantype_code");
@@ -23,6 +23,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		$arrayResult['LOAN_TYPE'] = $arrayGrpLoan;
+		$arrayResult['SKIP_PAGE'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

@@ -121,6 +121,7 @@
 	"WS0118" : [{"th" : "ไม่สามารถจองคิวยกเลิกพักชำระหนี้ได้ เนื่องจากท่านไม่มีการพักชำระหนี้","en" : "Cannot reserve the queue for cancel moratorium because you have no moratorium"}],
 	"WS0119" : [{"th" : "ไม่พบสัญญาที่สามารถยกเลิกพักชำระหนี้","en" : "Not found loan contract that can cancel moratorium"}],
 	"WS0121" : [{"th" : "เลขบัตรประจำตัวประชาชนนี้ไม่สามารถเพิ่มได้อีก กรุณาตรวจสอบและลองใหม่อีกครั้ง","en" : "This ID card number cannot be added any more. Please check and try again."}],
+	"WS0123" : [{"th" : "ท่านทำรายการขอกู้ต่ำกว่าจำนวนขั้นต่ำ ขั้นต่ำที่สามารถทำรายการได้ ${minrequest_loan_amt} บาท กรุณาตรวจสอบยอดทำรายการอีกครั้ง","en" : "Amount loan request is lower than define lowest allow request loan is ${minrequest_loan_amt} baht"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -237,12 +238,19 @@
 			}]
 		}],
 		"REQ_LOAN_STATUS" : [{
-			"8" : [{"th" : "รอลงรับ","en" : "Wait for accept"}],
+			"8" : [{"th" : "รออนุมัติ","en" : "Wait for accept"}],
 			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
-			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
+			"-9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}],
 			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
 			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
 		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
-		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}]
+		"SPEC_REMARK" : [{"th" : "ข้าพเจ้าตกลงยินยอมชำระต้นเงินกู้พร้อมดอกเบี้ยเพียงงวดเดียว จากเงินปันผลและเฉลี่ยคืน ประจำปี 2564 ในวันที่สหกรณ์กำหนด","en" : "ข้าพเจ้าตกลงยินยอมชำระต้นเงินกู้พร้อมดอกเบี้ยเพียงงวดเดียว จากเงินปันผลและเฉลี่ยคืน ประจำปี 2564 ในวันที่สหกรณ์กำหนด"}],
+		"ELECTION" : [{
+			"ELECTION_3" : [{"th" : "ท่านได้ลงทะเบียนแจ้งความประสงค์ในการสรรหาบนระบบออนไลน์เรียบร้อยแล้ว","en" : "You were registered for election by online system"}],
+			"ELECTION_2" : [{"th" : "ท่านได้ลงทะเบียนแจ้งความประสงค์ในการสรรหาบนระบบไปรษณีย์เรียบร้อยแล้ว","en" : "You were registered for election by post system"}],
+			"ELECTION_ERR" : [{"th" : "เกิดข้อผิดพลาดไม่สามารถลงทะเบียนแจ้งความประสงค์ในการสรรหาได้ กรุณาติดต่อสหกรณ์","en" : "Something was wronged that cannot register election online please contact cooperative"}],
+			"ELECTION_KEYCODE_WRONG" : [{"th": "รหัสผ่านสำหรับการสรรหาไม่ถูกต้อง กรุณาลองใหม่อีกคร้ง","en" : "Password for election online was wronged please try again"}],
+			"ELECTION_NOTFOUND" : [{"th" : "ไม่พบรายชื่อของท่านในการสรรหาออนไลน์","en" : "You do not have permission for election online"}]
+		}]
 }

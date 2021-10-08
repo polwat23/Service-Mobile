@@ -440,6 +440,16 @@ if(!$anonymous){
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep ?? [];
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan ?? [];
 				}
+				$checkElection = $conoracle->prepare("SELECT NVL(POST_NO,'-99') as POST_NO FROM MBMEMBELECTION WHERE ELECTION_YEAR = EXTRACT(YEAR FROM SYSDATE) + 543 AND MEMBER_NO = :member_no");
+				$checkElection->execute([':member_no' => $payload["member_no"]]);
+				$rowElec = $checkElection->fetch(PDO::FETCH_ASSOC);
+				if($rowElec["POST_NO"] == '-99' || $payload["member_no"] == 'etnmode2'){
+					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = TRUE;
+					$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+				}else{
+					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
+					$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+				}
 				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);

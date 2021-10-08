@@ -1,80 +1,52 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','loanpermit_amt'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		try{
 			$clientWS = new SoapClient($config["URL_LOAN"]);
 			try {
 				$argumentWS = [
-					"member_no" => $member_no,
-					"ItemAmt" => $dataComing["request_amt"],
-					"deptaccount_no" => $dataComing["deptaccount_no_coop"]
+					"member_no" => $member_no
 				];
-				$resultWS = $clientWS->__call("RqDividenPayment", array($argumentWS));
-				$respWS = $resultWS->RqDividenPaymentResult;
+				$resultWS = $clientWS->__call("RqDividenInquiry", array($argumentWS));
+				$respWS = $resultWS->RqDividenInquiryResult;
 				if($respWS->responseCode == '00'){
-					$reqloan_doc = $respWS->loanrequest_docno;
-					$dataComing["period"] = 0;
-					$dataComing["period_payment"] = 0;
-					$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																			int_rate_at_req,salary_at_req,id_userlogin)
-																			VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate,:salary,:id_userlogin)");
-					if($InsertFormOnline->execute([
-						':reqloan_doc' => $reqloan_doc,
-						':member_no' => $payload["member_no"],
-						':loantype_code' => $dataComing["loantype_code"],
-						':request_amt' => $dataComing["request_amt"],
-						':period_payment' => $dataComing["period_payment"],
-						':period' => $dataComing["period"],
-						':loanpermit_amt' => $dataComing["loanpermit_amt"],
-						':int_rate' => $dataComing["int_rate"] / 100,
-						':salary' => null,
-						':id_userlogin' => $payload["id_userlogin"]
-					])){
-						$arrayResult['SHOW_SLIP'] = TRUE;
-						$arrayResult['APV_DOCNO'] = $reqloan_doc;
-						$arrayResult['RESULT'] = TRUE;
-						require_once('../../include/exit_footer.php');
-					}else{
+					if($dataComing["request_amt"] < $respWS->minrequest_amt){
 						$filename = basename(__FILE__, '.php');
 						$logStruc = [
 							":error_menu" => $filename,
-							":error_code" => "WS1036",
-							":error_desc" => "ขอกู้ไม่ได้เพราะ Insert ลงตาราง gcreqloan ไม่ได้"."\n"."Query => ".$InsertFormOnline->queryString."\n"."Param => ". json_encode([
-								':reqloan_doc' => $reqloan_doc,
-								':member_no' => $payload["member_no"],
-								':loantype_code' => $dataComing["loantype_code"],
-								':request_amt' => $dataComing["request_amt"],
-								':period_payment' => $dataComing["period_payment"],
-								':period' => $dataComing["period"],
-								':loanpermit_amt' => $dataComing["loanpermit_amt"],
-								':int_rate' => $dataComing["int_rate"] / 100,
-								':salary' => null,
-								':id_userlogin' => $payload["id_userlogin"]
-							]),
+							":error_code" => "WS0123",
+							":error_desc" => json_encode($respWS),
 							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 						];
 						$log->writeLog('errorusage',$logStruc);
-						$message_error = "ขอกู้ไม่ได้เพราะ Insert ลง gcreqloan ไม่ได้"."\n"."Query => ".$InsertFormOnline->queryString."\n"."Param => ". json_encode([
-							':reqloan_doc' => $reqloan_doc,
-							':member_no' => $payload["member_no"],
-							':loantype_code' => $dataComing["loantype_code"],
-							':request_amt' => $dataComing["request_amt"],
-							':period_payment' => $dataComing["period_payment"],
-							':period' => $dataComing["period"],
-							':loanpermit_amt' => $dataComing["loanpermit_amt"],
-							':int_rate' => $dataComing["int_rate"] / 100,
-							':salary' => null,
-							':id_userlogin' => $payload["id_userlogin"]
-						]);
-						$lib->sendLineNotify($message_error);
-						$arrayResult['RESPONSE_CODE'] = "WS1036";
+						$arrayResult["RESPONSE_CODE"] = 'WS0123';
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
-						
+					}else{
+						if($dataComing["request_amt"] > $respWS->loancredit_amt){
+							$filename = basename(__FILE__, '.php');
+							$logStruc = [
+								":error_menu" => $filename,
+								":error_code" => "WS0084",
+								":error_desc" => json_encode($respWS),
+								":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+							];
+							$log->writeLog('errorusage',$logStruc);
+							$arrayResult["RESPONSE_CODE"] = 'WS0084';
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}else{
+							$arrayResult['REQUEST_AMT'] = $dataComing["request_amt"];
+							$arrayResult['RECEIVE_AMT'] = $dataComing["request_amt"];
+							$arrayResult['RESULT'] = TRUE;
+							require_once('../../include/exit_footer.php');
+
+						}
 					}
 				}else{
 					$filename = basename(__FILE__, '.php');
@@ -128,6 +100,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 		}
+		$arrayResult['RESULT'] = TRUE;
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

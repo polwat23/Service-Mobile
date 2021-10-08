@@ -26,12 +26,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					if($rowStatus["REQUEST_STATUS"] == '-1'){
 						$arrChild["REMARK"] = $rowStatus["CANCEL_REMARK"];
+						$arrChild['REQUEST_STATUS_COLOR'] = "#FF0000";
+						
+					}
+					if($rowStatus["REQUEST_STATUS"] == '9'){
+						$arrChild['REQUEST_STATUS_COLOR'] = "#FF6000";
 					}
 					$arrChild['REQUEST_STATUS'] = $rowStatus["REQUEST_STATUS"];
 					$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["REQUEST_STATUS"][0][$rowStatus["REQUEST_STATUS"]][0][$lang_locale];
 				}
 				$checkChildHaveThisYear = $conoracle->prepare("SELECT NVL(APPROVE_STATUS,8) as APPROVE_STATUS, ASNREQUEST_DOCNO
-																FROM ASNREQSCHOLARSHIP WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and childcard_id = :childcard_id");
+																FROM ASNREQSCHOLARSHIP WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and childcard_id = :childcard_id and  NVL(APPROVE_STATUS,8) > 0");
 				$checkChildHaveThisYear->execute([':childcard_id' => $rowChildAdd["CHILDCARD_ID"]]);
 				$rowChildThisYear = $checkChildHaveThisYear->fetch(PDO::FETCH_ASSOC);
 				

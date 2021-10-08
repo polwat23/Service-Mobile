@@ -45,28 +45,62 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
-			$arrayDest["member_no"] = $member_no;
-			$arrayDest["tel"] = $arrayTel[0]["TEL"];
-			$arrayDest["message"] = $arrMessage["BODY"];
-			$arraySendSMS = $lib->sendSMS($arrayDest);
-			if($arraySendSMS["RESULT"]){
-				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
-				$conmysql->commit();
-				$arrayResult['REFERENCE_OTP'] = $reference;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
+			if($dataComing["menu_component"] == "Election"){
+				$arrVerifyToken['exp'] = time() + 300;
+				$arrVerifyToken['action'] = "sendmsg";
+				$arrVerifyToken["mode"] = "eachmsg";
+				$arrVerifyToken['typeMsg'] = 'OTP';
+				$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
+				$arrMsg[0]["msg"] = $arrMessage["BODY"];
+				$arrMsg[0]["to"] = $arrayTel[0]["TEL"];
+				$arrSendData["dataMsg"] = $arrMsg;
+				$arrSendData["custId"] = 'mhd';
+				$arrHeader[] = "version: v1";
+				$arrHeader[] = "OAuth: Bearer ".$verify_token;
+				$arraySendSMS = $lib->posting_data($config["URL_SMS_ELECTION"].'/navigator',$arrSendData,$arrHeader);
+				//$arraySendSMS = json_decode($responseAPI);
+				if($arraySendSMS["result"]){
+					$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
+					$conmysql->commit();
+					$arrayResult['REFERENCE_OTP'] = $reference;
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
+				}else{
+					$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
+							'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log'".json_encode($arraySendSMS).",'system',null)";
+					$func->logSMSWasNotSent($bulkInsert);
+					unset($bulkInsert);
+					$bulkInsert = array();
+					$conmysql->rollback();
+					$arrayResult['RESPONSE_CODE'] = "WS0018";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
 			}else{
-				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
-						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log'".json_encode($arraySendSMS).",'system',null)";
-				$func->logSMSWasNotSent($bulkInsert);
-				unset($bulkInsert);
-				$bulkInsert = array();
-				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0018";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
+				$arrayDest["member_no"] = $member_no;
+				$arrayDest["tel"] = $arrayTel[0]["TEL"];
+				$arrayDest["message"] = $arrMessage["BODY"];
+				$arraySendSMS = $lib->sendSMS($arrayDest);
+				if($arraySendSMS["RESULT"]){
+					$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
+					$conmysql->commit();
+					$arrayResult['REFERENCE_OTP'] = $reference;
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
+				}else{
+					$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
+							'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log'".json_encode($arraySendSMS).",'system',null)";
+					$func->logSMSWasNotSent($bulkInsert);
+					unset($bulkInsert);
+					$bulkInsert = array();
+					$conmysql->rollback();
+					$arrayResult['RESPONSE_CODE'] = "WS0018";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+					
+				}
 			}
 		}else{
 			$conmysql->rollback();

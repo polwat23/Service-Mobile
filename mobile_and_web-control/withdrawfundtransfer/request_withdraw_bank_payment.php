@@ -62,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNOMBA',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		if($fee_amt > 0){
 			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		}
 		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
-		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNOMBA'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
 		$conoracle->beginTransaction();

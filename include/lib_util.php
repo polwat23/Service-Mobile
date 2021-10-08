@@ -262,7 +262,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'zcs1.bestinternet.co.th';
+		$mailFunction->Host = 'mx1.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -273,7 +273,7 @@ class library {
 		$mailFunction->Hostname = 'gensoft.co.th';
 		$mailFunction->Helo = 'Gensoft-Mail';
 		$mailFunction->Encoding = 'quoted-printable';
-		$mailFunction->setFrom("coop-noreply@gensoft.co.th", $json_data["NAME_APP"]);
+		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;

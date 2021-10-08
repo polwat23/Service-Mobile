@@ -8,10 +8,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$to_deptaccount_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
 		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WAP');
 		if($arrInitDep["RESULT"]){
-			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
-			if($arrRightDep["RESULT"]){
-				$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
-				if($arrRightDeposit["RESULT"]){
+			//$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
+			//if($arrRightDep["RESULT"]){
+				//$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
+				//if($arrRightDeposit["RESULT"]){
 					$checkSeqAmt = $cal_dep->getSequestAmt($to_deptaccount_no,'DAP');
 					if($checkSeqAmt["CAN_DEPOSIT"]){
 						if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 					}
-				}else{
+				/*}else{
 					$arrayResult['RESPONSE_CODE'] = $arrRightDeposit["RESPONSE_CODE"];
 					if($arrRightDeposit["RESPONSE_CODE"] == 'WS0056'){
 						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDeposit["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
@@ -39,8 +39,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					}
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-				}
-			}else{
+				}*/
+			/*}else{
 				$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
 				if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
 					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				}
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-			}
+			}*/
 		}else{
 			$arrayResult['RESPONSE_CODE'] = $arrInitDep["RESPONSE_CODE"];
 			if($arrInitDep["RESPONSE_CODE"] == 'WS0056'){

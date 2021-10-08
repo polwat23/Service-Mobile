@@ -1,22 +1,20 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','moratorium_docno'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Moratorium')){
+if($lib->checkCompleteArgument(['menu_component','keycode'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Election')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$insertSchShipOnlineDoc = $conoracle->prepare("update lnreqmoratorium set request_status = '-9', cancel_id = :member_no, cancel_date = sysdate where coop_id = '000000' and MORATORIUM_DOCNO = :moratorium_docno");
-		if($insertSchShipOnlineDoc->execute([
-			':member_no' => $member_no,
-			':moratorium_docno' => $dataComing["moratorium_docno"]
-		])){
+		$checkKeycode = $conmysql->prepare("SELECT keycode FROM logregisterelection WHERE member_no = :member_no ORDER BY register_date DESC");
+		$checkKeycode->execute([':member_no' => $payload["member_no"]]);
+		$rowKeycode = $checkKeycode->fetch(PDO::FETCH_ASSOC);
+		if($rowKeycode["keycode"] == $dataComing["keycode"]){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS1041";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESPONSE_CODE'] = "EC0002";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError["ELECTION"][0]["ELECTION_KEYCODE_WRONG"][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
