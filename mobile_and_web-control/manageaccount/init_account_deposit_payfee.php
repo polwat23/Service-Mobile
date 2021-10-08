@@ -10,12 +10,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '10'");
 		$getDepositAcc->execute([':member_no' => $member_no]);
 		while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
-			$arrAccFee = array();
-			$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-			$arrAccFee['ACCOUNT_NAME'] = TRIM($rowDepAcc["DEPTACCOUNT_NAME"]);
-			$arrAccFee['BALANCE'] = number_format($rowDepAcc["PRNCBAL"],2);
-			$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
-			$arrGrpAccFee[] = $arrAccFee;
+			$checkAccJoint = $conmysql->prepare("SELECT deptaccount_no FROM gcdeptaccountjoint WHERE deptaccount_no = :deptaccount_no and is_joint = '1'");
+			$checkAccJoint->execute([':deptaccount_no' => TRIM($rowDepAcc["DEPTACCOUNT_NO"])]);
+			if($checkAccJoint->rowCount() > 0){
+			}else{
+				$arrAccFee = array();
+				$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccFee['ACCOUNT_NAME'] = TRIM($rowDepAcc["DEPTACCOUNT_NAME"]);
+				$arrAccFee['BALANCE'] = number_format($rowDepAcc["PRNCBAL"],2);
+				$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
+				$arrGrpAccFee[] = $arrAccFee;
+			}
 		}
 		$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
 		$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;

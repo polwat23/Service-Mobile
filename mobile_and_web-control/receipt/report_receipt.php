@@ -264,7 +264,7 @@ function GenerateReport($dataReport,$header,$lib){
 					color: #70ad47;
 				}
 			</style>
-		<div style="width:12.5cm; height:14cm; border:1px solid #eee;">
+		<div style="width:12.5cm; height:14cm;">
 			<div>
 				 <div style="text-align: center;">
 					<div style="display: inline-block;vertical-align: top;position: absolute;left: 10px;">
@@ -378,7 +378,7 @@ function GenerateReport($dataReport,$header,$lib){
 	$html .= '<div class="theme-color" style="margin-top: 16px;position: relative;white-space: nowrap;">
 						ผู้จัดการ / เหรัญญิก ................................................................................ เจ้าหน้าที่ผู้รับเงิน ............................................................................
 					<img src="../../resource/utility_icon/signature/mg.jpg" height="20" style="margin-top:10px;position: absolute;left: 90px;top: -20px;"/>
-					<img src="../../resource/utility_icon/signature/mg_temp.jpg" height="20" style="margin-top:10px;position: absolute;left: 330px;top: -20px;"/>
+					<img src="../../resource/utility_icon/signature/mg_temp.jpg" height="22" style="margin-top:10px;position: absolute;left: 330px;top: -22px;"/>
                 </div>
                 <div style="margin-top: 12px; border: 2px solid #70ad47; background-color: #c5e0b3;border-radius: 10px;height: 70px;">
 

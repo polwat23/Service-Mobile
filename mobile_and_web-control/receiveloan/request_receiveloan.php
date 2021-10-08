@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 		}
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-		$ref_no = date('YmdHis').substr($deptaccount_no,-3);
+		$ref_no = time().$lib->randomText('all',3);
 		$constFromAcc = $cal_dep->getConstantAcc($deptaccount_no);
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
 		$destvcid = $cal_dep->getVcMapID($dataCont["LOANTYPE_CODE"],'LON');
@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	coop_slip_no,id_userlogin,ref_no_source)
-																	VALUES(:ref_no,'DAP',:from_account,:destination,'4',:amount,:penalty_amt,:amount_receive,'1',
+																	VALUES(:ref_no,'DAP',:from_account,:destination,'4',:amount,:penalty_amt,:amount_receive,'-1',
 																	:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,

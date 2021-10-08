@@ -7,30 +7,27 @@ $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $receive_net = 0;
-$maxloanpermit_amt = 100000;
-$max_period = 12;
+$maxloanpermit_amt = 3000000;
+$max_period = 264;
 $canRequest = FALSE;
-$getTempEmp = $conmssql->prepare("select * from mbmembmaster where member_no = '00002012' and RTRIM(LTRIM(membgroup_code)) in('ล.ชั่วคราว','เกษียณ','ล.ผลิต','ล.อธิการบด')");
-$getTempEmp->execute([':member_no' => $member_no]);
-$rowTempEmp = $getTempEmp->fetch(PDO::FETCH_ASSOC);
-
-$getSalary = $conmssql->prepare("SELECT SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
+$getSalary = $conmssql->prepare("SELECT SALARY_AMOUNT,MEMBER_DATE FROM mbmembmaster WHERE member_no = :member_no");
 $getSalary->execute([':member_no' => $member_no]);
 $rowSalary = $getSalary->fetch(PDO::FETCH_ASSOC);
+$member_age = $lib->count_duration($rowSalary["MEMBER_DATE"],"m");
+$rowSalary = $rowSalary["SALARY_AMOUNT"];
 
-if(isset($rowTempEmp["MEMBER_NO"])){
-	$maxloanpermit_amt = 50000;
-	
-	$getShare = $conmssql->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,SHAREBEGIN_AMT
-													FROM shsharemaster WHERE member_no = :member_no");
-	$getShare->execute([':member_no' => $member_no]);
-	$rowShare = $getShare->fetch(PDO::FETCH_ASSOC);
-	$arrMin[] = $rowShare["SHARE_AMT"] * 0.9;
+if($member_age > 36){
+	$maxloan_amt = $rowSalary  * 80;
+}else if($member_age > 24){
+	$maxloan_amt = $rowSalary  * 70;
+}else if($member_age > 15){
+	$maxloan_amt = $rowSalary  * 50;
+}else if($member_age > 3){
+	$maxloan_amt = $rowSalary  * 36;
 }
-
-$arrMin[] = $rowSalary["SALARY_AMOUNT"] * 3;
-$arrMin[] = $maxloanpermit_amt;
-$maxloan_amt = min($arrMin);
+if($maxloan_amt > $maxloanpermit_amt){
+	$maxloan_amt = $maxloanpermit_amt;
+}
 
 
 $getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY 

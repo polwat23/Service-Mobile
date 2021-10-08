@@ -46,6 +46,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 			if($wtdResult["RESULT"]){
 				if($dataComing["penalty_amt"] > 0){
+					$constFromAcc["PRNCBAL"] = $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"];
+					$constFromAcc["WITHDRAWABLE_AMT"] = $constFromAcc["WITHDRAWABLE_AMT"] - $dataComing["amt_transfer"];
 					$vccamtPenalty = $cal_dep->getVcMapID('00','DEP','FEE');
 					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty["ACCOUNT_ID"],'FMB',
 					$dataComing["amt_transfer"],$dataComing["penalty_amt"],$dateOperC,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAcc);

@@ -123,6 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}else{
 					$prn_amount = $pay_period;
 				}
+				$prn_amount = floor($prn_amount + (10 - ($prn_amount % 10)));
 				$periodPayment = $prn_amount + $period_int;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
@@ -216,11 +217,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => " Argument ú "."\n".json_encode($dataComing),
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = " ".$filename."  Argument ú "."\n".json_encode($dataComing);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

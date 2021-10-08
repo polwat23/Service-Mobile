@@ -107,9 +107,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 								$arrayResult['RESULT'] = FALSE;
 								require_once('../../include/exit_footer.php');
 							}
-							$vccamtPenalty = $func->getConstant("accidfee_promotion");
+							$vccamtPenalty = $func->getConstant("accidfee_receive");
 							$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FDM',
-							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee);
+							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,$rowCountFee["C_TRANS"] + 1);
 							if($penaltyWtd["RESULT"]){
 								
 							}else{
@@ -135,7 +135,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 						if($rowBankDisplay["fee_deposit"] > 0){
 							$vccamtPenaltyDepPromo = $func->getConstant("accidfee_promotion");
 							$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$rowBankDisplay["account_payfee"],$vccamtPenaltyDepPromo,'FDM',
-							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee);
+							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,$rowCountFee["C_TRANS"] + 1);
 							if($penaltyWtdPromo["RESULT"]){
 								
 							}else{
@@ -206,7 +206,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 																	destination,transfer_mode
 																	,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	etn_refno,id_userlogin,ref_no_source,bank_code)
-																	VALUES(:ref_no,:slip_type,:from_account,'9',:destination,'2',:amount,:fee_amt,
+																	VALUES(:ref_no,:slip_type,:from_account,'3',:destination,'9',:amount,:fee_amt,
 																	:amount_receive,'1',:operate_date,'1',:member_no,:etn_refno,:id_userlogin,:ref_no_source,:bank_code)");
 						$insertTransactionLog->execute([
 							':ref_no' => $ref_no,
@@ -215,7 +215,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 							':destination' => $dataComing["contract_no"],
 							':amount' => $dataComing["amt_transfer"],
 							':fee_amt' => $dataComing["fee_amt"],
-							':amount_receive' => $dataComing["amt_transfer"] - $dataComing["fee_amt"],
+							':amount_receive' => $dataComing["amt_transfer"],
 							':operate_date' => $dateOperC,
 							':member_no' => $payload["member_no"],
 							':etn_refno' => $etn_ref,

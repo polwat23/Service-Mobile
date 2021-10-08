@@ -11,6 +11,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getBalanceMaster = $conmssql->prepare("SELECT CONVERT(VARCHAR(10),MAX(BALANCE_DATE),23) as BALANCE_DATE FROM YRCONFIRMMASTER WHERE member_no = :member_no");
 		$getBalanceMaster->execute([':member_no' => $member_no]);
 		$rowBalMaster = $getBalanceMaster->fetch(PDO::FETCH_ASSOC);
+		
+		$getBalStatus = $conmysql->prepare("SELECT confirm_status FROM confirm_balance WHERE member_no = :member_no and balance_date = :balance_date and confirm_status  in ('1','0') ");
+		$getBalStatus->execute([
+			':member_no' => $member_no,
+			':balance_date' => date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]))
+		]);
+		$rowBalStatus = $getBalStatus->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowBalStatus["confirm_status"])){
+			$arrayResult['IS_CONFIRM'] = TRUE;
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
+		}
+		
 		if(isset($rowBalMaster["BALANCE_DATE"]) && isset($rowBalMaster["BALANCE_DATE"]) != ""){
 			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT as PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,
 													mg.MEMBGROUP_DESC
@@ -63,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 				$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
 				$arrayResult['IS_CONFIRM'] = FALSE;
-				$arrayResult['DISABLED_CONFIRM'] = TRUE;
+				$arrayResult['DISABLED_CONFIRM'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

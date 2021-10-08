@@ -87,7 +87,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataDeposit["account_payfee"]);
 		$conmssql->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
-		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$rowCountFee["C_TRANS"] + 1);
 		if($wtdResult["RESULT"]){
 			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
 			if($coop_account_no == $from_account_no){
@@ -97,7 +97,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}
 			if($fee_amt > 0){
 				$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
-				$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee);
+				$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1);
 				if($penaltyWtd["RESULT"]){
 					
 				}else{
@@ -123,7 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				if($rowCountFee["C_TRANS"] + 1 > 2){
 				}else{
 					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyPromo,'FWM',
-					$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee);
+					$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1);
 					if($penaltyWtdPromo["RESULT"]){
 						
 					}else{

@@ -125,16 +125,21 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						}
 					}
 				}
+				$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email FROM gcmemberaccount WHERE member_no = :member_no");
+				$memberInfoMobile->execute([':member_no' => $member_no]);
+				$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 				
 				$fetchPrefix = $conmssql->prepare("SELECT prefix FROM lnloantype where loantype_code = :loantype_code");
 				$fetchPrefix->execute([
 					':loantype_code' => $dataComing["loantype_code"]
 				]);
+				
 				$rowPrefix = $fetchPrefix->fetch(PDO::FETCH_ASSOC);
 				
 				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MB.POSITION_DESC,MG.MEMBGROUP_DESC,MB.SALARY_AMOUNT,
 														MD.DISTRICT_DESC,(SH.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,MB.MEMBGROUP_CODE,
-														SH.SHARESTK_AMT as SHARE_AMT,(SH.SHARESTK_AMT * 10) as SHARESTK_AMT
+														SH.SHARESTK_AMT as SHARE_AMT,(SH.SHARESTK_AMT * 10) as SHARESTK_AMT,
+													   (SH.periodshare_amt * 10) as PERIOD_SHARE_AMOUNT
 														FROM mbmembmaster mb LEFT JOIN
 														mbucfprename mp ON mb.prename_code = mp.prename_code
 														LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
@@ -201,15 +206,19 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
 					$arrData["pos_group_code"] = $rowData["MEMBGROUP_CODE"];
 					$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
+					$arrData["period_share_amount"] = number_format($rowData["PERIOD_SHARE_AMOUNT"],2);
 					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 					$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 					$arrData["share_amt"] = number_format($rowData["SHARE_AMT"],2);
 					$arrData["sharestk_amt"] = number_format($rowData["SHARESTK_AMT"],2);
 					$arrData["request_amt"] = $dataComing["request_amt"];
+					$arrData["request_amt_text"] = $lib->baht_text($dataComing["request_amt"]);
 					$arrData["objective"] = $dataComing["objective"];
 					$arrData["period_payment"] = $dataComing["period_payment"];
 					$arrData["period"] = $dataComing["period"];
-					$arrData["recv_account"] = $dataComing["deptaccount_no_bank"];
+					$arrData["recv_account"] = $dataComing["deptaccount_no_bank"];				
+					$arrData["phone"] = $lib->formatphone($rowInfoMobile["phone_number"]);
+					$arrData["option_pay"] = $dataComing["option_paytype"];  //ชำระเงินต้นพร้อมดอกเบี้ย  = 0 ,  //ชำระเงินต้นอย่างเดียว = 1
 					if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 						include('form_request_loan_'.$dataComing["loantype_code"].'.php');
 						$arrayPDF = GeneratePDFContract($arrData,$lib);

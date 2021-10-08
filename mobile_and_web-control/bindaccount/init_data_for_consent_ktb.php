@@ -23,16 +23,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
 				$arrGrpAccFee[] = $arrAccFee;
 			}
-			$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
-			$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
-			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-			if($payload["member_no"] == 'etnmode3'){
-				$arrayResult['CITIZEN_ID'] = '1119900057012';
+			if(sizeof($arrGrpAccFee) > 0){
+				$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
+				$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
+				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+				if($payload["member_no"] == 'etnmode3'){
+					$arrayResult['CITIZEN_ID'] = '1119900057012';
+				}else{
+					$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+				}
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
 			}else{
-				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+				$arrayResult['RESPONSE_CODE'] = "WS0122";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
 			}
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

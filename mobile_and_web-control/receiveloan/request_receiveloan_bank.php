@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		}
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-		$ref_no = date('YmdHis').substr($deptaccount_no,-3);
+		$ref_no = time().$lib->randomText('all',3);
 		$constFromAcc = $cal_dep->getConstantAcc($deptaccount_no);
 		$fee_amt = 0;
 		$time = time();
@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 			if($receiveLon["RESULT"]){
 				if($fee_amt > 0){
 					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
-					$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee);
+					$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee,true,$payoutslip_no,$rowCountFee["C_TRANS"] + 1);
 					if($penaltyWtd["RESULT"]){
 						
 					}else{
@@ -122,7 +122,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 					if($rowCountFee["C_TRANS"] + 1 > 2){
 					}else{
 						$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyPromo,'FWM',
-						$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee);
+						$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1);
 						if($penaltyWtdPromo["RESULT"]){
 							
 						}else{
@@ -174,16 +174,16 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				if($arrResponse->RESULT){
 					$conmssql->commit();
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																	,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	coop_slip_no,id_userlogin,ref_no_source)
-																	VALUES(:ref_no,'DAP',:from_account,:destination,'9',:amount,:penalty_amt,:amount_receive,'-1',
+																	VALUES(:ref_no,'DAP',:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'-1',
 																	:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,
 						':from_account' => $contract_no,
 						':destination' => $deptaccount_no,
 						':amount' => $dataComing["amt_transfer"],
-						':penalty_amt' => $dataComing["penalty_amt"],
+						':fee_amt' => $fee_amt,
 						':amount_receive' => $dataComing["amt_transfer"],
 						':operate_date' => $dateOper,
 						':member_no' => $payload["member_no"],

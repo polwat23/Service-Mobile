@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
-												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
+												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1' ORDER BY gba.deptaccount_no_coop");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
@@ -29,14 +29,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT"] = $lib->formataccount($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account"]);
 					$arrAccBind["DEPTACCOUNT_NO_BANK_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBind["deptaccount_no_bank"],$rowAccBind["bank_format_account_hide"]);
 				}
-				$arrGroupAccBind["BIND"][] = $arrAccBind;
+				if(isset($rowAccBind["account_payfee"]) && $rowAccBind["account_payfee"] != ""){
+					$arrGroupAccBind["BIND"][] = $arrAccBind;
+				}
 			}
 			$dep_format = $func->getConstant('dep_format');
 			$dep_formathide = $func->getConstant('hidden_dep');
 			$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
 												DPM.PRNCBAL,DPT.MINPRNCBAL,dpm.DEPTACCOUNT_NO
 												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0");
+												WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.depttype_code IN('10','20')");
 			$getDataAcc->execute([':member_no' => $member_no]);
 			while($rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccCoop = array();
