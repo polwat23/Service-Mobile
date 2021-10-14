@@ -6,8 +6,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
 		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
-		$itemtypeWithdraw = 'WIM';
-		$itemtypeDepositDest = 'DIM';
+		$itemtypeWithdraw = 'WTA';
+		$itemtypeDepositDest = 'DTA';
 		$ref_no = time().$lib->randomText('all',3);
 		$dateOper = date('c');
 		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
@@ -41,13 +41,59 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
+			$vccamtPenalty = $cal_dep->getVcMapID('00','DEP','FEE');
 			$conmssql->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
 			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 			if($wtdResult["RESULT"]){
+				if($dataComing["penalty_amt"] > 0){
+					/*$constFromAcc["PRNCBAL"] = $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"];
+					$constFromAcc["WITHDRAWABLE_AMT"] = $constFromAcc["WITHDRAWABLE_AMT"] - $dataComing["amt_transfer"];
+					
+					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty["ACCOUNT_ID"],'FMB',
+					$dataComing["amt_transfer"],$dataComing["penalty_amt"],$dateOperC,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAcc);
+					if($penaltyWtd["RESULT"]){
+						
+					}else{
+						$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => $dateOperC,
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '2',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => $penaltyWtd['ACTION']
+							];
+						}else{
+							$arrayStruc = [
+								':member_no' => $payload["member_no"],
+								':id_userlogin' => $payload["id_userlogin"],
+								':operate_date' => $dateOperC,
+								':deptaccount_no' => $from_account_no,
+								':amt_transfer' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':type_request' => '2',
+								':transfer_flag' => '1',
+								':destination' => $to_account_no,
+								':response_code' => $arrayResult['RESPONSE_CODE'],
+								':response_message' => $penaltyWtd['ACTION']
+							];
+						}
+						$log->writeLog('transferinside',$arrayStruc);
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}*/
+				}
 				$depositMoney = $cal_dep->DepositMoneyInside($conmssql,$to_account_no,$srcvcid["ACCOUNT_ID"],$itemtypeDepositDest,
 				$dataComing["amt_transfer"],0,$dateOperC,$config,$log,$from_account_no,$payload,$deptslip_noDest,$lib,
-				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,$wtdResult["DEPTSLIP_NO"]);
+				$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,$wtdResult["DEPTSLIP_NO"],null,null,$constToAcc);
 				if($depositMoney["RESULT"]){
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
 														VALUES(:remark,:deptaccount_no,:seq_no)");
@@ -107,7 +153,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':destination' => $to_account_no,
 						':amount' => $dataComing["amt_transfer"],
 						':penalty_amt' => $dataComing["penalty_amt"],
-						':amount_receive' => $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
+						':amount_receive' => $dataComing["amt_transfer"],
 						':operate_date' => $dateOperC,
 						':member_no' => $payload["member_no"],
 						':slip_no' => $deptslip_no,

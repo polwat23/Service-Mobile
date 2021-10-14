@@ -1,12 +1,11 @@
 <?php
 
-namespace CalculateDeposit;
+namespace CalculateDepositTest;
 
 use Connection\connection;
 use Utility\Library;
 
-
-class CalculateDep {
+class CalculateDepositTest {
 	private $con;
 	private $conms;
 	private $lib;
@@ -15,7 +14,13 @@ class CalculateDep {
 		$connection = new connection();
 		$this->lib = new library();
 		$this->con = $connection->connecttomysql();
-		$this->conms = $connection->connecttosqlserver();
+		$dbhost = "192.168.1.126";
+		$dbport = "1433";
+		$dbuser = "sa";
+		$dbpass = "Icoop2021";
+		$dbname = "iscodemo";
+		$this->conms = new \PDO("sqlsrv:server=".$dbhost." ; Database = ".$dbname, $dbuser, $dbpass);
+		//$this->conms = $connection->connecttosqlserver();
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
@@ -670,8 +675,7 @@ class CalculateDep {
 		$rowItemCount = $checkItemIsCount->fetch(\PDO::FETCH_ASSOC);
 		if($rowItemCount["IS_NOTCOUNT"] > 0){
 			$getCountTrans = $this->conms->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps
-												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTRING(deptitemtype_code,1,1) <> 'D' 
-												and dps.DEPTITEMTYPE_CODE NOT IN(SELECT deptitem_code FROM dpucfwithncount WHERE depttype_code = :depttype_code and membcat_code = :membcat_code)
+												WHERE dps.deptaccount_no = :deptaccount_no and dps.DEPTITEMTYPE_CODE NOT IN(SELECT deptitem_code FROM dpucfwithncount WHERE depttype_code = :depttype_code and membcat_code = :membcat_code)
 												and dps.deptitemtype_code <> :itemtype_code and dps.item_status = '1' ".$queryCheckPeriod);
 			$getCountTrans->execute([
 				':deptaccount_no' => $deptaccount_no,
@@ -681,8 +685,7 @@ class CalculateDep {
 			]);
 		}else{
 			$getCountTrans = $this->conms->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps
-												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTRING(deptitemtype_code,1,1) <> 'D'
-												and dps.DEPTITEMTYPE_CODE NOT IN(SELECT deptitem_code FROM dpucfwithncount WHERE depttype_code = :depttype_code and membcat_code = :membcat_code)
+												WHERE dps.deptaccount_no = :deptaccount_no and dps.DEPTITEMTYPE_CODE NOT IN(SELECT deptitem_code FROM dpucfwithncount WHERE depttype_code = :depttype_code and membcat_code = :membcat_code)
 												and dps.item_status = '1' ".$queryCheckPeriod);
 			$getCountTrans->execute([
 				':deptaccount_no' => $deptaccount_no,
@@ -910,13 +913,13 @@ class CalculateDep {
 		$lastStmDestNo = $max_seqno + 1;
 		$deptslip_no = $deptslip;
 		$arrExecuteDest = [
-			$deptslip_no,$config["COOP_ID"],$deptaccount_no,$constToAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constToAcc["DEPTGROUP_CODE"],$constFromAcc["MEMBCAT_CODE"],
+			$deptslip_no,$config["COOP_ID"],$deptaccount_no,$constToAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constToAcc["DEPTGROUP_CODE"],$constToAcc["MEMBCAT_CODE"],
 			$itemtype_dpt,$amt_transfer,$rowDepPayDest["MONEYTYPE_SUPPORT"],$constToAcc["PRNCBAL"],$constToAcc["WITHDRAWABLE_AMT"],
 			$constToAcc["CHECKPEND_AMT"],$operate_date,$lastStmDestNo,$itemtype_dpt,date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),$penalty_amt,
 			$tofrom_accid,$slipWithdraw ?? null,$amt_transfer,$operate_date
 		];
 		if($menu_component == 'TransactionDeposit'){
-			$insertDpSlipDest = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,
+			$insertDpSlipDest = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 												deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 												PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
 												DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
@@ -928,7 +931,7 @@ class CalculateDep {
 												?,0,0,0,1,1,0,1,1,CONVERT(VARCHAR(19),?,20))");
 
 		}else{
-			$insertDpSlipDest = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,
+			$insertDpSlipDest = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 												deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 												PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
 												DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
@@ -1237,37 +1240,37 @@ class CalculateDep {
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		if($oneway_fee){
 			$arrExecutePenalty = [
-				$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],$constFromAcc["MEMBCAT_CODE"],
+				$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],
 				$itemtype_wtd,$penalty_amt,$rowDepPay["MONEYTYPE_SUPPORT"],$constFromAcc["PRNCBAL"],$constFromAcc["WITHDRAWABLE_AMT"],$constFromAcc["CHECKPEND_AMT"],
 				$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$penalty_amt,$tofrom_accid,
 				$deptslip_no,$penalty_amt,$operate_date
 			];
 			$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
-														deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
+														deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 														PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
 														DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
 														NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
 														POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 														TELLER_FLAG,OPERATE_TIME) 
-														VALUES(?,?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
+														VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
 														?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),
 														1,?,0,0,?,2,?,0,0,?,'DEP',0,0,0,1,1,0,1,1,
 														CONVERT(VARCHAR(19),?,20))");
 		}else{
 			$arrExecutePenalty = [
-				$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],$constFromAcc["MEMBCAT_CODE"],
+				$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],
 				$itemtype_wtd,$penalty_amt,$rowDepPay["MONEYTYPE_SUPPORT"],$constFromAcc["PRNCBAL"],$constFromAcc["WITHDRAWABLE_AMT"],$constFromAcc["CHECKPEND_AMT"],
 				$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$tofrom_accid,
 				$deptslip_no,$penalty_amt,$operate_date
 			];
 			$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
-														deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
+														deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 														PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
 														DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
 														NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
 														POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 														TELLER_FLAG,OPERATE_TIME) 
-														VALUES(?,?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
+														VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
 														?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),
 														1,0,0,?,2,?,0,0,?,'DEP',0,0,0,1,1,0,1,1,
 														CONVERT(VARCHAR(19),?,20))");
@@ -1320,19 +1323,19 @@ class CalculateDep {
 		$lastStmSrcNo = $max_seqno;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		$arrExecutePenalty = [
-			$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],$constFromAcc["MEMBCAT_CODE"],
+			$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],
 			$itemtype_wtd,$penalty_amt,$rowDepPay["MONEYTYPE_SUPPORT"],$constFromAcc["PRNCBAL"],$constFromAcc["WITHDRAWABLE_AMT"],$constFromAcc["CHECKPEND_AMT"],
 			$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$tofrom_accid,
 			$deptslip_no,$penalty_amt,$operate_date
 		];
 		$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
-													deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
+													deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 													PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
 													DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
 													NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
 													POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 													TELLER_FLAG,OPERATE_TIME) 
-													VALUES(?,?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
+													VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
 													?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),
 													1,0,0,0,?,9,?,0,0,?,'DEP',0,0,0,1,1,1,0,1,1,
 													CONVERT(VARCHAR(19),?,20))");

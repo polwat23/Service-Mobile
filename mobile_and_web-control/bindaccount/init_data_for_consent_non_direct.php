@@ -2,23 +2,29 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrChildGrp = array();
-		$checkChildHave = $conoracle->prepare("SELECT asch.childcard_id as CHILDCARD_ID, mp.prename_desc||asch.child_name||'   '||asch.child_surname as CHILD_NAME
-															FROM ASNREQSCHOLARSHIP asch LEFT JOIN mbucfprename mp ON  asch.childprename_code = mp.prename_code
-															WHERE  asch.approve_status = 1 and asch.scholarship_year = (EXTRACT(year from sysdate) +542) and asch.member_no = :member_no");
-		$checkChildHave->execute([':member_no' => $member_no]);
-		while($rowChild = $checkChildHave->fetch(PDO::FETCH_ASSOC)){
-			$arrChild = array();
-			$arrChild["CHILDCARD_ID"] = $rowChild["CHILDCARD_ID"];
-			$arrChild["CHILDCARD_ID_FORMAT"] = $lib->formatcitizen($rowChild["CHILDCARD_ID"]);
-			$arrChild["CHILD_NAME"] = $rowChild["CHILD_NAME"];
-			$arrChildGrp[] = $arrChild;
+		$fetchDataMember = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember->execute([
+			':member_no' => $member_no
+		]);
+		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowDataMember["CARD_PERSON"])){
+			$getFormat = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
+			$getFormat->execute([':bank_code' => $dataComing["bank_code"]]);
+			$rowFormat = $getFormat->fetch(PDO::FETCH_ASSOC);
+			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			$arrayResult['FORMAT_BANK_ACCOUNT'] = $rowFormat["bank_format_account"];
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
 		}
-		$arrayResult['CHILD'] = $arrChildGrp;
-		$arrayResult['RESULT'] = TRUE;
-		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

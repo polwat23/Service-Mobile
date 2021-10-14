@@ -4,16 +4,16 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loan_pause'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SuspendingDebt')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$conmssql->beginTransaction();
+		$conoracle->beginTransaction();
 		foreach($dataComing["loan_pause"] as $doc_no){
-			$updateLoanPuase = $conmssql->prepare("UPDATE LNREQMORATORIUM SET REQUEST_STATUS = -1, CANCEL_ID = :cancel_id, CANCEL_DATE = SYSDATE
+			$updateLoanPuase = $conoracle->prepare("UPDATE LNREQMORATORIUM SET REQUEST_STATUS = -1, CANCEL_ID = :cancel_id, CANCEL_DATE = SYSDATE
 																WHERE MORATORIUM_DOCNO = :docno");
 			if($updateLoanPuase->execute([
 				':cancel_id' => $member_no,
 				':docno' => $doc_no
 			])){
 			}else{
-				$conmssql->rollback();
+				$conoracle->rollback();
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
 					":error_menu" => $filename,
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component','loan_pause'],$dataComing)){
 				
 			}
 		}
-		$conmssql->commit();
+		$conoracle->commit();
 		$arrayResult['LOAN_PAUSE'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

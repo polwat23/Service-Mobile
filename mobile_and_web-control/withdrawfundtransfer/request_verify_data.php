@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
 		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
-		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$fee_amt = $rowDataDeposit["fee_withdraw"];
+		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],$rowDataDeposit["itemtype_wtd"],$fee_amt);
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["bank_code"]);

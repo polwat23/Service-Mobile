@@ -111,7 +111,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no
 														FROM gctransaction
-														WHERE transfer_mode = '9'  result_transaction = '1'
+														WHERE transfer_mode = '9' and result_transaction = '1'
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no = :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
@@ -122,7 +122,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}
 		$fetchReconcile->execute($arrayExecute);
-		$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = '004'");
+		$fetchFormatAccBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = '006'");
 		$fetchFormatAccBank->execute();
 		$rowFormatAcc = $fetchFormatAccBank->fetch();
 		$summary = 0;
@@ -131,15 +131,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayRecon = array();
 			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["transaction_type_code"];
 			if($rowRecon["trans_flag"] == '1'){
-				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$rowFormatAcc["bank_format_account"]);
+				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $rowRecon["from_account"];
 			}else{
-				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowRecon["from_account"],$formatDept);
+				$arrayRecon["FROM_ACCOUNT_FORMAT"] = $rowRecon["from_account"];
 			}
 			$arrayRecon["FROM_ACCOUNT"] = $rowRecon["from_account"];
 			if($rowRecon["trans_flag"] == '1'){
-				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$formatDept);
+				$arrayRecon["DESTINATION_FORMAT"] = $rowRecon["destination"];
 			}else{
-				$arrayRecon["DESTINATION_FORMAT"] = $lib->formataccount($rowRecon["destination"],$rowFormatAcc["bank_format_account"]);
+				$arrayRecon["DESTINATION_FORMAT"] = $rowRecon["destination"];
 			}
 			$arrayRecon["REF_NO"] = $rowRecon["ref_no"];
 			$arrayRecon["DESTINATION"] = $rowRecon["destination"];
@@ -165,10 +165,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../../include/exit_footer.php');
+		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../../../include/exit_footer.php');
+	
 }
 ?>

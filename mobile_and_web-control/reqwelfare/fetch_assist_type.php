@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAssistGrp = array();
-		$fetchCateGrp = $conmssql->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchCateGrp = $conoracle->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchCateGrp->execute([':member_no' => $member_no]);
 		$rowCateGrp = $fetchCateGrp->fetch(PDO::FETCH_ASSOC);
 		$fetchAssistType = $conmysql->prepare("SELECT welfare_type_code,welfare_type_desc FROM gcconstantwelfare WHERE 

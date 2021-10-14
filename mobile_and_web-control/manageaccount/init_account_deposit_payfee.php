@@ -2,21 +2,23 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrChildGrp = array();
-		$checkChildHave = $conoracle->prepare("SELECT asch.childcard_id as CHILDCARD_ID, mp.prename_desc||asch.child_name||'   '||asch.child_surname as CHILD_NAME
-															FROM ASNREQSCHOLARSHIP asch LEFT JOIN mbucfprename mp ON  asch.childprename_code = mp.prename_code
-															WHERE  asch.approve_status = 1 and asch.scholarship_year = (EXTRACT(year from sysdate) +542) and asch.member_no = :member_no");
-		$checkChildHave->execute([':member_no' => $member_no]);
-		while($rowChild = $checkChildHave->fetch(PDO::FETCH_ASSOC)){
-			$arrChild = array();
-			$arrChild["CHILDCARD_ID"] = $rowChild["CHILDCARD_ID"];
-			$arrChild["CHILDCARD_ID_FORMAT"] = $lib->formatcitizen($rowChild["CHILDCARD_ID"]);
-			$arrChild["CHILD_NAME"] = $rowChild["CHILD_NAME"];
-			$arrChildGrp[] = $arrChild;
+		$arrGrpAccFee = array();
+		$getDepositAcc = $conmssql->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
+											FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
+											WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '10'");
+		$getDepositAcc->execute([':member_no' => $member_no]);
+		while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
+			$arrAccFee = array();
+			$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			$arrAccFee['ACCOUNT_NAME'] = TRIM($rowDepAcc["DEPTACCOUNT_NAME"]);
+			$arrAccFee['BALANCE'] = number_format($rowDepAcc["PRNCBAL"],2);
+			$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
+			$arrGrpAccFee[] = $arrAccFee;
 		}
-		$arrayResult['CHILD'] = $arrChildGrp;
+		$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
+		$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
