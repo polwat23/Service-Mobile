@@ -75,7 +75,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					}
 					$vccamtPenalty = $func->getConstant("accidfee_promotion");
 					$from_account_no = $rowDataDeposit["account_payfee"];
-					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FDM',
+					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FTX',
 					$dataComing["amt_transfer"],$rowDataDeposit["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$depositMoney["MAX_SEQNO"],$dataAccFee);
 					if($penaltyWtd["RESULT"]){
 						
@@ -102,7 +102,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				if($rowDataDeposit["fee_deposit"] > 0){
 					$vccamtPenaltyDepPromo = $func->getConstant("accidfee_promotion");
 					$from_account_no = $rowDataDeposit["account_payfee"];
-					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyDepPromo,'FDM',
+					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyDepPromo,'FTX',
 					$dataComing["amt_transfer"],$rowDataDeposit["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$depositMoney["MAX_SEQNO"],$dataAccFee);
 					if($penaltyWtdPromo["RESULT"]){
 						

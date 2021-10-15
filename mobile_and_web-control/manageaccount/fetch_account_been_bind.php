@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrBindAccount = array();
 		while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
+			$arrAccount["NON_DIRECT"] = TRUE;
 			if($rowAccountBind["bank_code"] == "025"){
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $rowAccountBind["deptaccount_no_bank"];
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $rowAccountBind["deptaccount_no_bank"];
@@ -41,7 +42,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 			$arrAccount["BANK_CODE"] = $rowAccountBind["bank_code"];
 			$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
-			$arrAccount["NON_DIRECT"] = TRUE;
 			if(isset($rowAccountBind["account_payfee"])){
 				$arrAccount["DEPTACCOUNT_NO_PAYFEE"] = $lib->formataccount($rowAccountBind["account_payfee"],$func->getConstant('dep_format'));
 			}

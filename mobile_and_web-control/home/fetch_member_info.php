@@ -43,23 +43,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ?.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ???'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' ????????'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ???'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ????'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' ???'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+				$address .= (isset($rowMember["ADDR_MOO"]) && $rowMember["ADDR_MOO"] != "" ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) && $rowMember["ADDR_SOI"] != "" ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) && $rowMember["ADDR_VILLAGE"] != "" ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) && $rowMember["ADDR_ROAD"] != "" ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) && $rowMember["TAMBOL_DESC"] != "" ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) && $rowMember["DISTRICT_DESC"] != "" ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' '.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}else{
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ?.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ???'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' ????????'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ???'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ?.'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' ?.'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' ?.'.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+				$address .= (isset($rowMember["ADDR_MOO"]) && $rowMember["ADDR_MOO"] != "" ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) && $rowMember["ADDR_SOI"] != "" ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) && $rowMember["ADDR_VILLAGE"] != "" ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) && $rowMember["ADDR_ROAD"] != "" ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) && $rowMember["TAMBOL_DESC"] != "" ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) && $rowMember["DISTRICT_DESC"] != "" ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
@@ -95,11 +95,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "??? Argument ???????? "."\n".json_encode($dataComing),
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "???? ".$filename." ??? Argument ????????????? "."\n".json_encode($dataComing);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

@@ -4,7 +4,7 @@
 	"COOP_ID" : "075001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.nph.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/NHPCOOP-TEST/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/NHPCOOP-TEST/",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAA98IQzRQ:APA91bHlRR8jte92FmxaFMqqD_nTo6pwfQmck3_MMluUdCmNS2zaLaHAo7olDpZANYDAya2oVmSQ-NJVv2_IWDFy5DmHsd3ulZCA6LCKe-O1V3SEkjZVI1iCvOQ7RU9zpKb_lglvBJzD",
 	"SECRET_KEY_JWT" : "NHP!/-Gcoop+Connect^075001*!&",

@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$ref_no = $time.$lib->randomText('all',3);
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$penalty_include = $func->getConstant("include_penalty");
-		$fee_amt = 0;
+		$fee_amt = $rowDataWithdraw["fee_withdraw"];
 		
 		if($rowDataWithdraw["bank_code"] == '025'){
 			$fee_amt = $dataComing["penalty_amt"];
@@ -74,9 +74,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 		if($wtdResult["RESULT"]){
-			$vccamtPenalty = $cal_dep->getVcMapID('00','DEP','FEE');
+			$vccamtPenalty = $func->getConstant("accidfee_receive");
 			$dataAccFee = $wtdResult["DATA_CONT"];
-			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$coop_account_no,$vccamtPenalty,'FWM',
+			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$coop_account_no,$vccamtPenalty,'FTX',
 			$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$dataAccFee);
 			if($penaltyWtd["RESULT"]){
 				
