@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','bindacc_status','id_bindaccount'],$dataComing)){
-	if($func->check_permission_core($payload,'admincontrol','manageuser')){
+	if($func->check_permission_core($payload,'admincontrol','manageuser',$conoracle)){
 		$updaeusername = $conoracle->prepare("UPDATE gcbindaccount 
 										  SET bindaccount_status = :bindacc_status
 								          WHERE  id_bindaccount = :id_bindaccount;;");

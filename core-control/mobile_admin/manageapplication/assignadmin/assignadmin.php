@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','member_no','member_type'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','assignadmin')){
+	if($func->check_permission_core($payload,'mobileadmin','assignadmin',$conoracle)){
 			$updatemenu = $conoracle->prepare("UPDATE gcmemberaccount SET user_type = :member_type
 										 WHERE member_no = :member_no");
 			if($updatemenu->execute([

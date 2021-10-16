@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmswelfare')){
+	if($func->check_permission_core($payload,'sms','constantsmswelfare',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conoracle->prepare("SELECT
@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["ITEM_CODE"],array_column($arrayChkG,'ITEM_CODE')) === False){
-						$id_smsconstantwelfare = $func->getMaxTable('id_smsconstantwelfare' , 'smsconstantwelfare');
+						$id_smsconstantwelfare = $func->getMaxTable('id_smsconstantwelfare' , 'smsconstantwelfare',$conoracle);
 						$insertBulkCont[] = "('".$id_smsconstantwelfare."','".$value_diff["ITEM_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTWELFARE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
 						$insertBulkContLog[]='ITEM_CODE=> '.$value_diff["ITEM_CODE"].' ALLOW_SMSCONSTANTWELFARE ='.$value_diff["ALLOW_SMSCONSTANTWELFARE"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{

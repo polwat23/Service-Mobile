@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_name','id_menu','menu_language'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
+	if($func->check_permission_core($payload,'mobileadmin','managemenu',$conoracle)){
 		
 		if($dataComing["menu_language"] == "en"){
 			$updatemenu = $conoracle->prepare("UPDATE gcmenu SET menu_name_en = :menu_name

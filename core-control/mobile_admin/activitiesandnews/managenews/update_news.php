@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managenews')){
+	if($func->check_permission_core($payload,'mobileadmin','managenews',$conoracle)){
 		$conoracle->beginTransaction();
 		$pathImg1 = null;
 		$pathImg2 = null;
@@ -174,7 +174,15 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 								  </body>
 									</html>';
 		}
-
+		$file_pointer = __DIR__.'/../../../../resource/html/'.'news'.$dataComing["id_news"].'.html'; 
+  
+		if (!unlink($file_pointer)) { 
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../../../include/exit_footer.php');
+		} 
+		
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'news'.$dataComing["id_news"].'.html', $detail_html . PHP_EOL, FILE_APPEND);
 		$update_news= $conoracle->prepare("UPDATE gcnews SET 
 												news_title = :news_title,
 												news_detail = :news_detail,
@@ -200,7 +208,7 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 				':path_img_4' => $pathImg4 ?? null,
 				':path_img_5' => $pathImg5 ?? null,
 				':create_by' => $payload["username"],
-				':news_html' => $detail_html ?? null,
+				':news_html' => '/resource/html/'.'news'.$dataComing["id_news"].'.html' ?? null
 			])){
 				$last_id = $dataComing["id_news"];
 				

@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logtransfer')){
+	if($func->check_permission_core($payload,'log','logtransfer',$conoracle)){
 		$arrayGroup = array();
 		$fetLogTranfer = $conoracle->prepare("SELECT 
 													trans.ref_no,trans.member_no,
@@ -27,36 +27,36 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												WHERE trans.transfer_mode !='9'
 												ORDER BY trans.operate_date DESC");
 		$fetLogTranfer->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowLogTransfer = $fetLogTranfer->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTransfer = array();
-			$arrLogTransfer["REF_NO"] = $rowLogTransfer["ref_no"];
-			$arrLogTransfer["MEMBER_NO"] = $rowLogTransfer["member_no"];
-			$arrLogTransfer["CHANNEL"] = $rowLogTransfer["channel"];
-			$arrLogTransfer["DEVICE_NAME"] = $rowLogTransfer["device_name"];
-			$arrLogTransfer["TRANSACTION_TYPE_CODE"] = $rowLogTransfer["transaction_type_code"];
-			$arrLogTransfer["FROM_ACCOUNT"] = $rowLogTransfer["from_account"];
-			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransfer["from_account"],$formatDept);
-			$arrLogTransfer["DESTINATION_TYPE"] = $rowLogTransfer["destination_type"];
-			$arrLogTransfer["DESTINATION"] = $rowLogTransfer["destination"];
-			$arrLogTransfer["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransfer["destination"],$formatDept);
-			$arrLogTransfer["TRANSFER_MODE"] = $rowLogTransfer["transfer_mode"];
-			$arrLogTransfer["AMOUNT"] = $rowLogTransfer["amount"];
-			$arrLogTransfer["AMOUNT_FORMAT"] = number_format($rowLogTransfer["amount"],2);
-			$arrLogTransfer["FEE_AMT"] = $rowLogTransfer["fee_amt"];
-			$arrLogTransfer["FEE_AMT_FORMAT"] = number_format($rowLogTransfer["fee_amt"],2);
-			$arrLogTransfer["PENALTY_AMT"] = $rowLogTransfer["penalty_amt"];
-			$arrLogTransfer["PENALTY_AMT_FORMAT"] = number_format( $rowLogTransfer["penalty_amt"],2);
-			$arrLogTransfer["AMOUNT_RECEIVE"] = $rowLogTransfer["amount_receive"];
-			$arrLogTransfer["AMOUNT_RECEIVE_FORMAT"] = number_format($rowLogTransfer["amount_receive"],2);
-			$arrLogTransfer["TRANS_FLAG"] = $rowLogTransfer["trans_flag"];
-			$arrLogTransfer["RESULT_TRANSACTION"] = $rowLogTransfer["result_transaction"];
+			$arrLogTransfer["REF_NO"] = $rowLogTransfer["REF_NO"];
+			$arrLogTransfer["MEMBER_NO"] = $rowLogTransfer["MEMBER_NO"];
+			$arrLogTransfer["CHANNEL"] = $rowLogTransfer["CHANNEL"];
+			$arrLogTransfer["DEVICE_NAME"] = $rowLogTransfer["DEVICE_NAME"];
+			$arrLogTransfer["TRANSACTION_TYPE_CODE"] = $rowLogTransfer["TRANSACTION_TYPE_CODE"];
+			$arrLogTransfer["FROM_ACCOUNT"] = $rowLogTransfer["FROM_ACCOUNT"];
+			$arrLogTransfer["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogTransfer["FROM_ACCOUNT"],$formatDept);
+			$arrLogTransfer["DESTINATION_TYPE"] = $rowLogTransfer["DESTINATION_TYPE"];
+			$arrLogTransfer["DESTINATION"] = $rowLogTransfer["DESTINATION"];
+			$arrLogTransfer["DESTINATION_FORMAT"]= $lib->formataccount($rowLogTransfer["DESTINATION"],$formatDept);
+			$arrLogTransfer["TRANSFER_MODE"] = $rowLogTransfer["TRANSFER_MODE"];
+			$arrLogTransfer["AMOUNT"] = $rowLogTransfer["AMOUNT"];
+			$arrLogTransfer["AMOUNT_FORMAT"] = number_format($rowLogTransfer["AMOUNT"],2);
+			$arrLogTransfer["FEE_AMT"] = $rowLogTransfer["FEE_AMT"];
+			$arrLogTransfer["FEE_AMT_FORMAT"] = number_format($rowLogTransfer["FEE_AMT"],2);
+			$arrLogTransfer["PENALTY_AMT"] = $rowLogTransfer["PENALTY_AMT"];
+			$arrLogTransfer["PENALTY_AMT_FORMAT"] = number_format( $rowLogTransfer["PENALTY_AMT"],2);
+			$arrLogTransfer["AMOUNT_RECEIVE"] = $rowLogTransfer["AMOUNT_RECEIVE"];
+			$arrLogTransfer["AMOUNT_RECEIVE_FORMAT"] = number_format($rowLogTransfer["AMOUNT_RECEIVE"],2);
+			$arrLogTransfer["TRANS_FLAG"] = $rowLogTransfer["TRANS_FLAG"];
+			$arrLogTransfer["RESULT_TRANSACTION"] = $rowLogTransfer["RESULT_TRANSACTION"];
 			
-			$arrLogTransfer["OPERATE_DATE"] =  $lib->convertdate($rowLogTransfer["operate_date"],'d m Y',true); 
+			$arrLogTransfer["OPERATE_DATE"] =  $lib->convertdate($rowLogTransfer["OPERATE_DATE"],'d m Y',true); 
 			
-			$arrLogTransfer["REF_NO_1"] = $rowLogTransfer["ref_no_1"];
-			$arrLogTransfer["COOP_SLIP_NO"] = $rowLogTransfer["coop_slip_no"];
-			$arrLogTransfer["REF_NO_SOURCE"] = $rowLogTransfer["ref_no_source"];
+			$arrLogTransfer["REF_NO_1"] = $rowLogTransfer["REF_NO_1"];
+			$arrLogTransfer["COOP_SLIP_NO"] = $rowLogTransfer["COOP_SLIP_NO"];
+			$arrLogTransfer["REF_NO_SOURCE"] = $rowLogTransfer["REF_NO_SOURCE"];
 		
 			$arrayGroup[] = $arrLogTransfer;
 		}

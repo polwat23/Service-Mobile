@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','announce')){
+	if($func->check_permission_core($payload,'mobileadmin','announce',$conoracle)){
 		$arrayExecute = array();
 		$arrayGroup = array();
 		
@@ -29,6 +29,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													check_text,
 													accept_text,
 													cancel_text,
+													update_date,
 													TO_CHAR(effect_date,'yyyymmdd hh24:mi:ss') AS effect_date_check, 
 													TO_CHAR(due_date,'yyyymmdd hh24:mi:ss') AS due_date_check
 											 FROM gcannounce
@@ -43,10 +44,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		while($rowAnnounce = $fetchAnnounce->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupAnnounce = array();
 			$arrGroupAnnounce["ID_ANNOUNCE"] = $rowAnnounce["ID_ANNOUNCE"];
-			$arrGroupAnnounce["ANNOUNCE_COVER"] = stream_get_contents($rowAnnounce["ANNOUNCE_COVER"]);
+			$arrGroupAnnounce["ANNOUNCE_COVER"] = $rowAnnounce["ANNOUNCE_COVER"];
 			$arrGroupAnnounce["ANNOUNCE_TITLE"] = $rowAnnounce["ANNOUNCE_TITLE"];
-			$arrGroupAnnounce["ANNOUNCE_DETAIL"] = stream_get_contents($rowAnnounce["ANNOUNCE_DETAIL"]);
-			$arrGroupAnnounce["ANNOUNCE_HTML"] = stream_get_contents($rowAnnounce["ANNOUNCE_HTML"]);
+			$arrGroupAnnounce["ANNOUNCE_DETAIL"] = $rowAnnounce["ANNOUNCE_DETAIL"];
+			$arrGroupAnnounce["ANNOUNCE_HTML"] = file_get_contents(__DIR__.'/../../../..'.$rowAnnounce["ANNOUNCE_HTML"]);
 			$arrGroupAnnounce["PRIORITY"] = $rowAnnounce["PRIORITY"];
 			$arrGroupAnnounce["USERNAME"] = $rowAnnounce["USERNAME"];
 			$arrGroupAnnounce["IS_CHECK"] = $rowAnnounce["IS_CHECK"];

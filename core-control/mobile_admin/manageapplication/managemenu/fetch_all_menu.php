@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
+	if($func->check_permission_core($payload,'mobileadmin','managemenu',$conoracle)){
 		$arrayGroup = array();
 		$fetchMenuMobile = $conoracle->prepare("SELECT id_menu, menu_name,menu_name_en, menu_status,menu_channel,menu_parent FROM gcmenu 
 											  WHERE menu_status <> '-9' AND menu_parent IN(0,18,19,-9,-8,-1,57)

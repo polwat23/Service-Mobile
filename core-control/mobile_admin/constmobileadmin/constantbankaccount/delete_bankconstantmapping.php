@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
+	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount',$conoracle)){
 		$updateConstants = $conoracle->prepare("UPDATE gcbankconstantmapping
 		SET is_use = '0'
 		WHERE id_bankconstantmapping = :id_bankconstantmapping");

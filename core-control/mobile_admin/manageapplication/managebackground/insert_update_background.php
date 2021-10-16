@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managebackground')){
+	if($func->check_permission_core($payload,'mobileadmin','managebackground',$conoracle)){
 		
 		$fetchBG = $conoracle->prepare("SELECT id_background,image,update_date,is_use,update_by FROM gcconstantbackground");
 								
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						}
 					}else{
 						$path_bg = '/resource/background/'.$createBg["normal_path"];
-						$id_background = $func->getMaxTable('id_background' , 'gcconstantbackground');
+						$id_background = $func->getMaxTable('id_background' , 'gcconstantbackground',$conoracle);
 						$insert_news = $conoracle->prepare("INSERT INTO gcconstantbackground(id_background,image,update_by) VALUES (:id_background, :path_bg,:username)");
 						if($insert_news->execute([
 								':id_background' => $id_background,

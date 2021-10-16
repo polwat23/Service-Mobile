@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_template'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate')){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conoracle)){
 		$conoracle->beginTransaction();
 		if(isset($dataComing["id_smsquery"]) && $dataComing["id_smsquery"] != ""){
 			if(isset($dataComing["query_template_spc_"]) && isset($dataComing["column_selected"])){
@@ -81,7 +81,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 		}else{
 			if(isset($dataComing["query_template_spc_"]) && $dataComing["query_template_spc_"] != "" && isset($dataComing["column_selected"])){
 				if(empty($dataComing["condition_target"]) || $dataComing["condition_target"] == ""){
-					$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery');	
+					$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery',$conoracle);	
 					$insertSmsQuery = $conoracle->prepare("INSERT INTO smsquery(id_smsquery,sms_query,column_selected,target_field,create_by)
 															VALUES(:id_smsquery, :sms_query,:column_selected,:target_field,:username)");
 					if($insertSmsQuery->execute([
@@ -91,7 +91,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 						':target_field' => $dataComing["target_field"],
 						':username' => $payload["username"]
 					])){
-						$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery');	
+						$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery',$conoracle);	
 						$editTemplate = $conoracle->prepare("UPDATE smstemplate SET smstemplate_name = :smstemplate_name,smstemplate_body = :smstemplate_body,id_smsquery = :id_smsquery
 														WHERE id_smstemplate = :id_smstemplate");
 						if($editTemplate->execute([
@@ -127,7 +127,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body','id_
 						':condition_target' => $dataComing["condition_target"],
 						':username' => $payload["username"]
 					])){
-						$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery');	
+						$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery',$conoracle);	
 						$editTemplate = $conoracle->prepare("UPDATE smstemplate SET smstemplate_name = :smstemplate_name,smstemplate_body = :smstemplate_body,id_smsquery = :id_smsquery
 														WHERE id_smstemplate = :id_smstemplate");
 						if($editTemplate->execute([

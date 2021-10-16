@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 			while($rowMenu = $fetchMenu->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupRootMenu = array();
 				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["MENU_NAME"];
-				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
+				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["PAGE_NAME"];
 				$fetchSubMenu = $conoracle->prepare("SELECT menu_name,page_name FROM coresubmenu
 													WHERE id_menuparent = :id_submenu and menu_status <> '-9'
 													ORDER BY menu_order ASC");

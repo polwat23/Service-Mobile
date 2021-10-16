@@ -3,15 +3,15 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		$arrayResult = array();
+		
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conoracle->prepare("SELECT email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowInfoMobile["MEMBER_NO"])){		
 			if(isset($rowInfoMobile["PATH_AVATAR"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].stream_get_contents($rowInfoMobile["PATH_AVATAR"]);
-				$explodePathAvatar = explode('.',stream_get_contents($rowInfoMobile["PATH_AVATAR"]));
+				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["PATH_AVATAR"];
+				$explodePathAvatar = explode('.',$rowInfoMobile["PATH_AVATAR"]);
 				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			}else{
 				$arrayResult["AVATAR_PATH"] = null;
@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and fm.column_data = :member_no and fm.img_type_code = '002' and rownum <= 1 ORDER BY fm.seq_no DESC");
 			$getSignature->execute([':member_no' => $member_no]);
 			$rowSignature = $getSignature->fetch(PDO::FETCH_ASSOC);
-			$DataURLBase64 = isset($rowSignature["BASE64_IMG"]) ? "data:".$rowSignature["MIMETYPES"].";base64,".base64_encode(stream_get_contents($rowSignature["BASE64_IMG"])) : null;
+			$DataURLBase64 = isset($rowSignature["BASE64_IMG"]) ? "data:".$rowSignature["MIMETYPES"].";base64,".base64_encode($rowSignature["BASE64_IMG"]) : null;
 			if(isset($DataURLBase64) && $DataURLBase64 != ''){
 				$arrayResult['DATA_TYPE'] = $rowSignature["DATA_TYPE"] ?? 'pdf';
 				$arrayResult['SIGNATURE'] = $DataURLBase64;

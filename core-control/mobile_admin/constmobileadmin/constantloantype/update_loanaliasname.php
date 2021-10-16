@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','loan_typecode'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
+	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan',$conoracle)){
 		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,LOANTYPE_ALIAS_NAME 
 												FROM gcconstanttypeloan
 												WHERE LOANTYPE_CODE = :loan_typecode");
@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id','loan_typecode'],$dataComing)){
 		if(isset($rowLoantype["LOANTYPE_CODE"])){
 			$update_email = $conoracle->prepare("UPDATE gcconstanttypeloan 
 																	SET LOANTYPE_ALIAS_NAME = :alias_name
-																	WHERE  LOANTYPE_CODE = :loan_typecode;");
+																	WHERE  LOANTYPE_CODE = :loan_typecode");
 			if($update_email->execute([
 				':alias_name' => $dataComing["alias_name"],
 				':loan_typecode' => $dataComing["loan_typecode"] 

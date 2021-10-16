@@ -2,7 +2,8 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
+	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) 
+		|| $func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
@@ -32,7 +33,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				foreach($dataComing["message_importData"] as $target){
 					$destination[] = strtolower($lib->mb_str_pad($target["DESTINATION"]));
 				}
-				$arrToken = $func->getFCMToken('person',$destination);
+				$arrToken = $func->getFCMToken('person',$destination,$$conoracle);
 				foreach($dataComing["message_importData"] as $dest){
 					$indexFound = array_search($dest["DESTINATION"], $arrToken["MEMBER_NO"]);
 					if($indexFound !== false){
@@ -93,7 +94,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					foreach($dataComing["destination"] as $target){
 						$destination[] = strtolower($lib->mb_str_pad($target));
 					}
-					$arrToken = $func->getFCMToken('person',$destination);
+					$arrToken = $func->getFCMToken('person',$destination,$conoracle);
 					foreach($arrToken["LIST_SEND"] as $dest){
 						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
@@ -146,7 +147,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../../include/exit_footer.php');
 				}else{
-					$arrToken = $func->getFCMToken('all');
+					$arrToken = $func->getFCMToken('all',null,$conoracle);
 					foreach($arrToken["LIST_SEND"] as $dest){
 						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
@@ -210,7 +211,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$arrDestGRPNotCorrect[] = $destination_temp;
 					}
 				}
-				$arrayTel = $func->getSMSPerson('person',$destination);
+				$arrayTel = $func->getSMSPerson('person',$destination,$conoracle);
 				if(isset($arrDestGRP)){
 					$arrayMerge = array_merge($arrayTel,$arrDestGRP);
 				}else{
@@ -289,7 +290,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							$arrDestGRPNotCorrect[] = $destination_temp;
 						}
 					}
-					$arrayTel = $func->getSMSPerson('person',$destination);
+					$arrayTel = $func->getSMSPerson('person',$destination,$conoracle);
 					if(isset($arrDestGRP)){
 						$arrayMerge = array_merge($arrayTel,$arrDestGRP);
 					}else{
@@ -339,7 +340,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../../include/exit_footer.php');
 				}else{
-					$arrayTel = $func->getSMSPerson('all');
+					$arrayTel = $func->getSMSPerson('all',null,$conoracle);
 					foreach($arrayTel as $dest){
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 							$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];

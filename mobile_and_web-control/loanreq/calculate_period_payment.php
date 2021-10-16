@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 		try {
 			$request_net = $dataComing["request_amt"] - $dataComing["diff_old_contract"];
 			if($request_net <= 0){
-				$arrayResult = array();
+				
 				$arrayResult['RESPONSE_CODE'] = "WS0086";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -47,8 +47,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','period','request_am
 				$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
 				$pay_period = preg_replace('/,/', '', number_format($responseSoap->period_payment,2));
 				if($pay_period > $dataComing["maxperiod_payment"]){
-					if(($dataComing["maxperiod_payment"] - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
-						$arrayResult = array();
+					if(($pay_period - $dataComing["maxperiod_payment"]) > $rowPayRound["PAYROUND_FACTOR"]){
+						
 						$arrayResult['RESPONSE_CODE'] = "WS0071";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;

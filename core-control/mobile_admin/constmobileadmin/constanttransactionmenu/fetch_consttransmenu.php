@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu')){
+	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu',$conoracle)){
 		$arrayGroup = array();
 		$fetchConstant = $conoracle->prepare("SELECT id_menu,menu_name,menu_icon_path FROM gcmenu mc
 										WHERE id_menu in (56) AND menu_status<> -9");

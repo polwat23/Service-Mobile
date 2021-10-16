@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$id_bankconstantmapping = $func->getMaxTable('id_bankconstantmapping' , 'gcbankconstantmapping');
+	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount',$conoracle)){
+		$id_bankconstantmapping = $func->getMaxTable('id_bankconstantmapping' , 'gcbankconstantmapping',$conoracle);
 		$updateConstants = $conoracle->prepare("INSERT INTO gcbankconstantmapping
 		(id_bankconstantmapping,bank_code, id_bankconstant)
 		VALUES (:id_bankconstantmapping, :bank_code, :id_bankconstant)");

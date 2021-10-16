@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managegroup')){
+	if($func->check_permission_core($payload,'sms','managegroup',$conoracle)){
 		$arrGroupAll = array();
 		if(isset($dataComing["id_group"])){
 			$fetchGroup = $conoracle->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$rowGroup = $fetchGroup->fetch(PDO::FETCH_ASSOC);
 			$arrGroupAll["ID_GROUP"] = $rowGroup["ID_GROUPMEMBER"];
 			$arrGroupAll["GROUP_NAME"] = $rowGroup["GROUP_NAME"];
-			$arrGroupAll["GROUP_MEMBER"] = explode(',',stream_get_contents($rowGroup["GROUP_MEMBER"]));
+			$arrGroupAll["GROUP_MEMBER"] = explode(',',$rowGroup["GROUP_MEMBER"]);
 		}else{
 			$fetchGroup = $conoracle->prepare("SELECT id_groupmember,group_name,group_member FROM smsgroupmember
 												WHERE is_use = '1'");
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGroup = array();
 				$arrGroup["ID_GROUP"] = $rowGroup["ID_GROUPMEMBER"];
 				$arrGroup["GROUP_NAME"] = $rowGroup["GROUP_NAME"];
-				$arrGroup["GROUP_MEMBER"] = explode(',',stream_get_contents($rowGroup["GROUP_MEMBER"]));
+				$arrGroup["GROUP_MEMBER"] = explode(',',$rowGroup["GROUP_MEMBER"]);
 				$arrGroupAll[] = $arrGroup;
 			}
 		}

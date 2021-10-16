@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$pay_period = preg_replace('/,/', '', $responseSoap_Credit->period_payment);
 						if($pay_period > $responseSoap->maxperiod_payment){
 							if(($responseSoap->maxperiod_payment - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
-								$arrayResult = array();
+								
 								$arrayResult['RESPONSE_CODE'] = "WS0071";
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 							}
 						}
 						if($responseSoap->maxperiod_payment == 0){
-							$arrayResult = array();
+							
 							$arrayResult['RESPONSE_CODE'] = "WS0072";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
@@ -89,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 						$arrayResult['DISABLE_PERIOD'] = FALSE;
 						$arrayResult['RECEIVE_AMT'] = $arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'];
 						if($arrayResult['RECEIVE_AMT'] <= 0){
-							$arrayResult = array();
+							
 							$arrayResult['RESPONSE_CODE'] = "WS0086";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;

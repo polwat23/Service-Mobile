@@ -15,10 +15,10 @@ $conoracle = $con->connecttooracle();
 $lib = new library();
 $func = new functions();
 
-/*$columnArr = ['coremenu**','corepermissionmenu**','corepermissionsubmenu**','coresectionsystem**','coresubmenu**','coreuser**','coreuserlogin**','csbankdisplay**','gcannounce**',
-'gcbankconstant**','gcbankconstantmapping','gcbindaccount','gcconstant','gcconstantaccountdept','gcconstantbackground','gcconstantchangeinfo','gcconstanttypeloan',
+/*$columnArr = ['coremenu','corepermissionmenu','coresectionsystem','corepermissionsubmenu','coresubmenu','coreuser','coreuserlogin','csbankdisplay','gcannounce',
+'gcbankconstant','gcbankconstantmapping','gcbindaccount','gcconstant','gcconstantaccountdept','gcconstantbackground','gcconstantchangeinfo','gcconstanttypeloan',
 'gcconstantwelfare','gcdeptalias','gcdeviceblacklist','gcfavoritelist','gcformatreqwelfare','gchistory','gclinenotify','gcmemberaccount','gcmemodept',
-'gcmenu','gcmenuconstantmapping','gcnews','gcotp','gcpalettecolor','gctaskevent--','gctoken','gctransaction','gcuserallowacctransaction','gcuserlogin',
+'gcmenu','gcmenuconstantmapping','gcnews','gcotp','gcpalettecolor','gctaskevent','gctoken','gctransaction','gcuserallowacctransaction','gcuserlogin',
 'logacceptannounce','logbindaccount','logbuyshare','logchangepassword','logdepttransbankerror','logeditadmincontrol','logeditmobileadmin','logerrorusageapplication',
 'loglockaccount','logrepayloan','logreqloan','logtransferinsidecoop','logunbindaccount','loguseapplication','logwithdrawtransbankerror','reconcilewithdrawktb','smsconstantdept',
 'smsconstantinsure','smsconstantloan','smsconstantperson','smsconstantshare','smsconstantsystem','smsconstantwelfare','smsgroupmember','smslogmailsend','smslogwassent',
@@ -31,7 +31,7 @@ $func = new functions();
 	
 }*/
 
-$columnArr = ['gcconstantwelfare'];
+$columnArr = ['gcbindaccount'];
 foreach($columnArr as $table){
 	$i = 0;
 	$bulkInsertArr = array();

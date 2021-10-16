@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managepalette')){
+	if($func->check_permission_core($payload,'mobileadmin','managepalette',$conoracle)){
 		$arrayGroup = array();
 		$fetchPalette = $conoracle->prepare("SELECT id_palette,type_palette,color_main,color_secon,color_deg,color_text,
 										type_palette_prev,color_main_prev,color_secon_prev,color_text_prev,color_deg_prev,update_date

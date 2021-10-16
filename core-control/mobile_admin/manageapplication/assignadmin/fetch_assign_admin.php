@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','assignadmin')){
+	if($func->check_permission_core($payload,'mobileadmin','assignadmin',$conoracle)){
 		$arrayAdmin = array();
 		$fetchAdmin = $conoracle->prepare("SELECT member_no FROM gcmemberaccount WHERE user_type = '1'");
 		$fetchAdmin->execute();

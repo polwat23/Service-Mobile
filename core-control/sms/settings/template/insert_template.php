@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate')){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conoracle)){
 		$id_smsquery = null;
 		$conoracle->beginTransaction();	
-		$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery');
+		$id_smsquery  = $func->getMaxTable('id_smsquery' , 'smsquery',$conoracle);
 		if(isset($dataComing["query_template_spc_"]) && isset($dataComing["column_selected"]) && sizeof($dataComing["column_selected"]) > 0){
 			if($dataComing["is_stampflag"] == '1'){
 				if(empty($dataComing["condition_target"])){
@@ -94,7 +94,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 				}
 			}
 		}
-		$id_smstemplate  = $func->getMaxTable('id_smstemplate' , 'smstemplate');	
+		$id_smstemplate  = $func->getMaxTable('id_smstemplate' , 'smstemplate',$conoracle);	
 		$insertTemplate = $conoracle->prepare("INSERT INTO smstemplate(id_smstemplate,smstemplate_name,smstemplate_body,create_by,id_smsquery) 
 												VALUES(:id_smstemplate, :smstemplate_name,:smstemplate_body,:username,:id_smsquery)");
 		if($insertTemplate->execute([

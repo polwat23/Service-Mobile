@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','input_name','label_text'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
 		
-		$id_format_req_welfare  = $func->getMaxTable('id_format_req_welfare' , 'gcformatreqwelfare');	
+		$id_format_req_welfare  = $func->getMaxTable('id_format_req_welfare' , 'gcformatreqwelfare',$conoracle);	
 		$updaeusername = $conoracle->prepare("INSERT INTO gcformatreqwelfare (
 										id_format_req_welfare,
 										id_const_welfare, 

@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','reconcile')){
+	if($func->check_permission_core($payload,'mobileadmin','reconcile',$conoracle)){
 		$arrayBank = array();
 		
 		$fetchBankList = $conoracle->prepare("SELECT bank_code,bank_short_name,bank_logo_path FROM csbankdisplay");

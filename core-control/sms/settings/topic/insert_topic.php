@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_template','topic_name'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic') && is_numeric($dataComing["id_template"])){
+	if($func->check_permission_core($payload,'sms','managetopic',$conoracle) && is_numeric($dataComing["id_template"])){
 		$conoracle->beginTransaction();
 		$page_name = $lib->randomText('all',6);
-		$id_submenu  = $func->getMaxTable('id_submenu' , 'coresubmenu');	
+		$id_submenu  = $func->getMaxTable('id_submenu' , 'coresubmenu',$conoracle);	
 		$insertSmsMenu = $conoracle->prepare("INSERT INTO coresubmenu(id_submenu,menu_name,page_name,menu_order,create_by,id_menuparent,id_coremenu)
 												VALUES(:id_submenu,:topic_name,:page_name,1,:username,8,1)");
 		if($insertSmsMenu->execute([
@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id','id_template','topic_name'],$dataCom
 			':username' => $payload["username"]
 		])){
 				
-			$id_matching  = $func->getMaxTable('id_matching' , 'smstopicmatchtemplate');
+			$id_matching  = $func->getMaxTable('id_matching' , 'smstopicmatchtemplate',$conoracle);
 			$insertTopicMatch = $conoracle->prepare("INSERT INTO smstopicmatchtemplate(id_matching,id_submenu,id_smstemplate) 
 													VALUES(:id_matching, :id_submenu,:id_smstemplate)");
 			if($insertTopicMatch->execute([

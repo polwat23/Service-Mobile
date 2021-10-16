@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logdepositonline')){
+	if($func->check_permission_core($payload,'log','logdepositonline',$conoracle)){
 		$arrayGroup = array();
 		$fetLogDepositOnline = $conoracle->prepare("SELECT 
 													trans.ref_no,trans.member_no,
@@ -28,36 +28,36 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													  AND transfer_mode ='9'
 												ORDER BY trans.operate_date DESC");
 		$fetLogDepositOnline->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowLogDepositOnline = $fetLogDepositOnline->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositOnline = array();
-			$arrLogDepositOnline["REF_NO"] = $rowLogDepositOnline["ref_no"];
-			$arrLogDepositOnline["MEMBER_NO"] = $rowLogDepositOnline["member_no"];
-			$arrLogDepositOnline["CHANNEL"] = $rowLogDepositOnline["channel"];
-			$arrLogDepositOnline["DEVICE_NAME"] = $rowLogDepositOnline["device_name"];
-			$arrLogDepositOnline["TRANSACTION_TYPE_CODE"] = $rowLogDepositOnline["transaction_type_code"];
-			$arrLogDepositOnline["FROM_ACCOUNT"] = $rowLogDepositOnline["from_account"];
-			$arrLogDepositOnline["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogDepositOnline["from_account"],$formatDept);
-			$arrLogDepositOnline["DESTINATION_TYPE"] = $rowLogDepositOnline["destination_type"];
-			$arrLogDepositOnline["DESTINATION"] = $rowLogDepositOnline["destination"];
-			$arrLogDepositOnline["DESTINATION_FORMAT"]= $lib->formataccount($rowLogDepositOnline["destination"],$formatDept);
-			$arrLogDepositOnline["TRANSFER_MODE"] = $rowLogDepositOnline["transfer_mode"];
-			$arrLogDepositOnline["AMOUNT"] = $rowLogDepositOnline["amount"];
-			$arrLogDepositOnline["AMOUNT_FORMAT"] = number_format($rowLogDepositOnline["amount"],2);
-			$arrLogDepositOnline["FEE_AMT"] = $rowLogDepositOnline["fee_amt"];
-			$arrLogDepositOnline["FEE_AMT_FORMAT"] = number_format($rowLogDepositOnline["fee_amt"],2);
-			$arrLogDepositOnline["PENALTY_AMT"] = $rowLogDepositOnline["penalty_amt"];
-			$arrLogDepositOnline["PENALTY_AMT_FORMAT"] = number_format( $rowLogDepositOnline["penalty_amt"],2);
-			$arrLogDepositOnline["AMOUNT_RECEIVE"] = $rowLogDepositOnline["amount_receive"];
-			$arrLogDepositOnline["AMOUNT_RECEIVE_FORMAT"] = number_format($rowLogDepositOnline["amount_receive"],2);
-			$arrLogDepositOnline["TRANS_FLAG"] = $rowLogDepositOnline["trans_flag"];
-			$arrLogDepositOnline["RESULT_TRANSACTION"] = $rowLogDepositOnline["result_transaction"];
+			$arrLogDepositOnline["REF_NO"] = $rowLogDepositOnline["REF_NO"];
+			$arrLogDepositOnline["MEMBER_NO"] = $rowLogDepositOnline["MEMBER_NO"];
+			$arrLogDepositOnline["CHANNEL"] = $rowLogDepositOnline["CHANNEL"];
+			$arrLogDepositOnline["DEVICE_NAME"] = $rowLogDepositOnline["DEVICE_NAME"];
+			$arrLogDepositOnline["TRANSACTION_TYPE_CODE"] = $rowLogDepositOnline["TRANSACTION_TYPE_CODE"];
+			$arrLogDepositOnline["FROM_ACCOUNT"] = $rowLogDepositOnline["FROM_ACCOUNT"];
+			$arrLogDepositOnline["FROM_ACCOUNT_FORMAT"]= $lib->formataccount($rowLogDepositOnline["FROM_ACCOUNT"],$formatDept);
+			$arrLogDepositOnline["DESTINATION_TYPE"] = $rowLogDepositOnline["DESTINATION_TYPE"];
+			$arrLogDepositOnline["DESTINATION"] = $rowLogDepositOnline["DESTINATION"];
+			$arrLogDepositOnline["DESTINATION_FORMAT"]= $lib->formataccount($rowLogDepositOnline["DESTINATION"],$formatDept);
+			$arrLogDepositOnline["TRANSFER_MODE"] = $rowLogDepositOnline["TRANSFER_MODE"];
+			$arrLogDepositOnline["AMOUNT"] = $rowLogDepositOnline["AMOUNT"];
+			$arrLogDepositOnline["AMOUNT_FORMAT"] = number_format($rowLogDepositOnline["AMOUNT"],2);
+			$arrLogDepositOnline["FEE_AMT"] = $rowLogDepositOnline["FEE_AMT"];
+			$arrLogDepositOnline["FEE_AMT_FORMAT"] = number_format($rowLogDepositOnline["FEE_AMT"],2);
+			$arrLogDepositOnline["PENALTY_AMT"] = $rowLogDepositOnline["PENALTY_AMT"];
+			$arrLogDepositOnline["PENALTY_AMT_FORMAT"] = number_format( $rowLogDepositOnline["PENALTY_AMT"],2);
+			$arrLogDepositOnline["AMOUNT_RECEIVE"] = $rowLogDepositOnline["AMOUNT_RECEIVE"];
+			$arrLogDepositOnline["AMOUNT_RECEIVE_FORMAT"] = number_format($rowLogDepositOnline["AMOUNT_RECEIVE"],2);
+			$arrLogDepositOnline["TRANS_FLAG"] = $rowLogDepositOnline["TRANS_FLAG"];
+			$arrLogDepositOnline["RESULT_TRANSACTION"] = $rowLogDepositOnline["RESULT_TRANSACTION"];
 			
-			$arrLogDepositOnline["OPERATE_DATE"] =  $lib->convertdate($rowLogDepositOnline["operate_date"],'d m Y',true); 
+			$arrLogDepositOnline["OPERATE_DATE"] =  $lib->convertdate($rowLogDepositOnline["OPERATE_DATE"],'d m Y',true); 
 			
-			$arrLogDepositOnline["REF_NO_1"] = $rowLogDepositOnline["ref_no_1"];
-			$arrLogDepositOnline["COOP_SLIP_NO"] = $rowLogDepositOnline["coop_slip_no"];
-			$arrLogDepositOnline["REF_NO_SOURCE"] = $rowLogDepositOnline["ref_no_source"];
+			$arrLogDepositOnline["REF_NO_1"] = $rowLogDepositOnline["REF_NO_1"];
+			$arrLogDepositOnline["COOP_SLIP_NO"] = $rowLogDepositOnline["COOP_SLIP_NO"];
+			$arrLogDepositOnline["REF_NO_SOURCE"] = $rowLogDepositOnline["REF_NO_SOURCE"];
 		
 			$arrayGroup[] = $arrLogDepositOnline;
 		}

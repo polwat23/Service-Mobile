@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','allusers')){
+	if($func->check_permission_core($payload,'mobileadmin','allusers',$conoracle)){
 		$arrayGroup = array();
 		$fetchUserAccount = $conoracle->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status 
 												FROM gcmemberaccount");

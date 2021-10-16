@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','searchmember')){
+	if($func->check_permission_core($payload,'mobileadmin','searchmember',$conoracle)){
 		$arrayGroup = array();
 		$fetchProvince = $conoracle->prepare("SELECT province_code,province_desc FROM mbucfprovince");
 		$fetchProvince->execute();

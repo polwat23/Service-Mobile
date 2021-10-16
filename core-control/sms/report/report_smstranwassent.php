@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','reportsmstransuccess')){
+	if($func->check_permission_core($payload,'sms','reportsmstransuccess',$conoracle)){
 		$arrayExecute = array();
 		$arrayAll = array();
 		if(isset($dataComing["id_template"]) && $dataComing["id_template"] != ''){
@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											".(isset($dataComing["id_template"]) && $dataComing["id_template"] != '' ? "and id_smstemplate = :id_template" : null)."
 											".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? "and member_no = :member_no" : null)."
 											".(isset($dataComing["send_by"]) && $dataComing["send_by"] != '' ? "and send_by = :send_by" : null)."
-											".(isset($dataComing["start_date"]) && $dataComing["start_date"] != '' ? "and TO_DATE(send_date,'YYYY-MM-DD') >= :start_date" : null)."
-											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and TO_DATE(send_date,'YYYY-MM-DD') <= :end_date" : null)." ORDER BY send_date DESC");
+											".(isset($dataComing["start_date"]) && $dataComing["start_date"] != '' ? "and TO_CHAR(send_date,'YYYY-MM-DD') >= :start_date" : null)."
+											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and TO_CHAR(send_date,'YYYY-MM-DD') <= :end_date" : null)." ORDER BY send_date DESC");
 		$fetchReport->execute($arrayExecute);
 		while($rowReport = $fetchReport->fetch(PDO::FETCH_ASSOC)){
 			$arrayReport = array();

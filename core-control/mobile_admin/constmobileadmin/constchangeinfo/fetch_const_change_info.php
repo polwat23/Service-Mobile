@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantchangeinfo')){
+	if($func->check_permission_core($payload,'mobileadmin','constantchangeinfo',$conoracle)){
 		$arrayGroup = array();
 		$fetchConstChangeInfo = $conoracle->prepare("SELECT const_code,const_desc,is_change,save_tablecore FROM gcconstantchangeinfo");
 		$fetchConstChangeInfo->execute();

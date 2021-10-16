@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
+	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount',$conoracle)){
 		$menuName = "manageuseraccount";
 		$list_name = "reset password";
 

@@ -64,7 +64,6 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 						$receive_net = $dataComing["request_amt"] - $diff_old_contract;
 						$resultWS = $clientWS->__call("of_saveloanmobile_atm_ivr", array($argumentWS));
 						$responseSoapSave = $resultWS->of_saveloanmobile_atm_ivrResult;
-						
 						$insertReqLoan = $conoracle->prepare("INSERT INTO logreqloan(id_reqloan,member_no,loantype_code,request_amt,period_payment,period,deptaccount_no,loanpermit_amt,diff_old_contract,receive_net,id_userlogin)
 															VALUES(:id_reqloan,:member_no,:loantype_code,:request_amt,:period_payment,:period,:account_id,:loan_permit,:diff_old_contract,:receive_net,:id_userlogin)");
 						$insertReqLoan->execute([
@@ -80,6 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 							':receive_net' => $receive_net,
 							':id_userlogin' => $payload["id_userlogin"]
 						]);
+
 						$getLoanDesc = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 						$getLoanDesc->execute([':loantype_code' => $dataComing["loantype_code"]]);
 						$rowLoanDesc = $getLoanDesc->fetch(PDO::FETCH_ASSOC);
@@ -124,6 +124,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 							}
 						}
 						$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
+						$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent');
 						foreach($arrayTel as $dest){
 							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 								$message_body = $message_endpoint["BODY"];
@@ -133,16 +134,19 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 									$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
 									$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system');
 								}else{
-									$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+									$bulkInsert[] = "(".$id_smsnotsent.",null,'".$message_body."','".$payload["member_no"]."',
 											'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
 									$func->logSMSWasNotSent($bulkInsert);
 								}
 							}else{
-								$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+								$bulkInsert[] = "(".$id_smsnotsent.",null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
 										'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
 								$func->logSMSWasNotSent($bulkInsert);
 							}
+							$id_smsnotsent++;
 						}
+						$arrayResult['DIFF_OLD_CONTRACT'] = number_format($diff_old_contract,2);
+						$arrayResult['RECEIVE_AMT'] = number_format($dataComing["request_amt"] - $diff_old_contract,2);
 						$arrayResult['TRANSACTION_DATE'] = $lib->convertdate(date('Y-m-d'),'d m Y');
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');

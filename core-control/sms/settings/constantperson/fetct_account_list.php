@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageconstperson')){
+	if($func->check_permission_core($payload,'sms','manageconstperson',$conoracle)){
 		$arrayGroup = array();
 		//fetch smsConstantDept
 		$fetchConstant = $conoracle->prepare("SELECT id_smscsperson as id_constantperson,smscsp_member as member_no,smscsp_mindeposit as mindeposit,

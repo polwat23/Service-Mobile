@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead') || 
-	$func->check_permission_core($payload,'sms','sendmessageall') || 
-	$func->check_permission_core($payload,'sms','sendmessageperson')){
+	if($func->check_permission_core($payload,'sms','manageahead',$conoracle) || 
+	$func->check_permission_core($payload,'sms','sendmessageall',$conoracle) || 
+	$func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		$platform = null;
 		$pathImg = null;
 		$id_smsquery = isset($dataComing["id_smsquery"]) && $dataComing["id_smsquery"] != '' ? $dataComing["id_smsquery"] : null;
@@ -45,10 +45,10 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 			}
 		}
 		if(isset($dataComing["type_send"]) && $dataComing["type_send"] == "all"){
-			$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead');
+			$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead',$conoracle);
 			$insertSendAhead = $conoracle->prepare("INSERT INTO smssendahead(id_sendahead,send_topic,send_message,destination,send_date,create_by,
 													id_smsquery,id_smstemplate,send_platform,send_image)
-													VALUES(:id_sendahead,:send_topic,:send_message,'all',TO_DATE(:send_date,'yyyy/mm/dd'),:username,:id_smsquery,:id_template,:send_platform,:send_image)");
+													VALUES(:id_sendahead,:send_topic,:send_message,'all',TO_DATE(:send_date,'yyyy-mm-dd hh24:mi'),:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 			if($insertSendAhead->execute([
 				':id_sendahead' => $id_sendahead,
 				':send_topic' => $dataComing["send_topic_emoji_"],
@@ -70,10 +70,10 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 			}
 		}else{
 			if(isset($dataComing["message_importData"]) && $dataComing["message_importData"] != "" && sizeof($dataComing["message_importData"]) > 0){
-				$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead');
+				$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead',$conoracle);
 				$insertSendAhead = $conoracle->prepare("INSERT INTO smssendahead(id_sendahead,send_topic,destination,destination_revoke,send_date,create_by,is_import,
 														id_smsquery,id_smstemplate,send_platform,send_image)
-														VALUES(:id_sendahead, :send_topic,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy/mm/dd'),:username,'1',:id_smsquery,:id_template,:send_platform,:send_image)");
+														VALUES(:id_sendahead, :send_topic,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy-mm-dd hh24:mi'),:username,'1',:id_smsquery,:id_template,:send_platform,:send_image)");
 				if($insertSendAhead->execute([
 					':id_sendahead' => $id_sendahead,
 					':send_topic' => $dataComing["send_topic_emoji_"],
@@ -96,10 +96,10 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 				}
 			}else{
 				if(isset($id_smsquery)){
-					$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead');
+					$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead',$conoracle);
 					$insertSendAhead = $conoracle->prepare("INSERT INTO smssendahead(id_sendahead,send_topic,send_message,destination,destination_revoke,send_date,create_by,
 															id_smsquery,id_smstemplate,send_platform,send_image)
-															VALUES(:id_sendahead,:send_topic,:send_message,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy/mm/dd'),:username,:id_smsquery,:id_template,:send_platform,:send_image)");
+															VALUES(:id_sendahead,:send_topic,:send_message,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy/mm/dd hh24:mi'),:username,:id_smsquery,:id_template,:send_platform,:send_image)");
 					if($insertSendAhead->execute([
 						':id_sendahead' => $id_sendahead,
 						':send_topic' => $dataComing["send_topic_emoji_"],
@@ -123,10 +123,10 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 					}
 
 				}else{
-					$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead');
+					$id_sendahead  = $func->getMaxTable('id_sendahead' , 'smssendahead',$conoracle);
 					$insertSendAhead = $conoracle->prepare("INSERT INTO smssendahead(id_sendahead,send_topic,send_message,destination,destination_revoke,send_date,create_by, 
 															id_smstemplate,send_platform,send_image)
-															VALUES(:id_sendahead, :send_topic,:send_message,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy/mm/dd'),:username,:id_template,:send_platform,:send_image)");
+															VALUES(:id_sendahead, :send_topic,:send_message,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy/mm/dd hh24:mi'),:username,:id_template,:send_platform,:send_image)");
 					if($insertSendAhead->execute([
 						':id_sendahead' => $id_sendahead,
 						':send_topic' => $dataComing["send_topic_emoji_"],

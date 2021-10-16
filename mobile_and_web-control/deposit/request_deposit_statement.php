@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$fetchMail = $conoracle->prepare("SELECT  email FROM mbmembmaster WHERE member_no = :member_no");
-		$fetchMail->execute([':member_no' => $payload["member_no"]]);
+		$fetchMail->execute([':member_no' => $member_no]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
@@ -109,18 +109,19 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	//style table
 	  $html = '<style>
 
-		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
+		 @font-face {
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
-		  * {
-			font-family: THSarabun;
-		  }
+			* {
+			  font-family: TH Niramit AS;
+			}
+
 
 
 		  body {
@@ -169,6 +170,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding-top: 80px;
 		}
 		.frame-info-user {
+			line-height: 12px;
 			padding: 10px -10px 10px 10px;
 			position: fixed;
 			left: 440px;
@@ -178,6 +180,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			border: 0.5px #DDDDDD solid;
 			border-radius: 5px;
 		}
+
 		.label {
 			width: 30%;
 			padding: 0 5px;
@@ -196,15 +199,15 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 					สหกรณ์ออมทรัพย์กรมป่าไม้ จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Mahidol University Savings and Credit Co-Operative, Limited
+					Royal Forest Department Savings and Credit Cooperative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;">
 					<div class="label">เลขสมาชิก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
 					</div>
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
 					</div>
@@ -222,7 +225,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:70px;">วัน เดือน ปี</th>
+		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
 		  <th>รายการ</th>
 		  <th>ฝาก</th>
 		  <th>ถอน</th>
@@ -295,14 +298,18 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
-	$font = $dompdf->getFontMetrics()->get_font("THSarabun", "");
-	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}", $font, 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
+	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;

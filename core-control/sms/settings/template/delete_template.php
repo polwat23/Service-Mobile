@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_smstemplate'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate')){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conoracle)){
 		
 		$fetchCheckTemplate = $conoracle->prepare("SELECT temp.id_submenu,temp.id_smstemplate,temp.is_use as temp_isuse,sub.menu_status FROM `smstopicmatchtemplate` temp
 			JOIN coresubmenu sub On temp.id_submenu = sub.id_submenu

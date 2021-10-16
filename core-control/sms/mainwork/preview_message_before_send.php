@@ -1,9 +1,11 @@
 <?php
 require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send','id_query'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','sendmessageall') || $func->check_permission_core($payload,'sms','sendmessageperson')){
+	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) || 
+	$func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		if($dataComing["channel_send"] == "mobile_app"){
-			$getQuery = $conoracle->prepare("SELECT id_smsquery,sms_query,column_selected,is_bind_param,target_field,condition_target FROM smsquery WHERE id_smsquery = :id_query");
+			$getQuery = $conoracle->prepare("SELECT id_smsquery,sms_query,column_selected,is_bind_param,target_field,condition_target 
+											FROM smsquery WHERE id_smsquery = :id_query");
 			$getQuery->execute([':id_query' => $dataComing["id_query"]]);
 			$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowQuery["ID_SMSQUERY"])){
@@ -198,7 +200,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$arrGroupAllFailed = array();
 				$arrColumn = explode(',',$rowQuery["COLUMN_SELECTED"]);
 				if($rowQuery["IS_BIND_PARAM"] == '0'){
-					$queryTarget = $conoracle->prepare($rowQuery['SMS_QUERY']);
+					$queryTarget = $conoracle->prepare(preg_replace('/\"/',"'",$rowQuery['SMS_QUERY']));
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrTarget = array();
@@ -206,7 +208,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 						}
 						$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
-						$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
+						$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["TARGET_FIELD"]],$conoracle);
 						foreach($arrayTel as $dest){
 							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 								$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
@@ -225,6 +227,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
+					$arrayResult['TTT'] = $arrayTel;
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../../include/exit_footer.php');
 				}else{
@@ -302,6 +305,8 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						}
 					}
 					$arrayResult['SUCCESS'] = $arrGroupAllSuccess;
+					$arrayResult['QUERY'] = $query;
+					$arrayResult['DESTINATION'] = $destination;
 					$arrayResult['FAILED'] = $arrGroupAllFailed;
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../../include/exit_footer.php');

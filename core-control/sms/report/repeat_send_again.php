@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrDestGRP = array();
 		$arrayTel = array();
 		if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
-			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],false,true);
+			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],$conoracle,false,true);
 		}else{
 			$destination_temp["MEMBER_NO"] = null;
 			$destination_temp["TEL"] = $rowMessage["TEL_MOBILE"];
@@ -24,6 +24,8 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		}else{
 			$arrayMerge = $arrayTel;
 		}
+		$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
+		//$id_history = $func->getMaxTable('id_history' , 'gchistory');
 		foreach($arrayMerge as $dest){
 			if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 				$message_body = $rowMessage["SMS_MESSAGE"];
@@ -32,20 +34,21 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				if($arraySendSMS["RESULT"]){
 					$arrGRPAll[$dest["MEMBER_NO"]] = $rowMessage["SMS_MESSAGE"];
 				}else{
-					$bulkInsert[] = "(null,'".$message_body."','".$dest["MEMBER_NO"]."',
+					$bulkInsert[] = "(".$id_smsnotsent.",null,'".$message_body."','".$dest["MEMBER_NO"]."',
 							'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
 					if(sizeof($bulkInsert) == 1000){
-						$func->logSMSWasNotSent($bulkInsert);
+						$func->logSMSWasNotSent($bulkInsert,$conoracle);
 						unset($bulkInsert);
 					}
 				}
 			}
+			$id_smsnotsent++;
 		}
 		if(sizeof($arrGRPAll) > 0){
-			$func->logSMSWasSent($rowMessage["ID_SMSTEMPLATE"],$arrGRPAll,$arrayMerge,$payload["username"],true);
+			$func->logSMSWasSent($rowMessage["ID_SMSTEMPLATE"],$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
 		}
 		if(sizeof($bulkInsert) > 0){
-			$func->logSMSWasNotSent($bulkInsert);
+			$func->logSMSWasNotSent($bulkInsert,$conoracle);
 			unset($bulkInsert);
 			$bulkInsert = array();
 		}
@@ -62,7 +65,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$arrDestGRP = array();
 			$arrayTel = array();
 			if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
-				$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],false,true);
+				$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],$conoracle,false,true);
 			}else{
 				$destination_temp["MEMBER_NO"] = null;
 				$destination_temp["TEL"] = $rowMessage["TEL_MOBILE"];
@@ -74,6 +77,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			}else{
 				$arrayMerge = $arrayTel;
 			}
+			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			foreach($arrayMerge as $dest){
 				if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 					$message_body = $rowMessage["MESSAGE"];
@@ -82,20 +86,20 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 					if($arraySendSMS["RESULT"]){
 						$arrGRPAll[$dest["MEMBER_NO"]] = $rowMessage["MESSAGE"];
 					}else{
-						$bulkInsert[] = "(null,'".$message_body."','".$dest["MEMBER_NO"]."',
+						$bulkInsert[] = "(".$id_smsnotsent.",null,'".$message_body."','".$dest["MEMBER_NO"]."',
 								'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
 						if(sizeof($bulkInsert) == 1000){
-							$func->logSMSWasNotSent($bulkInsert);
+							$func->logSMSWasNotSent($bulkInsert,$conoracle);
 							unset($bulkInsert);
 						}
 					}
 				}
 			}
 			if(sizeof($arrGRPAll) > 0){
-				$func->logSMSWasSent($rowMessage["ID_SMSTEMPLATE"],$arrGRPAll,$arrayMerge,$payload["username"],true);
+				$func->logSMSWasSent($rowMessage["ID_SMSTEMPLATE"],$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
 			}
 			if(sizeof($bulkInsert) > 0){
-				$func->logSMSWasNotSent($bulkInsert);
+				$func->logSMSWasNotSent($bulkInsert,$conoracle);
 				unset($bulkInsert);
 				$bulkInsert = array();
 			}
@@ -105,7 +109,9 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$blukInsert = array();
 			$blukInsertNot = array();
 			$destination = array();
-			$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"]);
+			$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"],$conoracle);
+			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
+			$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 					$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
@@ -118,33 +124,35 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 					$arrPayloadNotify["SEND_BY"] = $payload["username"];
 					$arrPayloadNotify["ID_TEMPLATE"] = $rowMessage["ID_SMSTEMPLATE"];
 					if($lib->sendNotify($arrPayloadNotify,'person')){
-						$blukInsert[] = "('1','".$rowMessage["TOPIC"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
+						$blukInsert[] = "(".$id_history.",'1','".$rowMessage["TOPIC"]."','".$message."','".($pathImg ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
 						if(sizeof($blukInsert) == 1000){
 							$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 							$arrPayloadHistory["bulkInsert"] = $blukInsert;
-							$func->insertHistory($arrPayloadHistory);
+							$func->insertHistory($arrPayloadHistory,'1','0',$conoracle);
 							unset($blukInsert);
 							$blukInsert = array();
 						}
 					}else{
-						$blukInsertNot[] = "('".$rowMessage["TOPIC"]."','".$message."','".$dest["MEMBER_NO"]."','mobile_app',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").",'".($pathImg ?? null)."')";
+						$blukInsertNot[] = "(".$id_smsnotsent.",'".$rowMessage["TOPIC"]."','".$message."','".$dest["MEMBER_NO"]."','mobile_app',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").",'".($pathImg ?? null)."')";
 						if(sizeof($blukInsertNot) == 1000){
-							$func->logSMSWasNotSent($blukInsertNot,false,'0',true);
+							$func->logSMSWasNotSent($blukInsertNot,$conoracle,false,'0',true);
 							unset($blukInsertNot);
 							$blukInsertNot = array();
 						}
 					}
 				}
+				$id_smsnotsent++;
+				$id_history ++;
 			}
 			if(sizeof($blukInsert) > 0){
 				$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 				$arrPayloadHistory["bulkInsert"] = $blukInsert;
-				$func->insertHistory($arrPayloadHistory);
+				$func->insertHistory($arrPayloadHistory,'1','0',$conoracle);
 				unset($blukInsert);
 				$blukInsert = array();
 			}
 			if(sizeof($blukInsertNot) > 0){
-				$func->logSMSWasNotSent($blukInsertNot,false,'0',true);
+				$func->logSMSWasNotSent($blukInsertNot,$conoracle,false,'0',true);
 				unset($blukInsertNot);
 				$blukInsertNot = array();
 			}
@@ -159,7 +167,9 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$blukInsert = array();
 		$blukInsertNot = array();
 		$destination = array();
-		$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"]);
+		$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"],$conoracle);
+		$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
+		$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
 		foreach($arrToken["LIST_SEND"] as $dest){
 			if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 				$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
@@ -172,33 +182,35 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				$arrPayloadNotify["SEND_BY"] = $rowMessage["SEND_BY"];
 				$arrPayloadNotify["ID_TEMPLATE"] = $rowMessage["ID_SMSTEMPLATE"];
 				if($lib->sendNotify($arrPayloadNotify,'person')){
-					$blukInsert[] = "('1','".$rowMessage["HIS_TITLE"]."','".$message."','".($rowMessage["HIS_PATH_IMAGE"] ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
+					$blukInsert[] = "(".$id_history.",'1','".$rowMessage["HIS_TITLE"]."','".$message."','".($rowMessage["HIS_PATH_IMAGE"] ?? null)."','".$dest["MEMBER_NO"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
 					if(sizeof($blukInsert) == 1000){
 						$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 						$arrPayloadHistory["bulkInsert"] = $blukInsert;
-						$func->insertHistory($arrPayloadHistory,$rowMessage["HIS_TYPE"]);
+						$func->insertHistory($arrPayloadHistory,$rowMessage["HIS_TYPE"],'0',$conoracle);
 						unset($blukInsert);
 						$blukInsert = array();
 					}
 				}else{
-					$blukInsertNot[] = "('".$rowMessage["HIS_TITLE"]."','".$message."','".$dest["MEMBER_NO"]."','mobile_app',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").",'".($rowMessage["HIS_PATH_IMAGE"] ?? null)."')";
+					$blukInsertNot[] = "(".$id_smsnotsent.",'".$rowMessage["HIS_TITLE"]."','".$message."','".$dest["MEMBER_NO"]."','mobile_app',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").",'".($rowMessage["HIS_PATH_IMAGE"] ?? null)."')";
 					if(sizeof($blukInsertNot) == 1000){
-						$func->logSMSWasNotSent($blukInsertNot,false,'0',true);
+						$func->logSMSWasNotSent($blukInsertNot,$conoracle,false,'0',true);
 						unset($blukInsertNot);
 						$blukInsertNot = array();
 					}
 				}
 			}
+			$id_smsnotsent++;
+			$id_history++;
 		}
 		if(sizeof($blukInsert) > 0){
 			$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
 			$arrPayloadHistory["bulkInsert"] = $blukInsert;
-			$func->insertHistory($arrPayloadHistory,$rowMessage["HIS_TYPE"]);
+			$func->insertHistory($arrPayloadHistory,$rowMessage["HIS_TYPE"],'0',$conoracle);
 			unset($blukInsert);
 			$blukInsert = array();
 		}
 		if(sizeof($blukInsertNot) > 0){
-			$func->logSMSWasNotSent($blukInsertNot,false,'0',true);
+			$func->logSMSWasNotSent($blukInsertNot,$conoracle,false,'0',true);
 			unset($blukInsertNot);
 			$blukInsertNot = array();
 		}
@@ -214,7 +226,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrDestGRP = array();
 		$arrayTel = array();
 		if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
-			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],false,true);
+			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],$conoracle,false,true);
 		}else{
 			$destination_temp["MEMBER_NO"] = null;
 			$destination_temp["TEL"] = $rowMessage["TEL_MOBILE"];
@@ -226,6 +238,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		}else{
 			$arrayMerge = $arrayTel;
 		}
+		$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 		foreach($arrayMerge as $dest){
 			if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 				$message_body = $rowMessage["SMS_MESSAGE"];
@@ -234,20 +247,21 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 				if($arraySendSMS["RESULT"]){
 					$arrGRPAll[$dest["MEMBER_NO"]] = $rowMessage["SMS_MESSAGE"];
 				}else{
-					$bulkInsert[] = "(null,'".$message_body."','".$dest["MEMBER_NO"]."',
+					$bulkInsert[] = "(".$id_smsnotsent.",null,'".$message_body."','".$dest["MEMBER_NO"]."',
 							'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($rowMessage["ID_SMSTEMPLATE"]) ? ",".$rowMessage["ID_SMSTEMPLATE"] : ",null").")";
 					if(sizeof($bulkInsert) == 1000){
-						$func->logSMSWasNotSent($bulkInsert);
+						$func->logSMSWasNotSent($bulkInsert,$conoracle);
 						unset($bulkInsert);
 					}
 				}
 			}
+			$id_smsnotsent++;
 		}
 		if(sizeof($arrGRPAll) > 0){
-			$func->logSMSWasSent($rowMessage["ID_SMSTEMPLATE"],$arrGRPAll,$arrayMerge,$payload["username"],true);
+			$func->logSMSWasSent($rowMessage["ID_SMSTEMPLATE"],$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
 		}
 		if(sizeof($bulkInsert) > 0){
-			$func->logSMSWasNotSent($bulkInsert);
+			$func->logSMSWasNotSent($bulkInsert,$conoracle);
 			unset($bulkInsert);
 			$bulkInsert = array();
 		}

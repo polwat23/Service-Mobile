@@ -3,16 +3,18 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Notification')){
-		$getBadge = $conoracle->prepare("SELECT IFNULL(COUNT(id_history),0) as badge,his_type FROM gchistory 
+		$count = 0;
+		$getBadge = $conoracle->prepare("SELECT NVL(COUNT(id_history),0) as badge,his_type FROM gchistory 
 										WHERE member_no = :member_no AND his_read_status = '0' and his_del_status = '0' 
 										GROUP BY his_type");
 		$getBadge->execute([
 			':member_no' => $payload["member_no"]
 		]);
-		if($getBadge->rowCount() > 0){
-			while($badgeData = $getBadge->fetch(PDO::FETCH_ASSOC)){
+		while($badgeData = $getBadge->fetch(PDO::FETCH_ASSOC)){
 				$arrayResult['BADGE_'.$badgeData["HIS_TYPE"]] = isset($badgeData["BADGE"]) ? $badgeData["BADGE"] : 0;
-			}
+				$count++;
+		}	
+		if($count > 0){
 			if(isset($arrayResult['BADGE_1'])){
 				$arrayResult['BADGE_1'] = $arrayResult['BADGE_1'];
 			}else{

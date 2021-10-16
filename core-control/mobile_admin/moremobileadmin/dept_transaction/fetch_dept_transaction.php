@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','depttransaction')){
+	if($func->check_permission_core($payload,'mobileadmin','depttransaction',$conoracle)){
 		$arrayExecute = array();
 		$arrayGrpAll = array();
 		
@@ -112,7 +112,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchReconcile->execute($arrayExecute);
 
 		$summary = 0;
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrayRecon = array();
 			$arrayRecon["TRANSACTION_TYPE_CODE"] = $rowRecon["TRANSACTION_TYPE_CODE"];

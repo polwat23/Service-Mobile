@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_format_req_welfare','input_type','input_name','label_text'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
 		$updateform = $conoracle->prepare("UPDATE gcformatreqwelfare 
 									SET input_type = :input_type,
 									input_length = :input_length,

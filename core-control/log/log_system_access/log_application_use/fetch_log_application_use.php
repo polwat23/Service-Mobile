@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logapplicationuse')){
+	if($func->check_permission_core($payload,'log','logapplicationuse',$conoracle)){
 		$arrayGroup = array();
 		$fetchApplicationUseLog = $conoracle->prepare("SELECT
 																					l.id_loguseapp,
@@ -18,17 +18,19 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																					loguseapplication l
 																				INNER JOIN gcuserlogin g ON
 																					g.id_userlogin = l.id_userlogin
-																				WHERE l.access_date BETWEEN NOW() - INTERVAL 3 MONTH and NOW()
-																					ORDER BY g.login_date DESC");
+																				WHERE  TO_CHAR(l.access_date, 'YYYYMMDD')  BETWEEN TO_CHAR(ADD_MONTHS(sysdate,-3), 'YYYYMMDD') and TO_CHAR(sysdate, 'YYYYMMDD')
+																					ORDER BY g.login_date DESC
+
+");
 		$fetchApplicationUseLog->execute();
 		while($rowAppUseLog = $fetchApplicationUseLog->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupApplicationUseLog = array();
-			$arrGroupApplicationUseLog["ID_USERLOGIN"] = $rowAppUseLog["id_userlogin"];
-			$arrGroupApplicationUseLog["MEMBER_NO"] = $rowAppUseLog["member_no"];
-			$arrGroupApplicationUseLog["DEVICE_NAME"] = $rowAppUseLog["device_name"];
-			$arrGroupApplicationUseLog["ACCESS_DATE"] =  $lib->convertdate($rowAppUseLog["access_date"],'d m Y',true); 
-			$arrGroupApplicationUseLog["IS_LOGIN"] = $rowAppUseLog["is_login"];
-			$arrGroupApplicationUseLog["IP_ADDRESS"] = $rowAppUseLog["ip_address"];
+			$arrGroupApplicationUseLog["ID_USERLOGIN"] = $rowAppUseLog["ID_USERLOGIN"];
+			$arrGroupApplicationUseLog["MEMBER_NO"] = $rowAppUseLog["MEMBER_NO"];
+			$arrGroupApplicationUseLog["DEVICE_NAME"] = $rowAppUseLog["DEVICE_NAME"];
+			$arrGroupApplicationUseLog["ACCESS_DATE"] =  $lib->convertdate($rowAppUseLog["ACCESS_DATE"],'d m Y',true); 
+			$arrGroupApplicationUseLog["IS_LOGIN"] = $rowAppUseLog["IS_LOGIN"];
+			$arrGroupApplicationUseLog["IP_ADDRESS"] = $rowAppUseLog["IP_ADDRESS"];
 			
 			$arrayGroup[] = $arrGroupApplicationUseLog;
 		}

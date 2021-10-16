@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageaccbeenbind')){
+	if($func->check_permission_core($payload,'mobileadmin','manageaccbeenbind',$conoracle)){
 		$arrayBindaccount = array();
 		$fetchBindAcount = $conoracle->prepare("SELECT 
 														gba.id_bindaccount,
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												    ON cs.bank_code = gba.bank_code 
 													WHERE gba.bindaccount_status = '1'");
 		$fetchBindAcount->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($dataBindAcount = $fetchBindAcount->fetch(PDO::FETCH_ASSOC)){
 			$bindaccount = array();
 			$bindaccount["MEMBER_NO"] = $dataBindAcount["MEMBER_NO"];

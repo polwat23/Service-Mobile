@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managebackground')){
+	if($func->check_permission_core($payload,'mobileadmin','managebackground',$conoracle)){
 		$fetchBG = $conoracle->prepare("SELECT id_background,image,update_date,is_use,update_by FROM gcconstantbackground WHERE is_use = '1'");
 								
 		$fetchBG->execute();
@@ -15,8 +15,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupNews["UPDATE_BY"] = $rowbg["UPDATE_BY"];
 			
 			if(isset($rowbg["IMAGE"])){
-				$arrGroupNews["IMAGE"] = $config["URL_SERVICE"].stream_get_contents($rowbg["IMAGE"]);
-				$explodePathAvatar = explode('.', stream_get_contents($rowbg["IMAGE"]));
+				$arrGroupNews["IMAGE"] = $config["URL_SERVICE"].$rowbg["IMAGE"];
+				$explodePathAvatar = explode('.', $rowbg["IMAGE"]);
 				$arrGroupNews["IMAGE_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			}else{
 				$arrGroupNews["IMAGE"] = null;

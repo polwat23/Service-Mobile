@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','calendarcoop')){
+	if($func->check_permission_core($payload,'mobileadmin','calendarcoop',$conoracle)){
 		$arrayGroup = array();
 		
 		$fetchCalendar= $conoracle->prepare("SELECT id_task,task_topic,task_detail,TO_CHAR(start_date,'YYYY-MM-DD') as start_date,
@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ID_TASK"] = $rowCalendar["ID_TASK"];
 			$arrConstans["TASK_TOPIC"] = $rowCalendar["TASK_TOPIC"];
 			$arrConstans["TASK_DETAIL"] = $rowCalendar["TASK_DETAIL"] ?? "";
-			$arrConstans["EVENT_HTML"] = stream_get_contents($rowCalendar["EVENT_HTML"]);
+			$arrConstans["EVENT_HTML"] = file_get_contents(__DIR__.'/../../../..'.$rowCalendar["EVENT_HTML"]);
 			$arrConstans["START_DATE"] = $rowCalendar["START_DATE"];
 			$arrConstans["END_DATE"] = $rowCalendar["END_DATE"];
 			$arrConstans["START_TIME"] = $rowCalendar["EVENT_START_TIME"];

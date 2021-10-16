@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantsystem')){
+	if($func->check_permission_core($payload,'mobileadmin','constantsystem',$conoracle)){
 		$arrayGroup = array();
 		$fetchConstant = $conoracle->prepare("SELECT id_constant,constant_name,constant_desc,constant_value,is_dropdown,initial_value
 											 FROM gcconstant WHERE is_use = '1'");
@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["CONSTANT_DESC"] = $rowMenuMobile["CONSTANT_DESC"];
 			$arrConstans["CONSTANT_VALUE"] = $rowMenuMobile["CONSTANT_VALUE"];
 			$arrConstans["IS_DROPDOWN"] = $rowMenuMobile["IS_DROPDOWN"];
-			$arrConstans["INITIAL_VALUE"] = stream_get_contents($rowMenuMobile["INITIAL_VALUE"]);
+			$arrConstans["INITIAL_VALUE"] = $rowMenuMobile["INITIAL_VALUE"];
 			$arrayGroup[] = $arrConstans;
 		}
 		$arrayResult["CONSTANT_DATA"] = $arrayGroup;

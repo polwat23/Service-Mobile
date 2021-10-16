@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if(file_exists($pathname)){
 				$fileModify = date("YmdHi", filemtime($pathname));
 				if($rowBenefit["UPDATE_DATE"] >= $fileModify){
-					file_put_contents($pathname,base64_decode(base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"]))));
+					file_put_contents($pathname,base64_decode(base64_encode($rowBenefit["BASE64_IMG"])));
 					$arrSendData["prefix_file_name"] = $member_no;
 					$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
 					$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$filename;
@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
 				}
 			}else{
-				file_put_contents($pathname,base64_decode(base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"]))));
+				file_put_contents($pathname,base64_decode(base64_encode($rowBenefit["BASE64_IMG"])));
 				$arrSendData["prefix_file_name"] = $member_no;
 				$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
 				$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$filename;
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 		}else{
-			$DataURLBase64 = isset($rowBenefit["BASE64_IMG"]) ? "data:".$rowBenefit["MIMETYPES"].";base64,".base64_encode(stream_get_contents($rowBenefit["BASE64_IMG"])) : null;
+			$DataURLBase64 = isset($rowBenefit["BASE64_IMG"]) ? "data:".$rowBenefit["MIMETYPES"].";base64,".base64_encode($rowBenefit["BASE64_IMG"]) : null;
 		}
 		if(isset($DataURLBase64) && $DataURLBase64 != ''){
 			$arrayResult['DATA_TYPE'] = $rowBenefit["DATA_TYPE"] ?? 'pdf';

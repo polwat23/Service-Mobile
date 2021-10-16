@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 					"dept_inf_serv" => $arrGroupDep
 				];
 				$resultWS = $clientWS->__call("of_saveslip_share_mobile", array($argumentWS));
-				$responseSh = $resultWS->of_saveslip_share_mobileResult;
-				if($responseSh->msg_output == '0000'){
+				$responseSh = $resultWS->of_saveslip_share_mobileResult; 
+				if(isset($responseSh->payinslip_no)){
 					$fetchSeqno = $conoracle->prepare("SELECT MAX(SEQ_NO) as SEQ_NO FROM dpdeptstatement 
 													WHERE deptaccount_no = :deptaccount_no and deptitem_amt = :slip_amt
 													and TO_DATE(operate_date,'YYYY-MM-DD') = :slip_date");
@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 																,amount,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																id_userlogin,ref_no_source)
-																VALUES(:ref_no,'WTX',:from_account,'2',:member_no,'3',:amount,:amount,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'1',:member_no,
+																VALUES(:ref_no,'WTX',:from_account,'2',:member_no,'3',:amount,:amount,'-1',TO_DATE(:operate_date,'yyyy-mm-dd hh24:mi:ss'),'1',:member_no,
 																:id_userlogin,:ref_no_source)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,
@@ -147,7 +147,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 						':status_flag' => '0',
 						':destination' => $member_no,
 						':response_code' => "WS0065",
-						':response_message' => $responseSh->msg_output
+						':response_message' => "ไม่ได้รับ  msg_output จากต้นทางกรุณาตรวจสอบ"
 					];
 					$log->writeLog('buyshare',$arrayStruc);
 					$arrayResult["RESPONSE_CODE"] = 'WS0065';

@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','loglogin')){
+	if($func->check_permission_core($payload,'log','loglogin',$conoracle)){
 		$arrayGroup = array();
 		$fetchfetchLoginLog = $conoracle->prepare("SELECT
 																				g.id_userlogin,
@@ -23,14 +23,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchfetchLoginLog->execute();
 		while($rowLoginLog = $fetchfetchLoginLog->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLoginLog = array();
-			$arrGroupLoginLog["ID_USERLOGIN"] = $rowLoginLog["id_userlogin"];
-			$arrGroupLoginLog["MEMBER_NO"] = $rowLoginLog["member_no"];
-			$arrGroupLoginLog["DEVICE_NAME"] = $rowLoginLog["device_name"];
-			$arrGroupLoginLog["CHANNEL"] = $rowLoginLog["channel"];
-			$arrGroupLoginLog["LOGIN_DATE"] =  $lib->convertdate($rowLoginLog["login_date"],'d m Y',true); 
-			$arrGroupLoginLog["LOGOUT_DATE"] =  isset($rowLoginLog["logout_date"]) ? $lib->convertdate($rowLoginLog["logout_date"],'d m Y',true) : null;
-			$arrGroupLoginLog["IS_LOGIN"] = $rowLoginLog["is_login"];
-			$arrGroupLoginLog["IP_ADDRESS"] = $rowLoginLog["ip_address"];
+			$arrGroupLoginLog["ID_USERLOGIN"] = $rowLoginLog["ID_USERLOGIN"];
+			$arrGroupLoginLog["MEMBER_NO"] = $rowLoginLog["MEMBER_NO"];
+			$arrGroupLoginLog["DEVICE_NAME"] = $rowLoginLog["DEVICE_NAME"];
+			$arrGroupLoginLog["CHANNEL"] = $rowLoginLog["CHANNEL"];
+			$arrGroupLoginLog["LOGIN_DATE"] =  $lib->convertdate($rowLoginLog["LOGIN_DATE"],'d m Y',true); 
+			$arrGroupLoginLog["LOGOUT_DATE"] =  isset($rowLoginLog["LOGOUT_DATE"]) ? $lib->convertdate($rowLoginLog["LOGOUT_DATE"],'d m Y',true) : null;
+			$arrGroupLoginLog["IS_LOGIN"] = $rowLoginLog["IS_LOGIN"];
+			$arrGroupLoginLog["IP_ADDRESS"] = $rowLoginLog["IP_ADDRESS"];
 			
 			$arrayGroup[] = $arrGroupLoginLog;
 		}

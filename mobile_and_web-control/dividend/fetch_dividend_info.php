@@ -29,7 +29,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				]);
 				$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 				$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
-				$arrDividend["SLIP_DATE"] = $lib->convertdate($rowSlipDate["SLIP_DATE"],'d m Y');
+				$getDateSlip = $conoracle->prepare("SELECT SLIP_DATE FROM yrslippayout WHERE member_no = :member_no and div_year = :div_year");
+				$getDateSlip->execute([
+					':member_no' => $member_no,
+					':div_year' => $rowYear["DIV_YEAR"]
+				]);
+				$rowDateSlip = $getDateSlip->fetch(PDO::FETCH_ASSOC);
+				$arrDividend["SLIP_DATE"] = $lib->convertdate($rowDateSlip["SLIP_DATE"],'d m Y');
 				$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 				$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 				$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);

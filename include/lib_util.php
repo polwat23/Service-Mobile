@@ -224,19 +224,7 @@ class library {
 		$config = json_decode($json,true);
 		$arrayGrpSms = array();
 		if($bulk){
-			/*foreach($arrayDestination as $dest){
-				$argumentWS = [
-					"Member_No" => $dest["member_no"],
-					"MobilePhone" => $dest["tel"],
-					"Message" => $dest["message"]
-				];
-				$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-				$responseSoap = $resultWS->RqSendOTPResult;
-				$arraySms["MEMBER_NO"] = $dest["member_no"];
-				$arraySms["RESULT"] = $responseSoap;
-				$arrayGrpSms[] = $arraySms;
-			}
-			return $arrayGrpSms;*/
+			
 		}else{
 			$headers[] = 'Content-Type: text/xml';
 			$ch = curl_init();  

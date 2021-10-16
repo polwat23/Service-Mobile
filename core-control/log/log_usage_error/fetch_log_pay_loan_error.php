@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logrepayloanerror')){
+	if($func->check_permission_core($payload,'log','logrepayloanerror',$conoracle)){
 		$arrayGroup = array();
 		$fetchLogRepayLoan = $conoracle->prepare("SELECT
 												pay.id_repayloan,
@@ -29,16 +29,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLogRepayLoan["MEMBER_NO"] = $rowLogRepayLoan["MEMBER_NO"];
 			$arrLogRepayLoan["CHANNEL"] = $rowLogRepayLoan["CHANNEL"];
 			$arrLogRepayLoan["TRANSACTION_DATE"] =  $lib->convertdate($rowLogRepayLoan["TRANSACTION_DATE"],'d m Y',true); 
-			$arrLogRepayLoan["DEVICE_NAME"] = stream_get_contents($rowLogRepayLoan["DEVICE_NAME"]);
+			$arrLogRepayLoan["DEVICE_NAME"] = $rowLogRepayLoan["DEVICE_NAME"];
 			$arrLogRepayLoan["AMT_TRANSFER"] = $rowLogRepayLoan["AMT_TRANSFER"];
 			$arrLogRepayLoan["PENALTY_AMT"] = $rowLogRepayLoan["PENALTY_AMT"];
 			$arrLogRepayLoan["AMT_TRANSFER_FORMAT"] = number_format($rowLogRepayLoan["AMT_TRANSFER"],2);
 			$arrLogRepayLoan["PENALTY_AMT_FORMAT"] = number_format($rowLogRepayLoan["PENALTY_AMT"],2);
 			$arrLogRepayLoan["RESPONSE_CODE"] = $rowLogRepayLoan["RESPONSE_CODE"];
-			$arrLogRepayLoan["RESPONSE_MESSAGE"] = stream_get_contents($rowLogRepayLoan["RESPONSE_MESSAGE"]);
+			$arrLogRepayLoan["RESPONSE_MESSAGE"] = $rowLogRepayLoan["RESPONSE_MESSAGE"];
 			$arrLogRepayLoan["DEPTACCOUNT_NO"] = $rowLogRepayLoan["DEPTACCOUNT_NO"];
 			$arrLogRepayLoan["DESTINATION"] = $rowLogRepayLoan["DESTINATION"];
-			$arrLogRepayLoan["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowLogRepayLoan["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			$arrLogRepayLoan["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowLogRepayLoan["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conoracle));
 			$arrLogRepayLoan["UNIQE_ID"] = $rowLogRepayLoan["UNIQUE_ID"];
 			$arrLogRepayLoan["STATUS_FLAG"] = $rowLogRepayLoan["STATUS_FLAG"];
 			$arrayGroup[] = $arrLogRepayLoan;

@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_template','topic_name','id_submenu'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetopic') && is_numeric($dataComing["id_template"])){
+	if($func->check_permission_core($payload,'sms','managetopic',$conoracle) && is_numeric($dataComing["id_template"])){
 		$conoracle->beginTransaction();
 		$UpdateMenuSMS = $conoracle->prepare("UPDATE coresubmenu SET menu_name = :topic_name WHERE id_submenu = :id_submenu");
 		if($UpdateMenuSMS->execute([

@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','color_main','color_text','type_palette'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managepalette')){
+	if($func->check_permission_core($payload,'mobileadmin','managepalette',$conoracle)){
 		if($dataComing["type_palette"] == '1'){
-			$id_palette = $func->getMaxTable('id_palette' , 'gcpalettecolor');
+			$id_palette = $func->getMaxTable('id_palette' , 'gcpalettecolor',$conoracle);
 			$insertPalette = $conoracle->prepare("INSERT INTO gcpalettecolor (id_palette,type_palette,color_main,color_secon,color_deg,color_text) 
 								VALUES (:id_palette,:type_palette,:color_main,:color_main,'0',:color_text)");
 			if($insertPalette->execute([
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['unique_id','color_main','color_text','type_pale
 			}
 		}else{
 			if(isset($dataComing["color_secon"]) && isset($dataComing["color_deg"])){
-				$id_palette = $func->getMaxTable('id_palette' , 'gcpalettecolor');
+				$id_palette = $func->getMaxTable('id_palette' , 'gcpalettecolor',$conoracle);
 				$insertPalette = $conoracle->prepare("INSERT INTO gcpalettecolor (id_palette ,type_palette,color_main,color_secon,color_deg,color_text) 
 								VALUES (:id_palette,:type_palette,:color_main,:color_secon,:color_deg,:color_text)");
 				if($insertPalette->execute([

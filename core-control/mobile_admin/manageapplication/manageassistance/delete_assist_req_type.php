@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_const_welfare'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
 		$updateform = $conoracle->prepare("UPDATE gcconstantwelfare SET is_use = '0' WHERE id_const_welfare = :id_const_welfare");
 		if($updateform->execute([
 			':id_const_welfare' => $dataComing["id_const_welfare"]

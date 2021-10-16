@@ -21,9 +21,9 @@ if($lib->checkCompleteArgument(['menu_component','type_history'],$dataComing)){
 					break;
 			}
 		}
-		$getHistory = $conoracle->prepare("SELECT id_history,his_title,his_detail,receive_date,his_read_status,his_path_image  FROM gchistory 
-											WHERE member_no = :member_no and his_type = :his_type $extraQuery and his_del_status = '0' 
-											ORDER BY id_history DESC LIMIT 10");
+		$getHistory = $conoracle->prepare("SELECT * FROM (SELECT id_history,his_title,his_detail,receive_date,his_read_status,his_path_image  FROM gchistory 
+										   WHERE member_no = :member_no and his_type =  :his_type $extraQuery  and his_del_status = '0'  
+										   ORDER BY id_history DESC) WHERE rownum <= 10");
 		$getHistory->execute($executeData);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();

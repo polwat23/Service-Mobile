@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsloan')){
+	if($func->check_permission_core($payload,'sms','constantsmsloan',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conoracle->prepare("SELECT
@@ -47,11 +47,12 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						return ($loanChange>$loanOri) ? 1 : -1;
 					}
 				});
+				$id_smsconstantloan = $func->getMaxTable('id_smsconstantloan' , 'smsconstantloan',$conoracle);
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["LOANITEMTYPE_CODE"],array_column($arrayChkG,'LOANITEMTYPE_CODE')) === False){
-						$id_smsconstantloan = $func->getMaxTable('id_smsconstantloan' , 'smsconstantloan');
-						$insertBulkCont[] = "('".$id_smsconstantloan."','".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$insertBulkCont[] =  "INTO smsconstantloan(id_smsconstantloan, loan_itemtype_code,allow_smsconstantloan,allow_notify) VALUES(".$id_smsconstantloan.",'".$value_diff["LOANITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTLOAN"]."','".$value_diff["ALLOW_NOTIFY"]."')";
 						$insertBulkContLog[]='LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN ='.$value_diff["ALLOW_SMSCONSTANTLOAN"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
+						$id_smsconstantloan++;
 					}else{
 						$updateConst = $conoracle->prepare("UPDATE smsconstantloan SET allow_smsconstantloan = :ALLOW_SMSCONSTANTLOAN, allow_notify = :ALLOW_NOTIFY WHERE loan_itemtype_code = :LOANITEMTYPE_CODE");
 						$updateConst->execute([
@@ -62,8 +63,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'LOANITEMTYPE_CODE=> '.$value_diff["LOANITEMTYPE_CODE"].' ALLOW_SMSCONSTANTLOAN='.$value_diff["ALLOW_SMSCONSTANTLOAN"].' ALLOW_NOTIFY='.$value_diff["ALLOW_NOTIFY"];
 					}
 				}
-				$insertConst = $conoracle->prepare("INSERT smsconstantloan(id_smsconstantloan, loan_itemtype_code,allow_smsconstantloan,allow_notify)
-																VALUES".implode(',',$insertBulkCont));
+				$insertConst = $conoracle->prepare("INSERT ALL ".implode(' ',$insertBulkCont)."SELECT *  FROM DUAL");
 				$insertConst->execute();
 				$arrayStruc = [
 					':menu_name' => "constantsmsloan",
@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 					':use_list' =>"edit constant sms loan",
 					':details' => implode(',',$insertBulkContLog).' '.$updateConstLog
 				];
-				$log->writeLog('editsms',$arrayStruc);	
+				//$log->writeLog('editsms',$arrayStruc);	
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../../../include/exit_footer.php');
 			}else{

@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logallowacctransation')){
+	if($func->check_permission_core($payload,'log','logallowacctransation',$conoracle)){
 		$arrayGroup = array();
 		$fetLogAllowAccountTransation = $conoracle->prepare("
 															SELECT
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															INNER JOIN gcconstantaccountdept cont ON
 																alow.id_accountconstant = cont.id_accountconstant");
 		$fetLogAllowAccountTransation->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowLogAllowAccountTransation = $fetLogAllowAccountTransation->fetch(PDO::FETCH_ASSOC)){
 			$arrLogAllowTransation = array();
 			$arrLogAllowTransation["ID_USERALLOWACCTRAN"] = $rowLogAllowAccountTransation["id_userallowacctran"];

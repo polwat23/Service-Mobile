@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmswelfare')){
+	if($func->check_permission_core($payload,'sms','constantsmswelfare',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conoracle->prepare("SELECT

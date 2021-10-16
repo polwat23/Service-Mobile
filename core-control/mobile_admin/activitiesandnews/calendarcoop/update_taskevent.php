@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date','create_by','id_task'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','calendarcoop')){
+	if($func->check_permission_core($payload,'mobileadmin','calendarcoop',$conoracle)){
 		
 		if(isset($dataComing["news_html_root_"]) && $dataComing["news_html_root_"] != null){
 		$detail_html = '<!DOCTYPE HTML>
@@ -19,8 +19,17 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 							  </body>
 								</html>';
 		}
+		$file_pointer = __DIR__.'/../../../../resource/html/'.'event'.$dataComing["id_task"].'.html'; 
+  
+		if (!unlink($file_pointer)) { 
+			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขกิจกรรมได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../../../include/exit_footer.php');
+		} 
+		
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'event'.$dataComing["id_task"].'.html', $detail_html . PHP_EOL, FILE_APPEND);
 
-		$UpdateTaskEvent = $conoracle->prepare("UPDATE gctaskevent SET task_topic = :task_topic, task_detail = :task_detail, start_date = TO_DATE(:start_date,'yyyy/mm/dd hh24:mi:ss'), end_date = TO_DATE(:end_date,'yyyy/mm/dd hh24:mi:ss'),
+		$UpdateTaskEvent = $conoracle->prepare("UPDATE gctaskevent SET task_topic = :task_topic, task_detail = :task_detail, start_date = TO_DATE(:start_date,'yyyy-mm-dd'), end_date = TO_DATE(:end_date,'yyyy-mm-dd'),
 											event_start_time = :event_start_time,event_end_time = :event_end_time ,is_settime = :is_settime,create_by = :create_by,
 											is_notify = :is_notify,is_notify_before = :is_notify_before, event_html = :event_html
 											WHERE id_task = :id_task");
@@ -35,7 +44,7 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 			':create_by'=> $dataComing["create_by"],
 			':is_notify'=> $dataComing["is_notify"],
 			':is_notify_before'=> $dataComing["is_notify_before"],
-			':event_html'=>$detail_html ?? null,
+			':event_html'=>'/resource/html/'.'event'.$dataComing["id_task"].'.html' ?? null,
 			':id_task'=> $dataComing["id_task"]
 		])){
 			$arrayResult['RESULT'] = TRUE;

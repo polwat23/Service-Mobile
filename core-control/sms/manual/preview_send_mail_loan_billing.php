@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','loanbillingemail')){
+	if($func->check_permission_core($payload,'sms','loanbillingemail',$conoracle)){
 		$destination = array();
 		$arrGroupAllSuccess = array();
 		$arrGroupAllFailed = array();
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 														GROUP BY member_no");
 				$getDataForPreview->execute();
 				while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
-					$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"]);
+					$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"],$conoracle);
 					if(isset($mailAsset[0]["EMAIL"]) && $mailAsset[0]["EMAIL"] != ""){
 						$arrTarget = array();
 						$arrTarget["FULL_NAME"] = $arrDataPre[$mailAsset[0]["MEMBER_NO"]]["FULL_NAME"];
@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 													GROUP BY member_no");
 			$getDataForPreview->execute();
 			while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
-				$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"]);
+				$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"],$conoracle);
 				if(isset($mailAsset[0]["EMAIL"]) && $mailAsset[0]["EMAIL"] != ""){
 					$arrTarget = array();
 					$arrTarget["FULL_NAME"] = $rowDataPre["FULL_NAME"];

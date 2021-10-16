@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','group_name','group_member'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managegroup')){
+	if($func->check_permission_core($payload,'sms','managegroup',$conoracle)){
 		$id_groupmember  = $func->getMaxTable('id_groupmember' , 'smsgroupmember');
 		$insertSmsGroup = $conoracle->prepare("INSERT INTO smsgroupmember(id_groupmember,group_name,group_member)
 												VALUES(:id_groupmember,:group_name,:group_member)");

@@ -6,7 +6,7 @@ if(!$anonymous){
 	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 	$user_type = $payload["user_type"];
 	$permission = array();
-	$arrayResult = array();
+	
 	$arrayAllMenu = array();
 	$arrayMenuSetting = array();
 	switch($user_type){
@@ -233,14 +233,14 @@ if(!$anonymous){
 					}else if($rowMenu["MENU_PARENT"] == '57'){
 						$arrayMenuTransactionOutside[] = $arrMenu;
 					}
-					if($rowMenu["menu_component"] == "DepositInfo"){
+					if($rowMenu["MENU_COMPONENT"] == "DepositInfo"){
 						$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0");
 						$fetchMenuDep->execute([':member_no' => $member_no]);
 						$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 						$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 						$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						$arrMenuDep["LAST_STATEMENT"] = TRUE;
-					}else if($rowMenu["menu_component"] == "LoanInfo"){
+					}else if($rowMenu["MENU_COMPONENT"] == "LoanInfo"){
 						$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT 
 															FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8 and PRINCIPAL_BALANCE > 0");
 						$fetchMenuLoan->execute([':member_no' => $member_no]);
@@ -248,7 +248,7 @@ if(!$anonymous){
 						$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 						$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-					}else if($rowMenu["menu_component"] == "ShareInfo"){
+					}else if($rowMenu["MENU_COMPONENT"] == "ShareInfo"){
 						$fetchMenuSHR = $conoracle->prepare("SELECT (SHARESTK_AMT*10) as SHARE_BALANCE FROM shsharemaster WHERE member_no = :member_no");
 						$fetchMenuSHR->execute([':member_no' => $member_no]);
 						$rowMenuSHR = $fetchMenuSHR->fetch(PDO::FETCH_ASSOC);

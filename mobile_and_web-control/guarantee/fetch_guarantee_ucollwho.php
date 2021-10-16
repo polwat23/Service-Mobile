@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrayResult = array();
+		
 		$arrayGroupLoan = array();
 		try{
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");

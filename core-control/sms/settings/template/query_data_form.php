@@ -3,7 +3,7 @@ ini_set("memory_limit","-1");
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate')){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conoracle)){
 		if(strtolower(substr(trim($dataComing["query_message_spc_"]),0,6)) === "select"){
 			$arrayData = array();
 			$arrColumn = array();

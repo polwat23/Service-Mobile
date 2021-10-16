@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logunbindaccount')){
+	if($func->check_permission_core($payload,'log','logunbindaccount',$conoracle)){
 		$arrayGroup = array();
 		$fetchBindAccountLog = $conoracle->prepare("SELECT
 																				bind.id_bindaccount,
@@ -23,22 +23,22 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																				token.id_token = bind.id_token
 																			ORDER BY bind.update_date DESC");
 		$fetchBindAccountLog->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowBindAccountLog = $fetchBindAccountLog->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupBindAccountLog = array();
-			$arrGroupBindAccountLog["ID_BINDACCOUNT"] = $rowBindAccountLog["id_bindaccount"];
-			$arrGroupBindAccountLog["MEMBER_NO"] = $rowBindAccountLog["member_no"];
-			$arrGroupBindAccountLog["BANK_ACCOUNT_NAME"] = $rowBindAccountLog["bank_account_name"];
-			$arrGroupBindAccountLog["BIND_STATUS"] = $rowBindAccountLog["bindaccount_status"];
-			$arrGroupBindAccountLog["CONSENT_DATE"] =  $rowBindAccountLog["consent_date"]==null?"-":$lib->convertdate($rowBindAccountLog["consent_date"],'d m Y',true); 
-			$arrGroupBindAccountLog["BIND_DATE"] =  $rowBindAccountLog["bind_date"]==null?"-":$lib->convertdate($rowBindAccountLog["bind_date"],'d m Y',true); 
-			$arrGroupBindAccountLog["DEVICE_NAME"] = $rowBindAccountLog["device_name"];
-			$arrGroupBindAccountLog["MOBILE_NO"] = $rowBindAccountLog["mobile_no"];
-			$arrGroupBindAccountLog["IP_ADDRESS"] = $rowBindAccountLog["ip_address"];
-			$arrGroupBindAccountLog["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowBindAccountLog["deptaccount_no_coop"],$formatDept);
-			$arrGroupBindAccountLog["COOP_ACCOUNT_NO"] = $rowBindAccountLog["deptaccount_no_coop"];
-			$arrGroupBindAccountLog["BANK_ACCOUNT_NO"] = $rowBindAccountLog["deptaccount_no_bank"];
-			$arrGroupBindAccountLog["BANK_ACCOUNT_NO_FORMAT"] = $lib->formataccount( $rowBindAccountLog["deptaccount_no_bank"],$formatDept);
+			$arrGroupBindAccountLog["ID_BINDACCOUNT"] = $rowBindAccountLog["ID_BINDACCOUNT"];
+			$arrGroupBindAccountLog["MEMBER_NO"] = $rowBindAccountLog["MEMBER_NO"];
+			$arrGroupBindAccountLog["BANK_ACCOUNT_NAME"] = $rowBindAccountLog["BANK_ACCOUNT_NAME"];
+			$arrGroupBindAccountLog["BIND_STATUS"] = $rowBindAccountLog["BINDACCOUNT_STATUS"];
+			$arrGroupBindAccountLog["CONSENT_DATE"] =  $rowBindAccountLog["CONSENT_DATE"]==null?"-":$lib->convertdate($rowBindAccountLog["CONSENT_DATE"],'d m Y',true); 
+			$arrGroupBindAccountLog["BIND_DATE"] =  $rowBindAccountLog["BIND_DATE"]==null?"-":$lib->convertdate($rowBindAccountLog["BIND_DATE"],'d m Y',true); 
+			$arrGroupBindAccountLog["DEVICE_NAME"] = $rowBindAccountLog["DEVICE_NAME"];
+			$arrGroupBindAccountLog["MOBILE_NO"] = $rowBindAccountLog["MOBILE_NO"];
+			$arrGroupBindAccountLog["IP_ADDRESS"] = $rowBindAccountLog["IP_ADDRESS"];
+			$arrGroupBindAccountLog["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($rowBindAccountLog["DEPTACCOUNT_NO_COOP"],$formatDept);
+			$arrGroupBindAccountLog["COOP_ACCOUNT_NO"] = $rowBindAccountLog["DEPTACCOUNT_NO_COOP"];
+			$arrGroupBindAccountLog["BANK_ACCOUNT_NO"] = $rowBindAccountLog["DEPTACCOUNT_NO_BANK"];
+			$arrGroupBindAccountLog["BANK_ACCOUNT_NO_FORMAT"] = $lib->formataccount( $rowBindAccountLog["DEPTACCOUNT_NO_BANK"],$formatDept);
 			$arrayGroup[] = $arrGroupBindAccountLog;
 		}
 		$arrayResult["BIND_ACCOUNT_LOG"] = $arrayGroup;

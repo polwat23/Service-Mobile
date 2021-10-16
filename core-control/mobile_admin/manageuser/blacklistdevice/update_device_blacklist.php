@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','arr_id_blacklist'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','blacklistdevice')){
+	if($func->check_permission_core($payload,'mobileadmin','blacklistdevice',$conoracle)){
 		$updateform = $conoracle->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0'
 											WHERE id_blacklist IN(".implode(',',$dataComing["arr_id_blacklist"]).")");
 		if($updateform->execute()){

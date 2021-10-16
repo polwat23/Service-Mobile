@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
+	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conoracle->prepare("SELECT
@@ -68,8 +68,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 					}
 				});
 				foreach($resultUDiff as $value_diff){
+					
 					if(array_search($value_diff["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["DEPTTYPE_CODE"]."','".$value_diff["MEMBER_TYPE_CODE"]."','".$value_diff["ALLOW_DEPOSIT_INSIDE"]."','".
+						$id_accountconstant = $this->func->getMaxTable('id_accountconstant' , 'gcconstantaccountdept',$conoracle);
+						$insertBulkCont[] = "('".$id_accountconstant."','".$value_diff["DEPTTYPE_CODE"]."','".$value_diff["MEMBER_TYPE_CODE"]."','".$value_diff["ALLOW_DEPOSIT_INSIDE"]."','".
 						$value_diff["ALLOW_WITHDRAW_INSIDE"]."','".$value_diff["ALLOW_DEPOSIT_OUTSIDE"]."','".$value_diff["ALLOW_WITHDRAW_OUTSIDE"]."','".$value_diff["ALLOW_BUY_SHARE"]."'
 						,'".$value_diff["ALLOW_PAY_LOAN"]."')";
 						$insertBulkContLog[] = 'DEPTTYPE_CODE=> '.$value_diff["DEPTTYPE_CODE"].' MEMBER_TYPE_CODE ='.$value_diff["MEMBER_TYPE_CODE"].
@@ -102,7 +104,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						' ALLOW_BUY_SHARE ='.$value_diff["ALLOW_BUY_SHARE"].' ALLOW_PAY_LOAN ='.$value_diff["ALLOW_PAY_LOAN"];
 					}
 				}
-				$insertConst = $conoracle->prepare("INSERT gcconstantaccountdept(dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,
+				$insertConst = $conoracle->prepare("INSERT gcconstantaccountdept(id_accountconstant,dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,
 												allow_deposit_outside,allow_withdraw_outside,allow_buy_share,allow_pay_loan)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();

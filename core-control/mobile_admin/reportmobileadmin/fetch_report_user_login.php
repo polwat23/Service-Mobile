@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','userusagereport')){
+	if($func->check_permission_core($payload,'mobileadmin','userusagereport',$conoracle)){
 		$arrayExecute = array();
 		$arrayGrpAll = array();
 			if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ""){
@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserLogin["LOGIN_DATE"]==null?"-":$lib->convertdate($rowUserLogin["LOGIN_DATE"],'d m Y',true); 
 			$arrayUserLogin["LOGIN_DATE"] = $rowUserLogin["LOGIN_DATE"]==null?"-":$lib->convertdate($rowUserLogin["LOGIN_DATE"],'d m Y',true);		
 			$arrayUserLogin["LOGOUT_DATE"] =$rowUserLogin["LOGOUT_DATE"]==null?"-":$lib->convertdate($rowUserLogin["LOGOUT_DATE"],'d m Y',true); 
-			$arrayUserLogin["DEVICE_NAME"] = stream_get_contents($rowUserLogin["DEVICE_NAME"]);
+			$arrayUserLogin["DEVICE_NAME"] = $rowUserLogin["DEVICE_NAME"];
 			$arrayUserLogin["IS_LOGIN"] = $rowUserLogin["IS_LOGIN"];
 			$arrayUserLogin["MEMBER_NO"] = $rowUserLogin["MEMBER_NO"];
 	

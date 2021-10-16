@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
+	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount',$conoracle)){
 		$arrayGroup = array();
 		$fetchUserAccount = $conoracle->prepare("SELECT member_no, phone_number, email, register_date, register_channel, account_status, user_type
 												FROM gcmemberaccount WHERE user_type IN('0','1') ORDER BY register_date DESC");

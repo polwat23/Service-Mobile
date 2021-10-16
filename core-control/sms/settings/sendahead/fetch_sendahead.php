@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead')){
+	if($func->check_permission_core($payload,'sms','manageahead',$conoracle)){
 		$arrGroupSendAhead = array();
 		if(isset($dataComing["id_sendahead"])){
 			$fetchGroup = $conoracle->prepare("SELECT id_sendahead,send_topic,send_message,destination,

@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
 		$arrayWelfare = array();
 		
 		$getNameWelfare = $conoracle->prepare("SELECT DISTINCT aud.ASSISTTYPE_CODE,aut.ASSISTTYPE_DESC,aud.MEMBTYPE_CODE from assucfassisttype aut 

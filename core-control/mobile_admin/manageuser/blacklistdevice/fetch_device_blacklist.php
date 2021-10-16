@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','blacklistdevice')){
+	if($func->check_permission_core($payload,'mobileadmin','blacklistdevice',$conoracle)){
 		$arrayGroup = array();
 		$fetchUserAccount = $conoracle->prepare("SELECT gdb.id_blacklist,gdb.member_no,gdb.type_blacklist,gdb.blacklist_date,
 											(SELECT device_name from gctoken WHERE id_token = gdb.new_id_token) AS new_device,
@@ -16,8 +16,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupUserAcount["MEMBER_NO"] = $rowUserlogin["MEMBER_NO"];
 			$arrGroupUserAcount["TYPE_BLACKLIST"] = $rowUserlogin["TYPE_BLACKLIST"];
 			$arrGroupUserAcount["BLACKLIST_DATE"] = $lib->convertdate($rowUserlogin["BLACKLIST_DATE"],'d m Y H-i-s',true);
-			$arrGroupUserAcount["NEW_DEVICE"] = stream_get_contents($rowUserlogin["NEW_DEVICE"]);
-			$arrGroupUserAcount["OLD_DEVICE"] = stream_get_contents($rowUserlogin["OLD_DEVICE"]);
+			$arrGroupUserAcount["NEW_DEVICE"] = $rowUserlogin["NEW_DEVICE"];
+			$arrGroupUserAcount["OLD_DEVICE"] = $rowUserlogin["OLD_DEVICE"];
 			
 			if($rowUserlogin["TYPE_BLACKLIST"] == "1"){
 				$arrGroupUserAcount["TYPE_BLACKLIST_CODE"] = "Root";

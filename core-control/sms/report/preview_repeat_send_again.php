@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrDestGRP = array();
 		$arrayTel = array();
 		if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
-			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"]);
+			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],$conoracle);
 		}else{
 			$destination_temp = array();
 			$destination_temp["MEMBER_NO"] = null;
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			$arrDestGRP = array();
 			$arrayTel = array();
 			if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
-				$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"]);
+				$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],$conoracle);
 			}else{
 				$destination_temp = array();
 				$destination_temp["MEMBER_NO"] = null;
@@ -105,7 +105,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 			require_once('../../../include/exit_footer.php');
 		}else{
 			$destination = array();
-			$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"]);
+			$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"],$conoracle);
 			foreach($arrToken["LIST_SEND"] as $dest){
 				if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 					if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
@@ -144,7 +144,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$getMessageLog->execute([':id_history' => $dataComing["id_history"]]);
 		$rowMessage = $getMessageLog->fetch(PDO::FETCH_ASSOC);
 		$destination = array();
-		$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"]);
+		$arrToken = $func->getFCMToken('person',$rowMessage["MEMBER_NO"],$conoracle);
 		foreach($arrToken["LIST_SEND"] as $dest){
 			if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 				if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
@@ -184,7 +184,7 @@ if($lib->checkCompleteArgument(['unique_id','menu_component'],$dataComing)){
 		$arrDestGRP = array();
 		$arrayTel = array();
 		if(isset($rowMessage["MEMBER_NO"]) && $rowMessage["MEMBER_NO"] != ""){
-			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"]);
+			$arrayTel = $func->getSMSPerson('person',$rowMessage["MEMBER_NO"],$conoracle);
 		}else{
 			$destination_temp = array();
 			$destination_temp["MEMBER_NO"] = null;

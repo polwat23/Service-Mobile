@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
+	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount',$conoracle)){
 		$arrayGroup = array();
 		$fetchConstant = $conoracle->prepare("SELECT id_bankconstant, transaction_name, transaction_cycle, max_numof_deposit, max_numof_withdraw, min_deposit, max_deposit, min_withdraw, max_withdraw, each_bank FROM gcbankconstant");
 		$fetchConstant->execute();

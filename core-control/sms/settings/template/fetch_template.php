@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate') || $func->check_permission_core($payload,'sms','managetopic')
-		|| $func->check_permission_core($payload,'sms','reportsmssuccess')){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conoracle) || $func->check_permission_core($payload,'sms','managetopic',$conoracle)
+		|| $func->check_permission_core($payload,'sms','reportsmssuccess',$conoracle)){
 		$arrTemplateGroup = array();
 		if(isset($dataComing["id_smstemplate"])){
 			$fetchTemplate = $conoracle->prepare("SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,sq.set_column,
@@ -14,10 +14,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$rowTemplate = $fetchTemplate->fetch(PDO::FETCH_ASSOC);
 			$arrTemplateGroup["ID_TEMPLATE"] = $rowTemplate["ID_SMSTEMPLATE"];
 			$arrTemplateGroup["TEMPLATE_NAME"] = $rowTemplate["SMSTEMPLATE_NAME"];
-			$arrTemplateGroup["TEMPLATE_BODY"] = stream_get_contents($rowTemplate["SMSTEMPLATE_BODY"]);
+			$arrTemplateGroup["TEMPLATE_BODY"] = $rowTemplate["SMSTEMPLATE_BODY"];
 			$arrTemplateGroup["ID_SMSQUERY"] = $rowTemplate["ID_SMSQUERY"];
-			$arrTemplateGroup["SMS_QUERY"] = stream_get_contents($rowTemplate["SMS_QUERY"]);
-			$arrTemplateGroup["COLUMN_SELECTED"] = explode(',',stream_get_contents($rowTemplate["COLUMN_SELECTED"]));
+			$arrTemplateGroup["SMS_QUERY"] = $rowTemplate["SMS_QUERY"];
+			$arrTemplateGroup["COLUMN_SELECTED"] = explode(',',$rowTemplate["COLUMN_SELECTED"]);
 			$arrTemplateGroup["TARGET_FIELD"] = $rowTemplate["TARGET_FIELD"];
 			$arrTemplateGroup["CONDITION_TARGET"] = $rowTemplate["CONDITION_TARGET"];
 			$arrTemplateGroup["IS_STAMPFLAG"] = $rowTemplate["IS_STAMPFLAG"];
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrTemplate = array();
 				$arrTemplate["ID_TEMPLATE"] = $rowTemplate["ID_SMSTEMPLATE"];
 				$arrTemplate["TEMPLATE_NAME"] = $rowTemplate["SMSTEMPLATE_NAME"];
-				$arrTemplate["TEMPLATE_BODY"] = stream_get_contents($rowTemplate["SMSTEMPLATE_BODY"]);
+				$arrTemplate["TEMPLATE_BODY"] = $rowTemplate["SMSTEMPLATE_BODY"];
 				$arrTemplateGroup[] = $arrTemplate;
 			}
 		}

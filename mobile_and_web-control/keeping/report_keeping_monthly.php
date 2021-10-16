@@ -137,17 +137,18 @@ function GenerateReport($dataReport,$header){
 	$sumBalance = 0;
 	$html = '<style>
 				@font-face {
-				  font-family: THSarabun;
-				  src: url(../../resource/fonts/THSarabun.ttf);
+				  font-family: TH Niramit AS;
+				  src: url(../../resource/fonts/TH Niramit AS.ttf);
 				}
 				@font-face {
-					font-family: "THSarabun";
-					src: url(../../resource/fonts/THSarabun Bold.ttf);
+					font-family: TH Niramit AS;
+					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 					font-weight: bold;
 				}
 				* {
-				  font-family: THSarabun;
+				  font-family: TH Niramit AS;
 				}
+
 				.sub-table div{
 					padding : 5px;
 				}
@@ -244,7 +245,12 @@ function GenerateReport($dataReport,$header){
 							<div style="width: 90px;text-align: right;font-size: 18px;font-weight: bold;margin-left:600px;padding-top: 0px;">'.number_format($sumBalance,2).'</div>
 					</div>';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4', 'portrait');
 	$dompdf->load_html($html);
 	$dompdf->render();

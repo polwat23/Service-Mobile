@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','searchmember')){
+	if($func->check_permission_core($payload,'mobileadmin','searchmember',$conoracle)){
 		$arrayGroupAll = array();
 		$arrayExecute = array();
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){

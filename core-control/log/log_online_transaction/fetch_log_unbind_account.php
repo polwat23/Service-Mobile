@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logunbindaccount')){
+	if($func->check_permission_core($payload,'log','logunbindaccount',$conoracle)){
 		$arrayGroup = array();
 		$fetchLogBindAccount = $conoracle->prepare("SELECT
 																				unbin.id_logunbindaccount,
@@ -24,29 +24,29 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																				unbin.id_userlogin = login.id_userlogin  
 																			ORDER BY unbin.attempt_unbind_date DESC");
 		$fetchLogBindAccount->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowLogBindAccount = $fetchLogBindAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogBindAccount = array();
 			$fetchBinAccountCoopNo = $conoracle->prepare("SELECT deptaccount_no_coop,deptaccount_no_bank FROM gcbindaccount WHERE id_bindaccount = '$rowLogBindAccount[id_bindaccount]' ");
 			$fetchBinAccountCoopNo -> execute();
 			$coop_no=$fetchBinAccountCoopNo-> fetch(PDO::FETCH_ASSOC);
 			
-			$arrGroupLogBindAccount["ID_LOGUNBINDACCOUNT"] = $rowLogBindAccount["id_logunbindaccount"];
-			$arrGroupLogBindAccount["MEMBER_NO"] = $rowLogBindAccount["member_no"];
-			$arrGroupLogBindAccount["UNBIND_STATUS"] = $rowLogBindAccount["unbind_status"];
-			$arrGroupLogBindAccount["RESPONSE_CODE"] = $rowLogBindAccount["response_code"];
-			$arrGroupLogBindAccount["ATTEMPT_UNBIND_DATE"] =  $lib->convertdate($rowLogBindAccount["attempt_unbind_date"],'d m Y',true); 
-			$arrGroupLogBindAccount["RESPONSE_MESSAGE"] = $rowLogBindAccount["response_message"];
-			$arrGroupLogBindAccount["DEVICE_NAME"] = $rowLogBindAccount["device_name"];
-			$arrGroupLogBindAccount["CHANNEL"] = $rowLogBindAccount["channel"];
-			$arrGroupLogBindAccount["ID_BIND_ACCOUNT"] = $rowLogBindAccount["id_bindaccount"];
-			$arrGroupLogBindAccount["COOP_ACCOUNT_NO"] = $coop_no["deptaccount_no_coop"];
-			$arrGroupLogBindAccount["BANK_ACCOUNT_NO"] = $coop_no["deptaccount_no_bank"];
-			$arrGroupLogBindAccount["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_coop"],$formatDept);
-			$arrGroupLogBindAccount["BANK_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["deptaccount_no_bank"],$formatDept);
-  		    $arrGroupLogBindAccount["DATA_UNBIND_ERROR"] = $rowLogBindAccount["data_unbind_error"];
-			$arrGroupLogBindAccount["QUERY_ERROR"] = $rowLogBindAccount["query_error"];
-			$arrGroupLogBindAccount["QUERY_FLAG"] = $rowLogBindAccount["query_flag"];
+			$arrGroupLogBindAccount["ID_LOGUNBINDACCOUNT"] = $rowLogBindAccount["ID_LOGUNBINDACCOUNT"];
+			$arrGroupLogBindAccount["MEMBER_NO"] = $rowLogBindAccount["MEMBER_NO"];
+			$arrGroupLogBindAccount["UNBIND_STATUS"] = $rowLogBindAccount["UNBIND_STATUS"];
+			$arrGroupLogBindAccount["RESPONSE_CODE"] = $rowLogBindAccount["RESPONSE_CODE"];
+			$arrGroupLogBindAccount["ATTEMPT_UNBIND_DATE"] =  $lib->convertdate($rowLogBindAccount["ATTEMPT_UNBIND_DATE"],'d m Y',true); 
+			$arrGroupLogBindAccount["RESPONSE_MESSAGE"] = $rowLogBindAccount["RESPONSE_MESSAGE"];
+			$arrGroupLogBindAccount["DEVICE_NAME"] = $rowLogBindAccount["DEVICE_NAME"];
+			$arrGroupLogBindAccount["CHANNEL"] = $rowLogBindAccount["CHANNEL"];
+			$arrGroupLogBindAccount["ID_BIND_ACCOUNT"] = $rowLogBindAccount["ID_BINDACCOUNT"];
+			$arrGroupLogBindAccount["COOP_ACCOUNT_NO"] = $coop_no["DEPTACCOUNT_NO_COOP"];
+			$arrGroupLogBindAccount["BANK_ACCOUNT_NO"] = $coop_no["DEPTACCOUNT_NO_BANK"];
+			$arrGroupLogBindAccount["COOP_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["DEPTACCOUNT_NO_COOP"],$formatDept);
+			$arrGroupLogBindAccount["BANK_ACCOUNT_NO_FORMAT"]= $lib->formataccount($coop_no["DEPTACCOUNT_NO_BANK"],$formatDept);
+  		    $arrGroupLogBindAccount["DATA_UNBIND_ERROR"] = $rowLogBindAccount["DATA_UNBIND_ERROR"];
+			$arrGroupLogBindAccount["QUERY_ERROR"] = $rowLogBindAccount["QUERY_ERROR"];
+			$arrGroupLogBindAccount["QUERY_FLAG"] = $rowLogBindAccount["QUERY_FLAG"];
 			
 			$arrayGroup[] = $arrGroupLogBindAccount;
 		}

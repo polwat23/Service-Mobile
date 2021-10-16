@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','announce')){
+	if($func->check_permission_core($payload,'mobileadmin','announce',$conoracle)){
 		$pathImg = null;
 		if(isset($dataComing["announce_cover"]) && $dataComing["announce_cover"] != null){
 			$destination = __DIR__.'/../../../../resource/announce';
@@ -41,6 +41,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 									</html>';
 		}
 		
+		$file_pointer = __DIR__.'/../../../../resource/html/'.'announce'.$dataComing["id_announce"].'.html'; 
+  
+		if (!unlink($file_pointer)) { 
+			$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขประกาศได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../../../include/exit_footer.php');
+		} 
+		
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'announce'.$dataComing["id_announce"].'.html', $detail_html . PHP_EOL, FILE_APPEND);
 		$update_announce = $conoracle->prepare("UPDATE  gcannounce SET
 																		announce_cover = :announce_cover, 
 																		announce_title = :announce_title,
@@ -69,7 +78,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			':accept_text' => (isset($dataComing["accept_text"]) && $dataComing["accept_text"] != null && $dataComing["accept_text"] != "") ? $dataComing["accept_text"] : null,
 			':cancel_text' => (isset($dataComing["cancel_text"]) && $dataComing["cancel_text"] != null && $dataComing["cancel_text"] != "") ? $dataComing["cancel_text"] : null,
 			':check_text' => (isset($dataComing["check_text"]) && $dataComing["check_text"] != null && $dataComing["check_text"] != "") ? $dataComing["check_text"] : null,
-			':announce_html' => $detail_html ?? null
+			':announce_html' => '/resource/html/'.'announce'.$dataComing["id_announce"].'.html' ?? null
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["announce_html"] = $dataComing["announce_html"];

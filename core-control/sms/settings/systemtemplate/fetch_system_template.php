@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managesystemtemplate')){
+	if($func->check_permission_core($payload,'sms','managesystemtemplate',$conoracle)){
 		$arrGroupSysTemplate = array();
 		$fetchSysTemplate = $conoracle->prepare("SELECT component_system,subject,body,id_systemplate,is_use FROM smssystemtemplate WHERE is_use <> '-9'");
 		$fetchSysTemplate->execute();
@@ -11,7 +11,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arraySysTem = array();
 			$arraySysTem["COMPONENT"] = $rowSysTemplate["COMPONENT_SYSTEM"];
 			$arraySysTem["SUBJECT"] = $rowSysTemplate["SUBJECT"];
-			$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
+			
+			if($rowSysTemplate["ID_SYSTEMPLATE"] == '8'|| $rowSysTemplate["ID_SYSTEMPLATE"] == '11' || $rowSysTemplate["ID_SYSTEMPLATE"] =='28'){
+				$arraySysTem["BODY"] = file_get_contents(__DIR__.'/../../../..'.$rowSysTemplate["BODY"]);
+			}else{
+				$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
+			}
+			
 			$arraySysTem["IS_USE"] = $rowSysTemplate["IS_USE"];
 			$arraySysTem["ID_SYSTEMPLATE"] = $rowSysTemplate["ID_SYSTEMPLATE"];
 			$arrGroupSysTemplate[] = $arraySysTem;

@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
+	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan',$conoracle)){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
 		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN FROM gcconstanttypeloan");

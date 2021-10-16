@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageconstant')){
+	if($func->check_permission_core($payload,'mobileadmin','manageconstant',$conoracle)){
 		$arrayGroup = array();
 		$fetchConstant = $conoracle->prepare("SELECT id_constant,constant_name,constant_desc,constant_value
 											 FROM gcconstant WHERE is_use = '1'");

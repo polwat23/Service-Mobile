@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_sendahead'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','manageahead')){
+	if($func->check_permission_core($payload,'sms','manageahead',$conoracle)){
 		$deleteSendAhead = $conoracle->prepare("DELETE FROM smssendahead WHERE id_sendahead = :id_sendahead");
 		if($deleteSendAhead->execute([
 			':id_sendahead' => $dataComing["id_sendahead"]

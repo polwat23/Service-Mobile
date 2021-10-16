@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','reconciledeposit')){
+	if($func->check_permission_core($payload,'mobileadmin','reconciledeposit',$conoracle)){
 		$arrayGroup = array();
 		$arrayCheckReconcile = array();
 		$arrayMember = array();
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 			$arrTrans = array();
 			$arrTrans["REF_NO"] = $rowTrans["REF_NO"];
 			$arrTrans["FROM_ACCOUNT"] = $rowTrans["FROM_ACCOUNT"];
-			$arrTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format'));
+			$arrTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format',$conoracle));
 			$arrTrans["AMOUNT"] = number_format($rowTrans["AMOUNT"],2);
 			$arrTrans["FEE_AMT"] = number_format($rowTrans["FEE_AMT"],2);
 			$arrTrans["PENALTY_AMT"] = number_format($rowTrans["PENALTY_AMT"],2);

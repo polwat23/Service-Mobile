@@ -16,13 +16,13 @@ $arrayStmItem = array();
 $getStmItemTypeAllow = $conoracle->prepare("SELECT dept_itemtype_code FROM smsconstantdept WHERE allow_smsconstantdept = '1'");
 $getStmItemTypeAllow->execute();
 while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
-	$arrayStmItem[] = "'".$rowStmItemType["dept_itemtype_code"]."'";
+	$arrayStmItem[] = "'".$rowStmItemType["DEPT_ITEMTYPE_CODE"]."'";
 }
 $arrSMSCont = array();
 $getSMSConstant = $conoracle->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 $getSMSConstant->execute();
 while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
-	$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
+	$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["SMSCS_VALUE"];
 }
 $formatDept = $func->getConstant('hidden_dep');
 $templateMessage = $func->getTemplateSystem('DepositInfo',1);
@@ -73,20 +73,22 @@ if(isset($templateMessage)){
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 				]);
-				if($checkRights->rowCount() > 0){
-					$rowRights = $checkRights->fetch(PDO::FETCH_ASSOC);
-					if($rowRights["is_mindeposit"] == '1'){
-						if($rowSTM["AMOUNT"] >= $rowRights["smscsp_mindeposit"]){
+				$rowRights = $checkRights->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowRights["IS_MINDEPOSIT"])){					
+					if($rowRights["IS_MINDEPOSIT"] == '1'){
+						if($rowSTM["AMOUNT"] >= $rowRights["SMSCSP_MINDEPOSIT"]){
 							if($rowRights["smscsp_pay_type"] == '1'){
-								if($MonthNow > $rowRights["request_flat_date"]){
+								if($MonthNow > $rowRights["REQUEST_FLAT_DATE"]){
 									$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
-																		VALUES(:message,:member_no,:tel_mobile,'0',:deptaccount_no,'system')");
+									$id_smssent = $func->getMaxTable('id_smssent' , 'smstranwassent');
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(id_smssent,sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
+																		VALUES(:id_smssent,:message,:member_no,:tel_mobile,'0',:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
+										':id_smssent' => $id_smssent,
 										':message' => $message_endpoint["BODY"],
 										':member_no' => $rowSTM["MEMBER_NO"],
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
@@ -117,9 +119,11 @@ if(isset($templateMessage)){
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
-																	VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
+									$id_smssent = $func->getMaxTable('id_smssent' , 'smstranwassent');
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(id_smssent,sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+																	VALUES(:id_smssent,:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
+										':id_smssent' => $id_smssent,
 										':message' => $message_endpoint["BODY"],
 										':member_no' => $rowSTM["MEMBER_NO"],
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
@@ -151,9 +155,11 @@ if(isset($templateMessage)){
 								$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 								$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-								$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
-																VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
+								$id_smssent = $func->getMaxTable('id_smssent' , 'smstranwassent');
+								$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(id_smssent,sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+																VALUES(:id_smssent,:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 								if($insertSmsTran->execute([
+									':id_smssent' => $id_smssent,
 									':message' => $message_endpoint["BODY"],
 									':member_no' => $rowSTM["MEMBER_NO"],
 									':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
@@ -210,20 +216,22 @@ if(isset($templateMessage)){
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 				]);
-				if($checkRights->rowCount() > 0){
-					$rowRights = $checkRights->fetch(PDO::FETCH_ASSOC);
-					if($rowRights["is_minwithdraw"] == '1'){
-						if($rowSTM["AMOUNT"] >= $rowRights["smscsp_minwithdraw"]){
-							if($rowRights["smscsp_pay_type"] == '1'){
-								if($MonthNow > $rowRights["request_flat_date"]){
+				$rowRights = $checkRights->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowRights["IS_MINWITHDRAW"])){			
+					if($rowRights["IS_MINWITHDRAW"] == '1'){
+						if($rowSTM["AMOUNT"] >= $rowRights["SMSCSP_MINWITHDRAW"]){
+							if($rowRights["SMSCSP_PAY_TYPE"] == '1'){
+								if($MonthNow > $rowRights["REQUEST_FLAT_DATE"]){
 									$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
-																		VALUES(:message,:member_no,:tel_mobile,'0',:deptaccount_no,'system')");
+									$id_smssent = $func->getMaxTable('id_smssent' , 'smstranwassent');
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(id_smssent,sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
+																		VALUES(:id_smssent,:message,:member_no,:tel_mobile,'0',:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
+										':id_smssent' => $id_smssent,
 										':message' => $message_endpoint["BODY"],
 										':member_no' => $rowSTM["MEMBER_NO"],
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
@@ -254,9 +262,11 @@ if(isset($templateMessage)){
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
-																	VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
+									$id_smssent = $func->getMaxTable('id_smssent' , 'smstranwassent');
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(id_smssent,sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+																	VALUES(:id_smssent,:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
+										':id_smssent' => $id_smssent,
 										':message' => $message_endpoint["BODY"],
 										':member_no' => $rowSTM["MEMBER_NO"],
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
@@ -288,9 +298,11 @@ if(isset($templateMessage)){
 								$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 								$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-								$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
-																VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
+								$id_smssent = $func->getMaxTable('id_smssent' , 'smstranwassent');
+								$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(id_smssent,sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+																VALUES(:id_smssent,:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 								if($insertSmsTran->execute([
+									':id_smssent' => $id_smssent,
 									':message' => $message_endpoint["BODY"],
 									':member_no' => $rowSTM["MEMBER_NO"],
 									':tel_mobile' => $rowSTM["MEM_TELMOBILE"],

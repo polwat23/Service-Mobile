@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantchangeinfo')){
+	if($func->check_permission_core($payload,'mobileadmin','constantchangeinfo',$conoracle)){
 		foreach($dataComing["contdata"] as $constData){
 			$updateConst = $conoracle->prepare("UPDATE gcconstantchangeinfo SET is_change = :is_change,save_tablecore = :save_tablecore WHERE const_code = :const_code");
 			if($updateConst->execute([

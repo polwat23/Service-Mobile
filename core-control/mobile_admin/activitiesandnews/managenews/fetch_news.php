@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managenews')){
+	if($func->check_permission_core($payload,'mobileadmin','managenews',$conoracle)){
 		$arrayGroup = array();
 		$arrayExecute = array();
 		if(isset($dataComing["start_date"]) && $dataComing["start_date"] != ""){
@@ -41,10 +41,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupNews["ID_NEW"] = $rowNews["ID_NEWS"];
 			$arrGroupNews["NEWS_TITLE"] = $rowNews["NEWS_TITLE"];
 			$arrGroupNews["NEWS_DETAIL"] = $rowNews["NEWS_DETAIL"];
-			$arrGroupNews["NEWS_HTML"] = stream_get_contents($rowNews["NEWS_HTML"]);
+			$arrGroupNews["NEWS_HTML"] = file_get_contents(__DIR__.'/../../../..'.$rowNews["NEWS_HTML"]);
 			$arrGroupNews["NEWS_DETAIL_SHORT"] = $lib->text_limit($rowNews["NEWS_DETAIL"],480);
-			$arrGroupNews["PATH_IMG_HEADER"] = stream_get_contents($rowNews["PATH_IMG_HEADER"]);
-			$arrGroupNews["LINK_News_MORE"] = stream_get_contents($rowNews["LINK_NEWS_MORE"]);
+			$arrGroupNews["PATH_IMG_HEADER"] = $rowNews["PATH_IMG_HEADER"];
+			$arrGroupNews["LINK_News_MORE"] = $rowNews["LINK_NEWS_MORE"];
 			$arrGroupNews["CREATE_DATE"] = $lib->convertdate($rowNews["CREATE_DATE"],'d m Y',true); 
 			$arrGroupNews["UPDATE_DATE"] = $lib->convertdate($rowNews["UPDATE_DATE"],'d m Y',true);  
 			$arrGroupNews["PATH_IMG_1"] = $rowNews["IMG_GALLERY_1"];

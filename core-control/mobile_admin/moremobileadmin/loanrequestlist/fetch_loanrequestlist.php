@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','loanrequestlist')){
+	if($func->check_permission_core($payload,'mobileadmin','loanrequestlist',$conoracle)){
 		$arrayGroup = array();
 		
 		$fetchLoanReques = $conoracle->prepare("SELECT 
@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrLoanReques["LOANPERMIT_AMT"] = number_format($rowLoanReques["LOANPERMIT_AMT"],2);
 			$arrLoanReques["DEFF_OLD_CONTRACT"] = number_format($rowLoanReques["DIFF_OLD_CONTRACT"],2);
 			$arrLoanReques["RECEIVE_NET"] = number_format($rowLoanReques["RECEIVE_NET"],2);
-			$arrLoanReques["DEPTACCOUNT_NO"] = $lib->formataccount($rowLoanReques["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			$arrLoanReques["DEPTACCOUNT_NO"] = $lib->formataccount($rowLoanReques["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conoracle));
 			$arrayGroup[] = $arrLoanReques;
 		}
 	

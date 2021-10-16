@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																	ref_no_1,id_userlogin,ref_no_source)
-																	VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+																	VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount,'-1',TO_DATE(:operate_date,'yyyy-mm-dd hh24:mi:ss'),'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,
 						':from_account' => $from_account_no,

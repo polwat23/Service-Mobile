@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','processsmsservicefee')){
+	if($func->check_permission_core($payload,'sms','processsmsservicefee',$conoracle)){
 		$conoracle->beginTransaction();
 		$arrayGroup = array();
 		$MonthNow = date("Ym");
@@ -17,7 +17,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSmsTranWassent = $conoracle->prepare("SELECT count(sm.id_smssent) as round_send,sm.member_no,sm.deptaccount_no,sc.request_flat_date,
 												sc.smscsp_pay_type,sc.accrued_amt
 												FROM smstranwassent sm LEFT JOIN smsconstantperson sc ON sm.deptaccount_no = sc.smscsp_account
-												WHERE sm.process_flag = '0' and sm.is_receive = '1' GROUP BY sm.member_no,sm.deptaccount_no");
+												WHERE sm.process_flag = '0' and sm.is_receive = '1' 
+												GROUP BY sm.member_no,sm.deptaccount_no,sc.request_flat_date,sc.smscsp_pay_type,sc.accrued_amt,sm.id_smssent");
 		$fetchSmsTranWassent->execute();
 		while($rowSmsTranWassent = $fetchSmsTranWassent->fetch(PDO::FETCH_ASSOC)){
 			if($rowSmsTranWassent["SMSCSP_PAY_TYPE"] == '0'){

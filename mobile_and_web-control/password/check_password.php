@@ -5,8 +5,8 @@ if($lib->checkCompleteArgument(['password'],$dataComing)){
 	$getOldPassword = $conoracle->prepare("SELECT password,temppass,account_status FROM gcmemberaccount 
 											WHERE member_no = :member_no");
 	$getOldPassword->execute([':member_no' => $payload["member_no"]]);
-	if($getOldPassword->rowCount() > 0){
-		$rowAccount = $getOldPassword->fetch(PDO::FETCH_ASSOC);
+	$rowAccount = $getOldPassword->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowAccount["PASSWORD"]) && $rowAccount["PASSWORD"] != ""){
 		if($rowAccount['ACCOUNT_STATUS'] == '-9'){
 			$validpassword = password_verify($dataComing["password"], $rowAccount['TEMPPASS']);
 		}else{

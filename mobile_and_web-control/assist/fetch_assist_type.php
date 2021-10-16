@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
 			$yearAss = $dataComing["ass_year"] - 543;
 		}
-		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO as ASSCONTRACT_NO,
+		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSCONTRACT_NO as ASSCONTRACT_NO,asm.DEPTACCOUNT_NO,
 												asm.PAY_BALANCE as ASSIST_AMT,asm.APPROVE_DATE,asm.APPROVE_AMT
 												FROM asscontmaster asm LEFT JOIN 
 												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE and 

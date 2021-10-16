@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','loanrequestformmember')){
+	if($func->check_permission_core($payload,'mobileadmin','loanrequestformmember',$conoracle)){
 		$fetchAllow = $conoracle->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
 											FROM gcallowmemberreqloan WHERE is_allow = '1'");
 		$fetchAllow->execute();
