@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $arrPostData = array();
 $arrPostData['replyToken'] = $reply_token;
 $TextTemplate = $conmysql->prepare("SELECT ltm.id_ref,ltm.type_message,lic.menu_component,lic.file_service
@@ -36,7 +36,6 @@ if($TextTemplate->rowCount() > 0){
 			$dataTemplate = $lineLib->mergeTextMessage($rowDataTemplate["text_message"]);
 			$arrPostData['messages'][$indexMs] = $dataTemplate;
 		}else if($rowTemplate["type_message"] == 'quick_reply'){						
-	
 			$getDataTemplate = $conmysql->prepare("SELECT ac.id_action,ac.type,ac.url,ac.area_x,ac.area_y,ac.width,ac.height,ac.label,ac.data,ac.data,ac.mode,ac.initial,ac.max,ac.min,ac.text, qm.text AS title
 													FROM  lbquickmessagemap qmm
 													LEFT JOIN lbaction ac ON ac.id_action = qmm.action_id
@@ -91,11 +90,52 @@ if($TextTemplate->rowCount() > 0){
 				$arrPostData['messages'][0] = $dataTemplate;
 			}else {
 				file_put_contents(__DIR__.'/../log/response.txt', json_encode($groupDataTemplate) . PHP_EOL, FILE_APPEND);
-				$dataTemplate = $lineLib->mergeTextMessage("ลง else".$rowTemplate["id_ref"].$typeAction);
+				//$dataTemplate = $lineLib->mergeTextMessage("ลง else".$rowTemplate["id_ref"].$typeAction);
 				$arrPostData['messages'][0] = $dataTemplate;
 			}
-			
-
+		}else if($rowTemplate["type_message"] == 'image_carousel'){
+			$getDataTemplate = $conmysql->prepare("SELECT co.id_columns,co.	image_url,co.action_id 
+											   FROM lbimagecarouselmap tem
+											   LEFT JOIN lbimagecarouselcolumns co ON co.id_columns = tem.columns_id
+											   WHERE imagecarousel_id = :id_ref AND co.is_use ='1' AND tem.is_use = '1' 
+											   ORDER BY tem.update_date DESC");
+			$getDataTemplate->execute([':id_ref' => $rowTemplate["id_ref"]]);
+			$data = array();
+			while($rowDataTemplate = $getDataTemplate->fetch(PDO::FETCH_ASSOC)){
+				$arrData = array();
+				$fetchActions = $conmysql->prepare("SELECT id_action,type,text,url,area_x,area_y,width,height,label,data,mode,initial,max,min 
+													FROM lbaction 
+													WHERE id_action = :action_id AND is_use = '1'");
+				$fetchActions->execute([
+					':action_id' => $rowDataTemplate["action_id"]
+				]);
+				$actions = array();
+				while($rowAction = $fetchActions->fetch(PDO::FETCH_ASSOC)){
+					//$arrAction = array();
+					$arrData["ACTION_ID"] = $rowAction["id_action"];
+					$arrData["ID"] = $rowAction["id_action"];
+					$arrData["TYPE"] = $rowAction["type"];
+					$arrData["TEXT"] = $rowAction["text"];
+					$arrData["URL"] = $rowAction["url"];
+					$arrData["AREA_X"] = $rowAction["area_x"];
+					$arrData["AREA_Y"] = $rowAction["area_y"];
+					$arrData["WIDTH"] = $rowAction["width"];
+					$arrData["HEIGHT"] = $rowAction["height"];
+					$arrData["LABEL"] = $rowAction["label"];
+					$arrData["DATA"] = $rowAction["data"];
+					$arrData["MODE"] = $rowAction["mode"];
+					$arrData["INITIAL"] = $rowAction["initial"];
+					$arrData["MAX"] = $rowAction["max"];
+					$arrData["MIN"] = $rowAction["min"];
+					//$actions =  $arrAction;
+				}
+				$arrData["IMAGE_URL"] = $rowDataTemplate["image_url"];
+				//$arrData["ACTION"] = $actions;
+				$data[] = $arrData;
+			}
+			file_put_contents(__DIR__.'/../log/response.txt', json_encode($data) . PHP_EOL, FILE_APPEND);
+			$dataTemplate = $lineLib->mergeImageCarouselTemplate($data);
+			$arrPostData['messages'][$indexMs] = $dataTemplate;
 		}
 	 $indexMs++;
 	}
