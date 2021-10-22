@@ -1,3 +1,3 @@
 @echo off
-
-C:\Mobile\php7.4\php.exe C:\Mobile\Service-MHD-Test\external_service\sync_old_webportal.php
+C:\Mobile\php7.4\php.exe C:\Mobile\service-msk\external_service\sync_old_webportal.php
+pause
