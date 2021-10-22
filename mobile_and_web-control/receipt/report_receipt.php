@@ -216,10 +216,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)</p>
-			<p style="margin-top: -27px;font-size: 18px;">461 หมู่ 5 ถ.พหลโยธิน ต.น้ำรึม อ.เมือง จ.ตาก 63000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. 055-511-061,055-541-554</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.taktcoop1.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษาจังหวัดเชียงราย จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1115/23 ถนนไกรสรสิทธิ์ ตำบลเวียง อำเภอเมือง</p>
+			<p style="margin-top: -27px;font-size: 18px;">จังหวัดเชียงราย รหัสไปรษณีย์ 57000</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทรศัพท์ 053601176, 081-3039465,081-3469167</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">crigetcoop.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -325,11 +326,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 650px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.gif" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/mg.png" width="120" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 620px;margin-top:-40px;">(น.ส.สุนันทนา  ขันธเลิศ)</div>
-			<div style="font-size: 18px;margin-left: 655px;margin-top:0px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 670px;margin-top:-20px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new Dompdf([
