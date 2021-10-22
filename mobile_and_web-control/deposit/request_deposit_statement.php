@@ -176,6 +176,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			border: 0.5px #DDDDDD solid;
 			border-radius: 5px;
 		}
+
 		.label {
 			width: 30%;
 			padding: 0 5px;
@@ -190,10 +191,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)
+					สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษา จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Tak Teacher Saving and Credit cooperative LTD
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:14px">
+					Teachers Saving Cooperative of The Gerneral Education Department LTD.
 			   </div>
 			   </div>
 				<div class="frame-info-user">

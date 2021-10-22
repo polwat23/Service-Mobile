@@ -16,9 +16,9 @@ foreach($filelist as $name){
 			if(!file_exists('../resource/avatar/'.$fileInfo[0])){
 				mkdir('../resource/avatar/'.$fileInfo[0], 0777, true);
 			}
-			$dest = 'C:/Mobile/service-tak/resource/avatar/'.$fileInfo[0].'/'.$name;
-			rename('C:/Mobile/service-tak/resource/avatar/'.$name,$dest);
-			$webP_destination = 'C:/Mobile/service-tak/resource/avatar/'.$fileInfo[0].'/'.$fileInfo[0].'.webp';
+			$dest = 'D:/Mobile/service-scr/resource/avatar/'.$fileInfo[0].'/'.$name;
+			rename('D:/Mobile/service-scr/resource/avatar/'.$name,$dest);
+			$webP_destination = 'D:/Mobile/service-scr/resource/avatar/'.$fileInfo[0].'/'.$fileInfo[0].'.webp';
 			$webP->convert($dest,$webP_destination,[]);
 			echo $name;
 		
