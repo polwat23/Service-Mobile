@@ -91,13 +91,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$arrGroupAllLoan = array();
 			$getWhocollu = $conmssqlcoop->prepare("SELECT (isnull(lnm.amount,0) - isnull(lnm.principal_actual,0))  as PRNBAL, lnm.doc_no as LOANCONTRACT_NO,
-												IsNull(lnm.amount,0) as APPROVE_AMT,lt.description as TYPE_DESC
+												IsNull(lnm.amount,0) as APPROVE_AMT,lt.description as TYPE_DESC,lnm.HOLD,lnm.HOLD_PRINCIPALONLY
 												FROM coloanmember lnm LEFT JOIN cointerestrate_desc lt ON lnm.TYPE = lt.TYPE 
 												WHERE lnm.member_id = :member_no and lnm.status ='A'
-												GROUP BY lnm.doc_no,IsNull(lnm.amount,0),lt.description,lnm.principal_actual");
+												GROUP BY lnm.doc_no,IsNull(lnm.amount,0),lt.description,lnm.principal_actual,lnm.HOLD,lnm.HOLD_PRINCIPALONLY");
 			$getWhocollu->execute([':member_no' => $member_no]);
 			while($rowWhocollu = $getWhocollu->fetch(PDO::FETCH_ASSOC)){
 				$arrayGroupLoan = array();
+				if($rowWhocollu["HOLD"] == "1"){
+					$arrayGroupLoan["CONTRACT_STATUS"] = "พักชำระทั้งหมด";
+				}else if($rowWhocollu["HOLD_PRINCIPALONLY"] == "1"){
+					$arrayGroupLoan["CONTRACT_STATUS"] = "พักชำระเฉพาะเงินต้น";
+				}
 				$arrayGroupLoan['APPROVE_AMT'] = number_format($rowWhocollu["APPROVE_AMT"],2);
 				$arrayGroupLoan['TYPE_DESC'] = $rowWhocollu["TYPE_DESC"];
 				$arrayGroupLoan["CONTRACT_NO"] = $rowWhocollu["LOANCONTRACT_NO"];

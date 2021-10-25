@@ -4,15 +4,37 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getSharemasterinfo = $conmssqlcoop->prepare("SELECT (member_stock * 10) as SHARE_AMT, begin_value as PERIOD_SHARE_AMT
-															  FROM cocooptation WHERE member_id = :member_no");
+		$getSharemasterinfo = $conmssqlcoop->prepare("SELECT top 1  (co.member_stock * 10) as SHARE_AMT,
+													csk.value_per_period as VALUESHARE_PERIOD,csk.stock_per_period as STOCKSHARE_PERIOD,
+													(CASE WHEN PAYDATE_1 IS NULL OR PAYDATE_1 = 0 THEN 0 ELSE 1 END
+													+
+													CASE WHEN PAYDATE_2 IS NULL OR PAYDATE_2 = 0 THEN 0 ELSE 1 END
+													+
+													CASE WHEN PAYDATE_3 IS NULL OR PAYDATE_3 = 0 THEN 0 ELSE 1 END
+													+
+													CASE WHEN PAYDATE_4 IS NULL OR PAYDATE_4 = 0 THEN 0 ELSE 1 END
+													+
+													CASE WHEN PAYDATE_5 IS NULL OR PAYDATE_5 = 0 THEN 0 ELSE 1 END)
+													AS COUNT_PAID
+													FROM cocooptation co LEFT JOIN coreceipt cp ON co.member_id  = cp.member_id
+													LEFT JOIN coStockmember csk ON co.member_id = csk.member_id
+													LEFT JOIN cocompany com ON co.COMPANY = com.COMPANY
+													WHERE co.member_id = :member_no and cp.type ='10'
+													order by receipt_no  desc");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
 			//$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
 			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
-			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
+			//$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
+			$arrOptionHeader[0]["LABEL"] = "จำนวนหุ้นต่องวด";
+			$arrOptionHeader[0]["VALUE"] = number_format($rowMastershare["STOCKSHARE_PERIOD"],2);
+			$arrOptionHeader[1]["LABEL"] = "จำนวนเงินต่องวด";
+			$arrOptionHeader[1]["VALUE"] = number_format($rowMastershare["VALUESHARE_PERIOD"],2);
+			$arrOptionHeader[2]["LABEL"] = "จำนวนครั้งในการจ่ายต่อเดือน";
+			$arrOptionHeader[2]["VALUE"] = $rowMastershare["COUNT_PAID"];
+			$arrayResult["OPTION_INFO_HEADER"] = $arrOptionHeader;
 			$limit = $func->getConstant('limit_stmshare');
 			$arrayResult['LIMIT_DURATION'] = $limit;
 			if($lib->checkCompleteArgument(["date_start"],$dataComing)){
@@ -38,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["PERIOD_SHARE_AMOUNT"] = number_format($rowStm["PERIOD_SHARE_AMOUNT"],2);
 				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SUM_SHARE_AMT"],2);
 				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
-				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
+				//$arrayStm["PERIOD"] = $rowStm["PERIOD"];
 				$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
 				$arrGroupStm[] = $arrayStm;
 			}

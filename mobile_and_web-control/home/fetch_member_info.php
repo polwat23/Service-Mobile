@@ -26,14 +26,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											cpt.birthdate as BIRTH_DATE,  
 											cpt.id_number as CARD_PERSON,
 											cpt.member_in as MEMBER_DATE,
-											cdp.description as POSITION_DESC,
+											cpn.description as COMPANY_DESC,
 											cpn.description as MEMBGROUP_DESC,
 											'' as MEMBTYPE_DESC,
 											cpt.address1 as ADDRESS1,
 											cpt.address2 as ADDRESS2
-											FROM cocooptation cpt LEFT JOIN coDepartment cdp ON cpt.company = cdp.company 
-											AND cpt.department = cdp.department
-											LEFT JOIN cocompany cpn ON cpt.company = cpn.company
+											FROM cocooptation cpt LEFT JOIN cocompany cpn ON cpt.company = cpn.company
 											WHERE cpt.member_id = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
@@ -41,14 +39,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
-			$arrayResult["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
+			//$arrayResult["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
 			$arrayResult["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
-			$arrayResult["CARD_PERSON"] = $rowMember["CARD_PERSON"];
+			//$arrayResult["CARD_PERSON"] = $rowMember["CARD_PERSON"];
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
-			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
+			$arrayResult["COMPANY_DESC"] = $rowMember["COMPANY_DESC"];
 			///$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
-			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
+			$arrayResult["MEMBGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
+			$arrayResult["IS_CHANGE_AVATAR"] = false;
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RESULT"] = TRUE;

@@ -10,9 +10,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserAccount->execute();
 		while($rowUserlogin = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupUserAcount = array();
+			$getName = $conmssqlcoop->prepare("SELECT Prefixname , Firstname , Lastname , email , telephone 
+											FROM CoCooptation
+											WHERE member_id = :member_no");
+			$getName->execute([':member_no' => $rowUserlogin["member_no"]]);
+			$rowname = $getName->fetch(PDO::FETCH_ASSOC);			
+			
 			$arrGroupUserAcount["MEMBER_NO"] = $rowUserlogin["member_no"];
-			$arrGroupUserAcount["TEL"] = $lib->formatphone($rowUserlogin["phone_number"]);
-			$arrGroupUserAcount["EMAIL"] = $rowUserlogin["email"];
+			$arrGroupUserAcount["FULLNAME"]  = $rowname["Prefixname"].$rowname["Firstname"].' '.$rowname["Lastname"];
+			$arrGroupUserAcount["TEL"] = $lib->formatphone($rowname["telephone"]);
+			$arrGroupUserAcount["EMAIL"] = $rowname["email"];
 			$arrGroupUserAcount["REGISTERDATE"] = $lib->convertdate($rowUserlogin["register_date"],'d m Y',true);
 			$arrGroupUserAcount["REGISTERCHANNEL"] = $rowUserlogin["register_channel"];
 			$arrGroupUserAcount["ACCOUTSTATUS"] = $rowUserlogin["account_status"];

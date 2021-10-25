@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute["end_date"] = $dataComing["end_date"];
 		}
 			
-		$fetchNews = $conmssql->prepare("SELECT 
+		$fetchNews = $conmssql->prepare("SELECT TOP 20
 																id_news,news_title,
 																news_detail,
 																news_html,
@@ -29,10 +29,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															FROM gcnews
 															WHERE is_use = '1' 
 															".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-																"and date_format(create_date,'%Y-%m-%d') >= :start_date" : null)."
+																"and  convert(varchar,create_date,20) >= :start_date " : null)."
 															".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-																"and date_format(create_date,'%Y-%m-%d') <= :end_date" : null). "
-															ORDER BY create_date DESC LIMIT 20");
+																"and convert(varchar,create_date,20) <= :end_date" : null). "
+															ORDER BY create_date DESC ");													 
 		$fetchNews->execute($arrayExecute);
 		while($rowNews = $fetchNews->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupNews = array();
@@ -56,6 +56,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup[] = $arrGroupNews;
 		}
 		$arrayResult["NEWS_DATA"] = $arrayGroup;
+		$arrayResult["NEW"] = $arrayExecute;
+		$arrayResult["SQ"] = $fetchNews ;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

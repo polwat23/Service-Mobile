@@ -9,7 +9,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
+			$getName = $conmssqlcoop->prepare("SELECT Prefixname , Firstname , Lastname 
+											FROM CoCooptation
+											WHERE member_id = :member_no");
+			$getName->execute([':member_no' => $rowUserlogin["member_no"]]);
+			$getrowname = $getName->fetch(PDO::FETCH_ASSOC);			
 			$arrGroupRootUserlogin["MEMBER_NO"] = $rowUserlogin["member_no"];
+			$arrGroupRootUserlogin["FULLNAME"] = $getrowname["Prefixname"].$getrowname["Firstname"].' '.$getrowname["Lastname"];
 			$arrGroupRootUserlogin["DEVICE"] = $rowUserlogin["device_name"];
 			$arrGroupRootUserlogin["LOGIN_DATE"] = $lib->convertdate($rowUserlogin["login_date"],'d m Y',true);
 			$arrGroupRootUserlogin["ID_TOKEN"] = $rowUserlogin["id_token"];

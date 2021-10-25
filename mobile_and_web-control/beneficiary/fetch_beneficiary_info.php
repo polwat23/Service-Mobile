@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_id = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
 		$getBeneficiary = $conmssqlcoop->prepare("SELECT prefixname  as PRENAME_SHORT,firstname as GAIN_NAME,
-											lastname as GAIN_SURNAME,relationship as GAIN_CONCERN,BenefitRecipientsRatio
+											lastname as GAIN_SURNAME,relationship as GAIN_CONCERN,BENEFITRECIPIENTSRATIO
 											FROM coBeneficiaries WHERE member_id = :member_no ");
 		$getBeneficiary->execute([':member_no' => $member_id]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
@@ -16,7 +16,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
 			}
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
-			$arrBenefit["BENEFITRECIPIENTSRATIO"] = $rowBenefit["BENEFITRECIPIENTSRATIO"] * 100;
+			if($rowBenefit["BENEFITRECIPIENTSRATIO"] > 0 ){
+				$arrBenefit["PERCENT_TEXT"] = $rowBenefit["BENEFITRECIPIENTSRATIO"] * 100 .' %';
+			}else{
+				$arrBenefit["PERCENT_TEXT"] = "ยังไม่ได้กำหนดอัตราส่วนผู้รับผลประโยชน์";
+				$arrBenefit["PERCENT_TEXT_PROPS"]["color"] = "red" ;
+			}
+			
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;

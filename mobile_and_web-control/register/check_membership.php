@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $dataComing["member_no"];
 	$checkMember = $conmssql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
@@ -29,23 +29,23 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conmssql->prepare("SELECT mb.memb_name as MEMB_NAME,mb.memb_surname as MEMB_SURNAME,mb.resign_status as RESIGN_STATUS
-											,mp.prename_desc as PRENAME_DESC,rtrim(ltrim(mb.card_person)) as CARD_PERSON
-											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											WHERE mb.member_no = :member_no");
+		$checkValid = $conmssqlcoop->prepare("SELECT firstname as MEMB_NAME,lastname as MEMB_SURNAME,status as RESIGN_STATUS
+											,prefixname as PRENAME_DESC,rtrim(ltrim(id_number)) as CARD_PERSON
+											FROM cocooptation
+											WHERE member_id = :member_no");
 		$checkValid->execute([
 			':member_no' => $member_no
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowMember["MEMB_NAME"])){
-			if($rowMember["RESIGN_STATUS"] == '1'){
+			if($rowMember["RESIGN_STATUS"] == 'RE'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
 			}
-			if($rowMember["CARD_PERSON"] != $dataComing["id_card"]){
+			if(substr(preg_replace('/-/','',$rowMember["CARD_PERSON"]),9,4) != $dataComing["id_card"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0060";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

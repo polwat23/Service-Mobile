@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute["end_date"] = $dataComing["end_date"];
 		}
 		$dateNow = date('YmdHis');
-		$fetchAnnounce = $conmssql->prepare("SELECT id_announce,
+		$fetchAnnounce = $conmssql->prepare("SELECT TOP 20 id_announce,
 													announce_cover,
 													announce_title,
 													announce_detail,
@@ -29,14 +29,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													check_text,
 													accept_text,
 													cancel_text,
-													date_format(effect_date,'%Y%m%d%H%i%s') AS effect_date_check,
-													date_format(due_date,'%Y%m%d%H%i%s') AS due_date_check
+													convert(varchar,effect_date,20) AS effect_date_check,
+													convert(varchar,due_date,20) AS due_date_check
 											 FROM gcannounce
 											 WHERE id_announce <> '-1' and effect_date IS NOT NULL
 													".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and date_format(effect_date,'%Y-%m-%d') <= :start_date" : null)."
+														"and convert(varchar,effect_date,20) <= :start_date" : null)."
 													".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(due_date,'%Y-%m-%d') >= :end_date" : null). " ORDER BY effect_date DESC LIMIT 20");
+														"and convert(varchar,due_date,20) >= :end_date" : null). " ORDER BY effect_date DESC");
 		$fetchAnnounce->execute($arrayExecute);		
 		while($rowAnnounce = $fetchAnnounce->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupAnnounce = array();

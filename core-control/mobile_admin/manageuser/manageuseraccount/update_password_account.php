@@ -7,12 +7,12 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		$list_name = "reset password";
 
 		$dateNow = date('Y-m-d H:i:s',strtotime($dateOperC));
-		$fetchCitizenID = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON FROM mbmembmaster WHERE RTRIM(LTRIM(member_no)) = :member_no");
+		$fetchCitizenID = $conmssqlcoop->prepare("SELECT RTRIM(LTRIM(member_id)) as CARD_PERSON FROM cocooptation WHERE RTRIM(LTRIM(member_id)) = :member_no");
 		$fetchCitizenID->execute([
 			':member_no' => $dataComing["member_no"]
 		]);
 		$rowcitizenid = $fetchCitizenID->fetch(PDO::FETCH_ASSOC);
-		$new_password = $rowcitizenid["CARD_PERSON"];
+		$new_password = preg_replace('/-/','',$rowcitizenid["CARD_PERSON"]);
 		$repassword = $conmssql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :newpassword,account_status = '-9',counter_wrongpass = 0 WHERE member_no = :member_no");
 		if($repassword->execute([
 				':newpassword' => password_hash($new_password,PASSWORD_DEFAULT),

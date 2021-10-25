@@ -8,168 +8,95 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$recv_year = substr(trim($dataComing["recv_period"]),0,4) - 543;
-		$revc_period_raw = $recv_year.substr(trim($dataComing["recv_period"]),-2,2);
+		$receipt_No = $dataComing["recv_period"];
 		$header = array();
-		$fetchName = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MBG.MEMBGROUP_DESC,MBG.MEMBGROUP_CODE
-												FROM MBMEMBMASTER MB LEFT JOIN 
-												MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
-												LEFT JOIN MBUCFMEMBGROUP MBG ON MB.MEMBGROUP_CODE = MBG.MEMBGROUP_CODE
-												WHERE mb.member_no = :member_no");
+		$fetchName = $conmssqlcoop->prepare("SELECT DISTINCT
+											coCooptation.Prefixname as PRENAME_DESC, 
+											coCooptation.Firstname as MEMB_NAME, 
+											coCooptation.Lastname as MEMB_SURNAME, 
+											coCooptation.Member_Id as MEMBER_NO, 
+											coCooptation.department, 
+											coDepartment.description, 
+											coCompany.Description as  company_desc
+											FROM   coReceipt LEFT JOIN  coCooptation ON coReceipt.Member_Id=coCooptation.Member_Id
+											LEFT JOIN  coDepartment ON coCooptation.Company = coDepartment.Company AND coCooptation.Department=coDepartment.Department 
+											LEFT JOIN coCompany ON coDepartment.Company=coCompany.Company
+											WHERE coReceipt.status ='2' AND coReceipt.member_id = :member_no");
 		$fetchName->execute([
 			':member_no' => $member_no
 		]);
-		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);	
+		$header["FULLNAME"] = $rowName["PRENAME_DESC"].' '.$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
+		$header["MEMBER_NO"] = $rowName["MEMBER_NO"];
+		$header["receipt_No"] = $receipt_No;
+		$header["company_desc"] = $rowName["company_desc"];
+		$header["department_desc"] = "[".$rowName["department"]."]" ." ". TRIM($rowName["description"]);
 		
-		
-		$fetchIntAccum = $conmssql->prepare("SELECT INTEREST_ACCUM FROM KPMASTRECEIVE WHERE MEMBER_NO = :member_no AND RECV_PERIOD = :recv_period");
-		$fetchIntAccum->execute([
+		$getPaymentDetail = $conmssqlcoop->prepare("SELECT coReceipt.Receipt_No, 
+											coReceipt.Paydate,
+											coReceipt.Amount, 
+											coReceipt.Type, 
+											coReceipt.Loan_Doc_No,
+											coInterestRate_Desc.Description,
+											coReceipt.Principal, 
+											coReceipt.Interest, 
+											coReceiptType.LoanMember,
+											coReceiptType.StockMember,
+											coReceipt.Stock, 
+											coReceiptType.Description as TYPE_DESC,
+											coReceipt.Loan_Seq, 
+											coReceipt.Loan_FromDate, 
+											coReceipt.Loan_ToDate, 
+											coReceipt.PrincipalBF, 
+											coReceipt.Stock_OnHand, 
+											coReceipt.Stock_OnHand_Value
+											FROM  coReceipt  LEFT JOIN coReceiptType ON coReceipt.Type=coReceiptType.Type
+											LEFT JOIN  coLoanMember ON coReceipt.Loan_Doc_No=coLoanMember.Doc_No
+											LEFT  JOIN coInterestRate_Desc ON coLoanMember.Type=coInterestRate_Desc.Type
+											WHERE coReceipt.status ='2' AND coReceipt.member_id = :member_no and coReceipt.Receipt_No = :recv_period
+											ORDER BY coReceipt.Receipt_No");
+		$getPaymentDetail->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
-		]);
-		$rowIntAccum = $fetchIntAccum->fetch(PDO::FETCH_ASSOC);
-		
-		$header["fullname"] = $rowName["PRENAME_DESC"].' '.$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-		$header["member_group"] = $rowName["MEMBGROUP_DESC"];
-		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
-			$getPaymentDetail = $conmssql->prepare("SELECT 
-																		CASE kut.system_code 
-																		WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-																		WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-																		ELSE kut.keepitemtype_desc
-																		END as TYPE_DESC,
-																		kut.keepitemtype_grp as TYPE_GROUP,
-																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ADJUST_ITEMAMT,
-																		kpd.ADJUST_PRNAMT,
-																		kpd.ADJUST_INTAMT,
-																		case kut.keepitemtype_grp 
-																			WHEN 'DEP' THEN kpd.description
-																			WHEN 'LON' THEN kpd.loancontract_no
-																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.PERIOD,
-																		kpd.SEQ_NO,
-																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		ISNULL(kpd.interest_payment,0) AS INT_BALANCE
-																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																		kpd.keepitemtype_code = kut.keepitemtype_code
-																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		and kpd.seq_no = :seq_no
-																		ORDER BY kut.SORT_IN_RECEIVE ASC");
-			$getPaymentDetail->execute([
-				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"],
-				':seq_no' => $dataComing["seq_no"]
-			]);
-		}else{
-			$getPaymentDetail = $conmssql->prepare("SELECT 
-																		CASE kut.system_code 
-																		WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-																		WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-																		ELSE kut.keepitemtype_desc
-																		END as TYPE_DESC,
-																		kut.keepitemtype_grp as TYPE_GROUP,
-																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ADJUST_ITEMAMT,
-																		kpd.ADJUST_PRNAMT,
-																		kpd.ADJUST_INTAMT,
-																		case kut.keepitemtype_grp 
-																			WHEN 'DEP' THEN kpd.description
-																			WHEN 'LON' THEN kpd.loancontract_no
-																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.PERIOD,
-																		kpd.SEQ_NO,
-																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		ISNULL(kpd.interest_payment,0) AS INT_BALANCE
-																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-																		kpd.keepitemtype_code = kut.keepitemtype_code
-																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-																		ORDER BY kut.SORT_IN_RECEIVE ASC");
-			$getPaymentDetail->execute([
-				':member_no' => $member_no,
-				':recv_period' => $dataComing["recv_period"]
-			]);
-		}
+		]);	
 		$arrGroupDetail = array();
-		$sum_int = 0;
+		$sum_principal  = 0; $sum_interest  = 0; $sum_principalbf  = 0;
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
-			if($rowDetail["TYPE_GROUP"] == 'SHR'){
-				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
-				$arrDetail["CONTRACT_NO"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
-				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
-					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
-					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
-					$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
-				}else{
-					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
-					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
-					$sum_int += ($rowDetail["INT_BALANCE"] ?? 0);
-				}
-			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-			
-				$getAccDetail = $conmssql->prepare("select PRNCBAL from dpdeptstatement 
-												where  deptaccount_no = :deptaccount_no and 
-												deptitemtype_code = 'DTM' and CONVERT(varchar(6),operate_date,112) = :operate_date");
-				$getAccDetail->execute([
-					':deptaccount_no' => $rowDetail["PAY_ACCOUNT"],
-					':operate_date' => $revc_period_raw
-				]);
-				$rowAccDetail = $getAccDetail->fetch(PDO::FETCH_ASSOC);
-			
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
-				$rowDetail["ITEM_BALANCE"] = $rowAccDetail["PRNCBAL"];
-			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
-				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+			$header["PAYDATE"] = $lib->convertdate($rowDetail["Paydate"],'d M Y');
+			$arrDetail["Type"] = $rowDetail["Type"];
+			if($rowDetail["Type"] == '10'){
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"]." จำนวน ".$rowDetail["Stock"] ." หุ้น";
+				$arrDetail["AMOUNT"] = number_format($rowDetail["Amount"],2);
+				$header["STOCK_ONHAND"] = number_format($rowDetail["Stock_OnHand"]);
+				$header["STOCK_ONHAND_VALUE"] = number_format($rowDetail["Stock_OnHand_Value"],2);
+			}else if($rowDetail["Type"] == '20'){
+				$arrDetail["LOANTYPE_DESC"] = $rowDetail["Description"] ." ที่ ".$rowDetail["Loan_Doc_No"];
+				$arrDetail["PERIOD"] = $rowDetail["Loan_Seq"];
+				$arrDetail["PRINCIPAL"] = number_format($rowDetail["Principal"],2);
+				$arrDetail["INTEREST"] = number_format($rowDetail["Interest"],2);
+				$arrDetail["PRINCIPALBF"] = number_format($rowDetail["PrincipalBF"],2);
+				$arrDetail["AMOUNT"] = number_format($rowDetail["Amount"],2);
+				$arrDetail["LOAN_FROMDATE"] = $lib->convertdate($rowDetail["Loan_FromDate"],'d/n/Y');			
+				$arrDetail["LOAN_TODATE"] = $lib->convertdate($rowDetail["Loan_ToDate"],'d/n/Y');			
+				$sum_principal += $rowDetail["Principal"];
+				$sum_interest += $rowDetail["Interest"];
+				$sum_principalbf += $rowDetail["PrincipalBF"];
+				
 			}
-			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
-				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
-				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ADJUST_ITEMAMT"];
-			}else{
-				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
-				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
-			}
-			if($rowDetail["ITEM_BALANCE"] > 0){
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
-			}
+			$amount_amt += $rowDetail["Amount"];
 			$arrGroupDetail[] = $arrDetail;
-		}
-		$getDetailKPHeader = $conmssql->prepare("SELECT 
-																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
-																kpd.KEEPING_STATUS
-																FROM kpmastreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
-		$getDetailKPHeader->execute([
-			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
-		]);
-		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
-		
-		$header["interest_accum"] = number_format((($rowIntAccum["INTEREST_ACCUM"] ?? 0) + $sum_int),2);
-		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
-		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
-		$header["member_no"] = $payload["member_no"];
-		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D/n/Y');
-		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
+		}	
+		$sum_principal = number_format($sum_principal,2);
+		$sum_interest = number_format($sum_interest,2);
+		$sum_principalbf = number_format($sum_principalbf,2);
+		$amount = number_format($amount_amt,2);
+		$amount_baht =  $lib->baht_text($amount_amt);
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib , $sum_principal ,$sum_interest , $sum_principalbf , $amount ,$amount_baht);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['RESULT_AD'] = $amount_baht;
 			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
@@ -197,7 +124,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		
 	}
 }else{
-	$filename = basename(__FILE__, '.php');
+	/*$filename = basename(__FILE__, '.php');
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
@@ -208,189 +135,246 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];*/
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
 	
 }
 
-function GenerateReport($dataReport,$header,$lib){
-	$sumBalance = 0;
-	$html = '<style>
-				@font-face {
-				  font-family: TH Niramit AS;
-				  src: url(../../resource/fonts/TH Niramit AS.ttf);
-				}
-				@font-face {
-					font-family: TH Niramit AS;
-					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
-					font-weight: bold;
-				}
-				* {
-				  font-family: TH Niramit AS;
-				}
-
-				body {
-				  padding: 0px;
-				  font-size:x-small;
-				}
-				.sub-table div{
-					padding : 5px;
-				}
-				.theme-color {
-					color: #70ad47;
-				}
-
-				.theme-table {
-					border-spacing: 0;
-					border: 2px solid #70ad47;
-					border-radius: 10px;
-					width: 100%
-				}
-
-				.theme-table-bordered,
-				.theme-table-bordered th,
-				.theme-table-bordered td {
-					border: 2px solid #70ad47;
-					border-collapse: collapse;
-				}
-				.theme-table-bordered th {
-					border: 2px solid #70ad47;
-					background-color: #c5e0b3;
-					font-weight: bold;
-					border-collapse: collapse;
-					height: 40px;
-					color: #70ad47;
-				}
-			</style>
-		<div style="width:12.5cm; height:14cm; border:1px solid #eee;">
-			<div>
-				 <div style="text-align: center;">
-					<div style="display: inline-block;vertical-align: top;position: absolute;left: 10px;">
-						<img src="../../resource/logo/logo_slip.jpg" style="width:80px" />
-					</div>
-					<div style="display: inline-block;">
-						<div style="text-align:center;">
-							<div class="theme-color" style="font-weight: bold;font-size: 14pt;padding-top: 12px;">
-								สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จำกัด
-							</div>
-						</div>
-						<div style="text-align:center;">
-							<div class="theme-color" style="font-weight: bold;font-size: 14pt;padding-top: 12px;">
-								ใบรับเงิน
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div style="padding-top: 30px;">
-				<div style="display: inline-block;width: 55%; margin-right:1px;">
-					<div>
-						<table class="theme-table">
-							<tr>
-								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
-									เลขที่</td>
-								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["receipt_no"].'</td>
-							</tr>
-							<tr>
-								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
-									ได้รับเงินจาก</td>
-								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["fullname"].'</td>
-							</tr>
-							<tr>
-								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;">
-									หน่วยงาน</td>
-								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["member_group"].'
-								</td>
-							</tr>
-						</table>
-					</div>
-				</div>
-				<div style="display: inline-block;width: 43.3%;padding-left: 4px">
-					<div>
-						<table class="theme-table">
-							<tr>
-								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
-									วันที่</td>
-								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["operate_date"].'</td>
-							</tr>
-							<tr>
-								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;border_bottom: 2px solid #70ad47;">
-									เลขทะเบียน</td>
-								<td style="width: 100%;padding-right: 10px;padding-left: 10px;">'.$header["member_no"].'</td>
-							</tr>
-							<tr>
-								<td class="theme-color" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;border-right: 2px solid #70ad47;">
-									ดอกเบี้ยสะสม</td>
-								<td style="width: 100%;text-align: right;padding-right: 10px;padding-left: 10px;">'.$header["interest_accum"].'
-								</td>
-							</tr>
-						</table>
-					</div>
-				</div>
-            </div>';
-				// Detail
-	$html .= ' <div style=" margin-top:-10px;">
-				<div style="position: relative;">
-					<table class="theme-table-bordered" style="width: 100%">
-                    <tr>
-                        <th>รายการ/สัญญา</th>
-                        <th>งวดที่</th>
-                        <th>เงินต้น</th>
-                        <th>ดอกเบี้ย</th>
-                        <th>จำนวนเงิน</th>
-                        <th>ยอดคงเหลือ</th>
-                    </tr>';
-	for($i = 0;$i < sizeof($dataReport); $i++){
-	
-		$html .= '
-				<tr>
-					<td style="white-space: nowrap;padding-right: 10px;">'.($dataReport[$i]["CONTRACT_NO"] ? ($dataReport[$i]["CONTRACT_NO"].' '): '').''.$dataReport[$i]["TYPE_DESC"].'</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: center;">'.($dataReport[$i]["PERIOD"] ?? null).'</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["PRN_BALANCE"].'</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["INT_BALANCE"].'</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["ITEM_PAYMENT"].'</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.$dataReport[$i]["ITEM_BALANCE"].'</td>
-				</tr>'
-				;
-					
-		$sumBalance += $dataReport[$i]["ITEM_PAYMENT_NOTFORMAT"];
+function GenerateReport($dataReport,$header,$lib, $sum_principal ,$sum_interest , $sum_principalbf , $amount ,$amount_baht){
+	$html = '
+	<style>
+	@font-face {
+	  font-family: TH Niramit AS;
+	  src: url(../../resource/fonts/TH Niramit AS.ttf);
 	}
-	$html .= '
-				<tr>
-					<td style="white-space: nowrap;padding-right: 10px;">&nbsp;</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: center;">&nbsp;</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">&nbsp;</td>
-				</tr>
-				<tr>
-					<td colspan="4" style="white-space: nowrap;padding-right: 10px;padding-left: 10px;">'.$lib->baht_text($sumBalance).'</td>
-					<td style="padding-right: 10px;padding-left: 10px;text-align: right;">'.number_format($sumBalance, 2).'</td>
-					<td style="padding-right: 10px;padding-left: 10px;"></td>
-				</tr>
-				</table>
-				<img src="../../resource/logo/logo_slip.jpg" style="width:90px;position: absolute;opacity: 0.1;left: 50%;top: '.((sizeof($dataReport)/2)*32+50).'px; transform: translate(-50%, -50%); " />
-			</div>';
-			// Footer
-	$html .= '<div class="theme-color" style="margin-top: 16px;position: relative;white-space: nowrap;">
-						ผู้จัดการ / เหรัญญิก ................................................................................ เจ้าหน้าที่ผู้รับเงิน ............................................................................
-					<img src="../../resource/utility_icon/signature/mg.jpg" height="20" style="margin-top:10px;position: absolute;left: 90px;top: -20px;"/>
-					<img src="../../resource/utility_icon/signature/mg_temp.jpg" height="20" style="margin-top:10px;position: absolute;left: 330px;top: -20px;"/>
-                </div>
-                <div style="margin-top: 12px; border: 2px solid #70ad47; background-color: #c5e0b3;border-radius: 10px;height: 70px;">
+	@font-face {
+	  font-family: TH Niramit AS;
+	  src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+	  font-weight: bold;
+	}
+	* {
+	  font-family: TH Niramit AS;
+	}
+	body {
+	  font-size:11pt;
+	  line-height: 15px;
 
-                </div>
-                <div class="theme-color" style="margin-top: 24px;font-weight: bold;text-align: center;">
-                    ใบรับเงินประจำเดือนจะสมบูรณ์ต่อเมื่อสหกรณ์ได้รับเงินที่เรียกเก็บครบถ้วนแล้ว
-                </div>
-            </div>
+	}
+	div{
+	  font-size:11pt;
+	}
+	.center{
+	  text-align:center
+	}
+	.right{
+	  text-align:right
+	}
+	.bold{
+	  font-weight:bold;
+	}
+	.nowrap{
+	  white-space: nowrap;
+	}
+	.wrapper-page {
+	  page-break-after: always;
+	}
+
+	.wrapper-page:last-child {
+	  page-break-after: avoid;
+	}
+	table{
+	  border-collapse: collapse;
+
+	}
+	.main-td{
+	  border:0.25px solid green ;
+	  text-align:center;
+	  color:green;
+	  padding:5px 5px;
+	}
+	th{
+	  font-size:11pt;
+	}
+
+	p{
+	  margin:0px;
+	}
+	.text-color{
+	  color:green;
+	}
+	.data-text-color{
+	  color:#000000;
+	}
+	.border-top{
+	  border-top:1px solid;
+	}
+	.total{
+	  border-bottom:2px double;
+	}
+	.flex{
+	  display:flex;
+	}
+	.border{border:1px solid red}
+
+	@page { size: 15.24cm 15.24cm; }
+	</style>
+	';
+
+	//@page = ขนาดของกระดาษ 15.24 cm x  15.24 cm
+	//ระยะขอบ
+	$html .= '<div style=" margin: -30px -30px -50px -30px; ">';
+	$html .= '
+	  <div style="display:flex; height:80px;"  class="nowrap">
+		  <div style="positionabsolute; margin-left:-12px; ">
+			<img src="../../resource/logo/logo_recept.png" style="width:100px; " >
+		  </div>
+		  <div>
+			  <div  class="center text-color bold" style="margin-top:5px; font-size:18pt;">  สหกรณ์ออมทรัพย์ เอ็ม บี เค กรุ๊ป จำกัด</div>
+			  <div style="margin-top:10px; font-size:18pt;" class="center text-color bold">ใบรับเงิน</div>
+			  <div style="font-size:11pt; height:20px;">
+				 <div style="position:absolute; right:70px;" class="text-color">เลขที่</div> 
+				 <div style="position:absolute; right:-30px;  width:90px; ">'.($header["receipt_No"]??null).'</div> 
+			  </div>
+			  <div style="margin-right:90px; font-size:11pt; margin-top:10px;" >
+				<div style="position:absolute; right:70px;" class="text-color">วันที่</div> 
+				<div style="position:absolute; right:-30px;  width:90px; ">'.($header["PAYDATE"]??null).'</div> 
+			  </div>
+		  </div>
+	  </div>
+	  <div style="display:flex; height:30px; "class="text-color">
+		<div>ได้รับเงินจาก</div>
+		<div style="margin-left:75px;" class="data-text-color">'.($header["FULLNAME"]??null).'</div>
+	  </div>
+	  <div style="display:flex; height:30px; "class="text-color">
+		<div>สมาชิกเลขทะเบียนที่ </div>
+		<div style="margin-left:90px; width:80px;" class="data-text-color center">'.($header["MEMBER_NO"]??null).'</div>
+		<div style="margin-left:180px;">ดังต่อไปนี้</div>
+		<div style="position:absolute; right:5px; font-size:10px; top:70px;" class="data-text-color">'.($header["company_desc"]??null).'</div> 
+		<div style="position:absolute; right:5px; font-size:10px; top:80px;" class="data-text-color">'."แผนกฝ่าย ".($header["department_desc"]??null).'</div> 
+	  </div>
+	  <div>
+	  <div style="position:absolute; ">
+		<div style=" padding:5px;  height:20px; "></div>
+		<div>
+		  <table >
+			  <tr>
+				  <td style="width:160px;" class=""></td>
+				  <td style="width:85px;" class=" right">เงินต้น</td>
+				  <td style="width:85px;" class=" right">ดอกเบี้ย</td>
+				  <td style="width:95px;" class=" right">เงินต้นคงเหลือ</td>
+				  <td style="width:100px;" class=" right">จำนวนเงิน</td>
+			  </tr>';
+			  
+	foreach($dataReport AS $arrList){
+	  if($arrList["Type"]=="10"){
+		$html .='   
+		<tr>
+		  <td style="width:160px; padding-left:3px;">'.($arrList["TYPE_DESC"]??null).'</td>
+		  <td style="width:85px;" class=" right"></td>
+		  <td style="width:85px;" class=" right"></td>
+		  <td style="width:95px;" class=" right"></td>
+		  <td style="width:100px;" class=" right">'.($arrList["AMOUNT"]??null).'</td>
+	  </tr>';
+
+	  }else{
+		$html .='   
+		<tr>
+		  <td style="width:160px; padding-left:3px;"> '.($arrList["LOANTYPE_DESC"]??null).'</td>
+		  <td style="width:85px;" class=" right">'.($arrList["PRINCIPAL"]??null).'</td>
+		  <td style="width:85px;" class=" right">'.($arrList["INTEREST"]??null).'</td>
+		  <td style="width:95px; margin-right:5px" class=" right">'.($arrList["PRINCIPALBF"]??null).'</td>
+		  <td style="width:100px;" class=" right">'.($arrList["AMOUNT"]??null).'</td>
+		</tr>
+		<tr>
+		  <td style="width:150px; text-indent:20px;">'.($arrList["รายละเอียด"]??null).'</td>
+		  <td style="width:85px;" class="right"></td>
+		  <td style="width:85px;" class="right"></td>
+		  <td style="width:95px;" class="right"></td>
+		  <td style="width:100px;" class="right"></td>
+	  </tr>';
+
+	  }
+
+	}
+
+	$html .=' 
+		  <tr>
+			<td style="width:150px;"></td>
+			<td style="width:85px;" class="right"><div class="border-top total">'.($sum_principal??'&nbsp;').'</div></td>
+			<td style="width:85px;" class="right"><div class="border-top total">'.($sum_interest??'&nbsp;').'</div></td>
+			<td style="width:95px;" class="right"><div class="border-top total">'.($sum_principalbf??'&nbsp;').'</div></td>
+			<td style="width:100px;" class="right"></td>
+		  </tr>         
+		  </table>
+		</div>
+		';
+
+	  //   <div class="flex" style="height:10px; padding:5px;">
+	  //   <div class="border right" style="width:100px; margin-left:330px;">เงินต้นคงเหลือ</div>
+	  //   <div class="border right" style="width:80px; margin-left:250px;">ดอกเบี้ย</div>
+	  //   <div class="border right" style="width:90px; margin-left:158px;">เงินต้น</div>
+	  // </div>
+
+	   
+	$html.='
+	  </div>
+		<div style="height:260px;">
+		  <table style="width:100%;">
+			  <tr>
+				  <td class="main-td">รายการ</td>
+				  <td class="main-td" style="width:20%">จำนวนเงิน</td>
+			  </tr>
+			  <tr>
+				<td class="main-td" style="height:220px;"></td>
+				<td class="main-td"></td>
+			  </tr>
+		  </table>
+		  <div style="position:absolute; margin-top:-30px; font-size:9pt;    line-height: 10px;" >
+			<div style="padding-left:5px;">
+			  <div style="border-top:0.5px solid green;  position:absolute; width:109px ; margin-left:431px"></div>
+			  <div  style="margin-bottom:5px;">***หมายเหตุ หุ้นสะสม&nbsp;&nbsp;จำนวน  '.$header["STOCK_ONHAND"].' หุ้น&nbsp;&nbsp;เป็นมูลค่า&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '.$header["STOCK_ONHAND_VALUE"].' บาท</div>
+			  <div class="flex" style=" margin-top:5px; height:30px;">
+				<div style="margin-left:40px;" class="bold">('.($amount_baht??null).')</div>
+				<div style="margin-left:410px; " class="text-color">รวม</div>
+				<div style="margin-left:490px; " class="bold">'.($amount??null).'</div>
+			  </div>
+			  
+			</div>
+		  </div>
+	  </div>
+	  </div>
+	  <div class="flex" style="height:60px;">
+			<div class="center" style="width:50%">
+				<img src="../../resource/utility_icon/signature/payee.jpg" style="height:20px; margin-top:15px ">
+				<div class="text-color" style="margin-top:10px;">เจ้าหน้าที่ผู้รับเงิน</div>
+			</div>
+			<div class="center" style="margin-left:50%; width:50%">
+					<div class="" style="padding-top:25px;">'.($header["PAYDATE"]??null).'</div>
+					<div class="text-color" style="padding-top:5px;">วันที่</div>
+			</div>
+	  </div>
+	  <div class="flex">
+	  <div class="center" style="width:50%">
+		  <img src="../../resource/utility_icon/signature/manager.jpg" style="height:20px; margin-top:10px ">
+		  <div class="text-color" style="margin-top:5px;">เจ้าหน้าที่ผู้รับเงิน</div>
+	  </div>
+	  <div class="center" style="margin-left:50%; width:50%">
+		  <div  style="padding-top:10px;">'.($header["PAYDATE"]??null).'</div>
+		  <div style="padding-top:5px;" class="text-color">วันที่</div>
+	  </div>
+	</div>
+	';
+
+	//ระยะขอบ
+	$html .= '
 	</div>';
+
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
+		'tempDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
@@ -402,8 +386,8 @@ function GenerateReport($dataReport,$header,$lib){
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$header["member_no"].$header["receipt_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["member_no"].$header["receipt_no"].'.pdf?v='.time();
+	$pathfile = $pathfile.'/'.$header["MEMBER_NO"].$header["RECEIPT_NO"].'.pdf';
+	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["MEMBER_NO"].$header["RECEIPT_NO"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

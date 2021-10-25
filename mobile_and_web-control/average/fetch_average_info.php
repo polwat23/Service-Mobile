@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DividendInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DividendAverageInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDivmaster = array();
 		$show_pdf = 0;
@@ -15,30 +15,30 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$arrDiv = array();
+			$arrAvg = array();
 			$arrDetail = array();
 			$arrOther = array();
 			$arrayRecv = array();
-			$getDivMaster = $conmssqlcoop->prepare("select pt.STOCK_ONHAND, pt.STOCK_ONHAND_VALUE ,pt.AMOUNT as  DIV_AMT,pt.pay_no as DIV_YEAR, 
-													cb.shortname as BANK,co.bank_account as BANK_ACCOUNT,cpm.RATE 
-													from coPay_Transaction  pt LEFT  JOIN cocooptation co ON pt.member_id = co.member_id 
-													LEFT JOIN coBank cb ON   co.bank_code = cb.bank_code
-													LEFT  JOIN coPay_Master cpm ON pt.pay_no = cpm.pay_no AND pt.type = cpm.type
-													where  pt.type = 'D' and pt.pay_no = :div_year  and co.member_id = :member_no ");
-			$getDivMaster->execute([
+			
+			//เฉลี่ยคืน
+			$getAvgMaster = $conmssqlcoop->prepare("select pc.paramater2 as REMARK,ct.interest as INTEREST_AMT,ct.amount as AVG_AMT,
+										cpm.rate as AVG_RATE
+										from coPay_Transaction ct LEFT JOIN coPay_TransactionCalculate pc ON ct.member_id = pc.member_id 
+										AND ct.pay_no = pc.pay_no AND ct.type = pc.type
+										LEFT JOIN coPay_Master cpm ON ct.pay_no = cpm.pay_no AND ct.type = cpm.type
+										where ct.type ='A' AND ct.pay_no = :div_year AND ct.member_id = :member_no");
+			$getAvgMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
-			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
+			$rowAvg = $getAvgMaster->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
-			$arrDiv["TEXT_DESC"] = "ปันผล";
-			$arrDiv["AMOUNT"] = number_format($rowDiv["DIV_AMT"],2);
-			$arrDiv["OTHER_INFO"][0]["LABEL"] = "หุ้น";	
-			$arrDiv["OTHER_INFO"][0]["VALUE"] =  number_format($rowDiv["STOCK_ONHAND"],2);
-			$arrDiv["OTHER_INFO"][1]["LABEL"] = "มูลค่าหุ้น";	
-			$arrDiv["OTHER_INFO"][1]["VALUE"] =  number_format($rowDiv["STOCK_ONHAND_VALUE"],2);
-			
-			
+			$arrAvg["TEXT_DESC"] = "เฉลี่ยคืน";
+			$arrAvg["AMOUNT"] = number_format($rowAvg["AVG_AMT"],2);
+			$arrAvg["OTHER_INFO"][0]["LABEL"] = $rowAvg["REMARK"] ?? "-";	
+			$arrAvg["OTHER_INFO"][0]["VALUE"] =  number_format($rowAvg["INTEREST_AMT"],2);
+			$arrAvg["OTHER_INFO"][1]["LABEL"] = "อัตราเฉลี่ยคืน";	
+			$arrAvg["OTHER_INFO"][1]["VALUE"] =  number_format($rowAvg["AVG_RATE"],2);
 			
 			/*$arrayRecv["TEXT_DESC"] = "วิธีรับเงิน";
 			$arrayRecv["BANK"] = $rowDiv["BANK"];	
@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowDiv["BANK_ACCOUNT"],$func->getConstant('dep_format'));
 			}*/
-			$arrDividend["DETAIL"][0] = $arrDiv;
+			$arrDividend["DETAIL"][0] = $arrAvg;
 			//$arrDividend["DETAIL"][2] = $arrayRecv;
 			$arrDivmaster[] = $arrDividend;
 		}

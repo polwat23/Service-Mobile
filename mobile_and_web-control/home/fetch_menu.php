@@ -61,7 +61,7 @@ if(!$anonymous){
 				$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 				$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 			}
-			$arrMenuDep["LAST_STATEMENT"] = TRUE;
+			$arrMenuDep["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
@@ -91,7 +91,7 @@ if(!$anonymous){
 				$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 				$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			}
-			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+			$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
 		$arrayResult['RESULT'] = TRUE;
@@ -240,7 +240,7 @@ if(!$anonymous){
 								$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							}
-							$arrMenuDep["LAST_STATEMENT"] = TRUE;
+							$arrMenuDep["LAST_STATEMENT"] = FALSE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$arrMenuLoan = array();
 							if(isset($dataComing["home_loan_account"])) {
@@ -268,7 +268,7 @@ if(!$anonymous){
 								$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
-							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+							$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 						}			
 					}
 				}else{
@@ -387,6 +387,16 @@ if(!$anonymous){
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
+				$getRule = $conmssql->prepare("SELECT rule_name,rule_url FROM gcrulecooperative WHERE is_use = '1'");
+				$getRule->execute();
+				$arrGrpRule = array();
+				while($rowRule = $getRule->fetch(PDO::FETCH_ASSOC)){
+					$arrRule = array();
+					$arrRule["RULES_URL"] = $rowRule["rule_url"];
+					$arrRule["RULES_DESC"] = $rowRule["rule_name"];
+					$arrGrpRule[] = $arrRule;
+				}
+				$arrayResult["RULES"] = $arrGrpRule;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

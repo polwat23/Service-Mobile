@@ -4,7 +4,7 @@
 	"COOP_ID" : "999001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.mju.mobile",
-	"URL_SERVICE" : "https://uatmbkcoop.mbkgroup.co.th/",
+	"URL_SERVICE" : "https://uatmbkcoop.mbkgroup.co.th/service-mbk-test/",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAAIIsC6NU:APA91bGFbS3qFJFE7BeYH8k8mA24omGWnV_TivOo3FHmMDPIxGdplrUZW7ya7y7um-IJZBaV3l9LbDvtjSUOhvts6xwuVoOYFharEWDkibrTGOxAbD7diz5C-gfZ--H4M9V_OC_0g_FY",
 	"SECRET_KEY_JWT" : "MBK!/-Gcoop+Connect^999001*!&",
@@ -40,5 +40,8 @@
 			"LIMIT_AMOUNT_COOP" : "2000000",
 			"IS_USE" : "true"
 		}
-	}
+	},
+	"CONSENT_API" : "https://uat-apiconsent.mbkgroup.co.th/api",
+	"CONSENT_UN" : "isocare",
+	"CONSENT_PW" : "g&7#aF0"
 }

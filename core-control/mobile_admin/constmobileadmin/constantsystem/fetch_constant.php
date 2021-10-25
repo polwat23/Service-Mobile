@@ -4,6 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantsystem')){
 		$arrayGroup = array();
+		$initial_value ="";
 		$fetchConstant = $conmssql->prepare("SELECT id_constant,constant_name,constant_desc,constant_value,is_dropdown,initial_value
 											 FROM gcconstant WHERE is_use = '1'");
 		$fetchConstant->execute();
@@ -14,8 +15,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["CONSTANT_DESC"] = $rowMenuMobile["constant_desc"];
 			$arrConstans["CONSTANT_VALUE"] = $rowMenuMobile["constant_value"];
 			$arrConstans["IS_DROPDOWN"] = $rowMenuMobile["is_dropdown"];
-			$arrConstans["INITIAL_VALUE"] = $rowMenuMobile["initial_value"];
-			$arrayGroup[] = $arrConstans;
+			//$initial_value =  preg_replace('/(\)/', '', $rowMenuMobile["initial_value"]);
+			$arrConstans["INITIAL_VALUE"] = preg_replace('/r/n', '', $rowMenuMobile["initial_value"]);
+			$arrayGroup[] = $arrConstans;	
 		}
 		$arrayResult["CONSTANT_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;

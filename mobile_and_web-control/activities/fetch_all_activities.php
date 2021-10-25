@@ -5,8 +5,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Event')){
 		$arrayGroupNews = array();
 		$fetchEvent = $conmssql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
-										date_format(event_start_time,'%H:%i') as event_start_time,
-										date_format(event_end_time,'%H:%i') as event_end_time,
+										convert(CHAR(5),event_start_time,14) as event_start_time,
+										convert(CHAR(5),event_end_time,14) as event_end_time,
 										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html
 										FROM gctaskevent WHERE is_use = '1' ORDER BY start_date DESC");
 		$fetchEvent->execute();
