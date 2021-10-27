@@ -191,10 +191,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษา จำกัด
+					สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษาจังหวัดเชียงราย จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:14px">
-					Teachers Saving Cooperative of The Gerneral Education Department LTD.
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:12px">
+					CHIANG RAI PROVINCIAL GENERAL EDUCATION TEACHER\'S SAVING AND CREDIT COOPERATIVE LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
