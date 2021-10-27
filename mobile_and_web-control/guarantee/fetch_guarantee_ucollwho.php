@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
-											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT
+											NVL(LCM.principal_balance,0) as PRINCIPAL_BALANCE
 											FROM
 											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
 											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
 			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
 			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
-			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
+			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["PRINCIPAL_BALANCE"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
 		}
