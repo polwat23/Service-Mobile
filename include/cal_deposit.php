@@ -79,11 +79,6 @@ class CalculateDep {
 										and SUBSTR(dps.deptitemtype_code,1,1) = 'D'");
 		$getSumDept->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSumDept = $getSumDept->fetch(\PDO::FETCH_ASSOC);
-		if($rowSumDept["SUM_AMT"] + $amt_transfer > $rowLimitDept["constant_value"]){
-			$arrayResult['RESPONSE_CODE'] = "WS0093";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
 		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
@@ -725,7 +720,7 @@ class CalculateDep {
 		$rowLastSEQ = $getLastSEQ->fetch(\PDO::FETCH_ASSOC);
 		return $rowLastSEQ;
 	}
-	public function generateDocNo($component,$lib){
+	public function generateDocNo($component,$lib,$more=0){
 		$getLastDpSlipNo = $this->conora->prepare("SELECT DOCUMENT_FORMAT,DOCUMENT_PREFIX,LAST_DOCUMENTNO,DOCUMENT_YEAR,DOCUMENT_LENGTH
 												FROM cmdocumentcontrol where document_code = :component");
 		$getLastDpSlipNo->execute([':component' => $component]);
@@ -751,7 +746,7 @@ class CalculateDep {
 				}
 			}else if($key == 'R'){
 				if($countRunning > 0){
-					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1 + $more,$countRunning));
 				}
 			}
 		}
@@ -1071,7 +1066,7 @@ class CalculateDep {
 		}
 	}
 	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc){
+	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null){
 		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
@@ -1153,7 +1148,7 @@ class CalculateDep {
 			if($insertStatement->execute($arrExecuteStm)){
 				if($penalty_amt > 0){
 					$rowMapAccFee = $this->getVcMapID('00');
-					$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+					$deptslip_noPenalty = $penaltyslip;//$lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
 					$lastStmSrcNo += 1;
 					$arrExecutePenalty = [
 						':deptslip_no' => $deptslip_noPenalty,
@@ -1212,7 +1207,7 @@ class CalculateDep {
 						}
 					}else{
 						$arrayResult["RESPONSE_CODE"] = 'WS0066';
-						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecute);
+						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecutePenalty);
 						$arrayResult['RESULT'] = FALSE;
 						return $arrayResult;
 					}

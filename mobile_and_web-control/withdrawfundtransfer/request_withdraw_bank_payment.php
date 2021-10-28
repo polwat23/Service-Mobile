@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$ref_no = $time.$lib->randomText('all',3);
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$penalty_include = $func->getConstant("include_penalty");
-		$fee_amt = 0;
+		$fee_amt = $dataComing["fee_amt"];
 		if($rowDataWithdraw["bank_code"] == '025'){
 			$fee_amt = $dataComing["penalty_amt"];
 		}else{
@@ -63,8 +63,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrSendData["app_id"] = $config["APP_ID"];
 		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
+		$deptslip_noPenalty = null;
 		if($fee_amt > 0){
 			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
+			$arrSlipDPnoPenalty = $cal_dep->generateDocNo('DPSLIPNO',$lib,1);
+			$deptslip_noPenalty = $arrSlipDPnoPenalty["SLIP_NO"];
 		}else{
 			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		}
@@ -75,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$conoracle->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
-		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noPenalty);
 		if($wtdResult["RESULT"]){
 			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);

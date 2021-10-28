@@ -79,7 +79,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
 				$arrPic = explode('.',$rowAllow["bank_logo_path"]);
 				$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
-				$arrayBank["NON_DIRECT"] = TRUE;
 				$arrayBankGrp[] = $arrayBank;
 			}else {
 				$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
