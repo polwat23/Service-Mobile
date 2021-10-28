@@ -309,7 +309,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	}
 	$pathOutput = $pathfile."/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;
