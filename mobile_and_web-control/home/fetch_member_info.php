@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													mb.ADDR_NO as ADDR_REG_NO,
 													mb.ADDR_MOO as ADDR_REG_MOO,
 													mb.ADDR_SOI as ADDR_REG_SOI,
