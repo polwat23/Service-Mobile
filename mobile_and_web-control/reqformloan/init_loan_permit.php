@@ -60,8 +60,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["RECEIVE_NET"] = $receive_net;
 			}
 			if($dataComing["remain_salary"] > 0){
-				if($period_payment - $dataComing["remain_salary"] < 3000){
+				if($dataComing["remain_salary"] - $period_payment < 3000 || $period_payment > $dataComing["remain_salary"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0120";
+					$arrayResult['REVERT_VALUE'] = TRUE;
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');

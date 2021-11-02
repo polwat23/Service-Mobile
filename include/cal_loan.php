@@ -257,7 +257,7 @@ class CalculateLoan {
 					if(!$changerateint){
 						$yearDiffTemp++;
 					}
-					$prn_bal = $amt_transfer;
+					$prn_bal = $constLoanContract["PRINCIPAL_BALANCE"];
 					$interest += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
 				}
 			}else{
@@ -524,7 +524,8 @@ class CalculateLoan {
 	}
 	public function getContstantLoanContract($loancontract_no){
 		$contLoan = $this->conms->prepare("SELECT LNM.LOANAPPROVE_AMT,LNM.PRINCIPAL_BALANCE,LNM.PERIOD_PAYMENT,LNM.PERIOD_PAYAMT,LNM.LAST_PERIODPAY,LNM.WITHDRAWABLE_AMT,
-											LNM.LOANTYPE_CODE,(LNM.INTEREST_ARREAR - (LNM.RKEEP_INTEREST - LNM.NKEEP_INTEREST)) as INTEREST_ARREAR,LNM.INTEREST_ARREAR as INTEREST_ARREAR_SRC
+											LNM.LOANTYPE_CODE,LNM.INTEREST_ARREAR as BFINTEREST_ARREAR,(LNM.INTEREST_ARREAR - (LNM.RKEEP_INTEREST - LNM.NKEEP_INTEREST)) as INTEREST_ARREAR,
+											LNM.INTEREST_ARREAR as INTEREST_ARREAR_SRC
 											,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
@@ -567,13 +568,13 @@ class CalculateLoan {
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($int_return >= $interest){
+		/*if($int_return >= $interest){
 			$int_return = $int_return - $interest;
 			$interest = 0;
 		}else{
 			$interest = $interest - $int_return;
 			$int_return = 0;
-		}
+		}*/
 		if($interest > 0){
 			if($amt_transfer < $interest){
 				$interest = $amt_transfer;
@@ -1093,13 +1094,13 @@ class CalculateLoan {
 		$interest = $this->calculateInterestArr($contract_no,$amt_transfer);
 		$interestFull = $interest;
 		$prinPay = 0;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interestPeriod = $interest - $dataCont["BFINTEREST_ARREAR"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
 		$prinPay = $amt_transfer;
 		$int_returnSrc = 0;
-		$intArr = $dataCont["INTEREST_ARREAR"] + $interest;
+		$intArr = $dataCont["BFINTEREST_ARREAR"] + $interestPeriod;
 		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		
 		if($interestPeriod > 0){
@@ -1107,7 +1108,7 @@ class CalculateLoan {
 				$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,
 				'LRC',$slipdocno,$lastperiod,$prinPay,0,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
 				$dataCont["PRINCIPAL_BALANCE"],date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
-				$dataCont["INTEREST_ARREAR"],$interestPeriod,$intArr,$int_returnSrc,'TRN',$config["COOP_ID"],
+				$dataCont["BFINTEREST_ARREAR"],$interestPeriod,$intArr,$int_returnSrc,'TRN',$config["COOP_ID"],
 				$lnslip_no,$dataCont["INTEREST_RETURN"]
 			];
 			$insertSTMLoan = $conmssql->prepare("INSERT INTO lncontstatement(COOP_ID,LOANCONTRACT_NO,SEQ_NO,LOANITEMTYPE_CODE,SLIP_DATE,
@@ -1120,23 +1121,42 @@ class CalculateLoan {
 													CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,
 													?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
 		}else{
-			$executeLnSTM = [
-				$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,
-				'LRC',$slipdocno,$lastperiod,$prinPay,0,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
-				$dataCont["PRINCIPAL_BALANCE"],date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
-				date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
-				$dataCont["INTEREST_ARREAR"],$interestPeriod,$intArr,$int_returnSrc,'TRN',$config["COOP_ID"],
-				$lnslip_no,$dataCont["INTEREST_RETURN"]
-			];
-			$insertSTMLoan = $conmssql->prepare("INSERT INTO lncontstatement(COOP_ID,LOANCONTRACT_NO,SEQ_NO,LOANITEMTYPE_CODE,SLIP_DATE,
-													OPERATE_DATE,ACCOUNT_DATE,REF_DOCNO,PERIOD,PRINCIPAL_PAYMENT,INTEREST_PAYMENT,PRINCIPAL_BALANCE,
-													PRNCALINT_AMT,CALINT_FROM,CALINT_TO,BFINTARREAR_AMT,INTEREST_PERIOD,INTEREST_ARREAR,
-													INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
-													BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
-													VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),CONVERT(VARCHAR(10),GETDATE(),20),
-													CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),
-													CONVERT(VARCHAR(10),?,20),?,?,?,
-													?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
+			if($dataCont["PRINCIPAL_BALANCE"] > 0){
+				$executeLnSTM = [
+					$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,
+					'LRC',$slipdocno,$lastperiod,$prinPay,0,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
+					$dataCont["PRINCIPAL_BALANCE"],date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
+					date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
+					$dataCont["BFINTEREST_ARREAR"],$interestPeriod,$intArr,$int_returnSrc,'TRN',$config["COOP_ID"],
+					$lnslip_no,$dataCont["INTEREST_RETURN"]
+				];
+				$insertSTMLoan = $conmssql->prepare("INSERT INTO lncontstatement(COOP_ID,LOANCONTRACT_NO,SEQ_NO,LOANITEMTYPE_CODE,SLIP_DATE,
+														OPERATE_DATE,ACCOUNT_DATE,REF_DOCNO,PERIOD,PRINCIPAL_PAYMENT,INTEREST_PAYMENT,PRINCIPAL_BALANCE,
+														PRNCALINT_AMT,CALINT_FROM,CALINT_TO,BFINTARREAR_AMT,INTEREST_PERIOD,INTEREST_ARREAR,
+														INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
+														BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
+														VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),CONVERT(VARCHAR(10),GETDATE(),20),
+														CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),
+														CONVERT(VARCHAR(10),?,20),?,?,?,
+														?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
+			}else{
+				$executeLnSTM = [
+					$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,
+					'LRC',$slipdocno,$lastperiod,$prinPay,0,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
+					$dataCont["PRINCIPAL_BALANCE"],
+					$dataCont["BFINTEREST_ARREAR"],$interestPeriod,$intArr,$int_returnSrc,'TRN',$config["COOP_ID"],
+					$lnslip_no,$dataCont["INTEREST_RETURN"]
+				];
+				$insertSTMLoan = $conmssql->prepare("INSERT INTO lncontstatement(COOP_ID,LOANCONTRACT_NO,SEQ_NO,LOANITEMTYPE_CODE,SLIP_DATE,
+														OPERATE_DATE,ACCOUNT_DATE,REF_DOCNO,PERIOD,PRINCIPAL_PAYMENT,INTEREST_PAYMENT,PRINCIPAL_BALANCE,
+														PRNCALINT_AMT,CALINT_FROM,CALINT_TO,BFINTARREAR_AMT,INTEREST_PERIOD,INTEREST_ARREAR,
+														INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
+														BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
+														VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),CONVERT(VARCHAR(10),GETDATE(),20),
+														CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),
+														CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,
+														?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
+			}
 		}
 		if($insertSTMLoan->execute($executeLnSTM)){
 			$LoanDebt = $dataCont["PRINCIPAL_BALANCE"] + $prinPay;
@@ -1200,7 +1220,7 @@ class CalculateLoan {
 						':interest_return' => $int_returnSrc,
 						':interest_arrear' => $intArr,
 						':bfinterest_return' => $dataCont["INTEREST_RETURN"],
-						':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
+						':bfinterest_arrear' => $dataCont["BFINTEREST_ARREAR"],
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':app_version' => $app_version,
@@ -1226,7 +1246,7 @@ class CalculateLoan {
 						':interest_return' => $int_returnSrc,
 						':interest_arrear' => $intArr,
 						':bfinterest_return' => $dataCont["INTEREST_RETURN"],
-						':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
+						':bfinterest_arrear' => $dataCont["BFINTEREST_ARREAR"],
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':app_version' => $app_version,

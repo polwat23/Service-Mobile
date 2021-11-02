@@ -10,13 +10,29 @@ $receive_net = 0;
 $maxloanpermit_amt = 100000;
 $max_period = 12;
 $canRequest = FALSE;
+$getTempEmp = $conmssql->prepare("select * from mbmembmaster where member_no = '00002012' and RTRIM(LTRIM(membgroup_code)) in('ล.ชั่วคราว','เกษียณ','ล.ผลิต','ล.อธิการบด')");
+$getTempEmp->execute([':member_no' => $member_no]);
+$rowTempEmp = $getTempEmp->fetch(PDO::FETCH_ASSOC);
+
 $getSalary = $conmssql->prepare("SELECT SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
 $getSalary->execute([':member_no' => $member_no]);
 $rowSalary = $getSalary->fetch(PDO::FETCH_ASSOC);
-$maxloan_amt = $rowSalary["SALARY_AMOUNT"] * 3;
-if($maxloan_amt > $maxloanpermit_amt){
-	$maxloan_amt = $maxloanpermit_amt;
+
+if(isset($rowTempEmp["MEMBER_NO"])){
+	$maxloanpermit_amt = 50000;
+	
+	$getShare = $conmssql->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,SHAREBEGIN_AMT
+													FROM shsharemaster WHERE member_no = :member_no");
+	$getShare->execute([':member_no' => $member_no]);
+	$rowShare = $getShare->fetch(PDO::FETCH_ASSOC);
+	$arrMin[] = $rowShare["SHARE_AMT"] * 0.9;
 }
+
+$arrMin[] = $rowSalary["SALARY_AMOUNT"] * 3;
+$arrMin[] = $maxloanpermit_amt;
+$maxloan_amt = min($arrMin);
+
+
 $getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY 
 									FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
 									WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8 

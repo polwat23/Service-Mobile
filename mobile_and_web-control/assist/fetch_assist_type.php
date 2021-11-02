@@ -6,12 +6,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayGrpYear = array();
 		$yearAss = 0;
-		$fetchAssGrpYear = $conmssql->prepare("SELECT capital_year as ASSIST_YEAR,sum(ASSIST_AMT) as ASS_RECEIVED FROM asnreqmaster 
-												WHERE member_no = :member_no GROUP BY capital_year ORDER BY capital_year DESC");
+		$fetchAssGrpYear = $conmssql->prepare("SELECT ASSIST_YEAR,sum(ASSIST_AMT) as ASS_RECEIVED FROM assreqmaster 
+												WHERE member_no = :member_no GROUP BY ASSIST_YEAR ORDER BY ASSIST_YEAR DESC");
 		$fetchAssGrpYear->execute([':member_no' => $member_no]);
 		while($rowAssYear = $fetchAssGrpYear->fetch(PDO::FETCH_ASSOC)){
 			$arrayYear = array();
-			$arrayYear["ASSIST_YEAR"] = $rowAssYear["ASSIST_YEAR"];
+			$arrayYear["ASSIST_YEAR"] = $rowAssYear["ASSIST_YEAR"] + 543;
 			$arrayYear["ASS_RECEIVED"] = number_format($rowAssYear["ASS_RECEIVED"],2);
 			if($yearAss < $rowAssYear["ASSIST_YEAR"]){
 				$yearAss = $rowAssYear["ASSIST_YEAR"];
@@ -19,12 +19,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGrpYear[] = $arrayYear;
 		}
 		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
-			$yearAss = $dataComing["ass_year"];
+			$yearAss = $dataComing["ass_year"] - 543;
 		}
-		$fetchAssType = $conmssql->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSIST_DOCNO as ASSCONTRACT_NO,asm.ASSIST_AMT,asm.PAY_DATE
-												FROM asnreqmaster asm LEFT JOIN 
-												asnucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE and asm.coop_id = ast.coop_id WHERE asm.member_no = :member_no 
-												and asm.pay_status = 1 and asm.capital_year = :year");
+		$fetchAssType = $conmssql->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSIST_DOCNO as ASSCONTRACT_NO,asm.ASSIST_AMT,asm.APPROVE_DATE as PAY_DATE
+												FROM assreqmaster asm LEFT JOIN 
+												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE WHERE asm.member_no = :member_no 
+												and asm.req_status = 1 and asm.ASSIST_YEAR = :year");
 		$fetchAssType->execute([
 			':member_no' => $member_no,
 			':year' => $yearAss

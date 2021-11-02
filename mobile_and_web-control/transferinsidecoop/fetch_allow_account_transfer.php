@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getAllAcc = $conmssql->prepare("SELECT DPM.DEPTACCOUNT_NO,DPM.DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,DPM.PRNCBAL,
 											DPM.SEQUEST_AMOUNT,DPM.SEQUEST_STATUS,DPT.MINPRNCBAL,DPM.CHECKPEND_AMT
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-											WHERE dpm.deptaccount_no IN(".implode(',',$arrayDept).") and dpm.deptclose_status = '0' and dpm.member_no = :member_no
+											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no
 											ORDER BY dpm.deptaccount_no");
 			$getAllAcc->execute([':member_no' => $member_no]);
 			while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){
@@ -45,7 +45,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
 					$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-					$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+					if(in_array($rowDataAccAll["DEPTACCOUNT_NO"],$arrayDept)){
+						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+					}else{
+						$arrAccAllow["CAN_WITHDRAW"] = '0';
+					}
 					if($rowDataAccAll["SEQUEST_STATUS"] == '1'){
 						$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["SEQUEST_AMOUNT"] - $rowDataAccAll["MINPRNCBAL"] - $rowDataAccAll["CHECKPEND_AMT"];
 					}else{
