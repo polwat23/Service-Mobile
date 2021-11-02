@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													kpd.keepitemtype_code = kut.keepitemtype_code
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period  and kpd.keepitem_status = '1'
 													ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
