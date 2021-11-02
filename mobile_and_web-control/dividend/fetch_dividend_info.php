@@ -6,9 +6,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conmssql->prepare("SELECT TOP ".$limit_year." yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
+		$getYeardividend = $conmssql->prepare("SELECT TOP ".$limit_year." yr.DIV_YEAR AS DIV_YEAR,yr.DIVPERCENT_RATE,yr.AVGPERCENT_RATE FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
 												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.WEBSHOW_FLAG = '1' 
-												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC");
+												ORDER BY yr.DIV_YEAR DESC");
 		$getYeardividend->execute([
 			':member_no' => $member_no
 		]);
@@ -21,6 +21,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
+			$arrayOther[0]["LABEL"] = "เป็นยอดที่ยังไม่ได้หักค่าใช้จ่ายครูไทย ชุมนุม ฌาปนกิจต่าง ๆ และอื่น ๆ";
+			$arrayOther[0]["LABEL_PROPS"] = ["color" => "black"];
+			$arrayOther[1]["LABEL"] = "จะมีผลสมบูรณ์เมื่อได้รับอนุมัติจากที่ประชุมใหญ่สามัญประจำปี 2564 เรียบร้อยแล้ว";
+			$arrayOther[1]["LABEL_PROPS"] = ["color" => "black"];
+			$arrDividend["OTHER_INFO"]["DATA"] = $arrayOther;
+			$arrDividend["DIV_RATE"] = ($rowYear["DIVPERCENT_RATE"] *100).' %';
+			$arrDividend["AVG_RATE"] = ($rowYear["AVGPERCENT_RATE"] *100).' %';
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
