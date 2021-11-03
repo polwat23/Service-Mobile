@@ -10,7 +10,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
 		$getPaymentDetail = $conmssql->prepare("SELECT S.DEPTSLIP_NO,M.MEMBER_NO,M.DEPTACCOUNT_NO,P.PRENAME_DESC,M.DEPTACCOUNT_NAME,DEPTACCOUNT_SNAME,S.DEPTSLIP_DATE,S.DEPTITEMTYPE_CODE,S.DEPTSLIP_AMT,S.CASH_TYPE,S.ENTRY_ID,
-												D.SEQ_NO,D.SLIP_DESC,B.WFTYPE_CODE,B.WCMEMBERTYPE_DESC,B.WCMEMBER_DESC,D.PRNCSLIP_AMT,DBO.FT_READTHAIBAHT(S.DEPTSLIP_AMT) AS MONEY_THAIBAHT ,C.MONEYTYPE_DESC,MG.MEMBGROUP_CODE,MG.MEMBGROUP_DESC,MM.MEMB_NAME,MM.MEMB_SURNAME
+												D.SEQ_NO,D.SLIP_DESC,B.WFTYPE_CODE,B.WCMEMBERTYPE_DESC,B.WCMEMBER_DESC,D.PRNCSLIP_AMT,DBO.FT_READTHAIBAHT(S.DEPTSLIP_AMT) AS MONEY_THAIBAHT ,C.MONEYTYPE_DESC,MG.MEMBGROUP_CODE,MG.MEMBGROUP_DESC,MM.MEMB_NAME,MM.MEMB_SURNAME,MG.MEMBGROUP_DESC ,MG.MEMBGROUP_CODE,
+												(CASE WHEN S.CASH_TYPE ='CSH' THEN 'เงินสด'
+												WHEN S.CASH_TYPE ='CBT' THEN 'โอนธนาคาร'
+												WHEN S.CASH_TYPE ='TRN' THEN 'โอนภายใน'
+												WHEN S.CASH_TYPE ='LON' THEN ''  ELSE '' END ) as CASH_TYPE
 												FROM WCDEPTSLIP S
 												LEFT JOIN WCDEPTMASTER M ON S.DEPTACCOUNT_NO = M.DEPTACCOUNT_NO
 												LEFT JOIN WCDEPTSLIPDET D ON S.DEPTSLIP_NO = D.DEPTSLIP_NO
@@ -28,15 +32,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$header["deptslip_date"] = $lib->convertdate($rowDetail["DEPTSLIP_DATE"],'D m Y');
+			$header["name"] = $rowDetail["PRENAME_DESC"].$rowDetail["MEMB_NAME"]." ".$rowDetail["MEMB_SURNAME"];
 			$header["wcmember_desc"] = $rowDetail["WCMEMBER_DESC"];
 			$header["wftype_code"] = $rowDetail["WFTYPE_CODE"];
-			$arrDetail["slip_desc"] = $rowDetail["SLIP_DESC"];
+			$header["membgroup_desc"] = $rowDetail["MEMBGROUP_CODE"]." ".$rowDetail["MEMBGROUP_DESC"];
+			$header["cash_type"] = $rowDetail["CASH_TYPE"];
+			$arrDetail["slip_desc"] = $rowDetail["SLIP_DESC"]." - (".$member_no.") ".$rowDetail["PRENAME_DESC"].$rowDetail["MEMB_NAME"]." ".$rowDetail["MEMB_SURNAME"];
 			$arrDetail["deptslip_amt"] = number_format($rowDetail["DEPTSLIP_AMT"],2);
+			$arrDetail["amt"] = $rowDetail["DEPTSLIP_AMT"];
 			$arrGroupDetail[] = $arrDetail;
 		}	
 		$header["member_no"] = $member_no;
 		$header["deptslip_no"] = $dataComing["deptslip_no"];
-		$arrayPDF = GenerateReport($arrGroupDetail,$header);
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
@@ -85,7 +93,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	
 }
 
-function GenerateReport($dataReport,$header){
+function GenerateReport($dataReport,$header,$lib){
+	$sumBalance = 0;
 	if($header["wftype_code"] == '00'){
 		$logo = 'logo1';
 	}else if($header["wftype_code"] == '01'){
@@ -168,11 +177,12 @@ function GenerateReport($dataReport,$header){
 		  <div style="positionabsolute; margin-left:20px; ">
 			<img src="../../resource/logo/'.$logo.'.png" style="width:55px" />
 		  </div>
-		  <div style="margin-left:70px;" class="text-center text-color">
-			<div style="font-size:14pt; font-weight:bold;">กองทุนสวัสดิการสมาชิกสหกรณ์ออมทรัพย์สาธารณสุขหนองคาย</div>
-			<div style="font-size:9pt;">22/1 ถ.ศูนย์ราชการ ต.หนองกอมเกาะ อ.เมือง จ.หนองคาย โทร. 042-420750 Fax. 042420750 </div>
-			<div style="font-size:9pt; margin-top:-3px;">Email:support@nkbkcoop.com ตรวจสอบข้อมูลกองทุนของท่านได้ที่: www.nkbkcoop.com</div>
-		  </div>
+		   <div style="margin-left:70px; line-height:12px" class="text-center text-color">
+			<div style="font-size:9pt; font-weight:bold;">กองทุนสวัสดิการสมาชิกสหกรณ์ออมทรัพย์สาธารณสุขหนองคาย</div>
+			<div style="font-size:9pt;">22/1 ถ.ศูนย์ราชการ ต.หนองกอมเกาะ อ.เมือง จ.หนองคาย 43000 </div>
+			<div style="font-size:9pt;"> Tel. 042-420750, 042-42074 Fax. 042420750 </div>
+			<div style="font-size:9pt; margin-top:-3px;">Email:support@nkbkcoop.com ตรวจสอบข้อมูลกองทุนของท่านได้ที่: www.nkbk.coop.com</div>
+      </div>
 	  </div>
 	  <div style="margin-left:165px; padding:7px 40px; font-size:14pt; font-weight:bold; width:80px; background-color:#28b3f4; color:#ffffff; margin-bottom:10px; ">ใบเสร็จรับเงิน</div>
 	  <div style="display:flex; height:30px; " class="text-color">
@@ -183,28 +193,29 @@ function GenerateReport($dataReport,$header){
 	  </div>
 	  <div style="display:flex; height:30px; "class="text-color">
 		<div style="margin-left:10px;">ได้รับเงินจาก:</div>
-		<div style="margin-left:95px; line-height: 10px;" class="data-text-color">'.($header["wcmember_desc"]??null).'</div>
+		<div style="margin-left:95px; line-height: 10px;" class="data-text-color">'.($header["name"]??null).'</div>
+		    <div style="margin-left:265px;" class="data-text-color">สังกัด :</div>
+			<div style="margin-left:305px;" class="data-text-color">'.($header["membgroup_desc"]??null).'</div>
 	  </div>
 	  <div style="display:flex; height:30px; "class="text-color">
 		<div style="margin-left:10px;">เลขที่สมาชิก:</div>
-		<div style="margin-left:95px;" class="data-text-color">'.($header["member_no"]??null).'</div>
+		<div style="margin-left:95px;" class="data-text-color">'.($header["member_no"]??null)." ".($header["wcmember_desc"]??null).'</div>
+		  <div style="margin-left:265px;" class="data-text-color">ประเภทใบเสร็จ :</div>
+		  <div style="margin-left:360px;" class="data-text-color">'.($header["cash_type"]??null).'</div>
 	  </div>
 	  <div>
 	  <div style="position:absolute; ">
 		<div style=" padding:5px;  height:20px; "></div>
 		';
-
 	foreach($dataReport AS $arrList){
 	  $html .='   
 	  <div style=" padding:5px; display:flex; height: 10px; ">
-			 <div >'.($arrList["slip_desc"]??null).'</div>
-			 <div style="width:120px; margin-left:365px;" class="text-right">'.($arrList["deptslip_amt"]??null).'</div>
+			 <div style="width:365px;" >'.($arrList["slip_desc"]??null).'</div>
+			 <div style="width:120px; margin-left:365px; " class="text-right">'.($arrList["deptslip_amt"]??null).'</div>
 	  </div>';
+	  $sumBalance += ($arrList["amt"]??0);
 	}
 
-
-
-	   
 	$html.='
 	  </div>
 	  <div>
@@ -214,20 +225,19 @@ function GenerateReport($dataReport,$header){
 				<td style="width:25%">จำนวนเงิน</td>
 			</tr>
 			<tr>
-			  <td style="height:220px;"></td>
+			  <td style="height:210px;"></td>
 			  <td></td>
 			</tr>
+			<tr>
+				<td style="font-weight:bold;" class="data-text-color">'.$lib->baht_text($sumBalance).'</td>
+				<td style="padding:5px; font-weight:bold;" class="text-right data-text-color">'.number_format($sumBalance,2).'</td>
+			</tr>
+			
 		</table>
-		<div style="position:absolute; margin-top:-27px; font-size:9pt; opacity 0.2; color:#96c5ed;  line-height: 10px;" >
-		  <div style="margin-left:140px; width:230px; ">
-			<div>เพื่อความสะดวกและรวดเร็วของท่าน ได้โปรดนำใบเสร็จรับเงิน</div>
-			<div class="text-center">มาด้วยทุกครั้งที่มาติดต่อสหกรณ์</div>
-		  </div>
-		</div>
 	  </div>
 	  </div>
 	  <div style="position:absolute; bottom:0px;">
-		<div style="position:absolute;"><img src="../../resource/utility_icon/signature/manager.png" "width="90" height="40" style="margin-top:-28px; margin-left:60px; "></div>
+		<div style="position:absolute;"><img src="../../resource/utility_icon/signature/manager.png" "width="40" height="30" style="margin-top:-20px; margin-left:55px; "></div>
 		<div style="display:flex">
 		  <div style="margin-left:10px;" class="text-color">ลงชื่อ...........................................ผู้จัดการ</div>
 		  <div style="margin-left:245px;" class="text-color">ลงชื่อ........................................เจ้าหน้าที่กองทุน</div>

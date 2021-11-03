@@ -6,7 +6,7 @@ if(!$anonymous){
 	$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 	$user_type = $payload["user_type"];
 	$permission = array();
-	$arrayResult = array();
+	
 	$arrayAllMenu = array();
 	$arrayMenuSetting = array();
 	switch($user_type){
@@ -36,8 +36,8 @@ if(!$anonymous){
 			$arrMenuDep = array();
 			if(isset($dataComing["home_deposit_account"])) {
 				$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-				$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
-													WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
+				$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.DEPTACCOUNT_NO,dp.DEPTCLOSE_STATUS, dt.DEPTTYPE_DESC, (SELECT COUNT(deptaccount_no) 
+														FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 														FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 														WHERE deptaccount_no = :account_no");
 				$fetchMenuDep->execute([
@@ -70,8 +70,8 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			if(isset($dataComing["home_loan_account"])) {
 				$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-				$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, ln.contract_status,
-													(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
+				$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.CONTRACT_STATUS, 
+														(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 														FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 														WHERE loancontract_no = :contract_no");
 				$fetchMenuLoan->execute([
@@ -100,6 +100,8 @@ if(!$anonymous){
 			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
+		$arrayResult['RESULT'] = TRUE;
+		require_once('../../include/exit_footer.php');
 		
 	}else{
 		if(isset($dataComing["menu_parent"])){
@@ -218,12 +220,12 @@ if(!$anonymous){
 							$arrayMenuTransaction["MENU_STATUS"] = $rowStatus["menu_status"];
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
-						if($dataComing["menu_component"] == "DepositInfo"){
+						if($rowMenu["menu_component"] == "DepositInfo"){
 							$arrMenuDep = array();
 							if(isset($dataComing["home_deposit_account"])) {
 								$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-								$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
-																	WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
+								$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.DEPTACCOUNT_NO,dp.DEPTCLOSE_STATUS, dt.DEPTTYPE_DESC, (SELECT COUNT(deptaccount_no) 
+																		FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 																		FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 																		WHERE deptaccount_no = :account_no");
 								$fetchMenuDep->execute([
@@ -251,13 +253,12 @@ if(!$anonymous){
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							}
 							$arrMenuDep["LAST_STATEMENT"] = TRUE;
-							$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
-						}else if($dataComing["menu_component"] == "LoanInfo"){
+						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$arrMenuLoan = array();
 							if(isset($dataComing["home_loan_account"])) {
 								$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-								$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, ln.contract_status,
-																	(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
+								$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.CONTRACT_STATUS, 
+																		(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																		FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 																		WHERE loancontract_no = :contract_no");
 								$fetchMenuLoan->execute([
@@ -284,7 +285,6 @@ if(!$anonymous){
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-							$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 						}			
 					}
 				}else{
@@ -303,12 +303,12 @@ if(!$anonymous){
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
-					if($dataComing["menu_component"] == "DepositInfo"){
+					if($rowMenu["menu_component"] == "DepositInfo"){
 						$arrMenuDep = array();
 						if(isset($dataComing["home_deposit_account"])) {
 							$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-							$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) FROM dpdeptmaster 
-																WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
+							$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.DEPTACCOUNT_NO,dp.DEPTCLOSE_STATUS, dt.DEPTTYPE_DESC, (SELECT COUNT(deptaccount_no) 
+																	FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 																	FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 																	WHERE deptaccount_no = :account_no");
 							$fetchMenuDep->execute([
@@ -336,13 +336,12 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
 						$arrMenuDep["LAST_STATEMENT"] = TRUE;
-						$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
-					}else if($dataComing["menu_component"] == "LoanInfo"){
+					}else if($rowMenu["menu_component"] == "LoanInfo"){
 						$arrMenuLoan = array();
 						if(isset($dataComing["home_loan_account"])) {
 							$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-							$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no, ln.contract_status,
-																(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
+							$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.CONTRACT_STATUS, 
+																	(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																	FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 																	WHERE loancontract_no = :contract_no");
 							$fetchMenuLoan->execute([
@@ -369,7 +368,6 @@ if(!$anonymous){
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						}
 						$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-						$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 					}
 				}
 			}
