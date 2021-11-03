@@ -21,6 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrCremation["PERSON"][] = $arrPerson;
 			$arrCremation["OTHER_INFO"] = $arrayOther;
 			$arrCremation["CREMATION_TYPE"] = $rowCremation["WFTYPE_DESC"];
+			$arrCremation["CARD_COLOR"] = "#FF9966";
 			$arrDataWC[] = $arrCremation;
  		}
 		$arrayResult['CREMATION'] = $arrDataWC;
