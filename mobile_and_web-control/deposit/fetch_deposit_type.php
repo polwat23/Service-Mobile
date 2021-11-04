@@ -5,15 +5,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllAccount = array();
-		$getSumAllAccount = $conmssql->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status <> 1");
+		$getSumAllAccount = $conmssql->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no
+												and deptclose_status = 0");
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
+		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE
+												FROM MBMEMBMASTER 
+												WHERE member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$getAccount = $conmssql->prepare("SELECT dp.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE DEPTACCOUNT_NO = dp.DEPTACCOUNT_NO) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE and dt.MEMBCAT_CODE = :membcat_code
 											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.DEPTACCOUNT_NO ASC");
-		$getAccount->execute([':member_no' => $member_no]);
+		$getAccount->execute([
+			':member_no' => $member_no,
+			':membcat_code' => $rowName["MEMBCAT_CODE"]
+		]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();

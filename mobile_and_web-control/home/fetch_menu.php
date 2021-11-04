@@ -303,7 +303,7 @@ if(!$anonymous){
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
-					if($rowMenu["menu_component"] == "DepositInfo"){
+					if($dataComing["menu_component"] == "DepositInfo"){
 						$arrMenuDep = array();
 						if(isset($dataComing["home_deposit_account"])) {
 							$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
@@ -336,7 +336,7 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
 						$arrMenuDep["LAST_STATEMENT"] = TRUE;
-					}else if($rowMenu["menu_component"] == "LoanInfo"){
+					}else if($dataComing["menu_component"] == "LoanInfo"){
 						$arrMenuLoan = array();
 						if(isset($dataComing["home_loan_account"])) {
 							$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);

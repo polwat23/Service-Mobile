@@ -3,8 +3,6 @@
 namespace Line;
 
 class libraryLine {
-	
-
 	public function mergeTextMessage($message){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
@@ -54,44 +52,46 @@ class libraryLine {
 		return $dataTemplate;
 	}
 	
-	public function mergeMessageAction($text,$label){
+	public function mergeMessageAction($groupDataTemplate){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $text;
-		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
-		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "message";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = $label;
-		$dataTemplate["quickReply"]["items"][0]["action"]["text"] = $text;
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["quickReply"]["items"][$index]["type"] = "action";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["type"] = "message";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["label"] = $arrTemplate["LABEL"];
+			$dataTemplate["quickReply"]["items"][$index]["action"]["text"] = $arrTemplate["TEXT"];
+			$index++;
+		}
 		return $dataTemplate;
 	}
 	
-	public function mergeDetetimePickerAction($label,$data,$mode,$initial,$max,$min){
+	public function mergeDetetimePickerAction($groupDataTemplate){
 		 function convertdatetimeLineFormat($datetime){
-			 $dateData = date_create($datetime);
+			$dateData = date_create($datetime);
 			$date= date_format($dateData, 'Y-m-d');
 			$time =date_format($dateData,'H:i');
 			$dateFormat = $date.'t'.$time;
 			return $dateFormat;
 		}
-		 
 		$dataTemplate = array();
-		if($mode =="datetime"){
-			$initialData = convertdatetimeLineFormat($initial);
-			$maxData= convertdatetimeLineFormat($max);
-			$minData=convertdatetimeLineFormat($min);
-				
+		if($groupDataTemplate[0]["MODE"] =="datetime"){
+			$initialData = convertdatetimeLineFormat($groupDataTemplate[0]["INITIAL"]);
+			$maxData= convertdatetimeLineFormat($groupDataTemplate[0]["MAX"]);
+			$minData=convertdatetimeLineFormat($groupDataTemplate[0]["MIN"]);	
 		}else{
-			$initialData=$initial;
-			$maxData=$max;
-			$minData=$min;
+			$initialData = $groupDataTemplate[0]["INITIAL"];
+			$maxData=$groupDataTemplate[0]["MAX"];
+			$minData=$groupDataTemplate[0]["MIN"];
 		}
 		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $label;
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
 		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
 		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "datetimepicker";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = "Select date";
-		$dataTemplate["quickReply"]["items"][0]["action"]["data"] = $data;
-		$dataTemplate["quickReply"]["items"][0]["action"]["mode"] = $mode;
+		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = $groupDataTemplate[0]["LABEL"]??"Select date";
+		$dataTemplate["quickReply"]["items"][0]["action"]["data"] = $groupDataTemplate[0]["DATA"];
+		$dataTemplate["quickReply"]["items"][0]["action"]["mode"] = $groupDataTemplate[0]["MODE"];
 		if(isset($initial) && $initial != ""){
 			$dataTemplate["quickReply"]["items"][0]["action"]["initial"] = $initialData;
 		}
@@ -104,56 +104,136 @@ class libraryLine {
 		return $dataTemplate;
 	}
 	
-	public function mergePostbackAction($text,$label,$data){
-		$dataTemplate = array();
+	public function mergePostbackAction($groupDataTemplate){
 		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $text;
-		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
-		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "postback";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = $label;
-		$dataTemplate["quickReply"]["items"][0]["action"]["data"] = $data;
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["quickReply"]["items"][$index]["type"] = "action";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["type"] = "postback";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["text"] = $arrTemplate["TEXT"];
+			$dataTemplate["quickReply"]["items"][$index]["action"]["label"] = $arrTemplate["LABEL"];
+			$dataTemplate["quickReply"]["items"][$index]["action"]["data"] = $arrTemplate["DATA"];
+			$index++;
+		}
 		return $dataTemplate;
 	}
 	
-	public function mergeCameraAction($text,$label){
+	public function mergeCameraAction($groupDataTemplate){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $label;
-		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
-		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "camera";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = $label??"ถ่ายรูป";
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["quickReply"]["items"][$index]["type"] = "action";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["type"] = "camera";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["label"] = $arrTemplate["LABEL"]??"ถ่ายรูป";
+			$index++;
+		}
+		return $dataTemplate;
+	}
+
+	
+	public function mergeCameraRollAction($groupDataTemplate){
+		$dataTemplate["type"] = "text";
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["quickReply"]["items"][$index]["type"] = "action";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["type"] = "cameraRoll";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["label"] = $arrTemplate["LABEL"]??"อัลบั้มรูปภาพ";
+			$index++;
+		}
 		return $dataTemplate;
 	}
 	
-	public function mergeCameraRollAction($text,$label){
-		$dataTemplate = array();
+	public function mergeLocationAction($groupDataTemplate){
 		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $label;
-		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
-		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "cameraRoll";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = "Gallery";
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["quickReply"]["items"][$index]["type"] = "action";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["type"] = "location";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["label"] = $arrTemplate["LABEL"]??"location";
+			$index++;
+		}
 		return $dataTemplate;
 	}
 	
-	public function mergeLocationAction($text,$label){
+	public function mergeUrlAction($groupDataTemplate){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $label;
-		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
-		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "location";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = "location";
+		$dataTemplate["text"] = $groupDataTemplate[0]["TITLE"];
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["quickReply"]["items"][$index]["type"] = "action";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["type"] = "uri";
+			$dataTemplate["quickReply"]["items"][$index]["action"]["label"] = $arrTemplate["LABEL"];
+			$dataTemplate["quickReply"]["items"][$index]["action"]["uri"] = $arrTemplate["URL"];
+			$index++;
+		}
 		return $dataTemplate;
 	}
 	
-	public function mergeUrlAction($text,$url,$label){
+	public function mergeImageCarouselTemplate($groupDataTemplate){
+		function convertdatetimeLineFormat($datetime){
+			$dateData = date_create($datetime);
+			$date= date_format($dateData, 'Y-m-d');
+			$time =date_format($dateData,'H:i');
+			$dateFormat = $date.'t'.$time;
+			return $dateFormat;
+		}
+		
 		$dataTemplate = array();
-		$dataTemplate["type"] = "text";
-		$dataTemplate["text"] = $text;
-		$dataTemplate["quickReply"]["items"][0]["type"] = "action";
-		$dataTemplate["quickReply"]["items"][0]["action"]["type"] = "uri";
-		$dataTemplate["quickReply"]["items"][0]["action"]["label"] = $label??"label";
-		$dataTemplate["quickReply"]["items"][0]["action"]["uri"] = $url;
+		$dataTemplate["type"] = "template";
+		$dataTemplate["altText"] = "this is an image carousel template";
+		$dataTemplate["template"]["type"] = "image_carousel";
+		$index=0;
+		foreach($groupDataTemplate AS $arrTemplate){
+			$dataTemplate["template"]["columns"][$index]["imageUrl"] = $arrTemplate["IMAGE_URL"];
+			if($arrTemplate["TYPE"] == "uri"){
+				$dataTemplate["template"]["columns"][$index]["action"]["type"] = "uri";
+				$dataTemplate["template"]["columns"][$index]["action"]["label"] = $arrTemplate["LABEL"];
+				$dataTemplate["template"]["columns"][$index]["action"]["uri"] = $arrTemplate["URL"];
+			}else if($arrTemplate["TYPE"] == "postback"){
+				$dataTemplate["template"]["columns"][$index]["action"]["type"] = "postback";
+				$dataTemplate["template"]["columns"][$index]["action"]["label"] = $arrTemplate["LABEL"];
+				$dataTemplate["template"]["columns"][$index]["action"]["text"] = $arrTemplate["TEXT"];
+				$dataTemplate["template"]["columns"][$index]["action"]["data"] = $arrTemplate["DATA"];
+			}else if($arrTemplate["TYPE"] == "datetime_picker"){
+				if($arrTemplate["MODE"] =="datetime"){
+					$initialData = convertdatetimeLineFormat($arrTemplate["INITIAL"]);
+					$maxData = convertdatetimeLineFormat($arrTemplate["MAX"]);
+					$minData = convertdatetimeLineFormat($arrTemplate["MIN"]);	
+				}else{
+					$initialData = $arrTemplate["INITIAL"];
+					$maxData = $arrTemplate["MAX"];
+					$minData = $arrTemplate["MIN"];
+				}
+				$dataTemplate["template"]["columns"][$index]["action"]["type"] = "datetimepicker";
+				$dataTemplate["template"]["columns"][$index]["action"]["label"] = $arrTemplate["LABEL"];
+				$dataTemplate["template"]["columns"][$index]["action"]["data"] =  $arrTemplate["DATA"];
+				$dataTemplate["template"]["columns"][$index]["action"]["mode"] =  $arrTemplate["MODE"];
+				
+				if(isset($arrTemplate["INITIAL"]) && $arrTemplate["INITIAL"] != ""){
+					$dataTemplate["template"]["columns"][$index]["action"]["initial"] = $initialData;
+				}
+			
+				if(isset($arrTemplate["MAX"]) && $arrTemplate["MAX"] != ""){
+					$dataTemplate["quickReply"]["items"][0]["action"]["min"] = $maxData;
+				}
+				if(isset($arrTemplate["MIN"]) && $arrTemplate["MIN"] != ""){
+					$dataTemplate["quickReply"]["items"][0]["action"]["min"] = $minData;
+				}
+			}else{
+				$dataTemplate["template"]["columns"][$index]["action"]["type"] = "message";
+				$dataTemplate["template"]["columns"][$index]["action"]["label"] = "ว่าง";
+				$dataTemplate["template"]["columns"][$index]["action"]["text"] = "ว่าง";
+			}
+			$index++;			
+		}
 		return $dataTemplate;
+	
 	}
 	
 	

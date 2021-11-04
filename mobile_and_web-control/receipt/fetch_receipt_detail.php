@@ -6,6 +6,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$showSplitSlip = $func->getConstant('show_split_slip_report');
 		$arrGroupDetail = array();
+		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE
+												FROM MBMEMBMASTER 
+												WHERE member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$getDetailKP = $conmssql->prepare("SELECT 
 													CASE kut.system_code 
 													WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
@@ -30,11 +37,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code and dp.membcat_code = :membcat_code
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 													ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
+			':membcat_code' => $rowName["MEMBCAT_CODE"],
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){
@@ -54,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -65,7 +73,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 			$arrGroupDetail[] = $arrDetail;
 		}
