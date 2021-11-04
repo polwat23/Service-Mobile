@@ -28,6 +28,27 @@ class connection {
 			exit();
 		}
 	}
+	public function connecttooldmysql() {
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
+		$json_data = json_decode($json,true);
+		$dbhost = $json_data["DBMOBILEOLD_HOST"];
+		$dbuser = $json_data["DBMOBILEOLD_USERNAME"];
+		$dbpass = $json_data["DBMOBILEOLD_PASSWORD"];
+		$dbname = $json_data["DBMOBILEOLD_DATABASENAME"];
+		try{
+			$this->conmysql = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+			$this->conmysql->exec("set names utf8mb4");
+			return $this->conmysql;
+		}catch(\Throwable $e){
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To MySQL";
+			return $arrayError;
+			http_response_code(200);
+			exit();
+		}
+	}
 	public function connecttooracle() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);

@@ -1,7 +1,53 @@
 <?php
-require_once('../autoload.php');
+date_default_timezone_set("Asia/Bangkok");
+ini_set('display_errors', false);
+ini_set('error_log', __DIR__.'/../log/external_error.log');
 
-if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],$dataComing)){
+header("Access-Control-Allow-Methods: POST");
+header('Content-Type: application/json;charset=utf-8');
+
+if (strtoupper($_SERVER['REQUEST_METHOD']) === 'GET') {
+	http_response_code(500);
+	exit;
+}
+
+foreach ($_SERVER as $header_key => $header_value){
+	if($header_key == "HTTP_LANG_LOCALE") {
+		$headers["Lang_locale"] = $header_value;
+	}
+}
+require_once(__DIR__.'/../extension/vendor/autoload.php');
+require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/validate_input.php');
+require_once(__DIR__.'/../include/connection.php');
+require_once(__DIR__.'/../include/authorized.php');
+require_once(__DIR__.'/../include/control_log.php');
+
+use Utility\library;
+use Connection\connection;
+use Authorized\Authorization;
+use ControlLog\insertLog;
+use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
+use ReallySimpleJWT\Exception\ValidateException;
+
+$jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
+$configError = json_decode($jsonConfigError,true);
+
+$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
+$config = json_decode($jsonConfig,true);
+
+$lib = new library();
+$con = new connection();
+$auth = new Authorization();
+$log = new insertLog();
+$jwt_token = new Token();
+
+$conmysql = $con->connecttomysql();
+$conoldmysql = $con->connecttooldmysql();
+$conmssql = $con->connecttosqlserver();
+$lang_locale = $headers["Lang_locale"] ?? "th";
+
+if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$filename = basename(__FILE__, '.php');
@@ -16,66 +62,31 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		require_once('../../include/exit_footer.php');
-		
+		echo json_encode($arrayResult);
+		exit();
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
-										WHERE member_no = :member_no");
-	$checkLogin->execute([':member_no' => $member_no]);
-	if($checkLogin->rowCount() > 0){
-		if($arrPayload["PAYLOAD"]["channel"] == "mobile_app" && isset($dataComing["is_root"])){
-			$checkBlackList = $conmysql->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1' and type_blacklist = '1'");
-			$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
-			if($checkBlackList->rowCount() > 0){
-				$arrayResult['RESPONSE_CODE'] = "WS0069";
+	$member_no = $dataComing["member_no"];
+	$checkUserLogonStatus = $conoldmysql->prepare("SELECT status FROM mdbuserlogon WHERE member_no = :member_no and log_no = :logon_no");
+	$checkUserLogonStatus->execute([
+		':member_no' => $member_no,
+		':logon_no' => $dataComing["logon_no"]
+	]);
+	
+	if($checkUserLogonStatus->rowCount() > 0){
+		$logon_result = $checkUserLogonStatus->fetch(PDO::FETCH_ASSOC);
+		if($logon_result['status'] == '1') {
+			$checkResign = $conmssql->prepare("SELECT RESIGN_STATUS FROM mbmembmaster WHERE member_no = :member_no");
+			$checkResign->execute([':member_no' => $member_no]);
+			$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
+			if($rowResign["RESIGN_STATUS"] == '1'){
+				$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
+				$updateStatus->execute([':member_no' => $member_no]);
+				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
+				echo json_encode($arrayResult);
+				exit();
 			}
-			if($dataComing["is_root"] == "1"){
-				$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist)
-													VALUES(:unique_id,:member_no,'1')");
-				if($insertBlackList->execute([
-					':unique_id' => $dataComing["unique_id"],
-					':member_no' => $member_no
-				])){
-					$arrayResult['RESPONSE_CODE'] = "WS0069";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-			}
-		}
-		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conmssql->prepare("SELECT RESIGN_STATUS FROM mbmembmaster WHERE member_no = :member_no");
-		$checkResign->execute([':member_no' => $member_no]);
-		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
-		if($rowResign["RESIGN_STATUS"] == '1'){
-			$arrayResult['RESPONSE_CODE'] = "WS0051";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}
-		if($rowPassword['account_status'] == '-8'){
-			$arrayResult['RESPONSE_CODE'] = "WS0048";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}else if($rowPassword['account_status'] == '-9'){
-			if($rowPassword["temppass_is_md5"] == '1'){
-				$valid_pass = password_verify(md5($dataComing["password"]), $rowPassword['temppass']);
-			}else{
-				$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
-			}
-		}else{
-			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
-		}
-		if ($valid_pass) {
 			$refresh_token = $lib->generate_token();
 			try{
 				$conmysql->beginTransaction();
@@ -122,27 +133,18 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					])){
 						$arrPayloadNew = array();
 						$arrPayloadNew['id_userlogin'] = $conmysql->lastInsertId();
-						$arrPayloadNew['user_type'] = $rowPassword['user_type'];
+						$arrPayloadNew['user_type'] = '0';
 						$arrPayloadNew['id_token'] = $id_token;
 						$arrPayloadNew['member_no'] = $member_no;
-						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
+						$arrPayloadNew['exp'] = time() + 900;
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-							if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
-								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
-								$updateFCMToken->execute([
-									':fcm_token' => $dataComing["fcm_token"] ?? null,
-									':member_no' => $member_no
-								]);
-							}
-							if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
-								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
-								$updateFCMToken->execute([
-									':hms_token' => $dataComing["hms_token"] ?? null,
-									':member_no' => $member_no
-								]);
-							}
+							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token WHERE member_no = :member_no");
+							$updateFCMToken->execute([
+								':fcm_token' => $dataComing["fcm_token"] ?? null,
+								':member_no' => $member_no
+							]);
 						}
 						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 						if($updateAccessToken->execute([
@@ -152,26 +154,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							$conmysql->commit();
 							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 							$arrayResult['ACCESS_TOKEN'] = $access_token;
-							// Pin Status : 9 => DEV, 1 => TRUE, 0 => FALSE
-							if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-								if($rowPassword['user_type'] == '9'){
-									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 9 : 0);
-								}else{
-									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 1 : 0);
-								}
-							}else{
-								if($rowPassword['account_status'] == '-9'){
-									$arrayResult['TEMP_PASSWORD'] = TRUE;
-								}else{
-									$arrayResult['TEMP_PASSWORD'] = FALSE;
-								}
-							}
-							$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
-							$updateWrongPassCount->execute([
-								':member_no' => $member_no
-							]);
 							$arrayResult['RESULT'] = TRUE;
-							require_once('../../include/exit_footer.php');
+							echo json_encode($arrayResult);
 						}else{
 							$conmysql->rollback();
 							$filename = basename(__FILE__, '.php');
@@ -190,8 +174,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							$arrayResult['RESPONSE_CODE'] = "WS1001";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							require_once('../../include/exit_footer.php');
-							
+							echo json_encode($arrayResult);
+							exit();
 						}
 					}else{
 						$conmysql->rollback();
@@ -215,8 +199,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrayResult['RESPONSE_CODE'] = "WS1001";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-						
+						echo json_encode($arrayResult);
+						exit();
 					}
 				}else{
 					$conmysql->rollback();
@@ -239,8 +223,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$arrayResult['RESPONSE_CODE'] = "WS1001";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
+					echo json_encode($arrayResult);
+					exit();
 				}
 			}catch (PDOExecption $e) {
 				$conmysql->rollback();
@@ -257,43 +241,24 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrayResult['RESPONSE_CODE'] = "WS1001";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
+				echo json_encode($arrayResult);
+				exit();
 			}
-		}else{
-			$updateCounter = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
-			$updateCounter->execute([':member_no' => $member_no]);
-			$getCounter = $conmysql->prepare("SELECT counter_wrongpass FROM gcmemberaccount WHERE member_no = :member_no");
-			$getCounter->execute([':member_no' => $member_no]);
-			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
-			if($rowCounter["counter_wrongpass"] >= 5){
-				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
-				$updateAccountStatus->execute([':member_no' => $member_no]);
-				$struc = [
-					':member_no' =>  $member_no,
-					':device_name' =>  $arrPayload["PAYLOAD"]["device_name"],
-					':unique_id' =>  $dataComing["unique_id"]
-				];
-				$log->writeLog("lockaccount",$struc);
-				$arrayResult['RESPONSE_CODE'] = "WS0048";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-			$arrayResult['COUNTER_CAUTION'] = 5 - $rowCounter["counter_wrongpass"];
-			$arrayResult['RESPONSE_CODE'] = "WS0002";
+		}else {
+			$arrayResult['RESPONSE_CODE'] = "WS0009";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			http_response_code(401);
+			echo json_encode($arrayResult);
+			exit();
 		}
-	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0003";
+	}else {
+		$arrayResult['RESPONSE_CODE'] = "WS0014";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
-		require_once('../../include/exit_footer.php');
-		
+		http_response_code(401);
+		echo json_encode($arrayResult);
+		exit();
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -310,7 +275,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	echo json_encode($arrayResult);
+	exit();
 }
 ?>

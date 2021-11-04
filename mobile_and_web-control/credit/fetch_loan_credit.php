@@ -5,48 +5,36 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanCredit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupCredit = array();
-		$arrCanCal = array();
-		$arrCanReq = array();
-		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
-		$fetchLoanCanCal->execute();
-		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
-			$fetchLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
-			$fetchLoanType->execute([':loantype_code' => $rowCanCal["loantype_code"]]);
-			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
+		$arrayLoantype = array();
+		$getLoantypeCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
+		$getLoantypeCredit->execute();
+		while($rowLoanType = $getLoantypeCredit->fetch(PDO::FETCH_ASSOC)){
+			$arrayLoantype[] = "'".$rowLoanType["loantype_code"]."'";
+		}
+		$fetchCredit = $conmssql->prepare("SELECT lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt as MAXLOAN_AMT,LT.loantype_code as LOANTYPE_CODE,
+											(sm.sharestk_amt*sh.unitshare_value*lc.multiple_share ) + (ISNULL(mb.salary_amount,15000)*lc.multiple_salary ) AS CREDIT_AMT
+											FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,
+											shsharemaster sm LEFT JOIN mbmembmaster mb ON sm.member_no = mb.member_no,shsharetype sh
+											WHERE mb.member_no = :member_no AND sm.SHAREMASTER_STATUS = '1' AND LT.LOANGROUP_CODE IN ( '01','02' )
+											AND LT.LOANTYPE_CODE IN (".implode(",",$arrayLoantype).")
+											AND (CASE WHEN DATEDIFF(dd, EOMONTH(mb.member_date), EOMONTH(getdate())) = 0 THEN 0
+											ELSE DATEDIFF(mm, mb.member_date, getdate()) - 1 END) BETWEEN lc.startmember_time AND lc.endmember_time
+											AND sm.sharestk_amt*sh.unitshare_value BETWEEN lc.startshare_amt AND lc.endshare_amt
+											AND ISNULL(mb.salary_amount,15000) BETWEEN lc.startsalary_amt AND lc.endsalary_amt
+											GROUP BY LT.loantype_code,lt.loantype_desc,lc.maxloan_amt,(sm.sharestk_amt*sh.unitshare_value*lc.multiple_share ) + (ISNULL(mb.salary_amount,15000)*lc.multiple_salary)");
+		$fetchCredit->execute([':member_no' => $member_no]);
+		while($rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC)){
 			$arrCredit = array();
-			$maxloan_amt = 0;
-			$arrCollShould = array();
-			$arrOldContract = array();
-			$arrOtherInfo = array();
-			$canRequest = FALSE;
-			if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
-				include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
+			if($rowCredit["CREDIT_AMT"] > $rowCredit["MAXLOAN_AMT"]){
+				$loan_amt = $rowCredit["MAXLOAN_AMT"];
 			}else{
-				include('calculate_loan_etc.php');
+				$loan_amt = $rowCredit["CREDIT_AMT"];
 			}
-			if($canRequest === TRUE){
-				$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
-				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
-				$CheckIsReq->execute([
-					':loantype_code' => $rowCanCal["loantype_code"],
-					':member_no' => $member_no
-				]);
-				if($CheckIsReq->rowCount() > 0 || $maxloan_amt <= 0){
-					$canRequest = FALSE;
-				}else {
-					if(!$func->check_permission($payload["user_type"],'LoanRequestForm','LoanRequestForm')){
-						$canRequest = FALSE;
-					}
-				}
-			}
-			$arrCredit["OLD_CONTRACT"] = $arrOldContract;
-			$arrCredit["OTHER_INFO"] = $arrOtherInfo;
-			$arrCredit["COLL_SHOULD_CHECK"] = $arrCollShould;
-			$arrCredit["ALLOW_REQUEST"] = $canRequest;
-			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
-			$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
-			$arrCredit["LOAN_PERMIT_AMT"] = $maxloan_amt;
+			$arrCredit["LOANTYPE_DESC"] = $rowCredit["LOANTYPE_DESC"];
+			$arrCredit["LOANTYPE_CODE"] = $rowCredit["LOANTYPE_CODE"];
+			$arrCredit['LOAN_PERMIT_AMT'] = $loan_amt ?? 0;
+			$arrCredit['MAXLOAN_AMT'] = $loan_amt ?? 0;
+			$arrCredit["OLD_CONTRACT"] = [];
 			$arrGroupCredit[] = $arrCredit;
 		}
 		$arrayResult["LOAN_CREDIT"] = $arrGroupCredit;
@@ -65,11 +53,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
+		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
+	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

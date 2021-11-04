@@ -5,47 +5,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conmssql->prepare("SELECT MP.PRENAME_DESC,MG.GAIN_NAME,MG.GAIN_SURNAME,MG.ADDRESS_NO,MG.CARD_PERSON,MG.BIRTH_DATE,
-												MG.ADDRESS_MOO,MG.ADDRESS_SOI,MG.ADDRESS_VILLAGE,MG.ADDRESS_ROAD,MBT.TAMBOL_DESC AS TAMBOL_DESC,
-												MBD.DISTRICT_DESC AS DISTRICT_DESC,
-												mg.PROVINCE_CODE AS PROVINCE_CODE,
-												MBP.PROVINCE_DESC AS PROVINCE_DESC,mc.GAIN_CONCERN,mg.POSTCODE
-												FROM mbgainmaster mg LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
-												LEFT JOIN mbucfgainconcern mc ON mg.relation_code = mc.concern_code
-												LEFT JOIN MBUCFTAMBOL MBT ON mg.TAMBOL_CODE = MBT.TAMBOL_CODE
-												LEFT JOIN MBUCFDISTRICT MBD ON mg.DISTRICT_CODE = MBD.DISTRICT_CODE
-												LEFT JOIN MBUCFPROVINCE MBP ON mg.PROVINCE_CODE = MBP.PROVINCE_CODE	
+		$getBeneficiary = $conmssql->prepare("SELECT mg.GAIN_NAME,mg.GAIN_SURNAME,mg.GAIN_ADDR,mc.GAIN_CONCERN
+												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
 												WHERE mg.member_no = :member_no ORDER BY mg.SEQ_NO");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
-			$address = (isset($rowBenefit["ADDRESS_NO"]) ? $rowBenefit["ADDRESS_NO"] : null);
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_DESC"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			if(isset($rowBenefit["PROVINCE_CODE"]) && $rowBenefit["PROVINCE_CODE"] == '10'){
-				$address .= (isset($rowBenefit["ADDRESS_MOO"]) && $rowBenefit["ADDRESS_MOO"] != "" ? ' ม.'.$rowBenefit["ADDRESS_MOO"] : null);
-				$address .= (isset($rowBenefit["ADDRESS_SOI"]) && $rowBenefit["ADDRESS_SOI"] != "" ? ' ซอย'.$rowBenefit["ADDRESS_SOI"] : null);
-				$address .= (isset($rowBenefit["ADDRESS_VILLAGE"]) && $rowBenefit["ADDRESS_VILLAGE"] != "" ? ' หมู่บ้าน'.$rowBenefit["ADDRESS_VILLAGE"] : null);
-				$address .= (isset($rowBenefit["ADDRESS_ROAD"]) && $rowBenefit["ADDRESS_ROAD"] != "" ? ' ถนน'.$rowBenefit["ADDRESS_ROAD"] : null);
-				$address .= (isset($rowBenefit["TAMBOL_DESC"]) && $rowBenefit["TAMBOL_DESC"] != "" ? ' แขวง'.$rowBenefit["TAMBOL_DESC"] : null);
-				$address .= (isset($rowBenefit["DISTRICT_DESC"]) && $rowBenefit["DISTRICT_DESC"] != "" ? ' เขต'.$rowBenefit["DISTRICT_DESC"] : null);
-				$address .= (isset($rowBenefit["PROVINCE_DESC"]) && $rowBenefit["PROVINCE_DESC"] != "" ? ' '.$rowBenefit["PROVINCE_DESC"] : null);
-				$address .= (isset($rowBenefit["POSTCODE"]) && $rowBenefit["POSTCODE"] != "" ? ' '.$rowBenefit["POSTCODE"] : null);
-			}else{
-				$address .= (isset($rowBenefit["ADDRESS_MOO"]) && $rowBenefit["ADDRESS_MOO"] != "" ? ' ม.'.$rowBenefit["ADDRESS_MOO"] : null);
-				$address .= (isset($rowBenefit["ADDRESS_SOI"]) && $rowBenefit["ADDRESS_SOI"] != "" ? ' ซอย'.$rowBenefit["ADDRESS_SOI"] : null);
-				$address .= (isset($rowBenefit["ADDRESS_VILLAGE"]) && $rowBenefit["ADDRESS_VILLAGE"] != "" ? ' หมู่บ้าน'.$rowBenefit["ADDRESS_VILLAGE"] : null);
-				$address .= (isset($rowBenefit["ADDRESS_ROAD"]) && $rowBenefit["ADDRESS_ROAD"] != "" ? ' ถนน'.$rowBenefit["ADDRESS_ROAD"] : null);
-				$address .= (isset($rowBenefit["TAMBOL_DESC"]) && $rowBenefit["TAMBOL_DESC"] != "" ? ' ต.'.$rowBenefit["TAMBOL_DESC"] : null);
-				$address .= (isset($rowBenefit["DISTRICT_DESC"]) && $rowBenefit["DISTRICT_DESC"] != "" ? ' อ.'.$rowBenefit["DISTRICT_DESC"] : null);
-				$address .= (isset($rowBenefit["PROVINCE_DESC"]) && $rowBenefit["PROVINCE_DESC"] != "" ? ' จ.'.$rowBenefit["PROVINCE_DESC"] : null);
-				$address .= (isset($rowBenefit["POSTCODE"]) && $rowBenefit["POSTCODE"] != "" ? ' '.$rowBenefit["POSTCODE"] : null);
+			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
+			if(isset($rowBenefit["GAIN_ADDR"])){
+				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
 			}
-			$arrOtherInfo[0]["LABEL"] = "เลขบัตรประจำตัวประชาชน";
-			$arrOtherInfo[0]["VALUE"] = $rowBenefit["CARD_PERSON"];
-			$arrOtherInfo[1]["LABEL"] = "วันเกิด";
-			$arrOtherInfo[1]["VALUE"] = $lib->convertdate($rowBenefit["BIRTH_DATE"],"D m Y");
-			$arrBenefit["ADDRESS"] = $address;
-			$arrBenefit["OTHER_INFO"] = $arrOtherInfo;
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
 			$arrGroupBNF[] = $arrBenefit;
 		}

@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllLoan = array();
 		$getSumAllContract = $conmssql->prepare("SELECT SUM(principal_balance) as SUM_LOANBALANCE FROM lncontmaster WHERE member_no = :member_no
-												and contract_status > 0 and contract_status <> 8");
+																	and contract_status > 0 and contract_status <> 8");
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);

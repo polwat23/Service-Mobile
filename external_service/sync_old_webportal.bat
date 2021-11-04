@@ -1,3 +1,3 @@
 @echo off
 
-C:\Mobile\php7.4\php.exe C:\Mobile\Service-MHD-Test\external_service\sync_old_webportal.php
+C:\Mobile\php7.4\php.exe C:\Mobile\Service-UTP\external_service\move_avatar_to_folder.php

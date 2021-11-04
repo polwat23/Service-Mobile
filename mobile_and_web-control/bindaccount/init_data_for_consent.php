@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conmssql->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
@@ -27,13 +27,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
 				}
 				if(sizeof($arrAccBeenBind) > 0){
-					$fetchDataAccount = $conmssql->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
+					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 															ON dpm.depttype_code = dpt.depttype_code 
 															WHERE dpm.member_no = :member_no and
 															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0 and dpm.transonline_flag = 1
 															and dpm.deptaccount_no NOT IN(".implode(',',$arrAccBeenBind).")");
 				}else{
-					$fetchDataAccount = $conmssql->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
+					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 															ON dpm.depttype_code = dpt.depttype_code 
 															WHERE dpm.member_no = :member_no and dpm.transonline_flag = 1 and
 															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0");
