@@ -285,7 +285,7 @@ if(!$anonymous){
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-						}			
+						}					
 					}
 				}else{
 					$arrMenu = array();
