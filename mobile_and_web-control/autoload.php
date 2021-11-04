@@ -132,6 +132,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}
+						if($payload["exp"] <= time() + ($func->getConstant('limit_session_timeout') / 2)){
+							$regen_token = $auth->refresh_accesstoken($dataComing["refresh_token"],
+							$dataComing["unique_id"],$conmysql,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+							if(!$regen_token){
+								$arrayResult['RESPONSE_CODE'] = "WS0014";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								http_response_code(401);
+								require_once('/../include/exit_footer.php');
+							}
+							$arrayResult['NEW_TOKEN'] = $regen_token["ACCESS_TOKEN"];
+						}
 					}catch (ValidateException $e) {
 						$errorCode = $e->getCode();
 						if($errorCode === 3){
@@ -227,6 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 				->parse();
 			$payload = $parsed_token->getPayload();
 		}
+
 	}else{
 		$anonymous = true;
 	}

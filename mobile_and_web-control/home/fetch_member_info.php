@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
-													mb.MEMBER_DATE,mps.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
+													mb.MEMBER_DATE,MPS.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
 													mb.ADDRESS_SOI as ADDR_SOI,
@@ -32,34 +32,34 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
 													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-													LEFT JOIN MBUCFPOSITION mps ON mb.POSITION_CODE = mps.POSITION_CODE
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE	
+													LEFT JOIN MBUCFPOSITION MPS ON mb.POSITION_CODE = MPS.POSITION_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+				$address .= (isset($rowMember["ADDR_MOO"]) && $rowMember["ADDR_MOO"] != "" ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) && $rowMember["ADDR_SOI"] != "" ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) && $rowMember["ADDR_VILLAGE"] != "" ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) && $rowMember["ADDR_ROAD"] != "" ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) && $rowMember["TAMBOL_DESC"] != "" ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) && $rowMember["DISTRICT_DESC"] != "" ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' '.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}else{
-				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
-				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
-				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
-				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
-				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
-				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
-				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
-				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+				$address .= (isset($rowMember["ADDR_MOO"]) && $rowMember["ADDR_MOO"] != "" ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) && $rowMember["ADDR_SOI"] != "" ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) && $rowMember["ADDR_VILLAGE"] != "" ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) && $rowMember["ADDR_ROAD"] != "" ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) && $rowMember["TAMBOL_DESC"] != "" ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) && $rowMember["DISTRICT_DESC"] != "" ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
@@ -81,7 +81,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

@@ -96,46 +96,36 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			
 		}
 		$pin_split = str_split($dataComing["pin"]);
-		$duplicateDigit = $func->getConstant('check_duplicate_pin');
-		$sequestDigit = $func->getConstant('pin_sequest_digit');
 		$countSeqNumber = 1;
 		$countReverseSeqNumber = 1;
 		foreach($pin_split as $key => $value){
-			if($duplicateDigit == "0"){
-				if(($value == $dataComing["pin"][($key - 1) < 0 ? 7 : $key - 1] && $value == $dataComing["pin"][$key + 1]) || 
-				($value == $dataComing["pin"][($key - 1) < 0 ? 7 : $key - 1] && $value == $dataComing["pin"][($key - 2) < 0 ? 7 : $key - 2])){
-					$arrayResult['RESPONSE_CODE'] = "WS0057";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-			}
-			if($key < strlen($dataComing["pin"]) - 1){
-				if($value == ($dataComing["pin"][$key + 1] - 1)){
-					$countSeqNumber++;
-				}else{
-					if($countSeqNumber < 3){
-						$countSeqNumber = 1;
-					}
-				}
-				if($value - 1 == $dataComing["pin"][$key + 1]){
-					$countReverseSeqNumber++;
-				}else{
-					if($countReverseSeqNumber < 3){
-						$countReverseSeqNumber = 1;
-					}
-				}
-			}
-		}
-		if($sequestDigit == "0"){
-			if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
+			if(($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key + 1]) || 
+			($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key - 2])){
 				$arrayResult['RESPONSE_CODE'] = "WS0057";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
 			}
+			if($key < strlen($dataComing["pin"]) - 1){
+				if($value == ($dataComing["pin"][$key + 1] - 1)){
+					$countSeqNumber++;
+				}else{
+					$countSeqNumber = 1;
+				}
+				if($value - 1 == $dataComing["pin"][$key + 1]){
+					$countReverseSeqNumber++;
+				}else{
+					$countReverseSeqNumber = 1;
+				}
+			}
+		}
+		if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
+			$arrayResult['RESPONSE_CODE'] = "WS0057";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
 		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");

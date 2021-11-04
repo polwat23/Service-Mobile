@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SUM_SHARE_AMT"],2);
 				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
 				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
-				$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
+				//$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
 				$arrGroupStm[] = $arrayStm;
 			}
 			$arrayResult['STATEMENT'] = $arrGroupStm;

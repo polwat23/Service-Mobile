@@ -50,12 +50,12 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 			if($dataComing["source_type"] == "coop"){
 				if($rowTrans["DESTINATION_TYPE"] == "1"){
 					if($rowTrans["TRANSFER_MODE"] == '9'){
-						$fetchNameAccDes = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as DEPTACCOUNT_NAME
+						$fetchNameAccDes = $conmssql->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as DEPTACCOUNT_NAME
 																	FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 																	WHERE mb.member_no = :member_no");
 						$fetchNameAccDes->execute([':member_no' => $member_no]);
 					}else{
-						$fetchNameAccDes = $conoracle->prepare("SELECT TRIM(DEPTACCOUNT_NAME) as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+						$fetchNameAccDes = $conmssql->prepare("SELECT TRIM(DEPTACCOUNT_NAME) as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 						$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 					}
 					$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["bank_format_account"]);
 					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["bank_format_account_hide"]);
 				}else if($rowTrans["DESTINATION_TYPE"] == "3"){
-					$fetchNameLoanDes = $conoracle->prepare("SELECT lnt.loantype_desc FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code
+					$fetchNameLoanDes = $conmssql->prepare("SELECT lnt.loantype_desc FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code
 																	WHERE lnm.loancontract_no = :loancontract_no");
 					$fetchNameLoanDes->execute([':loancontract_no' => $rowTrans["DESTINATION"]]);
 					$rowNameLn = $fetchNameLoanDes->fetch(PDO::FETCH_ASSOC);
@@ -82,7 +82,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 						$arrayTrans["DESTINATION"] = $contract_no;
 					}
 				}else{
-					$fetchNameDes = $conoracle->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME
+					$fetchNameDes = $conmssql->prepare("SELECT mp.prename_desc || mb.memb_name || ' ' || mb.memb_surname as FULL_NAME
 																	FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 																	WHERE mb.member_no = :member_no");
 					$fetchNameDes->execute([':member_no' => $rowTrans["DESTINATION"]]);
@@ -92,7 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$arrayTrans["DESTINATION"] = $rowTrans["DESTINATION"];
 				}
 			}else{
-				$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$fetchNameAccDes = $conmssql->prepare("SELECT DEPTACCOUNT_NAME as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 				$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 				$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
 				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
