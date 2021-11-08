@@ -9,10 +9,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		$fetchName = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MBG.MEMBGROUP_DESC,MBG.MEMBGROUP_CODE
-												FROM MBMEMBMASTER MB LEFT JOIN 
-												MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
-												LEFT JOIN MBUCFMEMBGROUP MBG ON MB.MEMBGROUP_CODE = MBG.MEMBGROUP_CODE
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+												FROM mbmembmaster mb LEFT JOIN 
+												mbucfprename mp ON mb.prename_code = mp.prename_code
+												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
 												WHERE mb.member_no = :member_no");
 		$fetchName->execute([
 			':member_no' => $member_no
@@ -21,10 +21,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
-			$getPaymentDetail = $conmssql->prepare("SELECT 
-																		CASE kut.system_code 
-																		WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-																		WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
+			$getPaymentDetail = $conoracle->prepare("SELECT 
+																		CASE kut.system_code
+																		WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+																		WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 																		ELSE kut.keepitemtype_desc
 																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
@@ -36,11 +36,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.PERIOD,
-																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+																		kpd.period,
+																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		NVL(kpd.interest_payment,0) AS INT_BALANCE
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -54,10 +54,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				':seq_no' => $dataComing["seq_no"]
 			]);
 		}else{
-			$getPaymentDetail = $conmssql->prepare("SELECT 
+			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		CASE kut.system_code 
-																		WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-																		WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
+																		WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+																		WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 																		ELSE kut.keepitemtype_desc
 																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
@@ -69,11 +69,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
 																		ELSE kpd.description END as PAY_ACCOUNT,
-																		kpd.PERIOD,
-																		ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-																		ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-																		ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+																		kpd.period,
+																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+																		NVL(kpd.interest_payment,0) AS INT_BALANCE
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
-		$getDetailKPHeader = $conmssql->prepare("SELECT 
+		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE,
 																kpd.KEEPING_STATUS
@@ -187,40 +187,41 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
-				@font-face {
-				  font-family: TH Niramit AS;
-				  src: url(../../resource/fonts/TH Niramit AS.ttf);
-				}
-				@font-face {
-					font-family: TH Niramit AS;
-					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
-					font-weight: bold;
-				}
-				* {
-				  font-family: TH Niramit AS;
-				}
+			@font-face {
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
+			}
+			@font-face {
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+				font-weight: bold;
+			}
+			* {
+			  font-family: TH Niramit AS;
+			}
 
-				body {
-				  padding: 0 30px;
-				}
-				.sub-table div{
-					padding : 5px;
-				}
+			body {
+			  padding: 0 30px;
+			}
+			.sub-table div{
+				padding : 5px;
+			}
 			</style>
+
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
-				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
+			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ตำรวจภูธรจังหวัดอุตรดิตถ์ จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">191 หมู่ 9 ตำบลน้ำริด อำเภอเมือง</p>
-				<p style="margin-top: -25px;font-size: 18px;">จังหวัดอุตรดิตถ์ 53000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-5540-9902</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">uttaraditpolice-coop.com</p>
-				</div>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเลย จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">256 ถนนมลิวรรณ ตำบลนาอาน อำเภอเมือง จังหวัดเลย 42000</p>
+			<p style="margin-top: -27px;font-size: 18px;">ฝ่ายสินเชื่อ : 08-1974-1223 และ 09-1065-7271</p>
+			<p style="margin-top: -25px;font-size: 18px;">ฝ่ายการเงิน/บัญชี : 06-5121-5745, ฝ่ายธุรการ : 06-5121-2245</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.coop-scloei.com</p>
+			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
 			<table style="width: 100%;">
@@ -256,7 +257,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
 			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
 			</div>';
-				// Detail
+			// Detail
 	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
@@ -267,7 +268,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
-			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
+				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
 			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
@@ -324,11 +325,11 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/receive_money.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 650px;display:flex;">
+			<img src="../../resource/utility_icon/signature/mg.png" width="120" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 670px;margin-top:-20px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new Dompdf([
@@ -354,6 +355,6 @@ function GenerateReport($dataReport,$header,$lib){
 		$arrayPDF["RESULT"] = FALSE;
 	}
 	$arrayPDF["PATH"] = $pathfile_show;
-	return $arrayPDF; 
+	return $arrayPDF;
 }
 ?>

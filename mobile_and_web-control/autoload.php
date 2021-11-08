@@ -72,8 +72,8 @@ if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 	http_response_code(500);
 	
 }
-if(is_array($conmssql) && $conmssql["RESULT"] == FALSE && $conmssql["IS_OPEN"] == '1'){
-	$message_error = $conmssql["MESSAGE"]." ".$conmssql["ERROR"];
+if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"] == '1'){
+	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
 	$lib->sendLineNotify($message_error);
 	$func->MaintenanceMenu("System");
 	http_response_code(500);
@@ -144,14 +144,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							}
 							$arrayResult['NEW_TOKEN'] = $regen_token["ACCESS_TOKEN"];
 						}
-
 					}catch (ValidateException $e) {
 						$errorCode = $e->getCode();
 						if($errorCode === 3){
 							$arrayResult['RESPONSE_CODE'] = "WS0034";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							http_response_code(401);
+							http_response_code(500);
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}else if($errorCode === 4){

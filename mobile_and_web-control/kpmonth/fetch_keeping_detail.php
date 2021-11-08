@@ -10,74 +10,78 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		if($recv_now == trim($dataComing["recv_period"])){
 			if($dateNow >= $date_process){
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
 												WHEN 'LON' THEN kpd.loancontract_no
 											ELSE kpd.description END as PAY_ACCOUNT,
 											kpd.period,
-											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
 												WHEN 'LON' THEN kpd.loancontract_no
 											ELSE kpd.description END as PAY_ACCOUNT,
 											kpd.period,
-											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
 			if(trim($dataComing["recv_period"]) > $recv_now){
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
 												WHEN 'LON' THEN kpd.loancontract_no
 											ELSE kpd.description END as PAY_ACCOUNT,
 											kpd.period,
-											ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-											ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-											ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-											ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+											NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+											NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+											NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
 				$qureyKpDetail = "SELECT 
-										kut.keepitemtype_desc as TYPE_DESC,
+										NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 										kut.keepitemtype_grp as TYPE_GROUP,
 										case kut.keepitemtype_grp 
 											WHEN 'DEP' THEN kpd.description
 											WHEN 'LON' THEN kpd.loancontract_no
 										ELSE kpd.description END as PAY_ACCOUNT,
 										kpd.period,
-										ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-										ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-										ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-										ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+										NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+										NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+										NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+										NVL(kpd.interest_payment,0) AS INT_BALANCE
 										FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 										kpd.keepitemtype_code = kut.keepitemtype_code
+										LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}	
 		}
 		$arrGroupDetail = array();
-		$getDetailKP = $conmssql->prepare($qureyKpDetail);
+		$getDetailKP = $conoracle->prepare($qureyKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -117,11 +121,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "Êè§ Argument ÁÒäÁè¤Ãº "."\n".json_encode($dataComing),
+		":error_desc" => "à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸š "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ä¿Åì ".$filename." Êè§ Argument ÁÒäÁè¤ÃºÁÒá¤è "."\n".json_encode($dataComing);
+	$message_error = "à¹„à¸Ÿà¸¥à¹Œ ".$filename." à¸ªà¹ˆà¸‡ Argument à¸¡à¸²à¹„à¸¡à¹ˆà¸„à¸£à¸šà¸¡à¸²à¹à¸„à¹ˆ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

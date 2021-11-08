@@ -6,23 +6,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
-		$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,KEEPING_STATUS 
-															from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");
+		$getPeriodKP = $conoracle->prepare("SELECT * from ((
+															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
+															from kpmastreceive where member_no = :member_no
+														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
-				':member_no' => $member_no
+				':member_no' => $member_no,
+				':limit_period' => $limit_period
 		]);
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
-			$getKPDetail = $conmssql->prepare("SELECT ISNULL(SUM(KPD.ITEM_PAYMENT * KUT.SIGN_FLAG),0) AS ITEM_PAYMENT 
-													FROM KPMASTRECEIVEDET KPD
-													LEFT JOIN KPUCFKEEPITEMTYPE KUT ON 
-													KPD.KEEPITEMTYPE_CODE = KUT.KEEPITEMTYPE_CODE
-													where kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+			$getKPDetail = $conoracle->prepare("SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
+													FROM kpmastreceivedet kpd
+													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													where kpd.member_no = :member_no and kpd.kpslip_no = :kpslip_no");
 			$getKPDetail->execute([
 				':member_no' => $member_no,
-				':recv_period' => $rowPeriod["RECV_PERIOD"]
+				':kpslip_no' => $rowPeriod["KPSLIP_NO"]
 			]);
 			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
 			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];

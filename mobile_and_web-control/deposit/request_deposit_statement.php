@@ -13,15 +13,15 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getCardPerson = $conmssql->prepare("SELECT CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conmssql->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
+			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
 																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
 																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
-																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :dateafter, 23)
+																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
 																		ORDER BY dps.SEQ_NO DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
@@ -103,22 +103,22 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new DOMPDF();
+
 	//style table
 	  $html = '<style>
 
 		  @font-face {
-			  font-family: TH Niramit AS;
-			  src: url(../../resource/fonts/TH Niramit AS.ttf);
-			}
-			@font-face {
-				font-family: TH Niramit AS;
-				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
-				font-weight: bold;
-			}
-			* {
-			  font-family: TH Niramit AS;
-			}
+		  font-family: TH Niramit AS;
+		  src: url(../../resource/fonts/TH Niramit AS.ttf);
+		}
+		@font-face {
+			font-family: TH Niramit AS;
+			src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+			font-weight: bold;
+		}
+		* {
+		  font-family: TH Niramit AS;
+		}
 
 		  body {
 			margin-top: 3.6cm;
@@ -139,11 +139,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  }
 		  th {
 			text-align:center;
-			color:black;
+			color:white;
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:rgb(204, 255, 0);
+			background-color:#0C6DBF;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -191,10 +191,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ตำรวจภูธรจังหวัดอุตรดิตถ์ จำกัด
+					สหกรณ์ออมทรัพย์ครูกรมสามัญศึกษาจังหวัดเชียงราย จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Uttaradit Police Savings and Credit Cooperative Limited
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:12px">
+					CHIANG RAI PROVINCIAL GENERAL EDUCATION TEACHER\'S SAVING AND CREDIT COOPERATIVE LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -298,7 +298,6 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
-
 
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);

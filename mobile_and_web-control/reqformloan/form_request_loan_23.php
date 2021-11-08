@@ -3,8 +3,6 @@ use Dompdf\Dompdf;
 
 $dompdf = new DOMPDF();
 function GeneratePDFContract($data,$lib) {
-	$minispace = '&nbsp;&nbsp;';
-	$space = '&nbsp;&nbsp;&nbsp;&nbsp;';
 	$html = '<style>
 			@font-face {
 				font-family: THSarabun;
@@ -24,15 +22,6 @@ function GeneratePDFContract($data,$lib) {
 			.sub-table div{
 			  padding : 5px;
 			}
-			.text-input {
-				font-weight:bold;
-				font-size: 20px;
-				border-bottom: 1px dotted black;
-			}
-			.text-header {
-				font-size: 18px;
-				border-bottom: 1px dotted black;
-			}
 			</style>';
 	$html .= '<div style="display: flex;text-align: center;">
 			<div>
@@ -43,31 +32,11 @@ function GeneratePDFContract($data,$lib) {
 					   ใบคําขอกู้เพื่อเหตุฉุกเฉินออนไลน์ 
 					</p>
 			   </div>
-			   <div style="position: absolute; right: 15px; top: 0px;">
-				   <table style="width:100%">
-				   <tr>
-				   <td style="width: 100%"></td>
-						<td>
-						   <div style=" border: solid 1px #000000;padding: 5px;">
-									<div style="font-size: 18px;white-space: nowrap;">
-									  เลขที่สัญญาเงินกู้ '.$data["loan_prefix"].'.................................
-									 </div>
-									<div style="font-size: 18px;white-space: nowrap; ">
-									วันที่<span class="text-header">'.$minispace.date('d').$minispace.'/'.$minispace.(explode(' ',$lib->convertdate(date("Y-m-d"),"d m Y")))[1].$minispace.'/'.$minispace.(date('Y') + 543).$minispace.'</span>
-									</div>
-									<div style="font-size: 18px;white-space: nowrap;">
-									  เลขที่ใบคำขอกู้ออนไลน์<span class="text-header">'.$minispace.$data["requestdoc_no"].$minispace.'</span>
-									 </div>
-						   </div>
-						   </td>
-					   </tr>
-					 </table>
+			   <div style="position: absolute; right: 15px; top: 140px; width:100%">
+					<p style="font-size: 20px; text-align:right; ">
+					   เขียนที่ Surin Saving (Mobile Application)
+					</p>
 			   </div>
-				<div style="position: absolute; right: 15px; top: 140px; width:100%">
-							<p style="font-size: 20px; text-align:right; ">
-							   เขียนที่ Surin Saving (Mobile Application)
-							</p>
-				</div>
 			   <div style="position: absolute; right: 15px; top: 176px; width:100%;">
 				<p style="font-size: 20px;  text-align:right; ">
 				  วันที่............เดือน..........................พ.ศ..............
@@ -99,7 +68,7 @@ function GeneratePDFContract($data,$lib) {
 			   คณะกรรมการดําเนินการสหกรณ์ออมทรัพย์ครูสุรินทร์ จํากัด
 			</p>
 		  </div>
-		    <div style="position: absolute; left: 20px; top: 258px; right:0px; width:660px; font-size: 20px; ">
+		  <div style="position: absolute; left: 20px; top: 258px; right:0px; width:660px; font-size: 20px; ">
 			  <p style="text-indent:50px;  text-align:left;">
 			  ข้าพเจ้า.......................................................................... สมาชิกเลขทะเบียนที่...................................... รับราชการหรือ
 			  ทํางานประจําในตําแหน่ง........................................................โรงเรียนหรือที่ทําการ.......................................................................
@@ -108,8 +77,7 @@ function GeneratePDFContract($data,$lib) {
 			  </p>
 			  <p style="text-indent:50px; margin:0px; margin-top:-20px;  text-align:left;">
 				ข้อ 1. ข้าพเจ้าขอกู้เงินของสหกรณ์จํานวน........................................บาท (....................................................................)
-				โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)......................................................................................<br>
-				โดยโอนเงินเข้าบัญชีเงินฝากธนาคารกรุงไทย เลขที่บัญชี ........................................................... ชื่อบัญชี ....................................................................
+				โดยจะนําไปใช้เพื่อการดังต่อไปนี้ (ชี้แจงเหตุฉุกเฉินที่จําเป็นต้องขอกู้เงิน)......................................................................................
 			  </p>
 			  <p style="text-indent:50px; margin:0px; text-align:left;">
 				ข้อ 2. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งชําระเงินดอกเบี้ยเป็นรายเดือน และส่งคืนเงินกู้เพื่อเหตุฉุกเฉินเต็มจํานวน พร้อมดอกเบี้ยเดือนสุดท้ายให้เสร็จสิ้นภายใน 12 เดือน
@@ -165,8 +133,8 @@ function GeneratePDFContract($data,$lib) {
 
 		  
 		  <div style="position: absolute; left: 440px; top: 301px; width:210px; text-align:center;font-weight:bold; ">
-			<div style="font-size: 20px;white-space: nowrap ">
-			  '.$data["pos_group_code"].' '.$data["pos_group"].'
+			<div style="font-size: 20px; ">
+			  '.$data["pos_group"].'
 			</div>  
 		  </div>
 
@@ -211,16 +179,7 @@ function GeneratePDFContract($data,$lib) {
 			เพื่อเหตุฉุกเฉิน
 			</div>  
 		  </div>
-		<div style="position: absolute; left: 200px; top: 426px; width:280px; text-align:center;font-weight:bold;">
-			<div style="font-size: 20px; ">
-			'.$data["recv_account"].'
-			</div>  
-		  </div>
-		  <div style="position: absolute; left: 220px; top: 426px; width:280px; text-align:center;font-weight:bold;">
-			<div style="font-size: 20px; ">
-			'.$data["name"].'
-			</div>  
-		  </div>
+
 		  <div style="position: absolute; left: 250px; bottom: 38px; width:195px; text-align:center;font-weight:bold; ">
 			<div style="font-size: 20px; ">
 			 '.$data["name"].'
@@ -235,7 +194,6 @@ function GeneratePDFContract($data,$lib) {
 		  </tbody>
 		  </table>
 		  </div>
-
 	';
 	$dompdf = new DOMPDF();
 	$dompdf->set_paper('A4');

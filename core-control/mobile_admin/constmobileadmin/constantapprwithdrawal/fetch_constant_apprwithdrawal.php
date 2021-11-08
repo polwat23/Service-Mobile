@@ -4,34 +4,36 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantapprwithdrawal')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT cawd.id_apprwd_constant, cawd.minimum_value, cawd.maximum_value, cawd.member_no,css.id_section_system,css.system_assign 
-															FROM gcconstantapprwithdrawal cawd 
-															LEFT JOIN coresectionsystem css ON css.id_section_system = cawd.id_section_system 
-															WHERE cawd.is_use = '1'");
-		$fetchConstant->execute();
-		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
-			$arrConstans = array();
-			$arrConstans["ID_APPRWD_CONSTANT"] = $rowMenuMobile["id_apprwd_constant"];
-			$arrConstans["MINIMUM_VALUE"] = $rowMenuMobile["minimum_value"];
-			$arrConstans["MAXIMUM_VALUE"] = $rowMenuMobile["maximum_value"];
-			$arrConstans["MEMBER_NO"] = $rowMenuMobile["member_no"];
-			$arrConstans["ID_SECTION_SYSTEM"] = $rowMenuMobile["id_section_system"];
-			$arrConstans["SYSTEM_ASSIGN"] = $rowMenuMobile["system_assign"];
-			$arrayGroup[] = $arrConstans;
+		$getUserFromMobile = $conmysql->prepare("SELECT username_core,member_no,id_apprwd_constant  FROM gcconstantapprwithdrawal WHERE is_use = '1'");
+		$getUserFromMobile->execute();
+		while($rowUser = $getUserFromMobile->fetch(PDO::FETCH_ASSOC)){
+			$fetchApvLevel = $conoracle->prepare("SELECT amu.full_name,amu.description as section,aml.description,aml.dept_withdrawmax,aml.dept_depositmax
+														FROM amsecusers amu LEFT JOIN amsecapvlevel aml ON amu.apvlevel_id = aml.apvlevel_id WHERE amu.user_name = :username and amu.user_status = 1");
+			$fetchApvLevel->execute([':username' => $rowUser["username_core"]]);
+			while($rowLevel = $fetchApvLevel->fetch(PDO::FETCH_ASSOC)){
+				$arrApvLevel = array();
+				$arrApvLevel["ID_APPRWD_CONSTANT"] = $rowUser["id_apprwd_constant"];
+				$arrApvLevel["MEMBER_NO"] = $rowUser["member_no"];
+				$arrApvLevel["POSITION"] = $rowLevel["DESCRIPTION"];
+				$arrApvLevel["SECTION"] = $rowLevel["SECTION"];
+				$arrApvLevel["FULL_NAME"] = $rowLevel["FULL_NAME"];
+				$arrApvLevel["WITHDRAWMAX"] = number_format($rowLevel["DEPT_WITHDRAWMAX"],2);
+				$arrApvLevel["DEPOSITMAX"] = number_format($rowLevel["DEPT_DEPOSITMAX"],2);
+				$arrApvLevel["USERNAME"] = $rowUser["username_core"];
+				$arrayGroup[] = $arrApvLevel;
+			}
 		}
-		$arrayResult["CONSTANT_DATA"] = $arrayGroup;
+		$arrayResult["USER_LEVEL"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
+		require_once('../../../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../../../include/exit_footer.php');
 }
 ?>

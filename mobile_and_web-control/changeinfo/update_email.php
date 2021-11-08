@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','email'],$dataComing)){
 		$rowConst = $getConstInfo->fetch(PDO::FETCH_ASSOC);
 		if($rowConst["save_tablecore"] == '1'){
 			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
+			echo json_encode($arrayResult);
 		}else{
 			$updateEmail = $conmysql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
 			if($updateEmail->execute([
@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','email'],$dataComing)){
 				':member_no' => $payload["member_no"]
 			])){
 				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
+				echo json_encode($arrayResult);
 			}else{
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
@@ -38,8 +38,8 @@ if($lib->checkCompleteArgument(['menu_component','email'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS1010";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
+				echo json_encode($arrayResult);
+				exit();
 			}
 		}
 	}else{
@@ -47,8 +47,8 @@ if($lib->checkCompleteArgument(['menu_component','email'],$dataComing)){
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-		
+		echo json_encode($arrayResult);
+		exit();
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','email'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	echo json_encode($arrayResult);
+	exit();
 }
 ?>

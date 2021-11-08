@@ -16,7 +16,8 @@ if($lib->checkCompleteArgument(['unique_id','member_no_group'],$dataComing)){
 				$conmysql->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถตั้งแอดมินได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../../../include/exit_footer.php');
+				echo json_encode($arrayResult);
+				exit();
 			}
 		}
 		$conmysql->commit();

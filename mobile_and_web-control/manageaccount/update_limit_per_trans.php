@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','limit_amt','deptaccount_no'],$
 			':deptaccount_no' => $dataComing["deptaccount_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
+			echo json_encode($arrayResult);
 		}else{
 			$arrExecute = [
 				':limit_amt' => $dataComing["limit_amt"],
@@ -26,23 +26,23 @@ if($lib->checkCompleteArgument(['menu_component','limit_amt','deptaccount_no'],$
 			$arrayResult['RESPONSE_CODE'] = "WS1026";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			echo json_encode($arrayResult);
+			exit();
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-		
+		echo json_encode($arrayResult);
+		exit();
 	}
 }else{
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	echo json_encode($arrayResult);
+	exit();
 }
 ?>

@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAllAccount = array();
 		$arrAllLoan = array();
 		
-		$getAccount = $conmssql->prepare("SELECT DP.DEPTTYPE_CODE,DT.DEPTTYPE_DESC,DP.DEPTACCOUNT_NO,DP.DEPTACCOUNT_NAME,DP.PRNCBAL as BALANCE
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
 		$getAccount->execute([
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult['DEPOSIT'] = $arrAllAccount;
 		
-		$getContract = $conmssql->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO
+		$getContract = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 		$getContract->execute([

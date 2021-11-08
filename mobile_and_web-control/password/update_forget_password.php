@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$getNameMember = $conmssql->prepare("SELECT MEMB_NAME,MEMB_SURNAME FROM mbmembmaster WHERE member_no = :member_no");
+		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
 		$getNameMember->execute([':member_no' => $member_no]);
 		$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
 		$template = $func->getTemplateSystem('ForgetPassword');
