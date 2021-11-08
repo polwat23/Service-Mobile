@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 			});
 			foreach($resultUDiff as $value_diff){
 				if(array_search($value_diff["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE')) === False){
-					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_ESTIMATE_CREDITLOAN"]."')";
+					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_ESTIMATE_CREDITLOAN"]."','".$value_diff["IS_QRPAYMENT"]."')";
 					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].
 					' IS_ESTIMATE_CREDITLOAN ='.$value_diff["IS_ESTIMATE_CREDITLOAN"].' IS_QRPAYMENT ='.$value_diff["IS_QRPAYMENT"];
 				}else{

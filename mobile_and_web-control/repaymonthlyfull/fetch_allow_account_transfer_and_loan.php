@@ -1,6 +1,27 @@
 <?php
 require_once('../autoload.php');
+require_once('../../include/cal_deposit_test.php');
+require_once('../../include/cal_loan_test.php');
 
+use CalculateDepositTest\CalculateDepositTest;
+use CalculateLoanTest\CalculateLoanTest;
+
+$cal_dep = new CalculateDepositTest();
+$cal_loan = new CalculateLoanTest();
+
+$dbuser = "iscotest";
+$dbpass = "iscotest";
+$dbname = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.226)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = gcoop)
+			)
+		  )";
+$conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PayMonthlyFull')){
