@@ -23,7 +23,6 @@ $conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
 $conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
 $conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 
-
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','slip_no','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PayMonthlyFull')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];

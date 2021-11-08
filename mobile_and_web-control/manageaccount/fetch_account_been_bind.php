@@ -71,27 +71,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayBank["BANK_ACCOUNT_NAME"] = $rowRegis["bank_account_name_en"];
 				}
 			}
-			if($rowAllow["bank_code"] == '006'){
-				if ($payload["member_no"] == '00009885' || $payload["member_no"] == '00013298' || $payload["member_no"] == '00004538' || $payload["member_no"] == '00013942' || $payload["member_no"] == 'etnmode3') {
-					$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
-					$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
-					$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
-					$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
-					$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
-					$arrPic = explode('.',$rowAllow["bank_logo_path"]);
-					$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
-					$arrayBankGrp[] = $arrayBank;
-				}
-			}else {
-				$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
-				$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
-				$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
-				$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
-				$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
-				$arrPic = explode('.',$rowAllow["bank_logo_path"]);
-				$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
-				$arrayBankGrp[] = $arrayBank;
-			}
+			$arrayBank["BANK_CODE"] = $rowAllow["bank_code"];
+			$arrayBank["BANK_NAME"] = $rowAllow["bank_name"];
+			$arrayBank["BANK_SHORT_NAME"] = $rowAllow["bank_short_name"];
+			$arrayBank["BANK_SHORT_ENAME"] = $rowAllow["bank_short_ename"];
+			$arrayBank["BANK_LOGO_PATH"] = $config["URL_SERVICE"].$rowAllow["bank_logo_path"];
+			$arrPic = explode('.',$rowAllow["bank_logo_path"]);
+			$arrayBank["BANK_LOGO_PATH_WEBP"] = $config["URL_SERVICE"].$arrPic[0].'.webp';
+			$arrayBankGrp[] = $arrayBank;
 		}
 		$arrayResult['BANK_LIST'] = $arrayBankGrp;
 		$arrayResult['BIND_ACCOUNT'] = $arrBindAccount;
