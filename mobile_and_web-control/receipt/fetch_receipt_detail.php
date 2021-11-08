@@ -6,10 +6,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$showSplitSlip = $func->getConstant('show_split_slip_report');
 		$arrGroupDetail = array();
-		$getDetailKP = $conmssql->prepare("SELECT 
+		$getDetailKP = $conoracle->prepare("SELECT 
 													CASE kut.system_code 
-													WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-													WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
+													WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+													WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 													ELSE kut.keepitemtype_desc
 													END as TYPE_DESC,
 													kpd.SEQ_NO,
@@ -22,11 +22,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 														WHEN 'DEP' THEN kpd.description
 														WHEN 'LON' THEN kpd.loancontract_no
 													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.PERIOD,
-													ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-													ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+													kpd.period,
+													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+													NVL(kpd.interest_payment,0) AS INT_BALANCE
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code

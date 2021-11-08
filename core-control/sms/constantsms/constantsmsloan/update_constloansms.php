@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 			$arrConstans["ALLOW_SMSCONSTANTLOAN"] = $rowMenuMobile["allow_smsconstantloan"];
 			$arrayChkG[] = $arrConstans;
 		}
-		$fetchDepttype = $conmssql->prepare("SELECT LOANITEMTYPE_CODE,LOANITEMTYPE_DESC FROM LNUCFLOANITEMTYPE ORDER BY LOANITEMTYPE_CODE ASC");
+		$fetchDepttype = $conoracle->prepare("SELECT LOANITEMTYPE_CODE,LOANITEMTYPE_DESC FROM LNUCFLOANITEMTYPE ORDER BY LOANITEMTYPE_CODE ASC");
 		$fetchDepttype->execute();
 		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
 			$arrayDepttype = array();

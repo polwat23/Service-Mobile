@@ -36,7 +36,7 @@ if(!$anonymous){
 			$arrMenuDep = array();
 			if(isset($dataComing["home_deposit_account"])) {
 				$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-				$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.DEPTACCOUNT_NO,dp.DEPTCLOSE_STATUS, dt.DEPTTYPE_DESC, (SELECT COUNT(deptaccount_no) 
+				$fetchMenuDep = $conoracle->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) 
 														FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 														FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 														WHERE deptaccount_no = :account_no");
@@ -55,7 +55,7 @@ if(!$anonymous){
 					$arrMenuDep["ACCOUNT_NO"] = "close";
 				}
 			}else {
-				$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+				$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
 												WHERE member_no = :member_no and deptclose_status = 0");
 				$fetchMenuDep->execute([
 					':member_no' => $member_no
@@ -70,7 +70,7 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			if(isset($dataComing["home_loan_account"])) {
 				$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-				$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.CONTRACT_STATUS, 
+				$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.contract_status, 
 														(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 														FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 														WHERE loancontract_no = :contract_no");
@@ -88,7 +88,7 @@ if(!$anonymous){
 					$arrMenuLoan["CONTRACT_NO"] = 'close';
 				}
 			}else {
-				$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
+				$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
 													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 				$fetchMenuLoan->execute([
 					':member_no' => $member_no
@@ -221,10 +221,9 @@ if(!$anonymous){
 							$arrayMenuTransaction["MENU"][] = $arrMenu;
 						}
 						if($rowMenu["menu_component"] == "DepositInfo"){
-							$arrMenuDep = array();
 							if(isset($dataComing["home_deposit_account"])) {
 								$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-								$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.DEPTACCOUNT_NO,dp.DEPTCLOSE_STATUS, dt.DEPTTYPE_DESC, (SELECT COUNT(deptaccount_no) 
+								$fetchMenuDep = $conoracle->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) 
 																		FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 																		FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 																		WHERE deptaccount_no = :account_no");
@@ -243,7 +242,7 @@ if(!$anonymous){
 									$arrMenuDep["ACCOUNT_NO"] = "close";
 								}
 							}else {
-								$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+								$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
 																WHERE member_no = :member_no and deptclose_status = 0");
 								$fetchMenuDep->execute([
 									':member_no' => $member_no
@@ -254,10 +253,9 @@ if(!$anonymous){
 							}
 							$arrMenuDep["LAST_STATEMENT"] = TRUE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
-							$arrMenuLoan = array();
 							if(isset($dataComing["home_loan_account"])) {
 								$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-								$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.CONTRACT_STATUS, 
+								$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.contract_status, 
 																		(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																		FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 																		WHERE loancontract_no = :contract_no");
@@ -275,7 +273,7 @@ if(!$anonymous){
 									$arrMenuLoan["CONTRACT_NO"] = 'close';
 								}
 							}else {
-								$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
+								$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
 																	WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 								$fetchMenuLoan->execute([
 									':member_no' => $member_no
@@ -285,7 +283,7 @@ if(!$anonymous){
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
 							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
-						}					
+						}				
 					}
 				}else{
 					$arrMenu = array();
@@ -303,11 +301,10 @@ if(!$anonymous){
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
-					if($dataComing["menu_component"] == "DepositInfo"){
-						$arrMenuDep = array();
+					if($rowMenu["menu_component"] == "DepositInfo"){
 						if(isset($dataComing["home_deposit_account"])) {
 							$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
-							$fetchMenuDep = $conmssql->prepare("SELECT dp.prncbal as BALANCE, dp.DEPTACCOUNT_NO,dp.DEPTCLOSE_STATUS, dt.DEPTTYPE_DESC, (SELECT COUNT(deptaccount_no) 
+							$fetchMenuDep = $conoracle->prepare("SELECT dp.prncbal as BALANCE, dp.deptaccount_no,dp.deptclose_status, dt.depttype_desc, (SELECT COUNT(deptaccount_no) 
 																	FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status = 0) as C_ACCOUNT
 																	FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 																	WHERE deptaccount_no = :account_no");
@@ -326,7 +323,7 @@ if(!$anonymous){
 								$arrMenuDep["ACCOUNT_NO"] = "close";
 							}
 						}else {
-							$fetchMenuDep = $conmssql->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
 															WHERE member_no = :member_no and deptclose_status = 0");
 							$fetchMenuDep->execute([
 								':member_no' => $member_no
@@ -336,11 +333,10 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
 						$arrMenuDep["LAST_STATEMENT"] = TRUE;
-					}else if($dataComing["menu_component"] == "LoanInfo"){
-						$arrMenuLoan = array();
+					}else if($rowMenu["menu_component"] == "LoanInfo"){
 						if(isset($dataComing["home_loan_account"])) {
 							$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
-							$fetchMenuLoan = $conmssql->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.CONTRACT_STATUS, 
+							$fetchMenuLoan = $conoracle->prepare("SELECT ln.PRINCIPAL_BALANCE as BALANCE, lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.contract_status, 
 																	(SELECT COUNT(loancontract_no) FROM lncontmaster WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8) as C_CONTRACT
 																	FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 																	WHERE loancontract_no = :contract_no");
@@ -358,7 +354,7 @@ if(!$anonymous){
 								$arrMenuLoan["CONTRACT_NO"] = 'close';
 							}
 						}else {
-							$fetchMenuLoan = $conmssql->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
+							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
 																WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
 							$fetchMenuLoan->execute([
 								':member_no' => $member_no

@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup["IS_ALLOW"] = $rowAllow["is_allow"] ?? 0;
 			
 			$member_no = strtolower($lib->mb_str_pad($rowAllow["member_no"]));
-			$fetchMember = $conmssql->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
+			$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
 										mb.member_no
 										FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 										WHERE mb.resign_status = 0 and mb.member_no = :member_no");

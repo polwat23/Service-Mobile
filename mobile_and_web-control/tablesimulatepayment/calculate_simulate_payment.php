@@ -15,10 +15,10 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		$sumInt = 0;
 		$sumPayment = 0;
 		$period_payment = isset($dataComing['period_payment']) ? (float) preg_replace('/,/','',$dataComing['period_payment']) : 0;
-		$getRoundType = $conmssql->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
+		$getRoundType = $conoracle->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
 		$getRoundType->execute();
 		$rowRoundType = $getRoundType->fetch(PDO::FETCH_ASSOC);
-		$getConstantYear = $conmssql->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
+		$getConstantYear = $conoracle->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
 		$getConstantYear->execute();
 		$rowConstant = $getConstantYear->fetch(PDO::FETCH_ASSOC);
 		if($rowConstant["DAYINYEAR"] == 0){
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		}else{
 			$dayinYear = $rowConstant["DAYINYEAR"];
 		}
-		$getPayRound = $conmssql->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
+		$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
 		$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 		$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
 		if($lib->checkCompleteArgument(['period'],$dataComing)){
