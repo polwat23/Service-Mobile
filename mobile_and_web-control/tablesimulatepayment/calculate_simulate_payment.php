@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$request_date = $dataComing['request_date'];
+		$request_date = $dataComing["request_date"];
 		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
 		$pay_date = date("Y-m-t", strtotime($request_date));
 		$payment_sumbalance = (float) preg_replace('/,/','',$dataComing['payment_sumbalance']);
@@ -211,7 +211,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 							if($cal_start_pay_date == "next"){
 								$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
 							}else{
-								$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+								$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 							}
 						}else {
 							$lastDate = date('Y-m-t',strtotime("+".($period)." months",$lastDateofMonth));
@@ -263,7 +263,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 						if($cal_start_pay_date == "next"){
 							$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
 						}else{
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 						}
 						$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
 					}else {
@@ -302,7 +302,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 						if($cal_start_pay_date == "next"){
 							$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
 						}else{
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 						}
 						$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
 					}else {

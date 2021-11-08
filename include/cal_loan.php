@@ -365,7 +365,7 @@ class CalculateLoan {
 				$int_returnFull = $int_returnSrc;
 			}
 		}
-		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$updateInterestAccum = $conoracle->prepare("UPDATE mbmembmaster SET ACCUM_INTEREST = :int_accum WHERE member_no = :member_no");
 		if($updateInterestAccum->execute([
@@ -705,7 +705,7 @@ class CalculateLoan {
 	public function paySlipLonDet($conoracle,$dataCont,$amt_transfer,$config,$operate_date,
 	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$contract_no,$prinPay=0,$interest=0
 	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1){
-		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
+		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		$executeSlDet = [
 			':coop_id' => $config["COOP_ID"], 
 			':payinslip_no' => $payinslip_no,
