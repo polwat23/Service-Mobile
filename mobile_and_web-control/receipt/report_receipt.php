@@ -122,7 +122,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE,
-																kpd.KEEPING_STATUS
+																kpd.KEEPING_STATUS,
+																kpd.SHARESTK_VALUE,
+																kpd.INTEREST_ACCUM
 																FROM kpmastreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
@@ -133,6 +135,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
+		$header["share_value"] = number_format($rowKPHeader["SHARESTK_VALUE"],2);
+		$header["int_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -243,6 +247,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
+			<tr>
+			<td style="width: 50px;font-size: 18px;">ทุนเรือนหุ้น :</td>
+			<td style="width: 350px;">'.$header["share_value"].'</td>
+			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 101px;">'.$header["int_accum"].'</td>
+			</tr>
 			</tbody>
 			</table>
 			</div>
@@ -325,7 +335,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 650px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.gif" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/mg.gif" width="50" height="20" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 620px;margin-top:-40px;">(น.ส.สุนันทนา  ขันธเลิศ)</div>
