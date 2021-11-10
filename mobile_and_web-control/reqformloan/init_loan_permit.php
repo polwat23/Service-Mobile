@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					}
 				}
 			}
-			$arrayResult["RECEIVE_NET"] = $receive_net;
+			$arrayResult["RECEIVE_NET"] = $receive_net - $oldBal;
 			//$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -170,14 +170,14 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrayResult["DEFAULT_OPTION_PAYTYPE"] = "1";
 				}
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/loan_termanduse.html";
-				//$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
+				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal == 0 ? null : $oldBal;
 				$arrayResult["LOANREQ_AMT_STEP"] = 100;
-				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
+				$arrayResult["RECEIVE_NET"] = $maxloan_amt - $oldBal;
 				$arrayResult["REQUEST_AMT"] = (string)$request_amt;
 				$arrayResult["PAY_DATE"] = $lib->convertdate(date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d')))),'d M Y');
-				//$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
+				$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
 				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-				$arrayResult["MAX_PERIOD"] = $period;
+				$arrayResult["MAX_PERIOD"] = $period ?? "0";
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];

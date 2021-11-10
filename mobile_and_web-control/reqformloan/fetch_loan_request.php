@@ -23,6 +23,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
 				':member_no' => $payload["member_no"]
 			]);
+			
+			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$rowIntRate["LOANTYPE_CODE"].'.php')){
+				include(__DIR__.'/../credit/calculate_loan_'.$rowIntRate["LOANTYPE_CODE"].'.php');
+			}else{
+				include(__DIR__.'/../credit/calculate_loan_etc.php');
+			}
+			
 			if($CheckIsReq->rowCount() > 0){
 				$rowIsReq = $CheckIsReq->fetch(PDO::FETCH_ASSOC);
 				$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_FLAG_DESC"][0][$lang_locale];
@@ -33,7 +40,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getDeptATM->execute([':member_no' => $member_no]);
 				$rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDept["DEPTACCOUNT_NO"]) && $rowDept["DEPTACCOUNT_NO"] != ""){
-					$arrayDetailLoan["IS_REQ"] = TRUE;
+					if($canRequest){
+						$arrayDetailLoan["IS_REQ"] = TRUE;
+					}else{
+						$arrayDetailLoan["IS_REQ"] = FALSE;
+						if(isset($arrayOther)){
+							$arrayDetailLoan["FLAG_NAME"] = $arrayOther["LABEL"];
+						}
+					}
 				}else{
 					$arrayDetailLoan["FLAG_NAME"] = $configError["FLAG_NOT_HAVE_ATM"][0][$lang_locale];
 					$arrayDetailLoan["IS_REQ"] = FALSE;

@@ -196,9 +196,22 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$getDeptATM = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE depttype_code = '88' and deptclose_status = 0 and member_no = :member_no");
 				$getDeptATM->execute([':member_no' => $member_no]);
 				$rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
-				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
+				
+				$oldbal = 0;
+				if($dataComing["loantype_code"] == '25'){
+					$oldContract = $conoracle->prepare("SELECT lm.PRINCIPAL_BALANCE,lt.loantype_desc,lm.LOANCONTRACT_NO
+									FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
+									WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8 and lm.loantype_code IN('25')");
+					$oldContract->execute([
+						':member_no' => $member_no
+					]);
+					while($rowOldContract = $oldContract->fetch(PDO::FETCH_ASSOC)){
+						$oldbal += $rowOldContract["PRINCIPAL_BALANCE"];
+					}
+				}
+				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,diff_old_contract,receive_net,
 																		int_rate_at_req,salary_at_req,salary_img,citizen_img,house_regis_img,id_userlogin,contractdoc_url,deptaccount_no_coop,objective,option_pay,pay_date,channel)
-																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
+																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:diff_old,:receive_net,:int_rate
 																		,:salary,:salary_img,:citizen_img,:house_regis_img,:id_userlogin,:contractdoc_url,:deptaccount_no_coop,:objective,:option_pay,:pay_date,:channel)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
@@ -208,6 +221,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':period_payment' => $dataComing["period_payment"],
 					':period' => $dataComing["period"],
 					':loanpermit_amt' => $dataComing["loanpermit_amt"],
+					':diff_old' => $oldbal,
+					':receive_net' => $dataComing["request_amt"] - $oldbal,
 					':int_rate' => $dataComing["int_rate"] / 100,
 					':salary' => $rowData["SALARY_AMOUNT"],
 					':salary_img' => $slipSalary,
@@ -241,6 +256,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["pay_date"] = $lib->convertdate(date("Y-m-t", strtotime('last day of '.$cal_start_pay_date.' month',strtotime(date('Y-m-d')))),'d M Y');
 					$arrData["objective"] = $dataComing["objective"];
 					$arrData["tel"] = $rowTel["phone_number"];
+					$arrData["int_rate"] = $dataComing["int_rate"];
 					$arrData["card_person"] = $rowData["CARD_PERSON"];
 					if($dataComing["option_paytype"] == '0'){
 						$arrData["option_pay"] = "คงต้น";
@@ -316,6 +332,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':period_payment' => $dataComing["period_payment"],
 							':period' => $dataComing["period"],
 							':loanpermit_amt' => $dataComing["loanpermit_amt"],
+							':diff_old' => $oldbal,
+							':receive_net' => $dataComing["request_amt"] - $oldbal,
 							':int_rate' => $dataComing["int_rate"] / 100,
 							':salary' => $rowData["SALARY_AMOUNT"],
 							':salary_img' => $slipSalary,
@@ -339,6 +357,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':period_payment' => $dataComing["period_payment"],
 						':period' => $dataComing["period"],
 						':loanpermit_amt' => $dataComing["loanpermit_amt"],
+						':diff_old' => $oldbal,
+						':receive_net' => $dataComing["request_amt"] - $oldbal,
 						':int_rate' => $dataComing["int_rate"] / 100,
 						':salary' => $rowData["SALARY_AMOUNT"],
 						':salary_img' => $slipSalary,

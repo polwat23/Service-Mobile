@@ -17,12 +17,12 @@ $canRequest = TRUE;
 $arrSubOtherInfo["LABEL"] = "งวดสูงสุด";
 $arrSubOtherInfo["VALUE"] = "240 งวด";
 $arrOtherInfo[] = $arrSubOtherInfo;
-$checkLoanBan = $conoracle->prepare("SELECT LT.LOANPERMGRP_CODE FROM LNCONTMASTER LN LEFT JOIN LNLOANTYPE LT ON LN.LOANTYPE_CODE = LT.LOANTYPE_CODE
+$checkLoanBan = $conoracle->prepare("SELECT LT.LOANPERMGRP_CODE, LN.LOANTYPE_CODE FROM LNCONTMASTER LN LEFT JOIN LNLOANTYPE LT ON LN.LOANTYPE_CODE = LT.LOANTYPE_CODE
 									WHERE LN.MEMBER_NO = :member_no AND LN.CONTRACT_STATUS > 0 AND LN.CONTRACT_STATUS <> 8");
 $checkLoanBan->execute([':member_no' => $member_no]);
 while($rowLoan = $checkLoanBan->fetch(PDO::FETCH_ASSOC)){
 	$arrayOther = array();
-	if($rowLoan["LOANPERMGRP_CODE"] == '02' || $rowLoan["LOANPERMGRP_CODE"] == '03'){
+	if(($rowLoan["LOANPERMGRP_CODE"] == '02' || $rowLoan["LOANPERMGRP_CODE"] == '03') && $rowLoan["LOANTYPE_CODE"] != '25'){
 		$arrayOther["LABEL"] = "ไม่สามารถขอกู้ได้ เนื่องจากท่านมีหนี้สามัญหรือพิเศษ";
 		$arrayOther["LEBEL_TEXT_PROPS"] = ["color" => "red"];
 		$arrOtherInfo[] = $arrayOther;
@@ -32,7 +32,7 @@ while($rowLoan = $checkLoanBan->fetch(PDO::FETCH_ASSOC)){
 }
 $getOldLoan = $conoracle->prepare("SELECT lm.PRINCIPAL_BALANCE,lt.loantype_desc,lm.LOANCONTRACT_NO
 								FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
-								WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8 and lm.loantype_code IN('10','12','25')");
+								WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8 and lm.loantype_code IN('25')");
 $getOldLoan->execute([':member_no' => $member_no]);
 while($rowOldLoan = $getOldLoan->fetch(PDO::FETCH_ASSOC)){
 	$arrOld = array();
