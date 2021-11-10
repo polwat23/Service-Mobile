@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m y");
 			$birth_date = explode('-',$rowMember["BIRTH_DATE"]);
 			$yearBirth = $birth_date[0] - 543;
-			$arrayResult["BIRTH_DATE_COUNT"] =  $lib->count_duration($year.'-'.$birth_date[1].'-'.$birth_date[2],"ym");
+			$arrayResult["BIRTH_DATE_COUNT"] =  $lib->count_duration($yearBirth.'-'.$birth_date[1].'-'.$birth_date[2],"ym");
 			$arrayResult["CARD_PERSON"] = $lib->formatcitizen($rowMember["CARD_PERSON"]);
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m y");
 			$member_date = explode('-',$rowMember["MEMBER_DATE"]);
