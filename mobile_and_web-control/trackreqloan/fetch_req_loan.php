@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
-				//$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
+				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
-				//$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
+				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
 				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];

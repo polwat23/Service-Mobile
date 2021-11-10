@@ -4,7 +4,7 @@
 	"COOP_ID" : "016001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control",
 	"APP_ID" : "com.ktsccsaving.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/KTSCCSAVING-TEST/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/KTSCCSAVING-TEST/",
 	"URL_CORE_COOP" : "http://192.168.10.233/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.10.251:8081/websms/smsService.php",
 	"WS_STRC_DB" : "Data Source=192.168.10.235:1521/gcoop;Persist Security Info=True;User ID=iscotest;Password=iscotest;Unicode=True;coop_id=016001;coop_control=016001;",
