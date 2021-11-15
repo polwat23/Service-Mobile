@@ -256,46 +256,120 @@ class library {
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		$mailFunction->SMTPDebug = 0;
-		$mailFunction->isSMTP();
-		$mailFunction->SMTPOptions = [
+		
+		if ($json_data["SEND_MAIL_HTML"] === TRUE) {
+			return $this->sendMailHttp($email,$subject,$body,$attachment_path);
+		} else {
+			$mailFunction->SMTPDebug = 0;
+			$mailFunction->isSMTP();
+			$mailFunction->SMTPOptions = [
+				'ssl' => [
+					'verify_peer' => false,
+					'verify_peer_name' => false,
+					'allow_self_signed' => true
+				]
+			];
+			$mailFunction->Host = 'cloud1.gensoft.co.th';
+			$mailFunction->SMTPAuth = true;
+			$mailFunction->Username = $json_data["MAIL"];
+			$mailFunction->Password = $json_data["PASS_MAIL"];
+			$mailFunction->SMTPSecure = 'tls';
+			$mailFunction->Port = $json_data["PORT_MAILSERVER"] ?? 587;
+			$mailFunction->XMailer = 'gensoft.co.th Mailer';
+			$mailFunction->CharSet = 'UTF-8';
+			$mailFunction->Hostname = 'gensoft.co.th';
+			$mailFunction->Helo = 'Gensoft-Mail';
+			$mailFunction->Encoding = 'quoted-printable';
+			$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
+			$mailFunction->addAddress($email);
+			$mailFunction->isHTML(true);
+			$mailFunction->Subject = $subject;
+			$mailFunction->Body = $this->HTMLMinifier($body);
+			if(sizeof($attachment_path) > 0){
+				foreach($attachment_path as $attch_path){
+					$mailFunction->addAttachment($attch_path);
+				}
+			}
+			if(!$mailFunction->send()){
+				$arrRes["RESULT"] = FALSE;
+				$arrRes["MESSAGE_ERROR"] = $mailFunction->ErrorInfo;
+				return $arrRes;
+			}else{
+				$arrRes["RESULT"] = TRUE;
+				return $arrRes;
+			}
+		}
+	}
+	public function sendMailHttp($email,$subject,$body,$attachment_path=[]) {
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$json_data = json_decode($json,true);
+		
+		$mail = [];
+		$mail["SMTPDebug"] = 0;
+		$mail["SMTPOptions"] = [
 			'ssl' => [
 				'verify_peer' => false,
 				'verify_peer_name' => false,
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'cloud1.gensoft.co.th';
-		$mailFunction->SMTPAuth = true;
-		$mailFunction->Username = $json_data["MAIL"];
-		$mailFunction->Password = $json_data["PASS_MAIL"];
-		$mailFunction->SMTPSecure = 'tls';
-		$mailFunction->Port = $json_data["PORT_MAILSERVER"] ?? 587;
-		$mailFunction->XMailer = 'gensoft.co.th Mailer';
-		$mailFunction->CharSet = 'UTF-8';
-		$mailFunction->Hostname = 'gensoft.co.th';
-		$mailFunction->Helo = 'Gensoft-Mail';
-		$mailFunction->Encoding = 'quoted-printable';
-		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
-		$mailFunction->addAddress($email);
-		$mailFunction->isHTML(true);
-		$mailFunction->Subject = $subject;
-		$mailFunction->Body = $body;
+		$mail["Host"] = 'mail.gensoft.co.th';
+		$mail['SMTPAuth'] = true;
+		$mail['Username'] = $json_data["MAIL"];
+		$mail['Password'] = $json_data["PASS_MAIL"];
+		$mail['SMTPSecure'] = 'tls';
+		$mail['Port'] = $json_data["PORT_MAILSERVER"] ?? 587;
+		$mail['XMailer'] = 'gensoft.co.th Mailer';
+		$mail['CharSet'] = 'UTF-8';
+		$mail['Hostname'] = 'gensoft.co.th';
+		$mail['Helo'] = 'Gensoft-Mail';
+		$mail['Encoding'] = 'quoted-printable';
+		$mail['setFrom'] = ["address" => $json_data["MAIL"], "name" => $json_data["NAME_APP"]];
+		$mail['addAddress'] = $email;
+		$mail['isHTML'] = true;
+		$mail['Subject'] = $subject;
+		$mail['Body'] = $this->HTMLMinifier($body);
+		
+		$attachment = [];
 		if(sizeof($attachment_path) > 0){
 			foreach($attachment_path as $attch_path){
-				$mailFunction->addAttachment($attch_path);
+				$file = [];
+				$file['filename'] = basename($attch_path);
+				$file['filedata'] = 'data: '.mime_content_type($attch_path).';base64,'.base64_encode(file_get_contents($attch_path));
+				$attachment[] = $file;
 			}
 		}
-		if(!$mailFunction->send()){
+		
+		$mail['addAttachment'] = $attachment;
+		
+		$ch = curl_init();  
+		curl_setopt($ch,CURLOPT_URL, 'https://api.thaicoop.co/sendmail/');                                                                  
+		curl_setopt($ch,CURLOPT_POST, true);
+		curl_setopt($ch,CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch,CURLOPT_POSTFIELDS, json_encode($mail)); 																				 
+		$result = curl_exec($ch);
+		
+		if(isset($result) && $result !== FALSE) {
+			$response = json_decode($result);
+			curl_close($ch);
+			if(!$response->send) {
+				$arrRes["RESULT"] = FALSE;
+				$arrRes["MESSAGE_ERROR"] = $response->ErrorInfo;
+				return $arrRes;
+			} else {
+				$arrRes["RESULT"] = TRUE;
+				return $arrRes;
+			}
+		} else {
 			$arrRes["RESULT"] = FALSE;
-			$arrRes["MESSAGE_ERROR"] = $mailFunction->ErrorInfo;
-			return $arrRes;
-		}else{
-			$arrRes["RESULT"] = TRUE;
+			$arrRes["MESSAGE_ERROR"] = curl_error($ch);
+			curl_close($ch);
 			return $arrRes;
 		}
 	}
-
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
 		if(self::getBase64ImageSize($encode_string) < 10000){
 			$data_Img = explode(',',$encode_string);
@@ -841,6 +915,26 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	public function HTMLMinifier($html) {
+		$search = [
+			'/\>[^\S ]+/s',
+			'/[^\S ]+\</s',
+			'/(\s)+/s',
+			'/<!--(.|\s)*?-->/'
+		];
+		
+		$replace = [
+			'>',
+			'<',
+			'\\1',
+			''
+		];
+		
+		if($html != strip_tags($html)) {
+			$html = preg_replace($search, $replace, $html);
+		}
+		return $html;
 	}
 }
 ?>
