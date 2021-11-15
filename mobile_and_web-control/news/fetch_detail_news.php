@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 		$arrayDetailNews["TITLE"] = $rowDetailNews["news_title"];
 		$arrayDetailNews["LINK_NEWS_MORE"] = $rowDetailNews["link_news_more"];
 		$arrayDetailNews["DETAIL"] = $rowDetailNews["news_detail"];
-		$arrayDetailNews["NEWS_HTML"] = $rowDetailNews["news_html"];
+		$arrayDetailNews["NEWS_HTML"] = $lib->HTMLMinifier($rowDetailNews["news_html"]);
 		$arrayDetailNews["FILE_UPLOAD"] = $rowDetailNews["file_upload"];
 		$arrayDetailNews["CREATE_BY"] = $rowDetailNews["create_by"];
 		$arrayDetailNews["UPDATE_DATE"] = $lib->convertdate($rowDetailNews["update_date"],'D m Y',true);

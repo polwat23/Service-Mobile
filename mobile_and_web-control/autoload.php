@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors', false);
+ini_set('display_errors', true);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 

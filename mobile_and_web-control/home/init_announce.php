@@ -48,7 +48,7 @@ while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 			$arrAnn["CHECK_TEXT"] = $rowAnn["check_text"];
 			$arrAnn["ACCEPT_TEXT"] = $rowAnn["accept_text"];
 			$arrAnn["CANCEL_TEXT"] = $rowAnn["cancel_text"];
-			$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
+			$arrAnn["ANNOUNCE_HTML"] = $lib->HTMLMinifier($rowAnn["announce_html"]);
 			$arrGroupAnn[] = $arrAnn;
 	}
 }
