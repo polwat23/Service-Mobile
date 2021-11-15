@@ -157,7 +157,7 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด</p>
@@ -269,13 +269,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
+			<div style="width:200px;margin-left: 560px;display:flex;">
+			<img src="../../resource/utility_icon/signature/treasurer_ago.jpg" width="80" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="font-size: 18px;margin-left: 600px;margin-top:-90px;">
-			.....................................
-			<p style="margin-left: 30px;">ผู้จัดการ</p></div>
-			<div style="font-size: 18px;margin-left: 800px;margin-top:-90px;">
-			.....................................
-			<p style="margin-left: 20px;">เจ้าหน้าที่รับเงิน</p></div>
+			<div style="width:200px;margin-left: 770px;display:flex;">
+			<img src="../../resource/utility_icon/signature/finance_ago.jpg" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-110px;">เหรัญญิก</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-110px;">เจ้าหน้าที่รับเงิน</div>
 
 			';
 
