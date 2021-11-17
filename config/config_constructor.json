@@ -33,5 +33,5 @@
 	"HW_APPID" : "103443119",
     "HW_APPSECRET": "51ac131e7ee36a5e8befcee70d91a36ec5c6a6cfed7995fb56caef176aaac5e2",
 	"PORT_MAILSERVER" : "587",
-	"SEND_MAIL_HTML": true
+	"SEND_MAIL_HTTP": true
 }

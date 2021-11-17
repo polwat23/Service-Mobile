@@ -257,7 +257,7 @@ class library {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		
-		if ($json_data["SEND_MAIL_HTML"] === TRUE) {
+		if ($json_data["SEND_MAIL_HTTP"] === TRUE) {
 			return $this->sendMailHttp($email,$subject,$body,$attachment_path);
 		} else {
 			$mailFunction->SMTPDebug = 0;
