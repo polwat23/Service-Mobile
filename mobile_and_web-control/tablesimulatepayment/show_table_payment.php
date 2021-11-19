@@ -24,12 +24,16 @@ table thead {
 	background-color: #FFFFFF;
 	box-shadow: 0 4px 15px 0px #00000021;
 	border-radius: 5px;
+	font-size: 14px;
 }
 table thead th {
+	background-color: #FFFFFF;
+	box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+	position: sticky;
+	top: 0;
 	padding: 15px 20px;
 	text-align: center;
 }
-
 .body-card-table tr {
 	background-color: white;
 	text-align: center;

@@ -90,11 +90,14 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
 					$arrayIdToken[] = $rowIdToken["id_token"];
 				}
-				$updateLoggedOneDevice = $conmssql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
-															gt.at_is_revoke = '-6',gt.rt_expire_date = GETDATE() ,gt.at_expire_date = GETDATE(),
-															gu.is_login = '-5',gu.logout_date = GETDATE()
-															WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
-				$updateLoggedOneDevice->execute();
+				$updateLoggedOneDeviceGU = $conmssql->prepare("UPDATE gcuserlogin SET 
+															is_login = '-5',logout_date = GETDATE()
+															WHERE id_token IN(".implode(',',$arrayIdToken).")");
+				$updateLoggedOneDeviceGU->execute();
+				$updateLoggedOneDeviceGT = $conmssql->prepare("UPDATE gctoken SET rt_is_revoke = '-6',
+															at_is_revoke = '-6',rt_expire_date = GETDATE() ,at_expire_date = GETDATE()
+															WHERE id_token IN(".implode(',',$arrayIdToken).")");
+				$updateLoggedOneDeviceGT->execute();
 				$insertToken = $conmssql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
 													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
 				if($insertToken->execute([

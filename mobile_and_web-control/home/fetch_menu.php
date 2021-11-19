@@ -70,7 +70,7 @@ if(!$anonymous){
 				$contract_no = $dataComing["home_loan_account"];
 				$fetchMenuLoan = $conmssqlcoop->prepare("SELECT (isnull(lm.amount,0) - isnull(lm.principal_actual,0)) as BALANCE, cd.description AS LOAN_TYPE , lm.doc_no AS LOANCONTRACT_NO, 
 														lm.status as CONTRACT_STATUS, 
-														(SELECT COUNT(doc_no) FROM coloanmember WHERE member_id = ? and status = 'A') as C_CONTRACT
+														(SELECT COUNT(doc_no) FROM coloanmember WHERE member_id = ? and status IN ('A','N')) as C_CONTRACT
 														FROM coloanmember lm LEFT JOIN cointerestrate_desc cd ON lm.Type = cd.Type	
 														WHERE lm.doc_no = ?");
 				$fetchMenuLoan->execute([$member_no, $contract_no]);
@@ -85,7 +85,7 @@ if(!$anonymous){
 				}
 			}else {
 				$fetchMenuLoan = $conmssqlcoop->prepare("SELECT SUM((isnull(amount,0) - isnull(principal_actual,0))) as BALANCE,COUNT(doc_no) as C_CONTRACT FROM coloanmember 
-														 WHERE member_id = ? and status  = 'A' ");
+														 WHERE member_id = ? and status  IN ('A','N') ");
 				$fetchMenuLoan->execute([$member_no]);
 				$rowMenuLoan = $fetchMenuLoan->fetch(PDO::FETCH_ASSOC);
 				$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
@@ -387,7 +387,7 @@ if(!$anonymous){
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
-				$getRule = $conmssql->prepare("SELECT rule_name,rule_url FROM gcrulecooperative WHERE is_use = '1'");
+				/*$getRule = $conmssql->prepare("SELECT rule_name,rule_url FROM gcrulecooperative WHERE is_use = '1'");
 				$getRule->execute();
 				$arrGrpRule = array();
 				while($rowRule = $getRule->fetch(PDO::FETCH_ASSOC)){
@@ -395,8 +395,12 @@ if(!$anonymous){
 					$arrRule["RULES_URL"] = $rowRule["rule_url"];
 					$arrRule["RULES_DESC"] = $rowRule["rule_name"];
 					$arrGrpRule[] = $arrRule;
-				}
-				$arrayResult["RULES"] = $arrGrpRule;
+				}*/
+				$arrayResult["APP_CONFIG"]["REGISTER_REQ_PHONE"] = TRUE;
+				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_SMS"] = TRUE;
+				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_EMAIL"] = TRUE;
+				$arrayResult["APP_CONFIG"]["COOP_TEL"] = "tel:028539000,7215,7238,7226";
+				//$arrayResult["RULES"] = $arrGrpRule;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -454,6 +458,10 @@ if(!$anonymous){
 			}
 		}
 		if(isset($arrayAllMenu)){
+			$arrayResult["APP_CONFIG"]["REGISTER_REQ_PHONE"] = TRUE;
+			$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_SMS"] = TRUE;
+			$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_EMAIL"] = TRUE;
+			$arrayResult["APP_CONFIG"]["COOP_TEL"] = "tel:028539000,7215,7238,7226";
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

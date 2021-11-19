@@ -2,33 +2,26 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ConsentAgreement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$limit_period = $func->getConstant('limit_kpmonth');
-		$arrayGroupPeriod = array();
-		$getPeriodKP = $conmssqlcoop->prepare("select  TOP ". $limit_period." paydate as RECV_PERIOD , receipt_no   as RECEIPT_NO  , paydate as RECEIPT_DATE,
-												SUM(amount) as RECEIVE_AMT
-												from coReceipt where member_id = :member_no and status NOT IN(1,0)
-												group by receipt_no  ,paydate ORDER BY paydate  desc");
-		$getPeriodKP->execute([
-				':member_no' => $member_no
-		]);
-		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
-			$arrKpmonth = array();
-			$arrKpmonth["PERIOD"] = $rowPeriod["RECEIPT_NO"];
-			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertdate($rowPeriod["RECV_PERIOD"],'d M Y');			
-			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
-			//$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["RECEIPT_DATE"],'d m Y');
-			$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);
-			
-			/*if($rowPeriod["KEEPING_STATUS"] == '-99' || $rowPeriod["KEEPING_STATUS"] == '-9'){
-				$arrKpmonth["IS_CANCEL"] = TRUE;
-			}else{
-				$arrKpmonth["IS_CANCEL"] = FALSE;
-			}*/
-			$arrayGroupPeriod[] = $arrKpmonth;
+		$arrayResult['IS_THIRDPARTY'] = TRUE;
+		$arrTerm = array();
+		$arrayResult['TERMS'] = $arrTerm;
+		$checkOldFormTel = $conmssql->prepare("SELECT COUNT(id_editdata) as C_FORMNOTAPPROVE FROM gcmembereditdata 
+											WHERE member_no = :member_no and inputgroup_type = 'tel' and is_updateoncore = '0'");
+		$checkOldFormTel->execute([':member_no' => $payload["member_no"]]);
+		$rowOldFormTel = $checkOldFormTel->fetch(PDO::FETCH_ASSOC);
+		if($rowOldFormTel["C_FORMNOTAPPROVE"] > 0){
+			$getTelMobile = $conmssql->prepare("SELECT incoming_data as phone_number FROM gcmembereditdata WHERE member_no = :member_no
+												and inputgroup_type = 'tel' and is_updateoncore = '0'");
+			$getTelMobile->execute([':member_no' => $payload["member_no"]]);
+			$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
+		}else{
+			$getTelMobile = $conmssqlcoop->prepare("SELECT telephone as phone_number FROM COCOOPTATION WHERE member_id = :member_no");
+			$getTelMobile->execute([':member_no' => $member_no]);
+			$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
 		}
-		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
+		$arrayResult['PHONE'] = $rowTelMobile["phone_number"];
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

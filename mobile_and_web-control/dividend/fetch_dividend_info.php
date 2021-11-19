@@ -7,7 +7,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDivmaster = array();
 		$show_pdf = 0;
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conmssqlcoop->prepare("select TOP ".$limit_year." pay_no as DIV_YEAR from coPay_Transaction  where  member_id = :member_no and type = 'D' 
+		$getYeardividend = $conmssqlcoop->prepare("select TOP ".$limit_year." pay_no as DIV_YEAR from coPay_Transaction  
+												where  member_id = :member_no and type = 'D' 
 												group by pay_no
 												order by pay_no desc");
 		$getYeardividend->execute([
@@ -20,11 +21,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrOther = array();
 			$arrayRecv = array();
 			$getDivMaster = $conmssqlcoop->prepare("select pt.STOCK_ONHAND, pt.STOCK_ONHAND_VALUE ,pt.AMOUNT as  DIV_AMT,pt.pay_no as DIV_YEAR, 
-													cb.shortname as BANK,co.bank_account as BANK_ACCOUNT,cpm.RATE 
+													cb.shortname as BANK,co.bank_account as BANK_ACCOUNT,cpm.RATE,cpm.PAY_DATE,cpm.STATUS
 													from coPay_Transaction  pt LEFT  JOIN cocooptation co ON pt.member_id = co.member_id 
 													LEFT JOIN coBank cb ON   co.bank_code = cb.bank_code
 													LEFT  JOIN coPay_Master cpm ON pt.pay_no = cpm.pay_no AND pt.type = cpm.type
-													where  pt.type = 'D' and pt.pay_no = :div_year  and co.member_id = :member_no ");
+													where  pt.type = 'D' and pt.pay_no = :div_year  and co.member_id = :member_no");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -33,10 +34,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDiv["TEXT_DESC"] = "ปันผล";
 			$arrDiv["AMOUNT"] = number_format($rowDiv["DIV_AMT"],2);
-			$arrDiv["OTHER_INFO"][0]["LABEL"] = "หุ้น";	
-			$arrDiv["OTHER_INFO"][0]["VALUE"] =  number_format($rowDiv["STOCK_ONHAND"],2);
-			$arrDiv["OTHER_INFO"][1]["LABEL"] = "มูลค่าหุ้น";	
-			$arrDiv["OTHER_INFO"][1]["VALUE"] =  number_format($rowDiv["STOCK_ONHAND_VALUE"],2);
+			$arrDiv["OTHER_INFO"][0]["LABEL"] = "วันที่จ่ายปันผล";	
+			$arrDiv["OTHER_INFO"][0]["VALUE"] =  $lib->convertdate($rowDiv["PAY_DATE"],'d M Y');
+			$arrDiv["OTHER_INFO"][1]["LABEL"] = "หุ้น";	
+			$arrDiv["OTHER_INFO"][1]["VALUE"] =  number_format($rowDiv["STOCK_ONHAND"],2);
+			$arrDiv["OTHER_INFO"][2]["LABEL"] = "มูลค่าหุ้น";	
+			$arrDiv["OTHER_INFO"][2]["VALUE"] =  number_format($rowDiv["STOCK_ONHAND_VALUE"],2);
 			
 			
 			
@@ -51,7 +54,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}*/
 			$arrDividend["DETAIL"][0] = $arrDiv;
 			//$arrDividend["DETAIL"][2] = $arrayRecv;
-			$arrDivmaster[] = $arrDividend;
+			if($rowDiv["STATUS"] == 'A'){
+				$arrDivmaster[] = $arrDividend;
+			}
 		}
 		$arrayResult["DIVIDEND"] = $arrDivmaster;
 		$arrayResult['RESULT'] = TRUE;

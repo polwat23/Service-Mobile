@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
 		$arrayGroupNews = array();
 		$fetchNews = $conmssql->prepare("SELECT TOP 10 announce_title as news_title,announce_detail as news_detail,announce_cover as path_img_header,
-										username as create_by,update_date,id_announce as id_news
+										username as create_by,update_date,id_announce as id_news,category
 										FROM gcannounce WHERE 
 										CONVERT(CHAR,GETDATE(),20) BETWEEN 
 										CONVERT(CHAR,effect_date,20) AND CONVERT(CHAR,due_date,20)
@@ -21,10 +21,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayNews["UPDATE_RAW"] = $rowNews["update_date"];
 			$arrayNews["ID_NEWS"] = $rowNews["id_news"];
 			$arrayNews["CREATE_BY"] = $rowNews["create_by"];
+			$arrayNews["CATEGORY_LIST"] = array();
+			foreach(json_decode($rowNews["category"],true) as $category){
+				$getCateInfo = $conmssql->prepare("SELECT category_code,category_desc FROM gccategory WHERE category_code = :code");
+				$getCateInfo->execute([':code' => $category]);
+				$rowCate = $getCateInfo->fetch(PDO::FETCH_ASSOC);
+				$arrayNews["CATEGORY"] = $rowCate["category_code"];
+				$arrayNews["CATEGORY_DESC"] = $rowCate["category_desc"];
+				$arrayNews["CATEGORY_LIST"][] = $rowCate["category_code"];
+			}
 			//$arrayNews["LINK_NEWS_MORE"] = $rowNews["link_news_more"];
 			//$arrayNews["FILE_UPLOAD"] = $rowNews["file_upload"];
 			$arrayGroupNews[] = $arrayNews;
 		}
+		$getCategory = $conmssql->prepare("SELECT category_code,category_desc FROM gccategory WHERE is_use = '1'");
+		$getCategory->execute();
+		$arrGrpCate = array();
+		while($rowCate = $getCategory->fetch(PDO::FETCH_ASSOC)){
+			$arrCate = array();
+			$arrCate["CATEGORY"] = $rowCate["category_code"];
+			$arrCate["CATEGORY_DESC"] = $rowCate["category_desc"];
+			$arrGrpCate[] = $arrCate;
+		}
+		$arrayResult['CATEGORY_LIST'] = $arrGrpCate;
 		$arrayResult['ALLOW_SAVENEWS'] = FALSE;
 		$arrayResult['NEWS'] = $arrayGroupNews;
 		$arrayResult['RESULT'] = TRUE;

@@ -276,7 +276,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.gensoft.co.th';
+		$mailFunction->Host = '52.98.94.130';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -284,8 +284,6 @@ class library {
 		$mailFunction->Port = $json_data["PORT_MAILSERVER"] ?? 587;
 		$mailFunction->XMailer = 'gensoft.co.th Mailer';
 		$mailFunction->CharSet = 'UTF-8';
-		$mailFunction->Hostname = 'gensoft.co.th';
-		$mailFunction->Helo = 'Gensoft-Mail';
 		$mailFunction->Encoding = 'quoted-printable';
 		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
@@ -655,6 +653,27 @@ class library {
 			return $arrayErr;
 		}
 	}
+	public function posting_dataSMS($url,$payload,$header=[]) {
+		$ch = curl_init( $url );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($payload) );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded') );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch, CURLOPT_SSLVERSION, 6);
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 300);
+		$result = curl_exec($ch);
+		if($result){
+			curl_close($ch);
+			return $result;
+		}else{
+			$arrayErr = array();
+			$arrayErr["RESPONSE_MESSAGE"] = curl_error($ch);
+			$arrayErr["RESULT"] = FALSE;
+			curl_close ($ch);
+			return $arrayErr;
+		}
+	}
 	public function baht_text($number, $include_unit = true, $display_zero = true){
 		if (!is_numeric($number)) {
 			return null;
@@ -813,5 +832,22 @@ class library {
 		}
 		return $amtRaw + floatval($roundFrac);
 	}
+	 public function utf8_to_tis620($string)
+    {
+        $str = $string;
+        $res = "";
+        for ($i = 0; $i < strlen($str); $i++) {
+            if (ord($str[$i]) == 224) {
+                $unicode = ord($str[$i + 2]) & 0x3F;
+                $unicode |= (ord($str[$i + 1]) & 0x3F) << 6;
+                $unicode |= (ord($str[$i]) & 0x0F) << 12;
+                $res .= chr($unicode - 0x0E00 + 0xA0);
+                $i += 2;
+            } else {
+                $res .= $str[$i];
+            }
+        }
+        return $res;
+    }
 }
 ?>

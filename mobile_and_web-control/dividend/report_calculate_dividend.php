@@ -31,12 +31,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		while($rowDividend = $getDividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$arrDividend["YEAR"] = $rowDividend["YEAR_PAYDATE"].'/'.$rowDividend["MONTH_PAYDATE"];
+			$arrDividend["YEAR"] = ($rowDividend["YEAR_PAYDATE"] + 543).'/'.$rowDividend["MONTH_PAYDATE"];
 			$arrDividend["SHARE_MONTH"] = number_format($rowDividend["PARAMATER1"],2);
 			$arrDividend["DIV_AMT"] = number_format($rowDividend["OUTPUT"],2);
 			$arrDividend["CALCULATE"] = $rowDividend["PARAMATER1"].' * '.$rowDividend["PARAMATER2"].' / '.' 100 / 12 * '.$rowDividend["PARAMATER3"];			
 			$sum_div_amt += $rowDividend["OUTPUT"];
-			$arrHeader["PAY_NO"] = $dataComing["pay_no"];
+			$arrHeader["PAY_NO"] = $dataComing["year"];
+			$arrHeader["RATE_DIV"] = $rowDividend["PARAMATER2"];
 			$arrHeader["PROCESS_STARTDATE"] = $lib->convertdate($rowDividend["PROCESS_STARTDATE"],'d/n/Y');
 			$arrHeader["PROCESS_ENDDATE"] = $lib->convertdate($rowDividend["PROCESS_ENDDATE"],'d/n/Y');
 			$arrHeader["PROCESS_ACTIVEDATE"] = $lib->convertdate($rowDividend["PROCESS_ACTIVEDATE"],'d/n/Y');
@@ -172,7 +173,7 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 		</div>
 		<div>
 		  <div style="display:inline;">อัตราปันผล</div>
-		  <div style="display:inline; padding-left:10px; padding-right:10px;">6.00%</div>
+		  <div style="display:inline; padding-left:10px; padding-right:10px;">'.($header["RATE_DIV"]." %").'</div>
 		  <div style="display:inline;">วันที่จ่ายปันผล</div>
 		  <div style="display:inline;">'.($header["PAY_DATE"]??null).'</div>
 		</div>
@@ -205,8 +206,14 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 	  $html.=' 
 			  <tr>
 				<th></th>		
-				<th class="text-right">รวม</th>
+				<th class="text-right">รวมทั้งสิ้น</th>
 				<th class="text-right">'.number_format($sum_div_amt,2).'</th>
+				<th></th>
+			  </tr>
+			  <tr>
+				<th></th>		
+				<th class="text-right">ปัดเศษขึ้น</th>
+				<th class="text-right">'.number_format(ceil($sum_div_amt),2).'</th>
 				<th></th>
 			  </tr>
 			</table>
@@ -232,8 +239,8 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$arrHeader["MEMBER_ID"].'.pdf';
-	$pathfile_show = '/resource/pdf/dividend/'.$arrHeader["MEMBER_ID"].'.pdf?v='.time();
+	$pathfile = $pathfile.'/'.$header["MEMBER_ID"].'.pdf';
+	$pathfile_show = '/resource/pdf/dividend/'.$header["MEMBER_ID"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

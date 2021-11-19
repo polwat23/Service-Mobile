@@ -61,12 +61,18 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);	
 		$arrGroupDetail = array();
 		$sum_principal  = 0; $sum_interest  = 0; $sum_principalbf  = 0;
+		$$header["haveShare"] = false;
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$header["PAYDATE"] = $lib->convertdate($rowDetail["Paydate"],'d M Y');
 			$arrDetail["Type"] = $rowDetail["Type"];
-			if($rowDetail["Type"] == '10'){
-				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"]." จำนวน ".$rowDetail["Stock"] ." หุ้น";
+			if($rowDetail["Type"] == '10' || $rowDetail["Type"] == '32'){
+				if($rowDetail["Type"] == '10'){
+					$header["haveShare"] = true;
+					$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"]." จำนวน ".$rowDetail["Stock"] ." หุ้น";
+				}else{
+					$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+				}
 				$arrDetail["AMOUNT"] = number_format($rowDetail["Amount"],2);
 				$header["STOCK_ONHAND"] = number_format($rowDetail["Stock_OnHand"]);
 				$header["STOCK_ONHAND_VALUE"] = number_format($rowDetail["Stock_OnHand_Value"],2);
@@ -83,6 +89,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$sum_interest += $rowDetail["Interest"];
 				$sum_principalbf += $rowDetail["PrincipalBF"];
 				
+			}else{
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+				$arrDetail["AMOUNT"] = number_format($rowDetail["Amount"],2);
 			}
 			$amount_amt += $rowDetail["Amount"];
 			$arrGroupDetail[] = $arrDetail;
@@ -259,29 +268,46 @@ function GenerateReport($dataReport,$header,$lib, $sum_principal ,$sum_interest 
 		<div style=" padding:5px;  height:20px; "></div>
 		<div>
 		  <table >
-			  <tr>
-				  <td style="width:160px;" class=""></td>
-				  <td style="width:85px;" class=" right">เงินต้น</td>
-				  <td style="width:85px;" class=" right">ดอกเบี้ย</td>
-				  <td style="width:95px;" class=" right">เงินต้นคงเหลือ</td>
-				  <td style="width:100px;" class=" right">จำนวนเงิน</td>
-			  </tr>';
+			 ';
 			  
 	foreach($dataReport AS $arrList){
-	  if($arrList["Type"]=="10"){
-		$html .='   
+	  if($arrList["Type"]!="20"){
+		$html .='  
+			<tr>
+				  <td style="width:160px;" class=""></td>
+				  <td style="width:85px;" class=" right"></td>
+				  <td style="width:85px;" class=" right"></td>
+				  <td style="width:95px;" class=" right"></td>
+				  <td style="width:100px;" class=" right"></td>
+			  </tr>		
 		<tr>
 		  <td style="width:160px; padding-left:3px;">'.($arrList["TYPE_DESC"]??null).'</td>
 		  <td style="width:85px;" class=" right"></td>
 		  <td style="width:85px;" class=" right"></td>
 		  <td style="width:95px;" class=" right"></td>
 		  <td style="width:100px;" class=" right">'.($arrList["AMOUNT"]??null).'</td>
-	  </tr>';
+	  </tr>
+	   <tr>
+			<td style="width:150px;"></td>
+			<td style="width:85px;" class="right"><div ></div></td>
+			<td style="width:85px;" class="right"><div ></div></td>
+			<td style="width:95px;" class="right"><div ></div></td>
+			<td style="width:100px;" class="right"></td>
+		  </tr>     
+	  ';
 
 	  }else{
 		$html .='   
+		 <tr>
+				  <td style="width:160px;" class=""></td>
+				  <td style="width:85px;" class=" right">เงินต้น</td>
+				  <td style="width:85px;" class=" right">ดอกเบี้ย</td>
+				  <td style="width:95px;" class=" right">เงินต้นคงเหลือ</td>
+				  <td style="width:100px;" class=" right"></td>
+			  </tr>
 		<tr>
-		  <td style="width:160px; padding-left:3px;"> '.($arrList["LOANTYPE_DESC"]??null).'</td>
+		  <td style="width:160px; padding-left:3px;"> '.($arrList["LOANTYPE_DESC"]??null).'
+		  <p style="padding-left: 5px;font-size:11px;">- งวดที่ '.$arrList["PERIOD"]." (".$arrList["LOAN_FROMDATE"]." - ".$arrList["LOAN_TODATE"].")".'</p></td>
 		  <td style="width:85px;" class=" right">'.($arrList["PRINCIPAL"]??null).'</td>
 		  <td style="width:85px;" class=" right">'.($arrList["INTEREST"]??null).'</td>
 		  <td style="width:95px; margin-right:5px" class=" right">'.($arrList["PRINCIPALBF"]??null).'</td>
@@ -293,20 +319,22 @@ function GenerateReport($dataReport,$header,$lib, $sum_principal ,$sum_interest 
 		  <td style="width:85px;" class="right"></td>
 		  <td style="width:95px;" class="right"></td>
 		  <td style="width:100px;" class="right"></td>
-	  </tr>';
+	  </tr>
+	   <tr>
+			<td style="width:150px;"></td>
+			<td style="width:85px;" class="right"><div class="border-top total">'.($sum_principal??'&nbsp;').'</div></td>
+			<td style="width:85px;" class="right"><div class="border-top total">'.($sum_interest??'&nbsp;').'</div></td>
+			<td style="width:95px;" class="right"><div class="border-top total">'.($sum_principalbf??'&nbsp;').'</div></td>
+			<td style="width:100px;" class="right"></td>
+		  </tr>     
+	  ';
 
 	  }
 
 	}
 
 	$html .=' 
-		  <tr>
-			<td style="width:150px;"></td>
-			<td style="width:85px;" class="right"><div class="border-top total">'.($sum_principal??'&nbsp;').'</div></td>
-			<td style="width:85px;" class="right"><div class="border-top total">'.($sum_interest??'&nbsp;').'</div></td>
-			<td style="width:95px;" class="right"><div class="border-top total">'.($sum_principalbf??'&nbsp;').'</div></td>
-			<td style="width:100px;" class="right"></td>
-		  </tr>         
+		     
 		  </table>
 		</div>
 		';
@@ -331,11 +359,15 @@ function GenerateReport($dataReport,$header,$lib, $sum_principal ,$sum_interest 
 				<td class="main-td"></td>
 			  </tr>
 		  </table>
-		  <div style="position:absolute; margin-top:-30px; font-size:9pt;    line-height: 10px;" >
+		  <div style="position:absolute; margin-top:-35px; font-size:9pt;    line-height: 13px;" >
 			<div style="padding-left:5px;">
-			  <div style="border-top:0.5px solid green;  position:absolute; width:109px ; margin-left:431px"></div>
-			  <div  style="margin-bottom:5px;">***หมายเหตุ หุ้นสะสม&nbsp;&nbsp;จำนวน  '.$header["STOCK_ONHAND"].' หุ้น&nbsp;&nbsp;เป็นมูลค่า&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '.$header["STOCK_ONHAND_VALUE"].' บาท</div>
-			  <div class="flex" style=" margin-top:5px; height:30px;">
+			  <div style="border-top:0.5px solid green;  position:absolute; width:109px ; margin-left:431px"></div>';
+			   if($header["haveShare"]){
+				$html .= '<div  style="margin-bottom:5px;">***หมายเหตุ หุ้นสะสม&nbsp;&nbsp;จำนวน  '.$header["STOCK_ONHAND"].' หุ้น&nbsp;&nbsp;เป็นมูลค่า&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '.$header["STOCK_ONHAND_VALUE"].' บาท</div>';
+			   }else{
+				   $html .= '<div  style="margin-bottom:5px;"></div>';
+			   }
+			 $html .= '<div class="flex" style=" margin-top:5px; height:30px;">
 				<div style="margin-left:40px;" class="bold">('.($amount_baht??null).')</div>
 				<div style="margin-left:410px; " class="text-color">รวม</div>
 				<div style="margin-left:490px; " class="bold">'.($amount??null).'</div>

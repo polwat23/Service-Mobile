@@ -2,20 +2,14 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conmssqlcoop->prepare("SELECT ld.TYPE as LOANTYPE_CODE ,ld.description AS LOANTYPE_DESC,it.Interest as INTEREST_RATE
-										FROM cointerestrate_desc ld LEFT JOIN cointerestrate it ON ld.TYPE = it.TYPE and it.SEQ = '1'
-										WHERE it.Interest IS NOT NULL and ld.enable = '1'");
-		$fetchIntrate->execute();
-		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
-			$arrIntrate = array();
-			$arrIntrate["INT_RATE"] = number_format($rowIntrate["INTEREST_RATE"],2);
-			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
-			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
-			$arrIntGroup[] = $arrIntrate;
-		}
-		$arrayResult['INT_RATE'] = $arrIntGroup;
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingWithdrawConsent')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$arrayResult['IS_THIRDPARTY'] = TRUE;
+		$getTelMobile = $conmssql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+		$getTelMobile->execute([':member_no' => $payload["member_no"]]);
+		$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
+		$arrayResult['PHONE'] = $rowTelMobile["phone_number"];
+		$arrayResult['IS_THIRDPARTY'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

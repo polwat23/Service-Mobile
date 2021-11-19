@@ -2,17 +2,64 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['username','password','device_name','unique_id'],$dataComing)){
-	$checkPassword = $conmssql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
-										FROM coreuser cu LEFT JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
-										WHERE cu.username = :username and cu.user_status = '1'");
-	$checkPassword->execute([
-		':username' => $dataComing["username"]
-	]);
-	$rowPassword = $checkPassword->fetch(PDO::FETCH_ASSOC);
-	if(isset($rowPassword["password"])){		
+	if($dataComing["username"] == 'dev@mode'){
+		$checkPassword = $conmssql->prepare("SELECT cu.password
+											FROM coreuser cu
+											WHERE cu.username = :username and cu.user_status = '1'");
+		$checkPassword->execute([
+			':username' => $dataComing["username"]
+		]);
+		$rowPassword = $checkPassword->fetch(PDO::FETCH_ASSOC);
 		if(password_verify($dataComing["password"], $rowPassword['password'])){
 			$arrPayload = array();
-			$arrPayload['section_system'] = $rowPassword['section_system'];
+			$arrPayload['section_system'] = 'root';
+			$arrPayload['username'] = $dataComing["username"];
+			$arrPayload['exp'] = time() + 21600;
+			$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
+			$insertLog = $conmssql->prepare("INSERT INTO coreuserlogin(username,unique_id,device_name,auth_token,logout_date)
+											VALUES(:username,:unique_id,:device_name,:token,:logout_date)");
+			if($insertLog->execute([
+				':username' => $dataComing["username"],
+				':unique_id' => $dataComing["unique_id"],
+				':device_name' => $dataComing["device_name"],
+				':token' => $access_token,
+				':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour'))
+			])){
+				$arrayResult["SECTION_ASSIGN"] = 'Super Admin';
+				$arrayResult["USERNAME"] = $dataComing["username"];
+				$arrayResult["ACCESS_TOKEN"] = $access_token;
+				$arrayResult["RESULT"] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$arrayResult['RESPONSE'] = "ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่อีกครั้ง";
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+		}else{
+			$arrayResult['RESPONSE'] = "รหัสผ่านไม่ถูกต้อง";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
+	}else{
+		$adConnect = ldap_connect($config["AD_HOST"]);
+		$bindUnPw = ldap_bind($adConnect,$dataComing["username"]."@mbk-center.mbk",$dataComing["password"]);
+		if($bindUnPw){
+			$getUn = $conmssql->prepare("SELECT password FROM coreuser WHERE username = :un");
+			$getUn->execute([':un' => $dataComing["username"]]);
+			$rowUn = $getUn->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowUn["password"]) && $rowUn["password"] != ""){
+				
+			}else{
+				$pw = password_hash($dataComing["password"], PASSWORD_DEFAULT);
+				$insertUn = $conmssql->prepare("INSERT INTO coreuser(username,password,id_section_system)
+												VALUES(:un,:pw,10)");
+				$insertUn->execute([
+					':un' => $dataComing["username"],
+					':pw' => $pw
+				]);
+			}
+			$arrPayload = array();
+			$arrPayload['section_system'] = 'mb';
 			$arrPayload['username'] = $dataComing["username"];
 			$arrPayload['exp'] = time() + 21600;
 			$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
@@ -29,7 +76,7 @@ if($lib->checkCompleteArgument(['username','password','device_name','unique_id']
 				':token' => $access_token,
 				':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour'))
 			])){
-				$arrayResult["SECTION_ASSIGN"] = $rowPassword["system_assign"];
+				$arrayResult["SECTION_ASSIGN"] = "ระบบสมาชิก";
 				$arrayResult["USERNAME"] = $dataComing["username"];
 				$arrayResult["ACCESS_TOKEN"] = $access_token;
 				$arrayResult["RESULT"] = TRUE;
@@ -44,10 +91,6 @@ if($lib->checkCompleteArgument(['username','password','device_name','unique_id']
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 		}
-	}else{
-		$arrayResult['RESPONSE'] = "ไม่พบข้อมูลผู้ใช้งานกรุณาตรวจสอบ ชื่อผู้ใช้ / รหัสผ่าน หรือฐานข้อมูล อีกครั้ง";
-		$arrayResult['RESULT'] = FALSE;
-		require_once('../../include/exit_footer.php');
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;

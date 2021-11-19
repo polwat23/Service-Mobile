@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDivmaster = array();
 		$show_pdf = 0;
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conmssqlcoop->prepare("select TOP ".$limit_year." pay_no as DIV_YEAR from coPay_Transaction  where  member_id = :member_no and type = 'D' 
+		$getYeardividend = $conmssqlcoop->prepare("select TOP ".$limit_year." pay_no as DIV_YEAR from coPay_Transaction  where  member_id = :member_no and type = 'A' 
 												group by pay_no
 												order by pay_no desc");
 		$getYeardividend->execute([
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			
 			//เฉลี่ยคืน
 			$getAvgMaster = $conmssqlcoop->prepare("select pc.paramater2 as REMARK,ct.interest as INTEREST_AMT,ct.amount as AVG_AMT,
-										cpm.rate as AVG_RATE
+										pc.paramater3 as AVG_RATE
 										from coPay_Transaction ct LEFT JOIN coPay_TransactionCalculate pc ON ct.member_id = pc.member_id 
 										AND ct.pay_no = pc.pay_no AND ct.type = pc.type
 										LEFT JOIN coPay_Master cpm ON ct.pay_no = cpm.pay_no AND ct.type = cpm.type
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAvg["OTHER_INFO"][0]["LABEL"] = $rowAvg["REMARK"] ?? "-";	
 			$arrAvg["OTHER_INFO"][0]["VALUE"] =  number_format($rowAvg["INTEREST_AMT"],2);
 			$arrAvg["OTHER_INFO"][1]["LABEL"] = "อัตราเฉลี่ยคืน";	
-			$arrAvg["OTHER_INFO"][1]["VALUE"] =  number_format($rowAvg["AVG_RATE"],2);
+			$arrAvg["OTHER_INFO"][1]["VALUE"] =  $rowAvg["AVG_RATE"] * 100 ." %";
 			
 			/*$arrayRecv["TEXT_DESC"] = "วิธีรับเงิน";
 			$arrayRecv["BANK"] = $rowDiv["BANK"];	

@@ -15,13 +15,15 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$getCardPerson = $conmssqlcoop->prepare("SELECT id_number as CARD_PERSON FROM cocooptation WHERE member_id = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
-		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
+		$passwordPDF = filter_var(preg_replace('/-/','',$rowCardPerson["CARD_PERSON"]), FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conmssqlcoop->prepare("SELECT dt.transaction_description as TYPE_TRAN,dt.transaction_action as SIGN_FLAG ,stm.WITHDRAWAL , stm.DEPOSIT , stm.balance as PRNCBAL,
+			$fetchDataSTM = $conmssqlcoop->prepare("SELECT dt.transaction_description as TYPE_TRAN,dt.transaction_action as SIGN_FLAG ,ISNULL(stm.WITHDRAWAL,0) as  WITHDRAWAL
+														, ISNULL(stm.DEPOSIT,0) as DEPOSIT, stm.balance as PRNCBAL,
 														stm.transaction_date as OPERATE_DATE ,stm.transaction_seq as SEQ_NO
-														FROM codeposit_transaction stm LEFT JOIN  codeposit_transactiontype dt  ON stm.transaction_type = dt.transaction_type  and dt.transaction_subseq = 0
+														FROM codeposit_transaction stm LEFT JOIN  codeposit_transactiontype dt  ON stm.transaction_type = dt.transaction_type  and stm.transaction_subseq = 0
 														where  stm.deposit_id = :account_no and  stm.transaction_subseq = '0'
-														and dsm.transaction_date BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :dateafter, 23)
+														and CONVERT(varchar, stm.transaction_date, 112) BETWEEN CONVERT(varchar, :datebefore, 112) 
+														and CONVERT(varchar, :dateafter, 112)
 														ORDER BY stm.transaction_seq DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
@@ -34,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
 				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
 				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
-				$arraySTM["TRAN_AMOUNT"] = number_format($rowDataSTM["WITHDRAWAL"] + $rowDataSTM["DEPOSIT"],2);
+				$arraySTM["TRAN_AMOUNT"] = $rowDataSTM["WITHDRAWAL"] + $rowDataSTM["DEPOSIT"];
 				$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
 				$arraySTMGrp[] = $arraySTM;
 			}
@@ -49,7 +51,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			}
 		}
 		$arrayDataTemplate = array();
-		$arrayDataTemplate["ACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
+		$arrayDataTemplate["ACCOUNT_NO"] = $account_no;
 		$template = $func->getTemplateSystem('DepositStatement');
 		$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
 		$arrMailStatus = $lib->sendMail($rowMail["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,$arrayAttach);
@@ -143,7 +145,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:rgb(204, 255, 0);
+			background-color:#80bd00;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -189,12 +191,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo_recept.png" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จำกัด
+					สหกรณ์ออมทรัพย์ เอ็ม บี เค กรุ๊ป จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Maejo University’s Thrift & Credit Cooperative Ltd.
+					MBK Group Saving and Credit Cooperative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -295,6 +297,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</main>';
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
+		'tempDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);

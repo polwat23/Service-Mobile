@@ -5,7 +5,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllLoan = array();
-		$getSumAllContract = $conmssqlcoop->prepare("SELECT SUM(amount) as SUM_LOANBALANCE FROM coloanmember WHERE member_id = :member_no and status = 'A'");
+		$getSumAllContract = $conmssqlcoop->prepare("SELECT SUM((isnull(amount,0) - isnull(principal_actual,0))) as SUM_LOANBALANCE 
+													FROM coloanmember WHERE member_id = :member_no and status IN('A','N')");
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
@@ -14,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											lm.startdate as STARTCONT_DATE,lm.totalseq as PERIOD, lm.amount_per_period as PERIOD_PAYMENT , lm.lastseq as LAST_PERIOD,
 											lm.HOLD , lm.HOLD_PRINCIPALONLY     	
 											FROM coloanmember lm LEFT JOIN cointerestrate_desc cd ON lm.Type = cd.Type	
-											where lm.status = 'A' AND lm.member_id = :member_no");
+											where lm.status IN('A','N') AND lm.member_id = :member_no");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();

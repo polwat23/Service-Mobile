@@ -7,24 +7,24 @@ if($lib->checkCompleteArgument(['unique_id','username','id_submenu','status_perm
 		$getIdCoreMenu->execute([
 			':id_submenu' => $dataComing["id_submenu"]
 		]);
-		if($getIdCoreMenu->rowCount() > 0){
-			$rowidcoremenu = $getIdCoreMenu->fetch(PDO::FETCH_ASSOC);
+		$rowidcoremenu = $getIdCoreMenu->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowidcoremenu["id_coremenu"])){
 			$checkPermissionCoremenu = $conmssql->prepare("SELECT id_permission_menu FROM corepermissionmenu 
 															WHERE username = :username and is_use = '1' and id_coremenu = :id_coremenu");
 			$checkPermissionCoremenu->execute([
 				':username' => $dataComing["username"],
 				':id_coremenu' => $rowidcoremenu["id_coremenu"]
 			]);
-			if($checkPermissionCoremenu->rowCount() > 0){
-				$rowid_permission = $checkPermissionCoremenu->fetch(PDO::FETCH_ASSOC);
+			$rowid_permission = $checkPermissionCoremenu->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowid_permission["id_permission_menu"])){
 				$checkSubmenuPermit = $conmssql->prepare("SELECT id_permission_submenu FROM corepermissionsubmenu
 															WHERE id_permission_menu = :id_permission_menu and id_submenu = :id_submenu and is_use <> '-9'");
 				$checkSubmenuPermit->execute([
 					':id_permission_menu' => $rowid_permission["id_permission_menu"],
 					':id_submenu' => $dataComing["id_submenu"]
 				]);
-				if($checkSubmenuPermit->rowCount() > 0){
-					$rowid_permission_submenu = $checkSubmenuPermit->fetch(PDO::FETCH_ASSOC);
+				$rowid_permission_submenu = $checkSubmenuPermit->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowid_permission_submenu["id_permission_submenu"])){
 					$UpdateSubmenuPermit = $conmssql->prepare("UPDATE corepermissionsubmenu SET is_use = :status_permission
 																WHERE id_permission_submenu = :id_permission_submenu");
 					if($UpdateSubmenuPermit->execute([

@@ -19,14 +19,14 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $dataComing["member_no"];
 	$checkMember = $conmssql->prepare("SELECT account_status,email FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkMember->execute([
 		':member_no' => $member_no
 	]);
-	if($checkMember->rowCount() > 0){
-		$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+	$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowChkMemb["account_status"]) && $rowChkMemb["account_status"] != ""){
 		if($rowChkMemb["account_status"] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -48,7 +48,12 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$getNameMember = $conmssql->prepare("SELECT MEMB_NAME,MEMB_SURNAME FROM mbmembmaster WHERE member_no = :member_no");
+		$getNameMember = $conmssqlcoop->prepare("select
+											prefixname as PRENAME_SHORT , 
+											firstname as MEMB_NAME , 
+											lastname as MEMB_SURNAME
+											FROM cocooptation
+											WHERE member_id = :member_no");
 		$getNameMember->execute([':member_no' => $member_no]);
 		$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
 		$template = $func->getTemplateSystem('ForgetPassword');

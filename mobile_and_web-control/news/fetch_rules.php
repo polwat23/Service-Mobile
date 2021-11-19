@@ -2,20 +2,17 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conmssqlcoop->prepare("SELECT ld.TYPE as LOANTYPE_CODE ,ld.description AS LOANTYPE_DESC,it.Interest as INTEREST_RATE
-										FROM cointerestrate_desc ld LEFT JOIN cointerestrate it ON ld.TYPE = it.TYPE and it.SEQ = '1'
-										WHERE it.Interest IS NOT NULL and ld.enable = '1'");
-		$fetchIntrate->execute();
-		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
-			$arrIntrate = array();
-			$arrIntrate["INT_RATE"] = number_format($rowIntrate["INTEREST_RATE"],2);
-			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
-			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
-			$arrIntGroup[] = $arrIntrate;
-		}
-		$arrayResult['INT_RATE'] = $arrIntGroup;
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
+		$getRule = $conmssql->prepare("SELECT rule_name,rule_url FROM gcrulecooperative WHERE is_use = '1'");
+		$getRule->execute();
+		$arrGrpRule = array();
+		while($rowRule = $getRule->fetch(PDO::FETCH_ASSOC)){
+			$arrRule = array();
+			$arrRule["RULES_URL"] = $rowRule["rule_url"];
+			$arrRule["RULES_DESC"] = $rowRule["rule_name"];
+			$arrGrpRule[] = $arrRule;
+		};
+		$arrayResult['RULES'] = $arrGrpRule;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

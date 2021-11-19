@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
+if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','device_name'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$filename = basename(__FILE__, '.php');
@@ -19,37 +19,55 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$conmssql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$updateOldOTP = $conmssql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
-	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
-	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
-	$otp_password = $lib->randomText('number',6);
-	$reference = $lib->randomText('all',6);
-	$duration_expire = $func->getConstant('duration_otp_expire') ? $func->getConstant('duration_otp_expire') : '5';
-	$expire_date = date('Y-m-d H:i:s',strtotime('+'.$duration_expire.' minutes'));
-	$arrTarget["RANDOM_NUMBER"] = $otp_password;
-	$arrTarget["RANDOM_ALL"] = $reference;
-	$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
-	$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
-	$arrayComing["TEL"] = $dataComing["tel"];
-	$arrayComing["MEMBER_NO"] = $member_no;
-	$arrayTel[] = $arrayComing;
-	$bulkInsert = array();
-	$arrayDest = array();
-	if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != "" && mb_strlen($arrayTel[0]["TEL"]) == 10){
-		$insertOTP = $conmssql->prepare("INSERT INTO gcotp(refno_otp,otp_password,destination_number,expire_date,otp_text)
-											VALUES(:ref_otp,:otp_pass,:destination,:expire_date,:otp_text)");
-		if($insertOTP->execute([
-			':ref_otp' => $reference,
-			':otp_pass' => $otp_password,
-			':destination' => $arrayTel[0]["TEL"],
-			':expire_date' => $expire_date,
-			':otp_text' => $arrMessage["BODY"]
+	$checkMember = $conmssql->prepare("SELECT account_status,phone_number FROM gcmemberaccount 
+										WHERE member_no = :member_no");
+	$checkMember->execute([
+		':member_no' => $member_no
+	]);
+	$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowChkMemb["account_status"]) && $rowChkMemb["account_status"] != ""){
+		if($rowChkMemb["account_status"] == '-8'){
+			$arrayResult['RESPONSE_CODE'] = "WS0048";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+		if(empty($rowChkMemb["phone_number"])){
+			$arrayResult['RESPONSE_CODE'] = "WS0094";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+		if(strtolower($dataComing["tel"]) != strtolower($rowChkMemb["phone_number"])){
+			$arrayResult['RESPONSE_CODE'] = "WS0095";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+		$template = $func->getTemplateSystem('ForgetPasswordSMS');
+		$arrayDataTemplate = array();
+		$temp_pass = $lib->randomText('number',6);
+		$arrayDataTemplate["TEMP_PASSWORD"] = $temp_pass;
+		$arrayDataTemplate["MEMBER_NO"] = $member_no;
+		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
+		$conmssql->beginTransaction();
+		$updateTemppass = $conmssql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0,temppass_is_md5 = '0'
+											WHERE member_no = :member_no");
+		if($updateTemppass->execute([
+			':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),
+			':member_no' => $member_no
 		])){
+			$arrMessage = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
 			$arrayDest["member_no"] = $member_no;
-			$arrayDest["tel"] = $arrayTel[0]["TEL"];
+			$arrayDest["tel"] = $dataComing["tel"];
 			$arrayDest["message"] = $arrMessage["BODY"];
+			$arrayComing["TEL"] = $dataComing["tel"];
+			$arrayComing["MEMBER_NO"] = $member_no;
+			$arrayTel[] = $arrayComing;
 			$arrSendData["ACCOUNT"] = $config["UN_SMS"];
 			$arrSendData["PASSWORD"] = $config["PW_SMS"];
 			$arrSendData["MOBILE"] = $arrayTel[0]["TEL"];
@@ -57,7 +75,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			$arraySendSMS = $lib->posting_dataSMS($config["URL_SMS"],$arrSendData,$arrHeader);
 			if(!$arraySendSMS["RESULT"]){
 				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
-						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log','system',null)";
+						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก ".$arraySendSMS["RESPONSE_MESSAGE"]."','system',null)";
 				$func->logSMSWasNotSent($bulkInsert);
 				unset($bulkInsert);
 				$bulkInsert = array();
@@ -72,10 +90,27 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 				if (trim($resultSms[$indexSms]) == 'END=OK') {
 					if (TRIM($resultSms[0]) == 'STATUS=0') {
 						$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
-						$conmssql->commit();
-						$arrayResult['REFERENCE_OTP'] = $reference;
-						$arrayResult['RESULT'] = TRUE;
-						require_once('../../include/exit_footer.php');
+						if($func->logoutAll(null,$member_no,'-9')){
+							$conmssql->commit();
+							$arrayResult['RESULT'] = TRUE;
+							require_once('../../include/exit_footer.php');
+						}else{
+							$filename = basename(__FILE__, '.php');
+							$logStruc = [
+								":error_menu" => $filename,
+								":error_code" => "WS1014",
+								":error_desc" => "ลืมรหัสผ่านไม่ได้เพราะไม่สามารถบังคับอุปกรณ์อื่นออกจากระบบได้ "."\n".json_encode($dataComing),
+								":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+							];
+							$log->writeLog('errorusage',$logStruc);
+							$message_error = "ไม่สามารถลืมรหัสผ่านได้เพราะบังคับคนออกจากระบบไม่ได้"."\n"."Data => ".json_encode($dataComing)."\n"."Payload => ".json_encode($payload);
+							$lib->sendLineNotify($message_error);
+							$arrayResult['RESPONSE_CODE'] = "WS1014";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+							
+						}
 					}else{
 						$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
 								'mobile_app',null,null,'".$resultSms[0]."','system',null)";
@@ -106,24 +141,24 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
-				":error_code" => "WS1011",
-				":error_desc" => "ไม่สามารถ Resend OTP ได้"."\n".json_encode($dataComing),
+				":error_code" => "WS1014",
+				":error_desc" => "บันทึกรหัสผ่านชั่วคราวไม่ได้ "."\n".json_encode($dataComing),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไม่สามารถ Resend OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$deleteHistory->queryString."\n"."Param => ". json_encode([
-				':member_no' => $payload["member_no"],
-				':his_type' => $dataComing["type_history"]
+			$message_error = "ไม่สามารถลืมรหัสผ่านได้เพราะ Update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateTemppass->queryString."\n"."Param => ". json_encode([
+				':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),
+				':member_no' => $member_no
 			]);
 			$lib->sendLineNotify($message_error);
-			$arrayResult['RESPONSE_CODE'] = "WS1011";
+			$arrayResult['RESPONSE_CODE'] = "WS1014";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
 		}
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0017";
+		$arrayResult['RESPONSE_CODE'] = "WS0003";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');

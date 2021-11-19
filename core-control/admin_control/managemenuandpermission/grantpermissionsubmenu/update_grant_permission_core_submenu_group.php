@@ -7,15 +7,16 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 		$getIdCoreMenu->execute([
 			':id_coremenu' => $dataComing["id_coremenu"]
 		]);
-		if($getIdCoreMenu->rowCount() > 0){
-			$rowidcoremenu = $getIdCoreMenu->fetch(PDO::FETCH_ASSOC);
+		$rowidcoremenu = $getIdCoreMenu->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowidcoremenu["id_coremenu"])){	
 			$checkPermissionCoremenu = $conmssql->prepare("SELECT id_permission_menu FROM corepermissionmenu 
 															WHERE username = :username  and id_coremenu = :id_coremenu");
 			$checkPermissionCoremenu->execute([
 				':username' => $dataComing["username"],
 				':id_coremenu' => $rowidcoremenu["id_coremenu"]
 			]);
-			if($checkPermissionCoremenu->rowCount() > 0){
+			$rowid_permission = $checkPermissionCoremenu->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowid_permission["id_permission_menu"])){
 				$conmssql->beginTransaction();
 				$updatePermitCoreMenu = $conmssql->prepare("UPDATE corepermissionmenu SET
 																							is_use = :status_permission
@@ -72,6 +73,7 @@ if($lib->checkCompleteArgument(['unique_id','username','id_coremenu','status_per
 						}else{
 							$conmssql->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถให้สิทธิ์ได้";
+							$arrayResult['RESPONSE_s'] = $bulk_insert;
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../../../include/exit_footer.php');
 							

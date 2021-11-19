@@ -30,7 +30,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													accept_text,
 													cancel_text,
 													convert(varchar,effect_date,20) AS effect_date_check,
-													convert(varchar,due_date,20) AS due_date_check
+													convert(varchar,due_date,20) AS due_date_check,
+													category
 											 FROM gcannounce
 											 WHERE id_announce <> '-1' and effect_date IS NOT NULL
 													".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
@@ -53,7 +54,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupAnnounce["CANCEL_TEXT"] = $rowAnnounce["cancel_text"];
 			$arrGroupAnnounce["FLAG_GRANTED"] = $rowAnnounce["flag_granted"];	
 			$arrGroupAnnounce["EFFECT_DATE"] = $rowAnnounce["effect_date"];		
-			$arrGroupAnnounce["DUE_DATE"] = $rowAnnounce["due_date"];	
+			$arrGroupAnnounce["DUE_DATE"] = $rowAnnounce["due_date"];
+			$arrGrpCategory = array();
+			foreach(json_decode($rowAnnounce["category"],true) as $category){
+				$getCateInfo = $conmssql->prepare("SELECT category_code,category_desc FROM gccategory WHERE category_code = :code");
+				$getCateInfo->execute([':code' => $category]);
+				$rowCate = $getCateInfo->fetch(PDO::FETCH_ASSOC);
+				$arrCategory = array();
+				$arrCategory["CATEGORY_CODE"] = $rowCate["category_code"];
+				$arrCategory["CATEGORY_DESC"] = $rowCate["category_desc"];
+				$arrGrpCategory[] = $arrCategory;
+			}
+			$arrGroupAnnounce["CATEGORY"] = $arrGrpCategory;
 			$arrGroupAnnounce["DUE_DATE_FORMAT"] = $lib->convertdate($rowAnnounce["due_date"],'d m Y',true); 
 			$arrGroupAnnounce["IS_SHOW_BETWEEN_DUE"] = $rowAnnounce["is_show_between_due"];
 			$arrGroupAnnounce["IS_UPDATE"] = $rowAnnounce["is_update"];
@@ -70,7 +82,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup[] = $arrGroupAnnounce;
 		}
 		$arrayResult["ANNOUNCE_DATA"] = $arrayGroup;
-
+		$getCategory = $conmssql->prepare("SELECT category_code,category_desc FROM gccategory WHERE is_use = '1'");
+		$getCategory->execute();
+		$arrGrpCategory = array();
+		while($rowCate = $getCategory->fetch(PDO::FETCH_ASSOC)){
+			$arrCategory = array();
+			$arrCategory["CATEGORY_CODE"] = $rowCate["category_code"];
+			$arrCategory["CATEGORY_DESC"] = $rowCate["category_desc"];
+			$arrGrpCategory[] = $arrCategory;
+		}
+		$arrayResult["CATEGORY_LIST"] = $arrGrpCategory;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

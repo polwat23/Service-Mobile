@@ -17,34 +17,37 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrHeader["MEMBER_ID"] = $member_no;
 		
 		$sum_div_amt = 0 ;
-		$getDividend = $conmssqlcoop->prepare("SELECT pc.YEAR_PAYDATE,PC.MONTH_PAYDATE,pc.PARAMATER1,pc.PARAMATER2,
-											pc.PARAMATER3,pc.OUTPUT,cm.PROCESS_STARTDATE, cm.PROCESS_ENDDATE , cm.PAY_DATE ,pc.PAY_NO ,cm.PROCESS_ACTIVEDATE
-											FROM coPay_TransactionCalculate pc LEFT JOIN copay_transaction ct ON pc.pay_no = ct.pay_no
-											AND pc.member_id = ct.member_id AND pc.type = ct.type
-											LEFT JOIN  copay_master cm ON pc.pay_no = cm.pay_no AND pc.type = cm.type
-											WHERE pc.type ='D' and  pc.pay_no = :pay_no and pc.member_id = :member_no
-											ORDER BY pc.year_paydate,pc.month_paydate asc");
-		$getDividend->execute([
+		$getAverage = $conmssqlcoop->prepare("select pc.PARAMATER1,
+										pc.paramater2 as REMARK,
+										ct.interest as INTEREST_AMT,
+										pc.output as AVG_AMT,
+										pc.paramater3 as AVG_RATE,
+										cpm.PROCESS_STARTDATE,cpm.PROCESS_ENDDATE , cpm.PAY_DATE ,cpm.PROCESS_ACTIVEDATE
+										from coPay_Transaction ct LEFT JOIN coPay_TransactionCalculate pc ON ct.member_id = pc.member_id 
+										AND ct.pay_no = pc.pay_no AND ct.type = pc.type
+										LEFT JOIN coPay_Master cpm ON ct.pay_no = cpm.pay_no AND ct.type = cpm.type
+										where ct.type ='A' AND ct.pay_no = :pay_no AND ct.member_id = :member_no");
+		$getAverage->execute([
 			':pay_no' => $pay_no,
 			':member_no' => $member_no
 		]);
-		while($rowDividend = $getDividend->fetch(PDO::FETCH_ASSOC)){
-			$arrDividend = array();
-			$arrDividend["YEAR"] = $rowDividend["YEAR_PAYDATE"].'/'.$rowDividend["MONTH_PAYDATE"];
-			$arrDividend["SHARE_MONTH"] = number_format($rowDividend["PARAMATER1"],2);
-			$arrDividend["DIV_AMT"] = number_format($rowDividend["OUTPUT"],2);
-			$arrDividend["CALCULATE"] = $rowDividend["PARAMATER1"].' * '.$rowDividend["PARAMATER2"].' / '.' 100 / 12 * '.$rowDividend["PARAMATER3"];			
-			$sum_div_amt += $rowDividend["OUTPUT"];
-			$arrHeader["PAY_NO"] = $dataComing["pay_no"];
-			$arrHeader["PROCESS_STARTDATE"] = $lib->convertdate($rowDividend["PROCESS_STARTDATE"],'d/n/Y');
-			$arrHeader["PROCESS_ENDDATE"] = $lib->convertdate($rowDividend["PROCESS_ENDDATE"],'d/n/Y');
-			$arrHeader["PROCESS_ACTIVEDATE"] = $lib->convertdate($rowDividend["PROCESS_ACTIVEDATE"],'d/n/Y');
-			$arrHeader["PAY_DATE"] = $lib->convertdate($rowDividend["PAY_DATE"],'d/n/Y');
-			$arrDetail[] = $arrDividend;
+		while($rowAverage = $getAverage->fetch(PDO::FETCH_ASSOC)){
+			$arrAverage = array();
+			$arrAverage["REMARK"] = $rowAverage["PARAMATER1"].'  '.$rowAverage["REMARK"];
+			$arrAverage["INTEREST_AMT"] = number_format($rowAverage["INTEREST_AMT"],2);
+			$arrAverage["AVG_AMT"] = number_format($rowAverage["AVG_AMT"],2);
+			$arrAverage["AVG_RATE"] = $rowAverage["AVG_RATE"] * 100  ." %";			
+			$sum_avg_amt += $rowAverage["AVG_AMT"];
+			$arrHeader["PAY_NO"] = $pay_no;
+			$arrHeader["PROCESS_STARTDATE"] = $lib->convertdate($rowAverage["PROCESS_STARTDATE"],'d/n/Y');
+			$arrHeader["PROCESS_ENDDATE"] = $lib->convertdate($rowAverage["PROCESS_ENDDATE"],'d/n/Y');
+			$arrHeader["PROCESS_ACTIVEDATE"] = $lib->convertdate($rowAverage["PROCESS_ACTIVEDATE"],'d/n/Y');
+			$arrHeader["PAY_DATE"] = $lib->convertdate($rowAverage["PAY_DATE"],'d/n/Y');
+			$arrDetail[] = $arrAverage;
 			
 			
 		}
-		$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail,$sum_div_amt);
+		$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail,$sum_avg_amt);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			//$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
@@ -85,7 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	require_once('../../include/exit_footer.php');
 	
 }
-function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
+function GeneratePdfDoc($header,$arrDetail,$sum_avg_amt) {
 	$html = '
 	<style>
 	@font-face {
@@ -103,6 +106,9 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 	body {
 	  font-size:14pt;
 	  line-height: 20px;
+	}
+	.text-left{
+	  text-align:left;
 	}
 	.text-center{
 	  text-align:center
@@ -124,8 +130,8 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 	  border-collapse: collapse
 	}
 	th{
-	  border-top:0.5px solid ;
-	  border-bottom:0.5px solid  ;
+	  border-top:1px solid ;
+	  border-bottom:1px solid  ;
 
 	  text-align:center;
 	}
@@ -153,14 +159,14 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 	$html .= '<div style=" margin: 0px;    ">';
 
 	$html .='
-	  <div style="font-size:16pt; font-weight:bold; color:#00008B;" class="text-center">สหกรณ์อมทรัพย์ เอ็ม บี เค กรุ๊ป จำกัด MBK</div>
-		<div style="color:#00008B; margin-top:5px;" class="text-center">รายงานการจ่ายเงินปันผล
+	  <div style="font-size:16pt; font-weight:bold; color:#00008B;" class="text-center">สหกรณ์อมทรัพย์ เอ็ม บี เค กรุ๊ป จำกัด</div>
+		<div style="color:#00008B; margin-top:5px;" class="text-center">รายงานการเจ่ายเงินปันผลเฉลี่ยคืนให้แก่สมาชิก
 		  <div style="position:absolute; right:0px; color:green;">'.($header["วันที่พิม"]??null).'</div>
 		</div>
-		<div>
+		<div style="margin-top:5px">
 		   <div style="display:inline;">งวดที่</div>
 		   <div style="display:inline;">'.($header["PAY_NO"]??null).'</div>
-		   <div style="display:inline;">คำนวณจาก</div>
+		   <div style="display:inline;">คำนวนจาก</div>
 		   <div style="display:inline;">วันที่</div>
 		   <div style="display:inline;">'.($header["PROCESS_STARTDATE"]??null).'</div>
 		   <div style="display:inline;">ถึง</div>
@@ -170,8 +176,6 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 		   <div style="display:inline;">'.($header["PROCESS_ACTIVEDATE"]??null).'</div>
 		</div>
 		<div>
-		  <div style="display:inline;">อัตราปันผล</div>
-		  <div style="display:inline; padding-left:10px; padding-right:10px;">6.00%</div>
 		  <div style="display:inline;">วันที่จ่ายปันผล</div>
 		  <div style="display:inline;">'.($header["PAY_DATE"]??null).'</div>
 		</div>
@@ -186,35 +190,37 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 		<div style="line-height:15px; margin-top:10px;">
 			<table style="width:100%">
 				<tr>
-					<th style="width:40px;">ปี/เดือน</th>
-					<th style="width:120px;">ถือหุ้นรายเดือน</th>
-					<th style="width:120px;">เงินปันผล(บาท)</th>
-					<th style="text-align:left">การคำนวณ</th>
+					<th class="text-left" >รายการ</th>
+					<th style="width:120px;">ยอดเงิน</th>
+					<th style="width:120px;">การเฉลี่ยคืน</th>
+					<th style="width:120px;" class="text-right">รวมเป็นเงิน(บาท)</th>
 				</tr>';
 
 	foreach($arrDetail AS $dataReport){
 	$html.='           
 				<tr>
-				  <td>'.($dataReport["YEAR"]??null).'</td>
-				  <td class="text-right">'.($dataReport["SHARE_MONTH"]??null).'</td>
-				  <td class="text-right">'.($dataReport["DIV_AMT"]??null).'</td>
-				  <td style="text-align:left;">'.($dataReport["CALCULATE"]??null).'</td>
+				  <td>'.($dataReport["REMARK"]??null).'</td>
+				  <td class="text-center">'.($dataReport["INTEREST_AMT"]??null).'</td>
+				  <td class="text-center">'.($dataReport["AVG_RATE"]??null).'</td>
+				  <td class="text-right">'.($dataReport["AVG_AMT"]??null).'</td>
 				</tr>';
 				}
 	  $html.=' 
-			  <tr>
-				<th></th>		
-				<th class="text-right">รวม</th>
-				<th class="text-right">'.number_format($sum_div_amt,2).'</th>
+			  <tr style="line-height:20px">
 				<th></th>
+				<th></th>
+				<th class="text-right">
+					<div style="font-weight:normal;">รวมทั้งสิ้น</div>
+					<div style="font-weight:normal;">ปันเศษขึ้น</div>
+				</th>
+				<th class="text-right">
+					<div>'.number_format($sum_avg_amt,2).'</div>
+					<div>'.number_format(ceil($sum_avg_amt),2).'</div>
+				</th>
 			  </tr>
 			</table>
 		</div>
 	';
-
-	//ระยะขอบ
-	$html .= '
-	</div>';
 	
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
@@ -227,12 +233,12 @@ function GeneratePdfDoc($header,$arrDetail,$sum_div_amt) {
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathfile = __DIR__.'/../../resource/pdf/dividend';
+	$pathfile = __DIR__.'/../../resource/pdf/avg';
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$arrHeader["MEMBER_ID"].'.pdf';
-	$pathfile_show = '/resource/pdf/dividend/'.$arrHeader["MEMBER_ID"].'.pdf?v='.time();
+	$pathfile = $pathfile.'/'.$header["MEMBER_ID"].'.pdf';
+	$pathfile_show = '/resource/pdf/avg/'.$header["MEMBER_ID"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

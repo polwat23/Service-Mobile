@@ -53,6 +53,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																		accept_text = :accept_text,
 																		cancel_text = :cancel_text,
 																		check_text = :check_text,
+																		category = :category,
 																		announce_html = :announce_html
 																	WHERE id_announce = :id_announce");
 		if($update_announce->execute([
@@ -68,7 +69,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			':accept_text' => (isset($dataComing["accept_text"]) && $dataComing["accept_text"] != null && $dataComing["accept_text"] != "") ? $dataComing["accept_text"] : null,
 			':cancel_text' => (isset($dataComing["cancel_text"]) && $dataComing["cancel_text"] != null && $dataComing["cancel_text"] != "") ? $dataComing["cancel_text"] : null,
 			':check_text' => (isset($dataComing["check_text"]) && $dataComing["check_text"] != null && $dataComing["check_text"] != "") ? $dataComing["check_text"] : null,
-			':announce_html' => $detail_html ?? null
+			':announce_html' => $detail_html ?? null,
+			':category' =>  sizeof($dataComing["category"]) > 0 ? json_encode($dataComing["category"]) : null
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["announce_html"] = $dataComing["announce_html"];

@@ -48,14 +48,12 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			$arrayDest["member_no"] = $member_no;
 			$arrayDest["tel"] = $arrayTel[0]["TEL"];
 			$arrayDest["message"] = $arrMessage["BODY"];
-			$arraySendSMS = $lib->sendSMS($arrayDest);
-			if($arraySendSMS["RESULT"]){
-				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
-				$conmssql->commit();
-				$arrayResult['REFERENCE_OTP'] = $reference;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
+			$arrSendData["ACCOUNT"] = $config["UN_SMS"];
+			$arrSendData["PASSWORD"] = $config["PW_SMS"];
+			$arrSendData["MOBILE"] = $arrayTel[0]["TEL"];
+			$arrSendData["MESSAGE"] = $arrMessage["BODY"];
+			$arraySendSMS = $lib->posting_dataSMS($config["URL_SMS"],$arrSendData,$arrHeader);
+			if(!$arraySendSMS["RESULT"]){
 				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
 						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log','system',null)";
 				$func->logSMSWasNotSent($bulkInsert);
@@ -66,7 +64,40 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				
+			}else{
+				$resultSms = explode("\n", trim($arraySendSMS));
+				$indexSms = count($resultSms) - 1;
+				if (trim($resultSms[$indexSms]) == 'END=OK') {
+					if (TRIM($resultSms[0]) == 'STATUS=0') {
+						$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
+						$conmssql->commit();
+						$arrayResult['REFERENCE_OTP'] = $reference;
+						$arrayResult['RESULT'] = TRUE;
+						require_once('../../include/exit_footer.php');
+					}else{
+						$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
+								'mobile_app',null,null,'".$resultSms[0]."','system',null)";
+						$func->logSMSWasNotSent($bulkInsert);
+						unset($bulkInsert);
+						$bulkInsert = array();
+						$conmssql->rollback();
+						$arrayResult['RESPONSE_CODE'] = "WS0018";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
+				}else{
+					$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
+							'mobile_app',null,null,'".$response."','system',null)";
+					$func->logSMSWasNotSent($bulkInsert);
+					unset($bulkInsert);
+					$bulkInsert = array();
+					$conmssql->rollback();
+					$arrayResult['RESPONSE_CODE'] = "WS0018";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
 			}
 		}else{
 			$conmssql->rollback();

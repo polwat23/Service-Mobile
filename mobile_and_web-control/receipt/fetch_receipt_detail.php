@@ -13,11 +13,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											coReceipt.amount, 
 											coReceipt.Type as TYPE_GROUP ,
 											coReceipt.Loan_Doc_No, 
-											coInterestRate_Desc.Description as TYPE_DESC, 
+											coInterestRate_Desc.Description, 
 											coReceipt.Principal, 
 											coReceipt.Interest, 
 											coReceipt.Stock, 
-											coReceiptType.Description, 
+											coReceiptType.Description as TYPE_DESC, 
 											coReceipt.Loan_Seq, 
 											coReceipt.PrincipalBF, 
 											coReceipt.Stock_OnHand, 
@@ -45,6 +45,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["Principal"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["Interest"],2);
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["PrincipalBF"],2);
+			}else{
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["amount"],2);
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["amount"],2);
 			}
 			
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];

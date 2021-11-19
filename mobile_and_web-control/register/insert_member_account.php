@@ -20,7 +20,31 @@ if($lib->checkCompleteArgument(['member_no','password','api_token','unique_id'],
 		
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
+	if(isset($email) && $email != ""){
+		$memberInfo = $conmssqlcoop->prepare("SELECT EMAIL FROM COCOOPTATION WHERE member_id = :member_no");
+		$memberInfo->execute([':member_no' => $dataComing["member_no"]]);
+		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+		$insertChangeData = $conmssql->prepare("INSERT INTO gcmembereditdata(member_no,old_data,incoming_data,inputgroup_type)
+												VALUES(:member_no,:old_email,:email,'email')");
+		$insertChangeData->execute([
+			':member_no' => $payload["member_no"],
+			':old_email' => $rowMember["EMAIL"] ?? null,
+			':email' => $email
+		]);
+	}
 	$phone = $dataComing["phone"];
+	if(isset($phone) && $phone != ""){
+		$memberInfo = $conmssqlcoop->prepare("SELECT TELEPHONE FROM COCOOPTATION WHERE member_id = :member_no");
+		$memberInfo->execute([':member_no' => $dataComing["member_no"]]);
+		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+		$insertChangeData = $conmssql->prepare("INSERT INTO gcmembereditdata(member_no,old_data,incoming_data,inputgroup_type)
+												VALUES(:member_no,:old_tel,:tel,'tel')");
+		$insertChangeData->execute([
+			':member_no' => $payload["member_no"],
+			':old_tel' => $rowMember["TELEPHONE"],
+			':tel' => $phone
+		]);
+	}
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$insertAccount = $conmssql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
 										VALUES(:member_no,:password,:phone,:email,:channel)");

@@ -54,7 +54,8 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	cancel_text,
 																	username,
 																	is_show_between_due,
-																	announce_html)
+																	announce_html,
+																	category)
 																VALUES(
 																	:announce_cover,
 																	:announce_title,
@@ -69,7 +70,8 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	:cancel_text,
 																	:username,
 																	:is_show_between_due,
-																	:detail_html)");
+																	:detail_html,
+																	:category)");
 		if($insert_announce->execute([
 			':announce_title' =>  $dataComing["announce_title"],
 			':announce_detail' => $dataComing["announce_detail"],
@@ -84,7 +86,8 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 			':username' =>  $payload["username"],
 			':announce_cover' =>  $pathImg ?? null,
 			':is_show_between_due' => $dataComing["is_show_between_due"],
-			':detail_html' => $detail_html ?? null
+			':detail_html' => $detail_html ?? null,
+			':category' => json_encode($dataComing["category"]) ?? null
 			
 		])){
 			$arrayResult["RESULT"] = TRUE;

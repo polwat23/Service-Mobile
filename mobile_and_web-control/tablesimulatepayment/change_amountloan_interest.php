@@ -1,21 +1,23 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','loantype_code','amount'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conmssqlcoop->prepare("SELECT ld.TYPE as LOANTYPE_CODE ,ld.description AS LOANTYPE_DESC,it.Interest as INTEREST_RATE
-										FROM cointerestrate_desc ld LEFT JOIN cointerestrate it ON ld.TYPE = it.TYPE and it.SEQ = '1'
-										WHERE it.Interest IS NOT NULL and ld.enable = '1'");
-		$fetchIntrate->execute();
-		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
-			$arrIntrate = array();
-			$arrIntrate["INT_RATE"] = number_format($rowIntrate["INTEREST_RATE"],2);
-			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
-			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
-			$arrIntGroup[] = $arrIntrate;
+		$fetchIntrate = $conmssqlcoop->prepare("SELECT it.Interest as INTEREST_RATE
+											FROM cointerestrate it
+											WHERE it.Interest IS NOT NULL and it.type = :loantype_code and :amount BETWEEN it.loan_min and it.loan_max");
+		$fetchIntrate->execute([
+			':loantype_code' => $dataComing["loantype_code"],
+			':amount' => $dataComing["amount"]
+		]);
+		$rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC);
+		$getLimitMax = $conmssqlcoop->prepare("SELECT limit FROM cointerestrate_desc WHERE type = :loantype_code");
+		$getLimitMax->execute([':loantype_code' => $dataComing["loantype_code"]]);
+		$rowLimit = $getLimitMax->fetch(PDO::FETCH_ASSOC);
+		if($dataComing["amount"] > $rowLimit["limit"] && $rowLimit["limit"] != 0){
+			$arrayResult['AMOUNT'] = number_format($rowLimit["limit"],2);
 		}
-		$arrayResult['INT_RATE'] = $arrIntGroup;
+		$arrayResult['INT_RATE'] = number_format($rowIntrate["INTEREST_RATE"],2);
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

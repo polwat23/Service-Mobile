@@ -1,9 +1,9 @@
 {
-	"NAME_APP" : "MBK Saving",
+	"NAME_APP" : "MBK CO-OP",
 	"COOP_KEY" : "mbk-test",
 	"COOP_ID" : "999001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
-	"APP_ID" : "com.mju.mobile",
+	"APP_ID" : "com.mbk.mobile",
 	"URL_SERVICE" : "https://uatmbkcoop.mbkgroup.co.th/service-mbk-test/",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAAIIsC6NU:APA91bGFbS3qFJFE7BeYH8k8mA24omGWnV_TivOo3FHmMDPIxGdplrUZW7ya7y7um-IJZBaV3l9LbDvtjSUOhvts6xwuVoOYFharEWDkibrTGOxAbD7diz5C-gfZ--H4M9V_OC_0g_FY",
@@ -17,9 +17,13 @@
 	"DEFAULT_BANNER_COLOR_TEXT" : "#000000",
 	"ACCOUNT_BANK_FORMAT" : "xxx-x-xxxxx-x",
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
-	"MAIL" : "noreply@gensoft.co.th",
-	"PASS_MAIL" : "h>-^yM3cPd3&",
+	"MAIL" : "adminmbkcoop@mbkgroup.co.th",
+	"PASS_MAIL" : "xD34y2K#",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/DEV_member",
+	"URL_SMS" : "https://u8-2.sc4msg.com/SendMessage",
+	"UN_SMS" : "post01@mbkcoop",
+	"PW_SMS" : "64438C1AF8DAD21C8B77FD10B63B96637CD4404E271EAF4011190A292DEB5F86",
+	"AD_HOST" : "ldap.mbk-center.co.th",
 	"HW_APPID" : "104688611",
     "HW_APPSECRET": "79c65e7ab3cce5ecb557f3a83f47c0b7b03e7196038c83b1cc5ef24c22f1401d",
 	"PORT_MAILSERVER" : "587",
@@ -43,5 +47,7 @@
 	},
 	"CONSENT_API" : "https://uat-apiconsent.mbkgroup.co.th/api",
 	"CONSENT_UN" : "isocare",
-	"CONSENT_PW" : "g&7#aF0"
+	"CONSENT_PW" : "g&7#aF0",
+	"CONSENT_POINTID_TH" : "77bd9245-30fd-4944-4204-08d986f4bba8",
+	"CONSENT_POINTID_EN" : "799bb9f3-55fb-4526-4203-08d986f4bba8"
 }

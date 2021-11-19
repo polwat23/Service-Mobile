@@ -6,17 +6,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchSettingNotify = $conmssql->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email
 													FROM gcmemberaccount WHERE member_no = :member_no");
 		$fetchSettingNotify->execute([':member_no' => $payload["member_no"]]);
-		if($fetchSettingNotify->rowCount() > 0){
-			$rowSetting = $fetchSettingNotify->fetch(PDO::FETCH_ASSOC);
-			$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["receive_notify_news"];
-			$arrayResult["RECEIVE_NOTIFY_TRANSACTION"] = $rowSetting["receive_notify_transaction"];
-			$arrayResult["RECEIVE_LOGIN_EMAIL"] = $rowSetting["receive_login_email"];
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
-		}else{
-			http_response_code(204);
-			
-		}
+		$rowSetting = $fetchSettingNotify->fetch(PDO::FETCH_ASSOC);
+		$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["receive_notify_news"];
+		$arrayResult["RECEIVE_NOTIFY_TRANSACTION"] = $rowSetting["receive_notify_transaction"];
+		$arrayResult["RECEIVE_LOGIN_EMAIL"] = $rowSetting["receive_login_email"];
+		$arrayResult['RESULT'] = TRUE;
+		require_once('../../include/exit_footer.php');
+
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

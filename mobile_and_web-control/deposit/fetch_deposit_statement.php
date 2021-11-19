@@ -30,9 +30,10 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and stm.TRANSACTION_SEQ < ".$dataComing["old_seq_no"] : "and stm.TRANSACTION_SEQ < 999999";
 		}
 		$account_no = $dataComing["account_no"];
-		$getAccount = $conmssqlcoop->prepare("SELECT dt.balance  as BALANCE FROM codeposit_master dm  
-											LEFT JOIN codeposit_transaction dt ON dm.lastseq = dt.transaction_seq  and dm.deposit_id = dt.deposit_id
-											WHERE dm.status = 'A' and dm.deposit_id  = ? ");
+		$getAccount = $conmssqlcoop->prepare("SELECT dt.BALANCE AS BALANCE FROM codeposit_transaction dt
+												WHERE dt.deposit_id  = ? 
+												and dt.transaction_seq = (SELECT MAX(transaction_seq) 
+												FROM codeposit_transaction WHERE deposit_id = dt.deposit_id)");
 		$getAccount->execute([ $account_no]);
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);

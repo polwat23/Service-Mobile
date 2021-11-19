@@ -22,7 +22,8 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 	$member_no = $dataComing["member_no"];
 	$checkMember = $conmssql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
-	if($checkMember->rowCount() > 0){
+	$rowCheckMember = $checkMember->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowCheckMember["member_no"])){
 		$arrayResult['RESPONSE_CODE'] = "WS0020";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;

@@ -2,70 +2,16 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ConsentAgreement')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingWithdrawConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if($dataComing["consent_step"] == '0'){
-			$arrayResult["CONSENT_STEP"] = '1';
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
-		}else if($dataComing["consent_step"] == '1'){
-			$getRefresh = $conmssql->prepare("SELECT refresh_token,access_token,CONVERT(varchar,token_expire,20) as token_expire,
-											CONVERT(varchar,refresh_expire,20) as refresh_expire 
-											FROM gcauthconsent WHERE is_revoke = '0'");
-			$getRefresh->execute();
-			$rowRefreshToken = $getRefresh->fetch(PDO::FETCH_ASSOC);
-			$checkOldFormTel = $conmssql->prepare("SELECT COUNT(id_editdata) as C_FORMNOTAPPROVE FROM gcmembereditdata 
-												WHERE member_no = :member_no and inputgroup_type = 'tel' and is_updateoncore = '0'");
-			$checkOldFormTel->execute([':member_no' => $payload["member_no"]]);
-			$rowOldFormTel = $checkOldFormTel->fetch(PDO::FETCH_ASSOC);
-			if($rowOldFormTel["C_FORMNOTAPPROVE"] > 0){
-				$getTelMobile = $conmssql->prepare("SELECT incoming_data as phone_number FROM gcmembereditdata WHERE member_no = :member_no
-													and inputgroup_type = 'tel' and is_updateoncore = '0'");
-				$getTelMobile->execute([':member_no' => $payload["member_no"]]);
-				$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
-			}else{
-				$getTelMobile = $conmssqlcoop->prepare("SELECT telephone as phone_number FROM COCOOPTATION WHERE member_id = :member_no");
-				$getTelMobile->execute([':member_no' => $member_no]);
-				$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
-			}
-			if(isset($rowRefreshToken["refresh_token"]) && $rowRefreshToken["refresh_token"] != ""){
-				if($rowRefreshToken["token_expire"] <= date('Y-m-d H:i:s')){
-					$arrPrepare = array();
-					$arrPrepare["refreshToken"] = $rowRefreshToken["refresh_token"];
-					$arrAuth["HEADER"] = (object)[];
-					$arrAuth["BODY"] = $arrPrepare;
-					$arrAuth["URL"] = $config["CONSENT_API"].'/TokenAuth/RefreshToken';
-					$arrayResult["CONSENT_STEP"] = '2';
-					$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
-					$arrayResult["DATA_CONSENT"] = $arrAuth;
-					$arrayResult['RESULT'] = TRUE;
-					require_once('../../include/exit_footer.php');
-				}else{
-					$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
-					$arrayResult["DATA_CONSENT"] = $arrAuth;
-					$arrayResult["CONSENT_STEP"] = '2';
-					$arrayResult['RESULT'] = TRUE;
-					require_once('../../include/exit_footer.php');
-				}
-			}else{
-				$arrPrepare = array();
-				$arrPrepare["userNameOrEmailAddress"] = $config["CONSENT_UN"];
-				$arrPrepare["password"] = $config["CONSENT_PW"];
-				$arrAuth["HEADER"] = (object)[];
-				$arrAuth["BODY"] = $arrPrepare;
-				$arrAuth["URL"] = $config["CONSENT_API"].'/TokenAuth/Authenticate';
-				$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
-				$arrayResult["CONSENT_STEP"] = '2';
-				$arrayResult["PREVIOUS_CALL"] = FALSE;
-				$arrayResult["DATA_CONSENT"] = $arrAuth;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}
-		}else if($dataComing["consent_step"] == '2'){
 			$getRefresh = $conmssql->prepare("SELECT refresh_token,access_token,CONVERT(varchar,token_expire,20) as token_expire,CONVERT(varchar,refresh_expire,20) as refresh_expire 
 											FROM gcauthconsent WHERE is_revoke = '0'");
 			$getRefresh->execute();
 			$rowRefreshToken = $getRefresh->fetch(PDO::FETCH_ASSOC);
+			$getTelMobile = $conmssql->prepare("SELECT phone_number FROM gcmemberaccount WHERE member_no = :member_no");
+			$getTelMobile->execute([':member_no' => $payload["member_no"]]);
+			$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowRefreshToken["refresh_token"]) && $rowRefreshToken["refresh_token"] != ""){
 				if($rowRefreshToken["token_expire"] <= date('Y-m-d H:i:s')){
 					if(isset($dataComing["data_api"]["result"]["expireInSeconds"])){
@@ -79,7 +25,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAuth["HEADER"] = (object)[];
 						$arrAuth["BODY"] = $arrPrepare;
 						$arrAuth["URL"] = $config["CONSENT_API"].'/TokenAuth/RefreshToken';
-						$arrAuth["data_loopback"]["tel_mobile"] = $dataComing["data_api"]["tel_mobile"];
 						$arrayResult["CONSENT_STEP"] = $dataComing["consent_step"];
 						$arrayResult["PREVIOUS_CALL"] = FALSE;
 						$arrayResult["DATA_CONSENT"] = $arrAuth;
@@ -94,18 +39,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrPrepare["consentPointId"] = $config["CONSENT_POINTID_EN"];
 				}
-				if(isset($dataComing["data_api"]["data_loopback"]) && $dataComing["data_api"]["data_loopback"] != ""){
-					$arrAuth["data_loopback"]["tel_mobile"] = $dataComing["data_api"]["data_loopback"]["tel_mobile"];
-				}else{
-					$arrAuth["data_loopback"]["tel_mobile"] = $dataComing["data_api"]["tel_mobile"];
-				}
+				$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
 				$arrPrepare["identifier"] = $arrAuth["data_loopback"]["tel_mobile"];
 				$arrPrepare["langCode"] = $lang_locale;
 				$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];
 				$arrAuth["BODY"] = $arrPrepare;
 				$arrAuth["METHOD"] = "GET";
-				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/ConsentPoints/GetActivePurposes';
-				$arrayResult["CONSENT_STEP"] = '3';
+				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/ConsentPoints/GetApprovedPurposeByIdentifier';
+				$arrayResult["CONSENT_STEP"] = '1';
 				$arrayResult["PREVIOUS_CALL"] = FALSE;
 				$arrayResult["DATA_CONSENT"] = $arrAuth;
 				$arrayResult['RESULT'] = TRUE;
@@ -126,24 +67,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrPrepare["consentPointId"] = $config["CONSENT_POINTID_EN"];
 				}
-				if(isset($dataComing["data_api"]["data_loopback"]) && $dataComing["data_api"]["data_loopback"] != ""){
-					$arrAuth["data_loopback"]["tel_mobile"] = $dataComing["data_api"]["data_loopback"]["tel_mobile"];
-				}else{
-					$arrAuth["data_loopback"]["tel_mobile"] = $dataComing["data_api"]["tel_mobile"];
-				}
+				$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
 				$arrPrepare["identifier"] = $arrAuth["data_loopback"]["tel_mobile"];
 				$arrPrepare["langCode"] = $lang_locale;
 				$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];
 				$arrAuth["BODY"] = $arrPrepare;
 				$arrAuth["METHOD"] = "GET";
-				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/ConsentPoints/GetActivePurposes';
-				$arrayResult["CONSENT_STEP"] = '3';
+				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/ConsentPoints/GetApprovedPurposeByIdentifier';
+				$arrayResult["CONSENT_STEP"] = '1';
 				$arrayResult["PREVIOUS_CALL"] = FALSE;
 				$arrayResult["DATA_CONSENT"] = $arrAuth;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}
-		}else if($dataComing["consent_step"] == '3'){
+		} else if($dataComing["consent_step"] == '1') {
 			if($dataComing["data_api"]["success"]){
 				$arrPurposeGrp = array();
 				if(sizeof($dataComing["data_api"]["result"]["purposes"]) > 0){
@@ -154,10 +91,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrPurposeGrp[] = $arrPurpose;
 					}
 					$arrConsentGrp["DATA"] = $arrPurposeGrp;
+					$arrConsentGrp["IS_ACTIVE"] = TRUE;
 					if($lang_locale == 'th'){
 						$arrConsentGrp["SUBTITLE"] = "ยินยอมให้บริษัทฯ และบริษัทในกลุ่มเอ็มบีเค และพันธมิตรทางธุรกิจประมวลผลข้อมูลส่วนบุคคลของข้าพเจ้า เพื่อวัตถุประสงค์ดังต่อไปนี้";
 						$arrConsentGrp["REMARK"] = "หมายเหตุ: ท่านสามารถเลือกให้ความยินยอมทั้งหมด บางส่วน หรือไม่ให้ความยินยอมได้ หากท่านปฏิเสธไม่ให้ความยินยอมหรือถอนความยินยอมที่ท่านได้ให้ไว้ บริษัทฯ อาจไม่สามารถดำเนินการให้บริการให้ตรงกับความต้องการของท่านได้อย่างมีประสิทธิภาพ";
-						$arrConsentGrp["TITLE"] = 'การขอความยินยอม';
+						$arrConsentGrp["TITLE"] = 'การถอนความยินยอม';
 					}else{
 						$arrConsentGrp["SUBTITLE"] = 'consent to MBK Public Company Limited ("Company"), Companies in the MBK Group 
 						and Business Alliances to collect, use and disclose ("Processing") my personal data for';
@@ -169,16 +107,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAuth["tel_mobile"] = $dataComing["data_api"]["data_loopback"]["tel_mobile"];
 					$arrConsentGrp["data_loopback"] = $arrAuth;
 					$arrayResult["CONSENT"] = $arrConsentGrp;
-					$arrayResult["CONSENT_STEP"] = '4';
+					$arrayResult["CONSENT_STEP"] = '2';
 					$arrayResult["PREVIOUS_CALL"] = FALSE;
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
+					$arrayResult["CONSENT_STEP"] = '2';
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}
-			}	
-		}else if($dataComing["consent_step"] == '4'){
+			}
+		} else if ($dataComing["consent_step"] == '2') {
 			$getRefresh = $conmssql->prepare("SELECT refresh_token,access_token,CONVERT(varchar,token_expire,20) as token_expire,CONVERT(varchar,refresh_expire,20) as refresh_expire 
 											FROM gcauthconsent WHERE is_revoke = '0'");
 			$getRefresh->execute();
@@ -211,13 +150,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrPrepare["identifier"] = $dataConsentIncome["tel_mobile"];
 					$arrPrepare["mobileNo"] = $dataConsentIncome["tel_mobile"];
 					$arrPrepare["langCode"] = $lang_locale;
-					$arrPrepare["otpType"] = '1';
+					$arrPrepare["otpType"] = '2';
 					if($lang_locale == 'th'){
 						$arrPrepare["consentPoint"] = $config["CONSENT_POINTID_TH"];
 					}else{
 						$arrPrepare["consentPoint"] = $config["CONSENT_POINTID_EN"];
 					}
-					$arrPrepare["purposeConsent"] = $dataConsentIncome["consent"]["purposeConsent"];
+					$arrPrepare["purposeIds"] = $dataConsentIncome["consent"]["purposeIds"];
 					$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];
 					$arrAuth["BODY"] = $arrPrepare;
 					$arrAuth["data_loopback"] = $dataConsentIncome;
@@ -231,7 +170,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrPrepare["identifier"] = $dataConsentIncome["tel_mobile"];
 					$arrPrepare["mobileNo"] = $dataConsentIncome["tel_mobile"];
 					$arrPrepare["langCode"] = $lang_locale;
-					$arrPrepare["otpType"] = '1';
+					$arrPrepare["otpType"] = '2';
 					if($lang_locale == 'th'){
 						$arrPrepare["consentPoint"] = $config["CONSENT_POINTID_TH"];
 					}else{
@@ -239,26 +178,25 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 					$arrListPurpose = array();
 					foreach($dataComing["data_api"]["purposes"] as $purposes){
-						$arrPurposes = array();
-						$arrPurposes['id'] = $purposes["ID"];
-						$arrPurposes['consentStatus'] = $purposes["ACTIVE"] == 0 ? 'false' : 'true';
-						$arrListPurpose[] = $arrPurposes;
+						if($purposes["ACTIVE"] == 0){
+							$arrListPurpose[] = $purposes["ID"];
+						}
 					}
-					$arrPrepare["purposeConsent"] = $arrListPurpose;
+					$arrPrepare["purposeIds"] = $arrListPurpose;
 					$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];
 					$arrAuth["BODY"] = $arrPrepare;
 					$arrAuth["data_loopback"] = $dataComing["data_api"]["data_loopback"];
 					$arrAuth["data_loopback"]["consent"] = $arrPrepare;
 				}
 				
-				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/ConsentTrans/SubmitConsent';
-				$arrayResult["CONSENT_STEP"] = '5';
+				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/DataSubjects/RequestWithdrawnConsent';
+				$arrayResult["CONSENT_STEP"] = '3';
 				$arrayResult["PREVIOUS_CALL"] = FALSE;
 				$arrayResult["DATA_CONSENT"] = $arrAuth;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}
-		}else if($dataComing["consent_step"] == '5'){
+		}else if($dataComing["consent_step"] == '3'){
 			$getRefresh = $conmssql->prepare("SELECT refresh_token,access_token,CONVERT(varchar,token_expire,20) as token_expire,CONVERT(varchar,refresh_expire,20) as refresh_expire 
 											FROM gcauthconsent WHERE is_revoke = '0'");
 			$getRefresh->execute();
@@ -288,20 +226,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$accessToken = $dataComing["data_api"]["result"]["accessToken"] ?? $rowRefreshToken["access_token"];
 				$arrPrepare = array();
 				$arrPrepare["Key"] = $dataComing["data_api"]["result"]["otpRefCode"];
-				$arrPrepare["KeyDisplay"] = $dataComing["data_api"]["result"]["otpRefCodeDisplay"];
+				$arrPrepare["KeyDisplay"] = $dataComing["data_api"]["result"]["otpRefCode"];
 				$arrPrepare["Code"] = "";
 				$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];
 				$arrAuth["BODY"] = $arrPrepare;
 				$arrAuth["data_loopback"] = $dataComing["data_api"]["data_loopback"];
-				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/OptTrans/VerifyOtp';
-				$arrayResult["CONSENT_STEP"] = '6';
+				$arrAuth["URL"] = $config["CONSENT_API"].'/services/app/DataSubjects/WithdrawnVerifyOtp';
+				$arrayResult["CONSENT_STEP"] = '4';
 				$arrayResult["PREVIOUS_CALL"] = FALSE;
 				$arrayResult["IS_OTP"] = true;
 				$arrayResult["DATA_CONSENT"] = $arrAuth;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}
-		}else if($dataComing["consent_step"] == '6'){
+		}else if($dataComing["consent_step"] == '4'){
+			/*$insertChangeData = $conmssql->prepare("INSERT INTO gcmembereditdata(member_no,old_data,incoming_data,inputgroup_type)
+													VALUES(:member_no,:old_data,:new_data,'tel')");
+			$insertChangeData->execute([
+				':member_no' => $payload["member_no"],
+				':old_data' => null,
+				':new_data' => $dataComing["data_api"]["data_loopback"]["tel_mobile"]
+			]);*/
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}

@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											co.prefixname as PRENAME_DESC,
 											co.firstname  as MEMB_NAME, 
 											co.lastname as MEMB_SURNAME,
-											co.COLLATERAL,
+											cl.COLLATERAL,
 											(isnull(lm.amount,0) - isnull(lm.principal_actual,0)) as LOAN_BALANCE 
 											from cocollateral cl   LEFT JOIN  coloanmember lm ON cl.doc_no = lm.doc_no  AND 
 											lm.doc_no = cl.doc_no 

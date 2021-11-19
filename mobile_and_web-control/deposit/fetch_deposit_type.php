@@ -5,8 +5,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllAccount = array();
-		$getSumAllAccount = $conmssqlcoop->prepare("select dpt.balance as SUM_BALANCE from codeposit_master dpm LEFT JOIN codeposit_transaction dpt ON dpm.lastseq = dpt.transaction_seq 
-												and dpm.deposit_id = dpt.deposit_id where  dpm.status  = 'A' and dpm.member_id = :member_no");
+		$getSumAllAccount = $conmssqlcoop->prepare("select SUM(dpt.balance) as SUM_BALANCE from codeposit_master dpm LEFT JOIN codeposit_transaction dpt 
+													ON dpm.deposit_id = dpt.deposit_id
+													and dpt.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = dpm.deposit_id) 
+													and dpt.Transaction_subseq = '0'
+													where  dpm.status  = 'A' and dpm.member_id = :member_no");
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
@@ -14,7 +17,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										dm.description as DEPTACCOUNT_NAME,dpt.balance as BALANCE,
 										(SELECT max(transaction_date) FROM codeposit_transaction WHERE deposit_id = dm.deposit_id) as LAST_OPERATE_DATE
 										FROM  codeposit_master dm  LEFT JOIN codeposit_type dt ON dm.deposit_type = dt.deposit_type
-										LEFT JOIN codeposit_transaction dpt ON dm.lastseq = dpt.transaction_seq  and dm.deposit_id = dpt.deposit_id  AND dpt.transaction_subseq = 0
+										LEFT JOIN codeposit_transaction dpt ON dm.deposit_id = dpt.deposit_id  
+										and dpt.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = dm.deposit_id)
+										AND dpt.transaction_subseq = 0
 										WHERE dm.member_id = :member_no and dm.status = 'A' order by dm.deposit_id ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
