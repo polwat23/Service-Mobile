@@ -24,6 +24,7 @@
 	"UN_SMS" : "post01@mbkcoop",
 	"PW_SMS" : "64438C1AF8DAD21C8B77FD10B63B96637CD4404E271EAF4011190A292DEB5F86",
 	"AD_HOST" : "ldap.mbk-center.co.th",
+	"MAIL_FOR_NOTI" : "mbkcooperative@mbk-center.co.th",
 	"HW_APPID" : "104688611",
     "HW_APPSECRET": "79c65e7ab3cce5ecb557f3a83f47c0b7b03e7196038c83b1cc5ef24c22f1401d",
 	"PORT_MAILSERVER" : "587",

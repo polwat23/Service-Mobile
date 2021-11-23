@@ -243,6 +243,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 			}
 			$oddeven = true;
+			$j = 2;
 			for($i = 1;$i <= $period;$i++){
 				$arrPaymentPerPeriod = array();
 				if($calint_type === "1"){ // 
@@ -287,6 +288,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
 					
 				}else if($calint_type === "2"){ // ʹ  + ͡ ҡѹء͹
+					
 					if($i == 1){
 						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
 						$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));

@@ -402,10 +402,10 @@ class functions {
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,RTRIM(LTRIM(member_no)) as member_no FROM gcmemberaccount WHERE RTRIM(LTRIM(member_no)) IN('".implode("','",$member_no)."')");
 						$fetchFCMToken->execute();
 					}else{
-						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken = $this->con->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transactionRTRIM(LTRIM(member_no)) as member_no FROM gcmemberaccount WHERE RTRIM(LTRIM(member_no)) = :member_no");
 						$fetchFCMToken->execute([':member_no' => $member_no]);
 					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
