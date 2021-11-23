@@ -55,6 +55,14 @@ if($lib->checkCompleteArgument(['member_no','password','api_token','unique_id'],
 		':email' => $email,
 		':channel' => $dataComing["channel"]
 	])){
+		$template = $func->getTemplateSystem('NotifyStaffUpdateData');
+		$arrayDataTemplate = array();
+		$arrayDataTemplate["MEMBER_NO"] = $payload["member_no"];
+		$arrayDataTemplate["DEVICE_NAME"] = $dataComing["device_name"].' / On app version => '.$dataComing["app_version"];
+		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
+		
+		$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
+		$arrMailStatus = $lib->sendMail($config["MAIL_FOR_NOTI"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);
 		$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
 		$arrayResult['PASSWORD'] = $dataComing["password"];
 		$arrayResult['RESULT'] = TRUE;
