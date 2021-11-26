@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				':bank_account_name_en' => $account_name_th,
 				':id_token' => $payload["id_token"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_reg_id_for_consent',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/kbank/request_reg_id_for_consent',$arrSendData);
 				if(!$responseAPI["RESULT"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
 					$arrayStruc = [
@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':query_flag' => '1'
 					];
 					$log->writeLog('bindaccount',$arrayStruc);
-					$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+					$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/kbank/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 					$lib->sendLineNotify($message_error);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

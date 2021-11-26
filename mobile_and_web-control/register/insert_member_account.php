@@ -21,42 +21,52 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
-	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
-	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
-										VALUES(:member_no,:password,:phone,:email,:channel)");
-	if($insertAccount->execute([
-		':member_no' => $dataComing["member_no"],
-		':password' => $password,
-		':phone' => $phone,
-		':email' => $email,
-		':channel' => $dataComing["channel"]
-	])){
-		$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
-		$arrayResult['PASSWORD'] = $dataComing["password"];
-		$arrayResult['RESULT'] = TRUE;
-		require_once('../../include/exit_footer.php');
-	}else{
-		$filename = basename(__FILE__, '.php');
-		$logStruc = [
-			":error_menu" => $filename,
-			":error_code" => "WS1018",
-			":error_desc" => "ไม่สามารถสมัครได้ "."\n".json_encode($dataComing),
-			":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-		];
-		$log->writeLog('errorusage',$logStruc);
-		$message_error = "ไม่สามารถสมัครได้เพราะ Insert ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$insertAccount->queryString."\n"."Param => ". json_encode([
+	$getTel = $conoracle->prepare("SELECT SMS_MOBILEPHONE FROM mbmembmaster WHERE member_no = :member_no");
+	$getTel->execute([':member_no' => $dataComing["member_no"]]);
+	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
+	if($phone == $rowTel["SMS_MOBILEPHONE"]){
+		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
+		$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
+											VALUES(:member_no,:password,:phone,:email,:channel)");
+		if($insertAccount->execute([
 			':member_no' => $dataComing["member_no"],
 			':password' => $password,
 			':phone' => $phone,
 			':email' => $email,
 			':channel' => $dataComing["channel"]
-		]);
-		$lib->sendLineNotify($message_error);
-		$arrayResult['RESPONSE_CODE'] = "WS1018";
+		])){
+			$arrayResult['MEMBER_NO'] = $dataComing["member_no"];
+			$arrayResult['PASSWORD'] = $dataComing["password"];
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
+		}else{
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS1018",
+				":error_desc" => "ไม่สามารถสมัครได้ "."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไม่สามารถสมัครได้เพราะ Insert ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$insertAccount->queryString."\n"."Param => ". json_encode([
+				':member_no' => $dataComing["member_no"],
+				':password' => $password,
+				':phone' => $phone,
+				':email' => $email,
+				':channel' => $dataComing["channel"]
+			]);
+			$lib->sendLineNotify($message_error);
+			$arrayResult['RESPONSE_CODE'] = "WS1018";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+	}else{
+		$arrayResult['RESPONSE_CODE'] = "WS0017";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
-		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');

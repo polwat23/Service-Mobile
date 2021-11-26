@@ -22,7 +22,8 @@ class insertLog {
 			}else if($type_log == 'deposittrans'){
 				$this->logDepositTransfer($log_struc);
 			}else if($type_log == 'withdrawtrans'){
-				$this->logWithdrawTransfer($log_struc);
+				return $this->logWithdrawTransfer($log_struc);
+				
 			}else if($type_log == 'transferinside'){
 				$this->logTransferInsideCoop($log_struc);
 			}else if($type_log == 'manageuser'){
@@ -109,10 +110,11 @@ class insertLog {
 		}
 		private function logDepositTransfer($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logdepttransbankerror(member_no,id_userlogin,transaction_date,sigma_key,amt_transfer
-												,response_code,response_message,is_adj,ref_no) 
-												VALUES(:member_no,:id_userlogin,:operate_date,:sigma_key,:amt_transfer,:response_code,:response_message,:is_adj,:ref_no)");
+												,response_code,response_message) 
+												VALUES(:member_no,:id_userlogin,:operate_date,:sigma_key,:amt_transfer,:response_code,:response_message)");
 			$insertLog->execute($log_struc);
 		}
+
 		private function logWithdrawTransfer($log_struc){
 			if(isset($log_struc[":fee_amt"])){
 				$insertLog = $this->con->prepare("INSERT INTO logwithdrawtransbankerror(member_no,id_userlogin,transaction_date,amt_transfer,penalty_amt,fee_amt,deptaccount_no
@@ -123,7 +125,11 @@ class insertLog {
 												,response_code,response_message) 
 												VALUES(:member_no,:id_userlogin,:operate_date,:amt_transfer,:deptaccount_no,:response_code,:response_message)");
 			}
-			$insertLog->execute($log_struc);
+			if($insertLog->execute($log_struc)){
+				
+			}else{
+				return $insertLog->queryString;
+			}
 		}
 		private function logTransferInsideCoop($log_struc){
 			if(isset($log_struc[":penalty_amt"])){

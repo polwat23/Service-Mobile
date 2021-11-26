@@ -17,17 +17,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLoanIntRate->execute();
 		while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
 			$arrayDetailLoan = array();
-			$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+			$CheckIsReq = $conoracle->prepare("SELECT LOANREQUEST_DOCNO,loanrequest_status as REQ_STATUS
+														FROM lnreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and loanrequest_status NOT IN('-9','9') and TO_CHAR(LOANREQUEST_DATE,'YYYY-MM-DD') >= '2021-08-31'");
 			$CheckIsReq->execute([
 				':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
-				':member_no' => $member_no
+				':member_no' => $payload["member_no"]
 			]);
 			if($CheckIsReq->rowCount() > 0){
 				$rowIsReq = $CheckIsReq->fetch(PDO::FETCH_ASSOC);
 				$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_FLAG_DESC"][0][$lang_locale];
 				$arrayDetailLoan["IS_REQ"] = FALSE;
-				$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
+				$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["REQ_STATUS"]][0][$lang_locale];
 			}else{
 				$arrayDetailLoan["IS_REQ"] = TRUE;
 			}

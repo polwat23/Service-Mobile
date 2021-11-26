@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		if($memberInfoMobile->rowCount() > 0){
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
-			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
+			
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
 				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.sms_mobilephone,
 													mb.CURRADDR_NO as ADDR_NO,
 													mb.CURRADDR_MOO as ADDR_MOO,
 													mb.CURRADDR_SOI as ADDR_SOI,
@@ -60,6 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$arrayResult["PHONE"] = $rowMember["SMS_MOBILEPHONE"];
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];

@@ -21,10 +21,8 @@ if($lib->checkCompleteArgument(['menu_component','queue_id'],$dataComing)){
 				':member_no' => $member_no
 			])){
 				// update remain
-				$remain_queue = $rowBranch["remain_queue"] - 1;
-				$updatemaster = $conmysql->prepare("UPDATE gcsusdebtqueuemaster SET remain_queue = :remain_queue WHERE queue_id = :queue_id");
+				$updatemaster = $conmysql->prepare("UPDATE gcsusdebtqueuemaster SET remain_queue = remain_queue-1 WHERE queue_id = :queue_id");
 				if($updatemaster->execute([
-					':remain_queue' => $remain_queue,
 					':queue_id' => $dataComing["queue_id"]
 				])){
 					$conmysql->commit();
@@ -37,14 +35,12 @@ if($lib->checkCompleteArgument(['menu_component','queue_id'],$dataComing)){
 						":error_menu" => $filename,
 						":error_code" => "WS1038",
 						":error_desc" => "ไม่สามารถ updatemaster ลง gcsusdebtqueuemaster ได้ "."\n".$updatemaster->queryString."\n".json_encode([
-							':remain_queue' => $remain_queue,
 							':queue_id' => $dataComing["queue_id"]
 						]),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
 					$message_error = "ไม่สามารถ updatemaster ลง gcsusdebtqueuemaster ได้ "."\n".$updatemaster->queryString."\n".json_encode([
-						':remain_queue' => $remain_queue,
 						':queue_id' => $dataComing["queue_id"]
 					]);
 					$lib->sendLineNotify($message_error);

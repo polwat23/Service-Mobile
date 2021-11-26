@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','moratorium_docno'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Moratorium')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$insertSchShipOnlineDoc = $conoracle->prepare("update lnreqmoratorium set request_status = '-1', cancel_id = :member_no, cancel_date = sysdate where coop_id = '000000' and MORATORIUM_DOCNO = :moratorium_docno");
+		$insertSchShipOnlineDoc = $conoracle->prepare("update lnreqmoratorium set request_status = '-9', cancel_id = :member_no, cancel_date = sysdate where coop_id = '000000' and MORATORIUM_DOCNO = :moratorium_docno");
 		if($insertSchShipOnlineDoc->execute([
 			':member_no' => $member_no,
 			':moratorium_docno' => $dataComing["moratorium_docno"]

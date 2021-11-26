@@ -93,7 +93,9 @@ class library {
 			return (($date_duration->y)*12)+($date_duration->m);			
 		}else if($format == "d"){
 			return $date_duration->days;			
-		}     
+		}else if($format == "y"){
+			return  $date_duration->y ." ปี ";	
+		}        
 	}
 	public function formatcitizen($idcard,$separate=" "){
 		if(isset($idcard)){
@@ -260,7 +262,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.gensoft.co.th';
+		$mailFunction->Host = 'mx1.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];

@@ -14,6 +14,13 @@ class functions {
 			$this->conora = $connection->connecttooracle();
 		}
 		
+		public function getMsgLine($id_err){
+			$getMsgErr = $this->con->prepare("SELECT message FROM lbmessageerror WHERE id_msgerr = :id_err ");
+			$getMsgErr->execute([':id_err' => $id_err]);
+			$rowMsgErr = $getMsgErr->fetch(\PDO::FETCH_ASSOC);
+			return $rowMsgErr["message"];
+		}
+		
 		public function checkLogin($id_token) {
 			$checkLogin = $this->con->prepare("SELECT id_userlogin,is_login FROM gcuserlogin 
 												WHERE id_token = :id_token");
