@@ -25,13 +25,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':old_email' => $rowMember["EMAIL"],
 					':email' => $dataComing["email"]
 				])){
-					$arrayResult["RESULT_ADDRESS"] = TRUE;
+					$arrayResult["RESULT_EMAIL"] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
 						":error_menu" => $filename,
 						":error_code" => "WS1003",
-						":error_desc" => "แก้ไขที่อยู่ไม่ได้เพราะ insert ลงตาราง gcmembereditdata ไม่ได้"."\n"."Query => ".$insertChangeData->queryString."\n"."Param => ". json_encode([
+						":error_desc" => "แก้ไขอีเมลไม่ได้เพราะ insert ลงตาราง gcmembereditdata ไม่ได้"."\n"."Query => ".$insertChangeData->queryString."\n"."Param => ". json_encode([
 							':member_no' => $payload["member_no"],
 							':old_email' => $rowMember["EMAIL"],
 							':email' => $dataComing["email"]
@@ -39,13 +39,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$arrayResult["RESULT_ADDRESS"] = FALSE;
+					$arrayResult["RESULT_EMAIL"] = FALSE;
 				}
 			}
 		}
 		if(isset($dataComing["tel"]) && $dataComing["tel"] != ""){
 			if($arrConstInfo["tel"] == '1'){
-				$arrayResult['RESULT'] = TRUE;
+				$arrayResult['RESULT_TEL'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
 				$memberInfo = $conmssqlcoop->prepare("SELECT TELEPHONE FROM COCOOPTATION WHERE member_id = :member_no");
@@ -58,13 +58,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':old_tel' => $rowMember["TELEPHONE"],
 					':tel' => $dataComing["tel"]
 				])){
-					$arrayResult["RESULT_ADDRESS"] = TRUE;
+					$arrayResult["RESULT_TEL"] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
 						":error_menu" => $filename,
 						":error_code" => "WS1003",
-						":error_desc" => "แก้ไขที่อยู่ไม่ได้เพราะ insert ลงตาราง gcmembereditdata ไม่ได้"."\n"."Query => ".$insertChangeData->queryString."\n"."Param => ". json_encode([
+						":error_desc" => "แก้ไขเบอร์โทรไม่ได้เพราะ insert ลงตาราง gcmembereditdata ไม่ได้"."\n"."Query => ".$insertChangeData->queryString."\n"."Param => ". json_encode([
 							':member_no' => $payload["member_no"],
 							':old_tel' => $rowMember["TELEPHONE"],
 							':tel' => $dataComing["tel"]
@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
 					$log->writeLog('errorusage',$logStruc);
-					$arrayResult["RESULT_ADDRESS"] = FALSE;
+					$arrayResult["RESULT_TEL"] = FALSE;
 				}
 			}
 		}
@@ -137,7 +137,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayDataTemplate["MEMBER_NO"] = $payload["member_no"];
 		$arrayDataTemplate["DEVICE_NAME"] = $dataComing["device_name"].' / On app version => '.$dataComing["app_version"];
 		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
-		
+		$other_info = "จากหน้าแก้ไขข้อมูล ";
+		if(isset($dataComing["email"]) && $dataComing["email"] != ""){
+			if(isset($arrayResult["RESULT_EMAIL"]) && $arrayResult["RESULT_EMAIL"] === TRUE){
+				$other_info .= "Email => ".$dataComing["email"].' ';
+			}
+		}
+		if(isset($dataComing["tel"]) && $dataComing["tel"] != ""){
+			if(isset($arrayResult["RESULT_TEL"]) && $arrayResult["RESULT_TEL"]  === TRUE){
+				$other_info .= "เบอร์โทรศัพท์ => ".$dataComing["tel"].' ';
+			}
+		}
+		if(isset($dataComing["address"]) && $dataComing["address"] != ""){
+			if(isset($arrayResult["RESULT_ADDRESS"]) && $arrayResult["RESULT_ADDRESS"]  === TRUE){
+				$other_info .= "ที่อยู่ => ".json_encode($dataComing["address"],JSON_UNESCAPED_UNICODE ).' ';
+			}
+		}
+		$arrayDataTemplate["OTHER_INFO"] = $other_info;
 		$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
 		$arrMailStatus = $lib->sendMail($config["MAIL_FOR_NOTI"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);
 		$arrayResult['RESULT'] = TRUE;

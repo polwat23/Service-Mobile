@@ -302,14 +302,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 			}
 		}else if($dataComing["consent_step"] == '6'){
-			$template = $func->getTemplateSystem('NotifyStaffUpdateData');
+			/*$template = $func->getTemplateSystem('NotifyStaffUpdateData');
 			$arrayDataTemplate = array();
 			$arrayDataTemplate["MEMBER_NO"] = $payload["member_no"];
 			$arrayDataTemplate["DEVICE_NAME"] = $dataComing["device_name"].' / On app version => '.$dataComing["app_version"];
 			$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
 			
 			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-			$arrMailStatus = $lib->sendMail($config["MAIL_FOR_NOTI"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);
+			$arrMailStatus = $lib->sendMail($config["MAIL_FOR_NOTI"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);*/
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}
