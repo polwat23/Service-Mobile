@@ -37,7 +37,7 @@ class CalculateLoan {
 		}
 		if($calInt){
 			$yearFrom = date('Y',strtotime($constLoanContract["LASTCALINT_DATE"]));
-			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'ynd'));
+			$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTCALINT_DATE"],'y n d',false,true));
 			$yearTo = date('Y');
 			$roundLoop = 0;
 			$yearDiff = $yearTo - $yearFrom;
@@ -161,7 +161,7 @@ class CalculateLoan {
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
 		$constLoan = $this->getLoanConstant();
 		$yearFrom = date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"]));
-		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'ynd'));
+		$changerateint = $this->checkChangeRateInt($constLoanContract["LOANTYPE_CODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'y n d',false,true));
 		$yearTo = date('Y');
 		$yearDiff = $yearFrom - $yearTo;
 		if($yearDiff > 0){
@@ -457,7 +457,7 @@ class CalculateLoan {
 																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
 																		INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
 																		INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
-																		CONTRACT_STATUS = '0'
+																		CONTRACT_STATUS = '-1'
 																		WHERE loancontract_no = :loancontract_no");
 						}
 					}else{
@@ -487,7 +487,7 @@ class CalculateLoan {
 																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
 																		INTEREST_RETURN = :int_return,PRNPAYMENT_AMT = PRNPAYMENT_AMT + :prinpay,
 																		INTPAYMENT_AMT = INTPAYMENT_AMT + :int_pay,LAST_STM_NO = :laststmno,
-																		CONTRACT_STATUS = '0'
+																		CONTRACT_STATUS = '-1'
 																		WHERE loancontract_no = :loancontract_no");
 						}
 					}else{
@@ -666,27 +666,28 @@ class CalculateLoan {
 		}
 	}
 	public function paySlipDet($conoracle,$amt_transfer,$config,$operate_date,
-	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$itemtyp_desc,$slipseq_no,$stmitemtype=null,$share_value=0){
+	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$itemtype_desc,$slipseq_no,$stmitemtype=null,$share_value=0,$ref_depslip=null){
 		$executeSlDet = [
 			':coop_id' => $config["COOP_ID"], 
 			':payinslip_no' => $payinslip_no,
 			':slipitemtype' => $slipitemtype,
 			':slipseq_no' => $slipseq_no,
 			':loantype_code' => $shrloantype_code,
-			':itemtyp_desc' => $itemtyp_desc,
+			':itemtype_desc' => $itemtype_desc,
 			':lastperiod' => 0,
 			':itempay_amt' => $amt_transfer,
 			':prin_bal' => $share_value + $amt_transfer,
 			':stm_itemtype' => $stmitemtype ?? null,
 			':bfperiod' => $dataShare["LAST_PERIOD"],
-			':bfbal_share' => $share_value
+			':bfbal_share' => $share_value,
+			':ref_docno' => $ref_depslip
 		];
 		$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
 												SHRLONTYPE_CODE,CONCOOP_ID,SLIPITEM_DESC,PERIOD,ITEM_PAYAMT,ITEM_BALANCE,
 												INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
-												BFPERIOD,BFSHRCONT_BALAMT)
-												VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:itemtyp_desc,
-												:lastperiod,:itempay_amt,:prin_bal,0,0,:stm_itemtype,:bfperiod,:bfbal_share)");
+												BFPERIOD,BFSHRCONT_BALAMT,REF_DOCNO)
+												VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:itemtype_desc,
+												:lastperiod,:itempay_amt,:prin_bal,0,0,:stm_itemtype,:bfperiod,:bfbal_share,:ref_docno)");
 		if($insertSLSlipDet->execute($executeSlDet)){
 			$arrayResult['RESULT'] = TRUE;
 			return $arrayResult;
@@ -710,7 +711,7 @@ class CalculateLoan {
 	}
 	public function paySlipLonDet($conoracle,$dataCont,$amt_transfer,$config,$operate_date,
 	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$contract_no,$prinPay=0,$interest=0
-	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1){
+	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1,$ref_depslip=null){
 		$lastperiod = $dataCont["LAST_PERIODPAY"] + 1;
 		$executeSlDet = [
 			':coop_id' => $config["COOP_ID"], 
@@ -738,34 +739,35 @@ class CalculateLoan {
 			':rkeep_principal' => $dataCont["RKEEP_PRINCIPAL"],
 			':rkeep_interest' => $dataCont["RKEEP_INTEREST"],
 			':nkeep_interest' => $dataCont["NKEEP_INTEREST"],
-			':int_period' => $interestPeriod
+			':int_period' => $interestPeriod,
+			':ref_docno' => $ref_depslip
 		];
 		if($interestPeriod > 0){
 			$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
 													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
 													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
 													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
-													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
+													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG,REF_DOCNO)
 													VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:loancontract_no,:itemtype_desc,
 													:lastperiod,:prin_pay,:int_pay,:int_arrear,:itempay_amt,:prin_bal,:principal,
 													TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),TRUNC(SYSDATE),:int_period,:int_return,
 													:stm_itemtype,:bfperiod,
 													:bfintarr,TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),
 													TRUNC(TO_DATE(:lastprocess_date,'yyyy/mm/dd  hh24:mi:ss')),
-													:period_payment,:principal,1,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
+													:period_payment,:principal,1,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0,:ref_docno)");
 		}else{
 			$insertSLSlipDet = $conoracle->prepare("INSERT INTO slslippayindet(COOP_ID,PAYINSLIP_NO,SLIPITEMTYPE_CODE,SEQ_NO,OPERATE_FLAG,
 													SHRLONTYPE_CODE,CONCOOP_ID,LOANCONTRACT_NO,SLIPITEM_DESC,PERIOD,PRINCIPAL_PAYAMT,INTEREST_PAYAMT,
 													INTARREAR_PAYAMT,ITEM_PAYAMT,ITEM_BALANCE,PRNCALINT_AMT,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,INTEREST_RETURN,STM_ITEMTYPE,
 													BFPERIOD,BFINTARR_AMT,BFLASTCALINT_DATE,BFLASTPROC_DATE,BFPERIOD_PAYMENT,BFSHRCONT_BALAMT,BFCOUNTPAY_FLAG,
-													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG)
+													BFPAYSPEC_METHOD,RKEEP_PRINCIPAL,RKEEP_INTEREST,NKEEP_INTEREST,BFINTRETURN_FLAG,REF_DOCNO)
 													VALUES(:coop_id,:payinslip_no,:slipitemtype,:slipseq_no,1,:loantype_code,:coop_id,:loancontract_no,:itemtype_desc,
 													:lastperiod,:prin_pay,:int_pay,:int_arrear,:itempay_amt,:prin_bal,:principal,
 													TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss'))
 													,:int_period,:int_return,:stm_itemtype,:bfperiod,
 													:bfintarr,TRUNC(TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss')),
 													TRUNC(TO_DATE(:lastprocess_date,'yyyy/mm/dd  hh24:mi:ss')),
-													:period_payment,:principal,1,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0)");
+													:period_payment,:principal,1,:payspec_method,:rkeep_principal,:rkeep_interest,:nkeep_interest,0,:ref_docno)");
 
 		}
 		if($insertSLSlipDet->execute($executeSlDet)){

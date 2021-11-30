@@ -30,12 +30,10 @@ if($collNotOver2M > 2000000){
 	$collNotOver2M = number_format(2000000,2);
 }
 $arrSubOtherInfo["LABEL"] = "ต้องใช้ผู้ค้ำประกันสำหรับการกู้น้อยกว่า 2,000,000";
-if($rowCredit["MULTIPLE_SALARY"] == '20'){
-	$arrSubOtherInfo["VALUE"] = "3 คน";
-}else if($rowCredit["MULTIPLE_SALARY"] == '30'){
+if($rowCredit["MULTIPLE_SALARY"] == '30'){
 	$arrSubOtherInfo["VALUE"] = "3 คน";
 }else if($rowCredit["MULTIPLE_SALARY"] == '40'){
-	$arrSubOtherInfo["VALUE"] = "4 คน";
+	$arrSubOtherInfo["VALUE"] = "3 คน";
 }else if($rowCredit["MULTIPLE_SALARY"] == '50'){
 	$arrSubOtherInfo["VALUE"] = "4 คน";
 }else if($rowCredit["MULTIPLE_SALARY"] == '60'){
@@ -43,6 +41,8 @@ if($rowCredit["MULTIPLE_SALARY"] == '20'){
 }else if($rowCredit["MULTIPLE_SALARY"] == '70'){
 	$arrSubOtherInfo["VALUE"] = "5 คน";
 }else if($rowCredit["MULTIPLE_SALARY"] == '80'){
+	$arrSubOtherInfo["VALUE"] = "5 คน";
+}else if($rowCredit["MULTIPLE_SALARY"] == '90'){
 	$arrSubOtherInfo["VALUE"] = "5 คน";
 }
 $arrOtherInfo[] = $arrSubOtherInfo;

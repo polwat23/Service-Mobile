@@ -96,6 +96,91 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 		}
+		if(isset($dataComing["address"]) && $dataComing["address"] != ""){
+			if($arrConstInfo["address"] == '1'){
+				$getAddr = $conoracle->prepare("SELECT mb.CURRADDR_NO as ADDR_NO,
+														mb.CURRADDR_MOO as ADDR_MOO,
+														mb.CURRADDR_SOI as ADDR_SOI,
+														mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
+														mb.CURRADDR_ROAD as ADDR_ROAD,
+														MBT.TAMBOL_DESC AS TAMBOL_DESC,
+														MBD.DISTRICT_DESC AS DISTRICT_DESC,
+														MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
+														MBP.PROVINCE_DESC AS PROVINCE_DESC,
+														MB.CURRADDR_POSTCODE AS ADDR_POSTCODE,
+														mb.CURRAMPHUR_CODE AS DISTRICT_CODE,
+														mb.CURRTAMBOL_CODE AS TAMBOL_CODE
+														FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+														LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
+														LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+														LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
+														LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
+														LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
+														WHERE mb.member_no = :member_no");
+				$getAddr->execute([':member_no' => $member_no]);
+				$rowAddr = $getAddr->fetch(PDO::FETCH_ASSOC);
+				$updateDataAddress = $conoracle->prepare("UPDATE mbmembmaster SET 
+															CURRADDR_NO = :addr_no,
+															CURRADDR_MOO = :addr_moo,
+															CURRADDR_SOI = :addr_soi,
+															CURRADDR_VILLAGE = :addr_village,
+															CURRADDR_ROAD = :addr_road,
+															CURRPROVINCE_CODE = :province_code,
+															CURRADDR_POSTCODE = :post_code,
+															CURRAMPHUR_CODE = :district_code,
+															CURRTAMBOL_CODE = :tambol_code
+															WHERE member_no = :member_no");
+				if($updateDataAddress->execute([
+					':addr_no' => $dataComing["address"]["addr_no"] ?? $rowAddr["ADDR_NO"],
+					':addr_moo' => $dataComing["address"]["addr_moo"] ?? $rowAddr["ADDR_MOO"],
+					':addr_village' => $dataComing["address"]["addr_village"] ?? $rowAddr["ADDR_VILLAGE"],
+					':addr_soi' => $dataComing["address"]["addr_soi"] ?? $rowAddr["ADDR_SOI"],
+					':addr_road' => $dataComing["address"]["addr_road"] ?? $rowAddr["ADDR_ROAD"],
+					':tambol_code' => $dataComing["address"]["tambol_code"] ?? $rowAddr["TAMBOL_CODE"],
+					':district_code' => $dataComing["address"]["district_code"] ?? $rowAddr["DISTRICT_CODE"],
+					':province_code' => $dataComing["address"]["province_code"] ?? $rowAddr["PROVINCE_CODE"],
+					':post_code' => $dataComing["address"]["addr_postcode"] ?? $rowAddr["ADDR_POSTCODE"],
+					':member_no' => $member_no
+				])){
+					$arrayResult["RESULT_ADDRESS"] = TRUE;
+				}else{
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS1003",
+						":error_desc" => "แก้ไขเบอร์โทรไม่ได้เพราะ update ลงตาราง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateDataAddress->queryString."\n"."Param => ". json_encode([
+							':addr_no' => $dataComing["address"]["addr_no"] ?? $rowAddr["ADDR_NO"],
+							':addr_moo' => $dataComing["address"]["addr_moo"] ?? $rowAddr["ADDR_MOO"],
+							':addr_village' => $dataComing["address"]["addr_village"] ?? $rowAddr["ADDR_VILLAGE"],
+							':addr_soi' => $dataComing["address"]["addr_soi"] ?? $rowAddr["ADDR_SOI"],
+							':addr_road' => $dataComing["address"]["addr_road"] ?? $rowAddr["ADDR_ROAD"],
+							':tambol_code' => $dataComing["address"]["tambol_code"] ?? $rowAddr["TAMBOL_CODE"],
+							':district_code' => $dataComing["address"]["district_code"] ?? $rowAddr["DISTRICT_CODE"],
+							':province_code' => $dataComing["address"]["province_code"] ?? $rowAddr["PROVINCE_CODE"],
+							':post_code' => $dataComing["address"]["addr_postcode"] ?? $rowAddr["ADDR_POSTCODE"],
+							':member_no' => $member_no
+						]),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateDataAddress->queryString."\n"."Param => ". json_encode([
+						':addr_no' => $dataComing["address"]["addr_no"] ?? $rowAddr["ADDR_NO"],
+						':addr_moo' => $dataComing["address"]["addr_moo"] ?? $rowAddr["ADDR_MOO"],
+						':addr_village' => $dataComing["address"]["addr_village"] ?? $rowAddr["ADDR_VILLAGE"],
+						':addr_soi' => $dataComing["address"]["addr_soi"] ?? $rowAddr["ADDR_SOI"],
+						':addr_road' => $dataComing["address"]["addr_road"] ?? $rowAddr["ADDR_ROAD"],
+						':tambol_code' => $dataComing["address"]["tambol_code"] ?? $rowAddr["TAMBOL_CODE"],
+						':district_code' => $dataComing["address"]["district_code"] ?? $rowAddr["DISTRICT_CODE"],
+						':province_code' => $dataComing["address"]["province_code"] ?? $rowAddr["PROVINCE_CODE"],
+						':post_code' => $dataComing["address"]["addr_postcode"] ?? $rowAddr["ADDR_POSTCODE"],
+						':member_no' => $member_no
+					]);
+					$lib->sendLineNotify($message_error);
+					$arrayResult["RESULT_ADDRESS"] = FALSE;
+				}
+			}else{
+			}
+		}
 		if(isset($arrayResult["RESULT_EMAIL"]) && !$arrayResult["RESULT_EMAIL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS1010";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -109,6 +194,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
+		}
+		if(isset($arrayResult["RESULT_ADDRESS"]) && !$arrayResult["RESULT_ADDRESS"]){
+			$arrayResult['RESPONSE_CODE'] = "WS1039";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		
 		}
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

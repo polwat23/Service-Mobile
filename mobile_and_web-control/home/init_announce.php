@@ -47,6 +47,7 @@ while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 			$arrAnn["IS_CHECK"] = $rowAnn["is_check"];
 			$arrAnn["CHECK_TEXT"] = $rowAnn["check_text"];
 			$arrAnn["ACCEPT_TEXT"] = $rowAnn["accept_text"];
+			$arrAnn["ALLOW_TARGET"] = TRUE;
 			$arrAnn["CANCEL_TEXT"] = $rowAnn["cancel_text"];
 			$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
 			$arrGroupAnn[] = $arrAnn;
