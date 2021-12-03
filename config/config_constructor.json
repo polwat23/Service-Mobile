@@ -43,5 +43,9 @@
 			"LIMIT_AMOUNT_COOP" : "2000000",
 			"IS_USE" : "true"
 		}
-	}
+	},
+	"SMS_APIKEY" : "51975de4af2d18dcc00e728828309bdd",
+	"SMS_APISECRET" : "bcPsG2zkddGQGnwR",
+	"SMS_URL" : "https://portal-otp.smsmkt.com/api/send-message",
+	"SMS_SENDER" : "COOPKUBOTA"
 }

@@ -32,7 +32,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															(SELECT COUNT(reqloan_doc) AS COUNT_PROCESSING FROM gcreqloan WHERE req_status = '7'".$filterQuery.") AS COUNT_PROCESSING,
 															(SELECT COUNT(reqloan_doc) AS COUNT_CANCEL FROM gcreqloan WHERE req_status = '9'".$filterQuery.") AS COUNT_CANCEL,
 															(SELECT COUNT(reqloan_doc) AS COUNT_DISAPPROVAL FROM gcreqloan WHERE req_status = '-9'".$filterQuery.") AS COUNT_DISAPPROVAL,
-															(SELECT COUNT(reqloan_doc) AS COUNT_APPROVE FROM gcreqloan WHERE req_status = '1'".$filterQuery.") AS COUNT_APPROVE
+															(SELECT COUNT(reqloan_doc) AS COUNT_APPROVE FROM gcreqloan WHERE req_status = '1'".$filterQuery.") AS COUNT_APPROVE,
+															(SELECT COUNT(reqloan_doc) AS COUNT_CANCELAPPROVE FROM gcreqloan WHERE req_status = '-99'".$filterQuery.") AS COUNT_CANCELAPPROVE
 															FROM gcreqloan WHERE req_status = '8'".$filterQuery);
 															
 		$getAllReqDocno->execute($dataComing["is_filtered"] ? $arrayExecute : []);

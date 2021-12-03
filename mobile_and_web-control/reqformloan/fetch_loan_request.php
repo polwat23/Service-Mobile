@@ -21,15 +21,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrMoratorium[$rowMoratorium["loangroup_code"]] = $rowMoratorium["is_moratorium"];
 		}
 		
+		$getShareIno = $conmssql->prepare("SELECT TOP 1 stm.PERIOD
+						FROM shsharestatement stm
+						WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') ORDER BY stm.seq_no DESC");
+		$getShareIno->execute([':member_no' => $member_no]);
+		$rowShareIno = $getShareIno->fetch(PDO::FETCH_ASSOC);
+		$share_period = $rowShareIno["PERIOD"] ?? 0;
+		
 		$fetchLoanIntRate = $conmssql->prepare("SELECT lnt.LOANTYPE_DESC,lnt.LOANTYPE_CODE,lnd.INTEREST_RATE,lnt.LOANGROUP_CODE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 																	ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-																	WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and getdate() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
+																	WHERE lnt.loantype_code IN(".implode(',',$arrCanCal).") and 
+																	cast(getdate() as date) BETWEEN cast(lnd.EFFECTIVE_DATE as date) and cast(lnd.EXPIRE_DATE as date)
+																	ORDER BY lnt.loantype_code");
 		$fetchLoanIntRate->execute();
 		while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
 			$arrayDetailLoan = array();
 			
 			$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9','1')");
+														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9','1','-99')");
 			$CheckIsReq->execute([
 				':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
 				':member_no' => $payload["member_no"]
@@ -45,11 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayDetailLoan["FLAG_NAME"] = $arrMoratorium[$rowIntRate["LOANGROUP_CODE"]] == '1' ? "อยู่ระหว่างการพักชำระหนี้ไม่สามารถกู้ได้" : "อยู่ระหว่างรอเจ้าหน้าที่ยืนยันข้อมูลพักชำระหนี้ไม่สามารถกู้ได้";
 				}else{
 					if($rowIntRate["LOANGROUP_CODE"] == '01'){
-						$getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
-						$getMemberIno->execute([':member_no' => $member_no]);
-						$rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
-						$duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
-						if($duration_month >= 2){
+						if($share_period >= 2){
 							$getOldLoanBal = $conmssql->prepare("SELECT SUM(lnm.PRINCIPAL_BALANCE) as PRINCIPAL_BALANCE FROM lncontmaster lnm
 												LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code  
 												WHERE lnm.member_no = :member_no 
@@ -70,29 +75,50 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrayDetailLoan["FLAG_NAME"] = "กู้ได้เฉพาะสมาชิก 2 เดือนขึ้นไป";
 						}
 					}else if($rowIntRate["LOANGROUP_CODE"] == '02'){
-						$getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
-						$getMemberIno->execute([':member_no' => $member_no]);
-						$rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
-						$duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
-						if($duration_month >= 4){
-							$getOldLoanBal = $conmssql->prepare("SELECT lnm.LAST_PERIODPAY FROM lncontmaster lnm
-												LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code  
-												WHERE lnm.member_no = :member_no
-												and  lnm.loantype_code = :loantype_code and lnm.contract_status > 0 and lnm.contract_status <> 8");
-							$getOldLoanBal->execute([
-								':member_no' => $member_no,
-								':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
-							]);
-							$rowOldLoanBal = $getOldLoanBal->fetch(PDO::FETCH_ASSOC);
-							if(isset($rowOldLoanBal["LAST_PERIODPAY"]) && $rowOldLoanBal["LAST_PERIODPAY"] <= 2){
-								$arrayDetailLoan["IS_REQ"] = FALSE;
-								$arrayDetailLoan["FLAG_NAME"] = "ต้องชำระสัญญาเดิม 3 งวดขึ้นไป จึงจะขอกู้ได้";
-							}else{
-								$arrayDetailLoan["IS_REQ"] = TRUE;
-							}
-						}else{
+						if(date('d-m-Y') == '27-10-2021'){
 							$arrayDetailLoan["IS_REQ"] = FALSE;
-							$arrayDetailLoan["FLAG_NAME"] = "กู้ได้เฉพาะสมาชิก 4 เดือนขึ้นไป";
+							$arrayDetailLoan["FLAG_NAME"] = "ปิดปรับปรุงบริการขอกู้สามัญฯ กรุณาทำรายการใหม่อีกครั้งในวันถัดไป ขออภัยในความไม่สะดวก";
+						}else if(date('d')>=11 && date('d')<=19){
+							$arrayDetailLoan["IS_REQ"] = FALSE;
+							$arrayDetailLoan["FLAG_NAME"] = "ปิดบริการขอกู้สามัญฯ ในช่วงวันที่ 11 - 19  กรุณาทำรายการใหม่อีกครั้งหลังวันเวลาดังกล่าว";
+						}else{
+							if($share_period >= 4){
+								$getOldLoanBal = $conmssql->prepare("SELECT lnm.LAST_PERIODPAY, lnm.LOANCONTRACT_NO FROM lncontmaster lnm
+													LEFT JOIN lnloantype lnt ON lnm.loantype_code = lnt.loantype_code  
+													WHERE lnm.member_no = :member_no
+													and  lnm.loantype_code = :loantype_code and lnm.contract_status > 0 and lnm.contract_status <> 8");
+								$getOldLoanBal->execute([
+									':member_no' => $member_no,
+									':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
+								]);
+								$isNewContract = FALSE;
+								while($rowOldLoanBal = $getOldLoanBal->fetch(PDO::FETCH_ASSOC)){
+									$getMoraStatement = $conmssql->prepare("SELECT COUNT(lsm.SEQ_NO) as COUNT_MORA
+												FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
+												ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
+												WHERE RTRIM(lsm.loancontract_no) = :loancontract_no and lsm.LOANITEMTYPE_CODE = 'LPM' and lsm.PRINCIPAL_PAYMENT = 0 and lsm.ENTRY_ID != 'CNV'");
+									$getMoraStatement->execute([
+										':loancontract_no' => $rowOldLoanBal["LOANCONTRACT_NO"],
+									]);
+									$rowMoraStatement = $getMoraStatement->fetch(PDO::FETCH_ASSOC);
+									$contract_period = $rowOldLoanBal["LAST_PERIODPAY"] ?? 0;
+									$moratorium_period = $rowMoraStatement["COUNT_MORA"] ?? 0;
+									$last_periodpay = $contract_period - $moratorium_period;
+								
+									if($last_periodpay <= 2){
+										$isNewContract = TRUE;
+									}
+								}
+								if($isNewContract && $member_no != "00000432"){
+									$arrayDetailLoan["IS_REQ"] = FALSE;
+									$arrayDetailLoan["FLAG_NAME"] = "ต้องชำระสัญญาเดิม 3 งวดขึ้นไป จึงจะขอกู้ได้";
+								}else{
+									$arrayDetailLoan["IS_REQ"] = TRUE;
+								}
+							}else{
+								$arrayDetailLoan["IS_REQ"] = FALSE;
+								$arrayDetailLoan["FLAG_NAME"] = "กู้ได้เฉพาะสมาชิก 4 เดือนขึ้นไป";
+							}
 						}
 					}else{
 						$arrayDetailLoan["IS_REQ"] = TRUE;

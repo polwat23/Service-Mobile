@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$checkCanMora = $conmysql->prepare("SELECT is_moratorium FROM gcmoratorium WHERE LOANGROUP_CODE = :loangroup_code and member_no = :member_no and is_moratorium <> '0'");
 			$checkCanMora->execute([
 				':loangroup_code' =>  $rowLoanType["LOANGROUP_CODE"],
-				':member_no' =>  $member_no
+				':member_no' =>  $payload["member_no"]
 			]);
 			$rowCheck = $checkCanMora->fetch(PDO::FETCH_ASSOC);
 			if($rowCheck["is_moratorium"] == '8'){

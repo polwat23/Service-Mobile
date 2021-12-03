@@ -46,7 +46,8 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			':otp_text' => $arrMessage["BODY"]
 		])){
 			$arrayDest["member_no"] = $member_no;
-			$arrayDest["tel"] = $arrayTel[0]["TEL"];
+			$arrayDest["phone"] = $arrayTel[0]["TEL"];
+			$arrayDest["sender"] = $config["SMS_SENDER"];
 			$arrayDest["message"] = $arrMessage["BODY"];
 			$arraySendSMS = $lib->sendSMS($arrayDest);
 			if($arraySendSMS["RESULT"]){

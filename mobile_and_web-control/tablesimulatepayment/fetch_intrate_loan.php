@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	
 		$fetchIntrate = $conmssql->prepare("select lir.interest_rate as INTEREST_RATE,lp.LOANTYPE_DESC,lp.LOANTYPE_CODE from lnloantype lp LEFT JOIN lncfloanintratedet lir
 												ON lp.inttabrate_code = lir.loanintrate_code 
-												where lp.loantype_code IN(".implode(',',$arrCanCal).") AND GETDATE() 
+												where lp.loantype_code IN(".implode(',',$arrCanCal).") AND CONVERT(varchar, GETDATE(), 23)
 												BETWEEN CONVERT(varchar, lir.effective_date, 23) and CONVERT(varchar, lir.expire_date, 23)");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();

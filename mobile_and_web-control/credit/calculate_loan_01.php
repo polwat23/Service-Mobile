@@ -13,7 +13,7 @@ $maxloanpermit_amt = 30000;
 $sum_old_payment = 0;
 $other_amt = 0;
 $cal_period = 0;
-$getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
+$getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT,BIRTH_DATE FROM mbmembmaster WHERE member_no = :member_no");
 $getMemberIno->execute([':member_no' => $member_no]);
 $rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
 $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
@@ -33,18 +33,19 @@ $getOldContract->execute([
 ]);
 
 while($rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC)){
+	$arrContract = array();
+	$contract_no = preg_replace('/\//','',$rowOldContract["LOANCONTRACT_NO"]);
+	$arrContract['LOANTYPE_DESC'] = $rowOldContract["LOANTYPE_DESC"];
+	$arrContract["CONTRACT_NO"] = $contract_no;
+	$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
+	$arrContract['BALANCE_AND_INTEREST'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
+	$arrContract['INTEREST_AMT'] = $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 	if($rowOldContract["LOANTYPE_CODE"] == $loantype_code){
-		$arrContract = array();
-		$contract_no = preg_replace('/\//','',$rowOldContract["LOANCONTRACT_NO"]);
-		$arrContract['LOANTYPE_DESC'] = $rowOldContract["LOANTYPE_DESC"];
-		$arrContract["CONTRACT_NO"] = $contract_no;
-		$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
-		$arrContract['BALANCE_AND_INTEREST'] = $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		$arrOldContract[] = $arrContract;
 	}
 	
 	if(isset($dataComing["old_contract_selected"]) && $dataComing["old_contract_selected"] != ""){
-		if(strpos($dataComing["old_contract_selected"], $arrContract["CONTRACT_NO"]) < 0){
+		if(strpos($dataComing["old_contract_selected"], $arrContract["CONTRACT_NO"]) === false){
 			$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
 			$oldConsBal += $rowOldContract["PRINCIPAL_BALANCE"];
 		}else{
@@ -79,6 +80,11 @@ $sum_old_payment += $other_amt;
 if(isset($dataComing["period"]) && $dataComing["period"] != ""){
         $cal_period = $dataComing["period"];
 }else{
+	//เช็ควันเกษียณ สิ้นปี ปีที่ครบ 55 ปี
+	$m_birthdate = date('m',strtotime($rowMember["BIRTH_DATE"]));
+	$y_birthdate = date('Y')-date('Y',strtotime($rowMember["BIRTH_DATE"]));
+	$max_member_period = ((55 - $y_birthdate)*12) + (12 - date('m'));
+
 	$getCalMaxPeriod = $conmssql->prepare("SELECT MAX_PERIOD 
 					FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
 					WHERE lnd.LOANTYPE_CODE = :loantype_code");
@@ -88,6 +94,11 @@ if(isset($dataComing["period"]) && $dataComing["period"] != ""){
 	$rowCalMaxPeriod = $getCalMaxPeriod->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowCalMaxPeriod["MAX_PERIOD"])){
 		$cal_period = $rowCalMaxPeriod["MAX_PERIOD"];
+		//เช็คงวดเกษียณ
+		$arrMinPeriod = array();
+		$arrMinPeriod[] = $max_member_period;
+		$arrMinPeriod[] = $cal_period;
+		$cal_period =  min($arrMinPeriod);
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0088";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -126,6 +137,11 @@ if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != ""){
 }
 
 $receive_net = $maxloan_amt;
-
-
+$calculate_arr = array();
+$calculate_arr["SHARESTK_AMT"] = $rowShareBF["SHARESTK_AMT"];
+$calculate_arr["FUND_AMT"] = $rowFund["FUND_AMT"];
+$calculate_arr["OLDCONSBAL"] = $oldConsBal;
+$calculate_arr["SALARY_AMOUNT"] = $rowMember["SALARY_AMOUNT"];
+$calculate_arr["OTHER_AMT"] = $other_amt;
+$calculate_arr["SUM_OLD_PAYMENT"] = $sum_old_payment;
 ?>

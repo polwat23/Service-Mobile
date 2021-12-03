@@ -273,10 +273,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$conmysql->beginTransaction();
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
 																		int_rate_at_req,salary_at_req,salary_img,bookbank_img,bookcoop_img,id_userlogin,contractdoc_url,
-																		deptaccount_no_bank,bank_desc,deptaccount_no_coop,objective,extra_credit_project,diff_old_contract,old_contract)
+																		deptaccount_no_bank,bank_desc,deptaccount_no_coop,objective,extra_credit_project,diff_old_contract,old_contract,req_remark,receive_date,old_contract_prn,old_contract_int,
+																		old_contract_data)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:receive_net,:int_rate
 																		,:salary,:salary_img,:bookbank_img,:bookcoop_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:bank_desc,:deptaccount_no_coop,:objective,
-																		:extra_credit_project,:diff_old,:old_contract)");
+																		:extra_credit_project,:diff_old,:old_contract,:req_remark,:receive_date,:old_contract_prn,:old_contract_int,
+																		:old_contract_data)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -300,6 +302,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':extra_credit_project' => $dataComing["extra_credit_project"] ?? null,
 					':diff_old' => $dataComing["old_contract_balance"] ?? null,
 					':old_contract' => $dataComing["old_contract_selected"] ?? null,
+					':req_remark' => $dataComing["calculate_value"] ?? null,
+					':receive_date' => $dataComing["receive_date"] ?? null,
+					':old_contract_prn' => $dataComing["old_contract_prn"] ?? null,
+					':old_contract_int' => $dataComing["old_contract_int"] ?? null,
+					':old_contract_data' => $dataComing["old_contract_data"] ?? null
 				])){
 					$arrData = array();
 					$arrData["requestdoc_no"] = $reqloan_doc;
@@ -414,6 +421,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':extra_credit_project' => $dataComing["extra_credit_project"],
 							':diff_old' => $dataComing["old_contract_balance"] ?? null,
 							':old_contract' => $dataComing["old_contract_selected"] ?? null,
+							':req_remark' => $dataComing["calculate_value"] ?? null,
+							':receive_date' => $dataComing["receive_date"] ?? null,
+							':old_contract_prn' => $dataComing["old_contract_prn"] ?? null,
+							':old_contract_int' => $dataComing["old_contract_int"] ?? null,
+							':old_contract_data' => $dataComing["old_contract_data"] ?? null
 						]),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
@@ -442,6 +454,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						':expense_accid' => $dataComing["expense_accid"],
 						':diff_old' => $dataComing["old_contract_balance"] ?? null,
 						':old_contract' => $dataComing["old_contract_selected"] ?? null,
+						':req_remark' => $dataComing["calculate_value"] ?? null,
+						':receive_date' => $dataComing["receive_date"] ?? null,
+						':old_contract_prn' => $dataComing["old_contract_prn"] ?? null,
+						':old_contract_int' => $dataComing["old_contract_int"] ?? null,
+						':old_contract_data' => $dataComing["old_contract_data"] ?? null
 					]);
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_CODE'] = "WS1036";

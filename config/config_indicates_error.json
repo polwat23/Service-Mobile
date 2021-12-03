@@ -1,6 +1,6 @@
 {
 	"WS0001" : [{"th" : "ไม่สามารถยืนยันการเข้าใช้งานได้เพราะเวลาในเครื่องไม่ตรง กรุณาตรวจสอบเวลาในเครื่องของท่าน","en" : "Unauthenticated because the time in device not correct please check time in your device"}],
-	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หรือคลิกลืมรหัสผ่านเพื่อทำตามขั้นตอนของระบบ","en" : "Invalid password please check password again or click forget password for step by step of system"}],
+	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณากดลืมรหัสผ่านเพื่อรับรหัสผ่านใหม่ผ่านหมายเลขโทรศัพท์มือถือ","en" : "Invalid password please check password again or click forget password for send new password to your mobilephone"}],
 	"WS0003" : [{"th" : "ไม่พบข้อมูลผู้ใช้นี้ในระบบ กรุณาตรวจสอบเลขสมาชิก","en" : "Not found this user in system please check member no"}],
 	"WS0004" : [{"th" : "รหัสผ่านที่ท่านกรอกไม่ตรงกับรหัสผ่านเดิม","en" : "Password does not match"}],
 	"WS0005" : [{"th" : "ไม่พบบัญชีที่สามารถผูกได้ หากท่านต้องการผูกบัญชีกรุณาไปอนุญาตบัญชีที่สามารถทำธุรกรรมได้ที่หน้าจัดการบัญชีสหกรณ์","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
@@ -225,7 +225,8 @@
 			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
 			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
 			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
-			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}],
+			"-99" : [{"th" : "ยกเลิกการอนุมัติ","en" : "Cancel Approve form loan request"}]
 		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
 		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}]
