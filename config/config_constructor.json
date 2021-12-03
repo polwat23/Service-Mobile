@@ -6,7 +6,7 @@
 	"APP_ID" : "com.ago.mobile",
 	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/AGOCOOP/",
 	"FIREBASE_API_KEY" : "",
-	"FIREBASE_SERVER_KEY" : "",
+	"FIREBASE_SERVER_KEY" : "AAAARf-kKHU:APA91bHMKdprHitj8GNAMw8UmpjQt45MJqjO7CVWq_-cKFvfJCDDbop1ywTf-TcEMRssXdHPSFFUmFMZ102t_8vi6Nl5schE711cQZcpdF9R5MS5gEnU8RWs_POa4wq-DmFB9XpuwA4j",
 	"SECRET_KEY_JWT" : "AGO!/-Gcoop+Connect^069001*!&",
 	"SECRET_KEY_CORE" : "AGO!/+Control-BackOffice^069001*!&",
 	"SIGNATURE_KEY_VERIFY_API" : "AGOGcoop+-API_LB-WITH-!Bank!-^069001*!&",
@@ -20,7 +20,7 @@
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
-	"HW_APPID" : "103399457",
-    "HW_APPSECRET": "46d84fcb3382675767c321a0d3fc2873ca31a1897df5b371e618125363262260",
+	"HW_APPID" : "104758433",
+    "HW_APPSECRET": "b480806e1665422ed071f21db39b0febd9e3817815f83b78ae694251408e2dff",
 	"PORT_MAILSERVER" : "587"
 }
