@@ -18,7 +18,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		$getRoundType = $conmssql->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
 		$getRoundType->execute();
 		$rowRoundType = $getRoundType->fetch(PDO::FETCH_ASSOC);
-		$getConstantYear = $conmssql->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
+		$rowRoundType["ROUND_TYPE"] = 1;
+ 		$getConstantYear = $conmssql->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
 		$getConstantYear->execute();
 		$rowConstant = $getConstantYear->fetch(PDO::FETCH_ASSOC);
 		if($rowConstant["DAYINYEAR"] == 0){
@@ -109,9 +110,25 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
 				if (($payment_sumbalance) < $pay_period) {
-					$prn_amount = $payment_sumbalance;
+					if($i == $period){
+						$prn_amount = $payment_sumbalance;
+					}else{
+						if($payment_sumbalance % 100 > 0){
+							$prn_amount = floor($payment_sumbalance + (100 - ($payment_sumbalance % 100)));
+						}else{
+							$prn_amount = $payment_sumbalance;
+						}
+					}
 				}else{
-					$prn_amount = $pay_period;
+					if($i == $period){
+						$prn_amount = $pay_period;
+					}else{
+						if($pay_period % 100 > 0){
+							$prn_amount = floor($pay_period + (100 - ($pay_period % 100)));
+						}else{
+							$prn_amount = $pay_period;
+						}
+					}
 				}
 				$periodPayment = $prn_amount + $period_int;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
@@ -141,11 +158,28 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					$dayinYear = $rowConstant["DAYINYEAR"];
 				}
 				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
-				$prn_amount = $pay_period - $period_int;
+				$payPeriodRaw = $pay_period - $period_int;
+				if($i == $period){
+					$prn_amount = $payPeriodRaw;
+				}else{
+					if($payPeriodRaw % 100 > 0){
+						$prn_amount = floor($payPeriodRaw + (100 - ($payPeriodRaw % 100)));
+					}else{
+						$prn_amount = $payPeriodRaw;
+					}
+				}
 				
 				
 				if (($payment_sumbalance) < $pay_period) {
-				  $prn_amount = $payment_sumbalance;
+					if($i == $period){
+						$prn_amount = $payment_sumbalance;
+					}else{
+						if($payment_sumbalance % 100 > 0){
+							$prn_amount = floor($payment_sumbalance + (100 - ($payment_sumbalance % 100)));
+						}else{
+							$prn_amount = $payment_sumbalance;
+						}
+					}
 				}
 				$periodPaymentRaw = $prn_amount + $period_int;
 				if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
@@ -181,7 +215,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
 				$arrPaymentPerPeriod["PERIOD"] = $i;
 				$arrPaymentPerPeriod["INTEREST"] = number_format($period_int,2);
-				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment,2);
+				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPaymentRaw,2);
 				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
 			}
 			if($prn_amount > 0){
@@ -202,11 +236,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => " Argument ú "."\n".json_encode($dataComing),
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = " ".$filename."  Argument ú "."\n".json_encode($dataComing);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
