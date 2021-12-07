@@ -6,9 +6,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT YR.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER YR LEFT JOIN yrcfrate yc ON yr.div_year = yc.div_year
+		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT YR.DIV_YEAR AS DIV_YEAR,yc.DIVPERCENT_RATE,yc.AVGPERCENT_RATE
+																	FROM YRDIVMASTER YR LEFT JOIN yrcfrate yc ON yr.div_year = yc.div_year
 																	WHERE YR.MEMBER_NO = :member_no and yc.webshow_flag = '1'
-																GROUP BY YR.DIV_YEAR ORDER BY YR.DIV_YEAR DESC) where rownum <= :limit_year");
+																GROUP BY YR.DIV_YEAR,yc.DIVPERCENT_RATE,yc.AVGPERCENT_RATE 
+																ORDER BY YR.DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
 			':limit_year' => $limit_year
@@ -22,13 +24,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
+			$arrDividend["DIV_RATE"] = ($rowYear["DIVPERCENT_RATE"] * 100).' %';
+			$arrDividend["AVG_RATE"] = ($rowYear["AVGPERCENT_RATE"] * 100).' %';
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
 			
 			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
-											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('CBT','DEP')");
+											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('CBT','CSH','DEP','DEM','CBM')");
 			$getPaydiv->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -44,12 +48,48 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
-			
-			$arrayRecv["RECEIVE_DESC"] = "คงเหลือหลังรับ";
-			$arrayRecv["ACCOUNT_RECEIVE"] = "ติดต่อสอบถามทางสหกรณ์";
-			$arrayRecv["RECEIVE_AMT"] = number_format(($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"]) - $sumPay,2);
-			$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
-			
+			if($rowYear["DIV_YEAR"] >= '2564'){
+				$getRecvAcc = $conoracle->prepare("SELECT
+														yucf.methpaytype_desc AS TYPE_DESC,
+														CM.BANK_DESC AS BANK,
+														YM.EXPENSE_AMT AS RECEIVE_AMT ,						
+														YM.EXPENSE_ACCID AS BANK_ACCOUNT,
+														YM.METHPAYTYPE_CODE,
+														YM.MONEYTYPE_CODE
+													FROM 
+														YRDIVMETHPAY YM 
+														 LEFT JOIN yrucfmethpay yucf ON YM.methpaytype_code = yucf.methpaytype_code and ym.coop_id = yucf.coop_id
+														LEFT JOIN CMUCFMONEYTYPE CUCF ON YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
+														LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
+													WHERE
+														YM.MEMBER_NO = :member_no
+														AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP','DEM','CBM')
+														AND YM.DIV_YEAR = :div_year");
+				$getRecvAcc->execute([
+					':member_no' => $member_no,
+					':div_year' => $rowYear["DIV_YEAR"]
+				]);
+				while($rowMethpay = $getRecvAcc->fetch(PDO::FETCH_ASSOC)){
+					$arrayRecv = array();
+					if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP" || $rowMethpay["METHPAYTYPE_CODE"] == "DEM" || $rowMethpay["METHPAYTYPE_CODE"] == "CBM"){
+						if($rowMethpay["MONEYTYPE_CODE"] != 'TRN'){
+							$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+						}else{
+							$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+						}
+					}
+					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+					$arrayRecv["BANK"] = $rowMethpay["BANK"];
+					$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
+					$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+
+				}
+			}else{
+				$arrayRecv["RECEIVE_DESC"] = "คงเหลือหลังรับ";
+				$arrayRecv["ACCOUNT_RECEIVE"] = "ติดต่อสอบถามทางสหกรณ์";
+				$arrayRecv["RECEIVE_AMT"] = number_format(($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"]) - $sumPay,2);
+				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+			}
 			$arrDivmaster[] = $arrDividend;
 		}
 		$arrayResult["DIVIDEND"] = $arrDivmaster;
