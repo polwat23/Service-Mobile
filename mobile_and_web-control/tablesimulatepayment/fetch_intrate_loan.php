@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
 			$arrIntGroup[] = $arrIntrate;
 		}
+		$arrayResult['DEFAULT_PAYMENT_TYPE'] = 1;
 		$arrayResult['INT_RATE'] = $arrIntGroup;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
