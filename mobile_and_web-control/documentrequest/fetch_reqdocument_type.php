@@ -71,9 +71,14 @@ if($lib->checkCompleteArgument(['menu_component','document_code'],$dataComing)){
 		$arrAssistGrp[] = $arrType;
 	}
 	if(($dataComing["document_code"] == 'CSHR' || $dataComing["document_code"] == 'RRSN' || $dataComing["document_code"] == 'PAYD') && date("d") == 7){
+		$is_disabled = false;
+		$arrayResult['REQDOC_REMARK_TITLE'] = "หมายเหตุ";
+		$arrayResult['REQDOC_REMARK_DETAIL'] = "ปิดรับเอกสารใบคำขอ เพิ่มลดหุ้น ชำระหนี้บางส่วนและลาออก ทุกวันที่ 7 ของเดือน";
+	}
+	if(($dataComing["document_code"] == 'RRSN') && date("d") >= 8 && date("d") <= 19){
 		$is_disabled = true;
-		$arrayResult['REQDOC_REMARK_TITLE'] = "ปิดรับเอกสารใบคำขอ";
-		$arrayResult['REQDOC_REMARK_DETAIL'] = "ปิดรับเอกสารใบคำขอ สมัครสมาชิก เพิ่มลดหุ้น ชำระหนี้บางส่วนและลาออก ทุกวันที่ 7 ของเดือน กรุณาทำรายการใหม่อีกครั้งในภายหลัง";
+		$arrayResult['REQDOC_REMARK_TITLE'] = "ปิดรับเอกสารใบคำขอลาออก";
+		$arrayResult['REQDOC_REMARK_DETAIL'] = "อยู่ระหว่างประมวลผลวันที่ 8-19 กรุณาทำรายการใหม่อีกครั้งหลังวันเวลาดังกล่าว";
 	}
 	
 	$arrayResult['DISABLED_REQ'] = $is_disabled;

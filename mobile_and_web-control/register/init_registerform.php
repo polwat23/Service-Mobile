@@ -124,11 +124,11 @@ require_once('../autoload.php');
 	}
 	
 	$is_disabled = false;
-	if(date("d") == 7){
-		$is_disabled = true;
+	/*if(date("d") == 7){
+		$is_disabled = false;
 		$arrayResult['REQDOC_REMARK_TITLE'] = "ปิดรับเอกสารใบคำขอ";
-		$arrayResult['REQDOC_REMARK_DETAIL'] = "ปิดรับเอกสารใบคำขอ สมัครสมาชิก ทุกวันที่ 7 ของเดือน กรุณาทำรายการใหม่อีกครั้งในภายหลัง";
-	}
+		$arrayResult['REQDOC_REMARK_DETAIL'] = "ปิดรับเอกสารใบคำขอ สมัครสมาชิก ทุกวันที่ 7 ของเดือน";
+	}*/
 	
 	$arrayResult['DISABLED_REQ'] = $is_disabled;
 	$arrayResult['FORM_REQDOCUMENT'] = $arrayGrpForm;
