@@ -59,7 +59,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getSalaryBal->execute([':loantype_code' => $rowCredit["LOANTYPE_CODE"]]);
 				$rowSalaryPercent = $getSalaryBal->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowSalaryPercent["SALARYBAL_PERCENT"]) && $rowSalaryPercent["SALARYBAL_PERCENT"] != ""){
-					$salaryActual = $dataComing["salary"] * ($rowSalaryPercent["SALARYBAL_PERCENT"] / 100);
+					if($dataComing["salary"] < $loan_amt){
+						$loan_amt = $rowCredit["salary"];
+					}
+					$pay_period = $loan_amt / $rowMaxPeriod["MAX_PERIOD"];
+					if($pay_period % 100 > 0){
+						$pay_period = floor($pay_period + (100 - ($pay_period % 100)));
+					}
+					$intCal = (($loan_amt * $int_rate) * 31) / 365;
+					//--------------------------------------------------
+					/*$salaryActual = $dataComing["salary"] * ($rowSalaryPercent["SALARYBAL_PERCENT"] / 100);
 					if($remainSalary < $salaryActual){
 						$remainSalary = $salaryActual;
 					}
@@ -78,18 +87,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$loan_amt = floor($loan_amt - ($loan_amt % 1000));
 					}
 					$intCal = (($loan_amt * $int_rate) * 31) / 365;
-					$pay_period = ($loan_amt - $intCal) / $rowMaxPeriod["MAX_PERIOD"];
-					if($pay_period % 100 > 0){
-						$pay_period = floor($pay_period + (100 - ($pay_period % 100)));
-					}
 					
-					$interest = $lib->roundDecimal($intCal,1);
-					if($rowCredit["CREDIT_AMT"] < $loan_amt){
-						$loan_amt = $rowCredit["CREDIT_AMT"];
-					}
-					if($loan_amt > $rowCredit["MAXLOAN_AMT"]){
-						$loan_amt = $rowCredit["MAXLOAN_AMT"];
-					}
+					
+					$interest = $lib->roundDecimal($intCal,1);*/
+				
 					$remainSalary = $dataComing["salary"] - $pay_period - $interest - $dataComing["other_exp"];
 				}else{
 					if($loan_amt % 1000 > 0){
