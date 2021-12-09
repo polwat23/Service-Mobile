@@ -42,6 +42,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getIntRate->execute([':loantype_code' => $rowCredit["LOANTYPE_CODE"]]);
 				$rowIntRate = $getIntRate->fetch(PDO::FETCH_ASSOC);
 				$int_rate = $rowIntRate["INTEREST_RATE"] / 100;
+				if($loan_amt % 1000 > 0){
+					$loan_amt = floor($loan_amt - ($loan_amt % 1000));
+				}
 				$intCal = (($loan_amt * $int_rate) * 31) / 365;
 				$interest = $lib->roundDecimal($intCal,1);
 				$actualCredit = $loan_amt;
@@ -85,9 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 				
 				}
-				if($loan_amt % 1000 > 0){
-					$loan_amt = floor($loan_amt - ($loan_amt % 1000));
-				}
+				
 				$arrOther = array();
 				$arrOther[0]["LABEL"] = "ชำระต้นต่องวด";
 				$arrOther[0]["VALUE"] = number_format($pay_period,2);
@@ -96,6 +97,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrOther[2]["LABEL"] = "เงินเดือนคงเหลือ";
 				$arrOther[2]["VALUE"] = number_format($remainSalary,2);
 				$arrOther[2]["VALUE_TEXT_PROPS"] = ["color" => "red"];
+				$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 				$arrCredit["LOANTYPE_DESC"] = $rowCredit["LOANTYPE_DESC"];
 				$arrCredit["LOANTYPE_CODE"] = $rowCredit["LOANTYPE_CODE"];
 				$arrCredit['LOAN_PERMIT_AMT'] = $loan_amt ?? 0;
@@ -149,6 +151,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrOther[0]["VALUE"] = number_format($pay_period,2);
 				$arrOther[1]["LABEL"] = "ประมาณการดอกเบี้ย";
 				$arrOther[1]["VALUE"] = number_format($interest,2);
+				$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 				$arrCredit["LOANTYPE_DESC"] = $rowCredit["LOANTYPE_DESC"];
 				$arrCredit["LOANTYPE_CODE"] = $rowCredit["LOANTYPE_CODE"];
 				$arrCredit['LOAN_PERMIT_AMT'] = $loan_amt ?? 0;
