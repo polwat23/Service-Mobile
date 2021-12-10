@@ -191,10 +191,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ครูตาก จํากัด (สำนักงานใหญ่)
+					สหกรณ์ออมทรัพย์ครูพะเยา จำกัด (สำนักงานใหญ่)
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Tak Teacher Saving and Credit cooperative LTD
+					Phayao Teacher Saving Cooperative Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">

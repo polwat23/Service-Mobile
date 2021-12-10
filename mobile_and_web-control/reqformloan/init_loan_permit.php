@@ -45,12 +45,37 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMaxPeriod["MAX_PERIOD"])){
+				$getLoanObjective = $conoracle->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective WHERE loantype_code = :loantype");
+				$getLoanObjective->execute([':loantype' => $dataComing["loantype_code"]]);
+				$arrGrpObj = array();
+				while($rowLoanObj = $getLoanObjective->fetch(PDO::FETCH_ASSOC)){
+					$arrObj = array();
+					$arrObj["LOANOBJECTIVE_CODE"] = $rowLoanObj["LOANOBJECTIVE_CODE"];
+					$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
+					$arrGrpObj[] = $arrObj;
+				}
+				$arrDepositGrp = array();
+				$getAccountDeposit = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM DPDEPTMASTER WHERE member_no = :member_no 
+																				and deptclose_status = '0' and depttype_code = '01'");
+				$getAccountDeposit->execute([':member_no' => $member_no]);
+				while($rowAccDept = $getAccountDeposit->fetch(PDO::FETCH_ASSOC)){
+					$arrDeposit = array();
+					$arrDeposit["ACCOUNT_NO"] = $rowAccDept["DEPTACCOUNT_NO"];
+					$arrDeposit["ACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccDept["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+					$arrDepositGrp[] = $arrDeposit;
+				}
+
 				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 														WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
 				$period_payment = round($maxloan_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+				$arrRecvCoop["VALUE"] = "1";
+				$arrRecvCoop["DESC"] = "โอนเข้าบัญชีสหกรณ์";
+				$arrGrpReceive[] = $arrRecvCoop;
+				$arrayResult["DEFAULT_RECV_ACC"] = "1";
+				$arrayResult["RECV_ACC"] = $arrGrpReceive;
 				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
 				$arrayResult["REQUEST_AMT"] = $request_amt;
@@ -62,6 +87,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["REQ_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+				$arrayResult['COOP_ACCOUNT'] = $arrDepositGrp;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
