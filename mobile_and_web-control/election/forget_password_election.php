@@ -19,6 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrHeader[] = "version: v1";
 		$arrHeader[] = "OAuth: Bearer ".$verify_token;
 		$arraySendSMS = $lib->posting_data($config["URL_SMS_ELECTION"].'/navigator',$arrSendData,$arrHeader);
+		$arrayResult['REMARK_FORGETPASS'] = "หมายเลขโทรศัพท์ : ".substr($rowKeycode["tel_mobile"],0,3)."-XXX-X".substr($rowKeycode["tel_mobile"],7)." (Thaicoop)";
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

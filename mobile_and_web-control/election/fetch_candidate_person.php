@@ -28,8 +28,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['SELECT_MAX'] = 7;
 		$arrayResult['ELECTION_PERSON'] = $arrElec;
 		$arrayResult['TEXT_HEADER'] = "ลงคะแนนสรรหาคณะกรรมการดำเนินการ ปี 2565";
-		$arrayResult['TEXT_TITLE'] = "สมาชิกเลือกได้ไม่เกิน  7  หมายเลข";
-		$arrayResult['TEXT_FOOTER'] = "กรุณาตรวจสอบการเลือกหมายเลขของท่านให้เรียบร้อยก่อน กด ยืนยัน เพราะไม่สามารถกลับมาแก้ไขการสรรหาของท่านได้";
+		$arrayResult['TEXT_TITLE'] = "สมาชิกสรรหาได้ทุกเขตไม่เกิน  7  หมายเลข";
+		$arrayResult['TEXT_FOOTER'] = "กรุณาตรวจสอบการลงคะแนนของท่านให้เรียบร้อยก่อน แล้วจึงกดยืนยันเพราะไม่สามารถกลับมาแก้ไขได้";
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
