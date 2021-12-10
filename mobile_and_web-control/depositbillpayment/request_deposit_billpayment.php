@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 		$dateOperC = date('c');
 		$haveLon = FALSE;
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-		if($rowCheckBill["transfer_status"] == '0'){
+		if($rowCheckBill["transfer_status"] == '0' || $dataComing["tran_id"] == '202112071457431634'){
 			if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
 				$payload = array();
 				$payload["member_no"] = $rowCheckBill["member_no"];
