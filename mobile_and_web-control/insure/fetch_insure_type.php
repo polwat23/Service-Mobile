@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchinSureInfo = $conmssql->prepare("SELECT IGM.PERIODPAY_AMT AS INSURE_AMT,IGM.INSCOST_BLANCE AS PROTECT_AMT,IST.INSCOMPANY_NAME AS COMPANY_NAME,
 												IGM.STARTSAFE_DATE as PROTECTSTART_DATE,IGM.ENDSAFE_DATE as PROTECTEND_DATE
 												FROM INSGROUPMASTER IGM LEFT JOIN INSURENCETYPE IST ON IGM.INSTYPE_CODE = IST.INSTYPE_CODE
-												WHERE IGM.MEMBER_NO = :member_no");
+												WHERE IGM.MEMBER_NO = :member_no and IGM.INSTYPE_CODE NOT IN('01','03','02','08','09','10','11','12','13','14','15')");
 		$fetchinSureInfo->execute([
 			':member_no' => $member_no
 		]);
