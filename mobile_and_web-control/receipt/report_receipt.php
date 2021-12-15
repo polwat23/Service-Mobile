@@ -123,7 +123,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$getDetailKPHeader = $conmssql->prepare("SELECT 
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE,
-																kpd.KEEPING_STATUS
+																kpd.KEEPING_STATUS,
+																kpd.SHARESTK_VALUE
 																FROM kpmastreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
@@ -132,6 +133,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
+		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTK_VALUE"],2);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
@@ -233,8 +235,8 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">งวด :</td>
-			<td style="width: 350px;">'.$header["recv_period"].'</td>
+			<td style="width: 50px;font-size: 18px;">หุ้นสะสม :</td>
+			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
 			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>
