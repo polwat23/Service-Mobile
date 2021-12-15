@@ -5,6 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
+
 		$getBeneficiary = $conmssql->prepare("SELECT mg.GAIN_NAME,mg.GAIN_SURNAME,mg.GAIN_ADDRESS as GAIN_ADDR,mc.GAIN_CONCERN,mg.GAIN_PERCENT
 												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
 												WHERE mg.member_no = :member_no ORDER BY mg.SEQ_NO");
@@ -16,8 +17,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
 			}
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
-			$arrBenefit["TYPE_PERCENT"] = 'percent';
-			$arrBenefit["PERCENT_TEXT"] = number_format($rowBenefit["GAIN_PERCENT"],0).'%';
+			$arrBenefit["TYPE_PERCENT"] = 'text';
+			$arrBenefit["PERCENT_TEXT"] = 'แบ่งให้เท่า ๆ กัน';
 			$arrBenefit["PERCENT"] = filter_var(number_format($rowBenefit["GAIN_PERCENT"],0), FILTER_SANITIZE_NUMBER_INT);
 			$arrGroupBNF[] = $arrBenefit;
 		}
