@@ -1,0 +1,14 @@
+{
+	"LINEBOT_NAME" : "NKBK Link",
+	"COOP_ID" : "059001",
+	"COOP_NAME" : "สหกรณ์ออมทรัพย์สาธารณสุขหนองคาย จำกัด",
+	"COOP_KEY" : "NKH",
+	"LIFF_ID" : "1656729415-nDx8JYBP",
+	"LINE_ID" : "@006vwzdx",
+	"LINK_BIND" : "https://nkh.icoopsiam.com/app/home?qrdata=",
+	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
+	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",
+	"LINEBOT_CHANNELID" : "1656729292",
+	"LINEBOT_SECRETKEY" : "a531c7f6c726fd8165e3b0dd9bbd0b16",
+	"LINE_AUTH_KEY" : "eIVlmRlI+6tLBKfVfaGh9sjPizfW9i3cK+rw2IXvoWJSPyx8JnGtMOGUpHaKdpWrre6XflKKqnrLuhkysgFAhtHa608bcHc18BPtRq/v+lQPiFHUIhVg1WCJz47kt7lLjINcT/etbFIOlkyfcrnbYAdB04t89/1O/w1cDnyilFU="
+}

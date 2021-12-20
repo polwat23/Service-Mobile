@@ -22,6 +22,8 @@ use Component\functions;
 use ControlLog\insertLog;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use WebPConvert\WebPConvert;
+use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
+use ReallySimpleJWT\Exception\ValidateException;
 
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
@@ -36,9 +38,8 @@ $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.
 $configError = json_decode($jsonConfigError,true);
 $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
-$jsonLine = file_get_contents(__DIR__.'/../config/config_linebot.json');
-$configLine = json_decode($jsonLine,true);
 $lang_locale = "th";
+$jwt_token = new Token();
 
 if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
@@ -58,6 +59,6 @@ $user_id = $dataComing["events"][0]["source"]["userId"];
 $reply_token = $dataComing["events"][0]["replyToken"];
 $messageType = $arrMessage["type"];
 $message = $arrMessage["text"];
-file_put_contents(__DIR__.'/../log/lineincome.txt', json_encode($dataComing["events"][0],JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+//file_put_contents(__DIR__.'/../log/lineincome.txt', json_encode($dataComing["events"][0]) . PHP_EOL, FILE_APPEND);
 require_once(__DIR__.'./mappingwordingline.php');
 ?>

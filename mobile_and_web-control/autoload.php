@@ -37,12 +37,14 @@ if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACC
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/lib_line.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
 use Utility\Library;
+use Line\libraryLine;
 use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
@@ -54,6 +56,7 @@ use WebPConvert\WebPConvert;
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
+$lineLib = new libraryLine();
 $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
@@ -64,6 +67,8 @@ $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.
 $configError = json_decode($jsonConfigError,true);
 $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
+$jsonLine = file_get_contents(__DIR__.'/../config/config_linebot.json');
+$configLine = json_decode($jsonLine,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){

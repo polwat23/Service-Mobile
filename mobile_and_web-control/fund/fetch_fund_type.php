@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGroupFund = array();
 		$getFundInfo = $conmssql->prepare("SELECT mp.PRENAME_DESC,wcm.DEPTACCOUNT_NAME,wcm.DEPTACCOUNT_SNAME,wmt.WCMEMBER_DESC,wcm.DEPTACCOUNT_NO,wcm.DEPTOPEN_DATE,wcm.WFTYPE_CODE
 											FROM WCDEPTMASTER wcm LEFT JOIN mbucfprename mp ON wcm.prename_code = mp.prename_code
-											LEFT JOIN WCMEMBERTYPE wmt ON wcm.wftype_code = wmt.wftype_code
+											LEFT JOIN WCMEMBERTYPE wmt ON wcm.wftype_code = wmt.wftype_code and wcm.wc_id = wmt.wc_id
 											WHERE wcm.member_no = :member_no and wcm.deptclose_status = '0'");
 		$getFundInfo->execute([':member_no' => $member_no]);
 		while($rowFund = $getFundInfo->fetch(PDO::FETCH_ASSOC)){
