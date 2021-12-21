@@ -181,14 +181,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">หุ้นสะสม :</td>
-			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
+			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
+			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
-			<td style="width: 350px;">'.$header["fullname"].'</td>
+			<td style="width: 50px;font-size: 18px;">หุ้นสะสม :</td>
+			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
