@@ -29,15 +29,16 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
-											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											WHERE mb.member_no = :member_no");
+		$checkValid = $conoracle->prepare("SELECT MB.ID_CARD as CARD_PERSON,MB.TRIED_FLG as RESIGN_STATUS,
+										MB.FNAME as MEMB_NAME,MB.LNAME as MEMB_SURNAME,mp.PTITLE_NAME as PRENAME_DESC
+										FROM MEM_H_MEMBER MB LEFT JOIN MEM_M_PTITLE MP ON mb.ptitle_id = mp.ptitle_id
+										WHERE MB.account_id = :member_no");
 		$checkValid->execute([
 			':member_no' => $member_no
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMember["MEMB_NAME"])){
-			if($rowMember["RESIGN_STATUS"] == '1'){
+		if(isset($rowMember["CARD_PERSON"])){
+			if($rowMember["RESIGN_STATUS"] == '2'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

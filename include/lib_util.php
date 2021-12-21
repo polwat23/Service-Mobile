@@ -702,7 +702,7 @@ class library {
 
 		return $text;
 	}
-	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
+	public function mb_str_pad($input,$pad_length="5",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 	public function sendLineNotify($message){
