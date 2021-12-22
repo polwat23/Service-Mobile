@@ -25,39 +25,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
-			$getMethpay = $conoracle->prepare("SELECT
-													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
-													CM.BANK_DESC AS BANK,
-													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
-													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
-													YM.METHPAYTYPE_CODE
-												FROM 
-													YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
-													YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
-													LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
-												WHERE
-													YM.MEMBER_NO = :member_no
-													AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP')
-													AND YM.DIV_YEAR = :div_year");
-			$getMethpay->execute([
-				':member_no' => $member_no,
-				':div_year' => $rowYear["DIV_YEAR"]
-			]);
-			while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
-				$arrayRecv = array();
-				if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
-					if(isset($rowMethpay["BANK"])){
-						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
-					}else{
-						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
-					}
-				}
-				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
-				$arrayRecv["BANK"] = $rowMethpay["BANK"];
-				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
-				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
-			}
-			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
+			
+			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.pay_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
 											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('CBT','CSH','DEP')");
 			$getPaydiv->execute([
@@ -72,6 +41,47 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrPay["PAY_AMT"] = number_format($rowPay["PAY_AMT"],2);
 				$sumPay += $rowPay["PAY_AMT"];
 				$arrayPayGroup[] = $arrPay;
+			}
+			$receiveMinus = ($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"]) - $sumPay;
+			if($receiveMinus < 0){
+				$arrayRecv = array();
+				$arrayRecv["RECEIVE_DESC"] = 'รับสุทธิ';
+				$arrayRecv["BANK"] = '*** กรณียอดหักไม่พอจ่าย กรุณามาชำระได้ที่สหกรณ์ฯ';
+				$arrayRecv["RECEIVE_AMT"] = number_format($receiveMinus,2);
+				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+			}else{
+				$getMethpay = $conoracle->prepare("SELECT
+														CUCF.MONEYTYPE_DESC AS TYPE_DESC,
+														CM.BANK_DESC AS BANK,
+														YM.EXPENSE_AMT AS RECEIVE_AMT ,						
+														YM.EXPENSE_ACCID AS BANK_ACCOUNT,
+														YM.METHPAYTYPE_CODE
+													FROM 
+														YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
+														YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
+														LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
+													WHERE
+														YM.MEMBER_NO = :member_no
+														AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP')
+														AND YM.DIV_YEAR = :div_year");
+				$getMethpay->execute([
+					':member_no' => $member_no,
+					':div_year' => $rowYear["DIV_YEAR"]
+				]);
+				while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
+					$arrayRecv = array();
+					if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
+						if(isset($rowMethpay["BANK"])){
+							$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+						}else{
+							$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+						}
+					}
+					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+					$arrayRecv["BANK"] = $rowMethpay["BANK"];
+					$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
+					$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+				}
 			}
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
