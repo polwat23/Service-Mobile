@@ -161,11 +161,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูยโสธร จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">272 ถ.เลี่ยงเมือง ต.ในเมือง </p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.เมืองยโสธร จ.ยโสธร 35000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 045-712758 ต่อ 11</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.yasocoop.in.th</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูระยอง จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">444 หมู่ 4 ตำบลเชิงเนิน</p>
+				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองระยอง จังหวัดระยอง 21000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 038 017 156 8</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.rycoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
