@@ -17,6 +17,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['CAN_COPY_BANK_ACCOUNT'] = TRUE;
 			$arrayResult['REQ_AMOUNT'] = TRUE;
 			$arrayResult['REQ_SLIP'] = TRUE;
+			$arrayResult['IS_REQ'] = TRUE;
+			$arrayResult['REQ_MORE'] = FALSE;
+			$getOldReq = $conmysql->prepare("SELECT reqopendoc_no,amount_open,doc_url
+											FROM gcreqopenaccount WHERE member_no = :member_no and req_status = '8'");
+			$getOldReq->execute([':member_no' => $member_no]);
+			if($getOldReq->rowCount() > 0){
+				$rowOldReq = $getOldReq->fetch(PDO::FETCH_ASSOC);
+				$arrayResult['IS_REQ'] = FALSE;
+				$dataTracking = array();
+				$dataTracking["DOC_URL"] = $rowOldReq["doc_url"];
+				$dataTracking["AMOUNT"] = number_format($rowOldReq["amount_open"],2);
+				$dataTracking["DOC_NO"] = $rowOldReq["reqopendoc_no"];
+				$arrayResult["DATA_TRACKING"][] = $dataTracking;
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

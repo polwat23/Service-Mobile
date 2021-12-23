@@ -241,11 +241,18 @@
 			"4" : [{"th" : "รอเซ็นต์สัญญา/รอประกัน","en" : "Waiting for sign or guarantor"}],
 			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
 		}],
+		"REQ_OPENACC_STATUS" : [{
+			"8" : [{"th" : "รอดำเนินการ","en" : "Wait for accept"}],
+			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
+			"0" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}]
+		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
 		"RECEIVE_LOAN_RETRY_BEFORE" : [{"th" : "อายุของท่านไม่สามารถรับเงินกู้เพิ่มได้","en" : "Your age cannot withdraw loan"}],
 		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
 		"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}],
 		"OPEN_ACCOUNT" : [{
-			"NOT_HAVE_ACC" : [{"th" : "ท่านต้องมีบัญชีเงินฝากกับสหกรณ์อย่างน้อย 1 บัญชีถึงจะสามารถยื่นคำขอเปิดบัญชีออนไลน์ได้","en" : "You must have least 1 deposit account"}]
+			"NOT_HAVE_ACC" : [{"th" : "ท่านต้องมีบัญชีเงินฝากกับสหกรณ์อย่างน้อย 1 บัญชีถึงจะสามารถยื่นคำขอเปิดบัญชีออนไลน์ได้","en" : "You must have least 1 deposit account"}],
+			"CANNOT_INSERT" : [{"th" : "ไม่สามารถขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot request open account online please contact the cooperative"}],
+			"CANNOT_CREATEDOC" : [{"th" : "ไม่สามารถสร้างใบคำขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot generate request document for open account online please contact the cooperative"}]
 		}]
 }
