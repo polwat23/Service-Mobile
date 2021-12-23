@@ -48,15 +48,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getRecvAcc = $conoracle->prepare("SELECT
 													cmt.MONEYTYPE_DESC as DIVPAYTYPE_DESC,
 													cmt.MONEYTYPE_CODE as DIVPAYTYPE_CODE,
-													mx.DIVIDEND_ACCID as BANK_ACCID,
+													mx.LOANRCV_ACCID as BANK_ACCID,
 													cb.BANK_DESC,
 													cmbb.BRANCH_NAME
 												FROM 
 													MBMEMBMASTER MB LEFT JOIN mbmembexpense mx on mb.member_no = mx.member_no
-													LEFT JOIN cmucfbank cb ON mx.DIVIDEND_BANK = cb.bank_code LEFT JOIN cmucfbankbranch cmbb ON 
-													mx.DIVIDEND_BRANCH = cmbb.branch_id and
-													mx.DIVIDEND_BANK = cmbb.bank_code
-													LEFT JOIN cmucfmoneytype cmt ON mx.DIVIDEND_CODE = cmt.MONEYTYPE_CODE
+													LEFT JOIN cmucfbank cb ON mx.LOANRCV_BANK = cb.bank_code LEFT JOIN cmucfbankbranch cmbb ON 
+													mx.LOANRCV_BRANCH = cmbb.branch_id and
+													mx.LOANRCV_BANK = cmbb.bank_code
+													LEFT JOIN cmucfmoneytype cmt ON mx.LOANRCV_CODE = cmt.MONEYTYPE_CODE
 												WHERE TRIM(MB.MEMBER_NO) = :member_no");
 			$getRecvAcc->execute([':member_no' => $member_no]);
 			$rowRecvAcc = $getRecvAcc->fetch(PDO::FETCH_ASSOC);
