@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpAccFee = array();
 		$getDepositAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
 											FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-											WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '01'");
+											WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '00'");
 		$getDepositAcc->execute([':member_no' => $member_no]);
 		while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
 			$checkAccJoint = $conmysql->prepare("SELECT deptaccount_no FROM gcdeptaccountjoint WHERE deptaccount_no = :deptaccount_no and is_joint = '1'");

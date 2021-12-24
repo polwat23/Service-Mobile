@@ -255,6 +255,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					}					
 				}
 			}
+			
+			if( $rowRecon["result_transaction"]=='1'){
+				$summary += $rowRecon["amount"];
+			}else{
+				$summary += 0;
+			}
+			
 			$summary_feeamt += $rowRecon["fee_amt"];
 			$penalty_amt += $rowRecon["penalty_amt"];	
 			$arrayGrpAll[] = $arrayRecon;
@@ -314,6 +321,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['SUM_AMT_EXPORT'] = number_format($sum_deposit_external+$sum_withdraw_external+$sum_deposit_inside+$sum_withdraw_inside ?? '0',2);
 		
 
+		$arrayResult['SUMMARY'] = $summary;
+		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['DEPT_TRANSACTION'] = $arrayGrpAll;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');
