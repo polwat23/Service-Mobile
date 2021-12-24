@@ -113,6 +113,10 @@
 	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
 	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
 	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
+	"WS0107" : [{"th" : "ไม่พบรหัสรายการ QR ดังกล่าว กรุณาลองอีกครั้ง","en" : "Not found this transaction id please try again"}],
+	"WS0108" : [{"th" : "รายการนี้เสร็จสิ้นแล้ว ไม่สามารถทำรายการซ้ำได้","en" : "This transaction was completed cannot repeat transaction"}],
+	"WS0109" : [{"th" : "รายการหมดอายุ กรุณาสร้างรายการใหม่ที่แอปฯ สหกรณ์","en" : "Transaction has expired please create qr on cooperatives application"}],
+	"WS0112" : [{"th" : "ยอดทำรายการของท่านไม่ตรงกับที่ระบุใน QR","en" : "Transaction amount not match on the QR"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -147,6 +151,7 @@
 	"WS1035" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถปฏิเสธรายการอนุมัติเงินฝากได้ ตอนนี้โปรแกรมเมอร์ได้รับเรื่องแล้วกำลังดำเนินการแก้ไข #WS1035","en" : "Something was wronged that cannot deny approve deposit list. Now programmer has received the issue #WS1035"}],
 	"WS1036" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นใบคำขอกู้ออนไลน์ได้ กรุณาติดต่อสหกรณ์ #WS1036","en" : "Something was wronged that cannot request loan online please contact cooperative #WS1036"}],
 	"WS1037" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกใบคำขอกู้ได้ กรุณาติดต่อสหกรณ์ #WS1037","en" : "Something was wronged that cannot cancel request loan online please contact cooperative #WS1037"}],
+	"WS1039" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขที่อยู่ได้ กรุณาติดต่อสหกรณ์ #WS1039","en" : "Something was wronged that cannot change adress please contact cooperative #WS1039"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
@@ -232,5 +237,6 @@
 		}],
 		"REQ_HAVE_OLD_CONTRACT" : [{"th" : "ท่านมีสัญญาเงินกู้ประเภทนี้อยู่แล้วไม่สามารถกู้ซ้ำได้","en" : "Your have contract already exist cannot request repeat"}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
-		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}]
+		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
+		"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}]
 }
