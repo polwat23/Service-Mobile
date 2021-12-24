@@ -51,7 +51,10 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 							if($cal_start_pay_date == "next"){
 								$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
 							}else{
-								$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+								$dateSTDiff = date_create($pay_date);
+								$dateLTDiff = date_create($request_date);
+								$dayOfMonthArr = date_diff($dateSTDiff,$dateLTDiff);
+								$dayOfMonth = $dayOfMonthArr->format("%a");
 							}
 						}else {
 							$lastDate = date('Y-m-t',strtotime("+".($period)." months",$lastDateofMonth));
@@ -105,7 +108,10 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 							//$dayOfMonth++;
 							$i++;
 						}else{
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							$dateSTDiff = date_create($pay_date);
+							$dateLTDiff = date_create($request_date);
+							$dayOfMonthArr = date_diff($dateSTDiff,$dateLTDiff);
+							$dayOfMonth = $dayOfMonthArr->format("%a");
 							$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
 							//$dayOfMonth++;
 						}
@@ -141,12 +147,19 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}else if($calint_type === "2"){ // คงยอด ต้น + ดอก เท่ากันทุกเดือน
 					if($i == 1){
 						if($cal_start_pay_date == "next"){
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							$dateSTDiff = date_create($pay_date);
+							$dateLTDiff = date_create($request_date);
+							$dayOfMonthArr = date_diff($dateSTDiff,$dateLTDiff);
+							$dayOfMonth = $dayOfMonthArr->format("%a");
 							$lastDate = date('Y-m-t',strtotime("+0 months",$lastDateofMonth));
 							//$dayOfMonth++;
 							$i++;
 						}else{
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							//$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+							$dateSTDiff = date_create($pay_date);
+							$dateLTDiff = date_create($request_date);
+							$dayOfMonthArr = date_diff($dateSTDiff,$dateLTDiff);
+							$dayOfMonth = $dayOfMonthArr->format("%a");
 							$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
 							//$dayOfMonth++;
 						}
