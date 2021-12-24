@@ -663,7 +663,7 @@ class CalculateDep {
 		$rowItemCount = $checkItemIsCount->fetch(\PDO::FETCH_ASSOC);
 		if($rowItemCount["IS_NOTCOUNT"] > 0){
 			$getCountTrans = $this->conora->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' 
+												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and dps.DEPTITEMTYPE_CODE <> 'FEE'
 												and dps.deptitemtype_code <> :itemtype_code and dps.item_status = '1' ".$queryCheckPeriod);
 			$getCountTrans->execute([
 				':deptaccount_no' => $deptaccount_no,
@@ -671,7 +671,7 @@ class CalculateDep {
 			]);
 		}else{
 			$getCountTrans = $this->conora->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' 
+												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and dps.DEPTITEMTYPE_CODE <> 'FEE'
 												and dps.item_status = '1' ".$queryCheckPeriod);
 			$getCountTrans->execute([
 				':deptaccount_no' => $deptaccount_no
