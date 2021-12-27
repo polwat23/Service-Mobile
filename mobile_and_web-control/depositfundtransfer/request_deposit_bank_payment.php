@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$fetchDataDeposit = $conmysql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_dep,csb.itemtype_dep,csb.link_deposit_coopdirect,
-												csb.bank_short_ename,gba.account_payfee,csb.fee_deposit
+												csb.bank_short_ename,csb.fee_deposit
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
@@ -31,101 +31,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}
 		$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
-		$getBalanceAccFee = $conmssql->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
-		$getBalanceAccFee->execute([':deptaccount_no' => $rowDataDeposit["account_payfee"]]);
-		$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '1' and
-													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
-		$getTransactionForFee->execute([
-			':member_no' => $payload["member_no"]
-		]);
-		$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
-		$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 2;
+		$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
-		$dataAccFee = $cal_dep->getConstantAcc($rowDataDeposit["account_payfee"]);
 		$conmssql->beginTransaction();
 		$conmysql->beginTransaction();
 		$getlastseq_noDest = $cal_dep->getLastSeqNo($coop_account_no);
-		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataDeposit["account_payfee"]);
-		if($rowCountFee["C_TRANS"] + 1 > 1){
-			$depositMoney = $cal_dep->DepositMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataDeposit["itemtype_dep"],
-			$amt_transfer,$rowDataDeposit["fee_deposit"],$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
-			$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"]);
-		}else{
-			$depositMoney = $cal_dep->DepositMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataDeposit["itemtype_dep"],
-			$amt_transfer,0,$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
-			$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"]);
-		}
+		$depositMoney = $cal_dep->DepositMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataDeposit["itemtype_dep"],
+		$amt_transfer,0,$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
+		$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,null,$rowDataDeposit["bank_code"],$dataComing["sigma_key"],0);
 		if($depositMoney["RESULT"]){
-			if($coop_account_no == $rowDataDeposit["account_payfee"]){
-				$dataAccFee = $depositMoney["DATA_CONT"];
-			}else{
-				$depositMoney["MAX_SEQNO"] = $getlastseqFeeAcc["MAX_SEQ_NO"];
-			}
-			if($rowCountFee["C_TRANS"] + 1 > 1){
-				if($rowDataDeposit["fee_deposit"] > 0){
-					if($rowBalFee["PRNCBAL"] - $rowDataDeposit["fee_deposit"] < $dataAccFee["MINPRNCBAL"]){
-						$conmssql->rollback();
-						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = "WS0100";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
-					$vccamtPenalty = $func->getConstant("accidfee_promotion");
-					$from_account_no = $rowDataDeposit["account_payfee"];
-					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FTX',
-					$dataComing["amt_transfer"],$rowDataDeposit["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$depositMoney["MAX_SEQNO"],$dataAccFee);
-					if($penaltyWtd["RESULT"]){
-						
-					}else{
-						$conmssql->rollback();
-						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayStruc = [
-							':member_no' => $payload["member_no"],
-							':id_userlogin' => $payload["id_userlogin"],
-							':operate_date' => $dateOper,
-							':sigma_key' => $dataComing["sigma_key"],
-							':amt_transfer' => $amt_transfer,
-							':response_code' => $arrayResult['RESPONSE_CODE'],
-							':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
-						];
-						$log->writeLog('deposittrans',$arrayStruc);
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
-				}
-			}else{
-				if($rowDataDeposit["fee_deposit"] > 0){
-					$vccamtPenaltyDepPromo = $func->getConstant("accidfee_promotion");
-					$from_account_no = $rowDataDeposit["account_payfee"];
-					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyDepPromo,'FTX',
-					$dataComing["amt_transfer"],$rowDataDeposit["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$depositMoney["MAX_SEQNO"],$dataAccFee);
-					if($penaltyWtdPromo["RESULT"]){
-						
-					}else{
-						$conmssql->rollback();
-						$conmysql->rollback();
-						$arrayResult['RESPONSE_CODE'] = $penaltyWtdPromo["RESPONSE_CODE"];
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayStruc = [
-							':member_no' => $payload["member_no"],
-							':id_userlogin' => $payload["id_userlogin"],
-							':operate_date' => $dateOper,
-							':sigma_key' => $dataComing["sigma_key"],
-							':amt_transfer' => $amt_transfer,
-							':response_code' => $arrayResult['RESPONSE_CODE'],
-							':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtdPromo["ACTION"]
-						];
-						$log->writeLog('deposittrans',$arrayStruc);
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
-				}
-			}
 			$arrSendData = array();
 			$arrVerifyToken['exp'] = time() + 300;
 			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -179,7 +94,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				]);
 				$arrExecute = [
 					':ref_no' => $ref_no,
-					':slip_type' => 'DIM',
+					':slip_type' => 'DTX',
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
 					':amount' => $dataComing["amt_transfer"],

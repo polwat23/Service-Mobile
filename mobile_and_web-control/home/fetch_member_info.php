@@ -9,7 +9,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		if($memberInfoMobile->rowCount() > 0){
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
-			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
 				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
@@ -30,7 +29,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MB.PROVINCE_CODE AS PROVINCE_CODE,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.POSTCODE AS ADDR_POSTCODE
+													MB.POSTCODE AS ADDR_POSTCODE,
+													MB.MEM_TELMOBILE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
@@ -61,6 +61,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$arrayResult["PHONE"] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];

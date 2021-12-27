@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							$arrayResult['RESPONSE_CODE'] = "WS0034";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							http_response_code(401);
+							http_response_code(500);
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}else if($errorCode === 4){
