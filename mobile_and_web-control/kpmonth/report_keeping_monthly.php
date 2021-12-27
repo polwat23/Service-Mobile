@@ -338,7 +338,7 @@ function GenerateReport($dataReport,$header,$lib){
 	}
 	$html .= '</div>';
 			// Footer
-	$html .= '<div style="display:flex;width: 100%;height: 40px" class="sub-table">
+	$html .='<div style="display:flex;width: 100%;height: 40px" class="sub-table">
 			<div style="border-top: 0.5px solid black;">&nbsp;</div>
 			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
@@ -361,7 +361,6 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
 			';
-
 	$dompdf = new DOMPDF();
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
