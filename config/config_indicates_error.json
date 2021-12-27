@@ -94,6 +94,7 @@
 	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can track request in Welfare request menu"}],
 	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
 	"WS0079" : [{"th" : "หมดเวลาการยื่นขอทุนแล้ว","en" : "Out of time for request welfare"}],
+	"WS0083" : [{"th" : "สหกรณ์ได้ลงรับใบคำขอของท่านแล้ว ทำให้ท่านไม่สามารถยกเลิกใบคำขอได้ หากต้องการยกเลิกให้ติดต่อสหกรณ์","en" : "The cooperative has accept your request which you cannot cancel request please contact cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1004" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถลบบันทึกช่วยจำได้ กรุณาติดต่อสหกรณ์ #WS1004","en" : "Something was wronged that cannot delete memo please contact cooperative #WS1004"}],
@@ -121,6 +122,8 @@
 	"WS1029" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถสร้างรายการโปรดได้ กรุณาติดต่อสหกรณ์ #WS1029","en" : "Something was wronged that cannot create favorite transaction please contact cooperative #WS1029"}],
 	"WS1030" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเปลี่ยนแปลงสถานะการพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1030","en" : "Something was wronged that cannot change status moratorium please contact cooperative #WS1030"}],
 	"WS1032" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นขอทุนได้ กรุณาติดต่อสหกรณ์ #WS1032","en" : "Something was wronged that cannot request welfare please contract cooperative #WS1032"}],
+	"WS1041" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกใบคำขอได้ กรุณาติดต่อสหกรณ์ #WS1041","en" : "Something was wronged that cannot cancel request document online please contact cooperative #WS1041"}],
+	"WS1042" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นใบคำขอออนไลน์ได้ กรุณาติดต่อสหกรณ์ #WS1042","en" : "Something was wronged that cannot request document online please contact cooperative #WS1042"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
@@ -171,5 +174,12 @@
 		"9999" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}]
 		}],
-	"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}]
+		"ACC_FLAG_OFF" : [{"th" : "ทางสหกรณ์ไม่ให้ผูกบัญชีนี้กับบัญชีธนาคาร","en" : "The cooperative is not allow for bind this account to bank account"}],
+		"REQ_PETITION_STATUS" : [{
+			"8" : [{"th" : "รออนุมัติ","en" : "Wait for accept"}],
+			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
+			"-9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}],
+			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
+			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+		}]
 }

@@ -26,6 +26,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
 			$yearAss = $dataComing["ass_year"] - 543;
 		}
+		//member_info
+		$member_date_count = 0;
+		$member_age_count = 0;
+		$share_last_period = 0;
+		$memberInfo = $conoracle->prepare("SELECT mb.birth_date,mb.member_date,sh.sharestk_amt as SHARE_AMT,sh.LAST_PERIOD
+													FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
+													and mb.branch_id = sh.branch_id
+													WHERE mb.member_no = :member_no and mb.member_status = '1' and mb.branch_id = :branch_id");
+		$memberInfo->execute([
+			':member_no' => $member_no,
+			':branch_id' => $payload["branch_id"]
+		]);
+		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+		$member_date_count = $lib->count_duration($rowMember["MEMBER_DATE"],"y");
+		$member_date_countM = $lib->count_duration($rowMember["MEMBER_DATE"],"m");
+		$birth_date = $lib->count_duration($rowMember["BIRTH_DATE"],"y");
+		$birth_dateM = $lib->count_duration($rowMember["BIRTH_DATE"],"m");
+		$share_amt = $rowMember["SHARE_AMT"];
+		$share_last_period = $rowMember["LAST_PERIOD"];
+		
 		$assistretryRemain = 0;
 		$fetchAssType = $conoracle->prepare("SELECT asm.ASSIST_DOCNO as ASSCONTRACT_NO,CASE WHEN asm.REQ_STATUS IN('31','32') THEN ASSIST_AMT ELSE 0 END as ASSIST_AMT,
 												asm.APPROVE_DATE as PAY_DATE,asm.ASSISTAPPROVE_AMT as APPROVE_AMT,TRIM(asm.ASSISTTYPE_CODE) as ASSISTTYPE_CODE,
@@ -42,13 +62,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':year' => $yearAss
 		]);
 		$arrGroupAss = array();
+		$recvGPY = FALSE;
 		while($rowAssType = $fetchAssType->fetch(PDO::FETCH_ASSOC)){
 			$arrAss = array();
 			$arrAss["ASSIST_RECVAMT"] = number_format($rowAssType["ASSIST_AMT"],2);
 			$arrAss["APPROVE_AMT"] = number_format($rowAssType["APPROVE_AMT"],2);
 			$arrAss["PAY_DATE"] = $lib->convertdate($rowAssType["PAY_DATE"],'d m Y');
 			$arrAss["ASSISTTYPE_CODE"] = $rowAssType["ASSISTTYPE_CODE"];
-			$arrAss["ASSISTTYPE_DESC"] = $rowAssType["ASSISTTYPE_DESC"];
+			if($rowAssType["ASSISTTYPE_CODE"] == 'GPY'){
+				$recvGPY = TRUE;
+				$pay_date_count = $lib->count_duration($rowAssType["PAY_DATE"],"y");
+				$payBetweenCount = $member_date_count - $pay_date_count;
+				$payBetweenCountB = $birth_date - $pay_date_count;
+				if($payBetweenCount >= 25 && $payBetweenCountB < 60){
+					$arrAss["ASSISTTYPE_DESC"] = "บำเหน็จ 25 ( เป็นสมาชิก สอ.มศว ครบ 25 ปี )";
+				}else if($payBetweenCountB >= 60){
+					$arrAss["ASSISTTYPE_DESC"] = 'บำเหน็จ 60 (สมาชิกอายุครบ 60 ปี )';
+				}
+			}else{
+				$arrAss["ASSISTTYPE_DESC"] = $rowAssType["ASSISTTYPE_DESC"];
+			}
 			$arrAss["ASSCONTRACT_NO"] = $rowAssType["ASSCONTRACT_NO"];
 			$arrOtherInfoAssist = array();
 			$arrOtherInfoAssist["LABEL"] = "สถานะการจ่าย";
@@ -57,23 +90,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupAss[] = $arrAss;
 		}
 
-		//member_info
-		$member_date_count = 0;
-		$member_age_count = 0;
-		$share_last_period = 0;
-		$memberInfo = $conoracle->prepare("SELECT mb.birth_date,mb.member_date,sh.sharestk_amt as SHARE_AMT,sh.LAST_PERIOD
-													FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-													and mb.branch_id = sh.branch_id
-													WHERE mb.member_no = :member_no and mb.member_status = '1' and mb.branch_id = :branch_id");
-		$memberInfo->execute([
-			':member_no' => $member_no,
-			':branch_id' => $payload["branch_id"]
-		]);
-		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
-		$member_date_count = $lib->count_duration($rowMember["MEMBER_DATE"],"y");
-		$birth_date = $lib->count_duration($rowMember["BIRTH_DATE"],"y");
-		$share_amt = $rowMember["SHARE_AMT"];
-		$share_last_period = $rowMember["LAST_PERIOD"];
 		
 		//สวัสดิการค่าทำศพ
 		$fetchAssAsDead = $conoracle->prepare("SELECT money_amt from  ASTIMERANGEMONEY 
@@ -160,7 +176,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAss["LIST_ASSIST"] = $arrListAssist;
 		$arrRightGroupAss[] = $arrAss;
 		//บำเหน็จ 25 
-		if($member_date_count >= 25 && $share_amt > 0){
+		if($member_date_count >= 25 && $member_date_countM <= 303 && $share_amt > 0){
 			$fetchAsgrt25 = $conoracle->prepare("SELECT money_amt from ASTIMERANGEMONEY 
 												where RANGE_CODE = 'asgrt25'
 												AND :share_amt >= start_time AND :share_amt < end_time");
@@ -169,12 +185,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAss = array();
 				$arrAss["PAYPER_AMT"] = number_format($rowAsgrt25["MONEY_AMT"],2);
 				$arrAss["ASSISTTYPE_DESC"] = "บำเหน็จ 25 ( เป็นสมาชิก สอ.มศว ครบ 25 ปี )";
-				$arrRightGroupAss[] = $arrAss;
+				if(!$recvGPY){
+					$arrRightGroupAss[] = $arrAss;
+				}
 			}
 		}
 		
 		//บำเหน็จ 60 
-		if($member_date_count >= 60 && $share_last_period > 0){
+		if($birth_date >= 60 && $birth_dateM <= 723 && $share_last_period > 0){
 			$fetchAsgrt60 = $conoracle->prepare("SELECT money_amt from ASTIMERANGEMONEY 
 												where RANGE_CODE = 'asgrt60'
 												AND :share_last_period >= start_time AND :share_last_period < end_time");
