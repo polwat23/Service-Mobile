@@ -4,9 +4,21 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		if($payload["member_no"] == "00003476" || $payload["member_no"] == "00003477" || $payload["member_no"] == "00003478" || $payload["member_no"] == "00003479" || $payload["member_no"] == "00003480"
+		|| $payload["member_no"] == "00003481" || $payload["member_no"] == "00003482" || $payload["member_no"] == "00003483" || $payload["member_no"] == "00003484" || $payload["member_no"] == "00003485"
+		|| $payload["member_no"] == "00003486" || $payload["member_no"] == "00003487" || $payload["member_no"] == "00003488" || $payload["member_no"] == "00003489" || $payload["member_no"] == "00003490"
+		|| $payload["member_no"] == "00003491" || $payload["member_no"] == "00003492" || $payload["member_no"] == "00003493" || $payload["member_no"] == "00003494" || $payload["member_no"] == "00003495"
+		|| $payload["member_no"] == "00003496" || $payload["member_no"] == "00003497" || $payload["member_no"] == "00003498" || $payload["member_no"] == "00003462" || $payload["member_no"] == "00003498"
+		|| $payload["member_no"] == "00003499" || $payload["member_no"] == "00004400" || $payload["member_no"] == "00004402" || $payload["member_no"] == "00004741" || $payload["member_no"] == "00004767"){
+			$arrayResult['RESPONSE_CODE'] = "WS0006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			require_once('../../include/exit_footer.php');
+		}
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
-												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
+												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1' ORDER BY gba.deptaccount_no_coop");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
@@ -31,23 +43,35 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrGroupAccBind["BIND"][] = $arrAccBind;
 			}
-			$dep_format = $func->getConstant('dep_format');
-			$dep_formathide = $func->getConstant('hidden_dep');
-			$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
-												DPM.PRNCBAL,DPT.MINPRNCBAL,dpm.DEPTACCOUNT_NO
-												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0");
-			$getDataAcc->execute([':member_no' => $member_no]);
-			while($rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC)){
-				$arrAccCoop = array();
-				$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAcc["DEPTACCOUNT_NO"];
-				$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAcc["DEPTACCOUNT_NO"],$dep_format);
-				$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
-				$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
-				$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-				$arrAccCoop["BALANCE"] = $rowDataAcc["PRNCBAL"];
-				$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-				$arrGroupAccBind["COOP"][] = $arrAccCoop;
+			$fetchAccountBeenAllow = $conmysql->prepare("SELECT dept_type_code 
+												FROM gcconstantaccountdept
+												WHERE allow_deposit_outside = '1'");
+			$fetchAccountBeenAllow->execute([':member_no' =>  $payload["member_no"]]);
+			if($fetchAccountBeenAllow->rowCount() > 0){
+				$arrDeptCode = array();
+				while($rowAccAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
+					$arrDeptCode[] = $rowAccAllow["dept_type_code"];
+				}
+				$dep_format = $func->getConstant('dep_format');
+				$dep_formathide = $func->getConstant('hidden_dep');
+				$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
+													DPM.PRNCBAL,DPT.MINPRNCBAL,dpm.DEPTACCOUNT_NO
+													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpm.membcat_code = dpt.membcat_code
+													WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0");
+				$getDataAcc->execute([':member_no' => $member_no]);
+				while($rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC)){
+					if(in_array($rowDataAcc["DEPTTYPE_CODE"],$arrDeptCode)){
+						$arrAccCoop = array();
+						$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAcc["DEPTACCOUNT_NO"];
+						$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAcc["DEPTACCOUNT_NO"],$dep_format);
+						$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
+						$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
+						$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+						$arrAccCoop["BALANCE"] = $rowDataAcc["PRNCBAL"];
+						$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
+						$arrGroupAccBind["COOP"][] = $arrAccCoop;
+					}
+				}
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
@@ -81,11 +105,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_desc" => "??? Argument ???????? "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$message_error = "???? ".$filename." ??? Argument ????????????? "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

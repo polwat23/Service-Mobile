@@ -21,6 +21,15 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$getTel = $conmssql->prepare("SELECT MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
+	$getTel->execute([':member_no' => $member_no]);
+	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
+	if($dataComing["tel"] != $rowTel["MEM_TELMOBILE"]){
+		$arrayResult['RESPONSE_CODE'] = "WS0095";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		require_once('../../include/exit_footer.php');
+	}
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
 	$reference = $lib->randomText('all',6);
@@ -45,10 +54,18 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
-			$arrayDest["member_no"] = $member_no;
-			$arrayDest["tel"] = $arrayTel[0]["TEL"];
-			$arrayDest["message"] = $arrMessage["BODY"];
-			$arraySendSMS = $lib->sendSMS($arrayDest);
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['action'] = "sendmsg";
+			$arrVerifyToken["mode"] = "eachmsg";
+			$arrVerifyToken['typeMsg'] = 'OTP';
+			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
+			$arrMsg[0]["msg"] = $arrMessage["BODY"];
+			$arrMsg[0]["to"] = $arrayTel[0]["TEL"];
+			$arrSendData["dataMsg"] = $arrMsg;
+			$arrSendData["custId"] = 'nhp';
+			$arrHeader[] = "version: v1";
+			$arrHeader[] = "OAuth: Bearer ".$verify_token;
+			$arraySendSMS = $lib->posting_data($config["URL_SMS"].'/navigator',$arrSendData,$arrHeader);
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
 				$conmysql->commit();

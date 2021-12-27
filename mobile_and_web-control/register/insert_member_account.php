@@ -21,6 +21,15 @@ if($lib->checkCompleteArgument(['member_no','phone','password','api_token','uniq
 	}
 	$email = isset($dataComing["email"]) ? preg_replace('/\s+/', '', $dataComing["email"]) : null;
 	$phone = $dataComing["phone"];
+	$getTel = $conmssql->prepare("SELECT MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
+	$getTel->execute([':member_no' => $dataComing["member_no"]]);
+	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
+	if($phone != $rowTel["MEM_TELMOBILE"]){
+		$arrayResult['RESPONSE_CODE'] = "WS0095";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		require_once('../../include/exit_footer.php');
+	}
 	$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 	$insertAccount = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,phone_number,email,register_channel) 
 										VALUES(:member_no,:password,:phone,:email,:channel)");
