@@ -37,15 +37,21 @@ if($rowCredit["SHARE_AMT"] > 0){
 }
 $maxloan_amt = MIN($arrCheckLowest);
 $arrSubOtherInfo["LABEL"] = "กู้ได้ไม่เกิน";
-
-if($loantype_code == '55'){
+$getPeriod = $conoracle->prepare("SELECT MAX_PERIOD FROM lnloantypeperiod WHERE loantype_code = :loantype_code and money_from <= :loanamt and money_to >= :loanamt");
+$getPeriod->execute([
+	':loantype_code' => $loantype_code,
+	':loanamt' => $maxloan_amt
+]);
+$rowPeriod = $getPeriod->fetch(PDO::FETCH_ASSOC);
+$arrSubOtherInfo["VALUE"] = $rowPeriod["MAX_PERIOD"]." งวด";
+/*if($loantype_code == '55'){
 	if($maxloan_amt > 3000000){
 		$maxloan_amt = 3000000;
 	}
 	$arrSubOtherInfo["VALUE"] = "180 งวด";
 }else if($loantype_code == '10'){
 	$arrSubOtherInfo["VALUE"] = "10 งวด";
-} else if($loantype_code == '21'){
+}else if($loantype_code == '21'){
 	$arrSubOtherInfo["VALUE"] = "10 งวด";
 }else if($loantype_code == '22'){
 	$arrSubOtherInfo["VALUE"] = "10 งวด";
@@ -77,6 +83,6 @@ if($loantype_code == '55'){
 	$arrSubOtherInfo["VALUE"] = "24 งวด";
 }else{
 	$arrSubOtherInfo["VALUE"] = "180 งวด";
-}
+}*/
 $arrOtherInfo[] = $arrSubOtherInfo;
 ?>

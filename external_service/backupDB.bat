@@ -1,22 +1,28 @@
 @echo off
 
+for /f "skip=1" %%x in ('wmic os get localdatetime') do if not defined MyDate set MyDate=%%x
+for /f %%x in ('wmic path win32_localtime get /format:list ^| findstr "="') do set %%x
+set fmonth=00%Month%
+set fday=00%Day%
+set today=%Year%%fmonth:~-2%%fday:~-2%
 
-del C:\Mobile\service-doa\external_service\backupDB_doa.zip
+set DAY_OF_LIFE=3
+set DBHOST=localhost
+set DBPORT=3306
+set DBUSER=root
+set DBPASS=@DOA2020
+set DBNAME=mobile_doa
+set PROJECT_PATH=C:\Mobile\service-doa\
+set BACKUP_PATH=%PROJECT_PATH%backup\
 
-cd C:\Program Files\MariaDB 10.5\bin
+IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%
 
-C:
+"C:\Program Files\MariaDB 10.5\bin\mysqldump.exe" -h%DBHOST% -P%DBPORT% -u %DBUSER% -p%DBPASS% %DBNAME% > %BACKUP_PATH%%DBNAME%.sql
 
-mysqldump.exe -hlocalhost -P3306 -u root -p@DOA2020 mobile_doa > C:\Mobile\service-doa\external_service\backupDB_doa.sql
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_db.zip %BACKUP_PATH%%DBNAME%.sql
 
-"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\service-doa\external_service\backupDB_doa.zip C:\Mobile\service-doa\external_service\backupDB_doa.sql
+del %BACKUP_PATH%%DBNAME%.sql
 
-del C:\Mobile\service-doa\external_service\backupDB_doa.sql
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_resource.zip %PROJECT_PATH%resource\alias_account_dept %PROJECT_PATH%resource\announce %PROJECT_PATH%resource\avatar %PROJECT_PATH%resource\gallery %PROJECT_PATH%resource\news
 
-cd C:\Program Files (x86)\WinSCP
-
-C:
-
-winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put C:\Mobile\service-doa\external_service\backupDB_doa.zip" "exit"
-
-del C:\Mobile\service-doa\external_service\backupDB_doa.zip
+forfiles /P %BACKUP_PATH% /S /M *.* /D -%DAY_OF_LIFE% /C "cmd /c del @path"
