@@ -97,7 +97,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}
 				}
 			}
-			
+			$pay_period = floor($pay_period);
 			for($i = 1;$i <= $period;$i++){
 				$arrPaymentPerPeriod = array();
 				if($calint_type === "1"){ // คงต้น
@@ -172,7 +172,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}else{
 						$dayinYear = $rowConstant["DAYINYEAR"];
 					}
-					$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+					$period_int = floor($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear);
 					$prn_amount = $pay_period - $period_int;
 					
 					
@@ -283,6 +283,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}
 				}
 			}
+			$pay_period = floor($pay_period);
 			$oddeven = true;
 			$j = 2;
 			for($i = 1;$i <= $period;$i++){
@@ -291,10 +292,17 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					if($i == 1){
 						if($cal_start_pay_date == "next"){
 							$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+							$lastDate = date('Y-m-t',strtotime("+0 months",$lastDateofMonth));
+							//$dayOfMonth++;
+							$i++;
 						}else{
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
+							$dateSTDiff = date_create($pay_date);
+							$dateLTDiff = date_create($request_date);
+							$dayOfMonthArr = date_diff($dateSTDiff,$dateLTDiff);
+							$dayOfMonth = $dayOfMonthArr->format("%a");
+							$lastDate = date('Y-m-t',strtotime("+0 months",$lastDateofMonth));
+							//$dayOfMonth++;
 						}
-						$lastDate = date('Y-m-t',strtotime("+0 months",$lastDateofMonth));
 					}else {
 						if($oddeven){
 							$oddeven = false;
@@ -352,7 +360,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}else{
 						$dayinYear = $rowConstant["DAYINYEAR"];
 					}
-					$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+					$period_int = floor($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear);
 					$prn_amount = $pay_period - $period_int;
 					
 					
