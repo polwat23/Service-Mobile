@@ -97,7 +97,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}
 				}
 			}
-			$pay_period = floor($pay_period);
+			$pay_period = $lib->roundDecimal($pay_period,4);
 			for($i = 1;$i <= $period;$i++){
 				$arrPaymentPerPeriod = array();
 				if($calint_type === "1"){ // คงต้น
@@ -172,9 +172,12 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}else{
 						$dayinYear = $rowConstant["DAYINYEAR"];
 					}
-					$period_int = floor($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear);
-					$prn_amount = $pay_period - $period_int;
-					
+					$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,4);
+					if($i == $period){
+						$prn_amount = $payment_sumbalance;
+					}else{
+						$prn_amount = $pay_period - $period_int;
+					}
 					
 					if (($payment_sumbalance) < $pay_period) {
 					  $prn_amount = $payment_sumbalance;
@@ -283,7 +286,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}
 				}
 			}
-			$pay_period = floor($pay_period);
+			$pay_period = $lib->roundDecimal($pay_period,4);
 			$oddeven = true;
 			$j = 2;
 			for($i = 1;$i <= $period;$i++){
@@ -360,7 +363,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					}else{
 						$dayinYear = $rowConstant["DAYINYEAR"];
 					}
-					$period_int = floor($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear);
+					$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,4);
 					$prn_amount = $pay_period - $period_int;
 					
 					
