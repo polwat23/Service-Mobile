@@ -376,16 +376,20 @@ if(!$anonymous){
 				$arrayAllMenu = $arrayGroupAllMenu;
 			}
 			$arrFavMenuGroup = array();
-			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans FROM gcfavoritelist WHERE member_no = :member_no");
+			$fetchMenuFav = $conmysql->prepare("SELECT fav_refno,name_fav,destination,flag_trans,menu_component,from_account 
+												FROM gcfavoritelist WHERE member_no = :member_no and is_use = '1' and show_menu = '1'");
 			$fetchMenuFav->execute([':member_no' => $payload["member_no"]]);
 			while($rowMenuFav = $fetchMenuFav->fetch(PDO::FETCH_ASSOC)){
 				$arrFavMenu = array();
 				$arrFavMenu["NAME_FAV"] = $rowMenuFav["name_fav"];
+				$arrFavMenu["FROM_ACCOUNT"] = $rowMenuFav["from_account"];
+				$arrFavMenu["MENU_COMPONENT"] = $rowMenuFav["menu_component"];
 				$arrFavMenu["FAV_REFNO"] = $rowMenuFav["fav_refno"];
 				$arrFavMenu["FLAG_TRANS"] = $rowMenuFav["flag_trans"];
 				$arrFavMenu["DESTINATION"] = $rowMenuFav["destination"];
 				$arrFavMenuGroup[] = $arrFavMenu;
 			}
+
 			if(sizeof($arrayAllMenu) > 0 || sizeof($arrayMenuSetting) > 0){
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;

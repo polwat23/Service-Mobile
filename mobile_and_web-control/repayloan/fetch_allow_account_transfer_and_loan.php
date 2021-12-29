@@ -72,6 +72,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;
 			}
+			$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'LPM' and is_use = '1'");
+			$getAccFav->execute([':member_no' => $payload["member_no"]]);
+			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
+				$arrFavMenu = array();
+				$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
+				$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
+				$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
+				$arrFavMenu["DESTINATION_FORMAT"] = $rowAccFav["destination"];
+				$arrFavMenu["DESTINATION_HIDDEN"] = $rowAccFav["destination"];
+				if(isset($rowAccFav["from_account"])) {
+					$arrFavMenu["FROM_ACCOUNT"] = $rowAccFav["from_account"];
+					$arrFavMenu["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowAccFav["from_account"],$func->getConstant('dep_format'));
+					$arrFavMenu["FROM_ACCOUNT_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["from_account"],$func->getConstant('hidden_dep'));
+				}
+				$arrGroupAccFav[] = $arrFavMenu;
+			}
+
 			$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
 													csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
@@ -103,7 +120,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
-				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
+				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
+				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
+				$arrayResult['SCHEDULE']["ENABLED"] = TRUE;
 				$arrayResult['LOAN'] = $arrLoanGrp;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

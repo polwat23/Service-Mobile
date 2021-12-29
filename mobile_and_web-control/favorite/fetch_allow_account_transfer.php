@@ -2,15 +2,14 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
-	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and (gad.allow_deposit_inside = '1' OR gad.allow_withdraw_inside = '1')");
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_withdraw_inside = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
@@ -42,63 +41,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
 					$checkDep = $cal_dep->getSequestAmt($rowDataAccAll["DEPTACCOUNT_NO"]);
-					if($checkDep["CAN_DEPOSIT"]){
-						$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_DEPOSIT"] = '0';
-					}
-					if($checkDep["CAN_WITHDRAW"]){
-						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_WITHDRAW"] = '0';
-					}
-					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"];
-					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
-					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
+					$arrAccAllow["BALANCE"] = number_format($cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"],2);;
 					$arrGroupAccAllow[] = $arrAccAllow;
 				}
 			}
-			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
-				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'TRN' and is_use = '1'");
-				$getAccFav->execute([':member_no' => $payload["member_no"]]);
-				while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
-					$arrFavMenu = array();
-					$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
-					$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
-					$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
-					$arrFavMenu["DESTINATION_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
-					if(isset($rowAccFav["from_account"])) {
-						$arrFavMenu["FROM_ACCOUNT"] = $rowAccFav["from_account"];
-						$arrFavMenu["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowAccFav["from_account"],$func->getConstant('dep_format'));
-						$arrFavMenu["FROM_ACCOUNT_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["from_account"],$func->getConstant('hidden_dep'));
-					}
-					$arrGroupAccFav[] = $arrFavMenu;
-				}
-			}else {
-				$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE menu_component = 'TransferSelfDepInsideCoop' 
-												and member_no = :member_no and flag_trans = 'TRN' and is_use = '1'");
-				$getAccFav->execute([':member_no' => $payload["member_no"]]);
-				while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
-					$arrFavMenu = array();
-					$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
-					$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
-					$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
-					$arrFavMenu["DESTINATION_FORMAT"] = $lib->formataccount($rowAccFav["destination"],$func->getConstant('dep_format'));
-					if(isset($rowAccFav["from_account"])) {
-						$arrFavMenu["FROM_ACCOUNT"] = $rowAccFav["from_account"];
-						$arrFavMenu["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowAccFav["from_account"],$func->getConstant('dep_format'));
-						$arrFavMenu["FROM_ACCOUNT_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["from_account"],$func->getConstant('hidden_dep'));
-					}
-					$arrGroupAccFav[] = $arrFavMenu;
-				}
-			}
-
 			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult["FORMAT_DEPT"] = $func->getConstant('dep_format');
-				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
-				$arrayResult['SCHEDULE']["ENABLED"] = TRUE;
+				$arrayResult['IS_SAVE_SOURCE'] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
