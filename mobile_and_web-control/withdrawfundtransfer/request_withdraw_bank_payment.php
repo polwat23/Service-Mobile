@@ -195,7 +195,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':fee_amt' => $dataComing["fee_amt"],
 					':deptaccount_no' => $coop_account_no,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $arrResponse->RESPONSE_MESSAGE
+					':response_message' => $arrResponse->RESPONSE_CODE.' / '.$arrResponse->RESPONSE_MESSAGE
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
 				if(isset($configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
