@@ -5,7 +5,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'CremationInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayDataWcGrp = array();
-		$getDataWc = $conmssql->prepare("SELECT WCM.DEPTACCOUNT_NO,CONCAT(MP.PRENAME_DESC,WCM.DEPTACCOUNT_NAME,' ',WCM.DEPTACCOUNT_SNAME) AS CS_NAME,WCC.COOP_NAME,WCM.PRNCBAL
+		$arrayDataWcAcc = array();
+		$conmssqlcmt = $con->connecttosqlservercmt();
+		$getDataWc = $conmssqlcmt->prepare("SELECT WCM.DEPTACCOUNT_NO,CONCAT(MP.PRENAME_DESC,WCM.DEPTACCOUNT_NAME,' ',WCM.DEPTACCOUNT_SNAME) AS CS_NAME,WCC.COOP_NAME,WCM.PRNCBAL
 																	FROM WCDEPTMASTER WCM LEFT JOIN WCCONTCOOP WCC
 																	ON WCM.WC_ID = WCC.WC_ID  AND WCC.COOP_ID = '051001'
 																	LEFT JOIN MBUCFPRENAME MP ON WCM.PRENAME_CODE = MP.PRENAME_CODE
@@ -17,7 +19,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayDataWc["ACCOUNT_NAME"] = $rowDataWc["CS_NAME"];
 			$arrayDataWc["CREMATION_TYPE"] = $rowDataWc["COOP_NAME"];
 			$arrayDataWc["AMOUNT_WC"] = number_format($rowDataWc["PRNCBAL"],2);
-			$arrayDataWcGrp[] = $arrayDataWc;
+			if(in_array($rowDataWc["DEPTACCOUNT_NO"],$arrayDataWcAcc) === FALSE){
+				$arrayDataWcGrp[] = $arrayDataWc;
+				$arrayDataWcAcc[] = $rowDataWc["DEPTACCOUNT_NO"];
+			}
 		}
 		$arrayResult['CREMATION'] = $arrayDataWcGrp;
 		$arrayResult['RESULT'] = TRUE;
