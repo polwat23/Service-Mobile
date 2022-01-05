@@ -1,22 +1,35 @@
 @echo off
 
+for /f "skip=1" %%x in ('wmic os get localdatetime') do if not defined MyDate set MyDate=%%x
+for /f %%x in ('wmic path win32_localtime get /format:list ^| findstr "="') do set %%x
+set fmonth=00%Month%
+set fday=00%Day%
+set today=%Year%%fmonth:~-2%%fday:~-2%
 
-del C:\Mobile\service-ktscc\external_service\backupDB_ktscc.zip
+set DAY_OF_LIFE=3
+set DBHOST=localhost
+set DBPORT=3306
+set DBUSER=root
+set DBPASS=@KTSCC2020
+set DBNAME=mobile_ktscc
+set PROJECT_PATH=C:\Mobile\service-ktscc\
+set BACKUP_PATH=%PROJECT_PATH%backup\
 
-cd C:\Program Files\MariaDB 10.5\bin
+IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%
 
-C:
+"C:\Program Files\MariaDB 10.5\bin\mysqldump.exe" -h%DBHOST% -P%DBPORT% -u %DBUSER% -p%DBPASS% %DBNAME% > %BACKUP_PATH%%DBNAME%.sql
 
-mysqldump.exe -hlocalhost -P3306 -u root -p@KTSCC2020 mobile_ktscc > C:\Mobile\service-ktscc\external_service\backupDB_ktscc.sql
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_db.zip %BACKUP_PATH%%DBNAME%.sql
 
-"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\service-ktscc\external_service\backupDB_ktscc.zip C:\Mobile\service-ktscc\external_service\backupDB_ktscc.sql
+del %BACKUP_PATH%%DBNAME%.sql
 
-del C:\Mobile\service-ktscc\external_service\backupDB_ktscc.sql
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_resource.zip %PROJECT_PATH%resource\alias_account_dept %PROJECT_PATH%resource\announce %PROJECT_PATH%resource\avatar %PROJECT_PATH%resource\gallery %PROJECT_PATH%resource\news
 
-cd C:\Program Files (x86)\WinSCP
+forfiles /P %BACKUP_PATH% /S /M *.* /D -%DAY_OF_LIFE% /C "cmd /c del @path"
 
-C:
+forfiles /P %BACKUP_PATH% /S /M *_doc.zip /C "cmd /c del @path"
 
-winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put C:\Mobile\service-ktscc\external_service\backupDB_ktscc.zip" "exit"
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_doc.zip %PROJECT_PATH%resource\reqloan_doc
 
-del C:\Mobile\service-ktscc\external_service\backupDB_ktscc.zip
+
+::@pause
