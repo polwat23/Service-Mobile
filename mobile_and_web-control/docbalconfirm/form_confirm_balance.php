@@ -3,7 +3,7 @@ use Dompdf\Dompdf;
 
 $dompdf = new DOMPDF();
 
-function GeneratePdfDoc($arrHeader,$arrDetail) {
+function GeneratePdfDoc($arrHeader,$arrDetail,$isConfirm = false) {
 	$checkedIcon = '<img src="../../resource/utility_icon/check-icon.png" width="12px" height="12px" style="position: absolute;left: 20px;top: 6px;"/>';
 	$html = '<style>
 				@font-face {
@@ -44,7 +44,7 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 					text-align: right;
 				}
 			</style>';
-	$html .= '<div style="border:1px solid #eee; height:auto; margin: auto;width: 680px;position: relative;">
+	$html .= '<div style="height:auto; margin: auto;width: 680px;position: relative;">
 			<div style="margin-left:50px; margin-top:5px;"> 
 			<img src="../../resource/logo/logo.jpg" style="width:70px;" >
 			</div>
@@ -125,8 +125,7 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 			<div style="text-align: center;padding-top: 16px;">
 				 ขอแสดงความนับถือ									
 			</div>
-			<div style="text-align: center;">
-				<img src="../../resource/utility_icon/president.png" width="36px" height="36px"/>									
+			<div style="text-align: center;height: 36px">									
 			</div>
 			<div style="text-align: center;">
 			           (นางวริชยา         ตำนานจิตร)																	
@@ -135,6 +134,7 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 			            ประธานกรรมการ 																								
 			</div>
 			';
+				//<img src="../../resource/utility_icon/president.png" width="36px" height="36px"/>
 	$html .= '
 	   </div>
 	';
@@ -146,12 +146,18 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm';
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$arrHeader["member_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/docbalconfirm/'.$arrHeader["member_no"].'.pdf?v='.time();
+	if($isConfirm){
+		$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm/confirmed';
+		$pathfile = $pathfile.'/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf';
+		$pathfile_show = '/resource/pdf/docbalconfirm/confirmed/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf?v='.time();
+	}else{
+		$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm';
+		$pathfile = $pathfile.'/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf';
+		$pathfile_show = '/resource/pdf/docbalconfirm/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf?v='.time();
+	}
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

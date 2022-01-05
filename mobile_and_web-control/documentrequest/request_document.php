@@ -152,12 +152,16 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 							}
 						}
 						$receive_net = $rowMastershare["SHARE_AMT"]-($loan_prn_2 + $loan_int_2+$loan_prn_1 + $loan_int_1);
+						
+						$resign_form_option = $dataComing["form_value_root_"]["RESIGN_FROM_OPTION"]["VALUE"] ?? "";
 						if($receive_net < 0){
-							$conmysql->rollback();
-							$arrayResult['RESPONSE_CODE'] = "";
-							$arrayResult['RESPONSE_MESSAGE'] = "หนี้มากกว่าทุนเรือนหุ้น ไม่สามารถลาออกได้กรุณาติดต่อเจ้าหน้าที่ !";
-							$arrayResult['RESULT'] = FALSE;
-							require_once('../../include/exit_footer.php');
+							if($resign_form_option == '1'){
+								$conmysql->rollback();
+								$arrayResult['RESPONSE_CODE'] = "";
+								$arrayResult['RESPONSE_MESSAGE'] = "กรณีหนี้มากกว่าทุนเรือนหุ้น ไม่สามารถลาออกจากสหกรณ์ฯได้กรุณาติดต่อเจ้าหน้าที่ !";
+								$arrayResult['RESULT'] = FALSE;
+								require_once('../../include/exit_footer.php');
+							}
 						}
 					
 						$effect_month_arr = $dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"] ? $lib->convertdate($dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"],"D m Y") : "";
@@ -181,6 +185,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$arrGroupDetail["LOAN_GROUP_INT_1"] =  $dataComing["is_confirm"] ? ($dataComing["form_value_root_"]["LOAN_GROUP_INT_1"]["VALUE"] ?? "0") : number_format($dataComing["form_value_root_"]["LOAN_GROUP_INT_1"]["VALUE"] ?? "0",2);
 						$arrGroupDetail["RECEIVE_NET"] =  $dataComing["is_confirm"] ? ($dataComing["form_value_root_"]["RECEIVE_NET"]["VALUE"] ?? "0") : number_format($dataComing["form_value_root_"]["RECEIVE_NET"]["VALUE"] ?? "0",2);
 						$arrGroupDetail["RESIGN_OPTION"] =  $dataComing["form_value_root_"]["RESIGN_OPTION"]["VALUE"] ?? "";
+						$arrGroupDetail["RESIGN_FROM_OPTION"] =  $resign_form_option;
 						$arrGroupDetail["RECEIVE_ACC"] =  $rowData["EXPENSE_ACCID"];
 					}else if($dataComing["documenttype_code"] == "CBNF"){
 						$arrGroupDetail = array();
@@ -265,10 +270,10 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 								require_once('../../include/exit_footer.php');
 							}else{
 								//คำนวณเงินเดือนคงเหลือ
-								$getMemberIno = $conmssql->prepare("SELECT SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
+								$getMemberIno = $conmssql->prepare("SELECT SALARY_AMOUNT,SALARY_ID FROM mbmembmaster WHERE member_no = :member_no");
 								$getMemberIno->execute([':member_no' => $member_no]);
 								$rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
-								$salary = $rowMember["SALARY_AMOUNT"] ?? 0;
+								//$salary = $rowMember["SALARY_AMOUNT"] ?? 0;
 								$getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY, lt.LOANGROUP_CODE, lm.LOANTYPE_CODE, lm.PERIOD_PAYMENT
 									FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
 									WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8");
@@ -282,11 +287,22 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 								$getMthOther = $conmssql->prepare("SELECT SUM(mthother_amt) as MTHOTHER_AMT FROM mbmembmthother WHERE member_no = :member_no and sign_flag = '-1'");
 								$getMthOther->execute([':member_no' => $member_no]);
 								$rowOther = $getMthOther->fetch(PDO::FETCH_ASSOC);
-								$other_amt = $rowOther["MTHOTHER_AMT"] ?? 0;
+								$mthother_amt = $rowOther["MTHOTHER_AMT"] ?? 0;
+								$getSettlement = $conmysql->prepare("SELECT settlement_amt, salary FROM gcmembsettlement WHERE is_use = '1' AND emp_no = :emp_no AND MONTH(month_period) = MONTH(:month_period) AND YEAR(month_period) = YEAR(:month_period)");
+								$getSettlement->execute([
+									':emp_no' => $rowMember["SALARY_ID"],
+									':month_period' => $dataComing["form_value_root_"]["EFFECT_MONTH"]["VALUE"],
+								]);
+								$rowSettlement = $getSettlement->fetch(PDO::FETCH_ASSOC);
+								$salary = $rowSettlement["salary"] ?? 0;
+								$other_amt = $rowSettlement["settlement_amt"] ?? $mthother_amt;
 								$sum_old_payment += $other_amt;
 								$salary_balance = $salary - $sum_old_payment;
 								if($period_payment > $salary_balance){
 									$conmysql->rollback();
+									$arrayResult['other_amt'] = $other_amt;
+									$arrayResult['salary'] = $salary;
+									$arrayResult['sum_old_payment'] = $sum_old_payment;
 									$arrayResult['RESPONSE_CODE'] = "";
 									$arrayResult['RESPONSE_MESSAGE'] = "จำนวนทุนเรือนหุ้นรายเดือนที่เพิ่ม เกินเงินเดือนคงเหลือสุทธิ กรุณาตรวจสอบค่าหุ้นรายเดือนแล้วลองใหม่อีกครั้ง";
 									$arrayResult['RESULT'] = FALSE;

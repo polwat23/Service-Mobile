@@ -18,13 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getMemberInfo->execute([':member_no' => $member_no]);
 		$rowMemberInfo = $getMemberInfo->fetch(PDO::FETCH_ASSOC);
 		
-		$getBalanceMaster = $conmssql->prepare("SELECT * FROM (SELECT mp.PRENAME_DESC,cfm.MEMB_NAME,cfm.MEMB_SURNAME,cfm.MEMBGROUP_CODE,
-												md.SHORT_NAME1 as DEPARTMENT,md.SHORT_NAME2 as DEPART_GROUP,cfm.BALANCE_DATE,cfm.CONFIRM_FLAG
-												FROM cmconfirmmaster cfm LEFT JOIN mbmembmaster mb ON cfm.MEMBER_NO = mb.MEMBER_NO
-												LEFT JOIN mbucfdepartment md ON mb.department_code = md.department_code
-												LEFT JOIN mbucfprename mp ON cfm.PRENAME_CODE = mp.PRENAME_CODE
-												WHERE cfm.member_no = :member_no
-												ORDER BY cfm.balance_date DESC) WHERE rownum <= 1");
+		$getBalanceMaster = $conmssql->prepare("SELECT TOP 1 BALANCE_DATE FROM YRCONFIRMMASTER WHERE MEMBER_NO = :member_no ORDER BY BALANCE_DATE DESC");
 		$getBalanceMaster->execute([':member_no' => $member_no]);
 		$rowBalMaster = $getBalanceMaster->fetch(PDO::FETCH_ASSOC);
 		$arrHeader = array();
@@ -32,94 +26,102 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrHeader["full_name"] = $rowMemberInfo["PRENAME_SHORT"].$rowMemberInfo["MEMB_NAME"]." ".$rowMemberInfo["MEMB_SURNAME"];
 		$arrHeader["member_no"] = $member_no;
 		$arrHeader["date_confirm"] = $lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d M Y');
-		$getBalanceDetail = $conmssql->prepare("SELECT (CASE WHEN cfb.CONFIRMTYPE_CODE = 'DEP'
-												THEN dp.DEPTTYPE_DESC
-												WHEN cfb.CONFIRMTYPE_CODE = 'LON'
-												THEN ln.LOANTYPE_DESC
-												WHEN cfb.CONFIRMTYPE_CODE = 'ASS'
-												THEN 'กองทุนสวัสดิการสมาชิก'
-												ELSE 'ทุนเรือนหุ้น' END) AS DEPTTYPE_DESC,
-												(CASE WHEN cfb.CONFIRMTYPE_CODE = 'DEP' OR cfb.CONFIRMTYPE_CODE = 'LON'
-												THEN cfb.REF_MASTNO
-												ELSE '' END) as DEPTACCOUNT_NO,cfb.BALANCE_AMT,cfb.CONFIRMTYPE_CODE
-												FROM cmconfirmbalance cfb LEFT JOIN dpdepttype dp ON cfb.SHRLONTYPE_CODE = dp.DEPTTYPE_CODE
-												LEFT JOIN lnloantype ln ON cfb.SHRLONTYPE_CODE = ln.LOANTYPE_CODE
-												WHERE cfb.member_no = :member_no and cfb.BALANCE_DATE = to_date(:balance_date,'YYYY-MM-DD')
-												ORDER BY cfb.CONFIRMTYPE_CODE ASC");
-		$getBalanceDetail->execute([
+		$arrHeader["date_confirm_raw"] = date('Ymd',strtotime($rowBalMaster["BALANCE_DATE"]));
+		
+		$getBalStatus = $conmysql->prepare("SELECT confirm_date,confirm_flag,confirmlon_list, confirmshr_list, balance_date, remark, url_path FROM gcconfirmbalancelist WHERE member_no = :member_no and balance_date = :balance_date and is_use = '1'");
+		$getBalStatus->execute([
 			':member_no' => $member_no,
 			':balance_date' => date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]))
 		]);
-		$formatDept = $func->getConstant('dep_format');
-		while($rowBalDetail = $getBalanceDetail->fetch(PDO::FETCH_ASSOC)){
-			$arrBalDetail = array();
-			$arrBalDetail["TYPE_DESC"] = $rowBalDetail["DEPTTYPE_DESC"];
-			if($rowBalDetail["CONFIRMTYPE_CODE"] == "DEP"){
-				if(array_search($rowBalDetail["DEPTTYPE_DESC"],array_column($arrDetail,'TYPE_DESC')) === False){
-					$arrBalDetail["BALANCE_AMT"] = $rowBalDetail["BALANCE_AMT"];
-					$arrDetail[] = $arrBalDetail;
-				}else{
-					$arrDetail[array_search($rowBalDetail["DEPTTYPE_DESC"],array_column($arrDetail,'TYPE_DESC'))]["BALANCE_AMT"] += $rowBalDetail["BALANCE_AMT"];
-				}
-			}else{
-				$arrBalDetail["BALANCE_AMT"] = $rowBalDetail["BALANCE_AMT"];
-				$arrBalDetail["DEPTACCOUNT_NO"] = $rowBalDetail["DEPTACCOUNT_NO"];
-				$arrDetail[] = $arrBalDetail;
-			}
-		}
-		foreach($arrDetail as $key => $value){
-			$arrDetail[$key]["BALANCE_AMT"] = number_format($value["BALANCE_AMT"],2);
-		}
-		if(isset($rowBalMaster["MEMB_NAME"]) && sizeof($arrDetail) > 0 || true){
-			$arrConfirmGroup = array();
-			$arrConfirm = array();
-			$arrConfirm["CONFIRM_TYPE"] = "SHARE";
-			$arrConfirm["CONFIRM_DESC"] = "ทุนเรือนหุ้น";
-			$arrConfirm["CONFIRM_SUB_VALUE"] = "37500";
-			$arrConfirm["CONFIRM_VALUE"] = "375000";
-			$arrConfirm["CONFIRM_DATA"] = "37,500.00 หุ้น  จำนวนเงิน 375,000.00";
-			$arrConfirmGroup[] = $arrConfirm;
-			$arrConfirm = array();
-			$arrConfirm["CONFIRM_TYPE"] = "EMERLOAN";
-			$arrConfirm["CONFIRM_DESC"] = "เงินกู้ฉุกเฉิน";
-			$arrConfirm["CONFIRM_VALUE"] = "375500";
-			$arrConfirm["CONFIRM_DATA"] = "จำนวนเงิน 375,500.00";
-			$arrConfirmGroup[] = $arrConfirm;
-			$arrConfirm = array();
-			$arrConfirm["CONFIRM_TYPE"] = "LOAN";
-			$arrConfirm["CONFIRM_DESC"] = "เงินกู้สามัญ";
-			$arrConfirm["CONFIRM_VALUE"] = "5375500";
-			$arrConfirm["CONFIRM_DATA"] = "จำนวนเงิน 5,375,500.00";
-			$arrConfirmGroup[] = $arrConfirm;
-			
-			$arrayResult['CONFIRM_LIST'] = $arrConfirmGroup;
-			$arrDetail['CONFIRM_LIST'] = $arrConfirmGroup;
-				
-			include('form_confirm_balance.php');
-			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
-			if($arrayPDF["RESULT"]){
-				$arrayResult['DATA_CONFIRM'] = "ข้าพเจ้า ".$arrHeader["full_name"]." เลขที่สมาชิก ".$member_no." ตามที่ทาง 
-				สหกรณ์ออมทรัพย์พนักงานสยามคูโบต้า จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
-				' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
-				
-				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
-				$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
-				$arrayResult['IS_CONFIRM'] = FALSE;
-				$arrayResult['IS_SKIP_REPORT'] = FALSE;
-				$arrayResult['IS_OTP'] = TRUE;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0044";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-		}else{
-			$arrayResult['IS_CONFIRM'] = FALSE;
+		$rowBalStatus = $getBalStatus->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowBalStatus["balance_date"]) && $rowBalStatus["balance_date"] != ""){
+			$arrayResult['DATA_CONFIRM'] = "ข้าพเจ้า ".$arrHeader["full_name"]." เลขที่สมาชิก ".$member_no." ตามที่ทาง 
+			สหกรณ์ออมทรัพย์พนักงานสยามคูโบต้า จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
+			' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
+			$arrayResult['REPORT_URL'] = $rowBalStatus["url_path"];
+			$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalStatus["balance_date"]));
+			$arrayResult['CONFIRM_DATE'] = $lib->convertdate($rowBalStatus["confirm_date"],'d m Y',true);
+			$arrayResult['CONFIRMLON_LIST'] = $rowBalStatus["confirmlon_list"];
+			$arrayResult['CONFIRMSHR_LIST'] = $rowBalStatus["confirmshr_list"];
+			$arrayResult['CONFIRM_FLAG'] = json_decode($rowBalStatus["confirm_flag"]);
+			$arrayResult['REMARK'] = $rowBalStatus["remark"];
+			$arrayResult['IS_CONFIRM'] = TRUE;
+			$arrayResult['IS_SKIP_REPORT'] = TRUE;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
+		}else{
+			$getBalanceDetail = $conmssql->prepare("SELECT SEQ_NO,FROM_SYSTEM,BIZZACCOUNT_NO,BALANCE_AMT,BIZZTYPE_CODE FROM YRCONFIRMSTATEMENT WHERE MEMBER_NO = :member_no AND BALANCE_DATE = :balance_date");
+			$getBalanceDetail->execute([
+				':member_no' => $member_no,
+				':balance_date' => date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]))
+			]);
+			$share_amt = 0;
+			$loan_01_amt = 0;
+			$loan_02_amt = 0;
+			$count = 0;
+			while($rowBalDetail = $getBalanceDetail->fetch(PDO::FETCH_ASSOC)){
+				if($rowBalDetail["FROM_SYSTEM"] == "SHR"){
+					$share_amt += $rowBalDetail["BALANCE_AMT"];
+				}else if($rowBalDetail["FROM_SYSTEM"] == "LON"){
+					if(substr($rowBalDetail["BIZZTYPE_CODE"],0,1) == "1"){
+						$loan_01_amt += $rowBalDetail["BALANCE_AMT"];
+					}else if(substr($rowBalDetail["BIZZTYPE_CODE"],0,1) == "2"){
+						$loan_02_amt += $rowBalDetail["BALANCE_AMT"];
+					}
+				}
+			}
+			if(isset($rowBalMaster["BALANCE_DATE"])){
+				$arrConfirmGroup = array();
+				$arrConfirm = array();
+				$arrConfirm["CONFIRM_TYPE"] = "SHARE";
+				$arrConfirm["CONFIRM_DESC"] = "ทุนเรือนหุ้น";
+				$arrConfirm["CONFIRM_SUB_VALUE"] = $share_amt / 10;
+				$arrConfirm["CONFIRM_VALUE"] = $share_amt;
+				$arrConfirm["CONFIRM_DATA"] = number_format($share_amt / 10,2)." หุ้น  จำนวนเงิน ".number_format($share_amt,2);
+				$arrConfirmGroup[] = $arrConfirm;
+				$arrConfirm = array();
+				$arrConfirm["CONFIRM_TYPE"] = "EMERLOAN";
+				$arrConfirm["CONFIRM_DESC"] = "เงินกู้ฉุกเฉิน";
+				$arrConfirm["CONFIRM_VALUE"] = $loan_01_amt;
+				$arrConfirm["CONFIRM_DATA"] = "จำนวนเงิน ".number_format($loan_01_amt,2);
+				$arrConfirmGroup[] = $arrConfirm;
+				$arrConfirm = array();
+				$arrConfirm["CONFIRM_TYPE"] = "LOAN";
+				$arrConfirm["CONFIRM_DESC"] = "เงินกู้สามัญ";
+				$arrConfirm["CONFIRM_VALUE"] = $loan_02_amt;
+				$arrConfirm["CONFIRM_DATA"] = "จำนวนเงิน ".number_format($loan_02_amt,2);
+				$arrConfirmGroup[] = $arrConfirm;
+				
+				$arrayResult['CONFIRM_LIST'] = $arrConfirmGroup;
+				$arrDetail['CONFIRM_LIST'] = $arrConfirmGroup;
+					
+				include('form_confirm_balance.php');
+				$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
+				if($arrayPDF["RESULT"]){
+					$arrayResult['DATA_CONFIRM'] = "ข้าพเจ้า ".$arrHeader["full_name"]." เลขที่สมาชิก ".$member_no." ตามที่ทาง 
+					สหกรณ์ออมทรัพย์พนักงานสยามคูโบต้า จำกัด ได้แจ้งรายการบัญชีของข้าพเจ้า สิ้นสุด ณ วันที่ ".$lib->convertdate(date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"])),'d m Y').
+					' นั้น ข้าพเจ้าได้ตรวจสอบแล้วปรากฏว่า ข้อมูลดังกล่าว';
+					
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+					$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
+					$arrayResult['IS_CONFIRM'] = FALSE;
+					$arrayResult['IS_SKIP_REPORT'] = TRUE;
+					$arrayResult['IS_OTP'] = FALSE;
+					$arrayResult['RESULT'] = TRUE;
+					
+					require_once('../../include/exit_footer.php');
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS0044";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+					
+				}
+			}else{
+				$arrayResult['IS_CONFIRM'] = FALSE;
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

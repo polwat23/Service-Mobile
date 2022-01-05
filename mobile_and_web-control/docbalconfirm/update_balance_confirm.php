@@ -4,13 +4,13 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocBalanceConfirm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getBalStatus = $conmysql->prepare("SELECT confirm_status FROM confirm_balance WHERE member_no = :member_no and confirmation = :confirmdate");
+		$getBalStatus = $conmysql->prepare("SELECT balance_date FROM gcconfirmbalancelist WHERE member_no = :member_no and balance_date = :balance_date and is_use = '1'");
 		$getBalStatus->execute([
 			':member_no' => $member_no,
-			':confirmdate' => $dataComing["balance_date"]
+			':balance_date' => $dataComing["balance_date"]
 		]);
 		$rowBalStatus = $getBalStatus->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowBalStatus["confirm_status"]) && $rowBalStatus["confirm_status"] != ""){
+		if(isset($rowBalStatus["balance_date"]) && $rowBalStatus["balance_date"] != ""){
 			$arrayResult['RESPONSE_CODE'] = "WS0097";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 		$getBalanceDetail = $conmssql->prepare("SELECT SEQ_NO,FROM_SYSTEM,BIZZACCOUNT_NO,BALANCE_AMT,BIZZTYPE_CODE FROM YRCONFIRMSTATEMENT WHERE MEMBER_NO = :member_no AND BALANCE_DATE = :balance_date");
 		$getBalanceDetail->execute([
 			':member_no' => $member_no,
-			':balance_date' => $dataComing["balance_date"])
+			':balance_date' => $dataComing["balance_date"]
 		]);
 		$share_amt = 0;
 		$loan_01_amt = 0;
@@ -81,15 +81,16 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 		
 		include('form_confirm_balance.php');
 		$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail,true);
-		$FlagComfirm = $conmysql->prepare("INSERT INTO gcconfirmbalancelist(member_no, confirmlon_list, confirmshr_list, balance_date, url_path, remark) 
-						VALUES (:member_no, :confirmlon_list, :confirmshr_list, :balance_date, :url_path, :remark)");
+		$FlagComfirm = $conmysql->prepare("INSERT INTO gcconfirmbalancelist(member_no, confirmlon_list, confirmshr_list, balance_date, url_path, remark, confirm_flag) 
+						VALUES (:member_no, :confirmlon_list, :confirmshr_list, :balance_date, :url_path, :remark, :confirm_flag)");
 		if($FlagComfirm->execute([
 			':member_no' => $member_no,
-			':confirmlon_list' => $dataComing['lon_confirm'],
-			':confirmshr_list' => $dataComing['shr_confirm'],
+			':confirmlon_list' => $dataComing['lon_confirm_root_'],
+			':confirmshr_list' => $dataComing['shr_confirm_root_'],
 			':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"])),
 			':url_path' => $config["URL_SERVICE"].$arrayPDF["PATH"],
 			':remark' => $dataComing["remark"],
+			':confirm_flag' => json_encode($dataComing["confirm_flag"]),
 		])){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
@@ -101,22 +102,24 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 				":error_code" => "WS1038",
 				":error_desc" => "Update ลงตาราง  gcconfirmbalancelist ไม่ได้ "."\n".$FlagComfirm->queryString."\n"."data => ".json_encode([
 					':member_no' => $member_no,
-					':confirmlon_list' => 'confirmlon_list',
-					':confirmshr_list' => 'confirmshr_list',
+					':confirmlon_list' => $dataComing['lon_confirm_root_'],
+					':confirmshr_list' => $dataComing['shr_confirm_root_'],
 					':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"])),
 					':url_path' => $config["URL_SERVICE"].$arrayPDF["PATH"],
 					':remark' => $dataComing["remark"],
+					':confirm_flag' => json_encode($dataComing["confirm_flag"]),
 				]),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." Update ลงตาราง  gcconfirmbalancelist ไม่ได้"."\n".$FlagComfirm->queryString."\n"."data => ".json_encode([
 				':member_no' => $member_no,
-				':confirmlon_list' => 'confirmlon_list',
-				':confirmshr_list' => 'confirmshr_list',
+				':confirmlon_list' => $dataComing['lon_confirm_root_'],
+				':confirmshr_list' => $dataComing['shr_confirm_root_'],
 				':balance_date' => date('Y-m-d',strtotime($dataComing["balance_date"])),
 				':url_path' => $config["URL_SERVICE"].$arrayPDF["PATH"],
 				':remark' => $dataComing["remark"],
+				':confirm_flag' => json_encode($dataComing["confirm_flag"]),
 			]);
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS1038";

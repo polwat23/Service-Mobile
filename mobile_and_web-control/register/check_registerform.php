@@ -72,7 +72,14 @@ if($lib->checkCompleteArgument(['form_value_root_','api_token','unique_id'],$dat
 				if(!isset($rowInfoMobile["MEMBER_NO"])){
 					$shr_period_payment = $dataComing["form_value_root_"]["SHARE_PERIOD_PAYMENT"]["VALUE"] ?? "";
 					
-					$other_amt = $rowInfoRegister["EXPENSE_AMT"] ?? 0;
+					$mthother_amt = $rowInfoRegister["EXPENSE_AMT"] ?? 0;
+					$getSettlement = $conmysql->prepare("SELECT settlement_amt, salary FROM gcmembsettlement WHERE is_use = '1' AND emp_no = :emp_no AND MONTH(month_period) = MONTH(:month_period) AND YEAR(month_period) = YEAR(:month_period)");
+					$getSettlement->execute([
+						':emp_no' => $emp_no,
+						':month_period' => $dataComing["form_value_root_"]["EFFECT_MONTH"]["VALUE"],
+					]);
+					$rowSettlement = $getSettlement->fetch(PDO::FETCH_ASSOC);
+					$other_amt = $rowSettlement["settlement_amt"] ?? $mthother_amt;
 					if($shr_period_payment % 10 != 0){
 						$arrayResult['RESPONSE_CODE'] = "";
 						$arrayResult['RESPONSE_MESSAGE'] = "ค่าหุ้นรายเดือนไม่ถูกต้อง เนื่องจากหุ้นมีมูลค่าหุ้นละ 10 บาท กรุณาตรวจสอบค่าหุ้นรายเดือนและลองใหม่อีกครั้ง";
@@ -83,7 +90,7 @@ if($lib->checkCompleteArgument(['form_value_root_','api_token','unique_id'],$dat
 						$arrayResult['RESPONSE_MESSAGE'] = "ค่าหุ้นรายเดือนขั้นต่ำ 200 บาท กรุณาตรวจสอบค่าหุ้นรายเดือนและลองใหม่อีกครั้ง";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
-					}else if(($rowInfoRegister["SALARY_AMT"] - $other_amt) < $shr_period_payment){
+					}else if(($rowSettlement["salary"] - $other_amt) < $shr_period_payment){
 						$arrayResult['RESPONSE_CODE'] = "";
 						$arrayResult['RESPONSE_MESSAGE'] = "ค่าหุ้นรายเดือนเกินเงินเดือนคงเหลือสุทธิ กรุณาตรวจสอบค่าหุ้นรายเดือนและลองใหม่อีกครั้ง";
 						$arrayResult['RESULT'] = FALSE;

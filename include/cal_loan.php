@@ -135,6 +135,9 @@ class CalculateLoan {
 						}
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
+						if($yearDiffTemp > 0){
+							$dayInterest++;
+						}
 					}
 				}
 				if(!$changerateint){
@@ -160,18 +163,14 @@ class CalculateLoan {
 		$getLoanPayDate->execute();
 		$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
 		if(isset($rowLoanPayDate['loanpaydate']) && $rowLoanPayDate['loanpaydate'] != ''){
-			if($constLoanContract["CHECK_KEEPING"] == '1'){
+			if($constLoanContract["SPACE_KEEPING"] == 0){
 				$calInt = TRUE;
 			}else{
-				if($constLoanContract["SPACE_KEEPING"] == 0){
-					$calInt = TRUE;
+				if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
+					$calInt = FALSE;
+					$interest = $constLoanContract["INTEREST_ARREAR"];
 				}else{
-					if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
-						$calInt = FALSE;
-						$interest = $constLoanContract["INTEREST_ARREAR"];
-					}else{
-						$calInt = TRUE;
-					}
+					$calInt = TRUE;
 				}
 			}
 		}else{
@@ -269,7 +268,14 @@ class CalculateLoan {
 						$dateTo = new \DateTime(date('d-m-Y'));
 						//$dateTo = new \DateTime($rowLoanPayDate['loanpaydate']);
 						$date_duration = $dateTo->diff($dateFrom);
-						$dayInterest = $date_duration->days;
+						if($dateFrom > $dateTo){
+							$dayInterest = 0;
+						}else{
+							$dayInterest = $date_duration->days;
+						}
+						if($yearDiffTemp > 0){
+							$dayInterest++;
+						}
 					}
 				}
 				if(!$changerateint){
@@ -415,6 +421,10 @@ class CalculateLoan {
 						}
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
+						
+						if($yearDiffTemp > 0){
+							$dayInterest++;
+						}
 					}
 				}
 				if(!$changerateint){
@@ -536,6 +546,10 @@ class CalculateLoan {
 					$dateTo = new \DateTime(date('d-m-Y'));
 					$date_duration = $dateTo->diff($dateFrom);
 					$dayInterest = $date_duration->days;
+					
+					if($yearDiffTemp > 0){
+						$dayInterest++;
+					}
 				}
 			}
 			if(!$changerateint){

@@ -456,25 +456,6 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 			$arrayGrpForm[] = $arrayForm;
 		}
 		
-		if($dataComing["documenttype_code"] == "RRSN" && $receive_net < 0){
-			$arrayForm = array();
-			$arrayForm["ID_FORMAT_REQ_DOC"] = null;
-			$arrayForm["DOCUMENTTYPE_CODE"] = "RRSN";
-			$arrayForm["FORM_LABEL"] = "จำนวนเงินที่จะได้รับ";
-			$arrayForm["FORM_KEY"] = "LOAN_GROUP_BAL_1";
-			$arrayForm["FORM_TYPE"] = "remark";
-			$arrayForm["COLSPAN"] = "24";
-			$arrayForm["FULLWIDTH"] = false;
-			$arrayForm["REQUIRED"] = false;
-			$arrayForm["PLACEHOLDER"] = "หนี้มากกว่าทุนเรือนหุ้น ไม่สามารถลาออกได้กรุณาติดต่อเจ้าหน้าที่ !";
-			$arrayForm["DEFAULT_VALUE"] = null;
-			$arrayForm["FORM_OPTION"] = null;
-			$arrayForm["MAXWIDTH"] = null;
-			$arrayForm["GROUP_ID"] = "1";
-			$arrayForm["MAX_VALUE"] = '#ffffff';
-			$arrayForm["MIN_VALUE"] = '#dc5349';
-			$arrayGrpForm[] = $arrayForm;
-		}else{
 			while($rowForm = $getFormatForm->fetch(PDO::FETCH_ASSOC)){
 				if($dataComing["documenttype_code"] == "CSHR" && $rowForm["form_key"] == "SHARE_PERIOD_PAYMENT"){
 					$getSharemasterinfo = $conmssql->prepare("SELECT (periodshare_amt * 10) as PERIOD_SHARE_AMT
@@ -500,23 +481,65 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$arrayGrpForm[] = $arrayForm;
 				}
 				
+				//ลาออกหากหนี้มากกว่าทุนเรือนหุ้นให้เลือกว่าลาออกจากสหกรณ์หรือบริษัท
 				$arrayForm = array();
-				$arrayForm["ID_FORMAT_REQ_DOC"] = $rowForm["id_format_req_doc"];
-				$arrayForm["DOCUMENTTYPE_CODE"] = $rowForm["documenttype_code"];
-				$arrayForm["FORM_LABEL"] = $rowForm["form_label"];
-				$arrayForm["FORM_KEY"] = $rowForm["form_key"];
-				$arrayForm["FORM_TYPE"] = $rowForm["form_type"];
-				$arrayForm["COLSPAN"] = $rowForm["colspan"];
-				$arrayForm["FULLWIDTH"] = $rowForm["fullwidth"] == 1 ? true : false;
-				$arrayForm["REQUIRED"] = $rowForm["required"] == 1 ? true : false;
-				$arrayForm["PLACEHOLDER"] = $rowForm["placeholder"];
-				$arrayForm["DEFAULT_VALUE"] = $rowForm["default_value"];
-				$arrayForm["FORM_OPTION"] = $rowForm["form_option"];
-				$arrayForm["MAXWIDTH"] = $rowForm["maxwidth"];
-				$arrayForm["GROUP_ID"] = $rowForm["group_id"];
-				$arrayForm["MAX_VALUE"] = $rowForm["max_value"];
-				$arrayForm["MIN_VALUE"] = $rowForm["min_value"];
-				$arrayForm["MASK"] = $rowForm["mask"];
+				if($dataComing["documenttype_code"] == "RRSN" && $rowForm["form_key"] == "RESIGN_FROM_OPTION"){
+					if($dataComing["documenttype_code"] == "RRSN" && $receive_net < 0){
+						$arrayForm = array();
+						$arrayForm["ID_FORMAT_REQ_DOC"] = null;
+						$arrayForm["DOCUMENTTYPE_CODE"] = "RRSN";
+						$arrayForm["FORM_LABEL"] = "";
+						$arrayForm["FORM_KEY"] = "RESIGN_REMARK";
+						$arrayForm["FORM_TYPE"] = "remark";
+						$arrayForm["COLSPAN"] = "24";
+						$arrayForm["FULLWIDTH"] = false;
+						$arrayForm["REQUIRED"] = false;
+						$arrayForm["PLACEHOLDER"] = "กรณีหนี้มากกว่าทุนเรือนหุ้น ไม่สามารถลาออกจากสหกรณ์ฯได้กรุณาติดต่อเจ้าหน้าที่ !";
+						$arrayForm["DEFAULT_VALUE"] = null;
+						$arrayForm["FORM_OPTION"] = null;
+						$arrayForm["MAXWIDTH"] = null;
+						$arrayForm["GROUP_ID"] = "2";
+						$arrayForm["MAX_VALUE"] = '#e91e1e';
+						$arrayForm["MIN_VALUE"] = '#e91e1e33';
+						$arrayGrpForm[] = $arrayForm;
+					}
+					
+					if($receive_net < 0){
+						$arrayForm["ID_FORMAT_REQ_DOC"] = $rowForm["id_format_req_doc"];
+						$arrayForm["DOCUMENTTYPE_CODE"] = $rowForm["documenttype_code"];
+						$arrayForm["FORM_LABEL"] = $rowForm["form_label"];
+						$arrayForm["FORM_KEY"] = $rowForm["form_key"];
+						$arrayForm["FORM_TYPE"] = $rowForm["form_type"];
+						$arrayForm["COLSPAN"] = $rowForm["colspan"];
+						$arrayForm["FULLWIDTH"] = $rowForm["fullwidth"] == 1 ? true : false;
+						$arrayForm["REQUIRED"] = $rowForm["required"] == 1 ? true : false;
+						$arrayForm["PLACEHOLDER"] = $rowForm["placeholder"];
+						$arrayForm["DEFAULT_VALUE"] = $rowForm["default_value"];
+						$arrayForm["FORM_OPTION"] = $rowForm["form_option"];
+						$arrayForm["MAXWIDTH"] = $rowForm["maxwidth"];
+						$arrayForm["GROUP_ID"] = $rowForm["group_id"];
+						$arrayForm["MAX_VALUE"] = $rowForm["max_value"];
+						$arrayForm["MIN_VALUE"] = $rowForm["min_value"];
+						$arrayForm["MASK"] = $rowForm["mask"];
+					}
+				}else{
+					$arrayForm["ID_FORMAT_REQ_DOC"] = $rowForm["id_format_req_doc"];
+					$arrayForm["DOCUMENTTYPE_CODE"] = $rowForm["documenttype_code"];
+					$arrayForm["FORM_LABEL"] = $rowForm["form_label"];
+					$arrayForm["FORM_KEY"] = $rowForm["form_key"];
+					$arrayForm["FORM_TYPE"] = $rowForm["form_type"];
+					$arrayForm["COLSPAN"] = $rowForm["colspan"];
+					$arrayForm["FULLWIDTH"] = $rowForm["fullwidth"] == 1 ? true : false;
+					$arrayForm["REQUIRED"] = $rowForm["required"] == 1 ? true : false;
+					$arrayForm["PLACEHOLDER"] = $rowForm["placeholder"];
+					$arrayForm["DEFAULT_VALUE"] = $rowForm["default_value"];
+					$arrayForm["FORM_OPTION"] = $rowForm["form_option"];
+					$arrayForm["MAXWIDTH"] = $rowForm["maxwidth"];
+					$arrayForm["GROUP_ID"] = $rowForm["group_id"];
+					$arrayForm["MAX_VALUE"] = $rowForm["max_value"];
+					$arrayForm["MIN_VALUE"] = $rowForm["min_value"];
+					$arrayForm["MASK"] = $rowForm["mask"];
+				}
 				
 				//lock effect month
 				if($dataComing["documenttype_code"] == "CSHR" && $rowForm["form_key"] == "EFFECT_MONTH"){
@@ -578,7 +601,6 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$arrayGrpForm[] = $arrayForm;
 				}
 			}
-		}
 		
 		$arrayResult['FORM_REQDOCUMENT'] = $arrayGrpForm;
 		$arrayResult['FORM_GROUP'] = $arrayGrpData;
