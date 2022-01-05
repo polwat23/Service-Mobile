@@ -267,25 +267,25 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>';
 	if($header["sliptype_code"] == 'CLC'){
 			$html .= '<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/submg.jpg" width="70" height="35" style="margin-top:10px;"/>
 			</div>
 			<div style="width:200px;margin-left: 770px;display:flex;">
-			<img src="../../resource/utility_icon/signature/submg.jpg" width="80" height="30" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/finance.jpg" width="90" height="40" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">รองผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 540px;margin-top:-80px;">เจ้าหน้าที่สินเชื่อ</div>
+			<div style="font-size: 18px;margin-left: 770px;margin-top:-90px;">เจ้าหน้าที่การเงิน</div>
 			';
 	}else{
-		$html .= '<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+		$html .= '<div style="width:200px;margin-left: 560px;display:flex;">
+			<img src="../../resource/utility_icon/signature/recv.jpg" width="120" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="width:200px;margin-left: 770px;display:flex;">
-			<img src="../../resource/utility_icon/signature/finance.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 760px;display:flex;">
+			<img src="../../resource/utility_icon/signature/finance.jpg" width="90" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่การเงิน</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">รองผู้จัดการ</div>
 			';
 	}
 

@@ -181,10 +181,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = TRUE;
-				$arrayResult["REQ_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
+				$arrayResult["REQ_SALARY"] = FALSE;
+				$arrayResult["REQ_CITIZEN"] = FALSE;
+				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
+				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
 				$arrayResult['OBJECTIVE'] = $arrGrpObj;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

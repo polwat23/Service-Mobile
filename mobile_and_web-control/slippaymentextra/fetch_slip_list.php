@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayYear["COUNT"] = $rowListCountSlip["C_SLIP"];
 			$getMonthSlip = $conoracle->prepare("SELECT EXTRACT(MONTH FROM SLIP_DATE) AS EACH_MONTH
 												FROM SLSLIPPAYIN WHERE TRIM(MEMBER_NO) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year
-												GROUP BY EXTRACT(MONTH FROM SLIP_DATE) ORDER BY EXTRACT(MONTH FROM SLIP_DATE) ASC");
+												GROUP BY EXTRACT(MONTH FROM SLIP_DATE) ORDER BY EXTRACT(MONTH FROM SLIP_DATE) DESC");
 			$getMonthSlip->execute([
 				':member_no' => $member_no,
 				':year' => $rowListCountSlip["EACH_YEAR"]
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayMonth["MONTH"] = $thaimonth[$rowMonth["EACH_MONTH"]];
 				$getListSlip = $conoracle->prepare("SELECT PAYINSLIP_NO FROM SLSLIPPAYIN 
 													WHERE TRIM(member_no) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year 
-													and EXTRACT(MONTH FROM SLIP_DATE) = :month");
+													and EXTRACT(MONTH FROM SLIP_DATE) = :month ORDER BY PAYINSLIP_NO ASC");
 				$getListSlip->execute([
 					':member_no' => $member_no,
 					':year' => $rowListCountSlip["EACH_YEAR"],
