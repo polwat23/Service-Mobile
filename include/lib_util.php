@@ -278,7 +278,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'zcs1.bestinternet.co.th'; //'mail.gensoft.co.th';
+		$mailFunction->Host = 'mail.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -289,7 +289,7 @@ class library {
 		$mailFunction->Hostname = 'gensoft.co.th';
 		$mailFunction->Helo = 'Gensoft-Mail';
 		$mailFunction->Encoding = 'quoted-printable';
-		$mailFunction->setFrom("coop-noreply@gensoft.co.th", $json_data["NAME_APP"]); //setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
+		$mailFunction->setFrom($json_data["MAIL"], $json_data["NAME_APP"]);
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
@@ -471,7 +471,7 @@ class library {
 
 		curl_setopt( $ch,CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send' );                                                                  
 		curl_setopt( $ch,CURLOPT_POST, true );  
-		curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
+		curl_setopt( $ch, CURLOPT_PROXY, 'proxy.egat.co.th');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
@@ -523,7 +523,7 @@ class library {
 			curl_setopt($ch, CURLOPT_URL, "https://oauth-login.cloud.huawei.com/oauth2/v2/token");
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-			curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
+			curl_setopt( $ch, CURLOPT_PROXY, 'proxy.egat.co.th');
 			curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -594,7 +594,7 @@ class library {
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
+		curl_setopt( $ch, CURLOPT_PROXY, 'proxy.egat.co.th');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -648,7 +648,7 @@ class library {
 		$ch = curl_init( $url );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($payload) );
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: application/json; charset=utf-8', 'Accept: application/json'),$header));
-		curl_setopt( $ch, CURLOPT_PROXY, '10.20.220.63');
+		curl_setopt( $ch, CURLOPT_PROXY, 'proxy.egat.co.th');
 		curl_setopt( $ch, CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -769,7 +769,7 @@ class library {
 
 		curl_setopt( $ch,CURLOPT_URL, "https://notify-api.line.me/api/notify" );                                                                  
 		curl_setopt( $ch,CURLOPT_POST, true );
-		curl_setopt( $ch,CURLOPT_PROXY, '10.20.220.63');
+		curl_setopt( $ch,CURLOPT_PROXY, 'proxy.egat.co.th');
 		curl_setopt( $ch,CURLOPT_PROXYPORT, '8080');
 		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );

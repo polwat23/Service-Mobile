@@ -50,6 +50,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				$log->writeLog('errorusage',$logStruc);
 				$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee";
 				$lib->sendLineNotify($message_error);
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_CODE'] = "WS9999";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -89,6 +90,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						$log->writeLog('withdrawtrans',$arrayStruc);
 						$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
 						$lib->sendLineNotify($message_error);
+						$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 						$func->MaintenanceMenu($dataComing["menu_component"]);
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;

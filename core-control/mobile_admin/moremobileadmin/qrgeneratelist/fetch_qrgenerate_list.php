@@ -5,13 +5,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','qrgeneratelist')){
 		$arrayGrpAll = array();
 		
-		$fetchQrgenerateList = $conmysql->prepare("SELECT qrm.qrcodegen_id,qrm.qrgenerate,qrm.member_no,qrm.generate_date,qrm.qrtransfer_amt,qrm.qrtransfer_fee,
+		$fetchQrgenerateList = $conmysql->prepare("SELECT qrm.qrcodegen_id,qrm.qrgenerate,qrm.member_no,qrm.generate_date,qrm.qrtransfer_amt,qrm.qrtransfer_fee,qrd.auto_adj,qrd.type_code,qrd.qrtransferdt_prinbal,qrd.qrtransferdt_int,
 										qrm.expire_date,qrm.transfer_status,qrm.update_date,
 										qrd.trans_code_qr,qrd.ref_account,qrd.qrtransferdt_amt,qrd.qrtransferdt_fee,
                                         qrc.trans_desc_qr, qrd.trans_status
 										FROM gcqrcodegenmaster qrm
 										LEFT JOIN gcqrcodegendetail qrd ON qrd.qrgenerate = qrm.qrgenerate
 										LEFT JOIN gcconttypetransqrcode qrc ON qrd.trans_code_qr = qrc.trans_code_qr
+										ORDER BY qrm.generate_date DESC
 									");
 			
 		$fetchQrgenerateList->execute();
@@ -32,6 +33,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayQr["QRTRANSFERDT_FEE"] = number_format($rowQr["qrtransferdt_fee"],2);
 			$arrayQr["TRANS_DESC_QR"] = $rowQr["trans_desc_qr"];
 			$arrayQr["TRANS_STATUS"] = $rowQr["trans_status"];
+			$arrayQr["AUTO_ADJ"] = $rowQr["auto_adj"];
+			$arrayQr["TYPE_CODE"] = $rowQr["type_code"];
+			$arrayQr["QRTRANSFERDT_PRINBAL"] = $rowQr["qrtransferdt_prinbal"];
+			$arrayQr["QRTRANSFERDT_INT"] = $rowQr["qrtransferdt_int"];
 			
 			$arrayGrpAll[] = $arrayQr;
 		}
