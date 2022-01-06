@@ -40,6 +40,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
+		if($int_return >= $interest){
+			$int_return = $int_return - $interest;
+			$interest = 0;
+		}else{
+			$interest = $interest - $int_return;
+			$int_return = 0;
+		}
 		if($interest > 0){
 			if($dataComing["amt_transfer"] < $interest){
 				$interest = $dataComing["amt_transfer"];

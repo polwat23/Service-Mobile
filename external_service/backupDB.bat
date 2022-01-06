@@ -27,4 +27,11 @@ del %BACKUP_PATH%%DBNAME%.sql
 
 forfiles /P %BACKUP_PATH% /S /M *.* /D -%DAY_OF_LIFE% /C "cmd /c del @path"
 
+forfiles /P %BACKUP_PATH% /S /M *_doc.zip /C "cmd /c del @path"
+
+IF EXIST %PROJECT_PATH%resource\reqloan_doc "C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_doc.zip %PROJECT_PATH%resource\reqloan_doc
+
+IF EXIST %PROJECT_PATH%resource\reqwelfare "C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_doc.zip %PROJECT_PATH%resource\reqwelfare
+
+
 ::@pause
