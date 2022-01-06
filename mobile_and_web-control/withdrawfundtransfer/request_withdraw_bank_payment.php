@@ -77,6 +77,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/WithdrawFromCoopAccount";
 			$lib->sendLineNotify($message_error);
+			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_CODE'] = "WS9999";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -96,7 +97,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				':fee_amt' => $dataComing["fee_amt"],
 				':deptaccount_no' => $coop_account_no,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $arrResponseAPI->responseMessage
+				':response_message' => 'ถอนไปยังธนาคาร '.$rowDataWithdraw["bank_short_ename"].' '.$arrResponseAPI->responseMessage
 			];
 			$log->writeLog('withdrawtrans',$arrayStruc);
 			if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
@@ -153,6 +154,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$log->writeLog('withdrawtrans',$arrayStruc);
 			$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"];
 			$lib->sendLineNotify($message_error);
+			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 			$func->MaintenanceMenu($dataComing["menu_component"]);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -184,6 +186,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$log->writeLog('errorusage',$logStruc);
 				$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/SaveWithdrawRefCodeFromBankAccount";
 				$lib->sendLineNotify($message_error);
+				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_CODE'] = "WS9999";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

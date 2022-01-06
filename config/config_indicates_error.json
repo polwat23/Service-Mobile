@@ -229,6 +229,8 @@
 		}],
 		"416" : 
 			[{"th" : "ยอดคงเหลือหลังการถอนต่ำกว่าเกณฑ์ที่กำหนด","en" : "Balance after withdrawal lower than define"}],
+		"417" : 
+			[{"th" : "ไม่สามารถทำรายการได้ ผิดเงื่อนไขการถอน(ถอนได้คนเดียว,และหรือเท่านั้น) ","en" : "Cannot transaction because break the conditions (withdraw only one person)"}],
 		"421" : 
 			[{"th" : "บัญชีเงินฝากปลายทางถูกปิดบัญชีไปแล้ว","en" : "Destination deposit account was closed"}],
 		"422" : 
@@ -247,8 +249,22 @@
 			[{"th" : "เดือนนี้มีการฝากแล้ว ไม่สามารถทำรายการได้","en" : "This month has already been deposited. Unable to perform the transaction"}],
 		"429" : 
 			[{"th" : "บัญชีนี้ฝากครบ 24 งวดแล้ว","en" : "This account has been deposited in 24 installments"}],
+		"431" : 
+			[{"th" : "บัญชีเงินฝากปิดบัญชีแล้ว","en" : "This account has been closed"}],
+		"432" : 
+			[{"th" : "ไม่พบข้อมูลบัญชีเงินฝาก","en" : "Not found this account"}],
+		"433" : 
+			[{"th" : "ยอดถอนต่อวันต่อบัญชีเกินเกณฑ์ที่กำหนด","en" : "Amount withdraw per day over limit"}],
+		"434" : 
+			[{"th" : "ยอดที่ถอนได้ในบัญชีเงินฝากไม่พอถอน","en" : "Available amount withdraw in this account not enough"}],
+		"435" : 
+			[{"th" : "ยอดถอนต่ำกว่าเกณฑ์ที่กำหนด","en" : "Amount withdraw lower more than the cooperative defined"}],
 		"436" : 
 			[{"th" : "ยอดคงเหลือหลังการถอนต่ำกว่าเกณฑ์ที่กำหนด","en" : "Balance after withdrawal lower than define"}],
+		"438" : 
+			[{"th" : "ยอดถอนต่อวันต่อเลขสมาชิกเกินเกณฑ์ที่กำหนด","en" : "Amount withdraw per person over the limit"}],
+		"441" : 
+			[{"th" : "รหัสรายการนี้ได้ทำรายการเรียบร้อยแล้ว","en" : "This transaction is successful"}],
 		"444" : 
 			[{"th" : "ไม่สามารถทำรายการได้ ผิดเงื่อนไขบางประเภท กรุณาติดต่อสหกรณ์","en" : "Cannot transaction because condition was wrong please contact cooperative"}]
 	}],

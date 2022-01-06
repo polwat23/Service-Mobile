@@ -41,7 +41,18 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 				':member_no' => $member_no
 			]);
 			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
-			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+			if(isset($rowMember["MEMB_NAME"]) && $rowMember["MEMB_NAME"] != ""){
+				$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+			}else{
+				$getMemberApprove = $conoracle->prepare("SELECT mp.PRENAME_DESC,mr.MEMB_NAME,mr.MEMB_SURNAME 
+														FROM MBREQAPPL mr LEFT JOIN mbucfprename mp ON mr.PRENAME_CODE = mp.PRENAME_CODE
+														WHERE mr.member_no = :member_no and mr.APPL_STATUS = '8'");
+				$getMemberApprove->execute([':member_no' => $member_no]);
+				$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowMemberAcc["MEMB_NAME"]) && $rowMemberAcc["MEMB_NAME"] != ""){
+					$account_name_th = $rowMemberAcc["PRENAME_DESC"].$rowMemberAcc["MEMB_NAME"].' '.$rowMemberAcc["MEMB_SURNAME"];
+				}
+			}
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();
 			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token,reg_ref) 

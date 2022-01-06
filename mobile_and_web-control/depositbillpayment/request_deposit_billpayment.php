@@ -138,18 +138,35 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					}
 				}
 				foreach($can_notpay as $ref_account){
-					$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9' WHERE qrgenerate = :tran_id and ref_account = :ref_account");
-					$updateNotpayDetail->execute([
-						':tran_id' => $dataComing["tran_id"],
-						':ref_account' => $ref_account
-					]);
+					if($rowDetail["trans_code_qr"] == '001' || $rowDetail["trans_code_qr"] == '002'){
+						$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9',auto_adj = '1' WHERE qrgenerate = :tran_id and ref_account = :ref_account");
+						$updateNotpayDetail->execute([
+							':tran_id' => $dataComing["tran_id"],
+							':ref_account' => $ref_account
+						]);
+
+					}else{
+						$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9' WHERE qrgenerate = :tran_id and ref_account = :ref_account");
+						$updateNotpayDetail->execute([
+							':tran_id' => $dataComing["tran_id"],
+							':ref_account' => $ref_account
+						]);
+					}
 				}
 				foreach($can_pay as $ref_account){
-					$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1' WHERE qrgenerate = :tran_id and ref_account = :ref_account");
-					$updatepayDetail->execute([
-						':tran_id' => $dataComing["tran_id"],
-						':ref_account' => $ref_account
-					]);
+					if($rowDetail["trans_code_qr"] == '001' || $rowDetail["trans_code_qr"] == '002'){
+						$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1',auto_adj = '1' WHERE qrgenerate = :tran_id and ref_account = :ref_account");
+						$updatepayDetail->execute([
+							':tran_id' => $dataComing["tran_id"],
+							':ref_account' => $ref_account
+						]);
+					}else{
+						$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1' WHERE qrgenerate = :tran_id and ref_account = :ref_account");
+						$updatepayDetail->execute([
+							':tran_id' => $dataComing["tran_id"],
+							':ref_account' => $ref_account
+						]);
+					}
 				}
 				if(sizeof($can_pay) > 0){
 					if(sizeof($can_notpay) > 0){

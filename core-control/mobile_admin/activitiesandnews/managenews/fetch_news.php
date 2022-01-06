@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																"and date_format(create_date,'%Y-%m-%d') >= :start_date" : null)."
 															".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
 																"and date_format(create_date,'%Y-%m-%d') <= :end_date" : null). "
-															ORDER BY create_date DESC LIMIT 20");
+															ORDER BY create_date DESC LIMIT 5");
 		$fetchNews->execute($arrayExecute);
 		while($rowNews = $fetchNews->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupNews = array();
