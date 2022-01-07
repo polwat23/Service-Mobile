@@ -122,10 +122,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
 						$deposit_external_10 += $rowRecon["amount"];
 						$dept_count10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='20'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$deposit_external_20 += $rowRecon["amount"];
 						$dept_count20++;
 					}
@@ -135,10 +135,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
 						$withdraw_external_10 += $rowRecon["amount"];
 						$withdraw10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='20'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$withdraw_external_20 += $rowRecon["amount"];
 						$withdraw20++;
 					}				
@@ -176,10 +176,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
 						$deposit_inside_10 += $rowRecon["amount"];
 						$inside_dept10 ++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='20'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$deposit_inside_20 += $rowRecon["amount"];
 						$inside_dept20++;					
 					}
@@ -190,10 +190,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
 						$withdraw_inside_10 += $rowRecon["amount"];
 						$inside_withdraw10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='20'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$withdraw_inside_20 += $rowRecon["amount"];
 						$inside_withdraw20++;
 					}				
@@ -220,11 +220,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowWithdraw= $getWithdraw->fetch(PDO::FETCH_ASSOC);
-					if($rowWithdraw["DEPTTYPE_CODE"] =='10'){ 
+					if($rowWithdraw["DEPTTYPE_CODE"] =='00'){ 
 						$payment10 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
 						$inside_withdraw10++;
 						$inside_dept10 ++;
-					}else if($rowWithdraw["DEPTTYPE_CODE"] =='20'){
+					}else if($rowWithdraw["DEPTTYPE_CODE"] =='01'){
 						$payment20 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
 						$inside_withdraw20++;
 						$inside_dept20 ++;
@@ -245,10 +245,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							':destination' => $rowRecon["destination"]
 						]);
 						$rowDept= $getDept->fetch(PDO::FETCH_ASSOC);
-						if($rowDept["DEPTTYPE_CODE"] =='10'){ 
+						if($rowDept["DEPTTYPE_CODE"] =='00'){ 
 							$depositinside_10 = ($getloan_inside_01 ?? 0);
 							$inside_dept10++;
-						}else if($rowDept["DEPTTYPE_CODE"] =='20'){
+						}else if($rowDept["DEPTTYPE_CODE"] =='01'){
 							$depositinside_20 += ($getloan_inside_01 ?? 0);
 							$inside_dept20++;
 						}		

@@ -174,6 +174,14 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
 			$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
 			if($interest > 0){
+				$int_return = $rowLoan["INTEREST_RETURN"];
+				if($int_return >= $interest){
+					$int_return = $int_return - $interest;
+					$interest = 0;
+				}else{
+					$interest = $interest - $int_return;
+					$int_return = 0;
+				}
 				if($dataComing["amt_transfer"] < $interest){
 					$interest = $dataComing["amt_transfer"];
 				}else{
