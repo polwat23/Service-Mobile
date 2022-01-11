@@ -246,7 +246,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</tbody>
 			</table>
 			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
+			<div style="border: 0.5px solid black;width: 100%;">
 			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
 			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
 			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
@@ -257,19 +257,20 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
 			</div>';
 			// Detail
-	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
+	$html .= '<div style="width: 100%; padding-bottom:10px;" class="sub-table">';
+	$height = 30;
 	for($i = 0;$i < sizeof($dataReport); $i++){
 		if($i == 0){
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
+			<div style="width: 350px;border-right: 0.5px solid black;'.$height.'px;">&nbsp;</div>
+			<div style="width: 100px;border-right: 0.5px solid black; margin-left: 355px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black; margin-left: 465px;">&nbsp;</div>
+			<div style="width: 110px;border-right: 0.5px solid black; margin-left: 580px;">&nbsp;</div>
+			<div style="width: 120px;border-right: 0.5px solid black; margin-left: 700px;">&nbsp;</div>
 			<div style="width: 350px;text-align: left;font-size: 18px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px; ">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
 			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
@@ -285,33 +286,35 @@ function GenerateReport($dataReport,$header,$lib){
 			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
 			</div>
 			</div>';
+			$height+=30;
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 350px;text-align: left; border-right: 0.5px solid black; font-size: 18px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
-			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
+			<div style="width: 100px;text-align: center;font-size: 18px; border-right: 0.5px solid black; margin-left: 355px;">
+			<div>'.($dataReport[$i]["PERIOD"] ?? '&nbsp;').'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
+			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px; border-right: 0.5px solid black;">
+			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? '&nbsp;').'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
-			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
+			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px; border-right: 0.5px solid black;">
+			<div>'.($dataReport[$i]["INT_BALANCE"] ?? '&nbsp;').'</div>
 			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
-			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
+			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px; border-right: 0.5px solid black;">
+			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? '&nbsp;').'</div>
 			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
-			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
+			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px; ">
+			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? '&nbsp;').'</div>
 			</div>
 			</div>';
+			$height+=30;
 		}
 		$sumBalance += $dataReport[$i]["ITEM_PAYMENT_NOTFORMAT"];
 	}
 	$html .= '</div>';
 			// Footer
-	$html .= '<div style="display:flex;width: 100%;height: 40px" class="sub-table">
+	$html .= '<div style="display:flex;width: 100%;height: 30px; margin-top:5px;" class="sub-table">
 			<div style="border-top: 0.5px solid black;">&nbsp;</div>
 			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
@@ -321,14 +324,16 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
-			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div>
+				<div style="display:flex; height:70px;">
+					<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+					</div>
+					<div style="width:200px;margin-left: 675px;display:flex; ">
+					<img src="../../resource/utility_icon/signature/mg.jpg" width="100" height="50" style="margin-top:10px;"/>
+					</div>
+				</div>
 			</div>
-			<div style="width:200px;margin-left: 675px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.jpg" width="100" height="50" style="margin-top:10px;"/>
-			</div>
-			</div>
-			<div style="font-size: 18px;margin-left: 670px;margin-top:-40px;">(นายไมตรี  ทาปลูก)</div>
+			<div style="font-size: 18px;margin-left: 670px;margin-top:0px;">(นายไมตรี  ทาปลูก)</div>
 			<div style="font-size: 18px;margin-left: 615px;margin-top:0px;">รองประธานกรรมการ ทำหน้าที่ผู้จัดการ</div>
 			';
 
