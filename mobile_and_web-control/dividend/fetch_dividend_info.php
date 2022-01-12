@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["receive_acc"],'xxx-xxxxxx-x');
 				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["receive_desc"];
-				$arrayRecv["BANK"] = $rowMethpay["remark1"].' '.$rowMethpay["remark2"];
+				$arrayRecv["BANK"] = TRIM($rowMethpay["remark1"].' '.$rowMethpay["remark2"]);
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["balance"],2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			}
