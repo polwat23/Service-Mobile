@@ -1,4 +1,5 @@
 <?php
+require_once('../../../autoload.php');
 use Dompdf\Dompdf;
 
 $dompdf = new DOMPDF();
@@ -37,7 +38,7 @@ function GeneratePDFContract($data,$lib) {
 			</style>';
 	$html .= '<div style="display: flex;text-align: center;">
 			<div>
-				  <img src="../../resource/logo/logo.jpg" style="width:100px"/>
+				  <img src="../../../../resource/logo/logo.jpg" style="width:100px"/>
 				</div>
 				<div style="text-align:center;width:100%;margin-left: 0px; ">
 					<p style="margin-top: 110px;font-size: 20px;font-weight: bold;;">
@@ -247,7 +248,7 @@ function GeneratePDFContract($data,$lib) {
 
 	';
 	$dompdf = new Dompdf([
-		'fontDir' => realpath('../../resource/fonts'),
+		'fontDir' => realpath('../../../../resource/fonts'),
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
@@ -255,7 +256,7 @@ function GeneratePDFContract($data,$lib) {
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathfile = __DIR__.'/../../resource/pdf/request_loan';
+	$pathfile = __DIR__.'/../../../../resource/pdf/request_loan';
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
