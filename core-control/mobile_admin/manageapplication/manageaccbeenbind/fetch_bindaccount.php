@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchBindAcount = $conmysql->prepare("SELECT 
 														gba.id_bindaccount,
 														gba.member_no,
-														gba.deptaccount_no_coop,
+														gba.account_payfee as deptaccount_no_coop,
 														gba.deptaccount_no_bank,
 														gba.bank_account_name,
 														gba.bank_account_name_en,

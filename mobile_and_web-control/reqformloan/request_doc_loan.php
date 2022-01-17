@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			foreach($arrPrefixSort as $prefix){
 				$reqloan_doc .= $arrPrefixRaw[$prefix];
 			}
+			$arrayResult['arrPrefixRaw'] = $arrPrefixRaw;
 			if(isset($reqloan_doc) && $reqloan_doc != ""){
 				$getControlDoc = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
 				$getControlDoc->execute([':menu_component' => $dataComing["menu_component"]]);
@@ -125,6 +126,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 						}
 					}
 				}
+				
 				$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email FROM gcmemberaccount WHERE member_no = :member_no");
 				$memberInfoMobile->execute([':member_no' => $member_no]);
 				$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
@@ -174,6 +176,93 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrOldGrp[] = $arrOld;
 				}
 				$arrData["old_contract"] = $arrOldGrp;
+				
+				//อัปโหลดไฟล์เเนบ
+				$fetchLoanGrp = $conmssql->prepare("SELECT loangroup_code FROM lnloantype where loantype_code = :loantype_code");
+				$fetchLoanGrp->execute([
+					':loantype_code' => $dataComing["loantype_code"]
+				]);
+				
+				$rowLoanGrp = $fetchLoanGrp->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowLoanGrp["loangroup_code"]) && $rowLoanGrp["loangroup_code"] != ''){
+					$fetchConstUploadFile = $conmysql->prepare("SELECT fmap.filemapping_id, fmap.file_id, fmap.loangroup_code, fmap.max, fmap.is_require, fmap.update_date,
+														fatt.file_name
+														FROM gcreqfileattachmentmapping fmap 
+														LEFT JOIN gcreqfileattachment fatt ON fmap.file_id = fatt.file_id
+														WHERE fmap.is_use = '1' AND fmap.loangroup_code = :loangroup_code");
+					$fetchConstUploadFile->execute([
+						":loangroup_code" => $rowLoanGrp["loangroup_code"]
+					]);
+					while($rowConstUploadFile = $fetchConstUploadFile->fetch(PDO::FETCH_ASSOC)){
+						if(isset($dataComing["uploadfile_list"])){
+							if(isset($dataComing["uploadfile_list"][$rowConstUploadFile["file_id"]])){
+								$file_index = 0;
+								foreach ($dataComing["uploadfile_list"][$rowConstUploadFile["file_id"]] as $uploadData) {
+									$subpath = $rowConstUploadFile["file_id"]."_".$file_index;
+									$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+									$data_Img = explode(',',$uploadData);
+									$info_img = explode('/',$data_Img[0]);
+									$ext_img = str_replace('base64','',$info_img[1]);
+									if(!file_exists($destination)){
+										mkdir($destination, 0777, true);
+									}
+									if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+										$createImage = $lib->base64_to_img($uploadData,$subpath,$destination,null);
+									}else if($ext_img == 'pdf'){
+										$createImage = $lib->base64_to_pdf($uploadData,$subpath,$destination);
+									}
+									$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+									$fullPathUpload = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$createImage["normal_path"];
+									if($createImage == 'oversize'){
+										unlink($fullPathUpload);
+										rmdir($directory);
+										$arrayResult['RESPONSE_CODE'] = "WS0008";
+										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+										$arrayResult['RESULT'] = FALSE;
+										require_once('../../include/exit_footer.php');
+										
+									}else{
+										if($createImage){
+											$uploadCopy = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$createImage["normal_path"];
+											$getControlFolderUpload = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+											$getControlFolderUpload->execute([':menu_component' => 'loan_attachment']);
+											$rowControlCitizen = $getControlFolderUpload->fetch(PDO::FETCH_ASSOC);
+											$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+																					VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
+											$insertDocMaster->execute([
+												':doc_no' => $reqloan_doc.$subpath,
+												':docgrp_no' => $rowControlCitizen["docgrp_no"],
+												':doc_filename' => $reqloan_doc.$subpath,
+												':doc_type' => $ext_img,
+												':doc_address' => $uploadCopy,
+												':member_no' => $payload["member_no"]
+											]);
+											$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+																					VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
+											$insertDocList->execute([
+												':doc_no' => $reqloan_doc.$subpath,
+												':member_no' => $payload["member_no"],
+												':file_name' => $createImage["normal_path"],
+												':id_userlogin' => $payload["id_userlogin"]
+											]);
+											
+											$insertDocAttachment = $conmysql->prepare("INSERT INTO gcreqloanattachment(file_id, reqdoc_no, file_path, member_no) 
+																				VALUES (:file_id, :reqdoc_no, :file_path, :member_no)");
+											$insertDocAttachment->execute([
+												':file_id' => $rowConstUploadFile["file_id"],
+												':reqdoc_no' => $reqloan_doc,
+												':file_path' => $uploadCopy,
+												':member_no' => $payload["member_no"]
+											]);
+										}
+									}
+									$file_index++;
+								}
+							}
+						}
+					}
+				}
+				
 				$conmysql->beginTransaction();
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,diff_old_contract,receive_net,
 																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank)

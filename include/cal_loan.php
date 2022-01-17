@@ -124,6 +124,9 @@ class CalculateLoan {
 						$dateTo = new \DateTime(date('d-m-Y'));
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
+						if($yearDiffTemp > 0){
+							$dayInterest++;
+						}
 					}
 				}
 				if(!$changerateint){
@@ -151,7 +154,6 @@ class CalculateLoan {
 			$calInt = TRUE;
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
-				$betweenKeeping = TRUE;
 				$calInt = TRUE;
 			}else{
 				if($constLoanContract["PXAFTERMTHKEEP_TYPE"] == '1'){
@@ -252,12 +254,15 @@ class CalculateLoan {
 							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
+							if($yearDiffTemp > 0){
+								$dayInterest++;
+							}
 						}
 					}
 					if(!$changerateint){
 						$yearDiffTemp++;
 					}
-					$prn_bal = $constLoanContract["PRINCIPAL_BALANCE"];
+					$prn_bal = $amt_transfer;
 					$interest += (($prn_bal * ($intrate / 100)) * $dayInterest) / $dayinyear;
 				}
 			}else{
@@ -349,6 +354,9 @@ class CalculateLoan {
 							$dateTo = new \DateTime(date('d-m-Y'));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
+							if($yearDiffTemp > 0){
+								$dayInterest++;
+							}
 						}
 					}
 					if(!$changerateint){
@@ -469,6 +477,9 @@ class CalculateLoan {
 					$dateTo = new \DateTime(date('d-m-Y'));
 					$date_duration = $dateTo->diff($dateFrom);
 					$dayInterest = $date_duration->days;
+					if($yearDiffTemp > 0){
+						$dayInterest++;
+					}
 				}
 			}
 			if(!$changerateint){
@@ -658,14 +669,14 @@ class CalculateLoan {
 						if($dataCont["LOANTYPE_CODE"] == '13'){
 							$executeLnMaster = [
 								$dataCont["PRINCIPAL_BALANCE"] - $prinPay,$lastperiod,$intArr,$interest_accum + $interest,
-								$int_returnSrc,$prinPay,$interest,$dataCont["LAST_STM_NO"] + 1,$dataCont["WITHDRAWABLE_AMT"] + $prinPay,$periodPay,$contract_no
+								$int_returnSrc,$prinPay,$interest,$dataCont["LAST_STM_NO"] + 1,$dataCont["WITHDRAWABLE_AMT"] + $prinPay,$contract_no
 							];
 							$updateLnContmaster = $conmssql->prepare("UPDATE lncontmaster SET 
 																		PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
 																		LASTPAYMENT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),LASTCALINT_DATE = CONVERT(VARCHAR(10),GETDATE(),20),
 																		INTEREST_ARREAR = ?,INTEREST_ACCUM = ?,
 																		INTEREST_RETURN = ?,PRNPAYMENT_AMT = PRNPAYMENT_AMT + ?,
-																		INTPAYMENT_AMT = INTPAYMENT_AMT + ?,LAST_STM_NO = ?,WITHDRAWABLE_AMT = ?,PERIOD_PAYMENT = ?
+																		INTPAYMENT_AMT = INTPAYMENT_AMT + ?,LAST_STM_NO = ?,WITHDRAWABLE_AMT = ?
 																		WHERE loancontract_no = ?");
 
 						}else{

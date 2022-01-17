@@ -34,6 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayDataWcGrp[] = $arrayDataWc;
 			}
 		}
+		$arrayResult['NOTE'] = "เงินสงเคราะห์ศพ(ประมาณ) 600,000บาท";
 		$arrayResult['CREMATION'] = $arrayDataWcGrp;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

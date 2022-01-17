@@ -116,7 +116,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMaxPeriod["max_period"])){
-				$fetchLoanIntRate = $conmssql->prepare("SELECT lnd.interest_rate FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+				$fetchLoanIntRate = $conmssql->prepare("SELECT lnd.interest_rate,lnt.loangroup_code FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 														WHERE lnt.loantype_code = :loantype_code and GETDATE() BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
@@ -159,18 +159,44 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				if($dataComing["loantype_code"] != '23'){
 					$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				}
+				
+				//อัปโหลดไฟล์เเนบ
+				$arrayUploadFileGroup = array();
+				if(isset($rowIntRate["loangroup_code"]) && $rowIntRate["loangroup_code"] != ''){
+					$fetchConstUploadFile = $conmysql->prepare("SELECT fmap.filemapping_id, fmap.file_id, fmap.loangroup_code, fmap.max, fmap.is_require, fmap.update_date,
+														fatt.file_name
+														FROM gcreqfileattachmentmapping fmap 
+														LEFT JOIN gcreqfileattachment fatt ON fmap.file_id = fatt.file_id
+														WHERE fmap.is_use = '1' AND fmap.loangroup_code = :loangroup_code");
+					$fetchConstUploadFile->execute([
+						":loangroup_code" => $rowIntRate["loangroup_code"]
+					]);
+					while($rowConstUploadFile = $fetchConstUploadFile->fetch(PDO::FETCH_ASSOC)){
+						$arrConst = array();
+						$arrConst["FILEMAPPING_ID"] = $rowConstUploadFile["filemapping_id"];
+						$arrConst["FILE_ID"] = $rowConstUploadFile["file_id"];
+						$arrConst["FILE_NAME"] = $rowConstUploadFile["file_name"];
+						$arrConst["LOANGROUP_CODE"] = $rowConstUploadFile["loangroup_code"];
+						$arrConst["MAX"] = $rowConstUploadFile["max"];
+						$arrConst["IS_REQUIRE"] = $rowConstUploadFile["is_require"] == "1";
+						$arrConst["UPDATE_DATE"] = $rowConstUploadFile["update_date"];
+						$arrayUploadFileGroup[] = $arrConst;
+					}
+				}
+				
 				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = TRUE;
+				$arrayResult["REQ_SALARY"] = FALSE;
 				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = FALSE;
 				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-				$arrayResult["IS_UPLOAD_SALARY"] = TRUE; 
+				$arrayResult["IS_UPLOAD_SALARY"] = FALSE; 
 				$arrayResult["IS_REMAIN_SALARY"] = TRUE;
 				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
 				$arrayResult["BANK_ACCOUNT_REMARK"] = null;
 				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+				$arrayResult['UPLOADFILE_GRP'] = $arrayUploadFileGroup;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

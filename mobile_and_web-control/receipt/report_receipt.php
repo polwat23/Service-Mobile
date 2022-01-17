@@ -135,7 +135,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+			}else{
+				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}
+			
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ADJUST_ITEMAMT"];
@@ -377,7 +380,7 @@ function GenerateReport($dataReport,$header,$lib){
 			// Footer
 	$html .= '<div class="theme-color" style="margin-top: 16px;position: relative;white-space: nowrap;">
 						ผู้จัดการ / เหรัญญิก ................................................................................ เจ้าหน้าที่ผู้รับเงิน ............................................................................
-					<img src="../../resource/utility_icon/signature/mg.jpg" height="20" style="margin-top:10px;position: absolute;left: 90px;top: -20px;"/>
+					<img src="../../resource/utility_icon/signature/mg.jpg" height="27" style="margin-top:10px;position: absolute;left: 105px;top: -25px;"/>
 					<img src="../../resource/utility_icon/signature/mg_temp.jpg" height="22" style="margin-top:10px;position: absolute;left: 330px;top: -22px;"/>
                 </div>
                 <div style="margin-top: 12px; border: 2px solid #70ad47; background-color: #c5e0b3;border-radius: 10px;height: 70px;">
