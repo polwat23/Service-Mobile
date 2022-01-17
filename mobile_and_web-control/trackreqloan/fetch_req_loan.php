@@ -76,6 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayResult['REQ_LIST'] = $arrGrpReq;
 		$arrayResult['FILTER'] = $filter;
+		$arrayResult['IS_ATTACHFILE'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
 												DPM.PRNCBAL,DPT.MINPRNCBAL,dpm.DEPTACCOUNT_NO
 												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.depttype_code IN('10','20')");
+												WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.depttype_code IN('10','20') ORDER BY DPM.DEPTTYPE_CODE ASC");
 			$getDataAcc->execute([':member_no' => $member_no]);
 			while($rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccCoop = array();

@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqopendoc_no'],$dataC
 				exit();
 			}
 		}
-		s$getDataReqDoc = $conmysql->prepare("SELECT member_no FROM gcreqopenaccount WHERE reqopendoc_no = :reqopendoc_no");
+		$getDataReqDoc = $conmysql->prepare("SELECT member_no FROM gcreqopenaccount WHERE reqopendoc_no = :reqopendoc_no");
 		$getDataReqDoc->execute([':reqopendoc_no' => $dataComing["reqopendoc_no"]]);
 		$rowDataReq = $getDataReqDoc->fetch(PDO::FETCH_ASSOC);
 		$arrToken = $func->getFCMToken('person',$rowDataReq["member_no"]);

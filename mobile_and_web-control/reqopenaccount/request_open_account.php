@@ -49,16 +49,68 @@ if($lib->checkCompleteArgument(['menu_component','amount','slip'],$dataComing)){
 			':doc_url' => $docUrl,
 			':id_userlogin' => $payload["id_userlogin"]
 		])){
-			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME
-												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-												WHERE mb.member_no = :member_no");
+			$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+			$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
+			if($memberInfoMobile->rowCount() > 0){
+				$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
+				$dataReq["phone"] = $lib->formatphone($rowInfoMobile["phone_number"]);
+			}
+		
+		
+			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
+													mb.MEMBER_DATE,mb.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
+													mb.CURRADDR_NO as ADDR_NO,
+													mb.CURRADDR_MOO as ADDR_MOO,
+													mb.CURRADDR_SOI as ADDR_SOI,
+													mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
+													mb.CURRADDR_ROAD as ADDR_ROAD,
+													MBT.TAMBOL_DESC AS TAMBOL_DESC,
+													MBD.DISTRICT_DESC AS DISTRICT_DESC,
+													MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
+													MBP.PROVINCE_DESC AS PROVINCE_DESC,
+													MB.CURRADDR_POSTCODE AS ADDR_POSTCODE
+													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
+													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.tambol_code = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.amphur_code = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBP ON mb.province_code = MBP.PROVINCE_CODE
+													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
-			$dataReq = array();
-			$dataReq["member_no"] = $payload["member_no"];
+			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
+			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' เขต'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' '.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}else{
+				$address .= (isset($rowMember["ADDR_MOO"]) ? ''.$rowMember["ADDR_MOO"] : null);
+				$address .= (isset($rowMember["ADDR_SOI"]) ? ' ซอย'.$rowMember["ADDR_SOI"] : null);
+				$address .= (isset($rowMember["ADDR_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_VILLAGE"] : null);
+				$address .= (isset($rowMember["ADDR_ROAD"]) ? ' ถนน'.$rowMember["ADDR_ROAD"] : null);
+				$address .= (isset($rowMember["TAMBOL_DESC"]) ? ' ต.'.$rowMember["TAMBOL_DESC"] : null);
+				$address .= (isset($rowMember["DISTRICT_DESC"]) ? ' อ.'.$rowMember["DISTRICT_DESC"] : null);
+				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
+				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
+			}
 			$dataReq["fname"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"];
 			$dataReq["lname"] = $rowMember["MEMB_SURNAME"];
+			$dataReq["birth_date"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
+			$dataReq["birth_date_count"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
+			$dataReq["card_person"] = $lib->formatcitizen($rowMember["CARD_PERSON"]);
+			$dataReq["member_date"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
+			$dataReq["member_date_count"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
+			$dataReq["position_desc"] = $rowMember["POSITION_DESC"];
+			$dataReq["membergroup_desc"] = $rowMember["MEMBGROUP_DESC"];
+			$dataReq["full_address_curr"] = $address;
 			$dataReq["amount_open"] = $dataComing["amount"];
+			$dataReq["member_no"] = $member_no;
+
 			$docReq = GenerateReqDoc($dataReq,$lib,'reqdoc',$reqopendoc_no);
 			if($docReq["RESULT"]){
 				$conmysql->commit();
@@ -169,7 +221,7 @@ function GenerateReqDoc($data,$lib,$filename,$subpath){
 	}
 	.data{
 		font-size:14pt;
-		margin-top:-2px;
+		margin-top:-3px;
 	 
 	}
 	.absolute{
@@ -204,16 +256,16 @@ function GenerateReqDoc($data,$lib,$filename,$subpath){
 			</div>
 
 		</div>
-		<div class="" style="margin-left:55%;">
+		<div class="" style="margin-left:47%;">
 			<div>
 				<div class="absolute" style="margin-left:130px"><div class="data">'.($data["member_no"]??null).'</div></div>
 				สมาชิกเลขทะเบียนที่...................
 			</div>
 			<div>
-				<div class="absolute" style="text-indent:100px"><div class="data"></div></div>
-				ที่อยู่ของผู้ฝาก..................................................
+				<div class="absolute" style="text-indent:100px; margin-top:-4px">'.($data["full_address_curr"]??null).'</div>
+				ที่อยู่ของผู้ฝาก............................................................
 			</div>
-			<div>........................................................................</div>
+			<div>..................................................................................</div>
 		</div>
 	</div>
 	<div>เรียน &nbsp;ประธานกรรมการสหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด </div>
@@ -227,9 +279,9 @@ function GenerateReqDoc($data,$lib,$filename,$subpath){
 		สมาชิกแห่งสหกรณ์ออมทรัพย์มหาวิทยาลัยแม่โจ้ จํากัด เลขทะเบียนที่..........................
 	</div>
 	<div class="nowrap"> 
-		<div class="absolute" style="margin-left:160px;  width:240px;"><div class="data nowrap center"></div></div>
-		<div class="absolute" style="margin-left:430px"><div class="data"></div></div>
-		สังกัด กอง,คณะหรือสํานัก..............................................................โทร.....................มหาวิทยาลัยแม่โจ้
+		<div class="absolute" style="margin-left:140px;  width:240px;"><div class="data nowrap center">'.($data["membergroup_desc"]??null).'</div></div>
+		<div class="absolute" style="margin-left:410px; margin-top:-3px"><div class="data"></div>'.($data["phone"]??null).'</div>
+		สังกัด กอง,คณะหรือสํานัก.........................................................โทร.............................มหาวิทยาลัยแม่โจ้
 	</div>
 	<div class="nowrap">
 		<div class="absolute" style="margin-left:230px;  width:305px;"><div class="data nowrap center">'.($data["fname"].' '.$data["lname"] ?? null).'</div></div>
@@ -242,7 +294,7 @@ function GenerateReqDoc($data,$lib,$filename,$subpath){
 	</div>
 	<div style="margin-left:40px;">ผู้มีอํานาจถอนเงิน ตลอดจนให้คําสั่งเกี่ยวกับเงินฝากออมทรัพย์ ที่เปิดขึ้นนี้คือ</div>
 	<div style="margin-left:40px;" class="nowrap">
-		<div class="absolute" style="margin-left:15px;"><div class="data nowrap"></div></div>
+		<div class="absolute" style="margin-left:15px;"><div class="data nowrap">'.($data["fname"].' '.$data["lname"] ?? null).'</div></div>
 		<div class="absolute" style="margin-left:310px;"><div class="data nowrap"></div></div>
 		1. .......................................................................  2. .......................................................................
 	</div>
@@ -257,7 +309,7 @@ function GenerateReqDoc($data,$lib,$filename,$subpath){
 		5. ......................................................................  6. .......................................................................
 	</div>
 	<div style="margin-left:40px;">
-		<div class="absolute" style="margin-left:115px;"><div class="data nowrap"></div></div>
+		<div class="absolute" style="margin-left:115px;"><div class="data nowrap">ได้คนเดียว</div></div>
 		เงื่อนไขในการถอน.......................................................................
 	</div>
 	<div style="padding-left:80px;">ทั้งนี้ ข้าพเจ้าได้ส่งตัวอย่างลายมือชื่อของผู้มีอํานาจถอนเงินในบัตร มาพร้อมกับคําขอเปิด</div>

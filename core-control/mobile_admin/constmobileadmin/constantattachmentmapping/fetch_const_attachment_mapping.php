@@ -5,18 +5,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantattachmentmapping')){
 		$arrayGroup = array();
 		$arrayLoanGroup = array();
-		
-		$arrConst = array();
-		$arrConst["LOANGROUP_CODE"] = '01';
-		$arrConst["LOANGROUP_DESC"] = 'ฉุกเฉินพร้อมเปย์';
-		$arrayLoanGroup[] = $arrConst;
 		$arrConst = array();
 		$arrConst["LOANGROUP_CODE"] = '02';
 		$arrConst["LOANGROUP_DESC"] = 'เงินกู้สามัญ';
 		$arrayLoanGroup[] = $arrConst;
 		$arrConst = array();
-		$arrConst["LOANGROUP_CODE"] = '03';
+		$arrConst["LOANGROUP_CODE"] = '01';
 		$arrConst["LOANGROUP_DESC"] = 'ฉุกเฉินทั่วไป';
+		$arrayLoanGroup[] = $arrConst;
+		$arrConst = array();
+		$arrConst["LOANGROUP_CODE"] = '03';
+		$arrConst["LOANGROUP_DESC"] = 'ฉุกเฉินพร้อมเปย์';
 		$arrayLoanGroup[] = $arrConst;
 		
 		

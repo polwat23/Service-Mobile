@@ -124,6 +124,9 @@ class CalculateLoan {
 						$dateTo = new \DateTime(date('d-m-Y'));
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
+						if($yearDiffTemp > 0){
+							$dayInterest++;
+						}
 					}
 				}
 				if(!$changerateint){
@@ -251,6 +254,9 @@ class CalculateLoan {
 							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
+							if($yearDiffTemp > 0){
+								$dayInterest++;
+							}
 						}
 					}
 					if(!$changerateint){
@@ -348,6 +354,9 @@ class CalculateLoan {
 							$dateTo = new \DateTime(date('d-m-Y'));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
+							if($yearDiffTemp > 0){
+								$dayInterest++;
+							}
 						}
 					}
 					if(!$changerateint){
@@ -468,6 +477,9 @@ class CalculateLoan {
 					$dateTo = new \DateTime(date('d-m-Y'));
 					$date_duration = $dateTo->diff($dateFrom);
 					$dayInterest = $date_duration->days;
+					if($yearDiffTemp > 0){
+						$dayInterest++;
+					}
 				}
 			}
 			if(!$changerateint){
