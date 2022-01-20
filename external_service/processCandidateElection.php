@@ -58,17 +58,17 @@ $arrayDataTemplate["TEXT"] = "ชุดแรก ของชื่อไฟล�
 $arrayDataTemplate["PASSWORD"] = $passwordFirst;
 $template = $func->getTemplateSystem('PasswordElectionFile');
 $arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-$arrMailStatus = $lib->sendMail('it.support@musaving.com',$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,[]);
+$arrMailStatus = $lib->sendMail('wanna.sri@mahidol.ac.th',$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,[]);
 $mailFunction = new PHPMailer(false);
 $arrayDataTemplate2 = array();
 $arrayDataTemplate2["TEXT"] = "ชุดสอง ของชื่อไฟล์ : ".$arrayPDF["FILE_NAME"];
 $arrayDataTemplate2["PASSWORD"] = $passwordSecon;
 $arrResponse2 = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate2);
-$arrMailStatus2 = $lib->sendMail('samu_sathorn@hotmail.com',$arrResponse2["SUBJECT"],$arrResponse2["BODY"],$mailFunction,[]);
+$arrMailStatus2 = $lib->sendMail('yoot_ne@yahoo.com',$arrResponse2["SUBJECT"],$arrResponse2["BODY"],$mailFunction,[]);
 $mailFunction = new PHPMailer(false);
-$arrResponse["SUBJECT"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์";
-$arrResponse["BODY"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์อยู่ในไฟล์แนบ";
-$arrMailStatus = $lib->sendMail('it.support@musaving.com',$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,$arrayAttach);
+$arrResponse3["SUBJECT"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์";
+$arrResponse3["BODY"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์อยู่ในไฟล์แนบ";
+$arrMailStatus23 = $lib->sendMail('it.support@musaving.com',$arrResponse3["SUBJECT"],$arrResponse3["BODY"],$mailFunction,$arrayAttach);
 
 
 function GenerateReport($dataReport,$header,$password,$lib){

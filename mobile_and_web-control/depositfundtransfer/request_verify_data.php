@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 																							DPDEPTSLIP DPS LEFT JOIN DPUCFRECPPAYTYPE DPP ON DPS.RECPPAYTYPE_CODE = DPP.RECPPAYTYPE_CODE
 																							LEFT JOIN DPDEPTMASTER DPM ON DPS.DEPTACCOUNT_NO = DPM.DEPTACCOUNT_NO 
 																							WHERE 
-																							SUBSTR(DPS.RECPPAYTYPE_CODE,0,1) = 'D' AND DPP.CHKLIMITDEPTPERSON_FLAG = 1 
+																							DPP.CHKLIMITDEPTPERSON_FLAG = 1  AND dps.depttype_code  <> '50'
 																							AND DPS.ITEM_STATUS = 1 AND TO_CHAR(DPS.DEPTSLIP_DATE, 'YYYYMM') = TO_CHAR(SYSDATE,  'YYYYMM') AND
 																							DPM.MEMBER_NO = :member_no");
 				$getSumTransactionInMonth->execute([':member_no' => $member_no]);
@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					$checkLimitDeptPerMonth = $conoracle->prepare("SELECT LIMITDEPTPERSON_AMT FROM DPDEPTCONSTANT WHERE COOP_ID = '001001'");
 					$checkLimitDeptPerMonth->execute();
 					$rowLimitDept = $checkLimitDeptPerMonth->fetch(PDO::FETCH_ASSOC);
-					if($amt_transfer >= $rowLimitDept["LIMITDEPTPERSON_AMT"]){
+					if($amt_transfer > $rowLimitDept["LIMITDEPTPERSON_AMT"]){
 						$remain_amount_deposit_per_month = intval($rowLimitDept["LIMITDEPTPERSON_AMT"]) - $rowSumTran["NETAMT"];
 						$arrayResult['RESPONSE_CODE'] = "WS0085";
 						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);

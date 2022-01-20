@@ -5,7 +5,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','keycodeelectionlist')){
 		$arrGrp = array();
 		
-		$getAllReqDocno = $conmysql->prepare("SELECT id_regelection, member_no, keycode, tel_mobile, register_date, update_date FROM logregisterelection");
+		$getAllReqDocno = $conmysql->prepare("SELECT loe.id_regelection, loe.member_no, loe.keycode, loe.tel_mobile, loe.register_date, loe.update_date
+																FROM logregisterelection loe");
 		$getAllReqDocno->execute();
 		while($rowDocno = $getAllReqDocno->fetch(PDO::FETCH_ASSOC)){
 			$arrDocno = array();

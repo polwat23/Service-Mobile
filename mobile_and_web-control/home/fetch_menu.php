@@ -447,7 +447,7 @@ if(!$anonymous){
 					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
 					$arrayResult['ONPERIOD_ELECTION'] = FALSE;
 				}else{
-					$arrayResult['ONREGISTERED_ELECTION'] = TRUE;
+					$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
 					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
 					if($rowElec["POST_NO"] == '3' || $payload["member_no"] == 'etnmode3'){
 						$getElection = $conmysql->prepare("SELECT id_election FROM gcelection WHERE member_no = :member_no and year_election = YEAR(NOW()) + 543");
@@ -456,28 +456,13 @@ if(!$anonymous){
 							$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
 							$arrayResult['ONPERIOD_ELECTION'] = FALSE;
 						}else{
-							if(
-							$payload["member_no"] == '00007688' ||
-							$payload["member_no"] == '00021598' ||
-							$payload["member_no"] == '00027865' ||
-							$payload["member_no"] == '00029990' ||
-							$payload["member_no"] == '00031700' ||
-							$payload["member_no"] == '00041429' ||
-							$payload["member_no"] == '00040422' ||
-							$payload["member_no"] == '00059700' ||
-							$payload["member_no"] == '00061505' ||
-							$payload["member_no"] == 'etnmode3' || $payload["member_no"] == '00050402' || $payload["member_no"] == '00044196' || $payload["member_no"] == '00027507'
-							|| $payload["member_no"] == '00041435' || $payload["member_no"] == '00051146' || $payload["member_no"] == '00006930' || $payload["member_no"] == 'etnmode3'){
-								if(preg_replace('/\./','',$dataComing["app_version"]) >= '1162'){
-									$arrayResult['ONPERIOD_ELECTION'] = TRUE;
-									$arrElectionData["WELCOME_TITLE"] = "การสรรหาคณะกรรมการดำเนินการ ประจำปี 2565 ทางอิเล็กทรอนิกส์";
-									//$arrElectionData["WELCOME_SUBTITLE"] = "";
-									//$arrElectionData["PASSCODE_TITLE"] = "";
-									$arrElectionData["PASSCODE_SUBTITLE"] = "กรุณากรอกรหัสผ่าน (Key code) ที่ได้รับข้อความ (SMS) จาก Thaicoop ในวันแจ้งความประสงค์สรรหาส่งไปยังหมายเลขของท่าน หากไม่ทราบรหัสผ่าน(Key code) กรุณากดลืมรหัสผ่าน";
-									$arrayResult["ELECTION_DATA"] = $arrElectionData;
-								}else{
-									$arrayResult['ONPERIOD_ELECTION'] = FALSE;	
-								}
+							if(preg_replace('/\./','',$dataComing["app_version"]) >= '1162' || $dataComing["channel"] == 'web'){
+								$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+								$arrElectionData["WELCOME_TITLE"] = "การสรรหาคณะกรรมการดำเนินการ ประจำปี 2565 ทางอิเล็กทรอนิกส์";
+								//$arrElectionData["WELCOME_SUBTITLE"] = "";
+								//$arrElectionData["PASSCODE_TITLE"] = "";
+								$arrElectionData["PASSCODE_SUBTITLE"] = "กรุณากรอกรหัสผ่าน (Key code) ที่ได้รับข้อความ (SMS) จาก Thaicoop ในวันแจ้งความประสงค์สรรหาส่งไปยังหมายเลขของท่าน หากไม่ทราบรหัสผ่าน(Key code) กรุณากดลืมรหัสผ่าน";
+								$arrayResult["ELECTION_DATA"] = $arrElectionData;
 							}else{
 								$arrayResult['ONPERIOD_ELECTION'] = FALSE;	
 							}
@@ -530,7 +515,10 @@ if(!$anonymous){
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
-				$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '1164' || $dataComing["channel"] == 'web'){
+					$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
+					$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+				}
 				$arrayResult['rowRegisteredData'] = isset($rowRegisteredData["MEMBER_NO"]);
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -591,7 +579,10 @@ if(!$anonymous){
 			}
 		}
 		if(isset($arrayAllMenu)){
-			$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '1164' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
+				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
