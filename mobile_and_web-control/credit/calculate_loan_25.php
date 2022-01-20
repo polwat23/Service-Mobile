@@ -7,7 +7,7 @@ $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $request_amt = 0;
-$period = 240;
+$period = 200;
 $getShare = $conoracle->prepare("SELECT (sharestk_amt*10) as SHARE_VALUE FROM shsharemaster WHERE member_no = :member_no");
 $getShare->execute([':member_no' => $member_no]);
 $rowShare = $getShare->fetch(PDO::FETCH_ASSOC);
@@ -15,7 +15,7 @@ $maxloan_amt = $rowShare["SHARE_VALUE"] * 0.90;
 $maxloan_amt = $maxloan_amt - ($maxloan_amt % 100);
 $canRequest = TRUE;
 $arrSubOtherInfo["LABEL"] = "งวดสูงสุด";
-$arrSubOtherInfo["VALUE"] = "240 งวด";
+$arrSubOtherInfo["VALUE"] = "200 งวด";
 $arrOtherInfo[] = $arrSubOtherInfo;
 $checkLoanBan = $conoracle->prepare("SELECT LT.LOANPERMGRP_CODE, LN.LOANTYPE_CODE FROM LNCONTMASTER LN LEFT JOIN LNLOANTYPE LT ON LN.LOANTYPE_CODE = LT.LOANTYPE_CODE
 									WHERE LN.MEMBER_NO = :member_no AND LN.CONTRACT_STATUS > 0 AND LN.CONTRACT_STATUS <> 8");
