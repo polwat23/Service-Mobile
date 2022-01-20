@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else if((int)date("Ymd",strtotime("+1 day")) == (int)date_create($rowBranch["queue_date"])->format("Ymd")){
 					
 				if($rowBranch["queue_status"] == '1' && $rowBranch["remain_queue"] > 0){
-					$arrGroupUserAcount["ERROR_MSG"] = "กรุณารับบัตรคิวก่อนเวลา 16.00 น.";
+					$arrGroupUserAcount["ERROR_MSG"] = "ปิดรับคิว เวลา 16.00 น.";
 				}
 			
 				if((float)$currentTime > 16.00 && $rowBranch["queue_status"] == '1' && $rowBranch["remain_queue"] > 0){

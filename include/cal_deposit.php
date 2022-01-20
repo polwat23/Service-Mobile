@@ -73,11 +73,11 @@ class CalculateDep {
 		$getLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_deposit_each_member'");
 		$getLimitDept->execute();
 		$rowLimitDept = $getLimitDept->fetch(\PDO::FETCH_ASSOC);
-		$getSumDept = $this->conora->prepare("SELECT SUM(dps.DEPTITEM_AMT) as SUM_AMT
+		$getSumDept = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) as SUM_AMT
 										FROM dpdeptmaster dpm LEFT JOIN dpdeptstatement dps ON dpm.deptaccount_no = dps.deptaccount_no
 										LEFT JOIN dpucfrecppaytype ducp ON dps.DEPTITEMTYPE_CODE = ducp.recppaytype_code
 										WHERE dpm.member_no = :member_no and to_char(dps.operate_date,'YYYYMM') = to_char(SYSDATE,'YYYYMM')
-										and ducp.chklimitdeptperson_flag = '1'");
+										and ducp.chklimitdeptperson_flag = '1' and SUBSTR(DPS.DEPTITEMTYPE_CODE,0,1) = 'D'");
 		$getSumDept->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSumDept = $getSumDept->fetch(\PDO::FETCH_ASSOC);
 		if($rowSumDept["SUM_AMT"] + $amt_transfer > $rowLimitDept["constant_value"]){

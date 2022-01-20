@@ -23,14 +23,21 @@ if($lib->checkCompleteArgument(['menu_component','coop_branch_id','queue_date','
 			$arrGroupUserAcount["QUEUE_ENDTIME"] = $rowBranch["queue_endtime"];
 			$arrGroupUserAcount["QUEUE_STATUS"] = $rowBranch["queue_status"];
 			$arrGroupUserAcount["REMAIN_QUEUE"] = $rowBranch["remain_queue"];
-			$arrGroupUserAcount["QUEUE_TYPE"] = $rowBranch["queue_type"] == '0' ? "เงินกู้ฉุกเฉิน/สามัญหุ้น/พิเศษหุ้น" : "เงินกู้สามัญบุคคลค้ำ";;
+			
+			if($rowBranch["queue_type"] == '0'){
+				$arrGroupUserAcount["QUEUE_TYPE"] = "เงินกู้ฉุกเฉิน/สามัญหุ้น/พิเศษหุ้น";
+			}else if($rowBranch["queue_type"] == '1'){
+				$arrGroupUserAcount["QUEUE_TYPE"] = "เงินกู้สามัญบุคคลค้ำ";
+			}else if($rowBranch["queue_type"] == '2'){
+				$arrGroupUserAcount["QUEUE_TYPE"] = "คำนวนเงินกู้";
+			}
 			if((int)date("Ymd") >= (int)date_create($rowBranch["queue_date"])->format("Ymd")){
 					$arrGroupUserAcount["IS_DISABLE"] = true;
 					$arrGroupUserAcount["IS_HIDE"] = false;
 			}else if((int)date("Ymd",strtotime("+1 day")) == (int)date_create($rowBranch["queue_date"])->format("Ymd")){
 					
 				if($rowBranch["queue_status"] == '1' && $rowBranch["remain_queue"] > 0){
-					$arrGroupUserAcount["ERROR_MSG"] = "หมดเวลา";
+					$arrGroupUserAcount["ERROR_MSG"] = "ปิดรับคิว เวลา 16.00 น.";
 				}
 			
 				if((float)$currentTime > 16.00 && $rowBranch["queue_status"] == '1' && $rowBranch["remain_queue"] > 0){

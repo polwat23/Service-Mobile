@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['menu_component','keycode'],$dataComing)){
 		$checkKeycode->execute([':member_no' => $payload["member_no"]]);
 		$rowKeycode = $checkKeycode->fetch(PDO::FETCH_ASSOC);
 		if($rowKeycode["keycode"] == $dataComing["keycode"]){
+			$arrayResult['TEAMS_URL'] = $config["URL_SERVICE"]."/resource/html/accepttermelection.html";
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id','id_regelection'],$dataComing)){
 			$arrVerifyToken["mode"] = "eachmsg";
 			$arrVerifyToken['typeMsg'] = 'OTP';
 			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
-			$arrMsg[0]["msg"] = 'รหัสของท่านคือ : '.$rowDocno["keycode"].' รหัสผ่านชุดนี้ใช้ในการลงคะแนนสรรหา วันที่ 13-16 ธันวาคม 2564';
+			$arrMsg[0]["msg"] = 'รหัส '.$rowDocno["keycode"].' รหัสผ่านนี้จะใช้ในการลงคะแนนสรรหาวันที่ 13-16 ธันวาคม 2564';
 			$arrMsg[0]["to"] = $rowDocno["tel_mobile"];
 			$arrSendData["dataMsg"] = $arrMsg;
 			$arrSendData["custId"] = 'mhd';

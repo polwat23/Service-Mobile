@@ -444,17 +444,82 @@ if(!$anonymous){
 				$checkElection->execute([':member_no' => $payload["member_no"]]);
 				$rowElec = $checkElection->fetch(PDO::FETCH_ASSOC);
 				if($rowElec["POST_NO"] == '-99' || $payload["member_no"] == 'etnmode2'){
-					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = TRUE;
-					$arrayResult['ONPERIOD_ELECTION'] = FALSE;
-				}else{
 					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
 					$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+				}else{
+					$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
+					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
+					if($rowElec["POST_NO"] == '3' || $payload["member_no"] == 'etnmode3'){
+						$getElection = $conmysql->prepare("SELECT id_election FROM gcelection WHERE member_no = :member_no and year_election = YEAR(NOW()) + 543");
+						$getElection->execute([':member_no' => $payload["member_no"]]);
+						if($getElection->rowCount() > 0){
+							$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
+							$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+						}else{
+							if(preg_replace('/\./','',$dataComing["app_version"]) >= '1162' || $dataComing["channel"] == 'web'){
+								$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+								$arrElectionData["WELCOME_TITLE"] = "การสรรหาคณะกรรมการดำเนินการ ประจำปี 2565 ทางอิเล็กทรอนิกส์";
+								//$arrElectionData["WELCOME_SUBTITLE"] = "";
+								//$arrElectionData["PASSCODE_TITLE"] = "";
+								$arrElectionData["PASSCODE_SUBTITLE"] = "กรุณากรอกรหัสผ่าน (Key code) ที่ได้รับข้อความ (SMS) จาก Thaicoop ในวันแจ้งความประสงค์สรรหาส่งไปยังหมายเลขของท่าน หากไม่ทราบรหัสผ่าน(Key code) กรุณากดลืมรหัสผ่าน";
+								$arrayResult["ELECTION_DATA"] = $arrElectionData;
+							}else{
+								$arrayResult['ONPERIOD_ELECTION'] = FALSE;	
+							}
+						}
+					}else{
+						$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+					}
+					
+					// registered
+					$getRegisteredData = $conoracle->prepare("SELECT * FROM MBMEMBELECTION WHERE ELECTION_YEAR = EXTRACT(YEAR FROM SYSDATE) + 543 AND POST_NO IN('3','2','1') AND MEMBER_NO = :member_no");
+					$getRegisteredData->execute([':member_no' => $member_no]);
+					$rowRegisteredData = $getRegisteredData->fetch(PDO::FETCH_ASSOC);
+					if(isset($rowRegisteredData["MEMBER_NO"])){
+						$newArr = array();
+						$newArr["POST_NO"] = $rowRegisteredData["POST_NO"];
+						if($rowRegisteredData["POST_NO"] == "3"){
+							$newArr["POST_REMARK"] = "สมาชิกได้แจ้งความประสงค์ลงคะแนนสรรหาทาง";
+							$newArr["POST_REMARK_SUFFIX"] = "ไว้เเล้ว";
+							$newArr["POST_REMARK_TYPE"] = " E-Vote ";
+							$newArr["POST_REMARK_DESC"] = "โปรดลงคะแนนสรรหา วันที่ 13 ธ.ค. 2564 ตั้งแต่เวลา 00.01 น. ถึงวันที่ 16 ธ.ค. 2564 เวลา 15.30 น.";
+						}else if($rowRegisteredData["POST_NO"] == "2"){
+							$newArr["POST_REMARK"] = "สมาชิกรับบัตรลงคะแนนสรรหาทาง";
+							$newArr["POST_REMARK_TYPE"] = "ไปรษณีย์";
+							$newArr["POST_REMARK_DESC"] = "เมื่อลงคะแนนแล้ว โปรดส่งกลับสหกรณ์ก่อนวันที่ 16 ธ.ค. 2564 ภายในเวลา 15.30 น.";
+						}else if($rowRegisteredData["POST_NO"] == "1"){
+							$newArr["POST_REMARK"] = "สมาชิกรับบัตรลงคะแนนสรรหา ณ สหกรณ์";
+							if($rowRegisteredData["SELECT_NO"] == "1"){
+								$newArr["POST_REMARK_TYPE"] = "สำนักงานใหญ่ ศิริราช";
+							}else if($rowRegisteredData["SELECT_NO"] == "2"){
+								$newArr["POST_REMARK_TYPE"] = "สาขารามาธิบดี";
+							}else if($rowRegisteredData["SELECT_NO"] == "3"){
+								$newArr["POST_REMARK_TYPE"] = "สาขาเขตร้อน";
+							}else if($rowRegisteredData["SELECT_NO"] == "4"){
+								$newArr["POST_REMARK_TYPE"] = "สาขาศาลายา";
+							}else if($rowRegisteredData["SELECT_NO"] == "5"){
+								$newArr["POST_REMARK_TYPE"] = "สาขาจักรี";
+							}
+							
+							if($rowRegisteredData["SELECT_NO"] == "5"){
+								$newArr["POST_REMARK_DESC"] = "วันที่ 15 - 30 พ.ย. 2564 (เวลา 9.30 น. - 14.30 น.) โปรดหย่อนบัตรลงคะแนน วันที่ 7 - 16 ธ.ค. 2564 (เวลา 9.30 น. - 14.30 น.)";
+							}else{
+								$newArr["POST_REMARK_DESC"] = "วันที่ 15 - 30 พ.ย. 2564 (เวลา 8.30 น. - 15.00 น.) โปรดหย่อนบัตรลงคะแนน วันที่ 7 - 16 ธ.ค. 2564 (เวลา 8.30 น. - 15.30 น.)";
+							}
+						}
+						$arrayResult['REGISTERED_DATA'] = $newArr;
+					}
 				}
 				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '1164' || $dataComing["channel"] == 'web'){
+					$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
+					$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+				}
+				$arrayResult['rowRegisteredData'] = isset($rowRegisteredData["MEMBER_NO"]);
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -514,6 +579,10 @@ if(!$anonymous){
 			}
 		}
 		if(isset($arrayAllMenu)){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '1164' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
+				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

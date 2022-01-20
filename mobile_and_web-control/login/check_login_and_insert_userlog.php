@@ -49,9 +49,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				}
 			}
 		}
+		$member_noTemp = $configAS[$member_no] ?? $member_no;
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
-		$checkResign->execute([':member_no' => $member_no]);
+		$checkResign = $conoracle->prepare("SELECT resign_status,card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign->execute([':member_no' => $member_noTemp]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 		if($rowResign["RESIGN_STATUS"] == '1'){
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
@@ -59,6 +60,24 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
+		}
+		if(isset($dataComing["card_person"]) && $dataComing["card_person"] != ""){
+			if($dataComing["member_no"] == 'dev@mode' || $dataComing["member_no"] == 'etnmode1' || $dataComing["member_no"] == 'etnmode2'
+			|| $dataComing["member_no"] == 'etnmode3' || $dataComing["member_no"] == 'etnmode4'){
+				if($dataComing["card_person"] != '1150111201888'){
+					$arrayResult['RESPONSE_CODE'] = "WS0129";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
+			}else{
+				if($dataComing["card_person"] != $rowResign["CARD_PERSON"]){
+					$arrayResult['RESPONSE_CODE'] = "WS0129";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
+			}
 		}
 		if($rowPassword['account_status'] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";

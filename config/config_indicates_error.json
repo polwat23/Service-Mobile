@@ -122,6 +122,8 @@
 	"WS0119" : [{"th" : "ไม่พบสัญญาที่สามารถยกเลิกพักชำระหนี้","en" : "Not found loan contract that can cancel moratorium"}],
 	"WS0121" : [{"th" : "เลขบัตรประจำตัวประชาชนนี้ไม่สามารถเพิ่มได้อีก กรุณาตรวจสอบและลองใหม่อีกครั้ง","en" : "This ID card number cannot be added any more. Please check and try again."}],
 	"WS0123" : [{"th" : "ท่านทำรายการขอกู้ต่ำกว่าจำนวนขั้นต่ำ ขั้นต่ำที่สามารถทำรายการได้ ${minrequest_loan_amt} บาท กรุณาตรวจสอบยอดทำรายการอีกครั้ง","en" : "Amount loan request is lower than define lowest allow request loan is ${minrequest_loan_amt} baht"}],
+	"WS0127" : [{"th" : "ไม่สามารถลงคะแนนเลือกตั้งได้ กรุณาติดต่อเจ้าหน้าที่สหกรณ์","en" : "Cannot election please contact the cooperative"}],
+	"WS0129" : [{"th" : "หมายเลขบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง","en" : "Citizen id is not correct please check again"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -161,6 +163,7 @@
 	"WS1040" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1040","en" : "Something was wronged that cannot moratorium please contact cooperative #WS1040"}],
 	"WS1041" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกพักชำระหนี้ได้ กรุณาติดต่อสหกรณ์ #WS1041","en" : "Something was wronged that cannot cancel moratorium please contact cooperative #WS1041"}],
 	"WS1042" : [{"th" : "ไม่พบข้อมูลเอกสารรับรองการหักภาษี #WS1042","en" : "No tax deduction information was found. #WS1042"}],
+	"WS1044" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกใบคำขอออนไลน์ได้ กรุณาติดต่อสหกรณ์ #WS1044","en" : "Something was wronged that cannot cancel request document online please contact cooperative #WS1044"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
@@ -251,6 +254,7 @@
 			"ELECTION_2" : [{"th" : "ท่านได้ลงทะเบียนแจ้งความประสงค์ในการสรรหาบนระบบไปรษณีย์เรียบร้อยแล้ว","en" : "You were registered for election by post system"}],
 			"ELECTION_ERR" : [{"th" : "เกิดข้อผิดพลาดไม่สามารถลงทะเบียนแจ้งความประสงค์ในการสรรหาได้ กรุณาติดต่อสหกรณ์","en" : "Something was wronged that cannot register election online please contact cooperative"}],
 			"ELECTION_KEYCODE_WRONG" : [{"th": "รหัสผ่านสำหรับการสรรหาไม่ถูกต้อง กรุณาลองใหม่อีกคร้ง","en" : "Password for election online was wronged please try again"}],
-			"ELECTION_NOTFOUND" : [{"th" : "ไม่พบรายชื่อของท่านในการสรรหาออนไลน์","en" : "You do not have permission for election online"}]
+			"ELECTION_NOTFOUND" : [{"th" : "ไม่พบรายชื่อของท่านในการสรรหาออนไลน์","en" : "You do not have permission for election online"}],
+			"ELECTION_REPEAT" : [{"th" : "ไม่สามารถลงทะเบียนสรรหาออนไลน์ซ้ำได้","en" : "Cannot election online duplicate"}]
 		}]
 }

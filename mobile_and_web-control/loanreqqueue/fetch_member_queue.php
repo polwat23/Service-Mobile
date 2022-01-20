@@ -24,7 +24,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupUserAcount["QUEUE_ENDTIME"] = $rowQueue["queue_endtime"];
 			$arrGroupUserAcount["QUEUE_STATUS"] = $rowQueue["queue_status"];
 			$arrGroupUserAcount["REMAIN_QUEUE"] = $rowQueue["remain_queue"];
-			$arrGroupUserAcount["QUEUE_TYPE"] = $rowQueue["queue_type"] == '0' ? "เงินกู้ฉุกเฉิน/สามัญหุ้น/พิเศษหุ้น" : "เงินกู้สามัญบุคคลค้ำ";
+			if($rowQueue["queue_type"] == '0'){
+				$arrGroupUserAcount["QUEUE_TYPE"] = "เงินกู้ฉุกเฉิน/สามัญหุ้น/พิเศษหุ้น";
+			}else if($rowQueue["queue_type"] == '1'){
+				$arrGroupUserAcount["QUEUE_TYPE"] = "เงินกู้สามัญบุคคลค้ำ";
+			}else if($rowQueue["queue_type"] == '2'){
+				$arrGroupUserAcount["QUEUE_TYPE"] = "คำนวนเงินกู้";
+			}
 			$arrGroupUserAcount["COOP_BRANCH_DESC"] = null;
 			if(date("Y-m-d") == $rowQueue["queue_date"]){
 				$arrayResult['IS_CAN_CANCEL'] = false;
