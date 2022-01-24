@@ -9,11 +9,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
-											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
-		$getAccount->execute([':member_no' => $member_no]);
+		if($payload["member_no"] == 'etnmode4'){
+			$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+												(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
+												FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
+												WHERE dp.deptaccount_no = '0013209837' and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+			$getAccount->execute();
+		}else{
+			$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+												(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
+												FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
+												WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+			
+			$getAccount->execute([':member_no' => $member_no]);
+		}
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
 			$arrGroupAccount = array();
