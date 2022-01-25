@@ -46,6 +46,16 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 			
 		}
+		
+		$checkAccountStatus = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+		$checkAccountStatus->execute([':member_no' => $payload["member_no"]]);
+		$rowCheckAccountStatus = $checkAccountStatus->fetch(PDO::FETCH_ASSOC);
+		if ($rowCheckAccountStatus["account_status"] == '-9'){
+			$arrayResult['TEMP_PASSWORD'] = TRUE;
+		}else{
+			$arrayResult['TEMP_PASSWORD'] = FALSE;
+		}
+		
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
