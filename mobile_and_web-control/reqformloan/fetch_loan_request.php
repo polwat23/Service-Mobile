@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				]);
 				if($CheckIsReq->rowCount() > 0){
 					$rowIsReq = $CheckIsReq->fetch(PDO::FETCH_ASSOC);
-					$arrayDetailLoan["IS_REQ"] = TRUE;
+					$arrayDetailLoan["IS_REQ"] = FALSE;
 					if($rowIsReq["req_status"] == '8'){
 						$arrayDetailLoan["REQ_STATUS"] = "รอลงรับ";
 					}else if($rowIsReq["req_status"] == '1'){
@@ -45,11 +45,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayDetailLoan["REQ_STATUS"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
 					}
 				}else{
-					$arrayDetailLoan["IS_REQ"] = FALSE;
+					$arrayDetailLoan["IS_REQ"] = TRUE;
 				}
 				$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
 				$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];
-				$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"] * 100,2).' %';
+				$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"],2);
 				$arrGrpLoan[] = $arrayDetailLoan;
 			}
 		}

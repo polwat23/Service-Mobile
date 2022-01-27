@@ -45,10 +45,45 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
 			
-			$arrayRecv["RECEIVE_DESC"] = "คงเหลือหลังรับ";
-			$arrayRecv["ACCOUNT_RECEIVE"] = "ติดต่อสอบถามทางสหกรณ์";
-			$arrayRecv["RECEIVE_AMT"] = number_format(($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"]) - $sumPay,2);
-			$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+			if($rowYear["DIV_YEAR"] > '2563'){
+				$getMethpay = $conoracle->prepare("SELECT
+														CUCF.MONEYTYPE_DESC AS TYPE_DESC,
+														CM.BANK_DESC AS BANK,
+														YM.EXPENSE_AMT AS RECEIVE_AMT ,						
+														YM.EXPENSE_ACCID AS BANK_ACCOUNT,
+														YM.METHPAYTYPE_CODE
+													FROM 
+														YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
+														YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
+														LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
+													WHERE
+														YM.MEMBER_NO = :member_no
+														AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP')
+														AND YM.DIV_YEAR = :div_year");
+				$getMethpay->execute([
+					':member_no' => $member_no,
+					':div_year' => $rowYear["DIV_YEAR"]
+				]);
+				while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
+					$arrayRecv = array();
+					if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
+						if($rowMethpay["METHPAYTYPE_CODE"] == "CBT"){
+							$arrayRecv["BANK"] = $rowMethpay["BANK"];
+							$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x');
+						}else{
+							$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format'));
+						}
+					}
+					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+					$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
+					$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+				}
+			}else{
+				$arrayRecv["RECEIVE_DESC"] = "คงเหลือหลังรับ";
+				$arrayRecv["ACCOUNT_RECEIVE"] = "ติดต่อสอบถามทางสหกรณ์";
+				$arrayRecv["RECEIVE_AMT"] = number_format(($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"]) - $sumPay,2);
+				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+			}
 			
 			$arrDivmaster[] = $arrDividend;
 		}
