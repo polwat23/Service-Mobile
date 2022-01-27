@@ -41,8 +41,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
+			
 			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
+			$arrayResult["REQUEST_AMT"] = $maxloan_amt;
+			//$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
+			$arrayResult["MAX_PERIOD"] = 12;
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
