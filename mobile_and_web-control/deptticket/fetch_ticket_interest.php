@@ -6,20 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $payload["ref_memno"];
 		$date_now = $dataComing["date"] ??  $date_now = date('Y-m-d');
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM( A.PRNC_AMT)  as  SUM_BALANCE  
-												FROM DPDEPTPRNCFIXED A, DPDEPTMASTER B 
-												WHERE   A.DEPTACCOUNT_NO = B.DEPTACCOUNT_NO 
-												AND A.DEPTGROUP_CODE = B.DEPTGROUP_CODE 
-												AND TRIM(B.MEMBER_NO) = :member_no 
-												AND A.PRNC_DATE <= TO_DATE(:datenow,'YYYY-MM-DD')  
-												AND ((B.DEPTCLOSE_DATE > TO_DATE(:datenow,'YYYY-MM-DD') 
-												AND B.DEPTCLOSE_STATUS = 1) OR B.DEPTCLOSE_STATUS = 0)
-												AND A.DEPTGROUP_CODE = '03' ");
-		$getSumAllAccount->execute([':member_no' => $member_no,
-									':datenow' => $date_now
-		]);
-		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
-		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
+		$arrayResult['SUM_BALANCE'] =  0;
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
 		
@@ -51,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										AND DPDEPTPRNCFIXED.PRINC_ID = DPINTDUEDATE.PRINC_ID (+) 
 										AND (DPDEPTMASTER.DEPTOPEN_DATE <= TO_DATE(:datenow,'YYYY-MM-DD') )   
 										AND ((DPDEPTMASTER.DEPTCLOSE_DATE > TO_DATE(:datenow,'YYYY-MM-DD')  
-										AND DPDEPTMASTER.DEPTCLOSE_STATUS = 1) OR  DPDEPTMASTER.DEPTCLOSE_STATUS = 0)   
+										AND DPDEPTMASTER.DEPTCLOSE_STATUS = 0) OR  DPDEPTMASTER.DEPTCLOSE_STATUS = 0)   
 										AND ( DPDEPTMASTER.DEPTGROUP_CODE = '03' )   
 										AND (DPDEPTMASTER.CANCEL_DATE < TO_DATE(:datenow,'YYYY-MM-DD') OR  DPDEPTMASTER.CANCEL_DATE IS NULL)  
 										AND TRIM(DPDEPTMASTER.MEMBER_NO) = :member_no 
@@ -79,7 +66,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["DUE_DATE"] = $lib->convertdate($rowAccount["DUE_DATE"],'d M Y');
 			$arrAccount["BALANCE_AMT"] = number_format($rowAccount["BALANCE_AMT"],2);
 			$arrAccount["INT_AMT"] = number_format(($arrAccount["COUNT_DATE"] * $rowAccount["BALANCE_AMT"] * $rowAccount["INTEREST_RATE"] /36500),2);
-			
+			$arrayResult["SUM_INTEREST"] += $lib->round_up($rowAccount["COUNT_DATE"] * $rowAccount["BALANCE_AMT"] * $rowAccount["INTEREST_RATE"] /36500);
+			$arrayResult['SUM_BALANCE'] += $rowAccount["BALANCE_AMT"];
 			$arrGroupAccount['TYPE_ACCOUNT'] = $rowAccount["DEPTTYPE_DESC"];
 			$arrGroupAccount['DEPT_TYPE_CODE'] = $rowAccount["DEPTTYPE_CODE"];
 			if(array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT')) === False){
@@ -90,6 +78,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		
+		$arrayResult['SUM_BALANCE'] = number_format($arrayResult['SUM_BALANCE'],2);
+		$arrayResult['SUM_INTEREST'] = number_format($arrayResult['SUM_INTEREST'],2);
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

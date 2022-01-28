@@ -16,14 +16,15 @@ if($lib->checkCompleteArgument(['unique_id','member_no', 'ref_memno'],$dataComin
 		}
 		else
 		{
-			$insertUserCoop = $conmysql->prepare ("INSERT INTO gcmemberaccount(member_no, ref_memno, acc_name, acc_surname, phone_number, email , account_status)  
-							VALUES (:member_no ,:ref_memno ,:acc_name , :acc_surname, :phone_number, :email, '8')");
+			$insertUserCoop = $conmysql->prepare ("INSERT INTO gcmemberaccount(member_no, ref_memno, acc_name, acc_surname, phone_number, position_desc, email , account_status)  
+							VALUES (:member_no ,:ref_memno ,:acc_name , :acc_surname,:phone_number, :position_desc, :email, '8')");
 			if($insertUserCoop->execute([
 				':member_no' => $dataComing["member_no"],
 				':ref_memno' => $dataComing["ref_memno"],
 				':acc_name' => $dataComing["acc_name"],
 				':acc_surname'=> $dataComing["acc_surname"],
 				':phone_number'=> $dataComing["phone_number"],
+				':position_desc'=> $dataComing["position_desc"],
 				':email'=> $dataComing["email"],
 			])){
 				$arrayResult['RESULT'] = TRUE;

@@ -4,18 +4,19 @@ require_once('../autoload.php');
 if ($lib->checkCompleteArgument(['unique_id','share'],$dataComing)) {
 	if ($func->check_permission($payload["user_type"], $dataComing["menu_component"], 'SettingMemberInfo')) {
 		$member_no = $configAS[$payload["ref_memno"]] ?? $payload["ref_memno"];
+	
 		
-		$shareInfo = $conmysql->prepare("SELECT (share_amt) as SHARE_AMT FROM gcmembonlineregis WHERE TRIM(member_no) = :member_no");
-		$shareInfo->execute([':member_no' => $member_no]);
-		$rowShare = $shareInfo->fetch(PDO::FETCH_ASSOC);
-		
-		$UpdateShare = $conmysql->prepare("UPDATE gcmembonlineregis SET share_amt = :share_amt WHERE member_no =:member_no");
+		$UpdateShare = $conoracle->prepare("UPDATE mbreqappl SET coopstk_amt = :coopstk_amt , share_member =:share_member, biz_year =:biz_year WHERE member_no = :member_no");
 		if($UpdateShare->execute([':member_no' => $member_no,
-								':share_amt' => $dataComing["share"]
+								  ':coopstk_amt' => $dataComing["coopstk_amt"],
+								  ':share_member' => $dataComing["share"],
+								  ':biz_year' => $dataComing["biz_year"]
 			])){
-			$arrayResult["RESULT_EDIT"] = TRUE;
+			$arrayResult["RESULT"] = TRUE;
+			require_once('../../include/exit_footer.php');
 		}else{
-			$arrayResult["RESULT_EDIT"] = FALSE;
+			$arrayResult["RESULT"] = FALSE;
+			require_once('../../include/exit_footer.php');
 		}
 	} else {
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

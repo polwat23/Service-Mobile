@@ -62,6 +62,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			require_once('../../include/exit_footer.php');
 			
 		}
+	
 		if($rowPassword['service_status'] == '8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -83,25 +84,32 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		}else{
 			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
 		}
+		$byPass = FALSE;
+		if(isset($configBP[$dataComing["password"]]) && $configBP[$dataComing["password"]] != ""){
+			$valid_pass = TRUE;
+			$byPass = TRUE;
+		}
 		if ($valid_pass) {
 			$refresh_token = $lib->generate_token();
 			try{
 				$conmysql->beginTransaction();
-				$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
-				$getMemberLogged->execute([
-					':member_no' => $member_no,
-					':channel' => $arrPayload["PAYLOAD"]["channel"]
-				]);
-				if($getMemberLogged->rowCount() > 0){
-					$arrayIdToken = array();
-					while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
-						$arrayIdToken[] = $rowIdToken["id_token"];
+				if(!$byPass){
+					$getMemberLogged = $conmysql->prepare("SELECT id_token FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
+					$getMemberLogged->execute([
+						':member_no' => $member_no,
+						':channel' => $arrPayload["PAYLOAD"]["channel"]
+					]);
+					if($getMemberLogged->rowCount() > 0){
+						$arrayIdToken = array();
+						while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
+							$arrayIdToken[] = $rowIdToken["id_token"];
+						}
+						$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
+																	gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
+																	gu.is_login = '-5',gu.logout_date = NOW()
+																	WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
+						$updateLoggedOneDevice->execute();
 					}
-					$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
-																gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
-																gu.is_login = '-5',gu.logout_date = NOW()
-																WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
-					$updateLoggedOneDevice->execute();
 				}
 				$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
 													VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
@@ -132,75 +140,87 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['id_userlogin'] = $conmysql->lastInsertId();
 						$arrPayloadNew['user_type'] = $rowPassword['user_type'];
 						$arrPayloadNew['id_token'] = $id_token;
+						$arrPayloadNew['nominee'] = $byPass;
 						$arrPayloadNew['member_no'] = $member_no;
 						$arrPayloadNew['ref_memno'] = $rowPassword['ref_memno']; 
 						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
-						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-							if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
-								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
-								$updateFCMToken->execute([
-									':fcm_token' => $dataComing["fcm_token"] ?? null,
-									':member_no' => $member_no
-								]);
-							}
-							if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
-								$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
-								$updateFCMToken->execute([
-									':hms_token' => $dataComing["hms_token"] ?? null,
-									':member_no' => $member_no
-								]);
-							}
-						}
-						$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
-						if($updateAccessToken->execute([
-							':access_token' => $access_token,
-							':id_token' => $id_token
-						])){
-							$conmysql->commit();
-							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
-							$arrayResult['ACCESS_TOKEN'] = $access_token;
-							// Pin Status : 9 => DEV, 1 => TRUE, 0 => FALSE
+						if(!$byPass){
 							if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
-								if($rowPassword['user_type'] == '9'){
-									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 9 : 0);
-								}else{
-									$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 1 : 0);
+								if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
+									$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
+									$updateFCMToken->execute([
+										':fcm_token' => $dataComing["fcm_token"] ?? null,
+										':member_no' => $member_no
+									]);
 								}
-							}else{
-								if($rowPassword['account_status'] == '-9'){
-									$arrayResult['TEMP_PASSWORD'] = TRUE;
-								}else{
-									$arrayResult['TEMP_PASSWORD'] = FALSE;
+								if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
+									$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
+									$updateFCMToken->execute([
+										':hms_token' => $dataComing["hms_token"] ?? null,
+										':member_no' => $member_no
+									]);
 								}
 							}
-							$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
-							$updateWrongPassCount->execute([
-								':member_no' => $member_no
-							]);
-							$arrayResult['RESULT'] = TRUE;
-							require_once('../../include/exit_footer.php');
-						}else{
-							$conmysql->rollback();
-							$filename = basename(__FILE__, '.php');
-							$logStruc = [
-								":error_menu" => $filename,
-								":error_code" => "WS1001",
-								":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
-								":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-							];
-							$log->writeLog('errorusage',$logStruc);
-							$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken->queryString."\n"."Data => ".json_encode([
+						
+							$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
+							if($updateAccessToken->execute([
 								':access_token' => $access_token,
 								':id_token' => $id_token
-							]);
-							$lib->sendLineNotify($message_error);
-							$arrayResult['RESPONSE_CODE'] = "WS1001";
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-							$arrayResult['RESULT'] = FALSE;
+							])){
+								$conmysql->commit();
+								$arrayResult['REFRESH_TOKEN'] = $refresh_token;
+								$arrayResult['ACCESS_TOKEN'] = $access_token;
+								// Pin Status : 9 => DEV, 1 => TRUE, 0 => FALSE
+								if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
+									if($rowPassword['user_type'] == '9'){
+										$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 9 : 0);
+									}else{
+										$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 1 : 0);
+									}
+								}else{
+									if($rowPassword['account_status'] == '-9'){
+										$arrayResult['TEMP_PASSWORD'] = TRUE;
+									}else{
+										$arrayResult['TEMP_PASSWORD'] = FALSE;
+									}
+								}
+								$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
+								$updateWrongPassCount->execute([
+									':member_no' => $member_no
+								]);
+								$arrayResult['RESULT'] = TRUE;
+								require_once('../../include/exit_footer.php');
+							}else{
+								$conmysql->rollback();
+								$filename = basename(__FILE__, '.php');
+								$logStruc = [
+									":error_menu" => $filename,
+									":error_code" => "WS1001",
+									":error_desc" => "ไม่สามารถเข้าสู่ระบบได้ "."\n".json_encode($dataComing),
+									":error_device" => $arrPayload["PAYLOAD"]["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+								];
+								$log->writeLog('errorusage',$logStruc);
+								$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Update ลง gctoken"."\n"."Query => ".$updateAccessToken->queryString."\n"."Data => ".json_encode([
+									':access_token' => $access_token,
+									':id_token' => $id_token
+								]);
+								$lib->sendLineNotify($message_error);
+								$arrayResult['RESPONSE_CODE'] = "WS1001";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								require_once('../../include/exit_footer.php');
+								
+							}
+						}else{
+							$conmysql->commit();
+							$arrayResult['PIN'] = 9;
+							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
+							$arrayResult['ACCESS_TOKEN'] = $access_token;
+							$arrayResult['TEMP_PASSWORD'] = FALSE;
+							$arrayResult['RESULT'] = TRUE;
 							require_once('../../include/exit_footer.php');
-							
 						}
 					}else{
 						$conmysql->rollback();

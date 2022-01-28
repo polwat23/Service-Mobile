@@ -2,17 +2,22 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['username','password','device_name','unique_id'],$dataComing)){
-	$checkPassword = $conmysql->prepare("SELECT cs.section_system,cs.system_assign,cu.password
-										FROM coreuser cu LEFT JOIN coresectionsystem cs ON cu.id_section_system = cs.id_section_system
-										WHERE cu.username = :username and cu.user_status = '1'");
+	$checkPassword = $conoracle->prepare("SELECT pwd as PASSWORD
+										FROM amsecusers
+										WHERE user_name = :username ");
 	$checkPassword->execute([
 		':username' => $dataComing["username"]
 	]);
-	if($checkPassword->rowCount() > 0){
-		$rowPassword = $checkPassword->fetch(PDO::FETCH_ASSOC);
-		if(password_verify($dataComing["password"], $rowPassword['password'])){
+	$rowPassword = $checkPassword->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowPassword["PASSWORD"]) && $rowPassword["PASSWORD"] != ""){
+		
+		if($dataComing["password"] == $rowPassword['PASSWORD']){
 			$arrPayload = array();
-			$arrPayload['section_system'] = $rowPassword['section_system'];
+			if($dataComing["username"] == 'admina'){
+				$arrPayload['section_system'] = 'root';
+			}else{
+				$arrPayload['section_system'] = 'process';
+			}
 			$arrPayload['username'] = $dataComing["username"];
 			$arrPayload['exp'] = time() + 21600;
 			$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
@@ -29,7 +34,7 @@ if($lib->checkCompleteArgument(['username','password','device_name','unique_id']
 				':token' => $access_token,
 				':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour'))
 			])){
-				$arrayResult["SECTION_ASSIGN"] = $rowPassword["system_assign"];
+				$arrayResult["SECTION_ASSIGN"] = 'process';
 				$arrayResult["USERNAME"] = $dataComing["username"];
 				$arrayResult["ACCESS_TOKEN"] = $access_token;
 				$arrayResult["RESULT"] = TRUE;

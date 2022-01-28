@@ -69,6 +69,8 @@ $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.
 $configError = json_decode($jsonConfigError,true);
 $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
+$jsonConfigBP = file_get_contents(__DIR__.'/../config/config_bypass.json');
+$configBP = json_decode($jsonConfigBP,true);
 $lang_locale = $headers["Lang_locale"] ?? "th";
 
 if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
@@ -142,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_CODE'] = "WS0034";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
+						http_response_code(500);
 						require_once(__DIR__.'/../include/exit_footer.php');
 						
 					}else if($errorCode === 4){

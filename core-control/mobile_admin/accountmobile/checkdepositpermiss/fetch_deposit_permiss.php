@@ -14,34 +14,37 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				require_once('../../../../include/exit_footer.php');
 			}
 			
-			$checkMembno = $conmysql->prepare("SELECT ref_memno FROM gcmemberaccount WHERE  member_no = :member_no");
+			$ref_memno = $dataComing["member_no"];
+			$checkMembno = $conmysql->prepare("SELECT ref_memno FROM gcmemberaccount where  member_no = :member_no");
 			$checkMembno->execute([':member_no' => $dataComing["member_no"]]);
 			while($rowUser = $checkMembno->fetch(PDO::FETCH_ASSOC)){
-				$ref_memno  = $rowUser["ref_memno"];
+				$member_no  = $rowUser["ref_memno"];
 			}
+		
 			$getBalanceMaster = $conoracle->prepare("SELECT max(confirmbal_date) as BALANCE_DATE  FROM cmconfirmbalance WHERE member_no =  :member_no");
-			$getBalanceMaster->execute([':member_no' => $ref_memno]);
+			$getBalanceMaster->execute([':member_no' => $member_no]);
 			$rowBalMaster = $getBalanceMaster->fetch(PDO::FETCH_ASSOC);
 			$arrHeader = array();
 
 			$arrayAccountnoCheckGrp = array();
 			$fetchAccountnoCheck = $conmysql->prepare("SELECT DEPTACCOUNT_NO , MEMBER_NO, IS_CLOSESTATUS FROM gcconstantdeposit WHERE member_no = :member_no");
-			$fetchAccountnoCheck->execute([':member_no' => $ref_memno]);
+			$fetchAccountnoCheck->execute([':member_no' => $member_no]);
 			while($rowAccountnoCheck = $fetchAccountnoCheck->fetch(PDO::FETCH_ASSOC)){
 				$arrayAccountnoCheck = $rowAccountnoCheck;
 				$arrayAccountnoCheckGrp[] = $arrayAccountnoCheck;
 			}
-			$fetcAccountno = $conoracle->prepare("SELECT  cfb.member_no,mp.prename_desc||''||mb.memb_name as COOP_NAME,
+			$fetcAccountno = $conoracle->prepare("SELECT  cfb.member_no,mp.prename_desc||''||mb.memb_name||' '||mp.suffname_desc as COOP_NAME,
 												cfb.BIZZACCOUNT_NO , cfb.BALANCE_VALUE as BALANCE_AMT , dp.DEPTTYPE_DESC
-												FROM cmconfirmbalance cfb LEFT JOIN dpdeptmaster dm ON cfb.BIZZACCOUNT_NO = dm.deptaccount_no AND cfb.member_no = dm.member_no and dm.deptclose_status = 0
+												FROM cmconfirmbalance cfb LEFT JOIN dpdeptmaster dm ON cfb.BIZZACCOUNT_NO = dm.deptaccount_no AND cfb.member_no = dm.member_no 
 												LEFT JOIN dpdepttype dp   ON dm.depttype_code = dp.depttype_code AND dm.deptgroup_code = dp.deptgroup_code
 												LEFT JOIN mbmembmaster mb ON cfb.member_no = mb.member_no
 												LEFT JOIN mbucfprename mp on  mb.prename_code = mp.prename_code
 												WHERE bizz_system	= 'DEP'  
+												and dm.deptclose_status = 0
 												and cfb.member_no = :member_no
 												and cfb.confirmbal_date =  to_date(:confirm_date,'YYYY-MM-DD')                 
 												ORDER BY cfb.BIZZACCOUNT_NO");
-			$fetcAccountno->execute([':member_no' => $ref_memno , 
+			$fetcAccountno->execute([':member_no' => $member_no , 
 									 ':confirm_date' => date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]))
 								]);
 			while($rowAccountNo = $fetcAccountno->fetch(PDO::FETCH_ASSOC)){
@@ -63,9 +66,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			
 		}
 		$arrayResult["COOP_NAME"] = $CoopName;
-		$arrayResult["MEMBER"] = $ref_memno;
+		$arrayResult["MEMBER"] = $member_no;
 		$arrayResult["ACCOUNT_CREDIT"] = $arrayGroup;
-		$arrayResult["DATE"] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

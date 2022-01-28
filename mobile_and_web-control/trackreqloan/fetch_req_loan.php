@@ -6,97 +6,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		$arrLimit = array();
 		$limit = $func->getConstant('limit_loanrequest');
-		$arrLimit['LIMIT_DURATION'] = $limit;
+		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
 		$Contractno = null;
 		$fetchContractTypeCheck = $conmysql->prepare("SELECT balance_status FROM gcconstantbalanceconfirm WHERE member_no = :member_no");
 		$fetchContractTypeCheck->execute([':member_no' => $payload["ref_memno"]]);
 		$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
-		$Contractno  = $rowContractnoCheck["balance_status"] ;
+		$Contractno  = $rowContractnoCheck["balance_status"] || "0" ;
+		
 		if($Contractno == "0"){
 			if($dataComing["req_status"] == "8"){ //อยู่ระหว่างดำเนินการ
-			$fetchReqLoan = $conoracle->prepare("SELECT  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
-										LCREQLOAN.MEMBER_NO,    
-										LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
-										LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
-										LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
-										LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
-										LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
-										LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
-										LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-										LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
-										LCREQLOAN.REMARK as REMARK
-										FROM LCREQLOAN,      
-										LCCFLOANTYPE
-										WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
-										AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
-										AND LCREQLOAN.LOANREQUEST_STATUS =  8
-										AND LCREQLOAN.member_no = :member_no
-										AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ");
-				$fetchReqLoan->execute([
-					':member_no' => $payload["ref_memno"],
-					':req_status' => $dataComing["req_status"],
-					':datebefore' => $date_before,
-					':datenow' => $date_now
-				]);
-				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-					$arrayReq = array();
-					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
-					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
-					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
-					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
-					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
-					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
-					$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
-					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQ_STATUS"]][0][$lang_locale];
-					$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
-					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
-					$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["APPROVE_DATE"]) && $rowReqLoan["APPROVE_DATE"] != "" ? $lib->convertdate($rowReqLoan["APPROVE_DATE"],'d m Y') : null;
-					$arrGrpReq[] = $arrayReq;
-				}
-			}else if($dataComing["req_status"] == "-9"){ //ไม่อนุมัติ
-				$fetchReqLoan = $conoracle->prepare("SELECT  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
-										LCREQLOAN.MEMBER_NO,    
-										LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
-										LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
-										LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
-										LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
-										LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
-										LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
-										LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-										LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
-										LCREQLOAN.REMARK as REMARK
-										FROM LCREQLOAN,      
-										LCCFLOANTYPE
-										WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
-										AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
-										AND LCREQLOAN.LOANREQUEST_STATUS =  -9
-										AND LCREQLOAN.member_no = :member_no
-										AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ");
-				$fetchReqLoan->execute([
-					':member_no' => $payload["ref_memno"],
-					':req_status' => $dataComing["req_status"],
-					':datebefore' => $date_before,
-					':datenow' => $date_now
-				]);
-				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-					$arrayReq = array();
-					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
-					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
-					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
-					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
-					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
-					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
-					$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
-					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQ_STATUS"]][0][$lang_locale];
-					$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
-					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
-					$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["APPROVE_DATE"]) && $rowReqLoan["APPROVE_DATE"] != "" ? $lib->convertdate($rowReqLoan["APPROVE_DATE"],'d m Y') : null;
-					$arrGrpReq[] = $arrayReq;
-				}
-			}else if($dataComing["req_status"] == "0"){ //อนุมัติ/รอทำสัญญา 
-					$fetchReqLoan = $conoracle->prepare("SELECT  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+			$fetchReqLoan = $conoracle->prepare("select LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
 											LCREQLOAN.MEMBER_NO,    
 											LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
 											LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
@@ -105,106 +26,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 											LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 											LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-											LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
-											LCREQLOAN.REMARK as REMARK
-											FROM LCREQLOAN,      
-											LCCFLOANTYPE,
-											LCCONTMASTER 
-											WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
-											AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
-											AND LCREQLOAN.LOANREQUEST_DOCNO = lccontmaster.LOANREQUEST_DOCNO
-											AND LCCONTMASTER.CONTSIGN_STATUS  = <> 1
-											AND LCREQLOAN.member_no = :member_no
-											AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ");
-				$fetchReqLoan->execute([
-					':member_no' => $payload["ref_memno"],
-					':req_status' => $dataComing["req_status"],
-					':datebefore' => $date_before,
-					':datenow' => $date_now
-				]);
-				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-					$arrayReq = array();
-					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
-					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
-					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
-					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
-					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
-					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
-					$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
-					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQ_STATUS"]][0][$lang_locale];
-					$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
-					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
-					$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["APPROVE_DATE"]) && $rowReqLoan["APPROVE_DATE"] != "" ? $lib->convertdate($rowReqLoan["APPROVE_DATE"],'d m Y') : null;
-					$arrGrpReq[] = $arrayReq;
-				}
-			}else if($dataComing["req_status"] == "1"){ // 
-					$fetchReqLoan = $conoracle->prepare("SELECT  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
-											LCREQLOAN.MEMBER_NO,    
-											LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
-											LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
-											LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
-											LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
-											LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
-											LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
-											LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-											LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
-											LCREQLOAN.REMARK as REMARK,
-											LCCONTMASTER.CONTSIGN_DATE ,
-											LCCONTMASTER.CONTSIGN_AMT 
-											FROM LCREQLOAN,      
-											LCCFLOANTYPE,
-											LCCONTMASTER 
-											WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
-											AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
-											AND LCREQLOAN.LOANREQUEST_DOCNO = lccontmaster.LOANREQUEST_DOCNO
-											AND LCCONTMASTER.CONTSIGN_STATUS  = 1
-											AND LCREQLOAN.member_no = :member_no
-											AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ");
-				$fetchReqLoan->execute([
-					':member_no' => $payload["ref_memno"],
-					':req_status' => $dataComing["req_status"],
-					':datebefore' => $date_before,
-					':datenow' => $date_now
-				]);
-				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-					$arrayReq = array();
-					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
-					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
-					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
-					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
-					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
-					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
-					$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
-					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQ_STATUS"]][0][$lang_locale];
-					$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
-					$arrayReq["CONTSIGN_AMT"] = number_format($rowReqLoan["CONTSIGN_AMT"],2);
-					$arrayReq["CONTSIGN_DATE"] = $lib->convertdate($rowReqLoan["CONTSIGN_DATE"],'d M Y');
-					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
-					$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["APPROVE_DATE"]) && $rowReqLoan["APPROVE_DATE"] != "" ? $lib->convertdate($rowReqLoan["APPROVE_DATE"],'d m Y') : null;
-					$arrGrpReq[] = $arrayReq;
-				}
-			}else{
-				$fetchReqLoan = $conoracle->prepare("SELECT  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
-											LCREQLOAN.MEMBER_NO,    
-											LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
-											LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
-											LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
-											LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
-											LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
-											LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
-											LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-											LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
-											LCREQLOAN.REMARK as REMARK,
-											LCCONTMASTER.CONTSIGN_DATE ,
-											LCCONTMASTER.CONTSIGN_AMT 
-											FROM LCREQLOAN,      
-											LCCFLOANTYPE,
-											LCCONTMASTER 
-											WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
-											AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
-											AND LCREQLOAN.LOANREQUEST_DOCNO = lccontmaster.LOANREQUEST_DOCNO
-											AND LCREQLOAN.member_no = :member_no
-											AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ");
+											LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,					
+											8 as request_flag ,
+											LCREQLOAN.CONTSIGN_INTRATE,
+											from lcreqloan LEFT  JOIN   LCCFLOANTYPE  ON  lcreqloan.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE
+											where 
+											lcreqloan.member_no= :member_no and  lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and 
+											lcreqloan.approve_date is null and lcreqloan.loanrequest_status = 8 ");
 				$fetchReqLoan->execute([
 					':member_no' => $payload["ref_memno"],
 					':datebefore' => $date_before,
@@ -219,12 +47,247 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
 					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
 					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
-					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQ_STATUS"]][0][$lang_locale];
-					$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
-					$arrayReq["CONTSIGN_AMT"] = number_format($rowReqLoan["CONTSIGN_AMT"],2);
-					$arrayReq["CONTSIGN_DATE"] = $lib->convertdate($rowReqLoan["CONTSIGN_DATE"],'d M Y');				
+					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
+					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"],2)." %";
 					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
-					$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["APPROVE_DATE"]) && $rowReqLoan["APPROVE_DATE"] != "" ? $lib->convertdate($rowReqLoan["APPROVE_DATE"],'d m Y') : null;
+					$arrGrpReq[] = $arrayReq;
+				}
+			}else if($dataComing["req_status"] == "-9"){ //ไม่อนุมัติ
+				$fetchReqLoan = $conoracle->prepare("SELECT  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+										LCREQLOAN.MEMBER_NO,    
+										LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+										LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+										LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+										LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+										LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+										LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
+										LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+										LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+										LCREQLOAN.REMARK as REMARK,
+										0 as request_flag,
+										LCREQLOAN.CONTSIGN_INTRATE
+										FROM LCREQLOAN,      
+										LCCFLOANTYPE
+										WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
+										AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
+										AND LCREQLOAN.LOANREQUEST_STATUS =  0
+										AND LCREQLOAN.member_no = :member_no
+										AND lcreqloan.LOANAPPROVE_DATE BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ");
+				$fetchReqLoan->execute([
+					':member_no' => $payload["ref_memno"],
+					':datebefore' => $date_before,
+					':datenow' => $date_now
+				]);
+				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
+					$arrayReq = array();
+					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
+					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
+					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
+					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
+					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
+					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
+					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
+					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
+					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"],2)." %";
+					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
+					$arrGrpReq[] = $arrayReq;
+				}
+			}else if($dataComing["req_status"] == "0"){ //อนุมัติ/รอทำสัญญา 
+					$fetchReqLoan = $conoracle->prepare("select LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+										LCREQLOAN.MEMBER_NO,    
+										LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+										LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+										LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+										LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+										LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+										LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+										LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+										LCREQLOAN.REMARK as REMARK,
+										1 as request_flag ,
+										LCREQLOAN.CONTSIGN_INTRATE
+										from lcreqloan LEFT JOIN LCCFLOANTYPE ON lcreqloan.loantype_code  = LCCFLOANTYPE.loantype_code
+										where lcreqloan.member_no= :member_no
+										and lcreqloan.LOANAPPROVE_DATE  BETWEEN TO_DATE(:datebefore,'YYYY-MM-DD') and TO_DATE(:datenow,'YYYY-MM-DD')
+										and lcreqloan.approve_date is not null and lcreqloan.loanrequest_status = 1  
+										and  ( select count(lccontmaster.contsign_status) from lccontmaster 
+										where lccontmaster.contsign_status = 1 and lccontmaster.contsign_date is not null 
+										and lccontmaster.contract_status <> -9 and lccontmaster.loancontract_no =lcreqloan.loancontract_no ) = 0");
+				$fetchReqLoan->execute([
+					':member_no' => $payload["ref_memno"],
+					':datebefore' => $date_before,
+					':datenow' => $date_now
+				]);
+				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
+					$arrayReq = array();
+					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
+					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
+					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
+					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
+					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
+					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
+					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
+					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
+					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"],2)." %";
+					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
+					$arrGrpReq[] = $arrayReq;
+				}
+			}else if($dataComing["req_status"] == "1"){ // ทำสัญญาแล้ว
+					$fetchReqLoan = $conoracle->prepare("select LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+													LCREQLOAN.MEMBER_NO,    
+													LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+													LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+													LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+													LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+													LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+													LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
+													LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+													LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+													LCREQLOAN.REMARK as REMARK,
+													lccontmaster.CONTSIGN_DATE,,
+													LCREQLOAN.CONTSIGN_INTRATE,
+													FT_GETCONTINTRATE(LCCONTMASTER.branch_id,LCCONTMASTER.loancontract_no,sysdate) as INT_CONTINTRATE,
+													2 as request_flag 
+													from lcreqloan LEFT JOIN  LCCFLOANTYPE ON  lcreqloan.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE
+													LEFT JOIN LCCONTMASTER ON lcreqloan.LOANREQUEST_DOCNO = LCCONTMASTER.LOANREQUEST_DOCNO
+													where lcreqloan.member_no= :member_no
+													AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD')
+													and lcreqloan.approve_date is not null and lcreqloan.loanrequest_status = 1  and  
+													(select count(lccontmaster.contsign_status) from lccontmaster 
+													where lccontmaster.contsign_status = 1 and lccontmaster.contsign_date is not null 
+													and lccontmaster.contract_status <> -9 and lccontmaster.loancontract_no =lcreqloan.loancontract_no ) >0");
+				$fetchReqLoan->execute([
+					':member_no' => $payload["ref_memno"],
+					':datebefore' => $date_before,
+					':datenow' => $date_now
+				]);
+				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
+					$arrayReq = array();
+					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
+					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
+					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
+					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
+					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
+					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
+					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
+					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
+					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
+					$arrayReq["CONTSIGN_AMT"] = $rowReqLoan["CONTSIGN_AMT"];
+					$arrayReq["CONTSIGN_DATE"] = $lib->convertdate($rowReqLoan["CONTSIGN_DATE"],'d M Y');
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"],2)." %";
+					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
+					$arrGrpReq[] = $arrayReq;
+				}
+			}else{
+				$fetchReqLoan = $conoracle->prepare("select LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+												LCREQLOAN.MEMBER_NO,    
+												LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+												LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+												LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+												LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
+												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+												SYSDATE as CONTSIGN_DATE,
+												LCREQLOAN.REMARK as REMARK,
+												LCREQLOAN.CONTSIGN_INTRATE as  INT_CONTINTRATE,
+												8 as request_flag 
+												from lcreqloan LEFT  JOIN   LCCFLOANTYPE  ON  lcreqloan.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE
+												where 
+												lcreqloan.member_no= :member_no and  lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and 
+												lcreqloan.approve_date is null and lcreqloan.loanrequest_status = 8 
+
+												UNION
+												SELECT   LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+												LCREQLOAN.MEMBER_NO,    
+												LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+												LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+												LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+												LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
+												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+												SYSDATE as CONTSIGN_DATE,
+												LCREQLOAN.REMARK as REMARK,
+												LCREQLOAN.CONTSIGN_INTRATE as  INT_CONTINTRATE,
+												0 as request_flag
+												FROM LCREQLOAN,      
+												LCCFLOANTYPE
+												WHERE  LCREQLOAN.BRANCH_ID = LCCFLOANTYPE.BRANCH_ID   
+												AND LCREQLOAN.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE   
+												AND LCREQLOAN.LOANREQUEST_STATUS =  0
+												AND LCREQLOAN.member_no = :member_no
+												AND lcreqloan.LOANAPPROVE_DATE BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD')
+
+												UNION 
+												select  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+												LCREQLOAN.MEMBER_NO,    
+												LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+												LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+												LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+												LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
+												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+												SYSDATE as CONTSIGN_DATE,
+												LCREQLOAN.REMARK as REMARK,
+												LCREQLOAN.CONTSIGN_INTRATE as  INT_CONTINTRATE,
+												1 as request_flag 
+												from lcreqloan LEFT JOIN LCCFLOANTYPE ON lcreqloan.loantype_code  = LCCFLOANTYPE.loantype_code
+												where lcreqloan.member_no= :member_no
+												and lcreqloan.loanrequest_date  BETWEEN TO_DATE(:datebefore,'YYYY-MM-DD') and TO_DATE(:datenow,'YYYY-MM-DD')
+												and lcreqloan.approve_date is not null and lcreqloan.loanrequest_status = 1  
+												and  ( select count(lccontmaster.contsign_status) from lccontmaster 
+												where lccontmaster.contsign_status = 1 and lccontmaster.contsign_date is not null 
+												and lccontmaster.contract_status <> -9 and lccontmaster.loancontract_no =lcreqloan.loancontract_no ) = 0
+												UNION
+												select  LCREQLOAN.LOANREQUEST_DOCNO as REQLOAN_DOC, 
+												LCREQLOAN.MEMBER_NO,    
+												LCREQLOAN.LOANREQUEST_DATE as APPROVE_DATE,    
+												LCREQLOAN.LOANREQUEST_AMT  as REQUEST_AMT, 
+												LCREQLOAN.LOANCREDIT_AMT  as LOANPERMIT_AMT, 
+												LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
+												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
+												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
+												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
+												lccontmaster.CONTSIGN_DATE,
+												LCREQLOAN.REMARK as REMARK,
+												FT_GETCONTINTRATE(LCCONTMASTER.branch_id,LCCONTMASTER.loancontract_no,sysdate) as INT_CONTINTRATE,
+												2 as request_flag 
+												from lcreqloan LEFT JOIN  LCCFLOANTYPE ON  lcreqloan.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE
+												LEFT JOIN lccontmaster ON lcreqloan.LOANREQUEST_DOCNO = lccontmaster.LOANREQUEST_DOCNO
+												where lcreqloan.member_no= :member_no
+												AND lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD')
+												and lcreqloan.approve_date is not null and lcreqloan.loanrequest_status = 1  and  
+												(select count(lccontmaster.contsign_status) from lccontmaster 
+												where lccontmaster.contsign_status = 1 and lccontmaster.contsign_date is not null 
+												and lccontmaster.contract_status <> -9 and lccontmaster.loancontract_no =lcreqloan.loancontract_no ) >0");
+				$fetchReqLoan->execute([
+					':member_no' => $payload["ref_memno"],
+					':datebefore' => $date_before,
+					':datenow' => $date_now
+				]);
+				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
+					$arrayReq = array();
+					$arrayReq["LOANTYPE_DESC"] = $rowReqLoan["LOANTYPE_DESC"];
+					$arrayReq["REQLOAN_DOC"] = $rowReqLoan["REQLOAN_DOC"];
+					$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
+					$arrayReq["REQUEST_AMT"] = $rowReqLoan["REQUEST_AMT"];
+					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["PERIOD_PAYMENT"];
+					$arrayReq["PERIOD"] = $rowReqLoan["PERIOD"];
+					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
+					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
+					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
+					$arrayReq["CONTSIGN_AMT"] = $rowReqLoan["CONTSIGN_AMT"];
+					$arrayReq["CONTSIGN_DATE"] = $rowReqLoan["REQUEST_FLAG"] == "2" ? $lib->convertdate($rowReqLoan["CONTSIGN_DATE"],'d M Y') : null;
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["INT_CONTINTRATE"],2)." %";
+					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
 					$arrGrpReq[] = $arrayReq;
 				}
 			}
@@ -253,7 +316,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			
 			
 			$arrayResult['REQ_LIST'] = $arrGrpReq;
-			$arrayResult['Limit'] = $arrLimit;
 			$arrayResult['FILTER'] = $arrayLoanStatusList;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

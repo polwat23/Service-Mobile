@@ -7,13 +7,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no,acc_name ,acc_surname FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $member_no]);
+
 		if($memberInfoMobile->rowCount() > 0){
+				
+			$memberInfo = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,
+												MP.SUFFNAME_DESC
+												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												WHERE mb.member_no = :member_no");
+		$memberInfo->execute([':member_no' => $payload["ref_memno"]]);
+		$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			$arrayResult["COOP_NAME"] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["SUFFNAME_DESC"];
+			
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			$arrayResult["NAME"] = $rowInfoMobile["acc_name"];
 			$arrayResult["SURNAME"] = $rowInfoMobile["acc_surname"];
 			$arrayResult["MEMBER_NO"] = $payload["member_no"];
+			$arrayResult["REF_MEMNO"] = $payload["ref_memno"];
 			if(isset($rowInfoMobile["path_avatar"])){
 				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
 				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);

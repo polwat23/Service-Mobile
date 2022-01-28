@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchContractTypeCheck = $conmysql->prepare("SELECT balance_status FROM gcconstantbalanceconfirm WHERE member_no = :member_no");
 		$fetchContractTypeCheck->execute([':member_no' => $payload["ref_memno"]]);
 		$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
-		$Contractno  = $rowContractnoCheck["balance_status"] ;
+		$Contractno  = $rowContractnoCheck["balance_status"] ||"0" ;
 		if($Contractno == "0"){
 			$getUcollwho = $conoracle->prepare("SELECT 
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,

@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				$destination = array();
 				foreach($dataComing["message_importData"] as $key => $target){
 					if(!in_array($key,$dataComing["destination_revoke"])){
-						$destination[] = strtolower($lib->mb_str_pad($target["DESTINATION"]));
+						$destination[] = $target["DESTINATION"];
 						$destinationFull[] = $target;
 					}
 				}
@@ -133,7 +133,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$destination = array();
 					foreach($dataComing["destination"] as $key => $target){
 						if(!in_array($key,$dataComing["destination_revoke"])){
-							$destination[] = strtolower($lib->mb_str_pad($target));
+							$destination[] = $target;
 						}
 					}
 					$arrToken = $func->getFCMToken('person',$destination);
@@ -315,7 +315,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$destination_temp = array();
 					if(mb_strlen($target["DESTINATION"]) <= 8){
 						if(!in_array($key,$dataComing["destination_revoke"])){
-							$destination[] = strtolower($lib->mb_str_pad($target["DESTINATION"]));
+							$destination[] = $target["DESTINATION"];
 							$arrDestSend[] = $target;
 						}
 					}else if(mb_strlen($target["DESTINATION"]) == 10){
@@ -380,7 +380,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$destination_temp = array();
 						if(mb_strlen($target) <= 8){
 							if(!in_array($key,$dataComing["destination_revoke"])){
-								$destination[] = strtolower($lib->mb_str_pad($target));
+								$destination[] = $target;
 							}
 						}else if(mb_strlen($target) == 10){
 							if(!in_array($target,$dataComing["destination_revoke"])){

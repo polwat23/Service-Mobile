@@ -28,20 +28,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult['MEMBER_NO'] = $rowMastershare["MEMBER_NO"];
 			$arrayResult['COOP_NAME'] = $rowMastershare["COOP_NAME"];
 			$arrayResult['SHARESTK_AMT'] = number_format($rowMastershare["SHARESTK_AMT"],2);
-			$arrayResult['SHRPAR_STKCHKVALUE'] = number_format($rowMastershare["SHRPAR_STKCHKVALUE"],2);
+			$arrayResult['SHRPAR_STKCHKVALUE'] = number_format($rowMastershare["SHRPAR_STKCHKVALUE"]/500);
 			$arrayResult['SHRPAR_VALUE'] = number_format($rowMastershare["SHRPAR_VALUE"],2);
 			$arrayResult['SHRPAR_AMT'] = number_format($rowMastershare["SHRPAR_AMT"],2);
 			$arrayResult['SHRPAR_STKBIZVALUE'] = number_format($rowMastershare["SHRPAR_STKBIZVALUE"],2);
 			$arrayResult['SHRPAR_STATUS'] = $rowMastershare["SHRPAR_STATUS"];
+			$arrayResult['SHRPAR_YEAR'] = date('Y')+543;
 			
 			
 			$limit = $func->getConstant('limit_stmshare');
 			$arrayResult['LIMIT_DURATION'] = $limit;
-			if($lib->checkCompleteArgument(["date_start"],$dataComing)){
+			/*if($lib->checkCompleteArgument(["date_start"],$dataComing)){
 				$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
 			}else{
 				$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
-			}
+			}*/
+			$date_before = date('1968-08-01');
 			if($lib->checkCompleteArgument(["date_end"],$dataComing)){
 				$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
 			}else{
@@ -79,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SHAREBUY_DATE"] = $lib->convertdate($rowStm["SHAREBUY_DATE"],'D m Y');
 				$arrayStm["SHARENO_START"] = $rowStm["SHARENO_START"];
 				$arrayStm["SHARENO_ENDPREFIX"] = $rowStm["SHARENO_ENDPREFIX"];
-				$arrayStm["SHARE_AMT"] = number_format($rowStm["SHARE_AMT"],2);
+				$arrayStm["SHARE_AMT"] = $rowStm["SHARE_AMT"];
 				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SHARESTK_AMT"],2);
 				$arrGroupStm[] = $arrayStm;
 			}

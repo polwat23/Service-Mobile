@@ -6,27 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $payload["ref_memno"];
 		$date_now = $dataComing["date"] ??  $date_now = date('Y-m-d');
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM(DPDEPTPRNCFIXED.PRNC_AMT) as SUM_BALANCE
-										FROM DPDEPTMASTER, DPDEPTPRNCFIXED, DPDEPTTYPE, DPINTDUEDATE
-										WHERE ( DPDEPTPRNCFIXED.DEPTACCOUNT_NO = DPDEPTMASTER.DEPTACCOUNT_NO ) 
-										AND ( DPDEPTPRNCFIXED.MASTER_BRANCH_ID = DPDEPTMASTER.BRANCH_ID ) 
-										AND ( DPDEPTMASTER.DEPTTYPE_CODE = DPDEPTTYPE.DEPTTYPE_CODE ) 
-										AND ( DPDEPTMASTER.DEPTTYPE_BRANCH_ID = DPDEPTTYPE.BRANCH_ID ) 
-										AND ( DPDEPTMASTER.DEPTGROUP_CODE = DPDEPTPRNCFIXED.DEPTGROUP_CODE ) 
-										AND ( DPDEPTMASTER.DEPTGROUP_CODE = DPDEPTTYPE.DEPTGROUP_CODE ) 
-										AND (DPDEPTPRNCFIXED.PRINC_ID = DPINTDUEDATE.PRINC_ID(+)) 
-										AND ( ( TRIM(DPDEPTMASTER.MEMBER_NO) = :member_no) 
-										AND ( DPDEPTTYPE.DEPTGROUP_CODE = '01' ) 
-										AND (DPDEPTMASTER.DEPTOPEN_DATE <= TO_DATE(:datenow,'YYYY-MM-DD') ) 
-										AND ((DPDEPTMASTER.DEPTCLOSE_DATE > TO_DATE(:datenow,'YYYY-MM-DD') 
-										AND DPDEPTMASTER.DEPTCLOSE_STATUS = 1) OR DPDEPTMASTER.DEPTCLOSE_STATUS = 0) AND
-										(DPDEPTMASTER.CANCEL_DATE < TO_DATE(:datenow,'YYYY-MM-DD') OR DPDEPTMASTER.CANCEL_DATE IS NULL) )
-										ORDER BY DPDEPTPRNCFIXED.PRNCDUE_DATE ASC");
-		$getSumAllAccount->execute([':member_no' => $member_no,
-									':datenow' => $date_now
-		]);
-		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
-		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
+		$arrayResult['SUM_BALANCE'] = 0;
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
 		
@@ -69,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										AND DPDEPTPRNCFIXED.PRINC_ID = DPINTDUEDATE.PRINC_ID (+) 
 										AND (DPDEPTMASTER.DEPTOPEN_DATE <= TO_DATE(:datenow,'YYYY-MM-DD')  )   
 										AND ((DPDEPTMASTER.DEPTCLOSE_DATE > TO_DATE(:datenow,'YYYY-MM-DD')    
-										AND DPDEPTMASTER.DEPTCLOSE_STATUS = 1) OR  DPDEPTMASTER.DEPTCLOSE_STATUS = 0)   
+										AND DPDEPTMASTER.DEPTCLOSE_STATUS = 0) OR  DPDEPTMASTER.DEPTCLOSE_STATUS = 0)   
 										AND ( DPDEPTMASTER.DEPTGROUP_CODE = '01' )   
 										AND (DPDEPTMASTER.CANCEL_DATE < TO_DATE(:datenow,'YYYY-MM-DD')  OR DPDEPTMASTER.CANCEL_DATE IS NULL)   
 										AND TRIM(DPDEPTMASTER.MEMBER_NO) = :member_no   
@@ -97,7 +77,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["DUE_DATE"] = $lib->convertdate($rowAccount["DUE_DATE"],'d M Y');
 			$arrAccount["BALANCE_AMT"] = number_format($rowAccount["BALANCE_AMT"],2);
 			$arrAccount["INT_AMT"] = number_format(($arrAccount["COUNT_DATE"] * $rowAccount["BALANCE_AMT"] * $rowAccount["INTEREST_RATE"] /36500),2);
-			
+			$arrayResult["SUM_INTEREST"] += ($arrAccount["COUNT_DATE"] * $rowAccount["BALANCE_AMT"] * $rowAccount["INTEREST_RATE"] /36500);
+			$arrayResult['SUM_BALANCE'] += $rowAccount["BALANCE_AMT"];
 			$arrGroupAccount['TYPE_ACCOUNT'] = $rowAccount["DEPTTYPE_DESC"];
 			$arrGroupAccount['DEPT_TYPE_CODE'] = $rowAccount["DEPTTYPE_CODE"];
 			if(array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT')) === False){
@@ -107,6 +88,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrAllAccount[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
 			}
 		}
+		$arrayResult['SUM_BALANCE'] = number_format($arrayResult['SUM_BALANCE'],2);
+		$arrayResult['SUM_INTEREST'] = number_format($arrayResult['SUM_INTEREST'],2);
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

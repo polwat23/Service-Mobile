@@ -20,6 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup["tambol"] = "ตำบล";
 		$arrayGroup["email"] = "อีเมลล์";
 		$arrayGroup["tel"] = "เบอร์โทรศัพท์";
+		$arrayGroup["addr_fax"] = "โทรสาร";
 		$arrayGroup["website"] = "เว็บไซต์";
 		$arrayGroup["coopregis_date"] = "วันที่จดทะเบียน";
 		$arrayGroup["coopregis_no"] = "เลขทะเบียนสหกรณ์";

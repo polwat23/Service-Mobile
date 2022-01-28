@@ -18,8 +18,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			require_once('../../../../include/exit_footer.php');
 		}
 		
-		if(isset($dataComing["member_no"])){
-			$fetchAccount = $conmysql->prepare("SELECT member_no, prename_desc, memb_name, prename_edesc, memb_ename, remark ,service_status
+			$fetchAccount = $conmysql->prepare("SELECT member_no, prename_desc, memb_name, prename_edesc, memb_ename, remark ,service_status ,	suffname_desc
 											FROM gcmembonlineregis 
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and member_no = :member_no" : null).
 											(isset($dataComing["memb_name"]) && $dataComing["memb_name"] != '' ? " and TRIM(memb_name) LIKE :memb_name" : null));
@@ -30,11 +29,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrUserAcount["PRENAME_DESC"] = $rowUser["prename_desc"];
 				$arrUserAcount["PRENAME_EDESC"] = $rowUser["prename_edesc"];
 				$arrUserAcount["MEMB_NAME"] = $rowUser["memb_name"];
+				$arrUserAcount["NAME_COOP"] = $rowUser["prename_desc"].$rowUser["memb_name"].' '.$rowUser["suffname_desc"];
 				$arrUserAcount["MEMB_ENAME"] = $rowUser["memb_ename"];
 				$arrUserAcount["REMARK"] = $rowUser["remark"];
 				$arrUserAcount["SERVICE_STATUS"] = $rowUser["service_status"];
+				$arrUserAcount["SUFFNAME_DESC"] = $rowUser["suffname_desc"];
 				$arrUserAcount["CHECK_REGIS"] = true;
-				
+					
 				$fetchContractTypeCheck = $conmysql->prepare("SELECT BALANCE_STATUS FROM gcconstantbalanceconfirm WHERE member_no = :member_no");
 				$fetchContractTypeCheck->execute([':member_no' => $dataComing["member_no"]]);
 				$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
@@ -47,8 +48,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$fetchRegister = $conoracle->prepare("select mb.member_no,
                             mp.prename_desc,
                             mp.prename_edesc,
+							mp.suffname_desc,
                             mb.memb_name,
-                            mb.memb_ename
+                            mb.memb_ename,
+							mb.sector_id
                             from mbmembmaster mb , mbucfprename mp 
                             where mb.resign_status = 0
 							AND mb.prename_code = mp.prename_code
@@ -61,22 +64,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGroupRegis["REF_MEMNO"] = $rowRegis["MEMBER_NO"];
 				$arrGroupRegis["PRENAME_DESC"] = $rowRegis["PRENAME_DESC"];
 				$arrGroupRegis["PRENAME_EDESC"] = $rowRegis["PRENAME_EDESC"];
+				$arrGroupRegis["SUFFNAME_DESC"] = $rowRegis["SUFFNAME_DESC"];
 				$arrGroupRegis["MEMB_NAME"] = $rowRegis["MEMB_NAME"];
+				$arrGroupRegis["NAME_COOP"] = $rowRegis["PRENAME_DESC"].$rowRegis["MEMB_NAME"].' '.$rowRegis["SUFFNAME_DESC"];
 				$arrGroupRegis["MEMB_ENAME"] = $rowRegis["MEMB_ENAME"];
+				$arrGroupRegis["SECTOR_ID"] = $rowRegis["SECTOR_ID"];
 				$arrGroupRegis["CHECK_REGIS"] = false;
 				$arrayAccount[] = $arrGroupRegis;
 			}
 			$arrayResult["REGISTER_DATA"] = $arrayAccount;	
 			$arrayResult["arrRegisterCoop"]	 = $arrUserAcount["BALANCE_STATUS"];
-
+			if(count($arrayAccount) == 0){
+				$arrayResult['RESPONSE'] = "ไม่พบสหกรณ์ กรุณาลงทะเบียน";
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../../../include/exit_footer.php');
+			}
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');
-			
-		}else{
-			$arrayResult['RESPONSE'] = "ไม่พบสหกรณ์ กรุณาลงทะเบียน";
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../../../include/exit_footer.php');
-		}
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);

@@ -3,6 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','device_name'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
+	$member_no = $dataComing["member_no"];
 	if(!$arrPayload["VALIDATE"]){
 		$filename = basename(__FILE__, '.php');
 		$logStruc = [
@@ -19,8 +20,16 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT account_status,email FROM gcmemberaccount 
+	
+	
+	$fetchAccount = $conoracle->prepare("SELECT addr_email as email FROM mbmembmaster  where member_no =  :member_no");
+	$fetchAccount->execute([
+		':member_no' => $member_no
+	]);
+	$rowUser = $fetchAccount->fetch(PDO::FETCH_ASSOC);
+		
+	
+	$checkMember = $conmysql->prepare("SELECT account_status FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkMember->execute([
 		':member_no' => $member_no
@@ -34,14 +43,14 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			require_once('../../include/exit_footer.php');
 			
 		}
-		if(empty($rowChkMemb["email"])){
+		if(empty($rowUser["EMAIL"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0049";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
 		}
-		if(strtolower($dataComing["email"]) != strtolower($rowChkMemb["email"])){
+		if(strtolower($dataComing["email"]) != strtolower($rowUser["EMAIL"])){
 			$arrayResult['RESPONSE_CODE'] = "WS0050";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -128,6 +137,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0003";
+		$arrayResult['CODE'] =$member_no;
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');

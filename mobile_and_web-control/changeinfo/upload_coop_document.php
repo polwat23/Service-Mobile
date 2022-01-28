@@ -39,12 +39,13 @@ if($lib->checkCompleteArgument(['menu_component','docgrp_no','document_data'],$d
 						$directory = __DIR__.'/../../resource/coopdocument/'.$member_no;
 						$fullPathSalary = __DIR__.'/../../resource/coopdocument/'.$member_no.'/'.$createImage["normal_path"];
 						$slipSalary = $config["URL_SERVICE"]."resource/coopdocument/".$member_no."/".$createImage["normal_path"];
-						$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no,username)
-																VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no,:username)");
+						$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_aliasname,doc_type,doc_address,member_no,username)
+																VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_aliasname,:doc_type,:doc_address,:member_no,:username)");
 						$insertDocMaster->execute([
 							':doc_no' => $reqloan_doc,
 							':docgrp_no' => $dataComing["docgrp_no"],
 							':doc_filename' => $reqloan_doc,
+							':doc_aliasname' => $dataComing["doc_aliasname"],
 							':doc_type' => $ext_img,
 							':doc_address' => $slipSalary,
 							':member_no' => $member_no,
@@ -64,15 +65,6 @@ if($lib->checkCompleteArgument(['menu_component','docgrp_no','document_data'],$d
 				
 				$arrayResult['REPORT_URL'] = $slipSalary;
 				$arrayResult['APV_DOCNO'] = $reqloan_doc;
-				$arrayResult['master'] = [
-							':doc_no' => $reqloan_doc,
-							':docgrp_no' => $dataComing["docgrp_no"],
-							':doc_filename' => $reqloan_doc,
-							':doc_type' => $ext_img,
-							':doc_address' => $slipSalary,
-							':member_no' => $member_no,
-							':username' => $payload["member_no"]
-						];
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 				
