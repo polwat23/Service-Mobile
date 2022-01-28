@@ -391,7 +391,7 @@ class functions {
 				return false;
 			}
 		}
-		
+	
 		public function getFCMToken($type_target,$member_no=null){
 			$arrayMemberGRP = array();
 			$arrayMember = array();
@@ -409,6 +409,7 @@ class functions {
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 							$arrayMT = array();
+							$arrayHW = array();
 							if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
 								$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
 								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
@@ -416,13 +417,23 @@ class functions {
 								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
 								$arrayMember[] = $rowFCMToken["member_no"];
 								$arrayMemberGRP[] = $arrayMT;
+								$arrayHW["TOKEN"] = null;
+								$arrayHW["MEMBER_NO"] = null;
+								$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+								$arrayHW["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
+								$arrayMemberGRPHW[] = $arrayHW;
 							}else{
-								$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
-								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+								$arrayMT["TOKEN"] = null;
+								$arrayMT["MEMBER_NO"] = null;
 								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
+								$arrayMemberGRP[] = $arrayMT;
+								$arrayHW["TOKEN"] = $rowFCMToken["hms_token"];
+								$arrayHW["MEMBER_NO"] = $rowFCMToken["member_no"];
+								$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+								$arrayHW["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
 								$arrayMember[] = $rowFCMToken["member_no"];
-								$arrayMemberGRPHW[] = $arrayMT;
+								$arrayMemberGRPHW[] = $arrayHW;
 							}
 						}
 					}
@@ -433,18 +444,27 @@ class functions {
 				while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 					if(!in_array($rowFCMToken["member_no"],$arrayMember)){
 						$arrayMT = array();
+						$arrayHW = array();
 						if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
 							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
 							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 							$arrayMember[] = $rowFCMToken["member_no"];
 							$arrayMemberGRP[] = $arrayMT;
+							$arrayHW["TOKEN"] = null;
+							$arrayHW["MEMBER_NO"] = null;
+							$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMemberGRPHW[] = $arrayHW;
 						}else{
-							$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
-							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayMT["TOKEN"] = null;
+							$arrayMT["MEMBER_NO"] = null;
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
+							$arrayMemberGRP[] = $arrayMT;
+							$arrayHW["TOKEN"] = $rowFCMToken["hms_token"];
+							$arrayHW["MEMBER_NO"] = $rowFCMToken["member_no"];
+							$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 							$arrayMember[] = $rowFCMToken["member_no"];
-							$arrayMemberGRPHW[] = $arrayMT;
+							$arrayMemberGRPHW[] = $arrayHW;
 						}
 					}
 				}
