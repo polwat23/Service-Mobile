@@ -4,6 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanReceive')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 		$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
 												csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code

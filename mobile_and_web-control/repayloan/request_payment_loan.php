@@ -17,6 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$int_returnFull = 0;
 		$interestPeriod = 0;
 		$withdrawStatus = FALSE;
+		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 		if($dataComing["amt_transfer"] > $dataCont["INTEREST_ARREAR"]){
 			$intarrear = $dataCont["INTEREST_ARREAR"];
 		}else{

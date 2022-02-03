@@ -143,7 +143,7 @@ class CalculateLoan {
 			}
 			$interest = $this->lib->roundDecimal($interest,$constLoan["RDINTSATANG_TYPE"]) + $constLoanContract["INTEREST_ARREAR"];
 		}
-		return $interest;
+		return number_format($interest,2,'.','');
 	}
 	public function calculateInterestArr($loancontract_no,$amt_transfer=0){
 		$constLoanContract = $this->getContstantLoanContract($loancontract_no);
@@ -368,7 +368,7 @@ class CalculateLoan {
 			}
 			$interest = $this->lib->roundDecimal($interest,$constLoan["RDINTSATANG_TYPE"]) + $constLoanContract["INTEREST_ARREAR"];
 		}
-		return $interest;
+		return number_format($interest,2,'.','');
 	}
 	public function calculateIntAccum($member_no){
 		$getAccYear = $this->conms->prepare("SELECT ACCOUNT_YEAR FROM CMACCOUNTYEAR WHERE CONVERT(VARCHAR(10),GETDATE(),20) 
@@ -494,7 +494,7 @@ class CalculateLoan {
 			$int_return = $int_return + $interest;
 		}
 		$int_return = $this->lib->roundDecimal($int_return,$constLoan["RDINTSATANG_TYPE"],'1');
-		return $int_return;
+		return number_format($int_return,2,'.','');
 	}
 	private function getRateInt($inttabcode,$date){
 		$contLoan = $this->conms->prepare("SELECT INTEREST_RATE,CONVERT(VARCHAR(10),EXPIRE_DATE,20) as EXPIRE_DATE

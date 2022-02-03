@@ -5,6 +5,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 		$checkSeqAmt = $cal_dep->getSequestAmt($dataComing["deptaccount_no"],'DTX');
 		if($checkSeqAmt["CAN_DEPOSIT"]){
 		}else{
