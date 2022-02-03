@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 		$itemtypeDeposit = 'DTL';
 		$dataCont = $cal_loan->getContstantLoanContract($contract_no);
 		$interest = $cal_loan->calculateInterestArr($contract_no,$dataComing["amt_transfer"]);

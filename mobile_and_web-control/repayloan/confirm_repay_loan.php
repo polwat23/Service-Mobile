@@ -4,6 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 		if(isset($dataComing["deptaccount_no"]) && $dataComing["deptaccount_no"] != ""){
 			$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 			$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WFS');
@@ -40,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 					}else{
 						$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 					}
-					if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+					if(number_format($dataComing["amt_transfer"],2,'.','') > number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest,2,'.','')){
 						$arrayResult['RESPONSE_CODE'] = "WS0098";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;

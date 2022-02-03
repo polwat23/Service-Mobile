@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		if(isset($dataComing["deptaccount_no"]) && $dataComing["deptaccount_no"] != ""){
 			$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+			$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 			$fetchLoanRepay = $conmssql->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT
 													FROM lncontmaster
 													WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
