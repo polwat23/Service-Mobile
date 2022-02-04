@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getMethpay = $conmssql->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
 													CM.BANK_DESC AS BANK,
-													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
+													YM.EXPENSE_AMT AS RECEIVE_AMT ,	
 													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
 													YM.METHPAYTYPE_CODE
 												FROM 
@@ -53,9 +53,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayRecv = array();
 				if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
 					if(isset($rowMethpay["BANK"])){
-						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+						$arrayRecv["ACCOUNT_RECEIVE"] = $rowMethpay["BANK_ACCOUNT"];
 					}else{
-						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
+						$arrayRecv["ACCOUNT_RECEIVE"] = $rowMethpay["BANK_ACCOUNT"];
 					}
 				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
