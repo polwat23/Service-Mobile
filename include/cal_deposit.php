@@ -1257,19 +1257,19 @@ class CalculateDep {
 			$arrExecutePenalty = [
 				$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],$constFromAcc["MEMBCAT_CODE"],
 				$itemtype_wtd,$penalty_amt,$rowDepPay["MONEYTYPE_SUPPORT"],$constFromAcc["PRNCBAL"],$constFromAcc["WITHDRAWABLE_AMT"],$constFromAcc["CHECKPEND_AMT"],
-				$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$tofrom_accid,
+				$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$penalty_amt,$tofrom_accid,
 				$deptslip_no,$penalty_amt,$operate_date
 			];
 			$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 														deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 														PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-														DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
+														DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
 														NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
 														POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 														TELLER_FLAG,OPERATE_TIME) 
 														VALUES(?,?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
 														?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),
-														1,0,0,?,2,?,0,0,?,'DEP',0,0,0,1,1,0,1,1,
+														1,?,0,0,?,2,?,0,0,?,'DEP',0,0,0,1,1,0,1,1,
 														CONVERT(VARCHAR(19),?,20))");
 		}
 		if($insertDpSlipPenalty->execute($arrExecutePenalty)){
@@ -1328,13 +1328,13 @@ class CalculateDep {
 		$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 													deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 													PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-													DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
+													DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
 													NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
-													POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+													POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 													TELLER_FLAG,OPERATE_TIME) 
 													VALUES(?,?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
 													?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),
-													1,0,0,0,?,9,?,0,0,?,'DEP',0,0,0,1,1,1,0,1,1,
+													1,0,0,?,9,?,0,0,?,'DEP',0,0,0,1,1,0,1,1,
 													CONVERT(VARCHAR(19),?,20))");
 		if($insertDpSlipPenalty->execute($arrExecutePenalty)){
 			$arrayResult['RESULT'] = TRUE;
