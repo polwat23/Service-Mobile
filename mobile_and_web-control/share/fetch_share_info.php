@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$date_now = date('Y-m-d');
 			}
 			$getShareStatement = $conmssql->prepare("SELECT stm.OPERATE_DATE,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
-														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.SHRITEMTYPE_DESC,stm.PERIOD,stm.REF_SLIPNO
+														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.SHRITEMTYPE_DESC,stm.PERIOD,stm.REF_SLIPNO,stm.ITEM_STATUS
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
 														WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.OPERATE_DATE
 														BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :datenow, 23) ORDER BY stm.seq_no DESC");
@@ -37,6 +37,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			while($rowStm = $getShareStatement->fetch(PDO::FETCH_ASSOC)){
 				$arrayStm = array();
+				if($rowStm["ITEM_STATUS"] == '-9'){
+					$arrayStm["SIGN_FLAG"] = '-1';
+				}
 				$arrayStm["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 				$arrayStm["PERIOD_SHARE_AMOUNT"] = number_format($rowStm["PERIOD_SHARE_AMOUNT"],2);
 				$arrayStm["SUM_SHARE_AMT"] = number_format($rowStm["SUM_SHARE_AMT"],2);
