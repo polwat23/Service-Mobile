@@ -151,6 +151,7 @@ class CalculateLoan {
 		$betweenKeeping = FALSE;
 		$interest = 0;
 		if($constLoanContract["CHECK_KEEPING"] == '1'){
+			$betweenKeeping = TRUE;
 			$calInt = TRUE;
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
@@ -249,7 +250,7 @@ class CalculateLoan {
 							if($yearDiffTemp > 0){
 								$dateFrom = new \DateTime('01-01-'.date('Y'));
 							}else{
-								$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime(date('Y-m-d')))));
+								$dateFrom =  new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime(date('Y-m-d')))));
 							}
 							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
 							$date_duration = $dateTo->diff($dateFrom);
@@ -540,8 +541,8 @@ class CalculateLoan {
 											,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
-											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
-											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE,LNM.STARTCONT_DATE
+											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR (LNM.NKEEP_PRINCIPAL > 0 AND LNM.RKEEP_PRINCIPAL > 0) OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,
+											LNM.LAST_STM_NO,LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE,LNM.STARTCONT_DATE
 											FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE
 											WHERE lnm.loancontract_no = :contract_no and lnm.contract_status > 0 and lnm.contract_status <> 8");
 		$contLoan->execute([':contract_no' => $loancontract_no]);
@@ -1130,7 +1131,7 @@ class CalculateLoan {
 													VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),CONVERT(VARCHAR(10),GETDATE(),20),
 													CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),
 													CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,
-													?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
+													?,?,1,'MOBILE',CONVERT(VARCHAR,GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
 		}else{
 			if($dataCont["PRINCIPAL_BALANCE"] > 0){
 				$executeLnSTM = [
@@ -1149,7 +1150,7 @@ class CalculateLoan {
 														VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),CONVERT(VARCHAR(10),GETDATE(),20),
 														CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),
 														CONVERT(VARCHAR(10),?,20),?,?,?,
-														?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
+														?,?,1,'MOBILE',CONVERT(VARCHAR,GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
 			}else{
 				$executeLnSTM = [
 					$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,
@@ -1166,7 +1167,7 @@ class CalculateLoan {
 														VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),CONVERT(VARCHAR(10),GETDATE(),20),
 														CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),
 														CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,
-														?,?,1,'MOBILE',CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
+														?,?,1,'MOBILE',CONVERT(VARCHAR,GETDATE(),20),?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),'1')");
 			}
 		}
 		if($insertSTMLoan->execute($executeLnSTM)){
