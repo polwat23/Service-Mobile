@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
-			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
+			$contract_no = $rowContract["LOANCONTRACT_NO"];
 			$arrContract = array();
 			$arrContract["CONTRACT_NO"] = $contract_no;
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
