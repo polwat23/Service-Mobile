@@ -74,6 +74,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$getAssosiation = $conoracle->prepare("SELECT DECODE(WC1.COOP_ID,'016001','สมาคมฯ 1 ' , '016002' , 'สมาคมฯ 2 '  , 'ไม่พบข้อมูล') as ASSO_GROUP
+													FROM MBMEMBMASTER MB 
+													LEFT JOIN WCDEPTMASTER WC1 ON WC1.MEMBER_NO = MB.MEMBER_NO  AND WC1.DEPTCLOSE_STATUS <> 1 AND 
+													TRIM(MB.CARD_PERSON) = TRIM(WC1.CARD_PERSON)
+													WHERE MB.RESIGN_STATUS = 0 AND MB.MEMBER_NO = :member_no");
+			$getAssosiation->execute([':member_no' => $member_no]);
+			$rowAsso = $getAssosiation->fetch(PDO::FETCH_ASSOC);
 			$addressReg = (isset($rowMember["ADDR_REG_NO"]) ? $rowMember["ADDR_REG_NO"] : null);
 			if(isset($rowMember["PROVINCE_REG_CODE"]) && $rowMember["PROVINCE_REG_CODE"] == '10'){
 				$addressReg .= (isset($rowMember["ADDR_REG_MOO"]) ? ' ม.'.$rowMember["ADDR_REG_MOO"] : null);
@@ -94,6 +101,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$addressReg .= (isset($rowMember["PROVINCE_REG_DESC"]) ? ' จ.'.$rowMember["PROVINCE_REG_DESC"] : null);
 				$addressReg .= (isset($rowMember["ADDR_REG_POSTCODE"]) ? ' '.$rowMember["ADDR_REG_POSTCODE"] : null);
 			}
+			$arrayResult["ASSOCIATION"] = $rowAsso["ASSO_GROUP"];
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
