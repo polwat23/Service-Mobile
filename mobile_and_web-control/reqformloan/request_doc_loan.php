@@ -73,12 +73,29 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				}
 			}
 		}
-		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
-												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
+		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
+		$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
+		
+		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,mb.birth_date,
+												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,
+												mb.ADDR_NO as ADDR_REG_NO,
+												mb.ADDR_MOO as ADDR_REG_MOO,
+												mb.ADDR_SOI as ADDR_REG_SOI,
+												mb.ADDR_VILLAGE as ADDR_REG_VILLAGE,
+												mb.ADDR_ROAD as ADDR_REG_ROAD,
+												MBTR.TAMBOL_DESC AS TAMBOL_REG_DESC,
+												MBDR.DISTRICT_DESC AS DISTRICT_REG_DESC,
+												MB.PROVINCE_CODE AS PROVINCE_REG_CODE,
+												MBPR.PROVINCE_DESC AS PROVINCE_REG_DESC,
+												MB.ADDR_POSTCODE AS ADDR_REG_POSTCODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
 												LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
+												LEFT JOIN MBUCFTAMBOL MBTR ON mb.TAMBOL_CODE = MBTR.TAMBOL_CODE
+												LEFT JOIN MBUCFDISTRICT MBDR ON mb.AMPHUR_CODE = MBDR.DISTRICT_CODE
+												LEFT JOIN MBUCFPROVINCE MBPR ON mb.PROVINCE_CODE = MBPR.PROVINCE_CODE
 												LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 												WHERE mb.member_no = :member_no");
 		$fetchData->execute([
@@ -88,9 +105,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 		$conmysql->beginTransaction();
 		$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url)
+																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,objective,deptaccount_no_coop,contractdoc_url)
 																VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url)");
+																,:salary,:salary_img,:citizen_img,:id_userlogin,:objective,:deptaccount_no_coop,:contractdoc_url)");
 		if($InsertFormOnline->execute([
 			':reqloan_doc' => $reqloan_doc,
 			':member_no' => $payload["member_no"],
@@ -104,21 +121,37 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':salary_img' => $slipSalary,
 			':citizen_img' => $citizenCopy,
 			':id_userlogin' => $payload["id_userlogin"],
+			':objective' => $dataComing["objective"],
+			':deptaccount_no_coop' => $dataComing["deptaccount_no_coop"] ?? null,
 			':contractdoc_url' => $pathFile
 		])){
 			$arrData = array();
 			$arrData["requestdoc_no"] = $reqloan_doc;
 			$arrData["full_name"] = $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
+			$arrData["birth_date_count"] =  (explode(" ",$lib->count_duration($rowData["BIRTH_DATE"],"ym")))[0];
 			$arrData["name"] = $rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["member_no"] = $payload["member_no"];
 			$arrData["position"] = $rowData["POSITION_DESC"];
 			$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
+			$arrData["addr_no"] = $rowData["ADDR_REG_NO"];
+			$arrData["addr_moo"] = $rowData["ADDR_REG_MOO"];
+			$arrData["addr_soi"] = $rowData["ADDR_REG_SOI"];
+			$arrData["addr_village"] = $rowData["ADDR_REG_VILLAGE"];
+			$arrData["addr_road"] = $rowData["ADDR_REG_ROAD"];
+			$arrData["tambol"] = $rowData["TAMBOL_REG_DESC"];
+			$arrData["district"] = $rowData["DISTRICT_REG_DESC"];
+			$arrData["province"] = $rowData["PROVINCE_REG_DESC"];
 			$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
+			$arrData["phone"] = $lib->formatphone($rowInfoMobile["phone_number"]);
+			$arrData["objective"] = $dataComing["objective"];
+			$arrData["loantype_code"] = $dataComing["loantype_code"];
+			$arrData["deptaccount_no_coop"] = $dataComing["deptaccount_no_coop"];
 			$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 			$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
-			$arrData["request_amt"] = $dataComing["request_amt"];
-			if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
-				include('form_request_loan_'.$dataComing["loantype_code"].'.php');
+			$arrData["request_amt"] = number_format($dataComing["request_amt"],2);
+			$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
+			if(file_exists('form_request_emerloan.php')){
+				include('form_request_emerloan.php');
 				$arrayPDF = GeneratePDFContract($arrData,$lib);
 			}else{
 				$arrayPDF["RESULT"] = FALSE;
