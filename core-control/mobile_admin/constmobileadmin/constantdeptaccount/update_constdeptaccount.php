@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["DEPTTYPE_CODE"],array_column($arrayChkG,'DEPTTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["DEPTTYPE_CODE"]."','".$value_diff["MEMBER_TYPE_CODE"]."','".$value_diff["ALLOW_DEPOSIT_INSIDE"]."','".$value_diff["ALLOW_WITHDRAW_INSIDE"]."','".$value_diff["ALLOW_DEPOSIT_OUTSIDE"]."','".$value_diff["ALLOW_WITHDRAW_OUTSIDE"]."','".$value_diff["ALLOW_PAYLOAN"]."','".$value_diff["ALLOW_BUYSHARE"]."')";
+						$insertBulkCont[] = "('".$value_diff["DEPTTYPE_CODE"]."','".$value_diff["MEMBER_TYPE_CODE"]."','".$value_diff["ALLOW_DEPOSIT_INSIDE"]."','".$value_diff["ALLOW_WITHDRAW_INSIDE"]."','".$value_diff["ALLOW_DEPOSIT_OUTSIDE"]."','".$value_diff["ALLOW_WITHDRAW_OUTSIDE"]."','".$value_diff["ALLOW_PAYLOAN"]."','".$value_diff["ALLOW_BUYSHARE"]."','".$value_diff["ALLOW_RECEIVE_LOAN"]."')";
 						$insertBulkContLog[]='DEPTTYPE_CODE=> '.$value_diff["DEPTTYPE_CODE"].' MEMBER_TYPE_CODE ='.$value_diff["MEMBER_TYPE_CODE"].' ALLOW_DEPOSIT_INSIDE ='.$value_diff["ALLOW_DEPOSIT_INSIDE"].' ALLOW_WITHDRAW_INSIDE ='.$value_diff["ALLOW_WITHDRAW_INSIDE"].' ALLOW_DEPOSIT_OUTSIDE ='.$value_diff["ALLOW_DEPOSIT_OUTSIDE"].' ALLOW_WITHDRAW_OUTSIDE ='.
 						$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAYLOAN ='.$value_diff["ALLOW_PAYLOAN"].' ALLOW_BUYSHARE ='.$value_diff["ALLOW_BUYSHARE"].' ALLOW_RECEIVE_LOAN ='.$value_diff["ALLOW_RECEIVE_LOAN"];
 					}else{
@@ -100,7 +100,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						]);
 						$updateConstLog = 'DEPTTYPE_CODE=> '.$value_diff["DEPTTYPE_CODE"].' MEMBER_TYPE_CODE ='.$value_diff["MEMBER_TYPE_CODE"].' ALLOW_DEPOSIT_INSIDE='.
 						$value_diff["ALLOW_DEPOSIT_INSIDE"].' ALLOW_WITHDRAW_INSIDE='.$value_diff["ALLOW_WITHDRAW_INSIDE"].' ALLOW_DEPOSIT_OUTSIDE='.$value_diff["ALLOW_DEPOSIT_OUTSIDE"].
-						' ALLOW_WITHDRAW_OUTSIDE='.$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAY_LOAN='.$value_diff["ALLOW_PAYLOAN"].' ALLOW_RECEIVE_LOAN='.$value_diff["ALLOW_RECEIVE_LOAN"];
+						' ALLOW_WITHDRAW_OUTSIDE='.$value_diff["ALLOW_WITHDRAW_OUTSIDE"].' ALLOW_PAY_LOAN='.$value_diff["ALLOW_PAYLOAN"].' ALLOW_BUYSHARE='.$value_diff["ALLOW_BUYSHARE"].' ALLOW_RECEIVE_LOAN='.$value_diff["ALLOW_RECEIVE_LOAN"];
 					}
 				}
 				$insertConst = $conmysql->prepare("INSERT gcconstantaccountdept(dept_type_code,member_cate_code,allow_deposit_inside,allow_withdraw_inside,allow_deposit_outside,allow_withdraw_outside,allow_pay_loan,allow_buyshare,allow_receive_loan)

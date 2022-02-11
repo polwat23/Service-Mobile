@@ -336,7 +336,7 @@ function GenerateReport($dataReport,$header,$lib){
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
-	])
+	]);
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();
