@@ -185,7 +185,7 @@ class CalculateLoan {
 							if($i == 0){
 								$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],date('Y-m-d'));
 							}else{
-								$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"],'y-n-d'));
+								$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],$this->lib->convertdate($constLoanContract["LASTPROCESS_DATE"] ?? $constLoanContract["LASTCALINT_DATE"],'y-n-d'));
 							}
 						}else{
 							$intrateData = $this->getRateInt($constLoanContract["INT_CONTINTTABCODE"],date('Y-m-d'));
@@ -225,25 +225,25 @@ class CalculateLoan {
 						}else if($i == 1){
 							if($yearDiff > 0){
 								$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
-								$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
+								$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"] ?? $constLoanContract["LASTCALINT_DATE"])));
 								$date_duration = $dateTo->diff($dateFrom);
 								$dayInterest = $date_duration->days;
 							}else{
 								$dateFrom = new \DateTime($intrateData["EFFECTIVE_DATE"]);
-								$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
+								$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"] ?? $constLoanContract["LASTCALINT_DATE"])));
 								$date_duration = $dateTo->diff($dateFrom);
 								$dayInterest = $date_duration->days;
 							}
 						}else{
 							$dateFrom = new \DateTime('01-01-'.date('Y'));
-							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
+							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"] ?? $constLoanContract["LASTCALINT_DATE"])));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
 						}
 					}else{
 						if($yearDiffTemp == 0 && $yearDiff > 0){
 							$dateFrom = new \DateTime(date('d-m-Y',strtotime('+'.$yearDiffTemp.' year',strtotime(date('Y-m-d')))));
-							$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
+							$dateTo = new \DateTime('31-12-'.date('Y',strtotime($constLoanContract["LASTPROCESS_DATE"] ?? $constLoanContract["LASTCALINT_DATE"])));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
 						}else{
@@ -252,7 +252,7 @@ class CalculateLoan {
 							}else{
 								$dateFrom =  new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime(date('Y-m-d')))));
 							}
-							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"])));
+							$dateTo = new \DateTime(date('d-m-Y',strtotime($constLoanContract["LASTPROCESS_DATE"] ?? $constLoanContract["LASTCALINT_DATE"])));
 							$date_duration = $dateTo->diff($dateFrom);
 							$dayInterest = $date_duration->days;
 							if($yearDiffTemp > 0){
@@ -541,7 +541,7 @@ class CalculateLoan {
 											,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
-											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR (LNM.NKEEP_PRINCIPAL > 0 AND LNM.RKEEP_PRINCIPAL > 0) OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,
+											(CASE WHEN (LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR (LNM.NKEEP_PRINCIPAL > 0 AND LNM.RKEEP_PRINCIPAL > 0)) AND LNM.LASTPROCESS_DATE IS NOT NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,
 											LNM.LAST_STM_NO,LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE,LNM.STARTCONT_DATE
 											FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE
 											WHERE lnm.loancontract_no = :contract_no and lnm.contract_status > 0 and lnm.contract_status <> 8");
