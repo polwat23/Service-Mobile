@@ -1,5 +1,25 @@
 <?php
 require_once('../autoload.php');
+$dbuser = "iscory_test";
+$dbpass = "iscory_test";
+$dbname = "(DESCRIPTION =
+ (ADDRESS_LIST =
+   (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.60)(PORT = 1521))
+ )
+ (CONNECT_DATA =
+   (SERVICE_NAME = iorcl)
+ )
+  )";
+$conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+$dbhostMY = "127.0.0.1";
+$dbuserMY = "root";
+$dbpassMY = "@RYT2021";
+$dbnameMY = "mobile_ryt_test";
+$conmysql = new PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbpassMY);
+$conmysql->exec("set names utf8mb4");
+
 
 if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
@@ -11,20 +31,33 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			require_once('../../include/exit_footer.php');
 			
 		}
+		$checkDep = $cal_dep->getSequestAmt($dataComing["deptaccount_no"]);
+		if($checkDep["CAN_DEPOSIT"]){
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0092";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
 		$arrarDataAcc = array();
 		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
 												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												WHERE dpm.deptaccount_no = :deptaccount_no");
+												WHERE dpm.deptaccount_no = :deptaccount_no and dpm.acccont_type = '01'");
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
 		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataAcc["DEPTTYPE_DESC"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT allow_deposit_inside FROM gcconstantaccountdept 
-																	WHERE dept_type_code = :dept_type_code");
+														WHERE dept_type_code = :dept_type_code");
 			$fetchConstantAllowDept->execute([
 				':dept_type_code' => $rowDataAcc["DEPTTYPE_CODE"]
 			]);
 			$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
 			if($rowContAllow["allow_deposit_inside"] == '1'){
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
+					$arrarDataAcc["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrarDataAcc["DEPT_TYPE_IMG"] = null;
+				}
 				$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
 				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
 				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));

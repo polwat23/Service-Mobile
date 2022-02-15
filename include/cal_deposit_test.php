@@ -1,21 +1,38 @@
 <?php
 
-namespace CalculateDeposit;
+namespace CalculateDepositTest;
 
 use Connection\connection;
 use Utility\Library;
 
 
-class CalculateDep {
+class CalculateDepositTest {
 	private $con;
 	private $conora;
 	private $lib;
-	
+
 	function __construct() {
+		$dbuser = "iscory_test";
+		$dbpass = "iscory_test";
+		$dbname = "(DESCRIPTION =
+		 (ADDRESS_LIST =
+		   (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.60)(PORT = 1521))
+		 )
+		 (CONNECT_DATA =
+		   (SERVICE_NAME = iorcl)
+		 )
+		  )";
+		$this->conora = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+		$dbhostMY = "127.0.0.1";
+		$dbuserMY = "root";
+		$dbpassMY = "@RYT2021";
+		$dbnameMY = "mobile_ryt_test";
+		$this->con = new \PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbpassMY);
+		$this->con->exec("set names utf8mb4");
 		$connection = new connection();
 		$this->lib = new library();
-		$this->con = $connection->connecttomysql();
-		$this->conora = $connection->connecttooracle();
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
