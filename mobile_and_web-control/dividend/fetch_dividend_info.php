@@ -24,6 +24,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
+			$arrOther[0]["LABEL"] = "อื่น ๆ ";
+			$arrOther[0]["VALUE"] = number_format($rowDiv["ETC_AMT"],2).' บาท';
+			$arrDividend["OTHER_ITEM"] = $arrOther;
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"] + $rowDiv["ETC_AMT"],2);
 			$getMethpay = $conoracle->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
