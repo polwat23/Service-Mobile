@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
 				$arrayRecv["BANK"] = $rowMethpay["BANK"];
-				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
+				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"] + $rowDiv["ETC_AMT"],2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			}
 			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
