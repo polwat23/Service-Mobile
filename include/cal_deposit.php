@@ -640,6 +640,7 @@ class CalculateDep {
 		if($dataConst["PER_PERIOD_INCOUNT"] > 0){
 			if($dataConst["PERIOD_UNIT_CHECK"] == '1'){
 				$monthCheck = date('Ym',strtotime('-'.($dataConst["PER_PERIOD_INCOUNT"]-1).' months'));
+				$monthCheck = (substr($monthCheck,0,4) + 543).substr($monthCheck,4);
 				$queryCheckPeriod = "and CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN ".$monthCheck." and CONVERT(VARCHAR(6), GETDATE(), 112)";
 			}else if($dataConst["PERIOD_UNIT_CHECK"] == '2'){
 				$thisMonth = date('m');
@@ -653,7 +654,7 @@ class CalculateDep {
 					$queryCheckPeriod = "CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'10') and CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'12')";
 				}
 			}else if($dataConst["PERIOD_UNIT_CHECK"] == '3'){
-				$monthCheck = date('Y',strtotime('-'.($dataConst["PER_PERIOD_INCOUNT"]-1).' years'));
+				$monthCheck = date('Y',strtotime('-'.($dataConst["PER_PERIOD_INCOUNT"]-1).' years')) + 543;
 				$queryCheckPeriod = "and CONVERT(VARCHAR(4),dps.operate_date,112) BETWEEN ".$monthCheck." and CONVERT(VARCHAR(4), GETDATE(), 112)";
 			}else if($dataConst["PERIOD_UNIT_CHECK"] == '4'){
 				$queryCheckPeriod = "";
