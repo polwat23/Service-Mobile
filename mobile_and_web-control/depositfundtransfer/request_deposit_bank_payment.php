@@ -5,7 +5,8 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coop_account_no','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataDeposit = $conmysql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_dep,csb.itemtype_wtd,csb.link_deposit_coopdirect,csb.bank_short_ename
+		$fetchDataDeposit = $conmysql->prepare("SELECT gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_dep,csb.itemtype_dep,
+												csb.link_deposit_coopdirect,csb.bank_short_ename,gba.account_payfee,csb.fee_deposit
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
@@ -16,12 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$ref_no = time().$lib->randomText('all',3);
-		$penalty_include = $func->getConstant("include_penalty");
-		if($penalty_include == '0'){
-			$amt_transfer = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
-		}else{
-			$amt_transfer = $dataComing["amt_transfer"];
-		}
+		$amt_transfer = $dataComing["amt_transfer"];
 		$vccAccID = null;
 		if($rowDataDeposit["bank_code"] == '025'){
 			$vccAccID = $func->getConstant('map_account_id_bay');
@@ -30,15 +26,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}
 		$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
-		$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
+		$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 2;
 		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 		$conoracle->beginTransaction();
 		$conmysql->beginTransaction();
 		$getlastseq_noDest = $cal_dep->getLastSeqNo($coop_account_no);
-		$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$coop_account_no,$vccAccID,'DTX',
-		$amt_transfer,0,$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
-		$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,$rowDataDeposit["bank_code"]);
+		$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataDeposit["itemtype_dep"],
+		$amt_transfer,$rowDataDeposit["fee_deposit"],$dateOper,$config,$log,$rowDataDeposit["deptaccount_no_bank"],$payload,$deptslip_noDest,$lib,
+		$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],null,false,null,$rowDataDeposit["bank_code"]);
 		if($depositMoney["RESULT"]){
 			$arrSendData = array();
 			$arrVerifyToken['exp'] = time() + 300;
@@ -93,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				]);
 				$arrExecute = [
 					':ref_no' => $ref_no,
-					':slip_type' => 'DTX',
+					':slip_type' => $rowDataDeposit["itemtype_dep"],
 					':from_account' => $rowDataDeposit["deptaccount_no_bank"],
 					':destination' => $coop_account_no,
 					':amount' => $amt_transfer,
@@ -195,6 +191,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}
+			$arrayStruc = [
+				':member_no' => $payload["member_no"],
+				':id_userlogin' => $payload["id_userlogin"],
+				':operate_date' => $dateOper,
+				':sigma_key' => $dataComing["sigma_key"],
+				':amt_transfer' => $amt_transfer,
+				':response_code' => $arrayResult['RESPONSE_CODE'],
+				':response_message' => $arrayResult['RESPONSE_MESSAGE']
+			];
+			$log->writeLog('deposittrans',$arrayStruc);
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 		}

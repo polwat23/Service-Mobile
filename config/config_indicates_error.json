@@ -90,6 +90,7 @@
 	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
+	"WS0075" : [{"th" : "ไม่สามาถซื้อหุ้นได้เนื่องจากเหตุผลบางประการ กรุณาติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot buy shares because something was wronged please contact cooperative for more information"}],
 	"WS0076" : [{"th" : "สหกรณ์กำลังตรวจสอบเอกสารการขอทุนของท่าน ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has been considering your request. You can track request in Welfare request menu"}],
 	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามผลการขอทุนได้ที่เมนูสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can follow the result of request in Welfare menu"}],
 	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
@@ -112,8 +113,12 @@
 	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
 	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
 	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
+	"WS0107" : [{"th" : "ไม่พบรหัสรายการ QR ดังกล่าว กรุณาลองอีกครั้ง","en" : "Not found this transaction id please try again"}],
+	"WS0108" : [{"th" : "รายการนี้เสร็จสิ้นแล้ว ไม่สามารถทำรายการซ้ำได้","en" : "This transaction was completed cannot repeat transaction"}],
+	"WS0109" : [{"th" : "รายการหมดอายุ กรุณาสร้างรายการใหม่ที่แอปฯ สหกรณ์","en" : "Transaction has expired please create qr on cooperatives application"}],
 	"WS0110" : [{"th" : "ประเภทสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member type is not allowed to payment monthly special"}],
 	"WS0111" : [{"th" : "กลุ่มสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member group is not allowed to payment monthly special"}],
+	"WS0112" : [{"th" : "ยอดทำรายการของท่านไม่ตรงกับที่ระบุใน QR","en" : "Transaction amount not match on the QR"}],
 	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
@@ -223,6 +228,11 @@
 				"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
 				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
 			}]
+		}],
+		"BUY_SHARES_ERR" : [{
+			"0001" : [{"th" : "ไม่สามารถถือหุ้นเกิน ${MAXHOLD_AMT} ได้","en" : "Cannot hold shares over ${MAXHOLD_AMT}"}],
+			"0002" : [{"th" : "ไม่สามารถซื้อหุ้นต่อครั้งเกิน ${MAXSHAREPX_AMT} ได้","en" : "Cannot buy shares per times over ${MAXSHAREPX_AMT}"}],
+			"0003" : [{"th" : "ขั้นต่ำที่สามารถซื้อได้คือ ${SHAREROUND_FACTOR} บาท","en" : "Minimum can buy is ${SHAREROUND_FACTOR} baht"}]
 		}],
 		"REQ_LOAN_STATUS" : [{
 			"8" : [{"th" : "รอลงรับ","en" : "Wait for accept"}],

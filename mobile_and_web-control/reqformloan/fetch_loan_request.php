@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
 			$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];
-			$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"],2);
+			$arrayDetailLoan["INT_RATE"] = number_format($rowIntRate["INTEREST_RATE"] *100 ,2);
 			$arrGrpLoan[] = $arrayDetailLoan;
 		}
 		$arrayResult["LOAN_LIST"] = $arrGrpLoan;

@@ -1,21 +1,38 @@
 <?php
 
-namespace CalculateDeposit;
+namespace CalculateDepositTest;
 
 use Connection\connection;
 use Utility\Library;
 
 
-class CalculateDep {
+class CalculateDepositTest {
 	private $con;
 	private $conora;
 	private $lib;
-	
+
 	function __construct() {
+		$dbuser = "iscory_test";
+		$dbpass = "iscory_test";
+		$dbname = "(DESCRIPTION =
+		 (ADDRESS_LIST =
+		   (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.60)(PORT = 1521))
+		 )
+		 (CONNECT_DATA =
+		   (SERVICE_NAME = iorcl)
+		 )
+		  )";
+		$this->conora = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+		$dbhostMY = "127.0.0.1";
+		$dbuserMY = "root";
+		$dbpassMY = "@RYT2021";
+		$dbnameMY = "mobile_ryt_test";
+		$this->con = new \PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbpassMY);
+		$this->con->exec("set names utf8mb4");
 		$connection = new connection();
 		$this->lib = new library();
-		$this->con = $connection->connecttomysql();
-		$this->conora = $connection->connecttooracle();
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
@@ -109,7 +126,7 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_deposit_outside = '1'";
 			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$menucheckrights = "and gca.allow_buyshare = '1'";
 			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
@@ -344,7 +361,7 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
 			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$menucheckrights = "and gca.allow_buyshare = '1'";
 			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan' || $menu_component == 'PayMonthlyFull'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";

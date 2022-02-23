@@ -2,20 +2,18 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conoracle->prepare("SELECT TRIM(card_person) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
-		$fetchDataMember->execute([
-			':member_no' => $member_no
-		]);
-		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowDataMember["CARD_PERSON"])){
-			$arrGrpAccFee = array();
-			$getDepositAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
-												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '88'");
-			$getDepositAcc->execute([':member_no' => $member_no]);
-			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
+		$arrGrpAccFee = array();
+		$getDepositAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
+											FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
+											WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '88'");
+		$getDepositAcc->execute([':member_no' => $member_no]);
+		while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
+			$checkAccJoint = $conmysql->prepare("SELECT deptaccount_no FROM gcdeptaccountjoint WHERE deptaccount_no = :deptaccount_no and is_joint = '1'");
+			$checkAccJoint->execute([':deptaccount_no' => TRIM($rowDepAcc["DEPTACCOUNT_NO"])]);
+			if($checkAccJoint->rowCount() > 0){
+			}else{
 				$arrAccFee = array();
 				$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccFee['ACCOUNT_NAME'] = TRIM($rowDepAcc["DEPTACCOUNT_NAME"]);
@@ -23,23 +21,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
 				$arrGrpAccFee[] = $arrAccFee;
 			}
-			$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
-			$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
-			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-			if($payload["member_no"] == 'etnmode3'){
-				$arrayResult['CITIZEN_ID'] = '1530400073734';
-			}else{
-				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
-			}
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
-		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0003";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
 		}
+		$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
+		$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
+		$arrayResult['RESULT'] = TRUE;
+		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
