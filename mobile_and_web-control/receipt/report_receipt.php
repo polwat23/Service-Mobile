@@ -20,6 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_DESC"];
+		$header["sumpay"] = 0;
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		CASE kut.keepitemtype_grp
@@ -122,6 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
+			$header["sumpay"] += $rowDetail["ITEM_PAYMENT"];
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
@@ -355,9 +357,9 @@ foreach($dataReport AS $arrReport){
  $html.='           
         </table>
 	  <div style="display:flex; height:20px;">  
-        <div style=" font-weight:bold;">หนึ่งหมื่นเก้าร้อยแปดบาทถ้วน</div>
+        <div style=" font-weight:bold;">'.$lib->baht_text($header["sumpay"]).'</div>
         <div style=" font-weight:bold; margin-left:260px;">รวมเงิน</div>
-        <div style=" font-weight:bold; margin-left:310px;">10,918.00</div>
+        <div style=" font-weight:bold; margin-left:310px;">'.number_format($header["sumpay"],2).'</div>
       </div>
     </div>
     <div style="margin-top:10px;">

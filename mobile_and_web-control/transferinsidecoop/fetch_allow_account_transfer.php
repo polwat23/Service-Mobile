@@ -56,33 +56,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
 					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 					$arrGroupAccAllow[] = $arrAccAllow;
-				}else{
-					$arrAccAllow = array();
-					if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png')){
-						$arrAccAllow["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png?v='.date('Ym');
-					}else{
-						$arrAccAllow["DEPT_TYPE_IMG"] = null;
-					}
-					$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
-					$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
-					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
-					$checkDep = $cal_dep->getSequestAmt($rowDataAccAll["DEPTACCOUNT_NO"]);
-					if($checkDep["CAN_DEPOSIT"]){
-						$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_DEPOSIT"] = '0';
-					}
-					if($checkDep["CAN_WITHDRAW"]){
-						$arrAccAllow["CAN_WITHDRAW"] = '0';
-					}else{
-						$arrAccAllow["CAN_WITHDRAW"] = '0';
-					}
-					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"];
-					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
-					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
-					$arrGroupAccAllow[] = $arrAccAllow;
 				}
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
@@ -119,6 +92,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccFav[] = $arrFavMenu;
 				}
 			}
+
 			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
