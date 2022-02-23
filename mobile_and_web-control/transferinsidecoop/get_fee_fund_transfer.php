@@ -21,8 +21,6 @@ $conmysql = new PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbp
 $conmysql->exec("set names utf8mb4");
 
 
-$conmysql = new PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbpassMY);
-$conmysql->exec("set names utf8mb4");
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){	

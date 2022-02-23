@@ -46,6 +46,8 @@ require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/cal_deposit_test.php');
+require_once(__DIR__.'/../include/cal_share.php');
+require_once(__DIR__.'/../include/cal_loan.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
@@ -54,6 +56,8 @@ use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
 use CalculateDepositTest\CalculateDepositTest;
+use CalculateShare\CalculateShare;
+use CalculateLoan\CalculateLoan;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
@@ -67,6 +71,8 @@ $jwt_token = new Token();
 $func = new functions();
 $log = new insertLog();
 $cal_dep = new CalculateDepositTest();
+$cal_shr = new CalculateShare();
+$cal_loan = new CalculateLoan();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');

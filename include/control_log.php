@@ -41,8 +41,20 @@ class insertLog {
 				$this->logEditDocument($log_struc);
 			}else if($type_log == 'repayloan'){
 				$this->logRepayLoan($log_struc);
+			}else if($type_log == 'buyshare'){
+				$this->logBuyShare($log_struc);
 			}
+
 		}
+		
+		private function logBuyShare($log_struc){
+			$insertLog = $this->con->prepare("INSERT INTO logbuyshare(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
+											,destination,response_code,response_message) 
+											VALUES(:member_no,:id_userlogin,:operate_date,:deptaccount_no,:amt_transfer,:status_flag,
+											:destination,:response_code,:response_message)");
+			$insertLog->execute($log_struc);
+		}
+
 		private function logRepayLoan($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logrepayloan(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
 											,destination,response_code,response_message) 

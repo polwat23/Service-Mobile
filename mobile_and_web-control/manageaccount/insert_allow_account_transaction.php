@@ -1,6 +1,13 @@
 <?php
 require_once('../autoload.php');
 
+$dbhostMY = "127.0.0.1";
+$dbuserMY = "root";
+$dbpassMY = "@RYT2021";
+$dbnameMY = "mobile_ryt_test";
+$conmysql = new PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbpassMY);
+$conmysql->exec("set names utf8mb4");
+
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','id_accountconstant'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$insertDeptAllow = $conmysql->prepare("INSERT INTO gcuserallowacctransaction(deptaccount_no,member_no,id_accountconstant) 
