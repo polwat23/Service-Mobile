@@ -71,6 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$arrayResult['SPLIT_SLIP'] = $showSplitSlip == "1" ? TRUE : FALSE;
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
+		$arrayResult['DISABLE_SLIPDETAIL'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

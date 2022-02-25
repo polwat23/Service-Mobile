@@ -173,6 +173,7 @@ if(!$anonymous){
 			$arrMenuLoan = array();
 			$arrayGroupMenu = array();
 			$arrayMenuTransaction = array();
+			$arrayMenuEtc = array();
 			if($user_type == '5' || $user_type == '9'){
 				$fetch_menu = $conmysql->prepare("SELECT id_menu,menu_name,menu_name_en,menu_icon_path,menu_component,menu_parent,menu_status,menu_version FROM gcmenu 
 												WHERE menu_permission IN (".implode(',',$permission).") 
@@ -183,14 +184,14 @@ if(!$anonymous){
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).")
-												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
+												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0' OR gm.menu_component = 'UploadedFile')
 												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
 			}else{
 				$fetch_menu = $conmysql->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") 
-												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
+												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0' OR gm.menu_component = 'UploadedFile')
 												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
 			}
 			$fetch_menu->execute([
@@ -300,6 +301,8 @@ if(!$anonymous){
 						$arrayMenuSetting[] = $arrMenu;
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
+					}else if($rowMenu["menu_component"] == 'UploadedFile'){
+						$arrayMenuEtc[] = $arrMenu;
 					}
 					if($rowMenu["menu_component"] == "DepositInfo"){
 						if(isset($dataComing["home_deposit_account"])) {
@@ -401,6 +404,7 @@ if(!$anonymous){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
 					$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
+					$arrayResult['MENU_ETC'] = $arrayMenuEtc;
 					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep ?? [];
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan ?? [];

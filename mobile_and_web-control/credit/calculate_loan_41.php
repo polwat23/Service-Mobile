@@ -12,5 +12,5 @@ $getShareData = $conoracle->prepare("SELECT (sh.sharestk_amt * 50) as SHARE_BALA
 									FROM shsharemaster sh WHERE sh.member_no = :member_no");
 $getShareData->execute([':member_no' => $member_no]);
 $rowShareData = $getShareData->fetch(PDO::FETCH_ASSOC);
-$maxloan_amt = $rowShareData["SHARE_BALANCE"] * 0.90;
+$maxloan_amt = $rowShareData["SHARE_BALANCE"] * 0.80;
 ?>

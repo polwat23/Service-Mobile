@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = ($lib->mb_str_pad($dataComing["member_no"]));
 	$checkMember = $conmysql->prepare("SELECT account_status,email FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkMember->execute([

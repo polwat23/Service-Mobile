@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$getLoanCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_estimate_creditloan = '1'");
+		/*$getLoanCredit = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_estimate_creditloan = '1'");
 		$arrLoanAllow = array();
 		$getLoanCredit->execute();
 		while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
@@ -21,8 +21,30 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
 			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
 			$arrIntGroup[] = $arrIntrate;
-		}
+		}*/
+		$arrIntGroup = array();
+		$arrIntrate = array();
+		$arrIntrate["INT_RATE"] = 6.25;
+		$arrIntrate["LOANTYPE_CODE"] = "1";
+		$arrIntrate["LOANTYPE_DESC"] = "สามัญ";
+		$arrIntGroup[] = $arrIntrate;
+		$arrIntrate = array();
+		$arrIntrate["INT_RATE"] = 6.25;
+		$arrIntrate["LOANTYPE_CODE"] = "2";
+		$arrIntrate["LOANTYPE_DESC"] = "ฉุกเฉิน";
+		$arrIntGroup[] = $arrIntrate;
 		$arrayResult['INT_RATE'] = $arrIntGroup;
+		$arrFixPayMethod = array();
+		$arrPayMethod = array();
+		$arrPayMethod["LOANPAY_TYPE"] = "1";
+		$arrPayMethod["LOANTYPE_CODE"] = "2";
+		$arrFixPayMethod[] = $arrPayMethod;
+		$arrPayMethod = array();
+		$arrPayMethod["LOANPAY_TYPE"] = "2";
+		$arrPayMethod["LOANTYPE_CODE"] = "1";
+		$arrFixPayMethod[] = $arrPayMethod;
+		$arrayResult['FIX_PAYMETHOD'] = $arrFixPayMethod;
+		$arrayResult['IS_FIXPAYMETHOD'] = $true;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
