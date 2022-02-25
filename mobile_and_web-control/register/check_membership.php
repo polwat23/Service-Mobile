@@ -19,7 +19,14 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = ($lib->mb_str_pad($dataComing["member_no"]));
+	if($dataComing["channel"] == 'mobile_app'){
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+	}
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){

@@ -44,6 +44,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
+		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
+		$arrayResult['DISABLE_SLIPDETAIL'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

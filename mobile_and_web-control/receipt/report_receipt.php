@@ -221,10 +221,10 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">1039/74 ถนนร่วมจิตถวาย ต.เวียง อ.เมือง จ.เชียงราย 57000</p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร. ฝ่ายบริหารทั่วไป 086-451-9488, ฝ่ายสินเชื่อ  086-451-9187</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.cricoop.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์การทางพิเศษแห่งประเทศไทย จำกัด</p>
+			<p style="margin-top: -25px;font-size: 18px;">111 ถนนริมคลองบางกะปิ แขวงบางกะปิ เขตห้วยขวาง กรุงเทพฯ 10310</p>
+			<p style="margin-top: -23px;font-size: 18px;">โทรศัพท์ 02-558-9980 ต่อ 29000-29011 เบอร์มือถือ 093-562-8746 (สินเชื่อ) 092-647-4649 (การเงิน) <br /></p>
+			<p style="margin-top: -25px;font-size: 18px;">FAX 02-558-9979  email : payment.coop@gmail.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -247,12 +247,6 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
-			</tr>
-			<tr>
-			<td style="width: 50px;font-size: 18px;">ทุนเรือนหุ้น :</td>
-			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
-			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
-			<td style="width: 101px;">'.$header["interest_accum"].'</td>
 			</tr>
 			</tbody>
 			</table>
@@ -336,14 +330,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/manager.png"  height="20" style="margin-top:20px;"/>
 			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 790px;display:flex;">
+			<img src="../../resource/utility_icon/signature/staff_recv.png"  height="40" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-80px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
 	$dompdf = new Dompdf([

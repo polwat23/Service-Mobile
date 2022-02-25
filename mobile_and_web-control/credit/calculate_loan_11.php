@@ -9,7 +9,7 @@ $oldBal = 0;
 $request_amt = 0;
 $collNotOver2M = null;
 $collNotOver3M = null;
-$getMemberData = $conoracle->prepare("SELECT (sh.sharestk_amt * 10) as SHARE_BALANCE,mb.SALARY_AMOUNT,sh.LAST_PERIOD
+$getMemberData = $conoracle->prepare("SELECT (sh.sharestk_amt * 50) as SHARE_BALANCE,mb.SALARY_AMOUNT,sh.LAST_PERIOD
 									FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no WHERE mb.member_no = :member_no");
 $getMemberData->execute([':member_no' => $member_no]);
 $rowMembData = $getMemberData->fetch(PDO::FETCH_ASSOC);

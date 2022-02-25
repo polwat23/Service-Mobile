@@ -10,9 +10,9 @@ set DAY_OF_LIFE=3
 set DBHOST=localhost
 set DBPORT=3306
 set DBUSER=root
-set DBPASS=@CRH2020
-set DBNAME=mobile_crh
-set PROJECT_PATH=C:\Mobile\service-crh\
+set DBPASS=EXAT2022
+set DBNAME=mobile_exat
+set PROJECT_PATH=C:\Mobile\service-exat\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%

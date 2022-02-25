@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupCredit = array();
 		$arrCanCal = array();
 		$arrCanReq = array();
-		$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE, TRIM(MEMBGROUP_CODE) as MEMBGROUP_CODE, MEMBER_DATE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMemberType->execute([':member_no' => $member_no]);
 		$rowMemb = $getMemberType->fetch(PDO::FETCH_ASSOC);
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
@@ -19,7 +19,33 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':member_type' => $rowMemb["MEMBER_TYPE"]
 			]);
 			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowLoanType["LOANTYPE_DESC"]) && $rowLoanType["LOANTYPE_DESC"] != ""){
+			$sub_groupcode = $rowMemb["MEMBGROUP_CODE"][0];
+			$memb_duration = $lib->count_duration($rowMemb["MEMBER_DATE"],"m");
+			
+			$is_normal_group = false;
+			if($sub_groupcode == "A" || $sub_groupcode == "B" || $sub_groupcode == "C" || $sub_groupcode == "D" || $sub_groupcode == "E" || $sub_groupcode == "F" || $rowMemb["MEMBGROUP_CODE"] == "Y1"){
+				$is_normal_group = true;
+			}
+			$is_s_group = false;
+			if($rowMemb["MEMBGROUP_CODE"][0] == "S" && ($rowMemb["MEMBGROUP_CODE"][1] == "1" || $rowMemb["MEMBGROUP_CODE"][1] == "2")){
+				$is_s_group = true;
+			}
+			$is_y2_group = false;
+			if($rowMemb["MEMBGROUP_CODE"][0] == "Y" && $rowMemb["MEMBGROUP_CODE"][1] == "2"){
+				$is_y2_group = true;
+			}
+			if(($rowCanCal["loantype_code"] == "12" && !($is_normal_group || $is_s_group))){
+			}else if(($rowCanCal["loantype_code"] == "15" && !$is_normal_group)){
+			}else if(($rowCanCal["loantype_code"] == "16" && !$is_normal_group)){
+			}else if(($rowCanCal["loantype_code"] == "18" && !$is_y2_group)){
+			}else if(($rowCanCal["loantype_code"] == "19" && !$is_y2_group)){
+			}else if(($rowCanCal["loantype_code"] == "21" && !($is_normal_group || $is_s_group))){
+			}else if(($rowCanCal["loantype_code"] == "22" && !$is_normal_group)){
+			}else if(($rowCanCal["loantype_code"] == "33" && !$is_normal_group)){
+			}else if(($rowCanCal["loantype_code"] == "36" && !$is_normal_group)){
+			}else if(($rowCanCal["loantype_code"] == "41" && !$is_y2_group)){
+			}else if(($rowCanCal["loantype_code"] == "42" && !$is_normal_group)){
+			}else if(isset($rowLoanType["LOANTYPE_DESC"]) && $rowLoanType["LOANTYPE_DESC"] != "" && ($is_normal_group || $is_s_group || $is_y2_group)){
 				$arrCredit = array();
 				$maxloan_amt = 0;
 				$arrCollShould = array();
@@ -58,6 +84,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGroupCredit[] = $arrCredit;
 			}
 		}
+		$arrayResult["MEMBGROUP_CODE"] = $rowMemb;
+		$arrayResult["is_normal_group"] = $is_normal_group;
+		$arrayResult["is_s_group"] = $is_s_group;
+		$arrayResult["is_y2_group"] = $is_y2_group;
 		$arrayResult["LOAN_CREDIT"] = $arrGroupCredit;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

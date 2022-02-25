@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		]);
 		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
-		$arrayHeaderAcc["SEQUEST_AMOUNT"] = number_format(0,2);
+		// $arrayHeaderAcc["SEQUEST_AMOUNT"] = number_format(0,2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
 											dsm.OPERATE_DATE as operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL

@@ -188,11 +188,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<header>
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
-			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด
+			   <div style=" position: fixed;top:2px; left: 60px; font-size:18px; font-weight:bold;">
+					สหกรณ์ออมทรัพย์การทางพิเศษแห่งประเทศไทย จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Chiangrai Public Health Saving And Credit Co-operative Limited
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:14px">
+					EXPRESSWAY AUTHORITY OF THAILAND SAVING AND CREDIT CO-OPERATIVE, LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
