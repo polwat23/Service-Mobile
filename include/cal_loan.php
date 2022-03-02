@@ -297,12 +297,24 @@ class CalculateLoan {
 		$constLoan = $this->getLoanConstant();
 		$interest = 0;
 		
-		$getLoanPayDate = $this->con->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND CURDATE() < loanpaydate ORDER BY loanpaydate ASC LIMIT 1");
-		$getLoanPayDate->execute();
+		if(date('d')>=1 && date('d')<=15){
+			$middle_month = new \DateTime(date('Y')."-".date('m')."-20");
+			$middle_month = $middle_month->format('Y-m-d');
+			$lastcalint_date = date('Y-m-d',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"])));
+			if(date('d', strtotime($lastcalint_date)) > 15){
+				$lastcalint_date = date('Y-m-15',strtotime('+1 month',strtotime($constLoanContract["LASTCALINT_DATE"])));
+			}
+		}else{
+			$middle_month = new \DateTime(date('Y')."-".date('m')."-".date('d'));
+			$middle_month = $middle_month->format('Y-m-d');
+			$lastcalint_date = date('Y-m-d',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"])));
+		}
+		$getLoanPayDate = $this->con->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND :middle_month < loanpaydate ORDER BY loanpaydate ASC LIMIT 1");
+		$getLoanPayDate->execute([":middle_month" => $middle_month]);
 		$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
 		$getLoanPayDateNext = $this->con->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND loanpaydate > :last_calint_date ORDER BY loanpaydate ASC LIMIT 1");
 		$getLoanPayDateNext->execute([
-			":last_calint_date" => date('Y-m-d',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"])))
+			":last_calint_date" => $lastcalint_date
 		]);
 		$rowLoanPayDateNext = $getLoanPayDateNext->fetch(\PDO::FETCH_ASSOC);
 		
@@ -413,12 +425,13 @@ class CalculateLoan {
 						}else{
 							$dateFrom = new \DateTime(date('d-m-Y',strtotime('+0 year',strtotime($constLoanContract["LASTCALINT_DATE"]))));
 						}
+						
+						$dateTo = new \DateTime($rowLoanPayDate['loanpaydate']);
 						//เช็ค last calint ถ้ามากกว่าวันที่จ่ายเงินกู้ให้ดึงวันที่ถัดไป
 						if($dateFrom >= $dateTo){
 							$dateTo = new \DateTime($rowLoanPayDateNext['loanpaydate']);
-						}else{
-							$dateTo = new \DateTime($rowLoanPayDate['loanpaydate']);
 						}
+						
 						$date_duration = $dateTo->diff($dateFrom);
 						$dayInterest = $date_duration->days;
 						

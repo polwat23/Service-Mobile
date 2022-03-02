@@ -19,12 +19,13 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','principle','
 		]);
 		$rowContract = $getContract->fetch(PDO::FETCH_ASSOC);
 		$interest = $cal_loan->calculateInterestRevert($rowContract["LOANCONTRACT_NO"]);
-		if(date("d") == 7){
+		/*if(date("d") == 7){
 			$arrayResult['RESPONSE_CODE'] = "";
 			$arrayResult['RESPONSE_MESSAGE'] = "ปิดรับชำระหนี้แล้ว กรุณาทำรายการใหม่อีกครั้งในภายหลัง";
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-		}else if($rowContract["LOANGROUP_CODE"] == '01'){
+		}else */
+		if($rowContract["LOANGROUP_CODE"] == '01'){
 			if($dataComing["payment_amt"] < ($rowContract["LOAN_BALANCE"] + $interest)){
 				$arrayResult['RESPONSE_CODE'] = "";
 				$arrayResult['RESPONSE_MESSAGE'] = "การชำระหนี้ เงินกู้ฉุกเฉิน ต้องชำระหนี้คงเหลือทั้งหมดที่เป็นเงินต้น+ดอกเบี้ย";
@@ -43,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','principle','
 		if($dataComing["is_confirm"] == '1'){
 			$slipPayment = null;
 			if(isset($dataComing["upload_slip"]) && $dataComing["upload_slip"] != ""){
-				$subpath = 'slip'.$payload["member_no"].time();
+				$subpath = 'slip'.$payload["member_no"].$dataComing["loancontract_no"].time();
 				$destination = __DIR__.'/../../resource/slippaydept';
 				$data_Img = explode(',',$dataComing["upload_slip"]);
 				$info_img = explode('/',$data_Img[0]);

@@ -37,6 +37,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayDoc["REQUEST_DATE"] = $lib->convertdate($rowReqDocument["request_date"],"D m Y", true);
 			$arrayDoc["UPDATE_DATE"] = $lib->convertdate($rowReqDocument["update_date"],"D m Y", true);
 			$arrayDoc["REQUEST_DATE_RAW"] = $rowReqDocument["request_date"];
+			if($rowReqDocument["documenttype_code"] == "RRSN"){
+				$arrayDoc["IS_PAYSLIP"] = true;
+			}
 			$arrayDocGrp[] = $arrayDoc;
 		}
 		

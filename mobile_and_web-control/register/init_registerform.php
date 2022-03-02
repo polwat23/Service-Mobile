@@ -105,12 +105,12 @@ require_once('../autoload.php');
 		if($rowForm["form_key"] == "EFFECT_MONTH"){
 			$day = date('d');
 			if($day > 7){
-				$dateNow = new DateTime('now');
+				$dateNow = new DateTime('first day of this month');
 				$dateNow->modify('+1 month');
 				$dateNow = $dateNow->format('Y-m-d');
 				$arrayForm["DEFAULT_VALUE"] = $dateNow;
 			}else{
-				$dateNow = new DateTime('now');
+				$dateNow = new DateTime('first day of this month');
 				$dateNow = $dateNow->format('Y-m-d');
 				$arrayForm["DEFAULT_VALUE"] = $dateNow;
 			}

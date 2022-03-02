@@ -81,6 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','document_code'],$dataComing)){
 		$arrayResult['REQDOC_REMARK_DETAIL'] = "อยู่ระหว่างประมวลผลวันที่ 8-19 กรุณาทำรายการใหม่อีกครั้งหลังวันเวลาดังกล่าว";
 	}
 	
+	$arrayResult['IS_LOANPAY'] = true;
 	$arrayResult['DISABLED_REQ'] = $is_disabled;
 	$arrayResult['DOCUMENTTYPE_LIST'] = $arrAssistGrp;
 	$arrayResult['RESULT'] = TRUE;

@@ -79,16 +79,16 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no'],$dataComing)
 		$arrContract['IS_CANUPLOAD'] = true;
 		$arrContract['PAYMENT_VALUE'] =  $rowContract["LOAN_BALANCE"] + $interest;
 		
-		$start_paydate = 24;
-		if(date('w', strtotime(date("Y-m").'-'.$start_paydate)) == 0 || date('w', strtotime(date("Y-m").'-'.$start_paydate)) == 6){
-			$startPayDate = date('d', strtotime(date("Y-m").'-'.$start_paydate." friday this week"));
+		
+		if(date('w', strtotime(date("Y-m").'-28')) == 0 || date('w', strtotime(date("Y-m").'-28')) == 6){
+			$startPayDate = date('d', strtotime(date("Y-m").'-28'." friday this week"));
 		}else{
-			$startPayDate = $start_paydate;
+			$startPayDate = 28;
 		}
 		
 		if(!(date("d") >= $startPayDate || date("d") <= 7)){
 			$arrContract['IS_CANUPLOAD'] = false;
-			$arrContract['REMARK'] = 'เปิดให้ชำหนี้เฉพาะวันที่ '.$start_paydate.' - 7 กรุณาทำรายการใหม่อีกครั้งในวันเวลาดังกล่าว';
+			$arrContract['REMARK'] = 'เปิดให้ชำหนี้เฉพาะวันที่ 28 - 7 กรุณาทำรายการใหม่อีกครั้งในวันเวลาดังกล่าว';
 		}else if($rowContract["LOANGROUP_CODE"] == '01'){
 			$getActiveSlip = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, 
 											payment_amt, slip_url, create_date FROM gcslippaydept 

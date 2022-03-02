@@ -479,6 +479,56 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$arrayForm["MAX_VALUE"] = 'white';
 					$arrayForm["MIN_VALUE"] = 'cornflowerblue';
 					$arrayGrpForm[] = $arrayForm;
+					
+					//คำนวณเงินเดือนคงเหลือ
+					$getMemberIno = $conmssql->prepare("SELECT SALARY_AMOUNT,SALARY_ID FROM mbmembmaster WHERE member_no = :member_no");
+					$getMemberIno->execute([':member_no' => $member_no]);
+					$rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
+					$salary = $rowMember["SALARY_AMOUNT"] ?? 0;
+					$getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY, lt.LOANGROUP_CODE, lm.LOANTYPE_CODE, lm.PERIOD_PAYMENT
+						FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
+						WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8");
+					$getOldContract->execute([
+						':member_no' => $member_no
+					]);
+
+					while($rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC)){
+						$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
+					}
+					$getMthOther = $conmssql->prepare("SELECT SUM(mthother_amt) as MTHOTHER_AMT FROM mbmembmthother WHERE member_no = :member_no and sign_flag = '-1'");
+					$getMthOther->execute([':member_no' => $member_no]);
+					$rowOther = $getMthOther->fetch(PDO::FETCH_ASSOC);
+					$mthother_amt = $rowOther["MTHOTHER_AMT"] ?? 0;
+					$getSettlement = $conmysql->prepare("SELECT settlement_amt, salary FROM gcmembsettlement WHERE is_use = '1' AND emp_no = :emp_no AND MONTH(month_period) = MONTH(:month_period) AND YEAR(month_period) = YEAR(:month_period)");
+					$getSettlement->execute([
+						':emp_no' => $rowMember["SALARY_ID"],
+						':month_period' => $dataComing["form_value_root_"]["EFFECT_MONTH"]["VALUE"],
+					]);
+					$rowSettlement = $getSettlement->fetch(PDO::FETCH_ASSOC);
+					$other_amt = $rowSettlement["settlement_amt"] ?? $mthother_amt;
+					$sum_old_payment += $other_amt;
+					$salary_balance = $salary - $sum_old_payment;
+					$getSharemasterinfo = $conmssql->prepare("SELECT (periodshare_amt * 10) as PERIOD_SHARE_AMT
+														FROM shsharemaster WHERE member_no = :member_no");
+					$getSharemasterinfo->execute([':member_no' => $member_no]);
+					$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
+					$arrayForm = array();
+					$arrayForm["ID_FORMAT_REQ_DOC"] = null;
+					$arrayForm["DOCUMENTTYPE_CODE"] = "CSHR";
+					$arrayForm["FORM_LABEL"] = "จำนวนที่สามารถเพิ่มได้สูงสุด";
+					$arrayForm["FORM_KEY"] = "MAX_SHR_PAYMENT";
+					$arrayForm["FORM_TYPE"] = "remark";
+					$arrayForm["COLSPAN"] = "24";
+					$arrayForm["FULLWIDTH"] = false;
+					$arrayForm["REQUIRED"] = false;
+					$arrayForm["PLACEHOLDER"] = "จำนวนที่สามารถเพิ่มได้สูงสุด : ".number_format($salary_balance > 0 ? $salary_balance : 0, 2)." บาท";
+					$arrayForm["DEFAULT_VALUE"] = $salary_balance;
+					$arrayForm["FORM_OPTION"] = null;
+					$arrayForm["MAXWIDTH"] = null;
+					$arrayForm["GROUP_ID"] = '2';
+					$arrayForm["MAX_VALUE"] = '#f44336';
+					$arrayForm["MIN_VALUE"] = '#fff0f0';
+					$arrayGrpForm[] = $arrayForm;
 				}
 				
 				//ลาออกหากหนี้มากกว่าทุนเรือนหุ้นให้เลือกว่าลาออกจากสหกรณ์หรือบริษัท
@@ -494,7 +544,7 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 						$arrayForm["COLSPAN"] = "24";
 						$arrayForm["FULLWIDTH"] = false;
 						$arrayForm["REQUIRED"] = false;
-						$arrayForm["PLACEHOLDER"] = "กรณีหนี้มากกว่าทุนเรือนหุ้น ไม่สามารถลาออกจากสหกรณ์ฯได้กรุณาติดต่อเจ้าหน้าที่ !";
+						$arrayForm["PLACEHOLDER"] = "กรณีหนี้มากกว่าทุนเรือนหุ้น ไม่สามารถลาออกจากสหกรณ์ฯได้ กรุณาชำระหนี้หรือติดต่อเจ้าหน้าที่ !";
 						$arrayForm["DEFAULT_VALUE"] = null;
 						$arrayForm["FORM_OPTION"] = null;
 						$arrayForm["MAXWIDTH"] = null;
@@ -503,6 +553,25 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 						$arrayForm["MIN_VALUE"] = '#e91e1e33';
 						$arrayGrpForm[] = $arrayForm;
 					}
+					
+					//อัปโหลดสลิปชำระหนี้ตอนลาออก
+					$arrayFormLoan = array();
+					$arrayFormLoan["ID_FORMAT_REQ_DOC"] = null;
+					$arrayFormLoan["DOCUMENTTYPE_CODE"] = "RRSN";
+					$arrayFormLoan["FORM_LABEL"] = "ชำระหนี้";
+					$arrayFormLoan["FORM_KEY"] = "LOAN_PAYMENT";
+					$arrayFormLoan["FORM_TYPE"] = "loanpayment";
+					$arrayFormLoan["COLSPAN"] = "24";
+					$arrayFormLoan["FULLWIDTH"] = false;
+					$arrayFormLoan["REQUIRED"] = false;
+					$arrayFormLoan["PLACEHOLDER"] = null;
+					$arrayFormLoan["DEFAULT_VALUE"] = null;
+					$arrayFormLoan["FORM_OPTION"] =  null;
+					$arrayFormLoan["MAXWIDTH"] = null;
+					$arrayFormLoan["GROUP_ID"] = "2";
+					$arrayFormLoan["MAX_VALUE"] = null;
+					$arrayFormLoan["MIN_VALUE"] = null;
+					$arrayGrpForm[] = $arrayFormLoan;
 					
 					if($receive_net < 0){
 						$arrayForm["ID_FORMAT_REQ_DOC"] = $rowForm["id_format_req_doc"];
@@ -545,12 +614,12 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 				if($dataComing["documenttype_code"] == "CSHR" && $rowForm["form_key"] == "EFFECT_MONTH"){
 					$day = date('d');
 					if($day > 7){
-						$dateNow = new DateTime('now');
+						$dateNow = new DateTime('first day of this month');
 						$dateNow->modify('+1 month');
 						$dateNow = $dateNow->format('Y-m-d');
 						$arrayForm["DEFAULT_VALUE"] = $dateNow;
 					}else{
-						$dateNow = new DateTime('now');
+						$dateNow = new DateTime('first day of this month');
 						$dateNow = $dateNow->format('Y-m-d');
 						$arrayForm["DEFAULT_VALUE"] = $dateNow;
 					}
@@ -563,12 +632,12 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 				if($dataComing["documenttype_code"] == "RRSN" && $rowForm["form_key"] == "EFFECT_DATE"){
 					$day = date('d');
 					if($day > 7){
-						$dateNow = new DateTime('now');
+						$dateNow = new DateTime('first day of this month');
 						$dateNow->modify('+1 month');
 						$dateNow = $dateNow->format('Y-m-d');
 						$arrayForm["DEFAULT_VALUE"] = $dateNow;
 					}else{
-						$dateNow = new DateTime('now');
+						$dateNow = new DateTime('first day of this month');
 						$dateNow = $dateNow->format('Y-m-d');
 						$arrayForm["DEFAULT_VALUE"] = $dateNow;
 					}
@@ -599,6 +668,7 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$arrayForm["MAX_VALUE"] = '#e91e1e';
 					$arrayForm["MIN_VALUE"] = '#e91e1e33';
 					$arrayGrpForm[] = $arrayForm;
+
 				}
 			}
 		

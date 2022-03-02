@@ -177,12 +177,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$rowMaxPeriod["MAX_PERIOD"] = $rowMaxPeriodMain["MAX_PERIOD"] ?? $rowMaxPeriodTemp["MAX_PERIOD"];
 			
 			//เช็คงวดเกษียณ
+			if($max_member_period < 0){
+				$max_member_period = 0;
+			}
 			$arrMinPeriod = array();
 			$arrMinPeriod[] = $max_member_period;
 			$arrMinPeriod[] = $rowMaxPeriod["MAX_PERIOD"];
 			$rowMaxPeriod["MAX_PERIOD"] =  min($arrMinPeriod);
 
-			if(isset($rowMaxPeriod["MAX_PERIOD"])){
+			if(isset($rowMaxPeriod["MAX_PERIOD"]) && $rowMaxPeriod["MAX_PERIOD"] > 0){
 				$getLoanObjective = $conmssql->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective");
 				$getLoanObjective->execute();
 				$arrGrpObj = array();
@@ -279,11 +282,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 						$arrayResult['RECEIVE_DATE'] = $receive_date;
 					}
 				}else{
-					$getLoanPayDate = $conmysql->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND CURDATE() < loanpaydate ORDER BY loanpaydate ASC LIMIT 1");
-					$getLoanPayDate->execute();
-					$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
-					
 					if(date('d')>=1 && date('d')<=10){
+						$middle_month = new DateTime(date('Y')."-".date('m')."-20");
+						$middle_month = $middle_month->format('Y-m-d');
+						$getLoanPayDate = $conmysql->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND :middle_month < loanpaydate ORDER BY loanpaydate ASC LIMIT 1");
+						$getLoanPayDate->execute([':middle_month' => $middle_month]);
+						$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
 						if(isset($rowLoanPayDate["loanpaydate"])){
 							if(date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 0 || date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 6){
 								$receive_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]." friday this week"));

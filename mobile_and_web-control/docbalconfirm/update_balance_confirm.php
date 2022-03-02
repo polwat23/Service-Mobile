@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 		}
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getMemberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
+		$getMemberInfo = $conmssql->prepare("SELECT mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
 													mb.MEMBER_DATE,mup.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFPOSITION mup ON mb.POSITION_CODE = mup.POSITION_CODE
@@ -29,7 +29,9 @@ if($lib->checkCompleteArgument(['menu_component','confirm_flag'],$dataComing)){
 		
 		$arrHeader = array();
 		$arrDetail = array();
-		$arrHeader["full_name"] = $rowMemberInfo["PRENAME_SHORT"].$rowMemberInfo["MEMB_NAME"]." ".$rowMemberInfo["MEMB_SURNAME"];
+		$arrHeader["full_name"] = $rowMemberInfo["PRENAME_DESC"].$rowMemberInfo["MEMB_NAME"]." ".$rowMemberInfo["MEMB_SURNAME"];
+		$arrHeader["name"] = $rowMemberInfo["MEMB_NAME"]." ".$rowMemberInfo["MEMB_SURNAME"];
+		$arrHeader["memb_group"] = $rowMemberInfo["MEMBGROUP_DESC"];
 		$arrHeader["member_no"] = $member_no;
 		$arrHeader["date_confirm"] = $lib->convertdate(date('Y-m-d',strtotime($dataComing["balance_date"])),'d M Y');
 		$arrHeader["date_confirm_raw"] = date('Ymd',strtotime($dataComing["balance_date"]));

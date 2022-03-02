@@ -154,7 +154,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$receive_net = $rowMastershare["SHARE_AMT"]-($loan_prn_2 + $loan_int_2+$loan_prn_1 + $loan_int_1);
 						
 						$resign_form_option = $dataComing["form_value_root_"]["RESIGN_FROM_OPTION"]["VALUE"] ?? "";
-						if($receive_net < 0){
+						/*if($receive_net < 0){
 							if($resign_form_option == '1'){
 								$conmysql->rollback();
 								$arrayResult['RESPONSE_CODE'] = "";
@@ -162,7 +162,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 								$arrayResult['RESULT'] = FALSE;
 								require_once('../../include/exit_footer.php');
 							}
-						}
+						}*/
 					
 						$effect_month_arr = $dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"] ? $lib->convertdate($dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"],"D m Y") : "";
 						$effect_month_arr = explode(" ", $effect_month_arr);
@@ -187,6 +187,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$arrGroupDetail["RESIGN_OPTION"] =  $dataComing["form_value_root_"]["RESIGN_OPTION"]["VALUE"] ?? "";
 						$arrGroupDetail["RESIGN_FROM_OPTION"] =  $resign_form_option;
 						$arrGroupDetail["RECEIVE_ACC"] =  $rowData["EXPENSE_ACCID"];
+						$arrGroupDetail["LOAN_PAYMENT"] =  $dataComing["slip_payment_root_"];
 					}else if($dataComing["documenttype_code"] == "CBNF"){
 						$arrGroupDetail = array();
 						$arrGroupDetail["MEMBER_NO"] =  $member_no;
@@ -213,6 +214,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$sum_old_payment = 0;
 						
 						if($period_payment % 10 != 0){
+							$conmysql->rollback();
 							$arrayResult['RESPONSE_CODE'] = "";
 							$arrayResult['RESPONSE_MESSAGE'] = "ค่าหุ้นรายเดือนไม่ถูกต้อง เนื่องจากหุ้นมีมูลค่าหุ้นละ 10 บาท กรุณาตรวจสอบค่าหุ้นรายเดือนและลองใหม่อีกครั้ง";
 							$arrayResult['RESULT'] = FALSE;
@@ -273,7 +275,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 								$getMemberIno = $conmssql->prepare("SELECT SALARY_AMOUNT,SALARY_ID FROM mbmembmaster WHERE member_no = :member_no");
 								$getMemberIno->execute([':member_no' => $member_no]);
 								$rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
-								//$salary = $rowMember["SALARY_AMOUNT"] ?? 0;
+								$salary = $rowMember["SALARY_AMOUNT"] ?? 0;
 								$getOldContract = $conmssql->prepare("SELECT LM.PRINCIPAL_BALANCE,LT.LOANTYPE_DESC,LM.LOANCONTRACT_NO,LM.LAST_PERIODPAY, lt.LOANGROUP_CODE, lm.LOANTYPE_CODE, lm.PERIOD_PAYMENT
 									FROM lncontmaster lm LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
 									WHERE lm.member_no = :member_no and lm.contract_status > 0 and lm.contract_status <> 8");
@@ -294,7 +296,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 									':month_period' => $dataComing["form_value_root_"]["EFFECT_MONTH"]["VALUE"],
 								]);
 								$rowSettlement = $getSettlement->fetch(PDO::FETCH_ASSOC);
-								$salary = $rowSettlement["salary"] ?? 0;
+								//$salary = $rowSettlement["salary"] ?? 0;
 								$other_amt = $rowSettlement["settlement_amt"] ?? $mthother_amt;
 								$sum_old_payment += $other_amt;
 								$salary_balance = $salary - $sum_old_payment;
@@ -371,6 +373,99 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						include('form_request_document_'.$dataComing["documenttype_code"].'.php');
 						$arrayPDF = GenerateReport($arrGroupDetail,$lib);
 						if($arrayPDF["RESULT"]){
+							//slip payment
+							if($dataComing["documenttype_code"] == "RRSN"){
+								foreach ($dataComing["slip_payment_root_"] as $payment) {
+									$slipPayment = null;
+									if(isset($payment["SLIP_TEMP"]) && $payment["SLIP_TEMP"] != ""){
+										$paymentSlip = str_replace(';','',$payment["SLIP_TEMP"]);
+										$subpath = 'slip'.$payload["member_no"].$payment["CONTRACT_NO"].time();
+										$destination = __DIR__.'/../../resource/slippaydept';
+										$data_Img = explode(',',$paymentSlip);
+										$info_img = explode('/',$data_Img[0]);
+										$ext_img = str_replace('base64','',$info_img[1]);
+										if(!file_exists($destination)){
+											mkdir($destination, 0777, true);
+										}
+										if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+											$createImage = $lib->base64_to_img($paymentSlip,$subpath,$destination,null);
+										}else if($ext_img == 'pdf'){
+											$createImage = $lib->base64_to_pdf($paymentSlip,$subpath,$destination);
+										}
+										if($createImage == 'oversize'){
+											$conmysql->rollback();
+											$arrayResult['RESPONSE_CODE'] = "WS0008";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											require_once('../../include/exit_footer.php');
+											
+										}else{
+											if($createImage){
+												$directory = __DIR__.'/../../resource/slippaydept';
+												$fullPathSalary = __DIR__.'/../../resource/slippaydept/'.$createImage["normal_path"];
+												$slipPayment = $config["URL_SERVICE"]."resource/slippaydept/".$createImage["normal_path"];
+											}
+										}
+									}
+									
+									if(isset($slipPayment) && $slipPayment != ""){
+										$InsertSlipPayDept = $conmysql->prepare("INSERT INTO gcslippaydept(member_no, loancontract_no, principle, interest, payment_amt, slip_url, reqdoc_no) 
+																			VALUES (:member_no, :loancontract_no, :principle, :interest, :payment_amt, :slip_url, :reqdoc_no)");
+										if($InsertSlipPayDept->execute([
+											':member_no' => $payload["member_no"],
+											':loancontract_no' => $payment["CONTRACT_NO"],
+											':principle' => str_replace(',', '', $payment["PRINCIPLE"]),
+											':interest' => str_replace(',', '', $payment["INTEREST"]),
+											':payment_amt' => str_replace(',', '', $payment["PAYMENT_AMOUNT"]),
+											':slip_url' => $slipPayment,
+											':reqdoc_no' => $reqdoc_no
+										])){
+										
+										}else{
+											$filename = basename(__FILE__, '.php');
+											$logStruc = [
+												":error_menu" => $filename,
+												":error_code" => "WS1036",
+												":error_desc" => "อัปโหลดสลิปไม่ได้เพราะ Insert ลงตาราง gcslippaydept ไม่ได้"."\n"."Query => ".$InsertSlipPayDept->queryString."\n"."Param => ". json_encode([
+													':member_no' => $payload["member_no"],
+													':loancontract_no' => $payment["CONTRACT_NO"],
+													':principle' => $payment["PRINCIPLE"],
+													':interest' => $payment["INTEREST"],
+													':payment_amt' => $payment["PAYMENT_AMOUNT"],
+													':slip_url' => $slipPayment,
+													':reqdoc_no' => $reqdoc_no
+												]),
+												":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+											];
+											$log->writeLog('errorusage',$logStruc);
+											$message_error = "อัปโหลดสลิปไม่ได้เพราะ Insert ลง gcslippaydept ไม่ได้"."\n"."Query => ".$InsertSlipPayDept->queryString."\n"."Param => ". json_encode([
+													':member_no' => $payload["member_no"],
+													':loancontract_no' => $payment["CONTRACT_NO"],
+													':principle' => $payment["PRINCIPLE"],
+													':interest' => $payment["INTEREST"],
+													':payment_amt' => $payment["PAYMENT_AMOUNT"],
+													':slip_url' => $slipPayment,
+													':reqdoc_no' => $reqdoc_no
+											]);
+											$conmysql->rollback();
+											$lib->sendLineNotify($message_error);
+											$arrayResult['RESPONSE_CODE'] = "WS1036";
+											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+											$arrayResult['RESULT'] = FALSE;
+											require_once('../../include/exit_footer.php');
+										}
+									}else{
+										$conmysql->rollback();
+										$arrayResult['RESPONSE_CODE'] = "";
+										$arrayResult['payment'] = $payment;
+										$arrayResult['RESPONSE_MESSAGE'] = "อัปโหลดสลิปล้มเหลว กรุณาติดต่อสหกรณ์หรือลองใหม่อีกครั้งในภายหลัง";
+										$arrayResult['RESULT'] = FALSE;
+										require_once('../../include/exit_footer.php');
+									}
+								}
+							}
+							//end slip payment
+						
 							$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 							
 							$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)

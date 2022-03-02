@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['emp_no','api_token','unique_id'],$dataComing)){
 			//AND MB.MEMBER_STATUS = '-1' 
 			$rowInfoMobile = $fetchMemberInfo->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowInfoMobile["MEMBER_NO"])){
-				$arrayResult["MEMBER_NO"] = $rowInfoMobile["MEMBER_NO"];
+				$arrayResult["MEMBER_NO"] = ltrim($rowInfoMobile["MEMBER_NO"],"0");
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

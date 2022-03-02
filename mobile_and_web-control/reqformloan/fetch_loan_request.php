@@ -75,9 +75,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrayDetailLoan["FLAG_NAME"] = "กู้ได้เฉพาะสมาชิก 2 เดือนขึ้นไป";
 						}
 					}else if($rowIntRate["LOANGROUP_CODE"] == '02'){
-						if(date('d-m-Y') == '27-10-2021'){
+						if(date('d-m-Y') == '19-01-2022'){
 							$arrayDetailLoan["IS_REQ"] = FALSE;
 							$arrayDetailLoan["FLAG_NAME"] = "ปิดปรับปรุงบริการขอกู้สามัญฯ กรุณาทำรายการใหม่อีกครั้งในวันถัดไป ขออภัยในความไม่สะดวก";
+						}else if(date('d')==31){
+							$arrayDetailLoan["IS_REQ"] = FALSE;
+							$arrayDetailLoan["FLAG_NAME"] = "อยู่ระหว่างประมวลผลข้อมูลบริการขอกู้สามัญฯ กรุณาทำรายการใหม่อีกครั้งในวันถัดไป ขออภัยในความไม่สะดวก";
 						}else if(date('d')>=11 && date('d')<=19){
 							$arrayDetailLoan["IS_REQ"] = FALSE;
 							$arrayDetailLoan["FLAG_NAME"] = "ปิดบริการขอกู้สามัญฯ ในช่วงวันที่ 11 - 19  กรุณาทำรายการใหม่อีกครั้งหลังวันเวลาดังกล่าว";

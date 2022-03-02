@@ -109,12 +109,15 @@ function GeneratePdfDoc($arrHeader,$arrDetail,$isConfirm = false) {
 					</tr>      
 				</table>
 		    </div>
+			<br />
+			<br />
+			<br />
 			<div style="margin-left:80px;padding-top: 16px;">
 				 คำชี้แจง (กรณีไม่ถูกต้อง)<span class="input-zone"><span class="input-value">'.$arrDetail["CONFIRM_REASON"].'
 				</span>………………………………………………………………………………………………………………………………………</span>
 			</div>
-			<div style="padding-left:80px;text-align: center;padding-top: 16px;">
-				ลงชื่อ…………………………………..สมาชิก
+			<div style="margin-left:90px;text-align: center;padding-top: 16px;">
+				ลงชื่อ<span class="input-zone"><span class="input-value" style="left: 180px;width: 170px;">'.$arrHeader["name"].'</span>……………………….................……..</span>สมาชิก
 			</div>
 			<div style="margin-left:80px;padding-top: 16px;">
 				 ขอได้โปรดแจ้งไปยัง    นางดวงกมล  ลิ้มประชาศักดิ์  ผู้สอบบัญชี    ว่ารายการดังกล่าวข้างต้นถูกต้อง   
@@ -122,10 +125,12 @@ function GeneratePdfDoc($arrHeader,$arrDetail,$isConfirm = false) {
 			<div>
 				หรือมีข้อทักท้วงประการใด  ตามหนังสือยืนยันยอดฉบับนี้
 			</div>
+			<br />
 			<div style="text-align: center;padding-top: 16px;">
 				 ขอแสดงความนับถือ									
 			</div>
-			<div style="text-align: center;height: 36px">									
+			<div style="text-align: center;height: 36px">	
+				<img src="../../resource/utility_icon/signature/president.png" height="36px"/>								
 			</div>
 			<div style="text-align: center;">
 			           (นางวริชยา         ตำนานจิตร)																	
@@ -134,7 +139,6 @@ function GeneratePdfDoc($arrHeader,$arrDetail,$isConfirm = false) {
 			            ประธานกรรมการ 																								
 			</div>
 			';
-				//<img src="../../resource/utility_icon/president.png" width="36px" height="36px"/>
 	$html .= '
 	   </div>
 	';
@@ -143,20 +147,23 @@ function GeneratePdfDoc($arrHeader,$arrDetail,$isConfirm = false) {
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
-	$dompdf->set_paper('A4', 'landscape');
+	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	if(!file_exists($pathfile)){
-		mkdir($pathfile, 0777, true);
-	}
 	if($isConfirm){
-		$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm/confirmed';
+		$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm/confirmed/'.$arrHeader["memb_group"];
+		if(!file_exists($pathfile)){
+			mkdir($pathfile, 0777, true);
+		}
 		$pathfile = $pathfile.'/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf';
-		$pathfile_show = '/resource/pdf/docbalconfirm/confirmed/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf?v='.time();
+		$pathfile_show = '/resource/pdf/docbalconfirm/confirmed/'.$arrHeader["memb_group"]."/".$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf?v='.time();
 	}else{
-		$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm';
+		$pathfile = __DIR__.'/../../resource/pdf/docbalconfirm/'.$arrHeader["memb_group"];
+		if(!file_exists($pathfile)){
+			mkdir($pathfile, 0777, true);
+		}
 		$pathfile = $pathfile.'/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf';
-		$pathfile_show = '/resource/pdf/docbalconfirm/'.$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf?v='.time();
+		$pathfile_show = '/resource/pdf/docbalconfirm/'.$arrHeader["memb_group"]."/".$arrHeader["date_confirm_raw"].$arrHeader["member_no"].'.pdf?v='.time();
 	}
 	$arrayPDF = array();
 	$output = $dompdf->output();

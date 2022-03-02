@@ -1,15 +1,18 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','loanpaymentslip')){
+if($lib->checkCompleteArgument(['unique_id','reqdoc_no'],$dataComing)){
+	if($func->check_permission_core($payload,'mobileadmin','documentrequest')){
 		$arrGrp = array();
 		$arrayDocGrp = array();
 		
 		$getReqDocument = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, reqdoc_no,
 											payment_amt, slip_url, create_date FROM gcslippaydept 
+											WHERE reqdoc_no = :reqdoc_no
 											ORDER BY create_date DESC");
-		$getReqDocument->execute();
+		$getReqDocument->execute([
+			":reqdoc_no" => $dataComing["reqdoc_no"],
+		]);
 		while($rowPaymentSlip = $getReqDocument->fetch(PDO::FETCH_ASSOC)){
 			$arrayDoc = array();
 			$arrayDoc["ID_SLIP_PAYDEPT"] = $rowPaymentSlip["id_slip_paydept"];

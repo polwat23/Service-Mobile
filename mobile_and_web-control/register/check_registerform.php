@@ -90,7 +90,7 @@ if($lib->checkCompleteArgument(['form_value_root_','api_token','unique_id'],$dat
 						$arrayResult['RESPONSE_MESSAGE'] = "ค่าหุ้นรายเดือนขั้นต่ำ 200 บาท กรุณาตรวจสอบค่าหุ้นรายเดือนและลองใหม่อีกครั้ง";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
-					}else if(($rowSettlement["salary"] - $other_amt) < $shr_period_payment){
+					}else if(($rowInfoRegister["SALARY_AMT"] - $other_amt) < $shr_period_payment){
 						$arrayResult['RESPONSE_CODE'] = "";
 						$arrayResult['RESPONSE_MESSAGE'] = "ค่าหุ้นรายเดือนเกินเงินเดือนคงเหลือสุทธิ กรุณาตรวจสอบค่าหุ้นรายเดือนและลองใหม่อีกครั้ง";
 						$arrayResult['RESULT'] = FALSE;
