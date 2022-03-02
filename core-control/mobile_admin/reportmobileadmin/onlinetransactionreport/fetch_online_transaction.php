@@ -8,15 +8,21 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		if(isset($dataComing["trrans_type"]) && $dataComing["trrans_type"] != ""){
 			if($dataComing["trrans_type"] == "payloan"){
-				$arrayExecute["trrans_type"] = "4";
+				$arrayExecute["trrans_type"] = "2";
 			}else if($dataComing["trrans_type"] == "buyshare"){
 				$arrayExecute["trrans_type"] = "3";
 			}else if($dataComing["trrans_type"] == "transfer"){
 				$arrayExecute["trrans_type"] = "1";
 			}else if($dataComing["trrans_type"] == "receiveloan"){
-				$arrayExecute["trrans_type"] = "2";
+				$arrayExecute["trrans_type"] = "4";
 			}else if($dataComing["trrans_type"] == "exttransfer"){
 				$arrayExecute["trrans_type"] = "9";
+			}else if($dataComing["trrans_type"] == "withdraw"){
+				$arrayExecute["trrans_type"] = "9";
+			}else if($dataComing["trrans_type"] == "deposit"){
+				$arrayExecute["trrans_type"] = "9";
+			}else if($dataComing["trrans_type"] == "internal_tran"){
+				$arrayExecute["trrans_type"] != "9";
 			}else {
 				$arrayExecute["trrans_type"] = "-1";
 			}
@@ -41,7 +47,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
+														".($dataComing["trrans_type"] == "withdraw" ? 
+														"and (transaction_type_code = 'WTX' and trans_flag = '-1')" : null)."
+														".($dataComing["trrans_type"] == "deposit" ? 
+														"and (transaction_type_code = 'DTX' and trans_flag = '1')" : null)."
 														".($dataComing["trrans_type"] == "payloan" ? 
 														"or (transfer_mode = '9' and transaction_type_code = 'WFS')" : null)."
 														".($dataComing["trrans_type"] == "receiveloan" ? 
@@ -58,7 +72,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no, trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
+														".($dataComing["trrans_type"] == "withdraw" ? 
+														"and (transaction_type_code = 'WTX' and trans_flag = '-1')" : null)."
+														".($dataComing["trrans_type"] == "deposit" ? 
+														"and (transaction_type_code = 'DTX' and trans_flag = '1')" : null)."
 														".($dataComing["trrans_type"] == "payloan" ? 
 														"or (transfer_mode = '9' and transaction_type_code = 'WFS')" : null)."
 														".($dataComing["trrans_type"] == "receiveloan" ? 
@@ -75,7 +97,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$fetchReconcile = $conmysql->prepare("SELECT ref_no,trans_flag,transaction_type_code,from_account,destination,operate_date,amount,
 														penalty_amt,fee_amt,amount_receive,result_transaction,member_no,transfer_mode
 														FROM gctransaction
-														WHERE (transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type
+														WHERE (".
+														($dataComing["trrans_type"] != "internal_tran" ? 
+														"(transfer_mode ".($dataComing["trrans_type"] == "transaction" ? "!=" : "=")." :trrans_type)" : null)."
+														".($dataComing["trrans_type"] == "internal_tran" ? 
+														"(transfer_mode != '9')" : null)."
+														".($dataComing["trrans_type"] == "withdraw" ? 
+														"and (transaction_type_code = 'WTX' and trans_flag = '-1')" : null)."
+														".($dataComing["trrans_type"] == "deposit" ? 
+														"and (transaction_type_code = 'DTX' and trans_flag = '1')" : null)."
 														".($dataComing["trrans_type"] == "payloan" ? 
 														"or (transfer_mode = '9' and transaction_type_code = 'WFS')" : null)."
 														".($dataComing["trrans_type"] == "receiveloan" ? 

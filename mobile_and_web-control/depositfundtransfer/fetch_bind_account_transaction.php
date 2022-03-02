@@ -4,12 +4,10 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		if($payload["member_no"] == "00003476" || $payload["member_no"] == "00003477" || $payload["member_no"] == "00003478" || $payload["member_no"] == "00003479" || $payload["member_no"] == "00003480"
-		|| $payload["member_no"] == "00003481" || $payload["member_no"] == "00003482" || $payload["member_no"] == "00003483" || $payload["member_no"] == "00003484" || $payload["member_no"] == "00003485"
-		|| $payload["member_no"] == "00003486" || $payload["member_no"] == "00003487" || $payload["member_no"] == "00003488" || $payload["member_no"] == "00003489" || $payload["member_no"] == "00003490"
-		|| $payload["member_no"] == "00003491" || $payload["member_no"] == "00003492" || $payload["member_no"] == "00003493" || $payload["member_no"] == "00003494" || $payload["member_no"] == "00003495"
-		|| $payload["member_no"] == "00003496" || $payload["member_no"] == "00003497" || $payload["member_no"] == "00003498" || $payload["member_no"] == "00003462" || $payload["member_no"] == "00003498"
-		|| $payload["member_no"] == "00003499" || $payload["member_no"] == "00004400" || $payload["member_no"] == "00004402" || $payload["member_no"] == "00004741" || $payload["member_no"] == "00004767"){
+		$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMembcatCode->execute([':member_no' => $member_no]);
+		$rowMemb = $getMembcatCode->fetch(PDO::FETCH_ASSOC);
+		if($rowMemb["MEMBCAT_CODE"] == '20'){
 			$arrayResult['RESPONSE_CODE'] = "WS0006";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
