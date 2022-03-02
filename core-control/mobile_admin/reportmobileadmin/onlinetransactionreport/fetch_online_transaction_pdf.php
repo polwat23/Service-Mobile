@@ -52,9 +52,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".($dataComing["trrans_type"] == "internal_tran" ? 
 														"(transfer_mode != '9')" : null)."
 														".($dataComing["trrans_type"] == "withdraw" ? 
-														"and (transaction_type_code = 'WIM' and trans_flag = '-1')" : null)."
+														"and (transaction_type_code = 'WTX' and trans_flag = '-1')" : null)."
 														".($dataComing["trrans_type"] == "deposit" ? 
-														"and (transaction_type_code = 'DIM' and trans_flag = '1')" : null)."
+														"and (transaction_type_code = 'DTX' and trans_flag = '1')" : null)."
 														".($dataComing["trrans_type"] == "payloan" ? 
 														"or (transfer_mode = '9' and transaction_type_code = 'WFS')" : null)."
 														".($dataComing["trrans_type"] == "receiveloan" ? 
@@ -109,9 +109,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayRecon["TRANSFER_TYPE"] = 'จ่ายเงินกู้';
 			} else if($rowRecon["transfer_mode"] == '9'){
 				$arrayRecon["TRANSFER_TYPE"] = 'ธุรกรรมภายนอก';
-			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '-1' && $rowRecon["transaction_type_code"] == 'WIM')){
+			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '-1' && $rowRecon["transaction_type_code"] == 'WTX')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ถอน';
-			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '1' && $rowRecon["transaction_type_code"] == 'DIM')){
+			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '1' && $rowRecon["transaction_type_code"] == 'DTX')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ฝาก';
 			}
 			
@@ -128,6 +128,20 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					}else if($rowDepttype["depttype_code"] =='02'){
 						$withdraw_external_20 += $rowRecon["amount"];
 						$withdraw20++;
+					}				
+				}
+				if($rowRecon["transaction_type_code"] == 'DTX'){ //ฝากภายนอก
+					$getDepttype = $conmssql->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
+					$getDepttype->execute([
+						':destination' => $rowRecon["destination"]
+					]);
+					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
+					if($rowDepttype["depttype_code"] =='01'){
+						$deposit_external_10 += $rowRecon["amount"];
+						$dept_count10++;
+					}else if($rowDepttype["depttype_code"] =='02'){
+						$deposit_external_20 += $rowRecon["amount"];
+						$dept_count20++;
 					}				
 				}
 				/*else if($rowRecon["transaction_type_code"] == 'WFS'){ //โอนชำระหนี้
@@ -158,7 +172,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					}		
 				}*/	
 			}else{
-				if($rowRecon["transaction_type_code"] == 'WTX'){//โอนฝากภายใน	
+				if($rowRecon["transaction_type_code"] == 'WTA'){//โอนฝากภายใน	
 					$getDepttype = $conmssql->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
 					$getDepttype->execute([
 						':destination' => $rowRecon["destination"]
@@ -172,7 +186,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$inside_dept20++;					
 					}
 				}
-				if($rowRecon["transaction_type_code"] == 'WTX'){ //ถอนภายใน
+				if($rowRecon["transaction_type_code"] == 'WTA'){ //ถอนภายใน
 					$getDepttype = $conmssql->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :from_account");
 					$getDepttype->execute([
 						':from_account' => $rowRecon["from_account"]
