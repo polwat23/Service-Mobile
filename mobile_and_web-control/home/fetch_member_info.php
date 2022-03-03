@@ -65,7 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LEFT JOIN MBUCFCREMATION MU ON MD.CMTTYPE_CODE = MU.CMTTYPE_CODE
 												WHERE MD.MEMBER_NO = :member_no ORDER BY SEQ_NO ASC");
 			$getCremationAsso->execute([':member_no' => $member_no]);
-			while($rowAsso = $rowCremationAsso->fetch(PDO::FETCH_ASSOC)){
+			while($rowAsso = $getCremationAsso->fetch(PDO::FETCH_ASSOC)){
 				$assosiation[] = $rowAsso["CMTTYPE_DESC"]." ".number_format($rowAsso["ITEM_AMOUNT"],2)." บาท";
 			}
 			$arrayResult["ASSOCIATION"] = sizeof($assosiation) > 0 ? implode(',',$assosiation) : [];
