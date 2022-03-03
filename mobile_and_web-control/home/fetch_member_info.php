@@ -60,6 +60,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$assosiation = array();
+			$getCremationAsso = $conmssql->prepare("SELECT MD.ITEM_AMOUNT,MU.CMTTYPE_DESC FROM MBCREMATIONDET MD 
+												LEFT JOIN MBUCFCREMATION MU ON MD.CMTTYPE_CODE = MU.CMTTYPE_CODE
+												WHERE MD.MEMBER_NO = :member_no ORDER BY SEQ_NO ASC");
+			$getCremationAsso->execute([':member_no' => $member_no]);
+			while($rowAsso = $rowCremationAsso->fetch(PDO::FETCH_ASSOC)){
+				$assosiation[] = $rowAsso["CMTTYPE_DESC"]." ".number_format($rowAsso["ITEM_AMOUNT"],2)." บาท";
+			}
+			$arrayResult["ASSOCIATION"] = sizeof($assosiation) > 0 ? implode(',',$assosiation) : [];
+			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
