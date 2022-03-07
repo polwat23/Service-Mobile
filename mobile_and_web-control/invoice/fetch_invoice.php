@@ -22,40 +22,49 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
 		$Contractno  = $rowContractnoCheck["balance_status"] ||"0";
 		
-		$formatDept = $func->getConstant('dep_format_bank');
+		$fetchEndDate= $conmysql->prepare("SELECT end_date FROM GCENDCLOSEDATE");
+		$fetchEndDate->execute();
+		$rowEndDate = $fetchEndDate->fetch(PDO::FETCH_ASSOC);
 		
-		$getBalancedate = $conoracle->prepare("SELECT cf.NOTICE_DATE  FROM (
-											select MAX(NOTICE_DATE) as NOTICE_DATE from LCNOTICEMTHRECV where  member_no = :member_no
-											order by NOTICE_DATE desc ) t1, LCNOTICEMTHRECV cf
-											WHERE cf.NOTICE_DATE = t1.NOTICE_DATE and member_no = :member_no AND rownum  = 1");
+		$getBalancedate = $conoracle->prepare("select max(doc_date) as NOTICE_DATE , LONCONNO from CMNOTATIONREGISFILE where  member_no =  :member_no  GROUP BY LONCONNO");
 		$getBalancedate->execute([':member_no' => $member_no]);
 		$rowBalMaster = $getBalancedate->fetch(PDO::FETCH_ASSOC);
 		$year = date('Y',strtotime($rowBalMaster["NOTICE_DATE"]))+543;
 		$notice_date = date('dm',strtotime($rowBalMaster["NOTICE_DATE"])).$year;
 		
-		$getBalancedate = $conoracle->prepare("select is_view  from LCNOTICEMTHRECV where  member_no= :member_no and notice_status = 8");
-		$getBalancedate->execute([':member_no' => $member_no]);
-		$rowBalMaster = $getBalancedate->fetch(PDO::FETCH_ASSOC);
-		if($rowBalMaster["IS_VIEW"] == '1'){
-			if($Contractno == "0"){
-				$arrayResult['REPORT_URL'] = "https://apim.fsct.com/internal/Debt_".$member_no."_".$notice_date.".pdf";
-				$arrayResult['RESULT'] = TRUE;
-				$arrayResult['ADVICE'] = "หากสหกรณ์มีการรับเงินกู้หรือมีการชำระเงินกู้พิเศษหลังจากวันที่พิมพ์ด้านมุมบนขวา  กรุณาตรวจสอบยอดชำระอีกครั้ง หลังจากสหกรณ์ทำรายการเสร็จสิ้นเเล้วถัดไปอีก  5  วันทำการ  หรือติดต่อเจ้าหน้าที่  ชสอ.";
-				require_once('../../include/exit_footer.php');
+		$end_date = date('Ymd',strtotime($rowEndDate["end_date"]));
+		$datenow = date('Ymd',strtotime(date("Y-m-d")));
+		
+		if($end_date > $datenow){
+			$getBalancedate = $conoracle->prepare("select is_view ,file_name FROM  CMNOTATIONREGISFILE where  member_no= :member_no AND lonconno =:lonconno ");
+			$getBalancedate->execute([':member_no' => $member_no , 
+									  ':lonconno' => $rowBalMaster["LONCONNO"]
+									]);
+			$rowBalIs_VIEW= $getBalancedate->fetch(PDO::FETCH_ASSOC);
+			if($rowBalIs_VIEW["IS_VIEW"] == '1'){
+				if($Contractno == "0"){
+					$arrayResult['REPORT_URL'] = "https://apim.fsct.com/internal/Debt_".$rowBalIs_VIEW["FILE_NAME"].".?v=".time();
+					$arrayResult['RESULT'] = TRUE;
+					$arrayResult['ADVICE'] = "หากสหกรณ์มีการรับเงินกู้หรือมีการชำระเงินกู้พิเศษหลังจากวันที่พิมพ์ด้านมุมบนขวา  กรุณาตรวจสอบยอดชำระอีกครั้ง หลังจากสหกรณ์ทำรายการเสร็จสิ้นเเล้วถัดไปอีก  5  วันทำการ  หรือติดต่อเจ้าหน้าที่  ชสอ.";
+					require_once('../../include/exit_footer.php');
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS0114";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					http_response_code(403);
+					require_once('../../include/exit_footer.php');
+				}
+				
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0114";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				http_response_code(403);
+				$arrayResult['WAITING_CONFIRM '] = "หากสหกรณ์มีการรับเงินกู้หรือมีการชำระเงินกู้พิเศษหลังจากวันที่พิมพ์ด้านมุมบนขวา  กรุณาตรวจสอบยอดชำระอีกครั้ง หลังจากสหกรณ์ทำรายการเสร็จสิ้นเเล้วถัดไปอีก  5  วันทำการ  หรือติดต่อเจ้าหน้าที่  ชสอ.";
+				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}
-			
 		}else{
 			$arrayResult['WAITING_CONFIRM '] = "หากสหกรณ์มีการรับเงินกู้หรือมีการชำระเงินกู้พิเศษหลังจากวันที่พิมพ์ด้านมุมบนขวา  กรุณาตรวจสอบยอดชำระอีกครั้ง หลังจากสหกรณ์ทำรายการเสร็จสิ้นเเล้วถัดไปอีก  5  วันทำการ  หรือติดต่อเจ้าหน้าที่  ชสอ.";
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}
-
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

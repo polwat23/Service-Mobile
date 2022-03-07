@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','showinvoice')){
 		if(sizeof($dataComing["is_view"]) > 0){
-			$updateisview= $conoracle->prepare("UPDATE LCNOTICEMTHRECV SET is_view = '1' WHERE notice_docno in('".implode("','",$dataComing["is_view"])."')");
+			$updateisview= $conoracle->prepare("UPDATE CMNOTATIONREGISFILE SET is_view = '1' WHERE LONCONNO in('".implode("','",$dataComing["is_view"])."')");
 			if($updateisview->execute()){
 
 			}else{
@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		
 		if(sizeof($dataComing["isnot_view"]) > 0){
-			$updateisnotview = $conoracle->prepare("UPDATE LCNOTICEMTHRECV SET is_view = '0' WHERE notice_docno in('".implode("','",$dataComing["isnot_view"])."')");
+			$updateisnotview = $conoracle->prepare("UPDATE CMNOTATIONREGISFILE SET is_view = '0' WHERE LONCONNO in('".implode("','",$dataComing["isnot_view"])."')");
 			if($updateisnotview->execute()){
 
 			}else{

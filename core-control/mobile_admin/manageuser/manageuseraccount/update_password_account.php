@@ -10,9 +10,9 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		$fetchAccount->execute([':member_no' => $dataComing["member_no"]]);
 		while($rowUser = $fetchAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrUserAcount = array();
-			$arrUserAcount["MEMBER_NO"] = $rowUser["member_no"];
-			$arrUserAcount["EMAIL"] = $rowUser["email"];
-			$arrUserAcount["NAME"] = $rowUser["acc_name"].' '.$rowUser["acc_surname"];
+			$arrUserAcount["MEMBER_NO"] = $rowUser["MEMBER_NO"];
+			$arrUserAcount["EMAIL"] = $rowUser["EMAIL"];
+			$arrUserAcount["NAME"] = $rowUser["ACC_NAME"].' '.$rowUser["ACC_SURNAME"];
 		}
 		
 		$file_name = $lib->randomText('all',6);
