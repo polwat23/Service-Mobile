@@ -40,24 +40,29 @@ if($maxloan_amt < 500000){
 		$maxloan_amt = $shareShouldHave;
 	}
 }
+
 $arrCreditOnePerson[] = $rowMemb["SALARY_AMOUNT"] * 38;
-$arrCreditOnePerson[] = 600000 + $rowMemb["SHARE_AMT"];
+$arrCreditOnePerson[] = 500000 + $rowMemb["SHARE_AMT"];
 $creditOnePerson = min($arrCreditOnePerson);
+
+if($maxloan_amt > $rowCredit["MAXLOAN_AMT"]){
+	$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
+}
+if($maxloan_amt > 2200000){
+	$maxloan_amt = 2200000;
+}
 if($maxloan_amt > $creditOnePerson){
 	$collOnePerson = $creditOnePerson;
 }else{
 	$collOnePerson = $maxloan_amt;
 }
 $arrCreditTwoPerson[] = $rowMemb["SALARY_AMOUNT"] * 50;
-$arrCreditTwoPerson[] = 1200000 + $rowMemb["SHARE_AMT"];
+$arrCreditTwoPerson[] = 1000000 + $rowMemb["SHARE_AMT"];
 $creditTwoPerson = min($arrCreditTwoPerson);
 if($maxloan_amt > $creditTwoPerson){
 	$collTwoPerson = $creditTwoPerson;
 }else{
 	$collTwoPerson = $maxloan_amt;
-}
-if($maxloan_amt > $rowCredit["MAXLOAN_AMT"]){
-	$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
 }
 if(isset($collOnePerson)){
 	$arrSubCollPerson["LABEL"] = "สิทธิ์การกู้สำหรับคนค้ำคนเดียว";
@@ -69,6 +74,6 @@ if(isset($collTwoPerson)){
 	$arrSubCollPerson["CREDIT_AMT"] = $collTwoPerson;
 	$arrCollShould[] = $arrSubCollPerson;
 }
-$arrSubOther["VALUE"] = "สิทธิการกู้ที่แสดงในระบบนี้เป็นเพียงสิทธิประมาณการเท่านั้น  มิใช่สิทธิกู้จริง  ทางสหกรณ์จะต้องดูรายละเอียดต่าง ๆ ประกอบในการให้กู้แต่ละประเภทนั้น  ๆ อีกครั้ง";
+$arrSubOther["VALUE"] = "หมายเหตุ สิทธิการกู้ที่แสดงในระบบเป็นเพียงการประมาณการเท่านั้น มิใช่สิทธิการกู้จริงที่จะได้รับ ต้องผ่านการพิจารณาจากเจ้าหน้าที่สหกรณ์อีกครั้ง";
 $arrOtherInfo[] = $arrSubOther;
 ?>

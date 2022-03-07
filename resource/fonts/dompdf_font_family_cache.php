@@ -78,8 +78,8 @@
     'normal' => $rootDir . '/lib/fonts/DejaVuSerif',
   ),
   'th niramit as' => array(
-    'normal' => $fontDir . '/th_niramit_as_normal_70484c5c968f5490e89b9b842bf51a32',
-    'bold' => $fontDir . '/th_niramit_as_bold_84c4803304da036d155a024f98fb225f',
+    'normal' => $fontDir . '/th_niramit_as_normal_9c6fdf136572f9b0b9df412a2aedee89',
+    'bold' => $fontDir . '/th_niramit_as_bold_ab9b3f02e2a8ff41a68c02db070f6676',
     'italic' => $fontDir . '/th_niramit_as_italic_2dae3a406f06b2be49290226a113ec3b',
   ),
   'angsanaupc' => array(
