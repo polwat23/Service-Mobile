@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
-												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.LOCKPROC_FLAG = '1' 
+												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.WEBSHOW_FLAG = '1' 
 												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
@@ -21,61 +21,63 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
+			$getRateDiv = $conoracle->prepare("SELECT DIVPERCENT_RATE , AVGPERCENT_RATE FROM  YRCFRATE  WHERE DIV_YEAR  = :year");
+			$getRateDiv->execute([':year' => $rowYear["DIV_YEAR"]]);
+			$rowRateDiv = $getRateDiv->fetch(PDO::FETCH_ASSOC);
+			$arrDividend["DIV_RATE"] = number_format($rowRateDiv["DIVPERCENT_RATE"],2)." %";
+			$arrDividend["AVG_RATE"] = number_format($rowRateDiv["AVGPERCENT_RATE"],2)." %";
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
 			$getMethpay = $conoracle->prepare("SELECT
-													yu.METHPAYTYPE_DESC as TYPE_DESC,
-													ym.CBT_AMT AS RECEIVE_AMT ,						
-													ym.BANK_ACCID AS BANK_ACCOUNT
+													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
+													CM.BANK_DESC AS BANK,
+													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
+													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
+													YM.METHPAYTYPE_CODE,
+													YM.MONEYTYPE_CODE
 												FROM 
-													YRDIVMASTER ym,YRUCFMETHPAY yu
-												WHERE 
-													ym.MEMBER_NO = :member_no
-													AND ym.DIV_YEAR= :div_year and yu.METHPAYTYPE_CODE = 'CBT'");
+													YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
+													YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
+													LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
+												WHERE
+													YM.MEMBER_NO = :member_no
+													AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP')
+													AND YM.DIV_YEAR = :div_year");
 			$getMethpay->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			while($rowMethpay = $getMethpay->fetch(PDO::FETCH_ASSOC)){
 				$arrayRecv = array();
-				$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount_hidden($lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x'),'hhh-hhxxxx-h');
+				if($rowMethpay["METHPAYTYPE_CODE"] == "CBT" || $rowMethpay["METHPAYTYPE_CODE"] == "DEP"){
+					if($rowMethpay["MONEYTYPE_CODE"] != 'TRN'){
+						$arrayRecv["ACCOUNT_RECEIVE"] = $rowMethpay["BANK_ACCOUNT"];
+					}else{
+						$arrayRecv["ACCOUNT_RECEIVE"] = $rowMethpay["BANK_ACCOUNT"];
+					}
+				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+				$arrayRecv["BANK"] = $rowMethpay["BANK"];
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			}
-			$getPaydiv = $conoracle->prepare("SELECT   
-													W01_AMT AS W01,
-													W02_AMT AS W02,
-													(LONPRN_AMT + LONINT_AMT) AS LON,
-													SDV_AMT AS SDV,
-													SQT_AMT AS SQT,
-													MRT_AMT AS MRT,
-													DEP_AMT AS DEP
-													FROM yrdivmaster
-														WHERE MEMBER_NO = :member_no
-														and DIV_YEAR = :div_year");
+			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
+											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
+											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('CBT','CSH','DEP')");
 			$getPaydiv->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$arrayPayGroup = array();
 			$sumPay = 0;
-			
-			$rowPaydiv = $getPaydiv->fetch(PDO::FETCH_ASSOC);
-			foreach($rowPaydiv as $key => $value){
-				if($value > 0){
-					$fetchNameType = $conoracle->prepare("SELECT METHPAYTYPE_DESC as TYPE_DESC FROM yrucfmethpay WHERE METHPAYTYPE_CODE = :code");
-					$fetchNameType->execute([':code' => $key]);
-					$nametype = $fetchNameType->fetch(PDO::FETCH_ASSOC);
-
-					$arrPay = array();
-					$arrPay["TYPE_DESC"] = $nametype["TYPE_DESC"] ?? '';
-					$arrPay["PAY_AMT"] = number_format($value,2);
-					$sumPay += $value;
-					$arrayPayGroup[] = $arrPay;
-				}
+			while($rowPay = $getPaydiv->fetch(PDO::FETCH_ASSOC)){
+				$arrPay = array();
+				$arrPay["TYPE_DESC"] = $rowPay["TYPE_DESC"];
+				$arrPay["PAY_AMT"] = number_format($rowPay["PAY_AMT"],2);
+				$sumPay += $rowPay["PAY_AMT"];
+				$arrayPayGroup[] = $arrPay;
 			}
 			$arrDividend["PAY"] = $arrayPayGroup;
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);

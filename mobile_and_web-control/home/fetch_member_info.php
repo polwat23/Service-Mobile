@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mps.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mps.position_desc,mg.membgroup_desc,mt.membcat_code,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
 													mb.ADDRESS_SOI as ADDR_SOI,
@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
-			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
+			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBCAT_CODE"] == '10' ? 'สมาชิกสามัญ' : 'สมาชิกสมทบ';
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
