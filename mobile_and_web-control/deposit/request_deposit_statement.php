@@ -191,13 +191,13 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px; margin-top:17px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์สาธารณสุขจังหวัดน่าน จำกัด
+					สหกรณ์ออมทรัพย์โรงพยาบาลสรรพสิทธิประสงค์อุบลราชธานี จำกัด
 			   </div>
 			    <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					NAN PUBLIC HEALTH SAVING AND CREADIT 
+					Sunpasittiprasong Hospital Savings And Credit Co-Operative, 
 			   </div>
 			   <div style=" position: fixed;top:43px; left: 60px;font-size:20px">
-					COOPERATIVE LIMITED
+					Limited
 			   </div>
 
 

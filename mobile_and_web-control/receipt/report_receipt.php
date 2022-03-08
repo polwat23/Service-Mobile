@@ -219,11 +219,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขจังหวัดน่าน จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">480 หมู่ 5 ต.ผาสิงห์</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.เมืองน่าน จ.น่าน 55000 </p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร.  054-718846  , 088-5530032</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์โรงพยาบาลสรรพสิทธิประสงค์อุบลราชธานี  จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">247/1 อาคารสหกรณ์ออมทรัพย์ ชั้น5 ถ. สรรพสิทธิ์ ต.ในเมือง</p>
+				<p style="margin-top: -25px;font-size: 18px;">อ.เมืองอุบลราชธานี จ.อุบลราชธานี 34000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 045-255838-9 โทรสาร  045-26471 </p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.sunpasitcoop.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -273,40 +273,40 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 350px;text-align: left;font-size: 18px">
 			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 100px;text-align: center;font-size: 15px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
+			<div style="width: 110px;text-align: right;font-size: 15px;margin-left: 465px;">
 			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
+			<div style="width: 110px;text-align: right;font-size: 15px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
+			<div style="width: 120px;text-align: right;font-size: 15px;margin-left: 700px;">
 			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
 			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
+			<div style="width: 150px;text-align: right;font-size: 15px;margin-left: 814px;">
 			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
 			</div>
 			</div>';
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 350px;text-align: left;font-size: 15px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 100px;text-align: center;font-size: 15px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
+			<div style="width: 110px;text-align: right;font-size: 15px;margin-left: 465px;">
 			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
+			<div style="width: 110px;text-align: right;font-size: 15px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
+			<div style="width: 120px;text-align: right;font-size: 15px;margin-left: 700px;">
 			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
 			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
+			<div style="width: 150px;text-align: right;font-size: 15px;margin-left: 814px;">
 			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
 			</div>
 			</div>';
@@ -325,14 +325,30 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
-			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div>
+				<div style="height:30px;">
+					<div style="display:flex;">
+						<div style="width:500px;font-size: 18px;">
+							หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+						</div>
+					</div>
+				</div>
 			</div>
-			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/mg.jpg" width="100" height="50" style="margin-top:10px;"/>
-			</div>
-			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>
+			
+			<div style="position:absolute; border:0px solid  red ; width:100%; height:90px; ; bottom:0px;" >
+					<div style="display:flex">
+						<div>
+							<div  style="margin-left:300px">	<img src="../../resource/utility_icon/signature/payee.png" style="width:100px; height:50px; "></div>
+							<div style="margin-left:290px">( นางสาวศลิษา  ใจชอบ )</div>
+							<div style="margin-left:310px">ผู้รับเงิน</div>
+						</div>
+						<div style="margin-left:50%;">
+							<div style="margin-left:280px">	<img src="../../resource/utility_icon/signature/mg.png" style="width:100px; height:50px; "></div>
+							<div style="margin-left:290px;">( นางสุดา เชื้อสิงห์ )</div>
+							<div style="margin-left:300px;">ผู้จัดการ</div>
+						</div>
+					</div>
+				</div>
 			';
 
 	$dompdf = new Dompdf([

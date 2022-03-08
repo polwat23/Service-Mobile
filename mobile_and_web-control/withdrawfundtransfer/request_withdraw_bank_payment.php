@@ -76,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		if($wtdResult["RESULT"]){
 			$vccamtPenalty = $func->getConstant("accidfee_receive");
 			$dataAccFee = $wtdResult["DATA_CONT"];
-			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$coop_account_no,$vccamtPenalty,'FTX',
+			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$coop_account_no,$vccamtPenalty,'FEE',
 			$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$dataAccFee);
 			if($penaltyWtd["RESULT"]){
 				
