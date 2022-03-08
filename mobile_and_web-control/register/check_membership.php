@@ -20,9 +20,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	if($member_no != "00001057" && $member_no != "00002108" && $member_no != "00002875" && $member_no != "00003010"
-	&& $member_no != "00003369" && $member_no != "00004496" && $member_no != "00004497" && $member_no != "00004498"
-	&& $member_no != "00004861" && $member_no != "00004877" && $member_no != "00002156" && $member_no != "00000754"){
+	if($member_no != "00004491" && $member_no != "00005060" && $member_no != "00004378"){
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
