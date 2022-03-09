@@ -54,8 +54,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		//เงินกู้
 		$loanTypeAllow = array();
 		$loanTypeArr = array();
-		$getLoanType = $conoracle->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LNLOANTYPE");
-		$getLoanType->execute([':member_no' => $member_no]);
+		$getLoanType = $conoracle->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LNLOANTYPE ORDER BY LOANTYPE_CODE");
+		$getLoanType->execute();
 		while($rowLoanType = $getLoanType->fetch(PDO::FETCH_ASSOC)){
 			$newLoanTypeAcc = array();
 			$newLoanTypeAcc["LOAN_TYPE_CODE"] = $rowLoanType["LOANTYPE_CODE"];
@@ -83,7 +83,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$otherTypeAllow = array();
 		$otherTypeArr = array();
 		$getOther = $conmysql->prepare("SELECT trans_code_qr, trans_desc_qr FROM gcconttypetransqrcode where is_use = '1' AND trans_code_qr not in('001','002')");
-		$getOther->execute([':member_no' => $member_no]);
+		$getOther->execute();
 		while($rowOther = $getOther->fetch(PDO::FETCH_ASSOC)){
 			$newDeptTypeAcc = array();
 			$newDeptTypeAcc["ACC_TYPE_CODE"] = $rowOther["trans_code_qr"];
@@ -106,16 +106,24 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayQr["QRCODEGEN_ID"] = $rowQr["qrcodegen_id"];
 			$arrayQr["QRGENERATE"] = $rowQr["qrgenerate"];
 			$arrayQr["MEMBER_NO"] = $rowQr["member_no"];
+			if($rowQr["auto_adj"] == "0"){
+				$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname
+												FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												WHERE mb.member_no = :member_no");
+				$memberInfo->execute([':member_no' => $rowQr["member_no"]]);
+				$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+				$arrayQr["FULLNAME"] = $rowMember["PRENAME_SHORT"].$rowMember["MEMB_NAME"]." ".$rowMember["MEMB_SURNAME"];
+			}
 			$arrayQr["GENERATE_DATE"] = $lib->convertdate($rowQr["generate_date"],'d m Y',true);
-			$arrayQr["QRTRANSFER_AMT"] = number_format($rowQr["qrtransfer_amt"],2);
-			$arrayQr["QRTRANSFER_FEE"] = number_format($rowQr["qrtransfer_fee"],2);
+			$arrayQr["QRTRANSFER_AMT"] = $rowQr["qrtransfer_amt"] == "0" ? "-" : number_format($rowQr["qrtransfer_amt"],2);
+			$arrayQr["QRTRANSFER_FEE"] = $rowQr["qrtransfer_fee"] == "0" ? "-" : number_format($rowQr["qrtransfer_fee"],2);
 			$arrayQr["EXPIRE_DATE"] = $lib->convertdate($rowQr["expire_date"],'d m Y',true);
 			$arrayQr["TRANSFER_STATUS"] = $rowQr["transfer_status"];
 			$arrayQr["UPDATE_DATE"] = $lib->convertdate($rowQr["update_date"],'d m Y',true);
 			$arrayQr["TRANS_CODE_QR"] = $rowQr["trans_code_qr"];
 			$arrayQr["REF_ACCOUNT"] = $rowQr["ref_account"];
-			$arrayQr["QRTRANSFERDT_AMT"] = number_format($rowQr["qrtransferdt_amt"],2);
-			$arrayQr["QRTRANSFERDT_FEE"] = number_format($rowQr["qrtransferdt_fee"],2);
+			$arrayQr["QRTRANSFERDT_AMT"] = $rowQr["qrtransferdt_amt"] == "0" ? "-" : number_format($rowQr["qrtransferdt_amt"],2);
+			$arrayQr["QRTRANSFERDT_FEE"] = $rowQr["qrtransferdt_fee"] == "0" ? "-" : number_format($rowQr["qrtransferdt_fee"],2);
 			$arrayQr["TRANS_DESC_QR"] = $rowQr["trans_desc_qr"];
 			$arrayQr["TRANS_STATUS"] = $rowQr["trans_status"];
 			$arrayQr["AUTO_ADJ"] = $rowQr["auto_adj"];
@@ -177,30 +185,37 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		//เงินฝาก
 		$sum_dept_amt = 0;
 		$sum_dept_count = 0;
+		$arrayExtendDataDept = array();
 		if($dataComing["auto_adj"] != '0'){
 			$extendArr = array();
 			$extendArr["GENERATE_DATE"] = "";
 			$arrayExtendData[] = $extendArr;
 			$extendArr["GENERATE_DATE"] = "สรุปยอดรายการเงินฝาก(อัตโนมัติ)";
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataDept[] = $extendArr;
 			$extendArr = array();
 			$extendArr["GENERATE_DATE"] = "ประเภทรายการ";
 			$extendArr["EXPIRE_DATE"] = "จำนวนเงิน";
 			$extendArr["TRANS_STATUS"] = "จำนวนรายการ";
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataDept[] = $extendArr;
 			foreach ($deptTypeAllow as $dept) {
 				$extendArr = array();
-				$extendArr["GENERATE_DATE"] = $deptTypeArr[$dept]["ACC_TYPE_DESC"];
-				$extendArr["EXPIRE_DATE"] = number_format($deptTypeArr[$dept]["ACC_TYPE_AMT"],2);
-				$extendArr["TRANS_STATUS"] = number_format($deptTypeArr[$dept]["ACC_TYPE_COUNT"],0);
-				$sum_dept_amt += $deptTypeArr[$dept]["ACC_TYPE_AMT"];
-				$sum_dept_count += $deptTypeArr[$dept]["ACC_TYPE_COUNT"];
-				$arrayExtendData[] = $extendArr;
+				if($deptTypeArr[$dept]["ACC_TYPE_COUNT"] > 0){
+					$extendArr["GENERATE_DATE"] = $deptTypeArr[$dept]["ACC_TYPE_DESC"];
+					$extendArr["EXPIRE_DATE"] = $deptTypeArr[$dept]["ACC_TYPE_AMT"] == "0" ? "-" : number_format($deptTypeArr[$dept]["ACC_TYPE_AMT"],2);
+					$extendArr["TRANS_STATUS"] = $deptTypeArr[$dept]["ACC_TYPE_COUNT"] == "0" ? "-" : number_format($deptTypeArr[$dept]["ACC_TYPE_COUNT"],0);
+					$sum_dept_amt += $deptTypeArr[$dept]["ACC_TYPE_AMT"];
+					$sum_dept_count += $deptTypeArr[$dept]["ACC_TYPE_COUNT"];
+					$arrayExtendData[] = $extendArr;
+					$arrayExtendDataDept[] = $extendArr;
+				}
 			}
 			$extendArr = array();
-			$extendArr["EXPIRE_DATE"] = number_format($sum_dept_amt,2);
-			$extendArr["TRANS_STATUS"] = number_format($sum_dept_count,0);
+			$extendArr["EXPIRE_DATE"] = $sum_dept_amt == "0" ? "-" : number_format($sum_dept_amt,2);
+			$extendArr["TRANS_STATUS"] = $sum_dept_count == "0" ? "-" : number_format($sum_dept_count,0);
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataDept[] = $extendArr;
 		}
 		
 		//เงินกู้
@@ -209,12 +224,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$sum_loan_int = 0;
 		$sum_loan_fee = 0;
 		$sum_loan_count = 0;
+		$arrayExtendDataLoan = array();
 		if($dataComing["auto_adj"] != '0'){
 			$extendArr = array();
 			$extendArr["GENERATE_DATE"] = "";
 			$arrayExtendData[] = $extendArr;
 			$extendArr["GENERATE_DATE"] = "สรุปยอดรายการเงินกู้(อัตโนมัติ)";
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataLoan[] = $extendArr;
 			$extendArr = array();
 			$extendArr["GENERATE_DATE"] = "ประเภทรายการ";
 			$extendArr["EXPIRE_DATE"] = "จำนวนเงิน";
@@ -223,79 +240,108 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$extendArr["QRTRANSFERDT_FEE"] = "ค่าปรับ(ถ้ามี)";
 			$extendArr["TRANS_DESC_QR"] = "จำนวนรายการ";
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataLoan[] = $extendArr;
 			foreach ($loanTypeAllow as $loan) {
 				$extendArr = array();
-				$extendArr["GENERATE_DATE"] = $loanTypeArr[$loan]["LOAN_TYPE_DESC"];
-				$extendArr["EXPIRE_DATE"] = number_format($loanTypeArr[$loan]["LOAN_TYPE_AMT"],2);
-				$extendArr["TRANS_STATUS"] = number_format($loanTypeArr[$loan]["LOAN_TYPE_PRN"],2);
-				$extendArr["QRTRANSFERDT_AMT"] = number_format($loanTypeArr[$loan]["LOAN_TYPE_INT"],2);
-				$extendArr["QRTRANSFERDT_FEE"] = number_format($loanTypeArr[$loan]["LOAN_TYPE_FEE"],2);
-				$extendArr["TRANS_DESC_QR"] = number_format($loanTypeArr[$loan]["LOAN_TYPE_COUNT"],0);
-				$sum_loan_amt += $loanTypeArr[$loan]["LOAN_TYPE_AMT"];
-				$sum_loan_prn += $loanTypeArr[$loan]["LOAN_TYPE_PRN"];
-				$sum_loan_int += $loanTypeArr[$loan]["LOAN_TYPE_INT"];
-				$sum_loan_fee += $loanTypeArr[$loan]["LOAN_TYPE_FEE"];
-				$sum_loan_count += $loanTypeArr[$loan]["LOAN_TYPE_COUNT"];
-				$arrayExtendData[] = $extendArr;
+				$l_amt = $loanTypeArr[$loan]["LOAN_TYPE_AMT"];
+				$l_prn = $loanTypeArr[$loan]["LOAN_TYPE_PRN"];
+				$l_int = $loanTypeArr[$loan]["LOAN_TYPE_INT"];
+				$l_fee = $loanTypeArr[$loan]["LOAN_TYPE_INT"];
+				$l_count = $loanTypeArr[$loan]["LOAN_TYPE_COUNT"];
+				if($l_count > 0){
+					$extendArr["GENERATE_DATE"] = $loanTypeArr[$loan]["LOAN_TYPE_DESC"];
+					$extendArr["EXPIRE_DATE"] = $l_amt == "0" ? "-" : number_format($l_amt,2);
+					$extendArr["TRANS_STATUS"] =  $l_prn == "0" ? "-" : number_format($l_prn,2);
+					$extendArr["QRTRANSFERDT_AMT"] = $l_int == "0" ? "-" :  number_format($l_int,2);
+					$extendArr["QRTRANSFERDT_FEE"] =  $l_fee == "0" ? "-" : number_format($l_fee,2);
+					$extendArr["TRANS_DESC_QR"] = $l_count == "0" ? "-" : number_format($l_count,0);
+					$sum_loan_amt += $loanTypeArr[$loan]["LOAN_TYPE_AMT"];
+					$sum_loan_prn += $loanTypeArr[$loan]["LOAN_TYPE_PRN"];
+					$sum_loan_int += $loanTypeArr[$loan]["LOAN_TYPE_INT"];
+					$sum_loan_fee += $loanTypeArr[$loan]["LOAN_TYPE_FEE"];
+					$sum_loan_count += $loanTypeArr[$loan]["LOAN_TYPE_COUNT"];
+					$arrayExtendData[] = $extendArr;
+					$arrayExtendDataLoan[] = $extendArr;
+				}
 			}
 			$extendArr = array();
-			$extendArr["EXPIRE_DATE"] = number_format($sum_loan_amt,2);
-			$extendArr["TRANS_STATUS"] = number_format($sum_loan_prn,2);
-			$extendArr["QRTRANSFERDT_AMT"] = number_format($sum_loan_int,2);
-			$extendArr["QRTRANSFERDT_FEE"] = number_format($sum_loan_fee,2);
-			$extendArr["TRANS_DESC_QR"] = number_format($sum_loan_count,0);
+			$extendArr["EXPIRE_DATE"] = $sum_loan_amt == "0" ? "-" : number_format($sum_loan_amt,2);
+			$extendArr["TRANS_STATUS"] = $sum_loan_prn == "0" ? "-" : number_format($sum_loan_prn,2);
+			$extendArr["QRTRANSFERDT_AMT"] = $sum_loan_int == "0" ? "-" : number_format($sum_loan_int,2);
+			$extendArr["QRTRANSFERDT_FEE"] = $sum_loan_fee == "0" ? "-" : number_format($sum_loan_fee,2);
+			$extendArr["TRANS_DESC_QR"] = $sum_loan_count == "0" ? "-" : number_format($sum_loan_count,0);
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataLoan[] = $extendArr;
 		}
 		
 		//รายการอื่นๆ
 		$sum_other_amt = 0;
 		$sum_other_count = 0;
+		$arrayExtendDataExt = array();
 		if($dataComing["auto_adj"] != '1'){
 			$extendArr = array();
 			$extendArr["GENERATE_DATE"] = "";
 			$arrayExtendData[] = $extendArr;
-			$extendArr["GENERATE_DATE"] = "สรุปยอดรายอื่นๆ(ไม่อัตโนมัติ)";
+			$extendArr["GENERATE_DATE"] = "สรุปยอดรายการอื่นๆ(ไม่อัตโนมัติ)";
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataExt[] = $extendArr;
 			$extendArr = array();
 			$extendArr["GENERATE_DATE"] = "ประเภทรายการ";
 			$extendArr["EXPIRE_DATE"] = "จำนวนเงิน";
 			$extendArr["TRANS_STATUS"] = "จำนวนรายการ";
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataExt[] = $extendArr;
 			foreach ($otherTypeAllow as $other) {
 				$extendArr = array();
-				$extendArr["GENERATE_DATE"] = $otherTypeArr[$other]["ACC_TYPE_DESC"];
-				$extendArr["EXPIRE_DATE"] = number_format($otherTypeArr[$other]["ACC_TYPE_AMT"],2);
-				$extendArr["TRANS_STATUS"] = number_format($otherTypeArr[$other]["ACC_TYPE_COUNT"],0);
-				$sum_other_amt += $otherTypeArr[$other]["ACC_TYPE_AMT"];
-				$sum_other_count += $otherTypeArr[$other]["ACC_TYPE_COUNT"];
-				$arrayExtendData[] = $extendArr;
+				$o_amt = $otherTypeArr[$other]["ACC_TYPE_AMT"];
+				$o_count = $otherTypeArr[$other]["ACC_TYPE_COUNT"];
+				if($o_count > 0){
+					$extendArr["GENERATE_DATE"] = $otherTypeArr[$other]["ACC_TYPE_DESC"];
+					$extendArr["EXPIRE_DATE"] = $o_amt == "0" ? "-" : number_format($o_amt,2);
+					$extendArr["TRANS_STATUS"] = $o_count == "0" ? "-" : number_format($o_count,0);
+					$sum_other_amt += $otherTypeArr[$other]["ACC_TYPE_AMT"];
+					$sum_other_count += $otherTypeArr[$other]["ACC_TYPE_COUNT"];
+					$arrayExtendData[] = $extendArr;
+					$arrayExtendDataExt[] = $extendArr;
+				}
 			}
 			$extendArr = array();
-			$extendArr["EXPIRE_DATE"] = number_format($sum_other_amt,2);
-			$extendArr["TRANS_STATUS"] = number_format($sum_other_count,0);
+			$extendArr["EXPIRE_DATE"] = $sum_other_amt == "0" ? "-" : number_format($sum_other_amt,2);
+			$extendArr["TRANS_STATUS"] = $sum_other_count == "0" ? "-" : number_format($sum_other_count,0);
 			$arrayExtendData[] = $extendArr;
+			$arrayExtendDataExt[] = $extendArr;
 		}
 		//สรุป
+		$arrayExtendDataSum = array();
 		$extendArr = array();
 		$extendArr["GENERATE_DATE"] = "";
+		$arrayExtendDataSum[] = $extendArr;
+		$extendArr["GENERATE_DATE"] = "สรุปยอดรายการทั้งหมด";
 		$arrayExtendData[] = $extendArr;
-		$extendArr["GENERATE_DATE"] = "สรุปยอดรายการเงินฝาก(อัตโนมัติ)";
-		$arrayExtendData[] = $extendArr;
+		$arrayExtendDataSum[] = $extendArr;
 		$extendArr = array();
 		$extendArr["GENERATE_DATE"] = "ประเภทรายการ";
 		$extendArr["EXPIRE_DATE"] = "จำนวนเงิน";
 		$extendArr["TRANS_STATUS"] = "จำนวนรายการ";
 		$arrayExtendData[] = $extendArr;
+		$arrayExtendDataSum[] = $extendArr;
 		$extendArr = array();
 		$extendArr["GENERATE_DATE"] = "สรุปรวม";
-		$extendArr["EXPIRE_DATE"] = number_format($sum_dept_amt + $sum_loan_amt + $sum_other_amt,2);
-		$extendArr["TRANS_STATUS"] = number_format($sum_dept_count + $sum_loan_count + $sum_other_count,0);
+		$sum_all_amt = $sum_dept_amt + $sum_loan_amt + $sum_other_amt;
+		$sum_all_count = $sum_dept_count + $sum_loan_count + $sum_other_count;
+		$extendArr["EXPIRE_DATE"] = $sum_all_amt == "0" ? "-" : number_format($sum_all_amt,2);
+		$extendArr["TRANS_STATUS"] = $sum_all_count == "0" ? "-" : number_format($sum_all_count,0);
 		$arrayExtendData[] = $extendArr;
+		$arrayExtendDataSum[] = $extendArr;
 		
 		$arrayResult['QRGENERATELIST'] = $arrayGrpAll;
 		$arrayResult['EXTEND'] = $arrayExtendData;
+		$arrayResult['EXTEND_DEPT'] = $arrayExtendDataDept;
+		$arrayResult['EXTEND_LOAN'] = $arrayExtendDataLoan;
+		$arrayResult['EXTEND_EXT'] = $arrayExtendDataExt;
+		$arrayResult['EXTEND_SUM'] = $arrayExtendDataSum;
 		$arrayResult['LOAN_DATA'] = $arrayLoanData;
-		$arrayResult['fetchQrgenerateList'] = $fetchQrgenerateList;
+		$arrayResult['loanTypeAllow'] = $loanTypeAllow;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{
