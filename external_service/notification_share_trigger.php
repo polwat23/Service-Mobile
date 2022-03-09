@@ -16,10 +16,10 @@ while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
 	$arrayStmItem[] = "'".$rowStmItemType["share_itemtype_code"]."'";
 }
 $templateMessage = $func->getTemplateSystem('ShareInfo',1);
-$fetchDataSTM = $conmssql->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMBER_NO,(SHS.SHARE_AMOUNT * 10) AS AMOUNT,
-									(SHS.SHARESTK_AMT * 10) AS SHARE_BALANCE,SHI.SHRITEMTYPE_DESC
-									FROM SHSHARESTATEMENT SHS LEFT JOIN SHUCFSHRITEMTYPE SHI ON SHS.SHRITEMTYPE_CODE = SHI.SHRITEMTYPE_CODE
-									WHERE SHS.OPERATE_DATE BETWEEN (GETDATE() - 2) and GETDATE() AND (SHS.sync_notify_flag IS NULL OR SHS.sync_notify_flag = '0') AND SHS.SHRITEMTYPE_CODE IN(".implode(',',$arrayStmItem).")");
+$fetchDataSTM = $conoracle->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMBER_NO,(SHS.SHARE_AMOUNT * 10) AS AMOUNT,
+												(SHS.SHARESTK_AMT * 10) AS SHARE_BALANCE,SHI.SHRITEMTYPE_DESC
+												FROM SHSHARESTATEMENT SHS LEFT JOIN SHUCFSHRITEMTYPE SHI ON SHS.SHRITEMTYPE_CODE = SHI.SHRITEMTYPE_CODE
+												WHERE SHS.OPERATE_DATE BETWEEN (SYSDATE - 2) and SYSDATE AND SHS.SYNC_NOTIFY_FLAG = '0' AND SHS.SHRITEMTYPE_CODE IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
@@ -43,7 +43,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conmssql->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
+				$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
@@ -71,7 +71,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conmssql->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
+				$updateSyncFlag = $conoracle->prepare("UPDATE shsharestatement SET sync_notify_flag = '1' WHERE member_no = :member_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
 					':member_no' => $rowSTM["MEMBER_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]

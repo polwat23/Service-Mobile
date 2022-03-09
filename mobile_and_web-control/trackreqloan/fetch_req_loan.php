@@ -6,14 +6,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
+															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
 															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
 			$fetchReqLoan->execute([
 				':member_no' => $payload["member_no"],
 				':req_status' => $dataComing["req_status"]
 			]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-				$getLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
+				$getLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 				$getLoanType->execute([':loantype_code' => $rowReqLoan["loantype_code"]]);
 				$rowLoan = $getLoanType->fetch(PDO::FETCH_ASSOC);
 				$arrayReq = array();
@@ -32,17 +32,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
-				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
-															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
+															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
 			$fetchReqLoan->execute([':member_no' => $payload["member_no"]]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
-				$getLoanType = $conmssql->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
+				$getLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 				$getLoanType->execute([':loantype_code' => $rowReqLoan["loantype_code"]]);
 				$rowLoan = $getLoanType->fetch(PDO::FETCH_ASSOC);
 				$arrayReq = array();
@@ -61,21 +60,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
-				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
 			}
 		}
-		
-		$fetchReqStatus = $conmysql->prepare("SELECT id_reqstatus, req_value, req_desc
-											FROM gcconstantreqstatus WHERE menu_component = 'LoanRequestTrack' AND is_use = '1'");
-		$fetchReqStatus->execute();
-		while($rowReqStatus = $fetchReqStatus->fetch(PDO::FETCH_ASSOC)){
-			$filter[] = ["STATUS" => $rowReqStatus["req_value"], "DESC" => $rowReqStatus["req_desc"]];
-		}
-		
 		$arrayResult['REQ_LIST'] = $arrGrpReq;
-		$arrayResult['FILTER'] = $filter;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

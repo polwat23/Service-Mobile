@@ -13,15 +13,15 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getCardPerson = $conmssql->prepare("SELECT CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conmssql->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
+			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
 																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
 																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
-																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN CONVERT(varchar, :datebefore, 23) and CONVERT(varchar, :dateafter, 23)
+																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
 																		ORDER BY dps.SEQ_NO DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
@@ -45,6 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
 			$arrayGenPDF = generatePDFSTM($dompdf,$arrayData,$lib,$passwordPDF);
+			$arrayResult['PATH'] = $arrayGenPDF;
 			if($arrayGenPDF["RESULT"]){
 				$arrayAttach[] = $arrayGenPDF["PATH"];
 			}
@@ -139,11 +140,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  }
 		  th {
 			text-align:center;
-			color:black;
+			color:white;
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:rgb(204, 255, 0);
+			background-color:#0C6DBF;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -189,15 +190,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px; margin-top:17px"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์ข้าราชการสำนักงานอัยการสูงสุด จำกัด
+					สหกรณ์ออมทรัพย์ อาร์ วี คอนเน็กซ์ จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					THE OFFICE OF THE ATTORNEY GENERAL SAVINGS
-			   </div>
-			   <div style=" position: fixed;top:43px; left: 60px;font-size:20px">
-					 CO-OPERATIVE LTD.
+					RV CONNEX SAVING AND CREDIT COOPERATIVE, LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -302,11 +300,14 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		'isRemoteEnabled' => true
 	]);
 
-
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
+	$pathfile = __DIR__.'/../../resource/pdf/statement';
+	if(!file_exists($pathfile)){
+		mkdir($pathfile, 0777, true);
+	}
+	$pathOutput = $pathfile."/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
 	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();

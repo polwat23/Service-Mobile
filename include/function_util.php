@@ -6,12 +6,12 @@ use Connection\connection;
 
 class functions {
 		private $con;
-		private $conmssql;
+		private $conora;
 		
 		function __construct() {
 			$connection = new connection();
 			$this->con = $connection->connecttomysql();
-			$this->conmssql = $connection->connecttosqlserver();
+			$this->conora = $connection->connecttooracle();
 		}
 		
 		public function checkLogin($id_token) {
@@ -198,7 +198,7 @@ class functions {
 				]);
 			}else{
 				$checkPermission = $this->con->prepare("SELECT gm.id_menu FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu and (gm2.menu_channel = :channel OR gm2.menu_channel = 'both') 
-																,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
+										,(SELECT menu_status FROM gcmenu WHERE menu_component = 'System') menu_system
 										WHERE gm.menu_component = :menu_component and (gm2.menu_status = '1' OR gm.menu_parent IN('0','-1','-2','-8','-9'))
 										 and gm.menu_status = '1' and gm.menu_permission IN (".implode(',',$permission).") and (gm.menu_channel = :channel OR gm.menu_channel = 'both') and menu_system.menu_status = '1'");
 				$checkPermission->execute([
@@ -465,7 +465,7 @@ class functions {
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 					}
 					if(sizeof($arrayMemberTemp) > 0){
-						$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
 																resign_status = 0 and MEM_TELMOBILE IS NOT NULL");
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
@@ -479,10 +479,10 @@ class functions {
 					}
 				}else{
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
 						$fetchDataOra->execute();
 					}else{
-						$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
 						$fetchDataOra->execute([':member_no' => $member_no]);
 					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
@@ -502,7 +502,7 @@ class functions {
 					}
 				}
 			}else{
-				$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0'");
+				$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0'");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMT = array();
@@ -792,9 +792,9 @@ class functions {
 					if($rowPrefix["connection_db"] == 'mysql'){
 						$getRunning = $this->con->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'oracle'){
-						//$getRunning = $this->conora->prepare($rowPrefix["query_string"]);
+						$getRunning = $this->conora->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'mssql'){
-						$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
+						//$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
 					}
 					$getRunning->execute();
 					$rowRunning = $getRunning->fetch(\PDO::FETCH_ASSOC);
@@ -803,9 +803,9 @@ class functions {
 					if($rowPrefix["connection_db"] == 'mysql'){
 						$getData = $this->con->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'oracle'){
-						//$getData = $this->conora->prepare($rowPrefix["query_string"]);
+						$getData = $this->conora->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'mssql'){
-						$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
+						//$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
 					}
 					$getData->execute();
 					$rowData = $getData->fetch(\PDO::FETCH_ASSOC);

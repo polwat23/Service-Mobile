@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayLoanCheck = $rowLoantypeCheck;
 			$arrayLoanCheckGrp[] = $arrayLoanCheck;
 		}
-		$fetchLoantype = $conmssql->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LNLOANTYPE ORDER BY LOANTYPE_CODE ASC");
+		$fetchLoantype = $conoracle->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LNLOANTYPE ORDER BY LOANTYPE_CODE ASC");
 		$fetchLoantype->execute();
 		while($rowLoantype = $fetchLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoantype = array();

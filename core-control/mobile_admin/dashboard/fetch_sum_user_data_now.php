@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserloginMobile->execute();
 	    $rowUserloginMobile = $fetchUserloginMobile->fetch(PDO::FETCH_ASSOC);
 		
-		$fetchUserNotRegis = $conmssql->prepare("SELECT COUNT(member_no) AS C_USERNOTREGIS FROM mbmembmaster WHERE resign_status = '0' ");
+		$fetchUserNotRegis = $conoracle->prepare("SELECT COUNT(member_no) AS C_USERNOTREGIS FROM mbmembmaster WHERE resign_status = '0' ");
 		$fetchUserNotRegis->execute();
 		$rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC);
 		

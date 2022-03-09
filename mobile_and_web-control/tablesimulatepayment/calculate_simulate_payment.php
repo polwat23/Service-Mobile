@@ -15,11 +15,10 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		$sumInt = 0;
 		$sumPayment = 0;
 		$period_payment = isset($dataComing['period_payment']) ? (float) preg_replace('/,/','',$dataComing['period_payment']) : 0;
-		$getRoundType = $conmssql->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
+		$getRoundType = $conoracle->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
 		$getRoundType->execute();
 		$rowRoundType = $getRoundType->fetch(PDO::FETCH_ASSOC);
-		$rowRoundType["ROUND_TYPE"] = 1;
- 		$getConstantYear = $conmssql->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
+		$getConstantYear = $conoracle->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
 		$getConstantYear->execute();
 		$rowConstant = $getConstantYear->fetch(PDO::FETCH_ASSOC);
 		if($rowConstant["DAYINYEAR"] == 0){
@@ -27,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		}else{
 			$dayinYear = $rowConstant["DAYINYEAR"];
 		}
-		$getPayRound = $conmssql->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
+		$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
 		$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 		$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
 		if($lib->checkCompleteArgument(['period'],$dataComing)){
@@ -110,29 +109,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
 				if (($payment_sumbalance) < $pay_period) {
-					if($i == $period){
-						$prn_amount = $payment_sumbalance;
-					}else{
-						if($payment_sumbalance % 100 > 0){
-							$prn_amount = floor($payment_sumbalance + (100 - ($payment_sumbalance % 100)));
-						}else{
-							$prn_amount = $payment_sumbalance;
-						}
-					}
+					$prn_amount = $payment_sumbalance;
 				}else{
-					if($i == $period){
-						$prn_amount = $pay_period;
-					}else{
-						if($pay_period % 100 > 0){
-							$prn_amount = floor($pay_period + (100 - ($pay_period % 100)));
-						}else{
-							$prn_amount = $pay_period;
-						}
-					}
+					$prn_amount = $pay_period;
 				}
 				$periodPayment = $prn_amount + $period_int;
-				$sumInt += $period_int;
-				$sumPayment += $periodPayment;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
@@ -160,28 +141,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					$dayinYear = $rowConstant["DAYINYEAR"];
 				}
 				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
-				$payPeriodRaw = $pay_period - $period_int;
-				if($i == $period){
-					$prn_amount = $payPeriodRaw;
-				}else{
-					if($payPeriodRaw % 100 > 0){
-						$prn_amount = floor($payPeriodRaw + (100 - ($payPeriodRaw % 100)));
-					}else{
-						$prn_amount = $payPeriodRaw;
-					}
-				}
+				$prn_amount = $pay_period - $period_int;
 				
 				
 				if (($payment_sumbalance) < $pay_period) {
-					if($i == $period){
-						$prn_amount = $payment_sumbalance;
-					}else{
-						if($payment_sumbalance % 100 > 0){
-							$prn_amount = floor($payment_sumbalance + (100 - ($payment_sumbalance % 100)));
-						}else{
-							$prn_amount = $payment_sumbalance;
-						}
-					}
+				  $prn_amount = $payment_sumbalance;
 				}
 				$periodPaymentRaw = $prn_amount + $period_int;
 				if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
@@ -211,13 +175,13 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 				$payment_sumbalance = $payment_sumbalance - ($prn_amount);
 				$sumInt += $period_int;
-				$sumPayment += $periodPaymentRaw;
+				$sumPayment += $periodPayment;
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
 				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
 				$arrPaymentPerPeriod["PERIOD"] = $i;
 				$arrPaymentPerPeriod["INTEREST"] = number_format($period_int,2);
-				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPaymentRaw,2);
+				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment,2);
 				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
 			}
 			if($prn_amount > 0){
@@ -238,11 +202,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_desc" => " Argument ú "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$message_error = " ".$filename."  Argument ú "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

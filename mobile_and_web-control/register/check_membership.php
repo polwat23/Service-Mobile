@@ -29,8 +29,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conmssql->prepare("SELECT mb.memb_name as MEMB_NAME,mb.memb_surname as MEMB_SURNAME,mb.resign_status as RESIGN_STATUS
-											,mp.prename_desc as PRENAME_DESC,rtrim(ltrim(mb.card_person)) as CARD_PERSON
+		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											WHERE mb.member_no = :member_no");
 		$checkValid->execute([

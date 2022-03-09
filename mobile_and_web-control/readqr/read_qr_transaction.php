@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 						$arrayResult['FROM_IMG'] = $config['URL_SERVICE'].$rowDataBind["bank_logo_path"];
 					}
 				}else{
-					$getAccount = $conmssql->prepare("SELECT dt.depttype_desc,dp.deptaccount_name
+					$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name
 												FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 												WHERE dp.deptaccount_no = :deptaccount_no and dp.deptclose_status <> 1");
 					$getAccount->execute([':deptaccount_no' => $rowDataTrans["from_account"]]);
@@ -129,7 +129,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 							$arrayResult['TO_IMG'] = $config['URL_SERVICE'].$rowDataBind["bank_logo_path"];
 						}
 					}else{
-						$getAccount = $conmssql->prepare("SELECT dt.depttype_desc,dp.deptaccount_name
+						$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name
 													FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 													WHERE dp.deptaccount_no = :deptaccount_no and dp.deptclose_status <> 1");
 						$getAccount->execute([':deptaccount_no' => $rowDataTrans["destination"]]);
@@ -139,7 +139,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 						$arrayResult['TO_ACCOUNT_NO_FORMAT_HIDE'] = $lib->formataccount_hidden($arrayResult["TO_ACCOUNT_NO_FORMAT"],$formatDeptHidden);
 					}
 				}else{
-					$getAccount = $conmssql->prepare("SELECT dt.depttype_desc,dp.deptaccount_name
+					$getAccount = $conoracle->prepare("SELECT dt.depttype_desc,dp.deptaccount_name
 												FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
 												WHERE dp.deptaccount_no = :deptaccount_no and dp.deptclose_status <> 1");
 					$getAccount->execute([':deptaccount_no' => $rowDataTrans["from_account"]]);
@@ -149,7 +149,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 					$arrayResult['TO_ACCOUNT_NO_FORMAT_HIDE'] = $lib->formataccount($arrayResult["TO_ACCOUNT_NO_FORMAT"],$formatDeptHidden);
 				}
 			}else if($rowDataTrans["destination_type"] == '2'){
-				$getMemberName = $conmssql->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+				$getMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													WHERE mb.member_no = :member_no");
 				$getMemberName->execute([':member_no' => $rowDataTrans["destination"]]);
@@ -163,7 +163,7 @@ if($lib->checkCompleteArgument(['menu_component','transaction_no'],$dataComing))
 														FROM gcrepayloan WHERE ref_no = :ref_no");
 					$getDataPayLoan->execute([':ref_no' => $dataComing["transaction_no"]]);
 					$rowDataPay = $getDataPayLoan->fetch(PDO::FETCH_ASSOC);
-					$getLoantype = $conmssql->prepare("SELECT LT.LOANTYPE_DESC
+					$getLoantype = $conoracle->prepare("SELECT LT.LOANTYPE_DESC
 														FROM lncontmaster ln LEFT JOIN lnloantype lt ON ln.loantype_code = lt.loantype_code
 														WHERE ln.loancontract_no = :loancontract_no");
 					$getLoantype->execute([':loancontract_no' => $rowDataPay["loancontract_no"]]);

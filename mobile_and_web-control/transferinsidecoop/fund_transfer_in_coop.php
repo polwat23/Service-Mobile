@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
 		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
 		$ref_no = date('YmdHis').substr($from_account_no,-3);
+		$amount_receive = $dataComing["amt_transfer"] - $dataComing["penalty_amt"];
 		try {
 			$argumentWS = [
 				"as_wspass" => $config["WS_STRC_DB"],
@@ -23,19 +24,19 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$slip_no = $resultWS->of_withdraw_deposit_transResult;
 			$arrayResult['SLIP_NO'] = $slip_no;
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,penalty_amt,result_transaction,member_no,
-															ref_no_1,id_userlogin,ref_no_source)
-															VALUES(:ref_no,'WTB',:from_account,:destination,'1',:amount,:penalty_amt,'1',:member_no,:ref_no1,:id_userlogin,:ref_no_source)");
+															,amount,penalty_amt,amount_receive,trans_flag,result_transaction,member_no,
+															coop_slip_no,id_userlogin,ref_no_source)
+															VALUES(:ref_no,'WTB',:from_account,:destination,'1',:amount,:penalty_amt,:amount_receive,'-1','1',:member_no,:slip_no,:id_userlogin,:slip_no)");
 			$insertTransactionLog->execute([
 				':ref_no' => $ref_no,
 				':from_account' => $from_account_no,
 				':destination' => $to_account_no,
 				':amount' => $dataComing["amt_transfer"],
 				':penalty_amt' => $dataComing["penalty_amt"],
+				':amount_receive' => $amount_receive,
 				':member_no' => $payload["member_no"],
-				':ref_no1' => $from_account_no,
-				':id_userlogin' => $payload["id_userlogin"],
-				':ref_no_source' => $slip_no
+				':slip_no' => $slip_no,
+				':id_userlogin' => $payload["id_userlogin"]
 			]);
 			$arrToken = $func->getFCMToken('person',array($payload["member_no"]));
 			$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
@@ -60,16 +61,16 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			require_once('../../include/exit_footer.php');
 		}catch(SoapFault $e){
 			$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-															,amount,penalty_amt,result_transaction,cancel_date,member_no,ref_no_1,id_userlogin)
-															VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,'-9',NOW(),:member_no,:ref_no1,:id_userlogin)");
+															,amount,penalty_amt,amount_receive,result_transaction.trans_flag,cancel_date,member_no,id_userlogin)
+															VALUES(:ref_no,'WTX',:from_account,:destination,'1',:amount,:penalty_amt,:amount_receive,'-1','-9',NOW(),:member_no,:id_userlogin)");
 			$insertTransactionLog->execute([
 				':ref_no' => $ref_no,
 				':from_account' => $from_account_no,
 				':destination' => $to_account_no,
 				':amount' => $dataComing["amt_transfer"],
 				':penalty_amt' => $dataComing["penalty_amt"],
+				':amount_receive' => $amount_receive,
 				':member_no' => $payload["member_no"],
-				':ref_no1' => $from_account_no,
 				':id_userlogin' => $payload["id_userlogin"]
 			]);
 			$arrayResult["RESPONSE_CODE"] = 'WS8001';
@@ -77,6 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => date('Y-m-d H:i:s'),
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -90,6 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => date('Y-m-d H:i:s'),
 					':deptaccount_no' => $from_account_no,
 					':amt_transfer' => $dataComing["amt_transfer"],
 					':penalty_amt' => $dataComing["penalty_amt"],
@@ -115,6 +118,16 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		
 	}
 }else{
+	$filename = basename(__FILE__, '.php');
+	$logStruc = [
+		":error_menu" => $filename,
+		":error_code" => "WS4004",
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+	];
+	$log->writeLog('errorusage',$logStruc);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;

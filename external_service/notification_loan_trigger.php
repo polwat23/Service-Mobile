@@ -16,11 +16,11 @@ while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
 	$arrayStmItem[] = "'".$rowStmItemType["loan_itemtype_code"]."'";
 }
 $templateMessage = $func->getTemplateSystem('LoanInfo',1);
-$fetchDataSTM = $conmssql->prepare("SELECT LUT.LOANITEMTYPE_DESC,LCN.LOANCONTRACT_NO,LCN.OPERATE_DATE,LCM.MEMBER_NO,LCN.SEQ_NO,
-									LCN.PRINCIPAL_PAYMENT,LCN.INTEREST_PAYMENT,LCN.PRINCIPAL_BALANCE
+$fetchDataSTM = $conoracle->prepare("SELECT lut.loanitemtype_desc,lcn.loancontract_no,lcn.OPERATE_DATE,lcm.member_no,lcn.seq_no,
+									lcn.principal_payment,lcn.interest_payment,lcn.principal_balance
 									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
 									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
-									WHERE lcn.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (lcn.sync_notify_flag IS NULL OR lcn.sync_notify_flag = '0') and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
+									WHERE lcn.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and lcn.sync_notify_flag = '0' and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
@@ -46,7 +46,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotify($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conmssql->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
+				$updateSyncFlag = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
 					':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]
@@ -76,7 +76,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 			if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 				$func->insertHistory($arrPayloadNotify,'2');
-				$updateSyncFlag = $conmssql->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
+				$updateSyncFlag = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE loancontract_no = :loancontract_no and seq_no = :seq_no");
 				$updateSyncFlag->execute([
 					':loancontract_no' => $rowSTM["LOANCONTRACT_NO"],
 					':seq_no' => $rowSTM["SEQ_NO"]

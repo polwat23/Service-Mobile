@@ -19,8 +19,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
-													mb.MEMBER_DATE,MPN.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
+			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+													mb.member_date,mps.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
 													mb.ADDRESS_SOI as ADDR_SOI,
@@ -33,11 +33,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
+													LEFT JOIN mbucfposition mps ON mb.position_code = mps.position_code
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.District_CODE = MBD.DISTRICT_CODE
+													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
-													LEFT JOIN MBUCFPOSITION MPN ON mb.POSITION_CODE = MPN.POSITION_CODE
 													WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);

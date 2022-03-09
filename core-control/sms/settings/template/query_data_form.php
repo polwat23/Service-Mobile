@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
 		if(strtolower(substr(trim($dataComing["query_message_spc_"]),0,6)) === "select"){
 			$arrayData = array();
 			$arrColumn = array();
-			$queryDataForm = $conmssql->prepare($dataComing["query_message_spc_"]);
+			$queryDataForm = $conoracle->prepare($dataComing["query_message_spc_"]);
 			$queryDataForm->execute();
 			while($rowData = $queryDataForm->fetch(PDO::FETCH_ASSOC)){
 				$arrDataForm = array();
