@@ -6,10 +6,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$showSplitSlip = $func->getConstant('show_split_slip_report');
 		$arrGroupDetail = array();
-		$getDetailKP = $conmssql->prepare("SELECT 
+		$getKpSlipNo = $conoracle->prepare("SELECT kpslip_no from kpmastreceive where member_no = :member_no and recv_period = :recv_period");
+		$getKpSlipNo->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
+		$getDetailKP = $conoracle->prepare("SELECT 
 													CASE kut.system_code 
-													WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-													WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
+													WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+													WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 													ELSE kut.keepitemtype_desc
 													END as TYPE_DESC,
 													kpd.SEQ_NO,
@@ -22,20 +28,22 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 														WHEN 'DEP' THEN kpd.description
 														WHEN 'LON' THEN kpd.loancontract_no
 													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.PERIOD,
-													ISNULL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													ISNULL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													ISNULL(kpd.principal_payment,0) AS PRN_BALANCE,
-													ISNULL(kpd.interest_payment,0) AS INT_BALANCE
+													kpd.period,
+													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+													NVL(kpd.interest_payment,0) AS INT_BALANCE
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+													and kpd.kpslip_no = :kpslip
 													ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
-			':recv_period' => $dataComing["recv_period"]
+			':recv_period' => $dataComing["recv_period"],
+			':kpslip' => $rowKp["KPSLIP_NO"]
 		]);
 		while($rowDetail = $getDetailKP->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
@@ -46,7 +54,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
@@ -55,9 +62,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
@@ -67,6 +73,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			}
+			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 			$arrGroupDetail[] = $arrDetail;
 		}

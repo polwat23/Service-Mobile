@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['pin'],$dataComing)){
-	$checkResign = $conmssql->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+	$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
 	$checkResign->execute([':member_no' => $payload["member_no"]]);
 	$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 	if($rowResign["RESIGN_STATUS"] == '1'){
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 	if($dataComing["channel"] == "mobile_app" && isset($dataComing["is_root"])){
 		if($dataComing["is_root"] == "1"){
 			$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist,new_id_token,old_id_token)
-												VALUES(:unique_id,:member_no,'1',:id_token,:id_token)");
+					VALUES(:unique_id,:member_no,'1',:id_token,:id_token)");
 			if($insertBlackList->execute([
 				':unique_id' => $dataComing["unique_id"],
 				':member_no' => $payload["member_no"],

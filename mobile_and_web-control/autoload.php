@@ -25,20 +25,27 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}else if($header_key == "HTTP_LANG_LOCALE") {
 		$headers["Lang_locale"] = $header_value;
+	}else if($header_key == "HTTP_TRANSACTION_SCHEDULER") {
+		$headers["transaction_scheduler"] = $header_value;
 	}
 }
-if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
-   ob_start("ob_gzhandler");
-}else{
-   ob_start();
+
+if(empty($headers["transaction_scheduler"])){
+	if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
+	   ob_start("ob_gzhandler");
+	}else{
+	   ob_start();
+	}
 }
 
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
+require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
+require_once(__DIR__.'/../include/cal_deposit.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
@@ -46,6 +53,7 @@ use Utility\Library;
 use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
+use CalculateDeposit\CalculateDep;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
@@ -58,6 +66,7 @@ $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
 $log = new insertLog();
+$cal_dep = new CalculateDep();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
@@ -72,14 +81,13 @@ if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 	http_response_code(500);
 	
 }
-if(is_array($conmssql) && $conmssql["RESULT"] == FALSE && $conmssql["IS_OPEN"] == '1'){
-	$message_error = $conmssql["MESSAGE"]." ".$conmssql["ERROR"];
+if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"] == '1'){
+	$message_error = $conoracle["MESSAGE"]." ".$conoracle["ERROR"];
 	$lib->sendLineNotify($message_error);
 	$func->MaintenanceMenu("System");
 	http_response_code(500);
 	
 }
-
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
 	// Complete Argument
@@ -144,7 +152,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							}
 							$arrayResult['NEW_TOKEN'] = $regen_token["ACCESS_TOKEN"];
 						}
-
 					}catch (ValidateException $e) {
 						$errorCode = $e->getCode();
 						if($errorCode === 3){

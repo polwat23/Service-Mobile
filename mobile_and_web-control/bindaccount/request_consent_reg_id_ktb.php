@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 				$deleteAccForPending->execute();
 			}
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-			$fetchMemberName = $conmssql->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
 													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
 													WHERE MB.member_no = :member_no");
 			$fetchMemberName->execute([
@@ -42,8 +42,8 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token) 
-															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:bank_account_name,:bank_account_name_en,'006',:id_token)");
+			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token,account_payfee) 
+															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:bank_account_name,:bank_account_name_en,'006',:id_token,:acc_payfee)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
 				':member_no' => $payload["member_no"],
@@ -51,7 +51,8 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 				':citizen_id' => $dataComing["citizen_id"],
 				':bank_account_name' => $account_name_th,
 				':bank_account_name_en' => $account_name_th,
-				':id_token' => $payload["id_token"]
+				':id_token' => $payload["id_token"],
+				':acc_payfee' => preg_replace('/-/','',$dataComing["account_payfee"])
 			])){
 				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/ktb/request_reg_id_for_consent',$arrSendData);
 				if(!$responseAPI["RESULT"]){
@@ -123,7 +124,8 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 						':citizen_id' => $dataComing["citizen_id"],
 						':bank_account_name' => $account_name_th,
 						':bank_account_name_en' => $account_name_th,
-						':id_token' => $payload["id_token"]
+						':id_token' => $payload["id_token"],
+						':acc_payfee' => preg_replace('/-/','',$dataComing["account_payfee"])
 					]),
 					':query_error' => $insertPendingBindAccount->queryString,
 					':query_flag' => '-9'
@@ -136,7 +138,8 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 					':citizen_id' => $dataComing["citizen_id"],
 					':bank_account_name' => $account_name_th,
 					':bank_account_name_en' => $account_name_th,
-					':id_token' => $payload["id_token"]
+					':id_token' => $payload["id_token"],
+					':acc_payfee' => preg_replace('/-/','',$dataComing["account_payfee"])
 				]);
 				$lib->sendLineNotify($message_error);
 				$func->MaintenanceMenu($dataComing["menu_component"]);

@@ -10,10 +10,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];
 		}
 		$arrayGroup = array();
-		$fetchUserNotRegis = $conmssql->prepare("
-SELECT mb.MEMBER_NO,mp.PRENAME_DESC,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.MEMBER_DATE,mb.MEM_TELMOBILE as MEM_TELMOBILE 
-FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-WHERE mb.resign_status = '0';");
+		$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
+												,mb.mem_tel as MEM_TELMOBILE,mb.email as email FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												WHERE mb.resign_status = '0'");
 		$fetchUserNotRegis->execute();
 		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
 			if(!in_array($rowUserNotRegis["MEMBER_NO"],$arrayUserRegister)){
@@ -21,8 +20,8 @@ WHERE mb.resign_status = '0';");
 				$arrayUserNotRegister["MEMBER_NO"] = $rowUserNotRegis["MEMBER_NO"];
 				$arrayUserNotRegister["NAME"] = $rowUserNotRegis["PRENAME_DESC"].$rowUserNotRegis["MEMB_NAME"]." ".$rowUserNotRegis["MEMB_SURNAME"];
 				$arrayUserNotRegister["MEMBER_DATE"] = $lib->convertdate($rowUserNotRegis["MEMBER_DATE"],'D m Y');
-				$arrayUserNotRegister["TEL"] = isset($rowUserNotRegis["MEM_TELMOBILE"]) ? $lib->formatphone(preg_replace('/[^0-9]/', '', $rowUserNotRegis["MEM_TELMOBILE"]),'-') : "-";
-				$arrayUserNotRegister["EMAIL"] = "-";
+				$arrayUserNotRegister["TEL"] = $rowUserNotRegis["MEM_TELMOBILE"];
+				$arrayUserNotRegister["EMAIL"] = $rowUserNotRegis["EMAIL"] ?? "-";
 				$arrayGroup[] = $arrayUserNotRegister;
 			}
 		}

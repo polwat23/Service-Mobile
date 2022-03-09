@@ -16,25 +16,23 @@ $arrGrp = array();
 
 $dbhost = "127.0.0.1";
 $dbuser = "root";
-$dbpass = "@STK2021";
-$dbname = "mobile_stk";
+$dbpass = "@SRN2020";
+$dbname = "mobile_srn";
 try{
 	$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
 	$conmysql->exec("set names utf8mb4");
 }catch(Throwable $e){
 	echo json_encode($e);
-	exit();
 }
-$dbhost2 = "127.0.0.1";
+$dbhost2 = "192.168.1.159";
 $dbuser2 = "root";
-$dbpass2 = "@STK2021";
-$dbname2 = "mobile_temp";
+$dbpass2 = "WebServer";
+$dbname2 = "mobile_srn";
 try{
 	$conmysql2 = new PDO("mysql:dbname={$dbname2};host={$dbhost2}", $dbuser2, $dbpass2);
 	$conmysql2->exec("set names utf8mb4");
 }catch(Throwable $e){
-	echo json_encode($e->getMessage());
-	exit();
+	echo json_encode($e);
 }
 	$bulkIns = array();
 	$arrayMember = array();
@@ -80,11 +78,7 @@ try{
 	if(sizeof($insertTOSRN) > 0){
 		$insert = $conmysql->prepare("INSERT INTO gcmemberaccount(member_no,password,pin,phone_number,email,account_status,temppass,path_avatar,temppass_is_md5)
 												VALUES".implode(',',$insertTOSRN));
-		if($insert->execute()){
-		}else{
-			echo $insert->queryString;
-		}
-		
+		$insert->execute();
 	}
 	echo 'done !!';
 

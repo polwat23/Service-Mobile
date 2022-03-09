@@ -8,14 +8,14 @@ use Utility\Library;
 
 class CalculateDep {
 	private $con;
-	private $conms;
+	private $conora;
 	private $lib;
 	
 	function __construct() {
 		$connection = new connection();
 		$this->lib = new library();
 		$this->con = $connection->connecttomysql();
-		$this->conms = $connection->connecttosqlserver();
+		$this->conora = $connection->connecttooracle();
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
@@ -70,6 +70,15 @@ class CalculateDep {
 	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
+		$getLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_deposit_each_member'");
+		$getLimitDept->execute();
+		$rowLimitDept = $getLimitDept->fetch(\PDO::FETCH_ASSOC);
+		$getSumDept = $this->conora->prepare("SELECT SUM(dps.DEPTITEM_AMT) as SUM_AMT
+										FROM dpdeptmaster dpm LEFT JOIN dpdeptstatement dps ON dpm.deptaccount_no = dps.deptaccount_no
+										WHERE dpm.member_no = :member_no and to_char(dps.operate_date,'YYYYMM') = to_char(SYSDATE,'YYYYMM')
+										and SUBSTR(dps.deptitemtype_code,1,1) = 'D'");
+		$getSumDept->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		$rowSumDept = $getSumDept->fetch(\PDO::FETCH_ASSOC);
 		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
@@ -106,156 +115,28 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
 			$transfer_mode = "2";
 		}
-		/*$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
-												LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
-												WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
-		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
-		$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
-		if($rowUserAllow["is_use"] == "1"){*/
-			/*if($amt_transfer > $rowUserAllow["limit_transaction_amt"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0093";
-				$arrayResult['RESULT'] = FALSE;
-				return $arrayResult;
-			}*/
-			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
-														FROM gcbankconstantmapping gbm 
-														LEFT JOIN gcbankconstant gbc 
-														ON gbm.id_bankconstant = gbc.id_bankconstant
-														WHERE gbm.bank_code = :bank_code and gbm.is_use = '1'");
-				$getConstantMapMenu->execute([':bank_code' => $bank_code]);
-				while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
-					if($rowConstMapMenu["transaction_cycle"] == 'time'){
-						if($rowConstMapMenu["max_deposit"] >= '0' && $amt_transfer > $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["min_deposit"] >= '0' && $amt_transfer < $rowConstMapMenu["min_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0056";
-							$arrayResult['MINDEPT_AMT'] = $rowConstMapMenu["min_deposit"];
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
-						if($rowConstMapMenu["each_bank"] == '0'){
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':transfer_mode' => $transfer_mode
-							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0101";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
-						if($rowConstMapMenu["each_bank"] == '0'){
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':transfer_mode' => $transfer_mode
-							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0102";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
-						if($rowConstMapMenu["each_bank"] == '0'){
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':transfer_mode' => $transfer_mode
-							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
-																	and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0103";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
+		if(isset($bank_code)){
+			$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
+													FROM gcbankconstantmapping gbm 
+													LEFT JOIN gcbankconstant gbc 
+													ON gbm.id_bankconstant = gbc.id_bankconstant
+													WHERE gbm.bank_code = :bank_code and gbm.is_use = '1'");
+			$getConstantMapMenu->execute([':bank_code' => $bank_code]);
+			while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
+				if($rowConstMapMenu["transaction_cycle"] == 'time'){
+					if($rowConstMapMenu["max_deposit"] >= '0' && $amt_transfer > $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
 					}
-				}
-			}else{
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
-														FROM gcmenuconstantmapping gmm 
-														LEFT JOIN gcbankconstant gbc 
-														ON gmm.id_bankconstant = gbc.id_bankconstant
-														WHERE gmm.menu_component = :menu_component and gmm.is_use = '1'");
-				$getConstantMapMenu->execute([':menu_component' => $menu_component]);
-				while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
-					if($rowConstMapMenu["transaction_cycle"] == 'time'){
-						if($rowConstMapMenu["max_deposit"] >= '0' && $amt_transfer > $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["min_deposit"] >= '0' && $amt_transfer < $rowConstMapMenu["min_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0056";
-							$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["min_deposit"];
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
+					if($rowConstMapMenu["min_deposit"] >= '0' && $amt_transfer < $rowConstMapMenu["min_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0056";
+						$arrayResult['MINDEPT_AMT'] = $rowConstMapMenu["min_deposit"];
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
+					if($rowConstMapMenu["each_bank"] == '0'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
 																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
@@ -264,18 +145,30 @@ class CalculateDep {
 							':deptaccount_no' => $deptaccount_no,
 							':transfer_mode' => $transfer_mode
 						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0101";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
+					}else{
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D') and bank_code = :bank_code
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':bank_code' => $bank_code,
+							':transfer_mode' => $transfer_mode
+						]);
+					}
+					$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+					if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0101";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
+					if($rowConstMapMenu["each_bank"] == '0'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
 																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
@@ -284,18 +177,30 @@ class CalculateDep {
 							':deptaccount_no' => $deptaccount_no,
 							':transfer_mode' => $transfer_mode
 						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0102";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
+					}else{
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M') and bank_code = :bank_code
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':bank_code' => $bank_code,
+							':transfer_mode' => $transfer_mode
+						]);
+					}
+					$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+					if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0102";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
+					if($rowConstMapMenu["each_bank"] == '0'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
 																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
@@ -304,27 +209,115 @@ class CalculateDep {
 							':deptaccount_no' => $deptaccount_no,
 							':transfer_mode' => $transfer_mode
 						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0103";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
+					}else{
+						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y') and bank_code = :bank_code
+																and result_transaction = '1' and transfer_mode = :transfer_mode");
+						$getTransaction->execute([
+							':deptaccount_no' => $deptaccount_no,
+							':bank_code' => $bank_code,
+							':transfer_mode' => $transfer_mode
+						]);
+					}
+					$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+					if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0103";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
 					}
 				}
 			}
-			$arrayResult['RESULT'] = TRUE;
-			return $arrayResult;
-		/*}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}*/
+		}else{
+			$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
+													FROM gcmenuconstantmapping gmm 
+													LEFT JOIN gcbankconstant gbc 
+													ON gmm.id_bankconstant = gbc.id_bankconstant
+													WHERE gmm.menu_component = :menu_component and gmm.is_use = '1'");
+			$getConstantMapMenu->execute([':menu_component' => $menu_component]);
+			while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
+				if($rowConstMapMenu["transaction_cycle"] == 'time'){
+					if($rowConstMapMenu["max_deposit"] >= '0' && $amt_transfer > $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["min_deposit"] >= '0' && $amt_transfer < $rowConstMapMenu["min_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0056";
+						$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["min_deposit"];
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($rowConstMapMenu["transaction_cycle"] == 'day'){
+					$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+															FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+															and DATE_FORMAT(operate_date,'%Y%M%D') = DATE_FORMAT(NOW(),'%Y%M%D')
+															and result_transaction = '1' and transfer_mode = :transfer_mode");
+					$getTransaction->execute([
+						':deptaccount_no' => $deptaccount_no,
+						':transfer_mode' => $transfer_mode
+					]);
+					$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+					if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0101";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($rowConstMapMenu["transaction_cycle"] == 'month'){
+					$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+															FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+															and DATE_FORMAT(operate_date,'%Y%M') = DATE_FORMAT(NOW(),'%Y%M')
+															and result_transaction = '1' and transfer_mode = :transfer_mode");
+					$getTransaction->execute([
+						':deptaccount_no' => $deptaccount_no,
+						':transfer_mode' => $transfer_mode
+					]);
+					$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+					if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0102";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($rowConstMapMenu["transaction_cycle"] == 'year'){
+					$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+															FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+															and DATE_FORMAT(operate_date,'%Y') = DATE_FORMAT(NOW(),'%Y')
+															and result_transaction = '1' and transfer_mode = :transfer_mode");
+					$getTransaction->execute([
+						':deptaccount_no' => $deptaccount_no,
+						':transfer_mode' => $transfer_mode
+					]);
+					$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+					if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0103";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+					if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0093";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}
+			}
+		}
+		$arrayResult['RESULT'] = TRUE;
+		return $arrayResult;
 	}
 	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
@@ -353,7 +346,7 @@ class CalculateDep {
 		}else if($menu_component == 'TransferDepBuyShare'){
 			$menucheckrights = "and gca.allow_buy_share = '1'";
 			$transfer_mode = "3";
-		}else if($menu_component == 'TransferDepPayLoan'){
+		}else if($menu_component == 'TransferDepPayLoan' || $menu_component == 'PayMonthlyFull'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
 			$transfer_mode = "2";
 		}
@@ -579,35 +572,35 @@ class CalculateDep {
 	}
 	public function getSequestAmt($deptaccount_no){
 		$arrSequest = array();
-		$getSequestAmt = $this->conms->prepare("SELECT SEQUEST_STATUS,SEQUEST_AMOUNT FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+		$getSequestAmt = $this->conora->prepare("SELECT SEQUEST_STATUS,SEQUEST_AMOUNT FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$getSequestAmt->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowSeqAmt = $getSequestAmt->fetch(\PDO::FETCH_ASSOC);
 		if(isset($rowSeqAmt["SEQUEST_STATUS"])){
-			if($rowSeqAmt["SEQUEST_STATUS"] == '1'){ // อายัติจำนวนเงิน
+			if($rowSeqAmt["SEQUEST_STATUS"] == '1'){ // อายัดจำนวนเงิน
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '2'){ // อายัติการเคลื่อนไหว
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '2'){ // อายัดการเคลื่อนไหว
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '3'){ // อายัติรอปิดบัญชี
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '3'){ // อายัดรอปิดบัญชี
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '4'){ // อายัติห้ามถอน/ปิดบัญชี
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '4'){ // อายัดห้ามถอน/ปิดบัญชี
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '5'){ // อายัติห้ามฝาก
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '5'){ // อายัดห้ามฝาก
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
 				$arrSequest["SEQUEST_AMOUNT"] = 0;
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '9'){ // อายัติเพื่อ ATM
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '9'){ // อายัดเพื่อ ATM
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
-			}else if($rowSeqAmt["SEQUEST_STATUS"] == '0'){ // ไม่อายัติ
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '0'){ // ไม่อายัด
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
 				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
@@ -624,10 +617,10 @@ class CalculateDep {
 		return $arrSequest;
 	}
 	public function getConstantAcc($deptaccount_no){
-		$getConst = $this->conms->prepare("SELECT dpm.MEMBER_NO,dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
-											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,ISNULL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,ISNULL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
+		$getConst = $this->conora->prepare("SELECT dpm.MEMBER_NO,dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
+											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,NVL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
 											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG,dpm.LASTCALINT_DATE,dpm.WITHDRAWABLE_AMT,dpm.CHECKPEND_AMT
-											,ISNULL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,ISNULL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK
+											,NVL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.DEPTTYPE_CODE  = dpt.DEPTTYPE_CODE
 											WHERE dpm.DEPTACCOUNT_NO = :deptaccount_no");
 		$getConst->execute([':deptaccount_no' => $deptaccount_no]);
@@ -640,28 +633,28 @@ class CalculateDep {
 		if($dataConst["PER_PERIOD_INCOUNT"] > 0){
 			if($dataConst["PERIOD_UNIT_CHECK"] == '1'){
 				$monthCheck = date('Ym',strtotime('-'.($dataConst["PER_PERIOD_INCOUNT"]-1).' months'));
-				$queryCheckPeriod = "and CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN ".$monthCheck." and CONVERT(VARCHAR(6), GETDATE(), 112)";
+				$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYYMM')";
 			}else if($dataConst["PERIOD_UNIT_CHECK"] == '2'){
 				$thisMonth = date('m');
 				if($thisMonth >= 1 && $thisMonth <= 3){
-					$queryCheckPeriod = "CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'01') and CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'03')";
+					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '01' and to_char(TRUNC(sysdate),'YYYY') || '03'";
 				}else if($thisMonth >= 4 && $thisMonth <= 6){
-					$queryCheckPeriod = "CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'04') and CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'06')";
+					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '04' and to_char(TRUNC(sysdate),'YYYY') || '06'";
 				}else if($thisMonth >= 7 && $thisMonth <= 9){
-					$queryCheckPeriod = "CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'07') and CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'09')";
+					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '07' and to_char(TRUNC(sysdate),'YYYY') || '09'";
 				}else{
-					$queryCheckPeriod = "CONVERT(VARCHAR(6),dps.operate_date,112) BETWEEN CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'10') and CONCAT(CONVERT(VARCHAR(4), GETDATE(), 112),'12')";
+					$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYYMM') BETWEEN to_char(TRUNC(sysdate),'YYYY') || '10' and to_char(TRUNC(sysdate),'YYYY') || '12'";
 				}
 			}else if($dataConst["PERIOD_UNIT_CHECK"] == '3'){
 				$monthCheck = date('Y',strtotime('-'.($dataConst["PER_PERIOD_INCOUNT"]-1).' years'));
-				$queryCheckPeriod = "and CONVERT(VARCHAR(4),dps.operate_date,112) BETWEEN ".$monthCheck." and CONVERT(VARCHAR(4), GETDATE(), 112)";
+				$queryCheckPeriod = "and to_char(TRUNC(dps.operate_date),'YYYY') BETWEEN ".$monthCheck." and to_char(TRUNC(sysdate),'YYYY')";
 			}else if($dataConst["PERIOD_UNIT_CHECK"] == '4'){
 				$queryCheckPeriod = "";
 			}else{
 				$queryCheckPeriod = "";
 			}
 		}
-		$checkItemIsCount = $this->conms->prepare("SELECT COUNT(*) as IS_NOTCOUNT FROM dpucfwithncount 
+		$checkItemIsCount = $this->conora->prepare("SELECT COUNT(*) as IS_NOTCOUNT FROM dpucfwithncount 
 												WHERE depttype_code = :depttype_code and deptitem_code = :itemtype");
 		$checkItemIsCount->execute([
 			':depttype_code' => $dataConst["DEPTTYPE_CODE"],
@@ -669,16 +662,16 @@ class CalculateDep {
 		]);
 		$rowItemCount = $checkItemIsCount->fetch(\PDO::FETCH_ASSOC);
 		if($rowItemCount["IS_NOTCOUNT"] > 0){
-			$getCountTrans = $this->conms->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTRING(dps.DEPTITEMTYPE_CODE,1,1) = 'W' 
+			$getCountTrans = $this->conora->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
+												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and dps.DEPTITEMTYPE_CODE <> 'FEE'
 												and dps.deptitemtype_code <> :itemtype_code and dps.item_status = '1' ".$queryCheckPeriod);
 			$getCountTrans->execute([
 				':deptaccount_no' => $deptaccount_no,
 				':itemtype_code' => $itemtype
 			]);
 		}else{
-			$getCountTrans = $this->conms->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
-												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTRING(dps.DEPTITEMTYPE_CODE,1,1) = 'W' 
+			$getCountTrans = $this->conora->prepare("SELECT COUNT(dps.SEQ_NO) as C_TRANS FROM dpdeptstatement dps 
+												WHERE dps.deptaccount_no = :deptaccount_no and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and dps.DEPTITEMTYPE_CODE <> 'FEE'
 												and dps.item_status = '1' ".$queryCheckPeriod);
 			$getCountTrans->execute([
 				':deptaccount_no' => $deptaccount_no
@@ -687,7 +680,7 @@ class CalculateDep {
 		$rowCountTrans = $getCountTrans->fetch(\PDO::FETCH_ASSOC);
 		$count_trans = $rowCountTrans["C_TRANS"] + 1;
 		if($count_trans > $dataConst["MAXWITHD_INMONTH"]){
-			$getContDeptTypeFee = $this->conms->prepare("SELECT CHARGE_FLAG,s_chrg_amt1 as MIN_FEE,s_chrg_perc1 as PERCENT_FEE,s_chrg_amt2 as MAX_FEE 
+			$getContDeptTypeFee = $this->conora->prepare("SELECT CHARGE_FLAG,s_chrg_amt1 as MIN_FEE,s_chrg_perc1 as PERCENT_FEE,s_chrg_amt2 as MAX_FEE 
 														FROM dpdepttype WHERE depttype_code = :depttype_code");
 			$getContDeptTypeFee->execute([':depttype_code' => $dataConst["DEPTTYPE_CODE"]]);
 			$rowContFee = $getContDeptTypeFee->fetch(\PDO::FETCH_ASSOC);
@@ -704,22 +697,31 @@ class CalculateDep {
 		return $penalty_amt;
 	}
 	public function getVcMapID($depttype_code,$sys_code='DEP'){
-		$getvc = $this->conms->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = :sys_code AND SLIPITEMTYPE_CODE = :sys_code AND SHRLONTYPE_CODE = :depttype_code");
-		$getvc->execute([
-			':depttype_code' => $depttype_code,
-			':sys_code' => $sys_code
-		]);
+		if($sys_code == 'SHR'){
+			$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = 'LON' AND 
+											SLIPITEMTYPE_CODE = :sys_code AND SHRLONTYPE_CODE = '01' and SHRLONTYPE_STATUS = '1'");
+			$getvc->execute([
+				':sys_code' => $sys_code
+			]);
+		}else{
+			$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = :sys_code AND 
+											SLIPITEMTYPE_CODE = :sys_code AND SHRLONTYPE_CODE = :depttype_code");
+			$getvc->execute([
+				':depttype_code' => $depttype_code,
+				':sys_code' => $sys_code
+			]);
+		}
 		$rowvc = $getvc->fetch(\PDO::FETCH_ASSOC);
 		return $rowvc;
 	}
 	public function getLastSeqNo($deptaccount_no){
-		$getLastSEQ = $this->conms->prepare("SELECT MAX(SEQ_NO) as MAX_SEQ_NO FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no");
+		$getLastSEQ = $this->conora->prepare("SELECT MAX(SEQ_NO) as MAX_SEQ_NO FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no");
 		$getLastSEQ->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowLastSEQ = $getLastSEQ->fetch(\PDO::FETCH_ASSOC);
 		return $rowLastSEQ;
 	}
-	public function generateDocNo($component,$lib){
-		$getLastDpSlipNo = $this->conms->prepare("SELECT DOCUMENT_FORMAT,DOCUMENT_PREFIX,LAST_DOCUMENTNO,DOCUMENT_YEAR,DOCUMENT_LENGTH
+	public function generateDocNo($component,$lib,$more=0){
+		$getLastDpSlipNo = $this->conora->prepare("SELECT DOCUMENT_FORMAT,DOCUMENT_PREFIX,LAST_DOCUMENTNO,DOCUMENT_YEAR,DOCUMENT_LENGTH
 												FROM cmdocumentcontrol where document_code = :component");
 		$getLastDpSlipNo->execute([':component' => $component]);
 		$rowLastSlip = $getLastDpSlipNo->fetch(\PDO::FETCH_ASSOC);
@@ -735,11 +737,17 @@ class CalculateDep {
 		asort($arrPosString);
 		foreach($arrPosString as $key => $value){
 			if($key == 'P'){
-				$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				if($countPrefix > 0){
+					$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				}
 			}else if($key == 'Y'){
-				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				if($countYear > 0){
+					$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				}
 			}else if($key == 'R'){
-				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+				if($countRunning > 0){
+					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1 + $more,$countRunning));
+				}
 			}
 		}
 		$arrayResult["SLIP_NO"] = $deptslip_no;
@@ -747,13 +755,13 @@ class CalculateDep {
 		return $arrayResult;
 	}
 	public function getConstPayType($itemtype){
-		$getConstPay = $this->conms->prepare("SELECT group_itemtpe as GRP_ITEMTYPE,MONEYTYPE_SUPPORT 
+		$getConstPay = $this->conora->prepare("SELECT MONEYTYPE_SUPPORT 
 											FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype");
 		$getConstPay->execute([':itemtype' => $itemtype]);
 		$rowConstPay = $getConstPay->fetch(\PDO::FETCH_ASSOC);
 		return $rowConstPay;
 	}
-	public function DepositMoneyInside($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_dpt,$amt_transfer,$penalty_amt,
+	public function DepositMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_dpt,$amt_transfer,$penalty_amt,
 	$operate_date,$config,$log,$from_account_no,$payload,$deptslip,$lib,$max_seqno,$menu_component,$ref_no,$is_transfer=false,$slipWithdraw=null,$bank_code=null){
 		$constToAcc = $this->getConstantAcc($deptaccount_no);
 		$rowDepPayDest = $this->getConstPayType($itemtype_dpt);
@@ -866,40 +874,64 @@ class CalculateDep {
 		$lastStmDestNo = $max_seqno + 1;
 		$deptslip_no = $deptslip;
 		$arrExecuteDest = [
-			$deptslip_no,$config["COOP_ID"],$deptaccount_no,$constToAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constToAcc["DEPTGROUP_CODE"],
-			$itemtype_dpt,$amt_transfer,$rowDepPayDest["MONEYTYPE_SUPPORT"],$constToAcc["PRNCBAL"],$constToAcc["WITHDRAWABLE_AMT"],
-			$constToAcc["CHECKPEND_AMT"],$operate_date,$lastStmDestNo,$itemtype_dpt,date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
-			$tofrom_accid,$slipWithdraw ?? null,$amt_transfer,$operate_date
+			':deptslip_no' => $deptslip_no,
+			':coop_id' => $config["COOP_ID"],
+			':deptaccount_no' => $deptaccount_no,
+			':depttype_code' => $constToAcc["DEPTTYPE_CODE"],
+			':deptgrp_code' => $constToAcc["DEPTGROUP_CODE"],
+			':itemtype_code' => $itemtype_dpt,
+			':slip_amt' => $amt_transfer,
+			':cash_type' => $rowDepPayDest["MONEYTYPE_SUPPORT"],
+			':prncbal' => $constToAcc["PRNCBAL"],
+			':withdrawable_amt' => $constToAcc["WITHDRAWABLE_AMT"],
+			':checkpend_amt' => $constToAcc["CHECKPEND_AMT"],
+			':entry_date' => $operate_date,
+			':laststmno' => $lastStmDestNo,
+			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
+			':acc_id' => $tofrom_accid,
+			':refer_deptslip_no' => $slipWithdraw ?? null
 		];
-		$insertDpSlipDest = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
+		$insertDpSlipDest = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 											deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 											PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-											DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
+											DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
 											NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
-											POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+											POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 											TELLER_FLAG,OPERATE_TIME) 
-											VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,
-											CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),1,0,0,0,?,1,?,0,0,
-											?,1,0,0,1,1,1,0,1,1,CONVERT(VARCHAR(19),?,20))");
+											VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
+											:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+											TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,:acc_id,1,:refer_deptslip_no,0,0,
+											:slip_amt,1,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 		if($insertDpSlipDest->execute($arrExecuteDest)){
 			$arrExecuteStmDest = [
-				$config["COOP_ID"],$deptaccount_no,$lastStmDestNo,$itemtype_dpt,$amt_transfer,$constToAcc["PRNCBAL"],
-				$constToAcc["PRNCBAL"] + $amt_transfer,$operate_date,date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
-				$rowDepPayDest["MONEYTYPE_SUPPORT"],$operate_date,$deptslip_no
+				':coop_id' => $config["COOP_ID"],
+				':to_account_no' => $deptaccount_no,
+				':seq_no' => $lastStmDestNo,
+				':itemtype_code' => $itemtype_dpt,
+				':slip_amt' => $amt_transfer,
+				':balance_forward' => $constToAcc["PRNCBAL"],
+				':after_trans_amt' => $constToAcc["PRNCBAL"] + $amt_transfer,
+				':entry_date' => $operate_date,
+				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
+				':cash_type' => $rowDepPayDest["MONEYTYPE_SUPPORT"],
+				':deptslip_no' => $deptslip_no
 			];
-			$insertStatementDest = $conmssql->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
+			$insertStatementDest = $conoracle->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
 													CALINT_FROM,CALINT_TO,CASH_TYPE,OPERATE_TIME,DEPTSLIP_NO,SYNC_NOTIFY_FLAG)
-													VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),
-													CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),?,CONVERT(VARCHAR(19),?,20),?,'1')");
+													VALUES(:coop_id,:to_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+													TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),:cash_type,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:deptslip_no,'1')");
 			if($insertStatementDest->execute($arrExecuteStmDest)){
 				$arrUpdateMasterDest = [
-					$constToAcc["WITHDRAWABLE_AMT"] + $amt_transfer,$constToAcc["PRNCBAL"] + $amt_transfer,
-					$operate_date,$operate_date,$lastStmDestNo,$deptaccount_no
+					':withdraw_after_pay' => $constToAcc["WITHDRAWABLE_AMT"] + $amt_transfer,
+					':prncbal_after_pay' => $constToAcc["PRNCBAL"] + $amt_transfer,
+					':entry_date' => $operate_date,
+					':seq_no' => $lastStmDestNo,
+					':to_account_no' => $deptaccount_no
 				];
-				$updateDeptMasterDest = $conmssql->prepare("UPDATE DPDEPTMASTER SET withdrawable_amt = ?,prncbal = ?,
-														lastmovement_date = CONVERT(VARCHAR(10),?,20),
-														lastaccess_date = CONVERT(VARCHAR(10),?,20),laststmseq_no = ?
-														WHERE deptaccount_no = ?");
+				$updateDeptMasterDest = $conoracle->prepare("UPDATE DPDEPTMASTER SET withdrawable_amt = :withdraw_after_pay,prncbal = :prncbal_after_pay,
+														lastmovement_date = TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+														lastaccess_date = TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),laststmseq_no = :seq_no
+														WHERE deptaccount_no = :to_account_no");
 				if($updateDeptMasterDest->execute($arrUpdateMasterDest)){
 					if(isset($bank_code)){
 						
@@ -1033,8 +1065,8 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	public function WithdrawMoneyInside($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc){
+	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
+	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null){
 		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
@@ -1053,76 +1085,118 @@ class CalculateDep {
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		$arrExecute = [
-			$deptslip_no,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],
-			$itemtype_wtd,$amt_transfer,$rowDepPay["MONEYTYPE_SUPPORT"],$constFromAcc["PRNCBAL"],$constFromAcc["WITHDRAWABLE_AMT"],
-			$constFromAcc["CHECKPEND_AMT"],$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-			$penalty_amt,$tofrom_accid,$amt_transfer,$operate_date
+			':deptslip_no' => $deptslip_no,
+			':coop_id' => $config["COOP_ID"],
+			':deptaccount_no' => $deptaccount_no,
+			':depttype_code' => $constFromAcc["DEPTTYPE_CODE"],
+			':deptgrp_code' => $constFromAcc["DEPTGROUP_CODE"],
+			':itemtype_code' => $itemtype_wtd,
+			':slip_amt' => $amt_transfer,
+			':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
+			':prncbal' => $constFromAcc["PRNCBAL"],
+			':withdrawable_amt' => $constFromAcc["WITHDRAWABLE_AMT"],
+			':checkpend_amt' => $constFromAcc["CHECKPEND_AMT"],
+			':entry_date' => $operate_date,
+			':laststmno' => $lastStmSrcNo,
+			':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
+			':acc_id' => $tofrom_accid,
+			':penalty_amt' => $penalty_amt
 		];
 		if($penalty_amt > 0){
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 								deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 								PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,OTHER_AMT,
+								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
 								NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
-								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
-								VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,
-								CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),1,0,?,0,0,?,2,0,0,?,0,0,0,1,1,1,0,1,1,CONVERT(VARCHAR(19),?,20))";
+								VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
+								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,:penalty_amt,0,0,:acc_id,2,0,0,:slip_amt,0,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 		}else{
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 								deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 								PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,OTHER_AMT,
+								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
 								NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
-								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
-								VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,
-								CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),1,0,?,0,0,?,1,0,0,?,0,0,0,1,1,1,0,1,1,CONVERT(VARCHAR(19),?,20))";
+								VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
+								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,:penalty_amt,0,0,:acc_id,1,0,0,:slip_amt,0,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 		}
-		$insertDpSlip = $conmssql->prepare($insertDpSlipSQL);
+		$insertDpSlip = $conoracle->prepare($insertDpSlipSQL);
 		if($insertDpSlip->execute($arrExecute)){
 			$slipWithdraw = $deptslip_no;
 			$arrExecuteStm = [
-				$config["COOP_ID"],$deptaccount_no,$lastStmSrcNo,$itemtype_wtd,$amt_transfer,$constFromAcc["PRNCBAL"],
-				$constFromAcc["PRNCBAL"] - $amt_transfer,$operate_date,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-				$rowDepPay["MONEYTYPE_SUPPORT"],$operate_date,$deptslip_no
+				':coop_id' => $config["COOP_ID"],
+				':from_account_no' => $deptaccount_no,
+				':seq_no' => $lastStmSrcNo,
+				':itemtype_code' => $itemtype_wtd,
+				':slip_amt' => $amt_transfer,
+				':balance_forward' => $constFromAcc["PRNCBAL"],
+				':after_trans_amt' => $constFromAcc["PRNCBAL"] - $amt_transfer,
+				':entry_date' => $operate_date,
+				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
+				':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
+				':deptslip_no' => $deptslip_no
 			];
-			$insertStatement = $conmssql->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
+			$insertStatement = $conoracle->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
 													CALINT_FROM,CALINT_TO,CASH_TYPE,OPERATE_TIME,DEPTSLIP_NO,SYNC_NOTIFY_FLAG)
-													VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),
-													CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),?,CONVERT(VARCHAR(19),?,20),?,'1')");
+													VALUES(:coop_id,:from_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+													TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),:cash_type,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:deptslip_no,'1')");
 			if($insertStatement->execute($arrExecuteStm)){
 				if($penalty_amt > 0){
 					$rowMapAccFee = $this->getVcMapID('00');
-					$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+					$deptslip_noPenalty = $penaltyslip;//$lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
 					$lastStmSrcNo += 1;
 					$arrExecutePenalty = [
-						$deptslip_noPenalty,$config["COOP_ID"],$deptaccount_no,$constFromAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constFromAcc["DEPTGROUP_CODE"],
-						'FEE',$penalty_amt,$rowDepPay["MONEYTYPE_SUPPORT"],$constFromAcc["PRNCBAL"],$constFromAcc["WITHDRAWABLE_AMT"],$constFromAcc["CHECKPEND_AMT"],
-						$operate_date,$lastStmSrcNo,'FEE',date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$rowMapAccFee["ACCOUNT_ID"],
-						$deptslip_no,$penalty_amt,$operate_date
+						':deptslip_no' => $deptslip_noPenalty,
+						':coop_id' => $config["COOP_ID"],
+						':deptaccount_no' => $deptaccount_no,
+						':depttype_code' => $constFromAcc["DEPTTYPE_CODE"],
+						':deptgrp_code' => $constFromAcc["DEPTGROUP_CODE"],
+						':itemtype_code' => 'FEE',
+						':slip_amt' => $penalty_amt,
+						':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
+						':prncbal' => $constFromAcc["PRNCBAL"],
+						':withdrawable_amt' => $constFromAcc["WITHDRAWABLE_AMT"],
+						':checkpend_amt' => $constFromAcc["CHECKPEND_AMT"],
+						':entry_date' => $operate_date,
+						':laststmno' => $lastStmSrcNo,
+						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
+						':acc_id' => $rowMapAccFee["ACCOUNT_ID"],
+						':refer_deptslip_no' => $deptslip_no
 					];
-					$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
+					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 																deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 																PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-																DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
+																DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
 																NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
-																POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+																POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 																TELLER_FLAG,OPERATE_TIME) 
-																VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,
-																?,?,?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),
-																1,0,0,0,?,2,?,0,0,?,'DEP',0,0,0,1,1,1,0,1,1,
-																CONVERT(VARCHAR(19),?,20))");
+																VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
+																:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
+																TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,:acc_id,2,:refer_deptslip_no,0,0,:slip_amt,'DEP',0,0,0,1,1,0,1,1,
+																TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 					if($insertDpSlipPenalty->execute($arrExecutePenalty)){
 						$arrExecuteStmPenalty = [
-							$config["COOP_ID"],$deptaccount_no,$lastStmSrcNo,'FEE',$penalty_amt,$constFromAcc["PRNCBAL"] - $amt_transfer,
-							$constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,$operate_date,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-							$rowDepPay["MONEYTYPE_SUPPORT"],$operate_date,$deptslip_noPenalty
+							':coop_id' => $config["COOP_ID"],
+							':from_account_no' => $deptaccount_no,
+							':seq_no' => $lastStmSrcNo,
+							':itemtype_code' => 'FEE',
+							':slip_amt' => $penalty_amt,
+							':balance_forward' => $constFromAcc["PRNCBAL"] - $amt_transfer,
+							':after_trans_amt' => $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,
+							':entry_date' => $operate_date,
+							':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
+							':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
+							':deptslip_no' => $deptslip_noPenalty
 						];
-						$insertStatementPenalty = $conmssql->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
+						$insertStatementPenalty = $conoracle->prepare("INSERT INTO DPDEPTSTATEMENT(COOP_ID,DEPTACCOUNT_NO,SEQ_NO,DEPTITEMTYPE_CODE,OPERATE_DATE,DEPTITEM_AMT,BALANCE_FORWARD,PRNCBAL,ENTRY_ID,ENTRY_DATE,
 																CALINT_FROM,CALINT_TO,CASH_TYPE,OPERATE_TIME,DEPTSLIP_NO,SYNC_NOTIFY_FLAG)
-																VALUES(?,?,?,?,CONVERT(VARCHAR(10),GETDATE(),20),?,?,?,'MOBILE',CONVERT(VARCHAR(10),?,20),
-																CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),GETDATE(),20),?,CONVERT(VARCHAR(19),?,20),?,'1')");
+																VALUES(:coop_id,:from_account_no,:seq_no,:itemtype_code,TRUNC(sysdate),:slip_amt,:balance_forward,:after_trans_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+																TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),:cash_type,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),:deptslip_no,'1')");
 						if($insertStatementPenalty->execute($arrExecuteStmPenalty)){
 							$deptslip_no += 1;
 						}else{
@@ -1133,19 +1207,22 @@ class CalculateDep {
 						}
 					}else{
 						$arrayResult["RESPONSE_CODE"] = 'WS0066';
-						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecute);
+						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecutePenalty);
 						$arrayResult['RESULT'] = FALSE;
 						return $arrayResult;
 					}
 				}
 				$arrUpdateMaster = [
-					$constFromAcc["WITHDRAWABLE_AMT"] - $amt_transfer - $penalty_amt,$constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,
-					$operate_date,$operate_date,$lastStmSrcNo,$deptaccount_no
+					':withdraw_after_pay' => $constFromAcc["WITHDRAWABLE_AMT"] - $amt_transfer - $penalty_amt,
+					':prncbal_after_pay' => $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,
+					':entry_date' => $operate_date,
+					':seq_no' => $lastStmSrcNo,
+					':from_account_no' => $deptaccount_no
 				];
-				$updateDeptMaster = $conmssql->prepare("UPDATE DPDEPTMASTER SET withdrawable_amt = ?,prncbal = ?,
-														lastmovement_date = CONVERT(VARCHAR(19),?,20),
-														lastaccess_date = CONVERT(VARCHAR(19),?,20),laststmseq_no = ?
-														WHERE deptaccount_no = ?");
+				$updateDeptMaster = $conoracle->prepare("UPDATE DPDEPTMASTER SET withdrawable_amt = :withdraw_after_pay,prncbal = :prncbal_after_pay,
+														lastmovement_date = TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),
+														lastaccess_date = TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),laststmseq_no = :seq_no
+														WHERE deptaccount_no = :from_account_no");
 				if($updateDeptMaster->execute($arrUpdateMaster)){
 					$arrayResult['DEPTSLIP_NO'] = $slipWithdraw;
 					$arrayResult['RESULT'] = TRUE;

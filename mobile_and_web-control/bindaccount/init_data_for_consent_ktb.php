@@ -4,14 +4,33 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember = $conoracle->prepare("SELECT TRIM(card_person) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
+			$arrGrpAccFee = array();
+			$getDepositAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
+												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
+												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code IN('01','04','06')");
+			$getDepositAcc->execute([':member_no' => $member_no]);
+			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
+				$arrAccFee = array();
+				$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccFee['ACCOUNT_NAME'] = TRIM($rowDepAcc["DEPTACCOUNT_NAME"]);
+				$arrAccFee['BALANCE'] = number_format($rowDepAcc["PRNCBAL"],2);
+				$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
+				$arrGrpAccFee[] = $arrAccFee;
+			}
+			$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
+			$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
 			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-			$arrayResult['CITIZEN_ID'] = '1119900057012';//$rowDataMember["CARD_PERSON"];
+			if($payload["member_no"] == 'etnmode3'){
+				$arrayResult['CITIZEN_ID'] = '1100800900691';
+			}else{
+				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

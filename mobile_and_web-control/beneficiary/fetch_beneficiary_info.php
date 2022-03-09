@@ -5,21 +5,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-
-		$getBeneficiary = $conmssql->prepare("SELECT mg.GAIN_NAME,mg.GAIN_SURNAME,mg.GAIN_ADDRESS as GAIN_ADDR,mc.GAIN_CONCERN,mg.GAIN_PERCENT
+		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_address as GAIN_ADDR,mc.gain_concern,mg.remark
 												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
-												WHERE mg.member_no = :member_no ORDER BY mg.SEQ_NO");
+												WHERE mg.member_no = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			if(isset($rowBenefit["GAIN_ADDR"])){
-				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			}
+			$arrBenefit["FULL_NAME"] = $rowBenefit["GAIN_NAME"];
+			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
 			$arrBenefit["TYPE_PERCENT"] = 'text';
-			$arrBenefit["PERCENT_TEXT"] = 'แบ่งให้เท่า ๆ กัน';
-			$arrBenefit["PERCENT"] = filter_var(number_format($rowBenefit["GAIN_PERCENT"],0), FILTER_SANITIZE_NUMBER_INT);
+			$arrBenefit["PERCENT_TEXT"] = $rowBenefit["REMARK"];
+			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;

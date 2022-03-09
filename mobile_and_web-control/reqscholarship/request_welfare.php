@@ -4,12 +4,12 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ScholarshipRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$checkRightsReq = $conmssql->prepare("SELECT child_name as CHILD_NAME FROM ASNREQSCHOLARSHIP 
+		$checkRightsReq = $conoracle->prepare("SELECT child_name as CHILD_NAME FROM ASNREQSCHOLARSHIP 
 																WHERE CHILDCARD_ID = :child_id and SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and APPROVE_STATUS <> -9");
 		$checkRightsReq->execute([':child_id' => $dataComing["childcard_id"]]);
 		$rowRights = $checkRightsReq->fetch(PDO::FETCH_ASSOC);
 		if(empty($rowRights["CHILD_NAME"])){
-			$checkReqStatus = $conmssql->prepare("SELECT CHILDCARD_ID,REQUEST_STATUS, CANCEL_REMARK FROM asnreqschshiponline 
+			$checkReqStatus = $conoracle->prepare("SELECT CHILDCARD_ID,REQUEST_STATUS, CANCEL_REMARK FROM asnreqschshiponline 
 															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and REQUEST_STATUS <> 8");
 			$checkReqStatus->execute([':child_id' => $dataComing["childcard_id"]]);
 			$rowReqStatus = $checkReqStatus->fetch(PDO::FETCH_ASSOC);
@@ -47,18 +47,18 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 					
 				}
 			}else{
-				$delOldSchShip = $conmssql->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status = 8");
+				$delOldSchShip = $conoracle->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status = 8");
 				$delOldSchShip->execute([
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
 				]);
-				$insertSchShipOnline = $conmssql->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status)
+				$insertSchShipOnline = $conoracle->prepare("INSERT INTO asnreqschshiponline(scholarship_year, member_no, childcard_id, request_status)
 																				VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,8)");
 				if($insertSchShipOnline->execute([
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
 				])){
-					$conmssql->beginTransaction();
+					$conoracle->beginTransaction();
 					foreach($dataComing["upload_list"] as $list){
 						if(isset($list["upload_base64"]) && $list["upload_base64"] != ""){
 							$subpath = $dataComing["childcard_id"].date('Ym');
@@ -76,13 +76,13 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 								}else{
 									if($createImage){
 										$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
-										$deleteDocSch = $conmssql->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
+										$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
 										$deleteDocSch->execute([
 											':member_no' => $member_no,
 											':child_id' => $dataComing["childcard_id"],
 											':seq_no' => $list["upload_seq"]
 										]);
-										$insertSchShipOnlineDoc = $conmssql->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
+										$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
 																										VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,1,:filename)");
 										if($insertSchShipOnlineDoc->execute([
 											':member_no' => $member_no,
@@ -127,13 +127,13 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 								$createImage = $lib->base64_to_pdf($list["upload_base64"],$list["upload_name"],$destination);
 								if($createImage){
 									$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
-									$deleteDocSch = $conmssql->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
+									$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
 									$deleteDocSch->execute([
 										':member_no' => $member_no,
 										':child_id' => $dataComing["childcard_id"],
 										':seq_no' => $list["upload_seq"]
 									]);
-									$insertSchShipOnlineDoc = $conmssql->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
+									$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
 																									VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,1,:filename)");
 									if($insertSchShipOnlineDoc->execute([
 										':member_no' => $member_no,
@@ -174,13 +174,13 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 								}
 							}
 						}else{
-							$deleteDocSch = $conmssql->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
+							$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
 							$deleteDocSch->execute([
 								':member_no' => $member_no,
 								':child_id' => $dataComing["childcard_id"],
 								':seq_no' => $list["upload_seq"]
 							]);
-							$insertSchShipOnlineDoc = $conmssql->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
+							$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
 																							VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,8,:filename)");
 							if($insertSchShipOnlineDoc->execute([
 								':member_no' => $member_no,
@@ -220,8 +220,8 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 							}
 						}
 					}
-					$conmssql->commit();
-					$updateFlagUpload = $conmssql->prepare("UPDATE asnreqschshiponline SET request_status = 1, lastupload_date = sysdate 
+					$conoracle->commit();
+					$updateFlagUpload = $conoracle->prepare("UPDATE asnreqschshiponline SET request_status = 1, lastupload_date = sysdate 
 																			WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id");
 					$updateFlagUpload->execute([
 						':member_no' => $member_no,

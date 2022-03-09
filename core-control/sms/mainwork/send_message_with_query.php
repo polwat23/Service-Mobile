@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 				$arrColumn = explode(',',$rowQuery["column_selected"]);
 				if($rowQuery["is_bind_param"] == '0'){
-					$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
+					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrGroupMessage = array();
@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											foreach($arrayRawExecute[1] as $execute){
 												$arrayExecute[$execute] = $rowTarget[$execute];
 											}
-											$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 											$updateFlagStamp->execute($arrayExecute);
 										}
 										$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -112,7 +112,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												foreach($arrayRawExecute[1] as $execute){
 													$arrayExecute[$execute] = $rowTarget[$execute];
 												}
-												$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+												$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 												$updateFlagStamp->execute($arrayExecute);
 											}
 											$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -193,7 +193,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$target = $target;
 						}
 						
-						$queryTarget = $conmssql->prepare($query);
+						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$condition[1] => $target]);
 						$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
 						if(isset($rowTarget[$rowQuery["target_field"]])){
@@ -230,7 +230,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 													foreach($arrayRawExecute[1] as $execute){
 														$arrayExecute[$execute] = $rowTarget[$execute];
 													}
-													$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+													$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 													$updateFlagStamp->execute($arrayExecute);
 												}
 												$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -276,7 +276,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 														foreach($arrayRawExecute[1] as $execute){
 															$arrayExecute[$execute] = $rowTarget[$execute];
 														}
-														$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+														$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 														$updateFlagStamp->execute($arrayExecute);
 													}
 													$blukInsert[] = "('1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND_HW"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -354,7 +354,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$rowQuery = $getQuery->fetch(PDO::FETCH_ASSOC);
 				$arrColumn = explode(',',$rowQuery["column_selected"]);
 				if($rowQuery["is_bind_param"] == '0'){
-					$queryTarget = $conmssql->prepare($rowQuery['sms_query']);
+					$queryTarget = $conoracle->prepare($rowQuery['sms_query']);
 					$queryTarget->execute();
 					while($rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC)){
 						$arrTarget = array();
@@ -374,7 +374,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 										foreach($arrayRawExecute[1] as $execute){
 											$arrayExecute[$execute] = $rowTarget[$execute];
 										}
-										$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+										$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 										$updateFlagStamp->execute($arrayExecute);
 									}
 									$arrayMerge[] = $arrayTel[0];
@@ -440,7 +440,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 							$destination = $target;
 						}
 						
-						$queryTarget = $conmssql->prepare($query);
+						$queryTarget = $conoracle->prepare($query);
 						$queryTarget->execute([':'.$condition[1] => $destination]);
 						$rowTarget = $queryTarget->fetch(PDO::FETCH_ASSOC);
 						if(isset($rowTarget[$rowQuery["target_field"]])){
@@ -467,7 +467,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 											foreach($arrayRawExecute[1] as $execute){
 												$arrayExecute[$execute] = $rowTarget[$execute];
 											}
-											$updateFlagStamp = $conmssql->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
+											$updateFlagStamp = $conoracle->prepare("UPDATE ".$rowQuery["stamp_table"]." SET ".$rowQuery["set_column"]." WHERE ".$rowQuery["where_stamp"]);
 											$updateFlagStamp->execute($arrayExecute);
 										}
 										$arrayMerge[] = $arrayTel[0];
