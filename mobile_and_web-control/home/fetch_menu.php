@@ -414,7 +414,7 @@ if(!$anonymous){
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
-				$arrayResult['APP_CONFIG'] = ["COOP_TEL" => ""];
+				$arrayResult['APP_CONFIG'] = ["COOP_MAIL" => "", "SUPPORT_MAIL" => "exat.mobilesupport@gensoft.co.th"];
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -474,7 +474,7 @@ if(!$anonymous){
 			}
 		}
 		if(isset($arrayAllMenu)){
-			$arrayResult['APP_CONFIG'] = ["COOP_TEL" => ""];
+			$arrayResult['APP_CONFIG'] = ["COOP_MAIL" => "", "SUPPORT_MAIL" => "exat.mobilesupport@gensoft.co.th"];
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
