@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getBeneficiary = $conoracle->prepare("SELECT gain.GAIN_NAME,gain.GAIN_SURNAME,ucon.GAIN_CONCERN,pre.PRENAME_SHORT,gain.GAIN_ADDRESS as GAIN_ADDR,gain.REMARK
 												FROM MBGAINDETAIL gain LEFT JOIN mbucfprename pre ON gain.prename_code = pre.prename_code
 												LEFT JOIN mbucfgainconcern ucon ON gain.CONCERN_CODE = ucon.CONCERN_CODE
-												WHERE TRIM(gain.member_no) = :member_no");
+												WHERE TRIM(gain.member_no) = :member_no ORDER BY gain.SEQ_NO");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
