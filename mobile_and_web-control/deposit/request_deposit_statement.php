@@ -191,10 +191,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์มหาวิทยาลัยสุโขทัยธรรมาธิราช จำกัด (สำนักงานใหญ่)
+					สหกรณ์ออมทรัพย์กรมชลประทาน จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					STOU Savings And Credit Cooperative Limited
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:16px">
+					Royal Irrigation Department Savings and Credit Cooperative Limited.
 			   </div>
 			   </div>
 				<div class="frame-info-user">

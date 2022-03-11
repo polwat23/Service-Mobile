@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','device_name'],$dataComing)){
+if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','device_name'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$filename = basename(__FILE__, '.php');
@@ -19,8 +19,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtoupper($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT account_status,email FROM gcmemberaccount 
+	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$checkMember = $conmysql->prepare("SELECT account_status,phone_number FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkMember->execute([
 		':member_no' => $member_no
@@ -34,29 +34,25 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			require_once('../../include/exit_footer.php');
 			
 		}
-		if(empty($rowChkMemb["email"])){
-			$arrayResult['RESPONSE_CODE'] = "WS0049";
+		if(empty($rowChkMemb["phone_number"])){
+			$arrayResult['RESPONSE_CODE'] = "WS0094";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
 		}
-		if(strtolower($dataComing["email"]) != strtolower($rowChkMemb["email"])){
-			$arrayResult['RESPONSE_CODE'] = "WS0050";
+		if(strtolower($dataComing["tel"]) != strtolower($rowChkMemb["phone_number"])){
+			$arrayResult['RESPONSE_CODE'] = "WS0095";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$getNameMember = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no");
-		$getNameMember->execute([':member_no' => $member_no]);
-		$rowName = $getNameMember->fetch(PDO::FETCH_ASSOC);
-		$template = $func->getTemplateSystem('ForgetPassword');
+		$template = $func->getTemplateSystem('ForgetPasswordSMS');
 		$arrayDataTemplate = array();
 		$temp_pass = $lib->randomText('number',6);
-		$arrayDataTemplate["FULL_NAME"] = (isset($rowName["MEMB_NAME"]) ? $rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"] : $member_no);
 		$arrayDataTemplate["TEMP_PASSWORD"] = $temp_pass;
-		$arrayDataTemplate["DEVICE_NAME"] = $arrPayload["PAYLOAD"]["device_name"];
+		$arrayDataTemplate["MEMBER_NO"] = $member_no;
 		$arrayDataTemplate["REQUEST_DATE"] = $lib->convertdate(date('Y-m-d H:i'),'D m Y',true);
 		$conmysql->beginTransaction();
 		$updateTemppass = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :temp_pass,account_status = '-9',counter_wrongpass = 0,temppass_is_md5 = '0'
@@ -65,11 +61,24 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),
 			':member_no' => $member_no
 		])){
-			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-			$arrMailStatus = $lib->sendMail($dataComing["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);
-			if($arrMailStatus["RESULT"]){
-				$conmysql->commit();
+			$arrMessage = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['action'] = "sendmsg";
+			$arrVerifyToken["mode"] = "eachmsg";
+			$arrVerifyToken['typeMsg'] = 'OTP';
+			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
+			$arrMsg[0]["msg"] = $arrMessage["BODY"];
+			$arrMsg[0]["to"] = $dataComing["tel"];
+			$arrSendData["dataMsg"] = $arrMsg;
+			$arrSendData["custId"] = 'rid';
+			$arrHeader[] = "version: v1";
+			$arrHeader[] = "OAuth: Bearer ".$verify_token;
+			$arraySendSMS = $lib->posting_data($config["URL_SMS"].'/navigator',$arrSendData,$arrHeader);
+
+			if($arraySendSMS["RESULT"]){
+				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
 				if($func->logoutAll(null,$member_no,'-9')){
+					$conmysql->commit();
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
@@ -90,16 +99,13 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 					
 				}
 			}else{
-				$filename = basename(__FILE__, '.php');
-				$logStruc = [
-					":error_menu" => $filename,
-					":error_code" => "WS0019",
-					":error_desc" => "ส่งเมลไม่ได้ ".$dataComing["email"]."\n"."Error => ".$arrMailStatus["MESSAGE_ERROR"],
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-				];
-				$log->writeLog('errorusage',$logStruc);
+				$bulkInsert[] = "('".$arrMessage["BODY"]."','".$member_no."',
+						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก ".$arraySendSMS["RESPONSE_MESSAGE"]."','system',null)";
+				$func->logSMSWasNotSent($bulkInsert);
+				unset($bulkInsert);
+				$bulkInsert = array();
 				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0019";
+				$arrayResult['RESPONSE_CODE'] = "WS0018";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');

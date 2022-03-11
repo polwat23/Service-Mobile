@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mc.gain_concern as gain_concern,mg.remark
+		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mg.gain_relation as gain_concern,mg.remark
 												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
 												WHERE mg.member_no = :member_no");
 		$getBeneficiary->execute([':member_no' => $member_no]);

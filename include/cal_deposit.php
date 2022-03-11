@@ -79,11 +79,6 @@ class CalculateDep {
 										and SUBSTR(dps.deptitemtype_code,1,1) = 'D'");
 		$getSumDept->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSumDept = $getSumDept->fetch(\PDO::FETCH_ASSOC);
-		if($rowSumDept["SUM_AMT"] + $amt_transfer > $rowLimitDept["constant_value"]){
-			$arrayResult['RESPONSE_CODE'] = "WS0093";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
 		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
@@ -725,7 +720,7 @@ class CalculateDep {
 		$rowLastSEQ = $getLastSEQ->fetch(\PDO::FETCH_ASSOC);
 		return $rowLastSEQ;
 	}
-	public function generateDocNo($component,$lib){
+	public function generateDocNo($component,$lib,$more=0){
 		$getLastDpSlipNo = $this->conora->prepare("SELECT DOCUMENT_FORMAT,DOCUMENT_PREFIX,LAST_DOCUMENTNO,DOCUMENT_YEAR,DOCUMENT_LENGTH
 												FROM cmdocumentcontrol where document_code = :component");
 		$getLastDpSlipNo->execute([':component' => $component]);
@@ -751,7 +746,7 @@ class CalculateDep {
 				}
 			}else if($key == 'R'){
 				if($countRunning > 0){
-					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1 + $more,$countRunning));
 				}
 			}
 		}
@@ -899,14 +894,14 @@ class CalculateDep {
 		$insertDpSlipDest = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 											deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 											PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-											DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
+											DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
 											NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
-											POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+											POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 											TELLER_FLAG,OPERATE_TIME) 
 											VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 											:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
-											TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,0,:acc_id,1,:refer_deptslip_no,0,0,
-											:slip_amt,1,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
+											TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,:acc_id,1,:refer_deptslip_no,0,0,
+											:slip_amt,1,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 		if($insertDpSlipDest->execute($arrExecuteDest)){
 			$arrExecuteStmDest = [
 				':coop_id' => $config["COOP_ID"],
@@ -1071,7 +1066,7 @@ class CalculateDep {
 		}
 	}
 	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc){
+	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null){
 		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
@@ -1111,24 +1106,24 @@ class CalculateDep {
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 								deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 								PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,OTHER_AMT,
+								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
 								NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
-								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
 								VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
-								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,:penalty_amt,0,0,:acc_id,2,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
+								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,:penalty_amt,0,0,:acc_id,2,0,0,:slip_amt,0,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 		}else{
 			$insertDpSlipSQL = "INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 								deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 								PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,OTHER_AMT,
+								DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,OTHER_AMT,
 								NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,
-								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+								POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 								TELLER_FLAG,OPERATE_TIME) 
 								VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 								:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
-								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,:penalty_amt,0,0,:acc_id,1,0,0,:slip_amt,0,0,0,1,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
+								TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,:penalty_amt,0,0,:acc_id,1,0,0,:slip_amt,0,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))";
 		}
 		$insertDpSlip = $conoracle->prepare($insertDpSlipSQL);
 		if($insertDpSlip->execute($arrExecute)){
@@ -1153,7 +1148,7 @@ class CalculateDep {
 			if($insertStatement->execute($arrExecuteStm)){
 				if($penalty_amt > 0){
 					$rowMapAccFee = $this->getVcMapID('00');
-					$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+					$deptslip_noPenalty = $penaltyslip;//$lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
 					$lastStmSrcNo += 1;
 					$arrExecutePenalty = [
 						':deptslip_no' => $deptslip_noPenalty,
@@ -1176,13 +1171,13 @@ class CalculateDep {
 					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 																deptcoop_id,DEPTGROUP_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 																PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
-																DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,CLOSEDAY_STATUS,
+																DPSTM_NO,DEPTITEMTYPE_CODE,CALINT_FROM,CALINT_TO,ITEM_STATUS,
 																NOBOOK_FLAG,CHEQUE_SEND_FLAG,TOFROM_ACCID,PAYFEE_METH,REFER_SLIPNO,DUE_FLAG,DEPTAMT_OTHER,DEPTSLIP_NETAMT,REFER_APP,
-																POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,SHOWFOR_DEPT,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
+																POSTTOVC_FLAG,TAX_AMT,INT_BFYEAR,ACCID_FLAG,GENVC_FLAG,PEROID_DEPT,CHECKCLEAR_STATUS,   
 																TELLER_FLAG,OPERATE_TIME) 
 																VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 																:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
-																TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,0,:acc_id,2,:refer_deptslip_no,0,0,:slip_amt,'DEP',0,0,0,1,1,1,0,1,1,
+																TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,:acc_id,2,:refer_deptslip_no,0,0,:slip_amt,'DEP',0,0,0,1,1,0,1,1,
 																TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 					if($insertDpSlipPenalty->execute($arrExecutePenalty)){
 						$arrExecuteStmPenalty = [
@@ -1212,7 +1207,7 @@ class CalculateDep {
 						}
 					}else{
 						$arrayResult["RESPONSE_CODE"] = 'WS0064';
-						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecute);
+						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecutePenalty);
 						$arrayResult['RESULT'] = FALSE;
 						return $arrayResult;
 					}
