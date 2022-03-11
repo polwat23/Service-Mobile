@@ -162,8 +162,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		while($rowUCollWho = $getUCollWho->fetch(PDO::FETCH_ASSOC)){
 			$arrUCollWho[] = $rowUCollWho["PRENAME_DESC"].$rowUCollWho["MEMB_NAME"].' '.$rowUCollWho["MEMB_SURNAME"];
 		}
+		
+		$getText = $conoracle->prepare("SELECT TEXT1,TEXT2,TEXT3,TEXT4 FROM KPTEMPTEXT");
+		$getText->execute();
+		$rowgetText= $getText->fetch(PDO::FETCH_ASSOC);
+		$text = $rowgetText["TEXT1"];
 		$header["guarantee"] = $arrUCollWho;
-		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib,$text);
 		if($arrayPDF["RESULT"]){
 			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
 			$arrayResult['RESULT'] = TRUE;
@@ -212,7 +217,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	
 }
 
-function GenerateReport($dataReport,$header,$lib){
+function GenerateReport($dataReport,$header,$lib,$text){
 	$sumBalance = 0;
 	
 	
@@ -395,7 +400,7 @@ foreach($dataReport AS $arrReport){
             <div style="display:flex; height:40px;">
                 <div>ลงชื่อ</div> 
                 <div><img src="../../resource/utility_icon/signature/sign_ผจก.png" width="80" height="30" style=" margin-left:70px;"></div>
-                <div style="margin-left:210px;">แทนผู้จัดการ</div>
+                <div style="margin-left:210px;">ผู้จัดการ</div>
             </div>
             <div style="display:flex">
                 <div>ลงชื่อ</div> 
@@ -428,10 +433,7 @@ foreach($dataReport AS $arrReport){
             <div style="font-size:10pt">811 อาคารสวัสดิการ กรมชลประทานสามแสน ถนนสามแสน</div>
             <div style="font-size:10pt">แขวงถนนนครไซยศรี เขตดุสิต กรุงเทพ 10300</div>
             <div style="font-size:10pt">โทร. 0-2669-6595 โทรสาร 0-2669-6575 http://www.ridsaving.com</div>
-            <div style="font-size:10pt; margin-top:10px;">***กำหนดการสรรหา*** กรมการดำเนินการ ผู้ตรวจสอบกิจการ ประจำ</div>
-            <div style="font-size:10pt;">2565 ในวันศุกร์ที่ 12 พฤศจิการยน 2564 ตั้งแต่เวลา 08.00 น. - 12.00 น.</div>
-            <div style="font-size:10pt;">สมาชิกท่านใดประสงค์จะเปลี่ยนแปลงการใช้สิทธิ์ ลงคะแนนเสียงหรรหา</div>
-            <div style="font-size:10pt;">ขอให้แจ้งสหกรณ์ ฯ ภายในวันที่ 20 ตุลาคม 2564</div>
+            <div style="font-size:10pt; margin-top:10px; text-align:left;">'.($text ?? null).'</div>
         </div>
   </div>';
 
