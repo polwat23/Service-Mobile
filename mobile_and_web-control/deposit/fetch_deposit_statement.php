@@ -3,7 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit');
@@ -18,46 +17,64 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-		if(!$arrResponseAPI["RESULT"]){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS9999",
-				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "เมนู Statement เงินฝากโดนปิด ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-			$lib->sendLineNotify($message_error);
-			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}
-		$arrResponseAPI = json_decode($arrResponseAPI);
-		if($arrResponseAPI->responseCode == "200"){
-			foreach($arrResponseAPI->accountDetail as $accData){
-				if($accData->coopAccountNo == $account_no){
-					$arrayHeaderAcc["BALANCE"] = number_format(preg_replace('/,/', '', $accData->accountBalance),2);
-				}
+		
+		if($dataComing["channel"] == 'mobile_app'){
+			$rownum = $func->getConstant('limit_fetch_stm_dept');
+			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO > 0";
+			}else{
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS9001";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			$rownum = 999999;
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and dsm.SEQ_NO < 999999";
 		}
-		
+		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
+		$getAccount = $conoracle->prepare("SELECT prncbal as BALANCE FROM dpdeptmaster
+											WHERE deptclose_status <> 1 and deptaccount_no = :account_no");
+		$getAccount->execute([
+			':account_no' => $account_no
+		]);
+		$rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC);
+		$arrayHeaderAcc["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
-		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,ref_no FROM gcmemodept 
+		$fetchSlipTrans = $conmysql->prepare("SELECT coop_slip_no FROM gctransaction WHERE (from_account = :deptaccount_no OR destination = :deptaccount_no) and result_transaction = '-9'");
+		$fetchSlipTrans->execute([':deptaccount_no' => $account_no]);
+		$arrSlipTrans = array();
+		$arrSlipStm = array();
+		while($rowslipTrans = $fetchSlipTrans->fetch(PDO::FETCH_ASSOC)){
+			$arrSlipTrans[] = $rowslipTrans["coop_slip_no"];
+		}
+		if(sizeof($arrSlipTrans) > 0){
+			$fetchStmSeqDept = $conoracle->prepare("SELECT dpstm_no FROM dpdeptslip WHERE (deptslip_no IN('".implode("','",$arrSlipTrans)."') OR refer_slipno IN('".implode("','",$arrSlipTrans)."')) and deptaccount_no = :deptacc_no");
+			$fetchStmSeqDept->execute([':deptacc_no' => $account_no]);
+			while($rowstmseq = $fetchStmSeqDept->fetch(PDO::FETCH_ASSOC)){
+				$arrSlipStm[] = $rowstmseq["DPSTM_NO"];
+			}
+		}
+		if(sizeof($arrSlipStm) > 0){
+			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
+												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
+												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
+												WHERE dsm.deptaccount_no = :account_no and dsm.seq_no NOT IN('".implode("','",$arrSlipStm)."') and dsm.OPERATE_DATE 
+												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+		}else{
+			$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.DEPTITEMTYPE_DESC AS TYPE_TRAN,dit.SIGN_FLAG,dsm.seq_no,
+												dsm.operate_date,dsm.DEPTITEM_AMT as TRAN_AMOUNT,dsm.PRNCBAL
+												FROM dpdeptstatement dsm LEFT JOIN DPUCFDEPTITEMTYPE dit
+												ON dsm.DEPTITEMTYPE_CODE = dit.DEPTITEMTYPE_CODE 
+												WHERE dsm.deptaccount_no = :account_no and dsm.OPERATE_DATE 
+												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
+												ORDER BY dsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+		}
+		$getStatement->execute([
+			':account_no' => $account_no,
+			':datebefore' => $date_before,
+			':datenow' => $date_now
+		]);
+		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,ref_no as seq_no FROM gcmemodept 
 											WHERE deptaccount_no = :account_no");
 		$getMemoDP->execute([
 			':account_no' => $account_no
@@ -66,53 +83,26 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		while($rowMemo = $getMemoDP->fetch(PDO::FETCH_ASSOC)){
 			$arrMemo[] = $rowMemo;
 		}
-		$arrHeaderAPISTM[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPISTM["MemberID"] = substr($member_no,-6);
-		$arrDataAPISTM["CoopAccountNo"] = $account_no;
-		$arrDataAPISTM["FromDate"] = date('c',strtotime($date_before));
-		$arrDataAPISTM["ToDate"] = date('c',strtotime($date_now));
-		$arrResponseAPISTM = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryBalance",$arrDataAPISTM,$arrHeaderAPISTM);
-		if(!$arrResponseAPISTM["RESULT"]){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS9999",
-				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryBalance",
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "เมนู Statement เงินฝากโดนปิด ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryBalance";
-			$lib->sendLineNotify($message_error);
-			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}
-		$arrResponseAPISTM = json_decode($arrResponseAPISTM);
-		if($arrResponseAPISTM->responseCode == "200"){
-			foreach($arrResponseAPISTM->inquieryBalanceDetail as $accData){
-				$seq_no = isset($accData->trxRefno) && $accData->trxRefno != "" ? $accData->trxRefno : $accData->trxSeqno;
-				$arrSTM = array();
-				$arrSTM["TYPE_TRAN"] = $accData->trxDesc;
-				$arrSTM["SIGN_FLAG"] = $accData->trxOperate == '+' ? "1" : "-1";
-				$arrSTM["SEQ_NO"] = $seq_no;
-				$arrSTM["OPERATE_DATE"] = $lib->convertdate($accData->trxDate,'D m Y');
-				$arrSTM["TRAN_AMOUNT"] = str_replace('-','',$accData->totalAmount);
-				if(array_search($seq_no,array_column($arrMemo,'ref_no')) === False){
-					$arrSTM["MEMO_TEXT"] = null;
-					$arrSTM["MEMO_ICON_PATH"] = null;
-				}else{
-					$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($seq_no,array_column($arrMemo,'ref_no'))]["memo_text"] ?? null;
-					$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($seq_no,array_column($arrMemo,'ref_no'))]["memo_icon_path"] ?? null;
-				}
-				$arrayGroupSTM[] = $arrSTM;
+		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
+			$arrSTM = array();
+			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
+			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];
+			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
+			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
+			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
+			$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
+			if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no')) === False){
+				$arrSTM["MEMO_TEXT"] = null;
+				$arrSTM["MEMO_ICON_PATH"] = null;
+			}else{
+				$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
+				$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
 			}
+			$arrayGroupSTM[] = $arrSTM;
 		}
-		$arrayResult["REQUEST_STATEMENT"] = FALSE;
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

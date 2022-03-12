@@ -4,74 +4,38 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrGroupAccAllow = array();
-		$arrGroupAccFav = array();
-		$arrayDept = array();
-		$formatDept = $func->getConstant('dep_format');
-		$formatDeptHidden = $func->getConstant('hidden_dep');
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_pay_loan = '1'");
-		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
-		if($fetchAccAllowTrans->rowCount() > 0){
-			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
+		$arrLoanGrp = array();
+		
+		$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE,
+												lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnm.INTEREST_RETURN
+												FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
+												WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+		$fetchLoanRepay->execute([':member_no' => $member_no]);
+		while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
+			$interest = 0;
+			$arrLoan = array();
+			$interest = $cal_loan->calculateInterest($rowLoan["LOANCONTRACT_NO"]);
+			if($interest > 0){
+				$arrLoan["INT_BALANCE"] = $interest;
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt as prncbal,dpm.depttype_code
-													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.deptclose_status = 0
-													ORDER BY dpm.deptaccount_no ASC");
-			$getDataBalAcc->execute();
-			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
-				$arrAccAllow = array();
-				$checkDep = $cal_dep->getSequestAmt($rowDataAccAllow["DEPTACCOUNT_NO"]);
-				if($checkDep["CAN_WITHDRAW"]){
-					$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAllow["DEPTACCOUNT_NO"];
-					$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAllow["DEPTACCOUNT_NO"],$formatDept);
-					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccAllow["DEPTACCOUNT_NO_FORMAT"],$formatDeptHidden);
-					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
-					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-					$arrAccAllow["BALANCE"] = number_format($cal_dep->getWithdrawable($rowDataAccAllow["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"]);
-					$arrGroupAccAllow[] = $arrAccAllow;
-				}
-			}
-			$fetchLoanRepay = $conoracle->prepare("SELECT lnt.loantype_desc,lnm.loancontract_no,lnm.principal_balance,lnm.period_payamt,lnm.last_periodpay,lnm.LOANTYPE_CODE,
-													lnm.LASTCALINT_DATE,lnm.LOANPAYMENT_TYPE,lnm.INTEREST_RETURN
-													FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE 
-													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
-			$fetchLoanRepay->execute([':member_no' => $member_no]);
-			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
-				$interest = 0;
-				$arrLoan = array();
-				$interest = $cal_loan->calculateInterest($rowLoan["LOANCONTRACT_NO"]);
-				if($interest > 0){
-					$arrLoan["INT_BALANCE"] = $interest;
-				}
-				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
-					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
-				}else{
-					$arrLoan["LOAN_TYPE_IMG"] = null;
-				}
-				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
-				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
-				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
-				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
-				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
-				$arrLoanGrp[] = $arrLoan;
-			}
-			
-			if(sizeof($arrGroupAccAllow) > 0){
-				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				$arrayResult['LOAN'] = $arrLoanGrp;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
+			if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
+				$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0023";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
+				$arrLoan["LOAN_TYPE_IMG"] = null;
 			}
+			$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
+			$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
+			$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
+			$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
+			$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
+			$arrLoanGrp[] = $arrLoan;
+		}
+		
+		if(sizeof($arrLoanGrp) > 0){
+			$arrayResult['LOAN'] = $arrLoanGrp;
+			$arrayResult['IS_SAVE_SOURCE'] = FALSE;
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0023";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

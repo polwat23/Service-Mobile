@@ -4,67 +4,35 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','limit_amt','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
-		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrDataAPI["CoopAccountNo"] = $dataComing["deptaccount_no"];
-		$arrDataAPI["WtdAmountMax"] = $dataComing["limit_amt"];
-		$arrDataAPI["UserRequestDate"] = date('c');
-		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/SaveWithdrawMaxPerDay",$arrDataAPI,$arrHeaderAPI);
-		if(!$arrResponseAPI["RESULT"]){
+		$updateLimitTrans = $conmysql->prepare("UPDATE gcuserallowacctransaction SET limit_transaction_amt = :limit_amt 
+												WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
+		if($updateLimitTrans->execute([
+			':limit_amt' => $dataComing["limit_amt"],
+			':member_no' => $payload["member_no"],
+			':deptaccount_no' => $dataComing["deptaccount_no"]
+		])){
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
+		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,
-				":error_code" => "WS9999",
-				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/SaveWithdrawMaxPerDay",
+				":error_code" => "WS1026",
+				":error_desc" => "แกไขวงเงินในการทำธุรกรรมไม่ได้ "."\n".json_encode($dataComing),
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/SaveWithdrawMaxPerDay";
+			$message_error = "แกไขวงเงินในการทำธุรกรรมไม่ได้เพราะ Update ลง gcuserallowacctransaction ไม่ได้"."\n"."Query => ".$updateLimitTrans->queryString."\n"."Param => ". json_encode([
+				':limit_amt' => $dataComing["limit_amt"],
+				':member_no' => $payload["member_no"],
+				':deptaccount_no' => $dataComing["deptaccount_no"]
+			]);
 			$lib->sendLineNotify($message_error);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
+			$arrayResult['RESPONSE_CODE'] = "WS1026";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
-		}
-		$arrResponse = json_decode($arrResponseAPI);
-		if($arrResponse->responseCode == "200"){
-			$updateLimitTrans = $conmysql->prepare("UPDATE gcuserallowacctransaction SET limit_transaction_amt = :limit_amt 
-													WHERE member_no = :member_no and deptaccount_no = :deptaccount_no");
-			if($updateLimitTrans->execute([
-				':limit_amt' => $dataComing["limit_amt"],
-				':member_no' => $payload["member_no"],
-				':deptaccount_no' => $dataComing["deptaccount_no"]
-			])){
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$filename = basename(__FILE__, '.php');
-				$logStruc = [
-					":error_menu" => $filename,
-					":error_code" => "WS1026",
-					":error_desc" => "แกไขวงเงินในการทำธุรกรรมไม่ได้ "."\n".json_encode($dataComing),
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-				];
-				$log->writeLog('errorusage',$logStruc);
-				$message_error = "แกไขวงเงินในการทำธุรกรรมไม่ได้เพราะ Update ลง gcuserallowacctransaction ไม่ได้"."\n"."Query => ".$updateLimitTrans->queryString."\n"."Param => ". json_encode([
-					':limit_amt' => $dataComing["limit_amt"],
-					':member_no' => $payload["member_no"],
-					':deptaccount_no' => $dataComing["deptaccount_no"]
-				]);
-				$lib->sendLineNotify($message_error);
-				$arrayResult['RESPONSE_CODE'] = "WS1026";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS9001";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

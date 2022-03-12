@@ -11,88 +11,54 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$arrayDept = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no 
-												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-												WHERE gat.deptaccount_no = :deptaccount_no and gat.is_use = '1' and gct.allow_deposit_inside = '1'");
-		$fetchAccAllowTrans->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
-		if($fetchAccAllowTrans->rowCount() > 0){
-			$arrarDataAcc = array();
-			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-			$arrDataAPI["MemberID"] = substr($member_no,-6);
-			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-			if(!$arrResponseAPI["RESULT"]){
-				$filename = basename(__FILE__, '.php');
-				$logStruc = [
-					":error_menu" => $filename,
-					":error_code" => "WS9999",
-					":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-				];
-				$log->writeLog('errorusage',$logStruc);
-				$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-				$lib->sendLineNotify($message_error);
-				$func->MaintenanceMenu($dataComing["menu_component"]);
-				$arrayResult['RESPONSE_CODE'] = "WS9999";
+		$checkDep = $cal_dep->getSequestAmt($dataComing["deptaccount_no"]);
+		if($checkDep["CAN_DEPOSIT"]){
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0092";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
+		$arrarDataAcc = array();
+		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
+												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+												WHERE dpm.deptaccount_no = :deptaccount_no and dpm.acccont_type = '01'");
+		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
+		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowDataAcc["DEPTTYPE_DESC"])){
+			$fetchConstantAllowDept = $conmysql->prepare("SELECT allow_deposit_inside FROM gcconstantaccountdept 
+														WHERE dept_type_code = :dept_type_code");
+			$fetchConstantAllowDept->execute([
+				':dept_type_code' => $rowDataAcc["DEPTTYPE_CODE"]
+			]);
+			$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
+			if($rowContAllow["allow_deposit_inside"] == '1'){
+				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png')){
+					$arrarDataAcc["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowDataAcc["DEPTTYPE_CODE"].'.png?v='.date('Ym');
+				}else{
+					$arrarDataAcc["DEPT_TYPE_IMG"] = null;
+				}
+				$arrarDataAcc["DEPTACCOUNT_NO"] = $dataComing["deptaccount_no"];
+				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($dataComing["deptaccount_no"],$func->getConstant('dep_format'));
+				$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($dataComing["deptaccount_no"],$func->getConstant('hidden_dep'));
+				$arrarDataAcc["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAcc["DEPTACCOUNT_NAME"]);
+				$arrarDataAcc["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+				$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0026";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
 			}
-			$arrResponseAPI = json_decode($arrResponseAPI);
-			if($arrResponseAPI->responseCode == "200"){
-				foreach($arrResponseAPI->accountDetail as $accData){
-					if ($accData->coopAccountNo == $dataComing["deptaccount_no"]){
-						if($accData->accountStatus == "0" && $accData->creditFlag == "0"){
-							$checkAllowToTransaction = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
-							$checkAllowToTransaction->execute([':member_no' => $payload["member_no"]]);
-							if($checkAllowToTransaction->rowCount() > 0){
-								$arrarDataAcc["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
-								$arrarDataAcc["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-								$arrarDataAcc["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($accData->coopAccountNo,$func->getConstant('hidden_dep'));
-								$arrarDataAcc["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
-								$arrarDataAcc["DEPT_TYPE"] = $accData->accountDesc;
-								$arrayResult['ACCOUNT_DATA'] = $arrarDataAcc;
-								$arrayResult['RESULT'] = TRUE;
-								require_once('../../include/exit_footer.php');
-							}else{
-								$arrayResult['RESPONSE_CODE'] = "WS0026";
-								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-								$arrayResult['RESULT'] = FALSE;
-								require_once('../../include/exit_footer.php');
-								
-							}
-						}else{
-							$arrayResult['RESPONSE_CODE'] = "WS0054";
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-							$arrayResult['RESULT'] = FALSE;
-							require_once('../../include/exit_footer.php');
-							
-						}
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0025";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-						
-					}
-				}
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS9001";
-				if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
-					$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
-				}else{
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				}
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0026";
+			$arrayResult['RESPONSE_CODE'] = "WS0025";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

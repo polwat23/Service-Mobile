@@ -20,10 +20,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,TRIM(mg.membgroup_code) as membgroup_code,
-													mb.MEMB_ADDR as ADDR_NO, mb.SOI as ADDR_SOI,mb.MOOBAN as ADDR_MOO,mb.ROAD AS ADDR_ROAD,
+													mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,TRIM(mg.membgroup_code) as membgroup_code,
+													mb.ADDRESS_NO as ADDR_NO, mb.ADDRESS_SOI as ADDR_SOI,mb.ADDRESS_MOO as ADDR_MOO,mb.ADDRESS_ROAD AS ADDR_ROAD,
+													MB.ADDRESS_VILLAGE as ADDR_VILLAGE,
 													mb.PROVINCE_CODE,
-													mb.MEMBADDR_FULL,
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
@@ -31,7 +31,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+													LEFT JOIN MBUCFPOSITION MPOS ON mb.POSITION_CODE = MPOS.POSITION_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 													WHERE mb.member_no = :member_no");
@@ -70,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
 				$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 				$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
-				$arrayResult["FULL_ADDRESS_CURR"] = isset($rowMember["MEMBADDR_FULL"]) && $rowMember["MEMBADDR_FULL"] != "" ? $rowMember["MEMBADDR_FULL"] : $address;
+				$arrayResult["FULL_ADDRESS_CURR"] = $address;
 				$arrayResult["MEMBER_NO"] = $member_no;
 				$arrayResult["IGNORE_INFO"] = ["CARD_PERSON","MEMBERGROUP_DESC","BIRTH_DATE","POSITION_DESC"];
 				$arrayResult["RECEIVE_MONEY_FROM"] = $rowMember["MEMBGROUP_DESC"]." (".$rowMember["MEMBGROUP_CODE"].")";
@@ -78,8 +79,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 			}else{
 				$getInfoMembTemp = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-														mb.position_desc,mg.membgroup_desc,mt.membtype_desc,TRIM(mg.membgroup_code) as membgroup_code,
-														mb.MEMB_ADDR as ADDR_NO, mb.SOI as ADDR_SOI,mb.MOOBAN as ADDR_MOO,mb.ROAD AS ADDR_ROAD,
+														mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,TRIM(mg.membgroup_code) as membgroup_code,
+														mb.ADDRESS_NO as ADDR_NO, mb.ADDRESS_SOI as ADDR_SOI,mb.ADDRESS_MOO as ADDR_MOO,mb.ADDRESS_ROAD AS ADDR_ROAD,
 														mb.PROVINCE_CODE,
 														MBT.TAMBOL_DESC AS TAMBOL_DESC,
 														MBD.DISTRICT_DESC AS DISTRICT_DESC,
@@ -88,7 +89,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														FROM MBREQAPPL mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 														LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 														LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-														LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL = MBT.TAMBOL_CODE
+														LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+														LEFT JOIN MBUCFPOSITION MPOS ON mb.POSITION_CODE = MPOS.POSITION_CODE
 														LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 														LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 														WHERE mb.member_no = :member_no");
@@ -126,7 +128,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["POSITION_DESC"] = $rowInfoTemp["POSITION_DESC"];
 				$arrayResult["MEMBER_TYPE"] = $rowInfoTemp["MEMBTYPE_DESC"];
 				$arrayResult["MEMBERGROUP_DESC"] = $rowInfoTemp["MEMBGROUP_DESC"];
-				$arrayResult["FULL_ADDRESS_CURR"] = isset($rowInfoTemp["MEMBADDR_FULL"]) && $rowInfoTemp["MEMBADDR_FULL"] != "" ? $rowInfoTemp["MEMBADDR_FULL"] : $address;
+				$arrayResult["FULL_ADDRESS_CURR"] = $address;
 				$arrayResult["MEMBER_NO"] = $member_no;
 				$arrayResult["IGNORE_INFO"] = ["CARD_PERSON","MEMBERGROUP_DESC","BIRTH_DATE","POSITION_DESC"];
 				$arrayResult["RECEIVE_MONEY_FROM"] = $rowInfoTemp["MEMBGROUP_DESC"]." (".$rowInfoTemp["MEMBGROUP_CODE"].")";

@@ -31,52 +31,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 			if($fetchAccAllowTrans->rowCount() > 0){
 				while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-					$arrayDept[] = $rowAccAllow["deptaccount_no"];
+					$arrayDept[] = "'".$rowAccAllow["deptaccount_no"]."'";
 				}
-				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-				$arrDataAPI["MemberID"] = substr($member_no,-6);
-				$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-				if(!$arrResponseAPI["RESULT"]){
-					$filename = basename(__FILE__, '.php');
-					$logStruc = [
-						":error_menu" => $filename,
-						":error_code" => "WS9999",
-						":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
-						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-					];
-					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-					$lib->sendLineNotify($message_error);
-					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
-					$func->MaintenanceMenu($dataComing["menu_component"]);
-					$arrayResult['RESPONSE_CODE'] = "WS9999";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-				$arrResponseAPI = json_decode($arrResponseAPI);
-				if($arrResponseAPI->responseCode == "200"){
-					foreach($arrResponseAPI->accountDetail as $accData){
-						if (in_array($accData->coopAccountNo, $arrayDept) && $accData->accountStatus == "0"){
-							$arrAccCoop = array();
-							$arrAccCoop["DEPTACCOUNT_NO"] = $accData->coopAccountNo;
-							$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-							$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
-							$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
-							$arrAccCoop["DEPT_TYPE"] = $accData->accountDesc;
-							$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $accData->availableBalance);
-							$arrAccCoop["BALANCE_FORMAT"] = $accData->availableBalance;
-							$arrAccCoop["BALANCE_DEST"] = preg_replace('/,/', '', $accData->accountBalance);
-							$arrGroupAccBind["COOP"][] = $arrAccCoop;
-						}
-					}
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS9001";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
+				$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
+												dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal,dpm.CHECKPEND_AMT
+												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpm.membcat_code = dpt.membcat_code
+												WHERE dpm.deptclose_status = '0' and dpm.deptaccount_no IN(".implode(',',$arrayDept).")
+												ORDER BY dpm.deptaccount_no");
+				$getAllAcc->execute();
+				while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){
+					$arrAccCoop = array();
+					$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
+					$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+					$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
+					$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
+					$arrAccCoop["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
+					$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $rowDataAccAll["PRNCBAL"]);
+					$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
+					$arrGroupAccBind["COOP"][] = $arrAccCoop;
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0023";

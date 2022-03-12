@@ -11,7 +11,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			if($payload["member_no"] == 'etnmode3'){
+				$arrayResult['CITIZEN_ID'] = '1530400073734';
+			}else{
+				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -20,7 +25,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMemberAcc["CARD_PERSON"]) && $rowMemberAcc["CARD_PERSON"] != ""){
 				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowMemberAcc["CARD_PERSON"]);
-				$arrayResult['CITIZEN_ID'] = $rowMemberAcc["CARD_PERSON"];
+				if($payload["member_no"] == 'etnmode3'){
+					$arrayResult['CITIZEN_ID'] = '1530400073734';
+				}else{
+					$arrayResult['CITIZEN_ID'] = $rowMemberAcc["CARD_PERSON"];
+				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
