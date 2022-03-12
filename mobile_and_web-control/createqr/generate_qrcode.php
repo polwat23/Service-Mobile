@@ -34,15 +34,33 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			//insert success
 			foreach ($dataComing["transList"] as $transValue) {
 				$account_no = preg_replace('/-/','',$transValue["account_no"]);
-				$insertQrDetail = $conmysql->prepare("INSERT INTO gcqrcodegendetail(qrgenerate, trans_code_qr, ref_account, qrtransferdt_amt, qrtransferdt_fee) 
-													VALUES (:qrgenerate, :trans_code_qr, :ref_account, :qrtransferdt_amt, :qrtransferdt_fee)");
-				if($insertQrDetail->execute([
-					':qrgenerate' => $randQrRef,
-					':trans_code_qr' => $transValue["trans_code"],
-					':ref_account' => $account_no ?? null,
-					':qrtransferdt_amt' => $transValue["amt_transfer"],
-					':qrtransferdt_fee' => 0,
-				])){
+				if($transValue["trans_code"] == '002'){
+					$getTypeCode = $conoracle->prepare("SELECT LOANTYPE_CODE FROM lncontmaster WHERE loancontract_no = :contract_no");
+					$getTypeCode->execute([':contract_no' => $account_no]);
+					$rowTypecode = $getTypeCode->fetch(PDO::FETCH_ASSOC);
+					$query = "INSERT INTO gcqrcodegendetail(qrgenerate, trans_code_qr,type_code, ref_account, qrtransferdt_amt, qrtransferdt_fee) 
+							VALUES (:qrgenerate, :trans_code_qr, :type_code,:ref_account, :qrtransferdt_amt, :qrtransferdt_fee)";
+					$execute = [
+						':qrgenerate' => $randQrRef,
+						':trans_code_qr' => $transValue["trans_code"],
+						':type_code' => $rowTypecode["LOANTYPE_CODE"] ?? null,
+						':ref_account' => $account_no ?? null,
+						':qrtransferdt_amt' => $transValue["amt_transfer"],
+						':qrtransferdt_fee' => 0,
+					];
+				}else{
+					$query = "INSERT INTO gcqrcodegendetail(qrgenerate, trans_code_qr, ref_account, qrtransferdt_amt, qrtransferdt_fee) 
+							VALUES (:qrgenerate, :trans_code_qr, :ref_account, :qrtransferdt_amt, :qrtransferdt_fee)";
+					$execute = [
+						':qrgenerate' => $randQrRef,
+						':trans_code_qr' => $transValue["trans_code"],
+						':ref_account' => $account_no ?? null,
+						':qrtransferdt_amt' => $transValue["amt_transfer"],
+						':qrtransferdt_fee' => 0,
+					];
+				}
+				$insertQrDetail = $conmysql->prepare($query);
+				if($insertQrDetail->execute($execute)){
 					$qrTransferAmt += $transValue["amt_transfer"];
 					$qrTransferFee += 0;
 				}else{
