@@ -102,6 +102,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
 			$responseSoap = $resultWS->of_dept_inf_servResult;
 			if($responseSoap->msg_status != '0000'){
+				file_put_contents('test.log',json_encode($responseSoap,JSON_UNESCAPED_UNICODE ));
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],

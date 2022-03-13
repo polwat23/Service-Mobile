@@ -9,8 +9,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
 		$ref_no = date('YmdHis').substr($from_account_no,-3);
 		$dateOperC = date('c');
-		$itemtype_dep = 'WAP';
-		$toitemtype_dep = 'DAP';
+		$itemtype_dep = 'WES';
+		$toitemtype_dep = 'DES';
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 		$amt_transfer = $dataComing["amt_transfer"] - ($dataComing["penalty_amt"] ?? 0);
 		$constantDep = $cal_dep->getConstantAcc($dataComing["from_deptaccount_no"]);
@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup = array();
 			$arrayGroup["account_id"] = $rowAccid["DEFAULT_ACCID"];
 			$arrayGroup["action_status"] = "1";
-			$arrayGroup["atm_no"] = "EGAT-SC";
+			$arrayGroup["atm_no"] = "MOBILE";
 			$arrayGroup["atm_seqno"] = null;
 			$arrayGroup["aviable_amt"] = null;
 			$arrayGroup["bank_accid"] = null;
