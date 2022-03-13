@@ -36,9 +36,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$rowIntSpc = $getIntSpc->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowIntSpc["INTRATE_INCREASE"]) && $rowIntSpc["INTRATE_INCREASE"] != ""){
-				$arrContract["INT_RATE"] = (($rowIntRate["INTEREST_RATE"] * 100) - $rowIntSpc["INTRATE_INCREASE"])."%";
+				$arrContract["INT_RATE"] = (($rowIntRate["INTEREST_RATE"]) - $rowIntSpc["INTRATE_INCREASE"])."%";
 			}else{
-				$arrContract["INT_RATE"] = ($rowIntRate["INTEREST_RATE"] * 100)."%";
+				$arrContract["INT_RATE"] = ($rowIntRate["INTEREST_RATE"])."%";
 			}
 			$arrContract["CONTRACT_NO"] = $rowContract["LOANCONTRACT_NO"];
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);

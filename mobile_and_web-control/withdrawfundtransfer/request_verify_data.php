@@ -11,57 +11,29 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$rowDataWithdraw = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$fee_amt = $rowDataWithdraw["fee_withdraw"];
-		$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataWithdraw["bank_code"]);
-		if($arrRightDep["RESULT"]){
-			$dateOperC = date('c');
-			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-			$amt_transfer = $dataComing["amt_transfer"];
-			$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_bank = :bank_account_no 
-												and member_no = :member_no and bindaccount_status = '1'");
-			$getDataUser->execute([
-				':bank_account_no' => $dataComing["bank_account_no"],
-				':member_no' => $payload["member_no"]
-			]);
-			$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
-			$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
-													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
-													WHERE MB.member_no = :member_no");
-			$fetchMemberName->execute([
-				':member_no' => $member_no
-			]);
-			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
-			$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-			$arrDataAPI["MemberID"] = substr($member_no,-6);
-			$arrDataAPI["ToBankAccountNo"] = $dataComing["bank_account_no"];
-			$arrDataAPI["ToBankCode"] = $rowDataWithdraw["bank_code"];
-			$arrDataAPI["FromCoopAccountNo"] = $deptaccount_no;
-			$arrDataAPI["TransferAmount"] = $amt_transfer;
-			$arrDataAPI["TransferFee"] = $fee_amt;
-			$arrDataAPI["UserRequestDate"] = $dateOperC;
-			$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee",$arrDataAPI,$arrHeaderAPI);
-			if(!$arrResponseAPI["RESULT"]){
-				$filename = basename(__FILE__, '.php');
-				$logStruc = [
-					":error_menu" => $filename,
-					":error_code" => "WS9999",
-					":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee",
-					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-				];
-				$log->writeLog('errorusage',$logStruc);
-				$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckWithdrawFee";
-				$lib->sendLineNotify($message_error);
-				$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
-				$func->MaintenanceMenu($dataComing["menu_component"]);
-				$arrayResult['RESPONSE_CODE'] = "WS9999";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-			$arrResponseAPI = json_decode($arrResponseAPI);
-			if($arrResponseAPI->responseCode == "200"){
+		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],$rowDataWithdraw["itemtype_wtd"],$fee_amt);
+		if($arrInitDep["RESULT"]){
+			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataWithdraw["bank_code"]);
+			if($arrRightDep["RESULT"]){
+				$dateOperC = date('c');
+				$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+				$amt_transfer = $dataComing["amt_transfer"];
+				$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_bank = :bank_account_no 
+													and member_no = :member_no and bindaccount_status = '1'");
+				$getDataUser->execute([
+					':bank_account_no' => $dataComing["bank_account_no"],
+					':member_no' => $payload["member_no"]
+				]);
+				$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
+				$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
+														FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+														WHERE MB.member_no = :member_no");
+				$fetchMemberName->execute([
+					':member_no' => $member_no
+				]);
+				$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 				if($rowDataWithdraw["bank_code"] == '006'){
-					$arrSendData = array();
+					/*$arrSendData = array();
 					$arrVerifyToken = array();
 					$arrVerifyToken['exp'] = time() + 300;
 					$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -70,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$arrVerifyToken['tran_date'] = $dateOper;
 					$arrVerifyToken['amt_transfer'] = $amt_transfer;
 					$arrVerifyToken['bank_account'] = $dataComing["bank_account_no"];
-					$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
+					$arrVerifyToken['citizen_id'] = "1530400073734";//$rowDataUser["citizen_id"];
 					$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 					$arrSendData["verify_token"] = $verify_token;
 					$arrSendData["app_id"] = $config["APP_ID"];
@@ -97,8 +69,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						require_once('../../include/exit_footer.php');
 						
 					}
-					$arrResponse = json_decode($responseAPI);
-					if($arrResponse->RESULT){
+					$arrResponse = json_decode($responseAPI);*/
+					if(1==1){
 						if($fee_amt > 0){
 							$arrayResult['FEE_AMT'] = $fee_amt;
 							$arrayResult['FEE_AMT_FORMAT'] = number_format($fee_amt,2);
@@ -253,13 +225,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					}
 				}
 				$arrayResult['ACCOUNT_NAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
-				if($arrResponseAPI->coopFee > 0){
+				if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
 					$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 					$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
 					$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
 					$arrayResult['CAUTION'] = $arrayCaution;
-					$arrayResult['PENALTY_AMT'] = $arrResponseAPI->coopFee;
-					$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrResponseAPI->coopFee,2);
+					$arrayResult['PENALTY_AMT'] = $arrInitDep["PENALTY_AMT"];
+					$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 				}
 				$arrayResult['TRAN_TIME'] = $arrResponse->TRAN_TIME;
 				$arrayResult['TOKEN_ID'] = $arrResponse->TOKEN_ID;
@@ -267,32 +239,12 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0028";
-				if($arrResponseAPI->responseCode == '415'){
-					$type_account = substr(preg_replace('/-/','',$deptaccount_no),3,2);
-					if($type_account == '10'){
-						$accountDesc = "NORMAL";
-					}else{
-						$accountDesc = "SPECIAL";
-					}
-					$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$accountDesc][0][$lang_locale];
+				$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
+				if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 				}else{
-					if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
-						$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					}
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				}
-				$arrayStruc = [
-					':member_no' => $payload["member_no"],
-					':id_userlogin' => $payload["id_userlogin"],
-					':operate_date' => $dateOper,
-					':amt_transfer' => $dataComing["amt_transfer"],
-					':deptaccount_no' => $dataComing["deptaccount_no"],
-					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $arrResponseAPI->responseMessage
-				];
-				$log->writeLog('withdrawtrans',$arrayStruc);
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
@@ -306,6 +258,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 		}
+
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

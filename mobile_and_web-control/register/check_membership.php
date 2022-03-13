@@ -29,34 +29,20 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrDataAPI["CitizenID"] = $dataComing["id_card"];
-		$arrDataAPI["CoopAccountNo"] = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."MemberProfile/VerifyMember",$arrDataAPI,$arrHeaderAPI);
-		if(!$arrResponseAPI["RESULT"]){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS9999",
-				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."MemberProfile/VerifyMember",
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."MemberProfile/VerifyMember";
-			$lib->sendLineNotify($message_error);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
-		}
-		$arrResponseAPI = json_decode($arrResponseAPI);
-		if($arrResponseAPI->responseCode == "200"){
+		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		$getDept = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and member_no = :member_no and deptclose_status = '0'");
+		$getDept->execute([
+			':deptaccount_no' => $deptaccount_no,
+			':member_no' => $member_no
+		]);
+		$rowDept = $getDept->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowDept["DEPTACCOUNT_NO"]) && $rowDept["DEPTACCOUNT_NO"] != ""){
+			$getName = $conoracle->prepare("SELECT memb_name,memb_surname FROM mbmembmaster WHERE member_no = :member_no and resign_status = '0'");
+			$getName->execute([':member_no' => $member_no]);
+			$rowName = $getName->fetch(PDO::FETCH_ASSOC);
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
-			$arrayResult['MEMBER_FULLNAME'] = $arrResponseAPI->firstName.' '.$arrResponseAPI->lastName;
+			$arrayResult['MEMBER_FULLNAME'] = $rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

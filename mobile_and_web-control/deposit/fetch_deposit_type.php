@@ -11,77 +11,63 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
 		$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
 		while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
-			$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
+			$arrTypeAllow[] = "'".$rowTypeAllow["deptaccount_no"]."'";
 		}
-		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-		if(!$arrResponseAPI["RESULT"]){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS9999",
-				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "เมนู เงินฝากโดนปิด ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-			$lib->sendLineNotify($message_error);
-			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-		}
-		$arrResponseAPI = json_decode($arrResponseAPI);
+
+		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE deptaccount_no IN(".implode(',',$arrTypeAllow).")
+												and deptclose_status <> 1");
+		$getSumAllAccount->execute();
+		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
+		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		if($arrResponseAPI->responseCode == "200"){
-			foreach($arrResponseAPI->accountDetail as $accData){
-				if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
-					$arrayResult['SUM_BALANCE'] += preg_replace('/,/', '', $accData->accountBalance);
-					$arrAccount = array();
-					$arrGroupAccount = array();
-					$arrAccount["DEPTACCOUNT_NO"] =  $lib->formataccount($accData->coopAccountNo,$formatDept);
-					$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($arrAccount["DEPTACCOUNT_NO"],$formatDeptHidden);
-					$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
-					$arrAccount["BALANCE"] = $accData->accountBalance;
-					if(isset($accData->rcvintrAccountNo) && $accData->rcvintrAccountNo != ""){
-						$arrAccount['RECV_INT_ACCOUNT_NO'] = $accData->rcvintrAccountNo;
-					}
-					if($dataComing["channel"] == 'mobile_app'){
-						$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img FROM gcdeptalias WHERE deptaccount_no = :account_no");
-						$fetchAlias->execute([
-							':account_no' => $accData->coopAccountNo
-						]);
-						$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-						$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
-						if(isset($rowAlias["path_alias_img"])){
-							$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
-							$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp';
-						}else{
-							$arrAccount["ALIAS_PATH_IMG"] = null;
-						}
-					}
-					$arrGroupAccount['TYPE_ACCOUNT'] = $accData->accountDesc;
-					$arrGroupAccount['DEPT_TYPE_CODE'] = $accData->accountType;
-					if(array_search($accData->accountDesc,array_column($arrAllAccount,'TYPE_ACCOUNT')) === False){
-						($arrGroupAccount['ACCOUNT'])[] = $arrAccount;
-						$arrAllAccount[] = $arrGroupAccount;
-					}else{
-						($arrAllAccount[array_search($accData->accountDesc,array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
-					}
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
+											WHERE dp.deptaccount_no IN(".implode(',',$arrTypeAllow).") and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+		$getAccount->execute();
+		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
+			$arrAccount = array();
+			$arrGroupAccount = array();
+			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept);
+			$arrayHeaderAcc = array();
+			if($dataComing["channel"] == 'web'){
+				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
+					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
+				}else{
+					$arrGroupAccount["COVER_IMG"] = null;
 				}
 			}
-		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS9001";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE deptaccount_no = :account_no");
+			$fetchAlias->execute([
+				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
+			]);
+			$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
+			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
+			if(isset($rowAlias["path_alias_img"])){
+				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
+				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
+				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["path_alias_img"].'?v='.$rowAlias["update_date"];
+			}else{
+				$arrAccount["ALIAS_PATH_IMG"] = null;
+				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
+			}
+			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
+			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$formatDeptHidden);
+			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccount["DEPTACCOUNT_NAME"]));
+			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
+			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
+			$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');
+			$arrGroupAccount['TYPE_ACCOUNT'] = $rowAccount["DEPTTYPE_DESC"];
+			$arrGroupAccount['DEPT_TYPE_CODE'] = $rowAccount["DEPTTYPE_CODE"];
+			if(array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT')) === False){
+				($arrGroupAccount['ACCOUNT'])[] = $arrAccount;
+				$arrAllAccount[] = $arrGroupAccount;
+			}else{
+				($arrAllAccount[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrAllAccount,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arrAccount;
+			}
 		}
-		$arrayResult['SUM_BALANCE'] = number_format($arrayResult['SUM_BALANCE'],2);
+		
 		$arrayResult['DETAIL_DEPOSIT'] = $arrAllAccount;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

@@ -12,7 +12,7 @@ set DBPORT=3306
 set DBUSER=root
 set DBPASS=@Egat2020
 set DBNAME=mobile_egat
-set PROJECT_PATH=D:\EgatscMobile\Service-Egat\
+set PROJECT_PATH=C:\Mobile\service-egat\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%

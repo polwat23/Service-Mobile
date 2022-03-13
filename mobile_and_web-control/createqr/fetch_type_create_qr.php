@@ -17,29 +17,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			
 			if($rowTypeQR["trans_code_qr"] == '001'){
 				$formatDept = $func->getConstant('dep_format');
+				$arrDepttypeAllow  = array();
 				$hiddenFormat = $func->getConstant('hidden_dep');
-				$checkCanReceive = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept WHERE allow_deposit_outside = '1'");
-				$checkCanReceive->execute();
-				$arrDepttypeAllow = array();
-				while($rowCanReceive = $checkCanReceive->fetch(PDO::FETCH_ASSOC)){
-					$arrDepttypeAllow[] = $rowCanReceive["dept_type_code"];
+				$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
+															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_deposit_outside = '1'");
+				$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
+				while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
+					$arrDepttypeAllow [] = "'".$rowAccAllow["deptaccount_no"]."'";
 				}
-				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-				$arrDataAPI["MemberID"] = substr($member_no,-6);
-				$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-				$arrResponseAPI = json_decode($arrResponseAPI);
-				if($arrResponseAPI->responseCode == "200"){
-					foreach($arrResponseAPI->accountDetail as $accData){
-						if(in_array($accData->accountType, $arrDepttypeAllow) && $accData->accountStatus == "0"){
-							$arrAccTrans = array();
-							$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$formatDept);
-							$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$hiddenFormat);
-							$arrAccTrans["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
-							$arrAccTrans["PRIN_BAL"] = $accData->accountBalance;
-							$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
-							$arrGrpAcc[] = $arrAccTrans;
-						}
-					}
+				$getAccountinTrans = $conoracle->prepare("SELECT DEPTACCOUNT_NO,DEPTACCOUNT_NAME,PRNCBAL FROM dpdeptmaster 
+															WHERE deptclose_status <> 1 and deptaccount_no IN(".implode(",",$arrDepttypeAllow).")");
+				$getAccountinTrans->execute();
+				while($rowAccTrans = $getAccountinTrans->fetch(PDO::FETCH_ASSOC)){
+					$arrAccTrans = array();
+					$arrAccTrans["ACCOUNT_NO"] = $lib->formataccount($rowAccTrans["DEPTACCOUNT_NO"],$formatDept);
+					$arrAccTrans["ACCOUNT_NO_HIDE"] = $lib->formataccount_hidden($arrAccTrans["ACCOUNT_NO"],$hiddenFormat);
+					$arrAccTrans["ACCOUNT_NAME"] = TRIM($rowAccTrans["DEPTACCOUNT_NAME"]);
+					$arrAccTrans["PRIN_BAL"] = $rowAccTrans["PRNCBAL"];
+					$arrAccTrans["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
+					$arrGrpAcc[] = $arrAccTrans;
 				}
 			}else if($rowTypeQR["trans_code_qr"] == '002'){
 				$checkCanGen = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_qrpayment = '1'");

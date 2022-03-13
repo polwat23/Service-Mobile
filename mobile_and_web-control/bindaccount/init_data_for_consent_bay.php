@@ -11,33 +11,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
-			if($payload["member_no"] == 'etnmode3'){
-				$arrayResult['CITIZEN_ID'] = '1530400073734';
-			}else{
-				$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
-			}
-
+			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$getMemberApprove = $conoracle->prepare("SELECT TRIM(CARD_PERSON) as CARD_PERSON FROM MBREQAPPL WHERE member_no = :member_no and APPL_STATUS = '8'");
-			$getMemberApprove->execute([':member_no' => $member_no]);
-			$rowMemberAcc = $getMemberApprove->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowMemberAcc["CARD_PERSON"]) && $rowMemberAcc["CARD_PERSON"] != ""){
-				$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowMemberAcc["CARD_PERSON"]);
-				if($payload["member_no"] == 'etnmode3'){
-					$arrayResult['CITIZEN_ID'] = '1530400073734';
-				}else{
-					$arrayResult['CITIZEN_ID'] = $rowMemberAcc["CARD_PERSON"];
-				}
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0003";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

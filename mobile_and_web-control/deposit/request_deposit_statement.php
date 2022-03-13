@@ -3,8 +3,6 @@ require_once('../autoload.php');
 
 use Dompdf\Dompdf;
 
-$dompdf = new DOMPDF();
-
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -18,24 +16,26 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
+			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
+																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
+																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
+																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
+																		ORDER BY dps.SEQ_NO DESC");
+			$fetchDataSTM->execute([
+				':account_no' => $account_no,
+				':datebefore' => $date_between[0],
+				':dateafter' => $date_between[1]
+			]);
 			$arraySTMGrp = array();
-			$arrHeaderAPISTM[] = 'Req-trans : '.date('YmdHis');
-			$arrDataAPISTM["MemberID"] = substr($member_no,-6);
-			$arrDataAPISTM["CoopAccountNo"] = $account_no;
-			$arrDataAPISTM["FromDate"] = date('c',strtotime($date_between[0]));
-			$arrDataAPISTM["ToDate"] = date('c',strtotime($date_between[1]));
-			$arrResponseAPISTM = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryBalance",$arrDataAPISTM,$arrHeaderAPISTM);
-			$arrResponseAPISTM = json_decode($arrResponseAPISTM);
-			if($arrResponseAPISTM->responseCode == "200"){
-				foreach($arrResponseAPISTM->inquieryBalanceDetail as $accData){
-					$arraySTM = array();
-					$arraySTM["TYPE_TRAN"] = $accData->trxDesc;
-					$arraySTM["SIGN_FLAG"] = $accData->trxOperate == '+' ? "1" : "-1";
-					$arraySTM["OPERATE_DATE"] = $lib->convertdate($accData->trxDate,'D m Y');
-					$arraySTM["TRAN_AMOUNT"] = str_replace('-','',$accData->totalAmount);
-					$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
-					$arraySTMGrp[] = $arraySTM;
-				}
+			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
+				$arraySTM = array();
+				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
+				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
+				$arraySTM["DEPTSLIP_NO"] = $rowDataSTM["DEPTSLIP_NO"];
+				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
+				$arraySTM["TRAN_AMOUNT"] = $rowDataSTM["TRAN_AMOUNT"];
+				$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
+				$arraySTMGrp[] = $arraySTM;
 			}
 			$arrayData["STATEMENT"] = $arraySTMGrp;
 			$arrayData["MEMBER_NO"] = $payload["member_no"];
@@ -101,15 +101,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new Dompdf([
-		'fontDir' => realpath('../../resource/fonts'),
-		'chroot' => realpath('/'),
-		'isRemoteEnabled' => true
-	]);
+	$dompdf = new DOMPDF();
 	//style table
-	$html = '<style>
+	  $html = '<style>
 
-			@font-face {
+		 @font-face {
 			  font-family: TH Niramit AS;
 			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
@@ -121,7 +117,6 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			* {
 			  font-family: TH Niramit AS;
 			}
-
 
 		  body {
 			margin-top: 3.6cm;
@@ -151,7 +146,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  }
 		  td{
 			padding:5px;
-			font-size: 18px;
+			font-size: 17px;
 		  }
 		  p{
 			margin:0px;
@@ -169,6 +164,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			padding-top: 80px;
 		}
 		.frame-info-user {
+			line-height: 12px;
 			padding: 10px -10px 10px 10px;
 			position: fixed;
 			left: 440px;
@@ -178,6 +174,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			border: 0.5px #DDDDDD solid;
 			border-radius: 5px;
 		}
+
 		.label {
 			width: 30%;
 			padding: 0 5px;
@@ -185,26 +182,25 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		}
 		  </style>
 		';
-
 	//head table
 	$html .='
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
-			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์มหาวิทยาลัยมหิดล จำกัด
+			   <div style=" position: fixed;top:2px; left: 60px; font-size:18px; font-weight:bold;">
+					สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิต จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Mahidol University Savings and Credit Co-Operative, Limited
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:14px">
+					Egat Savings and Credit Co-Operative, Limited
 			   </div>
 			   </div>
 				<div class="frame-info-user">
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;padding-top: 0px;">
 					<div class="label">เลขสมาชิก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
 					</div>
-					<div style="display:flex;width: 100%;padding-top: -20px;">
+					<div style="display:flex;width: 100%;padding-top: 0px;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
 					</div>
@@ -222,7 +218,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:70px;">วัน เดือน ปี</th>
+		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
 		  <th>รายการ</th>
 		  <th>ฝาก</th>
 		  <th>ถอน</th>
@@ -260,7 +256,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 				<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>';
 			}
 		  $html .= '<td style="text-align:right">'.number_format($stm["PRNCBAL"],2).'</td>
-		  <td style="text-align:center">'.$stm["DEPTSLIP_NO"].'</td>
+		  <td style="text-align:center">'.($stm["DEPTSLIP_NO"] ?? "-").'</td>
 		</tr>
 	';
 	}
@@ -277,8 +273,8 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	  <tr>
 		<td ></td>
 		<td ><b>รายการฝาก '.$count_deposit.' รายการ</b></td>
-		<td ></td>
 		<td style="text-align:right"><b>'.number_format($sum_deposit,2).'</b></td>
+		<td ></td>
 		<td ></td>
 		<td ></td>
 	  </tr>
@@ -295,13 +291,16 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
-
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
-	$font = $dompdf->getFontMetrics()->get_font("THSarabun", "");
-	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}", $font, 12, array(0,0,0));
+	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
 	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){

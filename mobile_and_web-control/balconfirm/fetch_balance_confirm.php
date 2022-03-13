@@ -8,49 +8,36 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpAllDept = array();
 		$arrGrpAllLoan = array();
 		$arrGrpLoanAll = array();
-		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-		if(!$arrResponseAPI["RESULT"]){
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS9999",
-				":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
-			$log->writeLog('errorusage',$logStruc);
-			$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-			$lib->sendLineNotify($message_error);
-			$func->MaintenanceMenu($dataComing["menu_component"]);
-			$arrayResult['RESPONSE_CODE'] = "WS9999";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+		$arrTypeAllow = array();
+		$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
+												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
+												WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+		$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
+		while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
+			$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
 		}
-		$arrResponseAPI = json_decode($arrResponseAPI);
-		if($arrResponseAPI->responseCode == "200"){
-			foreach($arrResponseAPI->accountDetail as $accData){
-				if ($accData->accountStatus == "0"){
-					$arraysumDept = array();
-					$arrGrpDept = array();
-					$arrGrpAllDept["SUM_ALL_ACC"] += preg_replace('/,/', '', $accData->accountBalance);
-					$arrGrpAllDept["COUNT_ACC"]++;
-					$arraysumDept["BALANCE"] = preg_replace('/,/', '', $accData->accountBalance);
-					$arraysumDept["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
-					$arraysumDept["SOURCE_NO"] = $lib->formataccount($accData->coopAccountNo,$func->getConstant('dep_format'));
-					$arraysumDept["TYPE_DESC"] = $accData->accountDesc;
-					$arrGrpDept['TYPE_ACCOUNT'] = $accData->accountDesc;
-					if(array_search($accData->accountDesc,array_column($arrGrpDeptAll,'TYPE_ACCOUNT')) === False){
-						($arrGrpDept['ACCOUNT'])[] = $arraysumDept;
-						$arrGrpDept['SUM_BAL_IN_TYPE'] += preg_replace('/,/', '', $accData->accountBalance);
-						$arrGrpDeptAll[] = $arrGrpDept;
-					}else{
-						($arrGrpDeptAll[array_search($accData->accountDesc,array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arraysumDept;
-						($arrGrpDeptAll[array_search($accData->accountDesc,array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += preg_replace('/,/', '', $accData->accountBalance);
-					}
-				}
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
+											WHERE dp.deptaccount_no IN(".implode(',',$arrTypeAllow).") and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+		$getAccount->execute();
+		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
+			$arraysumDept = array();
+			$arrGrpDept = array();
+			$arrGrpAllDept["SUM_ALL_ACC"] += preg_replace('/,/', '', $rowAccount["BALANCE"]);
+			$arrGrpAllDept["COUNT_ACC"]++;
+			$arraysumDept["BALANCE"] = preg_replace('/,/', '', $rowAccount["BALANCE"]);
+			$arraysumDept["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
+			$arraysumDept["SOURCE_NO"] = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+			$arraysumDept["TYPE_DESC"] = $rowAccount["DEPTTYPE_DESC"];
+			$arrGrpDept['TYPE_ACCOUNT'] = $rowAccount["DEPTTYPE_DESC"];
+			if(array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT')) === False){
+				($arrGrpDept['ACCOUNT'])[] = $arraysumDept;
+				$arrGrpDept['SUM_BAL_IN_TYPE'] += preg_replace('/,/', '', $rowAccount["BALANCE"]);
+				$arrGrpDeptAll[] = $arrGrpDept;
+			}else{
+				($arrGrpDeptAll[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))]["ACCOUNT"])[] = $arraysumDept;
+				($arrGrpDeptAll[array_search($rowAccount["DEPTTYPE_DESC"],array_column($arrGrpDeptAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += preg_replace('/,/', '', $rowAccount["BALANCE"]);
 			}
 		}
 		$getSumAllLoan = $conoracle->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.loancontract_no,ln.principal_balance as BALANCE

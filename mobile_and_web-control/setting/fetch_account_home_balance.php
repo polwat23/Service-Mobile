@@ -16,23 +16,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
 			$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
 		}
-		$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-		$arrDataAPI["MemberID"] = substr($member_no,-6);
-		$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-		$arrResponseAPI = json_decode($arrResponseAPI);
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
+											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
+											WHERE dp.deptaccount_no IN(".implode(',',$arrTypeAllow).") and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+		$getAccount->execute();
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		if($arrResponseAPI->responseCode == "200"){
-			foreach($arrResponseAPI->accountDetail as $accData){
-				if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0"){
-					$arrAccount = array();
-					$arrAccount["ACCOUNT_NO"] = $lib->formataccount($accData->coopAccountNo,$formatDept);
-					$arrAccount["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($accData->coopAccountNo,$formatDeptHidden);
-					$arrAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',$accData->coopAccountName);
-					$arrAccount["ACCOUNT_DESC"] = $accData->accountDesc;
-					$arrAllAccount[] = $arrAccount;
-				}
-			}
+		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
+			$arrAccount = array();
+			$arrAccount["ACCOUNT_NO"] = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$formatDept);
+			$arrAccount["ACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($rowAccount["DEPTACCOUNT_NO"],$formatDeptHidden);
+			$arrAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
+			$arrAccount["ACCOUNT_DESC"] = $rowAccount["DEPTTYPE_DESC"];
+			$arrAllAccount[] = $arrAccount;
 		}
 		$arrayResult['DEPOSIT'] = $arrAllAccount;
 		

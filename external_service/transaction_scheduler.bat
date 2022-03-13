@@ -1,3 +1,3 @@
 @echo off
 
-C:\php7.4\php.exe D:\EgatscMobile\Service-Egat\external_service\transaction_scheduler.php
+C:\Mobile\php7.4\php.exe C:\Mobile\service-egat\external_service\transaction_scheduler.php

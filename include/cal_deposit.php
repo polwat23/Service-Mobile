@@ -17,7 +17,60 @@ class CalculateDep {
 		$this->con = $connection->connecttomysql();
 		$this->conora = $connection->connecttooracle();
 	}
-	
+	public function getSequestAmount($deptaccount,$itemtype_code,$amt_transfer=0){
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$config = json_decode($json,true);
+		try {
+			$clientWS = new \SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+			try {
+				$argumentWS = [
+					"as_wspass" => $config["WS_STRC_DB"],
+					"as_deptaccount_no" => $deptaccount,
+					"as_deptitemtype_code" => $itemtype_code,
+					"adc_deptitem_amt" => $amt_transfer,
+					"ai_status" => 0,
+					"as_msglog" => null,
+					"adc_amt" => 0.00
+				];
+				$resultWS = $clientWS->__call("of_check_sequest_online", array($argumentWS));
+				if($resultWS->ai_status == '0'){
+					$arrayResult["CAN_DEPOSIT"] = TRUE;
+					$arrayResult["CAN_WITHDRAW"] = TRUE;
+				}else{
+					$arrayResult["SEQUEST_DESC"] = $resultWS->as_msglog;
+					$arrayResult["SEQUEST_AMOUNT"] = $resultWS->adc_amt;
+					if($resultWS->ai_status == '5'){
+						$arrayResult["CAN_DEPOSIT"] = FALSE;
+						$arrayResult["CAN_WITHDRAW"] = TRUE;
+					}else{
+						if($resultWS->ai_status == '2' || $resultWS->ai_status == '3'){
+							$arrayResult["CAN_DEPOSIT"] = FALSE;
+							$arrayResult["CAN_WITHDRAW"] = FALSE;
+						}else if($resultWS->ai_status == '2'){
+							$arrayResult["CAN_DEPOSIT"] = TRUE;
+							$arrayResult["CAN_WITHDRAW"] = FALSE;
+						}else{
+							$arrayResult["CAN_DEPOSIT"] = TRUE;
+							$arrayResult["CAN_WITHDRAW"] = TRUE;
+						}
+					}
+				}
+				$arrayResult['RESULT'] = TRUE;
+				return $arrayResult;
+			}catch(\SoapFault $e){
+				$arrayResult["RAW"] = $e;
+				$arrayResult["RESPONSE_CODE"] = 'WS0104';
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+		}catch(\Throwable $e){
+			$arrayResult["RAW"] = $e;
+			$arrayResult["RESPONSE_CODE"] = 'WS0104';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+	}
+
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
 		$penalty_amt = 0;
@@ -557,15 +610,55 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	private function getSequestAmt($deptaccount_no){
-		$getSequestAmt = $this->conora->prepare("SELECT SEQUEST_BALANCE FROM dpdeptsequest WHERE deptaccount_no = :deptaccount_no 
-												and sequest_status = '1' and item_status = '1'");
+	public function getSequestAmt($deptaccount_no){
+		$arrSequest = array();
+		$getSequestAmt = $this->conora->prepare("SELECT SEQUEST_STATUS,SEQUEST_AMOUNT FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$getSequestAmt->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowSeqAmt = $getSequestAmt->fetch(\PDO::FETCH_ASSOC);
-		return $rowSeqAmt;
+		if(isset($rowSeqAmt["SEQUEST_STATUS"])){
+			if($rowSeqAmt["SEQUEST_STATUS"] == '1'){ // อายัดจำนวนเงิน
+				$arrSequest["CAN_WITHDRAW"] = TRUE;
+				$arrSequest["CAN_DEPOSIT"] = TRUE;
+				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '2'){ // อายัดการเคลื่อนไหว
+				$arrSequest["CAN_WITHDRAW"] = FALSE;
+				$arrSequest["CAN_DEPOSIT"] = FALSE;
+				$arrSequest["SEQUEST_AMOUNT"] = 0;
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '3'){ // อายัดรอปิดบัญชี
+				$arrSequest["CAN_WITHDRAW"] = FALSE;
+				$arrSequest["CAN_DEPOSIT"] = FALSE;
+				$arrSequest["SEQUEST_AMOUNT"] = 0;
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '4'){ // อายัดห้ามถอน/ปิดบัญชี
+				$arrSequest["CAN_WITHDRAW"] = FALSE;
+				$arrSequest["CAN_DEPOSIT"] = TRUE;
+				$arrSequest["SEQUEST_AMOUNT"] = 0;
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '5'){ // อายัดห้ามฝาก
+				$arrSequest["CAN_WITHDRAW"] = TRUE;
+				$arrSequest["CAN_DEPOSIT"] = FALSE;
+				$arrSequest["SEQUEST_AMOUNT"] = 0;
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '9'){ // อายัดเพื่อ ATM
+				$arrSequest["CAN_WITHDRAW"] = TRUE;
+				$arrSequest["CAN_DEPOSIT"] = TRUE;
+				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
+			}else if($rowSeqAmt["SEQUEST_STATUS"] == '0'){ // ไม่อายัด
+				$arrSequest["CAN_WITHDRAW"] = TRUE;
+				$arrSequest["CAN_DEPOSIT"] = TRUE;
+				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
+			}else{
+				$arrSequest["CAN_WITHDRAW"] = FALSE;
+				$arrSequest["CAN_DEPOSIT"] = FALSE;
+				$arrSequest["SEQUEST_AMOUNT"] = 0;
+			}
+		}else{
+			$arrSequest["CAN_WITHDRAW"] = TRUE;
+			$arrSequest["CAN_DEPOSIT"] = TRUE;
+			$arrSequest["SEQUEST_AMOUNT"] = 0;
+		}
+		return $arrSequest;
 	}
+
 	public function getConstantAcc($deptaccount_no){
-		$getConst = $this->conora->prepare("SELECT dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
+		$getConst = $this->conora->prepare("SELECT dpm.LASTSTMSEQ_NO,dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
 											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,NVL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
 											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG
 											,NVL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK
