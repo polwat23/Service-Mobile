@@ -472,7 +472,7 @@ if(!$anonymous){
 					$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 					$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 					$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-					if($dataComing["unique_id"] == 'C12B2B02-EA2D-4FAE-817E-F592C3BAB575'){
+					if($dataComing["unique_id"] == '0BF2C726-6B8E-4EB7-9A60-E6E5DBFB3259'){
 						$arrMenu["MENU_STATUS"] = '1';
 					}else{
 						$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];
@@ -487,7 +487,7 @@ if(!$anonymous){
 				$arrMenu["MENU_NAME_EN"] = $rowMenu["menu_name_en"];
 				$arrMenu["MENU_ICON_PATH"] = $rowMenu["menu_icon_path"];
 				$arrMenu["MENU_COMPONENT"] = $rowMenu["menu_component"];
-				if($dataComing["unique_id"] == 'C12B2B02-EA2D-4FAE-817E-F592C3BAB575'){
+				if($dataComing["unique_id"] == '0BF2C726-6B8E-4EB7-9A60-E6E5DBFB3259'){
 					$arrMenu["MENU_STATUS"] = '1';
 				}else{
 					$arrMenu["MENU_STATUS"] = $rowMenu["menu_status"];

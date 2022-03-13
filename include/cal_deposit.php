@@ -24,19 +24,22 @@ class CalculateDep {
 			$clientWS = new \SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 			try {
 				$argumentWS = [
-					"as_wspass" => $config["WS_STRC_DB"],
+					"as_wspass" => $config["WS_PASS"],
 					"as_deptaccount_no" => $deptaccount,
 					"as_deptitemtype_code" => $itemtype_code,
 					"adc_deptitem_amt" => $amt_transfer,
+					"adtm_date" => date('c'),
 					"ai_status" => 0,
 					"as_msglog" => null,
 					"adc_amt" => 0.00
 				];
 				$resultWS = $clientWS->__call("of_check_sequest_online", array($argumentWS));
 				if($resultWS->ai_status == '0'){
+					$arrayResult["GET_BALANCE"] = TRUE;
 					$arrayResult["CAN_DEPOSIT"] = TRUE;
 					$arrayResult["CAN_WITHDRAW"] = TRUE;
 				}else{
+					$arrayResult["GET_BALANCE"] = FALSE;
 					$arrayResult["SEQUEST_DESC"] = $resultWS->as_msglog;
 					$arrayResult["SEQUEST_AMOUNT"] = $resultWS->adc_amt;
 					if($resultWS->ai_status == '5'){
@@ -94,8 +97,11 @@ class CalculateDep {
 	}
 	public function getWithdrawable($deptaccount_no){
 		$DataAcc = $this->getConstantAcc($deptaccount_no);
-		$DataSeqAmt = $this->getSequestAmt($deptaccount_no);
-		return $DataAcc["PRNCBAL"] - $DataSeqAmt["SEQUEST_BALANCE"] - $DataAcc["MINPRNCBAL"];
+		$withdraw_amt = $DataAcc["PRNCBAL"] - $DataAcc["MINPRNCBAL"];
+		if($withdraw_amt < 0){
+			$withdraw_amt = 0;
+		}
+		return $withdraw_amt;
 	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		/*$dataConst = $this->getConstantAcc($deptaccount_no);
@@ -662,7 +668,7 @@ class CalculateDep {
 											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,NVL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
 											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG
 											,NVL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK
-											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.DEPTTYPE_CODE  = dpt.DEPTTYPE_CODE
+											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.DEPTTYPE_CODE  = dpt.DEPTTYPE_CODE and dpm.membcat_code = dpt.membcat_code
 											WHERE dpm.DEPTACCOUNT_NO = :deptaccount_no");
 		$getConst->execute([':deptaccount_no' => $deptaccount_no]);
 		$rowConst = $getConst->fetch(\PDO::FETCH_ASSOC);
