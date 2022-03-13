@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["bank_cd"] = null;
 			$arrayGroup["branch_cd"] = null;
 			$arrayGroup["coop_code"] = $config["COOP_KEY"];
-			$arrayGroup["coop_id"] = $config["COOP_ID"];
+			$arrayGroup["coop_id"] = "065001";
 			$arrayGroup["deptaccount_no"] = $dataComing["from_deptaccount_no"];
 			$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
 			$arrayGroup["dest_deptaccount_no"] = $dataComing["to_deptaccount_no"];

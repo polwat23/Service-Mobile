@@ -80,7 +80,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["bank_cd"] = '025';
 			$arrayGroup["branch_cd"] = null;
 			$arrayGroup["coop_code"] = $config["COOP_KEY"];
-			$arrayGroup["coop_id"] = $config["COOP_ID"];
+			$arrayGroup["coop_id"] = "065001";
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = "MOBILE";

@@ -40,15 +40,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												ORDER BY dpm.deptaccount_no");
 				$getAllAcc->execute();
 				while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){
-					$arrAccCoop = array();
-					$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
-					$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-					$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
-					$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
-					$arrAccCoop["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
-					$arrAccCoop["BALANCE"] = preg_replace('/,/', '', $rowDataAccAll["PRNCBAL"]);
-					$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-					$arrGroupAccBind["COOP"][] = $arrAccCoop;
+					$getSeqAmt = $cal_dep->getSequestAmount($rowDataAccAll["DEPTACCOUNT_NO"],'WES');
+					if($getSeqAmt["RESULT"]){
+						$arrAccCoop = array();
+						$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
+						$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+						$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
+						$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
+						$arrAccCoop["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
+						if($getSeqAmt["GET_BALANCE"]){
+							$arrAccCoop["BALANCE"] = $rowDataAccAll["PRNCBAL"];
+						}else{
+							$arrAccCoop["BALANCE"] = $getSeqAmt["SEQUEST_AMOUNT"];
+						}
+						$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
+						$arrGroupAccBind["COOP"][] = $arrAccCoop;
+					}
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0023";

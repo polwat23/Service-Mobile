@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["bank_cd"] = '025';
 			$arrayGroup["branch_cd"] = null;
 			$arrayGroup["coop_code"] = $config["COOP_KEY"];
-			$arrayGroup["coop_id"] = $config["COOP_ID"];
+			$arrayGroup["coop_id"] = "065001";
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = "MOBILE";
@@ -102,7 +102,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
 			$responseSoap = $resultWS->of_dept_inf_servResult;
 			if($responseSoap->msg_status != '0000'){
-				file_put_contents('test.log',json_encode($responseSoap,JSON_UNESCAPED_UNICODE ));
 				$arrayResult['RESPONSE_CODE'] = "WS0041";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
@@ -149,6 +148,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':ref_no_source' => $refbank_no,
 						':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
 					]);
+					$arrayGroup["post_status"] = "-1";
+					$arrayGroup["atm_no"] = $ref_slipno;
+					$argumentWS = [
+							"as_wspass" => $config["WS_PASS"],
+							"astr_dept_inf_serv" => $arrayGroup
+					];
+					$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
+					$responseSoapCancel = $resultWS->of_dept_inf_servResult;
 					$arrayResult['RESPONSE_CODE'] = "WS0030";
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
@@ -282,6 +289,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':ref_no_source' => $refbank_no,
 						':bank_code' => $rowDataWithdraw["bank_code"] ?? '004'
 					]);
+					$arrayGroup["post_status"] = "-1";
+					$arrayGroup["atm_no"] = $ref_slipno;
+					$argumentWS = [
+							"as_wspass" => $config["WS_PASS"],
+							"astr_dept_inf_serv" => $arrayGroup
+					];
+					$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
+					$responseSoapCancel = $resultWS->of_dept_inf_servResult;
 					$arrayResult['RESPONSE_CODE'] = "WS0037";
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],

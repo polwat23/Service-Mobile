@@ -41,21 +41,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
-					$checkDep = $cal_dep->getSequestAmt($rowDataAccAll["DEPTACCOUNT_NO"]);
-					if($checkDep["CAN_DEPOSIT"]){
-						$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_DEPOSIT"] = '0';
+					
+					$checkDep = $cal_dep->getSequestAmount($rowDataAccAll["DEPTACCOUNT_NO"],'WES');
+					if($checkDep["RESULT"]){
+						if($checkDep["CAN_DEPOSIT"]){
+							$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
+						}else{
+							$arrAccAllow["CAN_DEPOSIT"] = '0';
+						}
+						if($checkDep["CAN_WITHDRAW"]){
+							$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+						}else{
+							$arrAccAllow["CAN_WITHDRAW"] = '0';
+						}
+						if($checkDep["GET_BALANCE"]){
+							$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"];
+						}else{
+							$arrAccAllow["BALANCE"] = $checkDep["SEQUEST_AMOUNT"];
+						}
+						$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
+						$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
+						$arrGroupAccAllow[] = $arrAccAllow;
 					}
-					if($checkDep["CAN_WITHDRAW"]){
-						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_WITHDRAW"] = '0';
-					}
-					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"];
-					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
-					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
-					$arrGroupAccAllow[] = $arrAccAllow;
 				}
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){

@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						]);
 						$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 						if($rowDataWithdraw["bank_code"] == '006'){
-							/*$arrSendData = array();
+							$arrSendData = array();
 							$arrVerifyToken = array();
 							$arrVerifyToken['exp'] = time() + 300;
 							$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							$arrVerifyToken['tran_date'] = $dateOper;
 							$arrVerifyToken['amt_transfer'] = $amt_transfer;
 							$arrVerifyToken['bank_account'] = $dataComing["bank_account_no"];
-							$arrVerifyToken['citizen_id'] = "1530400073734";//$rowDataUser["citizen_id"];
+							$arrVerifyToken['citizen_id'] = $rowDataUser["citizen_id"];
 							$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 							$arrSendData["verify_token"] = $verify_token;
 							$arrSendData["app_id"] = $config["APP_ID"];
@@ -81,8 +81,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 								require_once('../../include/exit_footer.php');
 								
 							}
-							$arrResponse = json_decode($responseAPI);*/
-							if(1==1){
+							$arrResponse = json_decode($responseAPI);
+							if($arrResponse->RESULT){
 								if($fee_amt > 0){
 									$arrayResult['FEE_AMT'] = $fee_amt;
 									$arrayResult['FEE_AMT_FORMAT'] = number_format($fee_amt,2);
@@ -243,7 +243,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
 							$arrayResult['CAUTION'] = $arrayCaution;
 							$arrayResult['PENALTY_AMT'] = $feeAmt;
-							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($feeAmt],2);
+							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($feeAmt,2);
 						}
 						$arrayResult['TRAN_TIME'] = $arrResponse->TRAN_TIME;
 						$arrayResult['TOKEN_ID'] = $arrResponse->TOKEN_ID;
@@ -293,9 +293,9 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 				require_once('../../include/exit_footer.php');
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
-			if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
-				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+			$arrayResult['RESPONSE_CODE'] = $arrInitDep["RESPONSE_CODE"];
+			if($arrInitDep["RESPONSE_CODE"] == 'WS0056'){
+				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrInitDep["MINWITD_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 			}else{
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			}

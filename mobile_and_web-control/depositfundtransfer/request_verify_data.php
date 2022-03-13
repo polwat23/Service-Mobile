@@ -20,7 +20,6 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 			}
 		}else{
-			file_put_contents('test.log',json_encode($checkSeqAmt,JSON_UNESCAPED_UNICODE ));
 			$arrayResult['RESPONSE_CODE'] = $checkSeqAmt["RESPONSE_CODE"];
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
