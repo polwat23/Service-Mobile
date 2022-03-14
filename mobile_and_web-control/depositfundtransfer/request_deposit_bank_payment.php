@@ -139,7 +139,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':sigma_key' => $dataComing["sigma_key"],
 						':amt_transfer' => $amt_transfer,
 						':response_code' => "WS0041",
-						':response_message' => "Server cannot connect"
+						':response_message' => json_encode($responseSoap,JSON_UNESCAPED_UNICODE )
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
 					$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ติดต่อ Service เงินฝากไม่ได้";
@@ -304,7 +304,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':sigma_key' => $dataComing["sigma_key"],
 					':amt_transfer' => $amt_transfer,
 					':response_code' => "WS0041",
-					':response_message' => "Server cannot connect"
+					':response_message' => json_encode($e,JSON_UNESCAPED_UNICODE )
 				];
 				$log->writeLog('deposittrans',$arrayStruc);
 				$message_error = "ไม่สามารถฝากเงินได้ ให้ดู Ref_no ในตาราง gctransaction ".$ref_no." สาเหตุเพราะ ติดต่อ Service เงินฝากไม่ได้";

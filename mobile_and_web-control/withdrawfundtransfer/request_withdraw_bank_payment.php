@@ -54,6 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
+		
 		// Withdraw Inside --------------------------------------
 		$ref_slipno = null;
 		try{
@@ -323,6 +324,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				
 			}
 		}catch(SoapFault $e){
+			file_put_contents('request_ErrWTD.txt', json_encode($e,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 			$arrayResult['RESPONSE_CODE'] = "WS0041";
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],
