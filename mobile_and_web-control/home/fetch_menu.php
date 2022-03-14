@@ -64,7 +64,7 @@ if(!$anonymous){
 				$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 				$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 			}
-			$arrMenuDep["LAST_STATEMENT"] = TRUE;
+			$arrMenuDep["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
@@ -252,7 +252,7 @@ if(!$anonymous){
 								$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							}
-							$arrMenuDep["LAST_STATEMENT"] = TRUE;
+							$arrMenuDep["LAST_STATEMENT"] = FALSE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$arrMenuLoan = array();
 							if(isset($dataComing["home_loan_account"])) {
@@ -335,7 +335,7 @@ if(!$anonymous){
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
-						$arrMenuDep["LAST_STATEMENT"] = TRUE;
+						$arrMenuDep["LAST_STATEMENT"] = FALSE;
 					}else if($dataComing["menu_component"] == "LoanInfo"){
 						$arrMenuLoan = array();
 						if(isset($dataComing["home_loan_account"])) {
