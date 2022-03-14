@@ -73,12 +73,13 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				}
 			}
 		}
-		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
+		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,mb.card_person,
 												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
 												LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
+												LEFT JOIN mbucfprovince pv ON mg.addr_province = pv.province_code
 												LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 												WHERE mb.member_no = :member_no");
 		$fetchData->execute([
@@ -110,6 +111,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			$arrData["requestdoc_no"] = $reqloan_doc;
 			$arrData["full_name"] = $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["name"] = $rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
+			$arrData["card_person"] = $rowData["CARD_PERSON"];			
 			$arrData["member_no"] = $payload["member_no"];
 			$arrData["position"] = $rowData["POSITION_DESC"];
 			$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
@@ -117,6 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 			$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 			$arrData["request_amt"] = $dataComing["request_amt"];
+			$arrData["loanpermit_amt"] = $dataComing["loanpermit_amt"];
 			if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 				include('form_request_loan_'.$dataComing["loantype_code"].'.php');
 				$arrayPDF = GeneratePDFContract($arrData,$lib);

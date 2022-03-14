@@ -40,10 +40,18 @@ require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
+require_once(__DIR__.'/../include/cal_deposit.php');
+require_once(__DIR__.'/../include/cal_loan.php');
+require_once(__DIR__.'/../include/cal_share.php');
+
+
 
 // Call functions
 use Utility\Library;
 use Authorized\Authorization;
+use CalculateDeposit\CalculateDep;
+use CalculateShare\CalculateShare;
+use CalculateLoan\CalculateLoan;
 use Component\functions;
 use ControlLog\insertLog;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
@@ -54,6 +62,9 @@ use WebPConvert\WebPConvert;
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
+$cal_dep = new CalculateDep();
+$cal_loan = new CalculateLoan();
+$cal_shr = new CalculateShare();
 $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();

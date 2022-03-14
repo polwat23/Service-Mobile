@@ -326,14 +326,18 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 550px;display:flex;">
-			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			<div style="width:200px;margin-left: 770px;display:flex;">
-			<img src="../../resource/utility_icon/signature/finance.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/payee.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 580px;margin-top:-100px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่การเงิน</div>
+			
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 805px;margin-top:-90px;">ผู้รับเงิน</div>
+			<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 550px;">( นายปัญญา สุรินทร์ )</div>
+			<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 773px;">( นางอนงนุช สิทธิชัย )</div>
+			
 			';
 
 	$dompdf = new DOMPDF();
