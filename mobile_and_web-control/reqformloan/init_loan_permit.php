@@ -11,6 +11,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
 			$period_payment = round($dataComing["request_amt"] * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($dataComing["period"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+			if($period_payment % 10 > 0){
+				$period_payment =$period_payment  + (10 - ($period_payment % 10));
+			}
+			
 			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -51,6 +55,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
 				$period_payment = round($maxloan_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+				$period_payment =$period_payment  + (10 - ($period_payment % 10));
+				
 				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
 				$arrayResult["REQUEST_AMT"] = $request_amt;
@@ -58,10 +64,10 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = FALSE;
-				$arrayResult["REQ_CITIZEN"] = FALSE;
-				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult["REQ_SALARY"] = TRUE;
+				$arrayResult["REQ_CITIZEN"] = TRUE;
+				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
+				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
