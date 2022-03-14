@@ -104,7 +104,7 @@ class CalculateDep {
 		return $withdraw_amt;
 	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
-		/*$dataConst = $this->getConstantAcc($deptaccount_no);
+		$dataConst = $this->getConstantAcc($deptaccount_no);
 		if($dataConst["MAXBALANCE_FLAG"] == '1'){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
@@ -127,7 +127,7 @@ class CalculateDep {
 			$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
-		}*/
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
 			$transfer_mode = "1";
@@ -364,7 +364,7 @@ class CalculateDep {
 		}
 	}
 	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
-		/*$dataConst = $this->getConstantAcc($deptaccount_no);
+		$dataConst = $this->getConstantAcc($deptaccount_no);
 		if($dataConst["DEPTCLOSE_STATUS"] != '0'){
 			$arrayResult['RESPONSE_CODE'] = "WS0089";
 			$arrayResult['RESULT'] = FALSE;
@@ -380,7 +380,7 @@ class CalculateDep {
 			$arrayResult['MINWITD_AMT'] = $dataConst["MINWITD_AMT"];
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
-		}*/
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
 			$transfer_mode = "1";
