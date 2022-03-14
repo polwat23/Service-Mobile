@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccAllow["CAN_WITHDRAW"] = '0';
 						}
 						if($checkDep["GET_BALANCE"]){
-							$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"];
+							$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]);
 						}else{
 							$arrAccAllow["BALANCE"] = $checkDep["SEQUEST_AMOUNT"];
 						}
