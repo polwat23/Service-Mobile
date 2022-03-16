@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["SUMPAY"] = number_format($sumPay,2);
 			
 			$arrayRecv["RECEIVE_DESC"] = "คงเหลือหลังรับ";
-			$arrayRecv["ACCOUNT_RECEIVE"] = "ติดต่อสอบถามทางสหกรณ์";
+			$arrayRecv["ACCOUNT_RECEIVE"] = "-";
 			$arrayRecv["RECEIVE_AMT"] = number_format(($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"]) - $sumPay,2);
 			$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			
