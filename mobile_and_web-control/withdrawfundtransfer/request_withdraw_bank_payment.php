@@ -54,6 +54,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$verify_token = $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
+		
 		// Withdraw Inside --------------------------------------
 		$ref_slipno = null;
 		try{
@@ -77,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = "MOBILE";
-			$arrayGroup["fee_amt"] = $fee_amt ?? 0;
+			$arrayGroup["fee_amt"] = $dataComing["fee_amt"] ?? 0;
 			$arrayGroup["fee_operate_cd"] = '0';
 			$arrayGroup["feeinclude_status"] = '1';
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
@@ -323,6 +324,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				
 			}
 		}catch(SoapFault $e){
+			file_put_contents('request_ErrWTD.txt', json_encode($e,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 			$arrayResult['RESPONSE_CODE'] = "WS0041";
 			$arrayStruc = [
 				':member_no' => $payload["member_no"],

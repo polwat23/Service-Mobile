@@ -30,6 +30,9 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 		
 	}else{
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
+		if(strlen($deptaccount_no) > 10){
+			$deptaccount_no = substr($deptaccount_no,3,2)."000".substr($deptaccount_no,-5,5);
+		}
 		$getDept = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and member_no = :member_no and deptclose_status = '0'");
 		$getDept->execute([
 			':deptaccount_no' => $deptaccount_no,

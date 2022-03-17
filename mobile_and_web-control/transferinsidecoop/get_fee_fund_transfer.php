@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					try{
 						$argumentWS = [
 							"as_wspass" => $config["WS_PASS"],
-							"as_account_no" => $dataComing["from_deptaccount_no"],
+							"as_account_no" => $from_deptaccount_no,
 							"as_itemtype_code" => "WES",
 							"adc_amt" => $dataComing["amt_transfer"],
 							"adtm_date" => date('c')

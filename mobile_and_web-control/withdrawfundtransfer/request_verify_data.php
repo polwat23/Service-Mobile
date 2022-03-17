@@ -20,8 +20,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					try{
 						$argumentWS = [
 							"as_wspass" => $config["WS_PASS"],
-							"as_account_no" => $dataComing["from_deptaccount_no"],
-							"as_itemtype_code" => "WES",
+							"as_account_no" => $deptaccount_no,
+							"as_itemtype_code" => $rowDataWithdraw["itemtype_wtd"],
 							"adc_amt" => $dataComing["amt_transfer"],
 							"adtm_date" => date('c')
 						];

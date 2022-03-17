@@ -104,8 +104,8 @@ class CalculateDep {
 		return $withdraw_amt;
 	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
-		/*$dataConst = $this->getConstantAcc($deptaccount_no);
-		if($dataConst["MAXBALANCE_FLAG"] == '1'){
+		$dataConst = $this->getConstantAcc($deptaccount_no);
+		/*if($dataConst["MAXBALANCE_FLAG"] == '1'){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
 				$arrayResult['RESULT'] = FALSE;
@@ -364,8 +364,8 @@ class CalculateDep {
 		}
 	}
 	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
-		/*$dataConst = $this->getConstantAcc($deptaccount_no);
-		if($dataConst["DEPTCLOSE_STATUS"] != '0'){
+		$dataConst = $this->getConstantAcc($deptaccount_no);
+		/*if($dataConst["DEPTCLOSE_STATUS"] != '0'){
 			$arrayResult['RESPONSE_CODE'] = "WS0089";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;

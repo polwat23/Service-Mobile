@@ -49,7 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
 						$arrAccCoop["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
 						if($getSeqAmt["GET_BALANCE"]){
-							$arrAccCoop["BALANCE"] = $rowDataAccAll["PRNCBAL"];
+							$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]);
 						}else{
 							$arrAccCoop["BALANCE"] = $getSeqAmt["SEQUEST_AMOUNT"];
 						}
