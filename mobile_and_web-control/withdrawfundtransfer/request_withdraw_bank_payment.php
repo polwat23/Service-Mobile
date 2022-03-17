@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
 			$arrayGroup["entry_id"] = "MOBILE";
-			$arrayGroup["fee_amt"] = $fee_amt ?? 0;
+			$arrayGroup["fee_amt"] = $dataComing["fee_amt"] ?? 0;
 			$arrayGroup["fee_operate_cd"] = '0';
 			$arrayGroup["feeinclude_status"] = '1';
 			$arrayGroup["item_amt"] = $dataComing["amt_transfer"];
