@@ -77,21 +77,22 @@ class CalculateDep {
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
 		$penalty_amt = 0;
-		if($dataConst["IS_CHECK_PENALTY"] == '1'){
+		/*if($dataConst["IS_CHECK_PENALTY"] == '1'){
 			$penalty_amt = $this->calculatePenalty($dataConst,$amt_transfer,$itemtype,$deptaccount_no);
-		}
+		}*/
 		if($penalty_amt > 0){
 			$arrayResult["PENALTY_AMT"] = $penalty_amt;
 			$arrayResult['PENALTY_AMT_FORMAT'] = number_format($penalty_amt,2);
 		}
 		$DataSeqAmt = $this->getSequestAmt($deptaccount_no);
-		$sumAllTransfer = ($dataConst["PRNCBAL"] - $DataSeqAmt["SEQUEST_BALANCE"]) - ($penalty_amt + $fee_amt + $amt_transfer);
+		$sumAllTransfer = ($dataConst["PRNCBAL"] - $DataSeqAmt["SEQUEST_AMOUNT"]) - ($fee_amt + $amt_transfer);
 		if($sumAllTransfer < $dataConst["MINPRNCBAL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0100";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
 		$arrayResult["DEPTACCOUNT_NAME"] = $dataConst["DEPTACCOUNT_NAME"];
+		$arrayResult["SUM_REMAIN"] = $sumAllTransfer;
 		$arrayResult['RESULT'] = TRUE;
 		return $arrayResult;
 	}

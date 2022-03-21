@@ -27,6 +27,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						];
 						$resultWS = $clientWS->__call("of_chk_withdrawcount_amt", array($argumentWS));
 						$feeAmt = $resultWS->of_chk_withdrawcount_amtResult;
+						$constantDep = $cal_dep->getConstantAcc($deptaccount_no);
+						if($arrInitDep["SUM_REMAIN"] - $feeAmt < $constantDep["MINPRNCBAL"]){
+							$arrayResult['RESPONSE_CODE'] = "WS0100";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
 						$dateOperC = date('c');
 						$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 						$amt_transfer = $dataComing["amt_transfer"];

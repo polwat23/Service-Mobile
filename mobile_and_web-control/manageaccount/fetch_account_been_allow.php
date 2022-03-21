@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				if($rowDeptTypeAllow["limit_transaction_amt"] > $limit_coop){
 					$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $limit_coop;
 				}else{
-					$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowDeptTypeAllow["limit_transaction_amt"];
+					$arrAccBeenAllow["LIMIT_TRANSACTION_AMT"] = $rowAccBeenAllow["limit_transaction_amt"];
 				}
 				$arrAccBeenAllow["LIMIT_COOP_TRANS_AMT"] = $limit_coop;
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
