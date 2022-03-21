@@ -36,6 +36,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			if($request_amt < $oldBal){
 				$request_amt = $oldBal;
 			}
+			$getLoanObjective = $conoracle->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective WHERE loantype_code = :loantype");
+			$getLoanObjective->execute([':loantype' => $dataComing["loantype_code"]]);
+			$arrGrpObj = array();
+			while($rowLoanObj = $getLoanObjective->fetch(PDO::FETCH_ASSOC)){
+				$arrObj = array();
+				$arrObj["LOANOBJECTIVE_CODE"] = $rowLoanObj["LOANOBJECTIVE_CODE"];
+				$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
+				$arrGrpObj[] = $arrObj;
+			}
 			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
 															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt <= lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
@@ -62,6 +71,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["REQ_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

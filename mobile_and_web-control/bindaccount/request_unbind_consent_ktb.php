@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['exp'] = time() + 300;
+			$arrPayloadverify['exp'] = time() + 600;
 			$arrPayloadverify['citizen_id'] = $rowAcc["citizen_id"];
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
 			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);

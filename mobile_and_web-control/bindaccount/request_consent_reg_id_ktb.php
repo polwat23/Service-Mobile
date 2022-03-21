@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 			$arrPayloadverify['coop_account_no'] = $coop_account_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
-			$arrPayloadverify['exp'] = time() + 300;
+			$arrPayloadverify['exp'] = time() + 600;
 			$sigma_key = $lib->generate_token();
 			$arrPayloadverify['sigma_key'] = $sigma_key;
 			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);

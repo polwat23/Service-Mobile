@@ -4,7 +4,7 @@
 	"COOP_ID" : "030001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control",
 	"APP_ID" : "com.stou.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/STOUCOOP-TEST/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/STOUCOOP-TEST/",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "",
 	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=001001;coop_control=001001;",

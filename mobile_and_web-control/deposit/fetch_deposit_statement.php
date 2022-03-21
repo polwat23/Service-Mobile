@@ -84,6 +84,16 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		while($rowMemo = $getMemoDP->fetch(PDO::FETCH_ASSOC)){
 			$arrMemo[] = $rowMemo;
 		}
+		
+		$fetchCollno = $conoracle->prepare("select lc.loancontract_no,lc.coll_percent,ln.principal_balance as PRNBAL from lncontcoll lc
+										LEFT JOIN lncontmaster ln ON ln.loancontract_no = lc.loancontract_no
+										where lc.loancolltype_code ='03' AND lc.coll_status = 1 AND ln.contract_status = 1 AND lc.ref_collno = :deptacc_no");
+		$fetchCollno->execute([':deptacc_no' => $account_no]);
+		while($rowCollno= $fetchCollno->fetch(PDO::FETCH_ASSOC)){
+			$arrayHeaderAcc["SEQUEST_AMOUNT"] =  number_format($rowCollno["PRNBAL"] * $rowCollno["COLL_PERCENT"],2);
+		}
+	
+		
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];

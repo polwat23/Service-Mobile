@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$getlastseq_noDest["MAX_SEQ_NO"],$dataComing["menu_component"],$ref_no,true,null,$rowDataDeposit["bank_code"]);
 		if($depositMoney["RESULT"]){
 			$arrSendData = array();
-			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['exp'] = time() + 600;
 			$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 			$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 			$arrVerifyToken['amt_transfer'] = $amt_transfer;

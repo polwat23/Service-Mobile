@@ -270,8 +270,8 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 650px;margin-top:-40px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			<p style="margin-left: 20px;margin-top: -5px">ผู้จัดการ</p></div>
 			';
 
 	$dompdf = new Dompdf([

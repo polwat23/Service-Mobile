@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 				if($rowBankDisplay["bank_code"] == '025'){
 					$dateOperC = date('c');
 					$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
-					$arrVerifyToken['exp'] = time() + 300;
+					$arrVerifyToken['exp'] = time() + 600;
 					$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 					$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 					$arrVerifyToken['operate_date'] = $dateOperC;

@@ -29,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}else{
 			$amt_transfer = $dataComing["amt_transfer"];
 		}
-		$arrVerifyToken['exp'] = $time + 300;
+		$arrVerifyToken['exp'] = $time + 600;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 		$arrVerifyToken['amt_transfer'] = $amt_transfer;

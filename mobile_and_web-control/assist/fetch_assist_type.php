@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGrpYear = array();
 		$yearAss = 0;
 		$fetchAssGrpYear = $conoracle->prepare("SELECT assist_year as ASSIST_YEAR,sum(ASSIST_AMT) as ASS_RECEIVED FROM assreqmaster 
-												WHERE member_no = :member_no and req_status = 1 GROUP BY assist_year ORDER BY assist_year DESC");
+												WHERE member_no = :member_no GROUP BY assist_year ORDER BY assist_year DESC");
 		$fetchAssGrpYear->execute([':member_no' => $member_no]);
 		while($rowAssYear = $fetchAssGrpYear->fetch(PDO::FETCH_ASSOC)){
 			$arrayYear = array();
@@ -21,11 +21,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["ass_year"]) && $dataComing["ass_year"] != ""){
 			$yearAss = $dataComing["ass_year"];
 		}
-		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSIST_DOCNO as ASSCONTRACT_NO,asm.ASSIST_AMT,asm.PAY_DATE
+		$fetchAssType = $conoracle->prepare("SELECT ast.ASSISTTYPE_DESC,ast.ASSISTTYPE_CODE,asm.ASSIST_DOCNO as ASSCONTRACT_NO,asm.ASSIST_AMT,asm.REQ_DATE
 												FROM assreqmaster asm LEFT JOIN 
 												assucfassisttype ast ON asm.ASSISTTYPE_CODE = ast.ASSISTTYPE_CODE and asm.coop_id = ast.coop_id 
 												WHERE asm.member_no = :member_no 
-												and asm.req_status = 1 and asm.assist_year = :year and asm.ref_slipno IS NOT NULL");
+												and asm.assist_year = :year");
 		$fetchAssType->execute([
 			':member_no' => $member_no,
 			':year' => $yearAss
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowAssType = $fetchAssType->fetch(PDO::FETCH_ASSOC)){
 			$arrAss = array();
 			$arrAss["ASSIST_RECVAMT"] = number_format($rowAssType["ASSIST_AMT"],2);
-			$arrAss["PAY_DATE"] = $lib->convertdate($rowAssType["PAY_DATE"],'d m Y');
+			$arrAss["PAY_DATE"] = $lib->convertdate($rowAssType["REQ_DATE"],'d m Y');
 			$arrAss["ASSISTTYPE_CODE"] = $rowAssType["ASSISTTYPE_CODE"];
 			$arrAss["ASSISTTYPE_DESC"] = $rowAssType["ASSISTTYPE_DESC"];
 			$arrAss["ASSCONTRACT_NO"] = $rowAssType["ASSCONTRACT_NO"];

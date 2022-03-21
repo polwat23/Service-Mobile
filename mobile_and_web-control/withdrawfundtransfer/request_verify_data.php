@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 					$arrSendData = array();
 					$arrVerifyToken = array();
-					$arrVerifyToken['exp'] = time() + 300;
+					$arrVerifyToken['exp'] = time() + 600;
 					$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 					$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
 					$arrVerifyToken['bank_code'] = $rowDataDeposit["bank_code"];

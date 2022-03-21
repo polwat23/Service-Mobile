@@ -34,7 +34,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-				
 			}else{
 				if($createImage){
 					$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
@@ -73,8 +72,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				}
 			}
 		}
-		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
-												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
+		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
+		$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
+		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,mb.birth_date,
+												md.district_desc,(sh.sharestk_amt * 10) as SHARE_AMT,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,
+												(periodshare_amt * 10) as PERIOD_SHARE_AMT
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
@@ -88,9 +91,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
 		$conmysql->beginTransaction();
 		$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url)
+																int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,objective)
 																VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url)");
+																,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:objective)");
 		if($InsertFormOnline->execute([
 			':reqloan_doc' => $reqloan_doc,
 			':member_no' => $payload["member_no"],
@@ -104,29 +107,71 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			':salary_img' => $slipSalary,
 			':citizen_img' => $citizenCopy,
 			':id_userlogin' => $payload["id_userlogin"],
-			':contractdoc_url' => $pathFile
+			':contractdoc_url' => $pathFile,
+			':objective' => $dataComing["objective"] ?? null
 		])){
+			$getUcollwho = $conoracle->prepare("SELECT
+												LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
+												LNTYPE.loantype_desc as TYPE_DESC,LNTYPE.loangroup_code,
+												PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
+												LCM.MEMBER_NO AS MEMBER_NO,
+												NVL(LCM.principal_balance,0) as LOAN_BALANCE,
+												LCM.LAST_PERIODPAY as LAST_PERIOD,
+												LCM.period_payamt as PERIOD
+												FROM
+												LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
+												LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
+												LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
+												LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
+												WHERE
+												LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
+												AND LCC.LOANCOLLTYPE_CODE = '01'
+												AND LCC.REF_COLLNO = :member_no");
+			$getUcollwho->execute([':member_no' => $member_no]);
+			$coll_01 = 0;
+			$coll_02 = 0;
+			while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
+				if($rowUcollwho["LOANGROUP_CODE"] == '01'){
+					$coll_01 += $rowUcollwho["LOAN_BALANCE"];
+				}else if($rowUcollwho["LOANGROUP_CODE"] == '02'){
+					$coll_02 += $rowUcollwho["LOAN_BALANCE"];
+				}
+			}
 			$arrData = array();
 			$arrData["requestdoc_no"] = $reqloan_doc;
 			$arrData["full_name"] = $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["name"] = $rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["member_no"] = $payload["member_no"];
+			$arrData["birth_date"] = $rowData["BIRTH_DATE"];
 			$arrData["position"] = $rowData["POSITION_DESC"];
 			$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
 			$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
 			$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
+			$arrData["sum_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 			$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
-			$arrData["request_amt"] = $dataComing["request_amt"];
+			$arrData["share_amt"] = $rowData["SHARE_AMT"];
+			$arrData["period_share_amt"] = number_format($rowData["PERIOD_SHARE_AMT"],2);
+			$arrData["request_amt"] = $dataComing["request_amt"] ?? 0;
+			$arrData["objective"] = $dataComing["objective"] ?? "";
+			$arrData["phone"] = $lib->formatphone($rowInfoMobile["phone_number"]);
+			$arrData["coll_01"] = number_format($coll_01,2);
+			$arrData["coll_02"] = number_format($coll_02,2);
+			$arrData["period_payment"] = number_format($dataComing["period_payment"],2);
+			$arrData["period"] = number_format($dataComing["period"]);
+			$arrData["int_rate"] = $dataComing["int_rate"];
+			$arrData["type_desc"] = $dataComing["int_rate"];
 			if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 				include('form_request_loan_'.$dataComing["loantype_code"].'.php');
 				$arrayPDF = GeneratePDFContract($arrData,$lib);
 			}else{
 				$arrayPDF["RESULT"] = FALSE;
 			}
+			
 			if($arrayPDF["RESULT"]){
 				$conmysql->commit();
-				$arrayResult['REPORT_URL'] = $pathFile;
+				//$arrayResult['REPORT_URL'] = $pathFile;
 				$arrayResult['APV_DOCNO'] = $reqloan_doc;
+				$arrayResult['SHOW_SLIP'] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 				
