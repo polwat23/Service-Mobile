@@ -5,10 +5,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBTYPE_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMembcatCode->execute([':member_no' => $member_no]);
 		$rowMemb = $getMembcatCode->fetch(PDO::FETCH_ASSOC);
-		if($rowMemb["MEMBCAT_CODE"] == '20'){
+		if($rowMemb["MEMBCAT_CODE"] == '20' && $rowMemb["MEMBTYPE_CODE"] == '05'){
 			$arrayResult['RESPONSE_CODE'] = "WS0006";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
