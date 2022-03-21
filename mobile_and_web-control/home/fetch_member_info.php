@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		$arrayResult = array();
+		
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mpos.position_desc,mb.member_type,mg.membgroup_desc,
 													mb.ADDR_NO as ADDR_REG_NO,
 													mb.ADDR_MOO as ADDR_REG_MOO,
 													mb.ADDR_SOI as ADDR_REG_SOI,
@@ -44,7 +44,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN mbucfposition mpos ON mb.position_code = mpos.position_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
-													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
 													LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
 													LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
@@ -103,7 +102,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
 			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
-			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
+			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBER_TYPE"] == '1' ? "สมาชิกสามัญ" : "สมาชิกสมทบ";
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["FULL_ADDRESS_REG"] = $addressReg;

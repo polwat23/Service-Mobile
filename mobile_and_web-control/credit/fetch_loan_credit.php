@@ -7,16 +7,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupCredit = array();
 		$arrCanCal = array();
 		$arrCanReq = array();
-		$getMemberType = $conoracle->prepare("SELECT MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
-		$getMemberType->execute([':member_no' => $member_no]);
-		$rowMemb = $getMemberType->fetch(PDO::FETCH_ASSOC);
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code,is_loanrequest FROM gcconstanttypeloan WHERE is_creditloan = '1' ORDER BY loantype_code ASC");
 		$fetchLoanCanCal->execute();
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
-			$fetchLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code and (member_type = :member_type OR member_type = '0')");
+			$fetchLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
 			$fetchLoanType->execute([
-				':loantype_code' => $rowCanCal["loantype_code"],
-				':member_type' => $rowMemb["MEMBER_TYPE"]
+				':loantype_code' => $rowCanCal["loantype_code"]
 			]);
 			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowLoanType["LOANTYPE_DESC"]) && $rowLoanType["LOANTYPE_DESC"] != ""){

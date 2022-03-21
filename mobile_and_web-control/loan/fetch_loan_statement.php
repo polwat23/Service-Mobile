@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
-		$arrayResult = array();
+		
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmloan');
 		$arrayResult['LIMIT_DURATION'] = $limit;
@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
+		$contract_no = $dataComing["contract_no"];
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){

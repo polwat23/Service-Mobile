@@ -1,6 +1,6 @@
 {
 	"WS0001" : [{"th" : "ไม่สามารถยืนยันการเข้าใช้งานได้เพราะเวลาในเครื่องไม่ตรง กรุณาตรวจสอบเวลาในเครื่องของท่าน","en" : "Unauthenticated because the time in device not correct please check time in your device"}],
-	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง","en" : "Invalid password please check password again"}],
+	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หากบัญชีถูกล็อคต้องติดต่อสหกรณ์เท่านั้น กรุณา คลิก ลืมรหัสผ่านเพื่อทำตามขั้นตอนของระบบ","en" : "Invalid password please check password again if account was locked you must contact cooperative only please click forget password for step by step of system"}],
 	"WS0003" : [{"th" : "ไม่พบข้อมูลผู้ใช้นี้ในระบบ กรุณาตรวจสอบเลขสมาชิก","en" : "Not found this user in system please check member no"}],
 	"WS0004" : [{"th" : "รหัสผ่านที่ท่านกรอกไม่ตรงกับรหัสผ่านเดิม","en" : "Password does not match"}],
 	"WS0005" : [{"th" : "ไม่พบบัญชีที่สามารถผูกได้ หากท่านต้องการผูกบัญชีกรุณาไปอนุญาตบัญชีที่สามารถทำธุรกรรมได้ที่หน้าจัดการบัญชีสหกรณ์","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
@@ -99,6 +99,12 @@
 	"WS0083" : [{"th" : "สหกรณ์ได้ลงรับใบคำขอของท่านแล้ว ทำให้ท่านไม่สามารถยกเลิกใบคำขอได้ หากต้องการยกเลิกให้ติดต่อสหกรณ์","en" : "The cooperative has accept your request which you cannot cancel request please contact cooperative"}],
 	"WS0084" : [{"th" : "ไม่สามารถยื่นกู้ได้เนื่องจากสิทธิ์การกู้ของท่านไม่เพียงพอ กรุณาตรวจสอบสิทธิ์การกู้ของท่านได้ที่เมนูสิทธิ์กู้โดยประมาณหรือติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot request loan because your loan rights amount not enough please check your rights in menu Loan Estimate or contact cooperative"}],
 	"WS0087" : [{"th" : "ท่านยังไม่ได้ทำการลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ กรุณาไปลงทะเบียนขอกู้กับทางสหกรณ์ก่อนทำรายการ","en" : "You have not registered for request loan online please register for request loan online before transaction"}],
+	"WS0088" : [{"th" : "ไม่สามารถคำนวณงวดการกู้ของท่านได้ กรุณาติดต่อสหกรณ์","en" : "Cannot calculate period of loan please contact cooperative"}],
+	"WS0089" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากบัญชีของท่านได้ถูกปิดบัญชีไปแล้ว","en" : "Cannot transaction because your account was closed"}],
+	"WS0090" : [{"th" : "ประเภทบัญชีเงินฝากของท่านไม่สามารถทำรายการโอนเงินภายในสหกรณ์ได้","en" : "This deposit type not allow to transfer inside cooperative"}],
+	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัติบัญชี จำนวนที่อายัติ ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
+	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เ เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
+	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -205,7 +211,8 @@
 				"9" : [{"th" : "ต้องการเอกสารเพิ่มเติม","en" : "Officer want more your document"}],
 				"11" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
 				"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
-				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
+				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}],
+				"99" : [{"th" : "หมดเวลายื่นขอทุนสวัสดิการออนไลน์แล้ว","en" : "End of time for request scholarship online"}]
 			}]
 		}],
 		"REQ_LOAN_STATUS" : [{

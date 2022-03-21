@@ -42,10 +42,11 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					':member_no' => $member_no
 				]);
 				$arrayGroupAccount = array();
+				$formatDept = $func->getConstant('dep_format');
 				while($rowDataAccount = $fetchDataAccount->fetch(PDO::FETCH_ASSOC)){
 					$arrayAccount = array();
 					$arrayAccount["DEPTTYPE_DESC"] = $rowDataAccount["DEPTTYPE_DESC"];
-					$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+					$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$formatDept);
 					$arrayAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAccount["DEPTACCOUNT_NAME"]));
 					$arrayGroupAccount[] = $arrayAccount;
 				}
