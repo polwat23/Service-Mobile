@@ -22,37 +22,21 @@ if($rowShare["LAST_PERIOD"] >= 3){
 		':loantype_code' => $loantype_code
 	]);
 	$rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
-	if($rowShare["SHARE_STK"] <= 5000){
-		$maxloan_amt = 4500;
+	$percentShare = $rowShare["SHARE_STK"];
+	$percentSalary = $rowCredit["SALARY_AMOUNT"] * 6;
+	$valueCredit = min($percentShare,$percentSalary);
+	if($valueCredit > $rowCredit["MAXLOAN_AMT"]){
+		$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
 	}else{
-		$percentShare = $rowShare["SHARE_STK"] * 0.90;
-		$percentSalary = $rowCredit["SALARY_AMOUNT"] * $rowCredit["MULTIPLE_SALARY"];
-		$valueCredit = min($percentShare,$percentSalary);
-		if($valueCredit > $rowCredit["MAXLOAN_AMT"]){
-			$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
-		}else{
-			$maxloan_amt = $valueCredit;
-		}
+		$maxloan_amt = $valueCredit;
 	}
 	$arrSubOtherInfo = array();
 	$arrSubOtherInfo["LABEL"] = "อัตราดอกเบี้ย";
-	$arrSubOtherInfo["VALUE"] = "6 %";
+	$arrSubOtherInfo["VALUE"] = "5 %";
 	$arrOtherInfo[] = $arrSubOtherInfo;
 	$arrSubOtherInfo = array();
 	$arrSubOtherInfo["LABEL"] = "งวดสูงสุด";
-	$arrSubOtherInfo["VALUE"] = "48 งวด";
-	$arrOtherInfo[] = $arrSubOtherInfo;
-	$arrSubOtherInfo = array();
-	$arrSubOtherInfo["LABEL"] = "ต้องมีเงินได้รายเดือนคงเหลือไม่ต่ำกว่า";
-	$arrSubOtherInfo["VALUE"] = "1,000 บาท";
-	$arrOtherInfo[] = $arrSubOtherInfo;
-	$arrSubOtherInfo = array();
-	$arrSubOtherInfo["LABEL"] = "กรณีสมาชิกหักเงินได้ ณ ที่จ่าย กู้ได้สูงสุดไม่เกิน 8 เท่าของเงินได้รายเดือน และไม่เกิน 90 % ของมูลค่าทุนเรือนหุ้นสะสมที่มีอยู่";
-	$arrSubOtherInfo["VALUE"] = "";
-	$arrOtherInfo[] = $arrSubOtherInfo;
-	$arrSubOtherInfo = array();
-	$arrSubOtherInfo["LABEL"] = "กรณีไม่สามารถหักเงินได้ ณ ที่จ่าย กู้ได้สูงสุดไม่เกิน 20,000 และไม่เกิน 90 % ของมูลค่าทุนเรือนหุ้นสะสม";
-	$arrSubOtherInfo["VALUE"] = "";
+	$arrSubOtherInfo["VALUE"] = "12 งวด";
 	$arrOtherInfo[] = $arrSubOtherInfo;
 	$getOldContract = $conoracle->prepare("SELECT lm.principal_balance,lt.loantype_desc,lm.loancontract_no FROM lncontmaster lm 
 											LEFT JOIN lnloantype lt ON lm.loantype_code = lt.loantype_code 
