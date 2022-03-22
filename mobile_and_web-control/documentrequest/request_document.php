@@ -78,11 +78,12 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 				$getControlDoc->execute([':menu_component' => $dataComing["documenttype_code"]]);
 				$rowConDoc = $getControlDoc->fetch(PDO::FETCH_ASSOC);
 				
-				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MB.SALARY_ID,MUP.POSITION_DESC,MB.EXPENSE_ACCID,MB.MEMBER_DATE,MG.MEMBGROUP_DESC
+				$fetchData = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MB.SALARY_ID,MUP.POSITION_DESC,MB.EXPENSE_ACCID,MB.MEMBER_DATE,MG.MEMBGROUP_DESC,MB.EXPENSE_BANK,cmb.BANK_DESC
 														FROM MBMEMBMASTER MB 
 														LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
 														LEFT JOIN MBUCFPOSITION MUP ON MB.POSITION_CODE = MUP.POSITION_CODE
 														LEFT JOIN MBUCFMEMBGROUP MG ON MB.MEMBGROUP_CODE = MG.MEMBGROUP_CODE
+														LEFT JOIN cmucfbank cmb ON MB.EXPENSE_BANK = cmb.BANK_CODE
 														WHERE MB.MEMBER_NO = :member_no");
 				$fetchData->execute([
 					':member_no' => $member_no
@@ -187,6 +188,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$arrGroupDetail["RESIGN_OPTION"] =  $dataComing["form_value_root_"]["RESIGN_OPTION"]["VALUE"] ?? "";
 						$arrGroupDetail["RESIGN_FROM_OPTION"] =  $resign_form_option;
 						$arrGroupDetail["RECEIVE_ACC"] =  $rowData["EXPENSE_ACCID"];
+						$arrGroupDetail["RECEIVE_BANK"] =  $rowData["BANK_DESC"];
 						$arrGroupDetail["LOAN_PAYMENT"] =  $dataComing["slip_payment_root_"];
 					}else if($dataComing["documenttype_code"] == "CBNF"){
 						$arrGroupDetail = array();

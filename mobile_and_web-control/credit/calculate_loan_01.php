@@ -13,7 +13,7 @@ $maxloanpermit_amt = 30000;
 $sum_old_payment = 0;
 $other_amt = 0;
 $cal_period = 0;
-$getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT,BIRTH_DATE FROM mbmembmaster WHERE member_no = :member_no");
+$getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT,BIRTH_DATE,MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
 $getMemberIno->execute([':member_no' => $member_no]);
 $rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
 $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
@@ -66,8 +66,14 @@ while($rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC)){
 $sum_old_payment += $rowShareBF["PERIOD_SHARE_AMT"];
 		
 $arrMin[] = ($rowShareBF["SHARESTK_AMT"] + $rowFund["FUND_AMT"]) - $oldConsBal;
-$arrMin[] = $maxloanpermit_amt;
-$arrMin[] = $rowMember["SALARY_AMOUNT"];
+if(date("Y-m-d") >= '2022-03-10'){
+	//สิทธิ์กู้ใหม่
+	$arrMin[] = $rowMember["SALARY_AMOUNT"]*2;
+}else{
+	//สิทธิ์กู้เดิม
+	$arrMin[] = $maxloanpermit_amt;
+	$arrMin[] = $rowMember["SALARY_AMOUNT"];
+}
 $maxloan_amt = min($arrMin) + $dataComing["old_contract_balance"];
 
 $getMthOther = $conmssql->prepare("SELECT SUM(mthother_amt) as MTHOTHER_AMT FROM mbmembmthother WHERE member_no = :member_no and sign_flag = '-1'");
@@ -83,7 +89,11 @@ if(isset($dataComing["period"]) && $dataComing["period"] != ""){
 	//เช็ควันเกษียณ สิ้นปี ปีที่ครบ 55 ปี
 	$m_birthdate = date('m',strtotime($rowMember["BIRTH_DATE"]));
 	$y_birthdate = date('Y')-date('Y',strtotime($rowMember["BIRTH_DATE"]));
-	$max_member_period = ((55 - $y_birthdate)*12) + (12 - date('m'));
+	if($rowMember["MEMBGROUP_CODE"] == "SKCM" || $rowMember["MEMBGROUP_CODE"] == "SKLM"){
+		$max_member_period = ((60 - $y_birthdate)*12) + (12 - date('m'));
+	}else{
+		$max_member_period = ((55 - $y_birthdate)*12) + (12 - date('m'));
+	}
 
 	$getCalMaxPeriod = $conmssql->prepare("SELECT MAX_PERIOD 
 					FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE

@@ -13,16 +13,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
-			$arrDividend = array();
 			$getDivMaster = $conmssql->prepare("SELECT DIV_AMT,AVG_AMT FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
+			$getRateDiv = $conmssql->prepare("SELECT DIVPERCENT_RATE, AVGPERCENT_RATE FROM YRCFRATE WHERE DIV_YEAR = :div_year");
+			$getRateDiv->execute([
+				':div_year' => $rowYear["DIV_YEAR"]
+			]);
+			$rowRateDiv = $getRateDiv->fetch(PDO::FETCH_ASSOC);
+			
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
+			$arrDividend["DIV_RATE"] = ($rowRateDiv["DIVPERCENT_RATE"]-0)." %";
+			$arrDividend["AVG_RATE"] = ($rowRateDiv["AVGPERCENT_RATE"]-0)." %";
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
 			$getMethpay = $conmssql->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,

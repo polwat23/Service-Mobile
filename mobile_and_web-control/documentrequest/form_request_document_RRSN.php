@@ -195,6 +195,18 @@ function GenerateReport($dataReport,$lib){
 							<td></td>
 						</tr>
 						<tr>
+							<td style="padding-left: 12px;">บัญชีธนาคาร</td>
+							<td colspan="2">
+							<span class="input-zone"><span class="input-value">'.($dataReport["RECEIVE_BANK"]).'
+								</span>..........................................</span>
+								</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
 							<td style="padding-left: 12px;">โอนเข้าเลขที่บัญชี</td>
 							<td colspan="2">
 							<span class="input-zone"><span class="input-value">'.($dataReport["RECEIVE_ACC"]).'
@@ -234,21 +246,21 @@ function GenerateReport($dataReport,$lib){
 							</span>……..</span>
 					</div>
 					<div style="padding-left: 50px;">
-						- เงินกู้ฉุกเฉิน (เงินต้น<span class="input-zone"><span class="input-value">
+						- เงินกู้ฉุกเฉิน (เงินต้น<span class="input-zone"><span class="input-value">'.number_format($dataReport["LOAN_GROUP_BAL_1"],2).'
 							</span>.................................</span>บาท ดอกเบี้ย<span class="input-zone"><span
-								class="input-value">
+								class="input-value">'.number_format($dataReport["LOAN_GROUP_INT_1"],2).'
 							</span>...............................</span>บาท) รวมยอด<span class="input-zone"><span
-								class="input-value">
+								class="input-value">'.number_format(($dataReport["LOAN_GROUP_BAL_1"] + $dataReport["LOAN_GROUP_INT_1"]),2).'
 							</span>................................</span>บาท
 					</div>
 					<div style="padding-left: 50px;">
-						- เงินกู้สามัญ (เงินต้น<span class="input-zone"><span class="input-value">
+						- เงินกู้สามัญ (เงินต้น<span class="input-zone"><span class="input-value">'.number_format($dataReport["LOAN_GROUP_BAL_2"],2).'
 							</span>.................................</span>บาท ดอกเบี้ย<span class="input-zone"><span
-								class="input-value">
+								class="input-value">'.number_format($dataReport["LOAN_GROUP_INT_2"],2).'
 							</span>...............................</span>บาท) รวมยอด<span class="input-zone"><span
-								class="input-value">
+								class="input-value">'.number_format(($dataReport["LOAN_GROUP_BAL_2"] + $dataReport["LOAN_GROUP_INT_2"]),2).'
 							</span>................................</span>บาท หนี้รวม<span class="input-zone"><span
-								class="input-value">
+								class="input-value">'.number_format(($dataReport["LOAN_GROUP_BAL_2"] + $dataReport["LOAN_GROUP_INT_2"] + $dataReport["LOAN_GROUP_BAL_1"] + $dataReport["LOAN_GROUP_INT_1"]),2).'
 							</span>.................................</span>บาท
 					</div>
 					<div style="padding-left: 30px;">
@@ -259,17 +271,17 @@ function GenerateReport($dataReport,$lib){
 							<td>
 								<div
 									style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000;position: relative;">
-									
+									'.($dataReport["RECEIVE_NET"] > 0 ? $checked : "").'
 								</div>
-								จ่ายคืนสมาชิก จำนวน<span class="input-zone"><span class="input-value">
+								จ่ายคืนสมาชิก จำนวน<span class="input-zone"><span class="input-value">'.($dataReport["RECEIVE_NET"] > 0 ? number_format(abs($dataReport["RECEIVE_NET"]),2) : "").'
 									</span>.................................</span>บาท
 							</td>
 							<td>
 								<div
 									style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000;position: relative;">
-									
+									'.($dataReport["RECEIVE_NET"] < 0 ? $checked : "").'
 								</div>
-								เรียกเก็บเงินจากสมาชิก จำนวน<span class="input-zone"><span class="input-value">
+								เรียกเก็บเงินจากสมาชิก จำนวน<span class="input-zone"><span class="input-value">'.($dataReport["RECEIVE_NET"] < 0 ? number_format(abs($dataReport["RECEIVE_NET"]),2) : "").'
 									</span>.................................</span>บาท
 							</td>
 						</tr>

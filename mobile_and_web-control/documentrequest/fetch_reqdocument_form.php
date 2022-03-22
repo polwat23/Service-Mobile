@@ -481,6 +481,15 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$arrayGrpForm[] = $arrayForm;
 					
 					//คำนวณเงินเดือนคงเหลือ
+					$day = date('d');
+					if($day > 7){
+						$dateNow = new DateTime('first day of this month');
+						$dateNow->modify('+1 month');
+						$dateNow = $dateNow->format('Y-m-d');
+					}else{
+						$dateNow = new DateTime('first day of this month');
+						$dateNow = $dateNow->format('Y-m-d');
+					}
 					$getMemberIno = $conmssql->prepare("SELECT SALARY_AMOUNT,SALARY_ID FROM mbmembmaster WHERE member_no = :member_no");
 					$getMemberIno->execute([':member_no' => $member_no]);
 					$rowMember = $getMemberIno->fetch(PDO::FETCH_ASSOC);
@@ -491,9 +500,10 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$getOldContract->execute([
 						':member_no' => $member_no
 					]);
-
+					$oldCont = array();
 					while($rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC)){
 						$sum_old_payment += $rowOldContract["PERIOD_PAYMENT"];
+						$oldCont[] = $rowOldContract;
 					}
 					$getMthOther = $conmssql->prepare("SELECT SUM(mthother_amt) as MTHOTHER_AMT FROM mbmembmthother WHERE member_no = :member_no and sign_flag = '-1'");
 					$getMthOther->execute([':member_no' => $member_no]);
@@ -502,7 +512,7 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$getSettlement = $conmysql->prepare("SELECT settlement_amt, salary FROM gcmembsettlement WHERE is_use = '1' AND emp_no = :emp_no AND MONTH(month_period) = MONTH(:month_period) AND YEAR(month_period) = YEAR(:month_period)");
 					$getSettlement->execute([
 						':emp_no' => $rowMember["SALARY_ID"],
-						':month_period' => $dataComing["form_value_root_"]["EFFECT_MONTH"]["VALUE"],
+						':month_period' => $dateNow,
 					]);
 					$rowSettlement = $getSettlement->fetch(PDO::FETCH_ASSOC);
 					$other_amt = $rowSettlement["settlement_amt"] ?? $mthother_amt;

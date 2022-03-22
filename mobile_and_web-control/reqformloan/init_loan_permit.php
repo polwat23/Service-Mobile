@@ -121,14 +121,18 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$oldBal = 0;
 			$loanRequest = TRUE;
 			//เช็ควันเกษียณ สิ้นปี ปีที่ครบ 55 ปี
-			$memberInfo = $conmssql->prepare("SELECT mb.BIRTH_DATE
+			$memberInfo = $conmssql->prepare("SELECT mb.BIRTH_DATE,mb.MEMBGROUP_CODE
 									FROM mbmembmaster mb
 									WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$m_birthdate = date('m',strtotime($rowMember["BIRTH_DATE"]));
 			$y_birthdate = date('Y')-date('Y',strtotime($rowMember["BIRTH_DATE"]));
-			$max_member_period = ((55 - $y_birthdate)*12) + (12 - date('m'));
+			if($rowMember["MEMBGROUP_CODE"] == "SKCM" || $rowMember["MEMBGROUP_CODE"] == "SKLM"){
+				$max_member_period = ((60 - $y_birthdate)*12) + (12 - date('m'));
+			}else{
+				$max_member_period = ((55 - $y_birthdate)*12) + (12 - date('m'));
+			}
 			
 			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$rowLoanGroup["LOANGROUP_CODE"].'.php')){
 				include(__DIR__.'/../credit/calculate_loan_'.$rowLoanGroup["LOANGROUP_CODE"].'.php');
@@ -307,14 +311,43 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 						$mid_date = new DateTime(date('Y')."-".date('m')."-15");
 						$mid_date->modify('+1 month');
 						$mid_date = $mid_date->format('Y-m-d');
-						if(date('w', strtotime($mid_date)) == 0 || date('w', strtotime($mid_date)) == 6){
-							$receive_date = date('Y-m-d', strtotime($mid_date." friday this week"));
-							$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
-							$arrayResult['RECEIVE_DATE'] = $receive_date;
+						
+						$mid_date_from = new DateTime(date('Y')."-".date('m')."-01");
+						$mid_date_from->modify('+1 month');
+						$mid_date_from = $mid_date_from->format('Y-m-d');
+						$mid_date_to = new DateTime(date('Y')."-".date('m')."-20");
+						$mid_date_to->modify('+1 month');
+						$mid_date_to = $mid_date_to->format('Y-m-d');
+						
+						$getLoanPayDate = $conmysql->prepare("SELECT loanpaydate FROM gcconstantloanpaydate 
+										WHERE is_use = '1' AND :mid_date_from <= loanpaydate AND :mid_date_to >= loanpaydate 
+										ORDER BY loanpaydate ASC LIMIT 1");
+						$getLoanPayDate->execute([
+							':mid_date_from' => $mid_date_from,
+							':mid_date_to' => $mid_date_to
+						]);
+						$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
+						
+						if(isset($rowLoanPayDate["loanpaydate"])){
+							if(date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 0 || date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 6){
+								$receive_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]." friday this week"));
+								$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
+								$arrayResult['RECEIVE_DATE'] = $receive_date;
+							}else{
+								$receive_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]));
+								$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
+								$arrayResult['RECEIVE_DATE'] = $receive_date;
+							}
 						}else{
-							$receive_date = date('Y-m-d', strtotime($mid_date));
-							$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
-							$arrayResult['RECEIVE_DATE'] = $receive_date;
+							if(date('w', strtotime($mid_date)) == 0 || date('w', strtotime($mid_date)) == 6){
+								$receive_date = date('Y-m-d', strtotime($mid_date." friday this week"));
+								$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
+								$arrayResult['RECEIVE_DATE'] = $receive_date;
+							}else{
+								$receive_date = date('Y-m-d', strtotime($mid_date));
+								$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
+								$arrayResult['RECEIVE_DATE'] = $receive_date;
+							}
 						}
 					}else{
 						$arrayResult['RECEIVE_DATE'] = null;
