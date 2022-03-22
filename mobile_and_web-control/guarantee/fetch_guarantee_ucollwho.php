@@ -95,6 +95,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 		$arrayResult['LIMIT_GUARANTEE'] = $maxcredit - $rowCredit["COLLACTIVE_AMT"];
 		$arrayResult['MAX_CREDIT'] = $maxcredit;
+		$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
+											and loantype_code IN('60','61','62') and contract_status > '0' and contract_status <> '8'");
+		$getBalance->execute([':member_no' => $member_no]);
+		$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
+		
+		$getBalanceGrp = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
+											and loantype_code IN('58') and contract_status > '0' and contract_status <> '8'");
+		$getBalanceGrp->execute([':member_no' => $member_no]);
+		$rowBalanceGrp = $getBalanceGrp->fetch(PDO::FETCH_ASSOC);
+		$percentShare = $rowMembType['SHARESTK_VALUE'] * 10;
+		$percentSalary = $rowMembType['SALARY_AMOUNT'] * 72;
+		$valueNormal = min($percentShare,$percentSalary);
+		$valueNormal -= $rowBalance["BALANCE_ALL"];
+		$valueNormalGrp = 50000 - $rowBalanceGrp["BALANCE_ALL"];
+		$arrLoanGuaAmt = array();
+		$arrLoanGuaAmt[0]["LABEL"] = "สิทธิค้ำวงเงินค้ำสามัญ";
+		$arrLoanGuaAmt[0]["VALUE"] = number_format($valueNormal,2)." บาท";
+		$arrLoanGuaAmt[1]["LABEL"] = "สิทธิค้ำประกันเงินกู้สามัญพัฒนาคุณภาพชีวิต";
+		$arrLoanGuaAmt[1]["VALUE"] = number_format($valueNormalGrp,2)." บาท";
+		$arrayResult['LIMIT_GUARANTEE_LIST'] = $arrLoanGuaAmt;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

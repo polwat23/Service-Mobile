@@ -325,12 +325,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>';
 	if($header["recv_period_raw"] >= '256405'){
-		$html .= '<div style="width:200px;margin-left: 750px;display:flex;">
+		$html .= '<div style="width:200px;margin-left: 720px;display:flex;">
 			<img src="../../resource/utility_icon/signature/mg_temp.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 750px;margin-top:-50px;">นายวินัย ชื่นจิตต์</div>
-			<div style="font-size: 18px;margin-left: 725px;">กรรมการทำหน้าที่ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 680px;margin-top:-50px;">นายโกมินทร์ วิโรจน์วัฒนกุล</div>
+			<div style="font-size: 18px;margin-left: 725px;">ผู้จัดการ</div>
 			';
 	}else{
 		$html .= '<div style="width:200px;margin-left: 750px;display:flex;">

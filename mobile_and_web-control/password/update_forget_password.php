@@ -65,8 +65,12 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 			':temp_pass' => password_hash($temp_pass,PASSWORD_DEFAULT),
 			':member_no' => $member_no
 		])){
+			$arrPayloadNew = array();
+			$arrPayloadNew['custId'] = "doa";
+			$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
+			$access_token = $jwt_token->customPayload($arrPayloadNew, $config["KEYCODE"]);
 			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-			$arrMailStatus = $lib->sendMail($dataComing["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction);
+			$arrMailStatus = $lib->sendHelper($access_token,$dataComing["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],[]);
 			if($arrMailStatus["RESULT"]){
 				$conmysql->commit();
 				if($func->logoutAll(null,$member_no,'-9')){
