@@ -10,6 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$fetchMail->execute([':member_no' => $payload["member_no"]]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
+		$arrayAttachParse = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
@@ -46,17 +47,23 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$arrayResult['PATH'] = $arrayGenPDF;
 			if($arrayGenPDF["RESULT"]){
 				$arrayAttach[] = $arrayGenPDF["PATH"];
+				$arrayAttachParse[] = $arrayGenPDF["PATH_PARSE"];
 			}
 		}
-		$arrayDataTemplate = array();
-		$arrayDataTemplate["ACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-		$template = $func->getTemplateSystem('DepositStatement');
-		$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-		$arrMailStatus = $lib->sendMail($rowMail["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,$arrayAttach);
+		if(sizeof($arrayAttachParse) > 0){
+			$arrayDataTemplate = array();
+			$arrayDataTemplate["ACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
+			$template = $func->getTemplateSystem('DepositStatement');
+			$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
+			$arrPayloadNew = array();
+			$arrPayloadNew['custId'] = "doa";
+			$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
+			$access_token = $jwt_token->customPayload($arrPayloadNew, $config["KEYCODE"]);
+			$arrMailStatus = $lib->sendHelper($access_token,$rowMail["email"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$arrayAttachParse);
+		}else{
+			$arrMailStatus["RESULT"] = FALSE;
+		}
 		if($arrMailStatus["RESULT"]){
-			foreach($arrayAttach as $path){
-				unlink($path);
-			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -314,6 +321,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	}else{
 		$arrayPDF["RESULT"] = FALSE;
 	}
+	$arrayPDF["PATH_PARSE"] = "/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$arrayPDF["PATH"] = $pathOutput;
 	return $arrayPDF;
 }

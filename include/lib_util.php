@@ -300,6 +300,55 @@ class library {
 			}
 		}
 	}
+	public function sendHelper($accessToken,$email,$subject,$body,$attachment_path=[]) {
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$json_data = json_decode($json,true);
+		$arrayReq = array();
+		$attachMent = [];
+		foreach($attachment_path as $attach){
+			$arrayAttech = [];
+			$arrayAttech["filename"] = basename($attach);
+			$arrayAttech["path"] = $json_data["URL_SERVICE"].'/resource'.$attach;
+			$attachMent[] = $arrayAttech;
+		}
+		$arrayReq["infoEmail"] = (object)[
+			"listEmail" => array($email),
+			"subject" => $subject,
+			"detailHtml" => $body,
+			"attachment" => $attachMent,
+		];
+		$arrayReq["custId"] = "doa";
+		$arrayReq["configEmail"] = (object)[
+			"typeSend" => 'multi'
+		];
+		$ch = curl_init();  
+		curl_setopt($ch,CURLOPT_URL, 'https://api-node.thaicoop.co/sendHelper-Test/sendMail');                                                                  
+		curl_setopt($ch,CURLOPT_POST, true);
+		curl_setopt($ch,CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:'.$accessToken,'requestId:'.$this->randomText('all',8)));
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch,CURLOPT_POSTFIELDS, json_encode($arrayReq)); 																				 
+		$result = curl_exec($ch);
+		
+		if(isset($result) && $result !== FALSE) {
+			$response = json_decode($result);
+			curl_close($ch);
+			if(!$response->RESULT) {
+				$arrRes["RESULT"] = FALSE;
+				$arrRes["MESSAGE_ERROR"] = $response->RESPONSE_MESSAGE;
+				return $arrRes;
+			} else {
+				$arrRes["RESULT"] = TRUE;
+				return $arrRes;
+			}
+		} else {
+			$arrRes["RESULT"] = FALSE;
+			$arrRes["MESSAGE_ERROR"] = curl_error($ch);
+			curl_close($ch);
+			return $arrRes;
+		}
+	}
 	public function sendMailHttp($email,$subject,$body,$attachment_path=[]) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
@@ -335,7 +384,8 @@ class library {
 			foreach($attachment_path as $attch_path){
 				$file = [];
 				$file['filename'] = basename($attch_path);
-				$file['filedata'] = 'data: '.mime_content_type($attch_path).';base64,'.base64_encode(file_get_contents($attch_path));
+				$file['filedata'] = base64_encode(file_get_contents($attch_path));
+				$file['filetype'] = mime_content_type($attch_path);
 				$attachment[] = $file;
 			}
 		}
