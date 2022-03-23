@@ -9,20 +9,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FundInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		$getPaymentDetail = $conmssql->prepare("SELECT S.DEPTSLIP_NO,M.MEMBER_NO,M.DEPTACCOUNT_NO,P.PRENAME_DESC,M.DEPTACCOUNT_NAME,DEPTACCOUNT_SNAME,S.DEPTSLIP_DATE,S.DEPTITEMTYPE_CODE,S.DEPTSLIP_AMT,S.CASH_TYPE,S.ENTRY_ID,
-												D.SEQ_NO,D.SLIP_DESC,B.WFTYPE_CODE,B.WCMEMBERTYPE_DESC,B.WCMEMBER_DESC,D.PRNCSLIP_AMT,DBO.FT_READTHAIBAHT(S.DEPTSLIP_AMT) AS MONEY_THAIBAHT ,C.MONEYTYPE_DESC,MG.MEMBGROUP_CODE,MG.MEMBGROUP_DESC,MM.MEMB_NAME,MM.MEMB_SURNAME,MG.MEMBGROUP_DESC ,MG.MEMBGROUP_CODE,
+		$getPaymentDetail = $conmssql->prepare("SELECT S.DEPTSLIP_NO,M.MEMBER_NO,M.DEPTACCOUNT_NO,P.PRENAME_DESC,
+															M.DEPTACCOUNT_NAME,DEPTACCOUNT_SNAME,S.DEPTSLIP_DATE,S.DEPTITEMTYPE_CODE,
+															S.DEPTSLIP_AMT,S.CASH_TYPE,S.ENTRY_ID,
+															D.SEQ_NO,D.SLIP_DESC,B.WFTYPE_CODE,
+															B.WCMEMBERTYPE_DESC,B.WCMEMBER_DESC,D.PRNCSLIP_AMT,DBO.FT_READTHAIBAHT(S.DEPTSLIP_AMT) AS MONEY_THAIBAHT ,
+															C.MONEYTYPE_DESC,MG.MEMBGROUP_CODE,MG.MEMBGROUP_DESC,P.PRENAME_DESC AS MEMBER_PRENAME_DISC,MM.MEMB_NAME,MM.MEMB_SURNAME,MG.MEMBGROUP_DESC ,
+															MG.MEMBGROUP_CODE,
 												(CASE WHEN S.CASH_TYPE ='CSH' THEN 'เงินสด'
 												WHEN S.CASH_TYPE ='CBT' THEN 'โอนธนาคาร'
 												WHEN S.CASH_TYPE ='TRN' THEN 'โอนภายใน'
 												WHEN S.CASH_TYPE ='LON' THEN ''  ELSE '' END ) as CASH_TYPE
 												FROM WCDEPTSLIP S
 												LEFT JOIN WCDEPTMASTER M ON S.DEPTACCOUNT_NO = M.DEPTACCOUNT_NO
+												LEFT JOIN MBMEMBMASTER MM ON M.MEMBER_NO = MM.MEMBER_NO
 												LEFT JOIN WCDEPTSLIPDET D ON S.DEPTSLIP_NO = D.DEPTSLIP_NO
-												LEFT JOIN MBUCFPRENAME P ON M.PRENAME_CODE = P.PRENAME_CODE
+												LEFT JOIN MBUCFPRENAME P ON MM.PRENAME_CODE = P.PRENAME_CODE
 												LEFT JOIN WCMEMBERTYPE B ON M.WFTYPE_CODE = B.WFTYPE_CODE
 												LEFT JOIN CMUCFMONEYTYPE C ON S.CASH_TYPE = C.MONEYTYPE_CODE
-												LEFT JOIN MBMEMBMASTER MM ON M.MEMBER_NO = MM.MEMBER_NO
 												LEFT JOIN MBUCFMEMBGROUP MG ON MM.MEMBGROUP_CODE = MG.MEMBGROUP_CODE
+		
 												WHERE S.DEPTSLIP_NO = :deptslip_no AND ITEM_STATUS=1
 												ORDER BY S.DEPTSLIP_NO");
 		$getPaymentDetail->execute([
@@ -90,7 +96,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	
 }
 
 function GenerateReport($dataReport,$header,$lib){
@@ -215,7 +220,6 @@ function GenerateReport($dataReport,$header,$lib){
 	  </div>';
 	  $sumBalance += ($arrList["amt"]??0);
 	}
-
 	$html.='
 	  </div>
 	  <div>
@@ -225,7 +229,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<td style="width:25%">จำนวนเงิน</td>
 			</tr>
 			<tr>
-			  <td style="height:210px;"></td>
+			  <td style="height:180px;"></td>
 			  <td></td>
 			</tr>
 			<tr>
@@ -236,7 +240,7 @@ function GenerateReport($dataReport,$header,$lib){
 		</table>
 	  </div>
 	  </div>
-	  <div style="position:absolute; bottom:0px;">
+	  <div style="position:absolute; bottom:-30px;">
 		<div style="position:absolute;"><img src="../../resource/utility_icon/signature/manager.png" "width="40" height="30" style="margin-top:-20px; margin-left:55px; "></div>
 		<div style="display:flex">
 		  <div style="margin-left:10px;" class="text-color">ลงชื่อ...........................................ผู้จัดการ</div>
@@ -244,7 +248,6 @@ function GenerateReport($dataReport,$header,$lib){
 		</div>
 	  </div>
 	';
-
 	//ระยะขอบ
 	//<div style="position:absolute;"><img src="../../resource/utility_icon/signature/welfare_staff.png" "width="90" height="40" style="margin-top:-28px; margin-left:300px;"></div>
 	$html .= '

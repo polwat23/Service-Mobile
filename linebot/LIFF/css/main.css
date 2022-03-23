@@ -1,20 +1,22 @@
 
-
-
-
-
-
-
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
+@font-face {
+  font-family: Serithai;
+  src: url(../fonts/Serithai-Regular.ttf);
+}
+@font-face {
+  font-family: Serithai;
+  src: url(../fonts/Serithai-Bold.ttf);
+  font-weight: bold;
+}
 
 * {
-	font-family: 'Sriracha', cursive;
+	font-family: 'Serithai', cursive;
 	margin: 0px; 
 	padding: 0px; 
 	box-sizing: border-box;
 }
-
 body, html {
 	height: 100%;
 }
@@ -167,13 +169,16 @@ iframe {
   background-position: center;
   
   position: relative;
-  z-index: 1;
+  z-index: 0;
+}
+body{
+  background-image: linear-gradient(356deg, #ef54a5, #f1d0e1);
+  background-color: #f7b8da;
 }
 
 .container-login100::before {
   content: "";
-  background-image: url("../../../resource/logo/bglineregister.jpg");
-  background-size: cover;
+ 
   display: block;
   position: absolute;
   z-index: -1;
@@ -181,7 +186,7 @@ iframe {
   height: 100%;
   top: 0;
   left: 0;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .wrap-login100 {
@@ -221,9 +226,28 @@ iframe {
   border-radius: 50%;
   overflow: hidden;
   margin: 0 auto;
+  z-index: 1; 
 }
 .login100-form-avatar img {
   width: 100%;
+  z-index: 1;
+}
+.box-logo{
+	position:absolute;
+	margin-top:10%;
+	margin-left:35%;
+}
+.logo{
+	justify-content: center;
+	display:flex;
+	text-align:center;
+	margin:auto;
+}
+
+.logo img {
+  width: 110px;
+  opacity: 0.5;
+  z-index: 2;
 }
 
 

@@ -9,7 +9,7 @@ header('Content-Type: application/json;charset=utf-8');
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'./autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
-require_once(__DIR__.'/../include/lib_line.php');
+require_once(__DIR__.'/../include/lib_line_kfinance.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
@@ -25,6 +25,7 @@ use WebPConvert\WebPConvert;
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
 
+
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
@@ -32,17 +33,23 @@ $lineLib = new libraryLine();
 $auth = new Authorization();
 $func = new functions();
 $log = new insertLog();
+$jwt_token = new Token();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
 $configError = json_decode($jsonConfigError,true);
 $jsonConfigAS = file_get_contents(__DIR__.'/../config/config_alias.json');
 $configAS = json_decode($jsonConfigAS,true);
+$jsonLine = file_get_contents(__DIR__.'/../config/config_linebotKfinance.json');
+$configLine = json_decode($jsonLine,true);
 $lang_locale = "th";
-$jwt_token = new Token();
 
 if(is_array($conmysql) && $conmysql["RESULT"] == FALSE){
 	$message_error = $conmysql["MESSAGE"]." ".$conmysql["ERROR"];
+	$lib->sendLineNotify($message_error);
+}
+if(is_array($conmssql) && $conmssql["RESULT"] == FALSE){
+	$message_error = $conmssql["MESSAGE"]." ".$conmssql["ERROR"];
 	$lib->sendLineNotify($message_error);
 }
 
@@ -59,6 +66,7 @@ $user_id = $dataComing["events"][0]["source"]["userId"];
 $reply_token = $dataComing["events"][0]["replyToken"];
 $messageType = $arrMessage["type"];
 $message = $arrMessage["text"];
-//file_put_contents(__DIR__.'/../log/lineincome.txt', json_encode($dataComing["events"][0]) . PHP_EOL, FILE_APPEND);
+file_put_contents(__DIR__.'/../log/lineincome.txt', json_encode($dataComing["events"][0],JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+
 require_once(__DIR__.'./mappingwordingline.php');
 ?>

@@ -13,22 +13,22 @@ $checkSystem->execute();
 if($checkSystem->rowCount() > 0){
 	$rowSystem = $checkSystem->fetch(PDO::FETCH_ASSOC);
 	if($rowSystem["menu_status"] == '1'){
-		$conoracle = $con->connecttooracle();
-		if(is_array($conoracle)){
-			$conoracle["IS_OPEN"] = '1';
+		$conmssql = $con->connecttosqlserver();
+		if(is_array($conmssql)){
+			$conmssql["IS_OPEN"] = '1';
 		}
 	}else{
-		$conoracle = $con->connecttooracle();
-		$conoracle->IS_OPEN = '0';
-		if(!is_array($conoracle)){
+		$conmssql = $con->connecttosqlserver();
+		$conmssql->IS_OPEN = '0';
+		if(!is_array($conmssql)){
 			$updateMenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1',menu_permission = '0' WHERE menu_parent = '-1' and menu_permission = '3'");
 			$updateMenu->execute();
 		}
 	}
 }else{
-	$conoracle = $con->connecttooracle();
-	$conoracle->IS_OPEN = '0';
-	if(!is_array($conoracle)){
+	$conmssql = $con->connecttosqlserver();
+	$conmssql->IS_OPEN = '0';
+	if(!is_array($conmssql)){
 		$updateMenu = $conmysql->prepare("UPDATE gcmenu SET menu_status = '1',menu_permission = '0' WHERE menu_parent = '-1' and menu_permission = '3'");
 		$updateMenu->execute();
 	}

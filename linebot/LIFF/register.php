@@ -35,12 +35,20 @@ $config = json_decode($json,true);
 	<div id="warning">
 	กรุณาใช้งานผ่านแอปพลิเคชัน Line Version มือถือเท่านั้น
 	</div>
+	<!--
+	<div class="box-logo">
+		<div class="logo">
+			 <img src="https://cdn.thaicoop.co/coop/nkh.png"  alt="logo">
+		</div>
+	</div>
+	-->
 	<div class="limiter" id="limiter">
 		<div class="container-login100" >
 			<div class="wrap-login100 p-b-30">
 				<div class="login100-form validate-form">
+				
 					<div class="login100-form-avatar">
-						<img src="https://cdn.thaicoop.co/coop/<?=$config["COOP_KEY"]?>.png" id="avatar" alt="logo">
+						<img src="https://cdn.thaicoop.co/coop/<?=$config["COOP_KEY"]?>.jpg" id="avatar" alt="logo">
 					</div>
 					<span class="login100-form-title p-t-20">
 						สมัครใช้บริการ <?=$config["LINEBOT_NAME"]?>
@@ -78,7 +86,7 @@ $(document).ready(function(){
 				}
 				$('#nameline').text(profile.displayName)
 				$('#avatar').attr('src',profile.pictureUrl)
-				$('#deeplink').attr('href',"<?=$config["LINK_BIND"]?>" + encodeURI(JSON.stringify(dataProfile)))
+				$('#deeplink').attr('href',"<?=$config["LINK_BIND"]?>" + encodeURI(JSON.stringify(dataProfile)) ) ,
 				$('#showwhenload').css('display','block')
 				$('#limiter').css('display','block')
 				$('#loader').css('display','none')

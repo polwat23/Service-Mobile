@@ -1,9 +1,26 @@
 <?php
-
 namespace Line;
 
+use Connection\connection;
+
 class libraryLine {
-		
+	private $con;
+	private $conmssql;
+	function __construct() {
+		$connection = new connection();
+		$this->con = $connection->connecttomysql();
+		$this->conmssql = $connection->connecttosqlserver();
+	}
+	public function checkBindAccount($line_token){
+		$fetchBindAccount = $this->con->prepare("SELECT member_no FROM gcmemberaccount WHERE line_token = :line_token");
+		$fetchBindAccount->execute([':line_token' => $line_token]);
+		if($fetchBindAccount->rowCount() > 0){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 	public function prepareMessageText($message){
 		$arrResponse[0]["type"] = "text";
 		$arrResponse[0]["label"] = $message;
@@ -86,13 +103,14 @@ class libraryLine {
 		}
 		return $dataReturn;
 	}
-	/*public function mergeTextMessage($message){
+
+	public function mergeTextMessage($message){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "text";
 		$dataTemplate["text"] = $message;
 		return $dataTemplate;
 	}
-	
+	/*
 	public function stickerMessage($packageId,$stickerId){
 		$dataTemplate = array();
 		$dataTemplate["type"] = "sticker";

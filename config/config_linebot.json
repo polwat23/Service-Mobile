@@ -5,7 +5,7 @@
 	"COOP_KEY" : "NKH",
 	"LIFF_ID" : "1656729415-nDx8JYBP",
 	"LINE_ID" : "@006vwzdx",
-	"LINK_BIND" : "https://nkh.icoopsiam.com/app/home?qrdata=",
+	"LINK_BIND" : "nkhsaving://app/home?qrdata=",
 	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
 	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",
 	"LINEBOT_CHANNELID" : "1656729292",
