@@ -23,6 +23,73 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowPhone = $getPhone->fetch(PDO::FETCH_ASSOC);
 			$arrayDataGrp["PHONE_NUMBER"] = $rowPhone["phone_number"];
 		}
+		if($arrayConst["address"] == '1'){
+			$memberInfo = $conoracle->prepare("SELECT 
+													mb.ADDR_NO as ADDR_NO,
+													mb.ADDR_MOO as ADDR_MOO,
+													mb.ADDR_SOI as ADDR_SOI,
+													mb.ADDR_VILLAGE as ADDR_VILLAGE,
+													mb.ADDR_ROAD as ADDR_ROAD,
+													MBTR.TAMBOL_DESC AS TAMBOL_REG_DESC,
+													MBDR.DISTRICT_DESC AS DISTRICT_REG_DESC,
+													MB.PROVINCE_CODE AS PROVINCE_CODE,
+													MBPR.PROVINCE_DESC AS PROVINCE_REG_DESC,
+													MB.ADDR_POSTCODE AS ADDR_POSTCODE,
+													MBTR.TAMBOL_CODE,
+													MBDR.DISTRICT_CODE
+													FROM mbmembmaster mb
+													LEFT JOIN MBUCFTAMBOL MBTR ON mb.TAMBOL_CODE = MBTR.TAMBOL_CODE
+													LEFT JOIN MBUCFDISTRICT MBDR ON mb.AMPHUR_CODE = MBDR.DISTRICT_CODE
+													LEFT JOIN MBUCFPROVINCE MBPR ON mb.PROVINCE_CODE = MBPR.PROVINCE_CODE
+													WHERE mb.member_no = :member_no");
+			$memberInfo->execute([':member_no' => $member_no]);
+			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			$arrAddress["ADDR_NO"] = $rowMember["ADDR_NO"];
+			$arrAddress["ADDR_MOO"] = $rowMember["ADDR_MOO"];
+			$arrAddress["ADDR_SOI"] = $rowMember["ADDR_SOI"];
+			$arrAddress["ADDR_VILLAGE"] = $rowMember["ADDR_VILLAGE"];
+			$arrAddress["ADDR_ROAD"] = $rowMember["ADDR_ROAD"];
+			$arrAddress["DISTRICT_CODE"] = $rowMember["DISTRICT_CODE"];
+			$arrAddress["ADDR_POSTCODE"] = $rowMember["ADDR_POSTCODE"];
+			$arrAddress["TAMBOL_CODE"] = $rowMember["TAMBOL_CODE"];
+			$arrAddress["PROVINCE_CODE"] = $rowMember["PROVINCE_CODE"];
+			$arrayDataGrp["CURR_ADDRESS"] = $arrAddress;
+			$arrAllTambol = array();
+			$dataTambol = $conoracle->prepare("SELECT TAMBOL_CODE,TAMBOL_DESC,DISTRICT_CODE FROM MBUCFTAMBOL");
+			$dataTambol->execute();
+			while($rowtambol = $dataTambol->fetch(PDO::FETCH_ASSOC)){
+				$arrTambol = array();
+				$arrTambol["TAMBOL_CODE"] = $rowtambol["TAMBOL_CODE"];
+				$arrTambol["TAMBOL_DESC"] = $rowtambol["TAMBOL_DESC"];
+				$arrTambol["DISTRICT_CODE"] = $rowtambol["DISTRICT_CODE"];
+				$arrAllTambol[] = $arrTambol;
+			}
+			$arrayDataGeo["TAMBOL_LIST"] = $arrAllTambol;
+			$arrAllDistrcit = array();
+			$dataDistrcit = $conoracle->prepare("SELECT DISTRICT_CODE,DISTRICT_DESC,PROVINCE_CODE,POSTCODE FROM MBUCFDISTRICT");
+			$dataDistrcit->execute();
+			while($rowdistrict = $dataDistrcit->fetch(PDO::FETCH_ASSOC)){
+				$arrDistrict = array();
+				$arrDistrict["DISTRICT_CODE"] = $rowdistrict["DISTRICT_CODE"];
+				$arrDistrict["DISTRICT_DESC"] = $rowdistrict["DISTRICT_DESC"];
+				$arrDistrict["PROVINCE_CODE"] = $rowdistrict["PROVINCE_CODE"];
+				$arrDistrict["POSTCODE"] = $rowdistrict["POSTCODE"];
+				$arrAllDistrcit[] = $arrDistrict;
+			}
+			$arrayDataGeo["DISTRCIT_LIST"] = $arrAllDistrcit;
+			$arrAllProvince = array();
+			$dataProvince = $conoracle->prepare("SELECT PROVINCE_CODE,PROVINCE_DESC FROM MBUCFPROVINCE");
+			$dataProvince->execute();
+			while($rowprovince = $dataProvince->fetch(PDO::FETCH_ASSOC)){
+				$arrProvince = array();
+				$arrProvince["PROVINCE_CODE"] = $rowprovince["PROVINCE_CODE"];
+				$arrProvince["PROVINCE_DESC"] = $rowprovince["PROVINCE_DESC"];
+				$arrAllProvince[] = $arrProvince;
+			}
+			$arrayDataGeo["PROVINCE_LIST"] = $arrAllProvince;
+			$arrayResult["COUNTRY"] = $arrayDataGeo;
+		}
+		$arrayResult['IS_OTP'] = FALSE;
 		$arrayResult['DATA'] = $arrayDataGrp;
 		$arrayResult['EMAIL_CAN_CHANGE'] = $arrayConst["email"] == '1' ? TRUE : FALSE;
 		$arrayResult['ADDRESS_CAN_CHANGE'] = $arrayConst["address"] == '1' ? TRUE : FALSE;
