@@ -29,10 +29,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													NVL(kpd.interest_payment,0) AS INT_BALANCE
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
+													LEFT JOIN mbmembmaster mb ON kpd.member_no = mb.member_no
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+													and dp.membcat_code = mb.membcat_code
 													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-													and kpd.SEQ_ARRNO = '0'
 													ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
