@@ -3,6 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount, gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
 												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
@@ -30,10 +31,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrGroupAccBind["BIND"][] = $arrAccBind;
 			}
-			$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no 
+			$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBTYPE_CODE FROM mbmembmaster WHERE member_no = :member_no");
+			$getMembcatCode->execute([':member_no' => $member_no]);
+			$rowMemb = $getMembcatCode->fetch(PDO::FETCH_ASSOC);
+			$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no,gct.allow_withdraw_outside
 												FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON 
 												gat.id_accountconstant = gct.id_accountconstant
-												WHERE gct.allow_withdraw_outside = '1' and gat.member_no = :member_no and gat.is_use = '1'");
+												WHERE gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchAccountBeenAllow->execute([':member_no' =>  $payload["member_no"]]);
 			if($fetchAccountBeenAllow->rowCount() > 0){
 				$dep_format = $func->getConstant('dep_format');
@@ -58,7 +62,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
 							$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowAccCoop["deptaccount_no"]) - $checkSeqAmt["SEQUEST_AMOUNT"];
 							$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-							$arrGroupAccBind["COOP"][] = $arrAccCoop;
+							if($rowMemb["MEMBCAT_CODE"] == '20' && $rowMemb["MEMBTYPE_CODE"] == '05'){
+								if($rowDataAcc["DEPTTYPE_CODE"] == '02'){
+									$arrGroupAccBind["COOP"][] = $arrAccCoop;
+								}
+							}else{
+								if($rowAccCoop["allow_withdraw_outside"] == '1'){
+									$arrGroupAccBind["COOP"][] = $arrAccCoop;
+								}
+							}
 						}
 					}
 				}
