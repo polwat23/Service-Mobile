@@ -32,6 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		WHEN 'LON' THEN kpd.loancontract_no
 																	ELSE kpd.description END as PAY_ACCOUNT,
 																	kpd.period,
+																	kpd.description,
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.PRINCIPAL_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -51,7 +52,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			if(isset($rowDetail["DESCRIPTION"]) && $rowDetail["DESCRIPTION"] != ""){
+				$arrDetail["TYPE_DESC"] = $rowDetail["DESCRIPTION"];
+			}else{
+				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			}
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
