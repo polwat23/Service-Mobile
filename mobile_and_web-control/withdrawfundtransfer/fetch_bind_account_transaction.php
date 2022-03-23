@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrGroupAccBind["BIND"][] = $arrAccBind;
 			}
-			$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBTYPE_CODE FROM mbmembmaster WHERE member_no = :member_no");
+			$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
 			$getMembcatCode->execute([':member_no' => $member_no]);
 			$rowMemb = $getMembcatCode->fetch(PDO::FETCH_ASSOC);
 			$fetchAccountBeenAllow = $conmysql->prepare("SELECT gat.deptaccount_no,gct.allow_withdraw_outside
@@ -62,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
 							$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowAccCoop["deptaccount_no"]) - $checkSeqAmt["SEQUEST_AMOUNT"];
 							$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-							if($rowMemb["MEMBCAT_CODE"] == '20' && $rowMemb["MEMBTYPE_CODE"] == '05'){
+							if($rowMemb["MEMBCAT_CODE"] == '20' && $rowMemb["MEMBGROUP_CODE"] == '120139'){
 								if($rowDataAcc["DEPTTYPE_CODE"] == '02'){
 									$arrGroupAccBind["COOP"][] = $arrAccCoop;
 								}
