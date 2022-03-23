@@ -158,8 +158,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														VALUES(:member_no,:old_address,:address,'address')");
 				if($insertChangeData->execute([
 					':member_no' => $payload["member_no"],
-					':old_address' => json_encode($arrOldAddress),
-					':address' => json_encode($dataComing["address"])
+					':old_address' => json_encode($arrOldAddress,JSON_UNESCAPED_UNICODE),
+					':address' => json_encode($dataComing["address"],JSON_UNESCAPED_UNICODE)
 				])){
 					$arrayResult["RESULT_ADDRESS"] = TRUE;
 				}else{
