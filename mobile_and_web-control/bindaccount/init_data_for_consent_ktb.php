@@ -4,14 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON,MEMBCAT_CODE,MEMBTYPE_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON,MEMBCAT_CODE,MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$arrGrpAccFee = array();
-			if($rowDataMember["MEMBCAT_CODE"] == '20' && $rowDataMember["MEMBTYPE_CODE"] == '05'){
+			if($rowDataMember["MEMBCAT_CODE"] == '20' && $rowDataMember["MEMBGROUP_CODE"] == '120139'){
 				$getDepositAcc = $conmssql->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
 												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
 												and dp.membcat_code = dt.membcat_code

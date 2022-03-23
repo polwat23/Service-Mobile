@@ -4,10 +4,10 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBTYPE_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMembcatCode->execute([':member_no' => $member_no]);
 		$rowMemb = $getMembcatCode->fetch(PDO::FETCH_ASSOC);
-		if($rowMemb["MEMBCAT_CODE"] == '20' && $rowMemb["MEMBTYPE_CODE"] == '05'){
+		if($rowMemb["MEMBCAT_CODE"] == '20' && $rowMemb["MEMBGROUP_CODE"] == '120139'){
 			$arrayResult['RESPONSE_CODE'] = "WS0006";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
