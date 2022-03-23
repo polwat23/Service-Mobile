@@ -208,7 +208,7 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 					}
 					$createImage = $lib->base64_to_pdf($dataComing["file_upload"],$file_name,$destination,null);
 					if($createImage){
-						$pathFile = $config["URL_SERVICE"]."resource/news/".$createImage["normal_path"];
+						$pathFile = $config["URL_SERVICE"]."/resource/news/".$createImage["normal_path"];
 						
 						if(isset($pathFile) && $pathFile != null){
 							$pathFile = $pathFile."?".$random_text;
