@@ -10,6 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
+											
 											LCM.MEMBER_NO AS MEMBER_NO,
 											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT,
 											NVL(LCM.principal_balance,0) as LOAN_BALANCE,
@@ -40,9 +41,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGroupLoan[] = $arrayColl;
 		}
 		$getMembType = $conoracle->prepare("SELECT lg.MBTYPEPERM_FLAG,lg.MANGRTPERMGRP_CODE,m.MEMBTYPE_CODE,lg.MANGRTTIME_TYPE
-										,sh.LAST_PERIOD,m.MEMBER_DATE,m.SALARY_AMOUNT,sh.SHARESTK_AMT * 10 as SHARESTK_VALUE
+										,sh.LAST_PERIOD,m.MEMBER_DATE,m.SALARY_AMOUNT,sh.SHARESTK_AMT * 10 as SHARESTK_VALUE,
+										mg.MEMBGROUP_CONTROL
 										FROM mbmembmaster m LEFT JOIN LNGRPMANGRTPERM lg ON m.member_type = lg.member_type
 										LEFT JOIN shsharemaster sh ON m.member_no = sh.member_no
+										LEFT JOIN mbucfmembgroup mg ON m.membgroup_code = mg.membgroup_code
 										WHERE m.member_no = :member_no and lg.MANGRTPERMGRP_CODE <> '57'");
 		$getMembType->execute([':member_no' => $member_no]);
 		$rowMembType = $getMembType->fetch(PDO::FETCH_ASSOC);
@@ -95,25 +98,50 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 		$arrayResult['LIMIT_GUARANTEE'] = $maxcredit - $rowCredit["COLLACTIVE_AMT"];
 		$arrayResult['MAX_CREDIT'] = $maxcredit;
-		$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
-											and loantype_code IN('60','61','62') and contract_status > '0' and contract_status <> '8'");
-		$getBalance->execute([':member_no' => $member_no]);
-		$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
-		
-		$getBalanceGrp = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
-											and loantype_code IN('58') and contract_status > '0' and contract_status <> '8'");
-		$getBalanceGrp->execute([':member_no' => $member_no]);
-		$rowBalanceGrp = $getBalanceGrp->fetch(PDO::FETCH_ASSOC);
-		$percentShare = $rowMembType['SHARESTK_VALUE'] * 10;
-		$percentSalary = $rowMembType['SALARY_AMOUNT'] * 72;
-		$valueNormal = min($percentShare,$percentSalary);
-		$valueNormal -= $rowBalance["BALANCE_ALL"];
-		$valueNormalGrp = 50000 - $rowBalanceGrp["BALANCE_ALL"];
-		$arrLoanGuaAmt = array();
-		$arrLoanGuaAmt[0]["LABEL"] = "สิทธิค้ำวงเงินค้ำสามัญ";
-		$arrLoanGuaAmt[0]["VALUE"] = number_format($valueNormal,2)." บาท";
-		$arrLoanGuaAmt[1]["LABEL"] = "สิทธิค้ำประกันเงินกู้สามัญพัฒนาคุณภาพชีวิต";
-		$arrLoanGuaAmt[1]["VALUE"] = number_format($valueNormalGrp,2)." บาท";
+		if($rowMembType["MEMBGROUP_CONTROL"] == '06'){
+			$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
+												and loantype_code IN('60','61','62') and contract_status > '0' and contract_status <> '8'");
+			$getBalance->execute([':member_no' => $member_no]);
+			$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
+			
+			$getBalanceGrp = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
+												and loantype_code IN('58') and contract_status > '0' and contract_status <> '8'");
+			$getBalanceGrp->execute([':member_no' => $member_no]);
+			$rowBalanceGrp = $getBalanceGrp->fetch(PDO::FETCH_ASSOC);
+			$percentShare = $rowMembType['SHARESTK_VALUE'] * 10;
+			$percentSalary = $rowMembType['SALARY_AMOUNT'] * 72;
+			$valueNormal = min($percentShare,$percentSalary);
+			$valueNormal -= $rowBalance["BALANCE_ALL"];
+			$valueNormalGrp = 50000 - $rowBalanceGrp["BALANCE_ALL"];
+			$arrLoanGuaAmt = array();
+			$arrLoanGuaAmt[0]["LABEL"] = "สิทธิค้ำวงเงินค้ำสามัญ";
+			$arrLoanGuaAmt[0]["VALUE"] = number_format($valueNormal,2)." บาท";
+			$arrLoanGuaAmt[1]["LABEL"] = "สิทธิค้ำประกันเงินกู้สามัญพัฒนาคุณภาพชีวิต";
+			$arrLoanGuaAmt[1]["VALUE"] = number_format($valueNormalGrp,2)." บาท";
+		}else{
+			$getLoantypeCustom = $conoracle->prepare("SELECT l.MAXLOAN_AMT,l.MULTIPLE_SALARY FROM lnloantypecustom l,mbmembmaster m 
+													where l.loantype_code = '53' 
+													AND TRUNC(MONTHS_BETWEEN (SYSDATE,m.member_date ) /12 *12) between
+													l.startmember_time and l.endmember_time
+													and m.member_no = :member_no");
+			$getLoantypeCustom->execute([':member_no' => $member_no]);
+			$rowCustom = $getLoantypeCustom->fetch(PDO::FETCH_ASSOC);
+			$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
+												and loantype_code IN('53','58') and contract_status > '0' and contract_status <> '8'");
+			$getBalance->execute([':member_no' => $member_no]);
+			$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
+			$percentShare = $rowMembType['SHARESTK_VALUE'] * 0.30;
+			$percentSalary = $rowMembType['SALARY_AMOUNT'] * $rowCustom["MULTIPLE_SALARY"];
+			$valueNormal = min($percentShare,$percentSalary,$rowCustom["MAXLOAN_AMT"]);
+			$valueNormal -= $rowBalance["BALANCE_ALL"];
+			if($valueNormal < 0){
+				$valueNormal = 0;
+			}
+			$arrLoanGuaAmt = array();
+			$arrLoanGuaAmt[0]["LABEL"] = "สิทธิค้ำวงเงินค้ำสามัญ";
+			$arrLoanGuaAmt[0]["VALUE"] = number_format($valueNormal,2)." บาท";
+
+		}
 		$arrayResult['LIMIT_GUARANTEE_LIST'] = $arrLoanGuaAmt;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
