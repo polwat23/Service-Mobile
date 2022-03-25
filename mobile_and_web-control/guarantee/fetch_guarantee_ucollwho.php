@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$getMembType = $conoracle->prepare("SELECT lg.MBTYPEPERM_FLAG,lg.MANGRTPERMGRP_CODE,m.MEMBTYPE_CODE,lg.MANGRTTIME_TYPE
 										,sh.LAST_PERIOD,m.MEMBER_DATE,m.SALARY_AMOUNT,sh.SHARESTK_AMT * 10 as SHARESTK_VALUE,
-										mg.MEMBGROUP_CONTROL
+										TRIM(mg.MEMBGROUP_CONTROL) as MEMBGROUP_CONTROL
 										FROM mbmembmaster m LEFT JOIN LNGRPMANGRTPERM lg ON m.member_type = lg.member_type
 										LEFT JOIN shsharemaster sh ON m.member_no = sh.member_no
 										LEFT JOIN mbucfmembgroup mg ON m.membgroup_code = mg.membgroup_code
@@ -98,7 +98,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 		$arrayResult['LIMIT_GUARANTEE'] = $maxcredit - $rowCredit["COLLACTIVE_AMT"];
 		$arrayResult['MAX_CREDIT'] = $maxcredit;
-		if($rowMembType["MEMBGROUP_CONTROL"] == '06'){
+		if($rowMembType["MEMBGROUP_CONTROL"] != '06'){
 			$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
 												and loantype_code IN('60','61','62') and contract_status > '0' and contract_status <> '8'");
 			$getBalance->execute([':member_no' => $member_no]);
@@ -130,15 +130,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and loantype_code IN('53','58') and contract_status > '0' and contract_status <> '8'");
 			$getBalance->execute([':member_no' => $member_no]);
 			$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
-			$percentShare = $rowMembType['SHARESTK_VALUE'] * 0.30;
 			$percentSalary = $rowMembType['SALARY_AMOUNT'] * $rowCustom["MULTIPLE_SALARY"];
-			$valueNormal = min($percentShare,$percentSalary,$rowCustom["MAXLOAN_AMT"]);
+			$valueNormal = min($percentSalary,$rowCustom["MAXLOAN_AMT"]);
+			$percentShare = $rowMembType['SHARESTK_VALUE'] * 0.30;
+			$valueNormalRate = $valueNormal * 0.30;
+			$valueNormalRate = $valueNormalRate - $percentShare;
+			$valueNormal -= $valueNormalRate;
 			$valueNormal -= $rowBalance["BALANCE_ALL"];
 			if($valueNormal < 0){
 				$valueNormal = 0;
 			}
 			$arrLoanGuaAmt = array();
-			$arrLoanGuaAmt[0]["LABEL"] = "สิทธิค้ำวงเงินค้ำสามัญ";
+			$arrLoanGuaAmt[0]["LABEL"] = "สิทธิค้ำวงเงินค้ำสามัญ พรก.";
 			$arrLoanGuaAmt[0]["VALUE"] = number_format($valueNormal,2)." บาท";
 
 		}
