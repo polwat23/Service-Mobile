@@ -11,7 +11,7 @@ $getDeptATM = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE
 $getDeptATM->execute([':member_no' => $member_no]);
 $rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
 if(isset($rowDept["DEPTACCOUNT_NO"]) && $rowDept["DEPTACCOUNT_NO"] != ""){
-	$getSalaryAmt = $conoracle->prepare("SELECT NVL(salary_amount,0) as SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
+	$getSalaryAmt = $conoracle->prepare("SELECT NVL(salary_amount + incomeetc_amt,0) as SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
 	$getSalaryAmt->execute([':member_no' => $member_no]);
 	$rowSalary = $getSalaryAmt->fetch(PDO::FETCH_ASSOC);
 
