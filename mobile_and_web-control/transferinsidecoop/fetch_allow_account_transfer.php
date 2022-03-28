@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["BALANCE"] = $rowDataAccAll["PRNCBAL"] - $rowDataAccAll["MINPRNCBAL"];
 				}
 				$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
-				$arrAccAllow["BALANCE_FORMAT"] = number_format($rowDataAccAll["PRNCBAL"],2);
+				$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 				$arrGroupAccAllow[] = $arrAccAllow;
 			}
 			if($dataComing["menu_component"] == 'TransferDepInsideCoop'){
