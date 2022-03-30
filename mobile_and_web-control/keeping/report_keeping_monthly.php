@@ -164,7 +164,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ อาร์ วี คอนเน็กซ์ จำกัด</p>
 				<p style="margin-top: -27px;font-size: 18px;">30/1 หมู่ที่ 1 ถนนพหลโยธิน ต.คลองหนึ่ง </p>
 				<p style="margin-top: -25px;font-size: 18px;">อ.คลองหลวง จ.ปทุมธานี 12120</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 02-0909510 ต่อ 4404</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 02-0909510 ต่อ 4410</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -267,7 +267,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
@@ -288,8 +288,9 @@ function GenerateReport($dataReport,$header,$lib){
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$header["member_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["member_no"].'.pdf?v='.time();
+	$tempFileName = time();
+	$pathfile = $pathfile.'/'.$header["member_no"].$tempFileName.'.pdf';
+	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["member_no"].$tempFileName.'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){
