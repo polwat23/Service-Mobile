@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
 		$arrayDept = array();
+		$arrayDeptAtm = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and (gad.allow_deposit_inside = '1' OR gad.allow_withdraw_inside = '1')");
@@ -16,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayDept[] = $rowAccAllow["deptaccount_no"];
 			}
-			$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
+			$getAllAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_no) as deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
 											dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal,dpm.CHECKPEND_AMT
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no
@@ -29,6 +30,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':dept_type_code' => $rowDataAccAll["DEPTTYPE_CODE"]
 				]);
 				$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
+				
+				$getAccAtm = $conoracle->prepare("SELECT TRIM(DEPTACCOUNT_NO) as DEPTACCOUNT_NO
+												from dpdeptmaster d LEFT JOIN   atmdept a ON d.member_no = a.member_no 
+												AND  d.deptaccount_no = a.coop_acc 
+												AND d.depttype_code = a.depttype_code
+												LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
+												where d.depttype_code in ( '01') AND  trim(d.member_no) = :member_no
+												and d.deptclose_status= '0'
+												order by deptaccount_no desc");
+				$getAccAtm->execute([':member_no' => $member_no]);
+				while($rowDataAccAtm = $getAccAtm->fetch(PDO::FETCH_ASSOC)){
+					$arrayDeptAtm["deptaccount_atm"] = $rowDataAccAtm["DEPTACCOUNT_NO"];
+				}
+
 				if(in_array($rowDataAccAll["DEPTACCOUNT_NO"],$arrayDept)){
 					$arrAccAllow = array();
 					if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowDataAccAll["DEPTTYPE_CODE"].'.png')){
@@ -47,10 +62,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}else{
 						$arrAccAllow["CAN_DEPOSIT"] = '0';
 					}
-					if($checkDep["CAN_WITHDRAW"]){
+					if($checkDep["CAN_WITHDRAW"] && $arrayDeptAtm["deptaccount_atm"] == $rowDataAccAll["DEPTACCOUNT_NO"]){
 						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
 					}else{
 						$arrAccAllow["CAN_WITHDRAW"] = '0';
+						$arrayResult['RESPONSE_CODE'] = "WS0023";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
 					}
 					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"];
 					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);

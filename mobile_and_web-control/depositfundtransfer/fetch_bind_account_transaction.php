@@ -41,10 +41,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				while($rowAccCoop = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 					$checkSeqAmt = $cal_dep->getSequestAmt($rowAccCoop["deptaccount_no"]);
 					if($checkSeqAmt["CAN_DEPOSIT"]){
-						$getDataAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code,
-															dpm.PRNCBAL,dpt.minprncbal
-															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-															WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
+						$getDataAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
+														FROM atmdept atm LEFT JOIN dpdeptmaster dp ON atm.COOP_ACC = dp.DEPTACCOUNT_NO
+														LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
+														WHERE atm.COOP_ACC = :deptaccount_no and dp.deptclose_status = '0'");
 						$getDataAcc->execute([':deptaccount_no' => $rowAccCoop["deptaccount_no"]]);
 						$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 						if(isset($rowDataAcc["DEPTTYPE_DESC"])){
@@ -63,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
-				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
+				$arrayResult['SCHEDULE']["ENABLED"] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
