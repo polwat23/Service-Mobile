@@ -962,6 +962,11 @@ class CalculateDep {
 							]);
 						}
 					}
+					$constToAcc["PRNCBAL"] = $constToAcc["PRNCBAL"] + $amt_transfer;
+					$constToAcc["WITHDRAWABLE_AMT"] = $constToAcc["WITHDRAWABLE_AMT"] + $amt_transfer;
+					$arrayResult['DEPTSLIP_NO'] = $deptslip_no;
+					$arrayResult['MAX_SEQNO'] = $lastStmDestNo;
+					$arrayResult['DATA_CONT'] = $constToAcc;
 					$arrayResult['RESULT'] = TRUE;
 					return $arrayResult;
 				}else{
