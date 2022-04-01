@@ -201,13 +201,13 @@ function GenerateReport($dataReport,$header,$lib,$sum_payment){
 		$html .= ' <div style=" margin-top:50px">
 			<div style="display:flex; height:30px">
 			<div style="position:absolute;font-weight:bold;"><img src="../../resource/utility_icon/signature/mg_etc.jpg" width="100" height="50" style="margin-top:-45px;margin-left: 90px"/></div>
-			<div style="position:absolute;font-weight:bold;"><img src="../../resource/utility_icon/signature/fn_etc.jpg" width="100" height="50" style="margin-top:-45px;margin-left: 70%"/></div>
+			<div style="position:absolute;font-weight:bold;"><img src="../../resource/utility_icon/signature/fn_etc.png" width="100" height="50" style="margin-top:-45px;margin-left: 70%"/></div>
 			<div style="display:inline;font-weight:bold;padding: 20px;">ลงชื่อ......................................................นายกสมาคมฯ</div>
 			<div style="display:inline;font-weight:bold;padding: 20px;margin-left:55%">ลงชื่อ......................................................จนท.ผู้รับเงิน</div>
 			</div>
 			<div style="display:flex; margin-top:-15px ">
-			<div style="display:inline;font-weight:bold;padding: 20px;margin-left: 60px;">นาย อุทิศ ทับทิมฉาย</div>
-			<div style="display:inline;font-weight:bold;padding: 20px;margin-left: 65%;">นางสาวบุญทิวา  เหล็กแก้ว</div>
+			<div style="display:inline;font-weight:bold;padding: 20px;margin-left: 60px;">นายอุทิศ ทับทิมฉาย</div>
+			<div style="display:inline;font-weight:bold;padding: 20px;margin-left: 65%;">นายธวัชชัย เยายานัง</div>
 		</div>';
 		$html .= '
 		

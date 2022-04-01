@@ -5,6 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingMemberInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrConstInfo = array();
+		$conoracle->beginTransaction();
 		$getConstInfo = $conmysql->prepare("SELECT const_code,save_tablecore FROM gcconstantchangeinfo");
 		$getConstInfo->execute();
 		while($rowConst = $getConstInfo->fetch(PDO::FETCH_ASSOC)){
@@ -54,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}
 		if(isset($dataComing["tel"]) && $dataComing["tel"] != ""){
-			if($arrConstInfo["tel"] == '1'){
+			if($arrConstInfo["tel"] == '0'){
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -73,8 +74,35 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						":data_type" => "tel",
 						":id_userlogin" => $payload["id_userlogin"]
 					];
-					$log->writeLog('editinfo',$logStruc);
-					$arrayResult["RESULT_TEL"] = TRUE;
+					$updatePhone = $conoracle->prepare("UPDATE mbmembmaster SET addr_mobilephone = :phone_number WHERE member_no = :member_no");
+					if($updatePhone->execute([
+						':member_no' => $member_no,
+						':phone_number' => $dataComing["tel"] ?? "-"
+					])){
+						$conoracle->commit();
+						$log->writeLog('editinfo',$logStruc);
+						$arrayResult["RESULT"] = TRUE;
+					}else{
+						$filename = basename(__FILE__, '.php');
+						$logStruc = [
+							":error_menu" => $filename,
+							":error_code" => "WS1003",
+							":error_desc" => "แก้ไขเบอร์โทรไม่ได้เพราะ update ลงตาราง mbmembmaster ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
+								':phone_number' => $dataComing["tel"],
+								':member_no' => $payload["member_no"]
+							]),
+							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+						];
+						
+						$log->writeLog('errorusage',$logStruc);
+						$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ update ลง mbmembmaster ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
+							':phone_number' => $dataComing["tel"],
+							':member_no' => $payload["member_no"]
+						]);
+						$lib->sendLineNotify($message_error);
+						$arrayResult["RESULT"] = FALSE;
+						$conoracle->rollback();
+					}			
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
@@ -86,6 +114,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						]),
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
+					
 					$log->writeLog('errorusage',$logStruc);
 					$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateTel->queryString."\n"."Param => ". json_encode([
 						':phone_number' => $dataComing["tel"],
@@ -142,7 +171,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':post_code' => $dataComing["address"]["addr_postcode"] ?? $rowAddr["ADDR_POSTCODE"],
 					':member_no' => $member_no
 				])){
+					$conoracle->commit();
 					$arrayResult["RESULT_ADDRESS"] = TRUE;
+					$arrayResult["RESULT"] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
@@ -177,6 +208,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					]);
 					$lib->sendLineNotify($message_error);
 					$arrayResult["RESULT_ADDRESS"] = FALSE;
+					$arrayResult["RESULT"] = FALSE;
+					$conoracle->rollback();
 				}
 			}else{
 			}
@@ -202,7 +235,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 		
 		}
-		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
