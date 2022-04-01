@@ -95,6 +95,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['EMAIL_CAN_CHANGE'] = $arrayConst["email"] == '1' ? TRUE : FALSE;
 		$arrayResult['ADDRESS_CAN_CHANGE'] = $arrayConst["address"] == '1' ? TRUE : FALSE;
 		$arrayResult['TEL_CAN_CHANGE'] = $arrayConst["tel"] == '1' ? TRUE : FALSE;
+		$arrayResult['IS_OTP'] = FALSE;
+		$arrayResult['IS_SMS'] = FALSE;
+		$arrayResult['IS_EMAIL'] = FALSE;
+		$arrayResult['DATA'] = $arrayDataGrp;
+		$arrayResult['REQ_EMAIL'] = FALSE;
+		$arrayResult['REQ_TEL'] = FALSE;
+		$arrayResult['REQ_ADDRESS'] = FALSE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

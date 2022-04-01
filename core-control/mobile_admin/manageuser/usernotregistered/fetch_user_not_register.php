@@ -4,15 +4,16 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','usernotregistered')){
 		$arrayUserRegister = array();
-		$fetchUserAccount = $conmysql->prepare("SELECT member_no FROM gcmemberaccount");
+		$fetchUserAccount = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no NOT IN('dev@mode','etnmode1','etnmode2','etnmode3','etnmode4','salemode')");
 		$fetchUserAccount->execute();
 		while($rowUserRegis = $fetchUserAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrayUserRegister[] = $rowUserRegis["member_no"];
 		}
 		$arrayGroup = array();
-		$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date
+		$fetchUserNotRegis = $conoracle->prepare("SELECT mb.member_no,mp.prename_desc,mb.memb_name,mb.memb_surname,mb.member_date,mg.membgroup_desc,mb.MEMBGROUP_CODE
 												,mb.addr_mobilephone as MEM_TELMOBILE,mb.addr_email as email FROM mbmembmaster mb 
 												LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 												WHERE mb.resign_status = '0'");
 		$fetchUserNotRegis->execute();
 		while($rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC)){
@@ -23,6 +24,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayUserNotRegister["MEMBER_DATE"] = $lib->convertdate($rowUserNotRegis["MEMBER_DATE"],'D m Y');
 				$arrayUserNotRegister["TEL"] = $rowUserNotRegis["MEM_TELMOBILE"];
 				$arrayUserNotRegister["EMAIL"] = $rowUserNotRegis["EMAIL"] ?? "-";
+				$arrayUserNotRegister["MEMBGROUP_DESC"] = $rowUserNotRegis["MEMBGROUP_DESC"];
+				$arrayUserNotRegister["MEMBGROUP_CODE"] = $rowUserNotRegis["MEMBGROUP_CODE"];
 				$arrayGroup[] = $arrayUserNotRegister;
 			}
 		}
