@@ -29,16 +29,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayDetailLoan["IS_REQ"] = FALSE;
 				$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
 			}else{
-				$checkOldContract = $conoracle->prepare("SELECT LOANCONTRACT_NO FROM lncontmaster WHERE member_no = :member_no 
+				$checkOldContract = $conoracle->prepare("SELECT LOANCONTRACT_NO ,LAST_PERIODPAY FROM lncontmaster WHERE member_no = :member_no 
 														and loantype_code = :loantype_code and contract_status > 0 and contract_status <> 8");
 				$checkOldContract->execute([
 					':member_no' => $member_no,
 					':loantype_code' => $rowIntRate["LOANTYPE_CODE"]
 				]);
-				$rowOldCont = $checkOldContract->fetch(PDO::FETCH_ASSOC);
+				$rowOldCont = $checkOldContract->fetch(PDO::FETCH_ASSOC);		
 				if(isset($rowOldCont["LOANCONTRACT_NO"]) && $rowOldCont["LOANCONTRACT_NO"] != ""){
-					$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_HAVE_OLD_CONTRACT"][0][$lang_locale];
-					$arrayDetailLoan["IS_REQ"] = FALSE;
+					if($rowIntRate["LOANTYPE_CODE"] == '23' && $rowOldCont["LAST_PERIODPAY"] < '6'){
+						$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_HAVE_OLD"][0][$lang_locale];
+						$arrayDetailLoan["IS_REQ"] = FALSE;
+					}else{
+						$arrayDetailLoan["IS_REQ"] = TRUE;
+					}
+					if($rowIntRate["LOANTYPE_CODE"] != '23'){
+						$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_HAVE_OLD_CONTRACT"][0][$lang_locale];
+						$arrayDetailLoan["IS_REQ"] = FALSE;
+					}
 				}else{
 					$arrayDetailLoan["IS_REQ"] = TRUE;
 				}

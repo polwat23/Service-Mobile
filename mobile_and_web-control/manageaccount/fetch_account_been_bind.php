@@ -47,9 +47,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccount["BANK_CODE"] = $rowAccountBind["bank_code"];
 			$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
 			$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
-			if(isset($rowAccountBind["account_payfee"])){
+			/*if(isset($rowAccountBind["account_payfee"])){
 				$arrAccount["DEPTACCOUNT_NO_PAYFEE"] = $lib->formataccount($rowAccountBind["account_payfee"],$func->getConstant('dep_format'));
-			}
+			}*/
 			$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 			$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
 			$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];

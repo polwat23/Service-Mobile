@@ -13,33 +13,33 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);
 		$rowKp = $getKpSlipNo->fetch(PDO::FETCH_ASSOC);
 		$getDetailKP = $conoracle->prepare("SELECT 
-													CASE kut.system_code 
-													WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
-													WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
-													ELSE kut.keepitemtype_desc
-													END as TYPE_DESC,
-													kpd.SEQ_NO,
-													kut.keepitemtype_grp as TYPE_GROUP,
-													kpd.MONEY_RETURN_STATUS,
-													kpd.ADJUST_ITEMAMT,
-													kpd.ADJUST_PRNAMT,
-													kpd.ADJUST_INTAMT,
-													case kut.keepitemtype_grp 
-														WHEN 'DEP' THEN kpd.description
-														WHEN 'LON' THEN kpd.loancontract_no
-													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.period,
-													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
-													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
-													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-													NVL(kpd.interest_payment,0) AS INT_BALANCE
-													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-													and kpd.kpslip_no = :kpslip
-													ORDER BY kut.SORT_IN_RECEIVE ASC");
+												CASE kut.system_code 
+												WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+												WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+												ELSE kut.keepitemtype_desc
+												END as TYPE_DESC,
+												kpd.SEQ_NO,
+												kut.keepitemtype_grp as TYPE_GROUP,
+												kpd.MONEY_RETURN_STATUS,
+												kpd.ADJUST_ITEMAMT,
+												kpd.ADJUST_PRNAMT,
+												kpd.ADJUST_INTAMT,
+												case kut.keepitemtype_grp 
+													WHEN 'DEP' THEN kpd.description
+													WHEN 'LON' THEN kpd.loancontract_no
+												ELSE kpd.description END as PAY_ACCOUNT,
+												kpd.period,
+												NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+												NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+												NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+												NVL(kpd.interest_payment,0) AS INT_BALANCE
+												FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+												kpd.keepitemtype_code = kut.keepitemtype_code
+												LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+												LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+												and kpd.kpslip_no = :kpslip
+												ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"],
@@ -88,7 +88,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');

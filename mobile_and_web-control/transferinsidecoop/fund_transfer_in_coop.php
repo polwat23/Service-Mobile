@@ -1,27 +1,5 @@
 <?php
 require_once('../autoload.php');
-$dbuser = "iscory_test";
-$dbpass = "iscory_test";
-$dbname = "(DESCRIPTION =
- (ADDRESS_LIST =
-   (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.60)(PORT = 1521))
- )
- (CONNECT_DATA =
-   (SERVICE_NAME = iorcl)
- )
-  )";
-$conoracle = new PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
-$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
-$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
-$dbhostMY = "127.0.0.1";
-$dbuserMY = "root";
-$dbpassMY = "@RYT2021";
-$dbnameMY = "mobile_ryt_test";
-$conmysql = new PDO("mysql:dbname={$dbnameMY};host={$dbhostMY}", $dbuserMY, $dbpassMY);
-$conmysql->exec("set names utf8mb4");
-
-
-
 
 if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','penalty_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||

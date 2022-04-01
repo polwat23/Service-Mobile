@@ -21,9 +21,11 @@ $getMemberInfo->execute([':member_no' => $member_no]);
 $rowMemberInfo = $getMemberInfo->fetch(PDO::FETCH_ASSOC);
 $member_date_count = $lib->count_duration($rowMemberInfo["MEMBER_DATE"],"m");
 
-$maxloan_amt = $maxloanpermit_amt;
-
-
+if($member_date_count < 3){
+	$maxloan_amt = 0;	
+}else{
+	$maxloan_amt = $maxloanpermit_amt;
+}
 $maxloan_amt = intval($maxloan_amt - ($maxloan_amt % 100));
 $receive_net = $maxloan_amt;
 $canRequest = TRUE;
