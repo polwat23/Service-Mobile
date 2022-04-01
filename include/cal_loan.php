@@ -151,8 +151,12 @@ class CalculateLoan {
 		$betweenKeeping = FALSE;
 		$interest = 0;
 		if($constLoanContract["CHECK_KEEPING"] == '1'){
-			$betweenKeeping = TRUE;
-			$calInt = TRUE;
+			if($constLoanContract["PRINCIPAL_BALANCE"] == 0){
+				$calInt = FALSE;
+			}else{
+				$betweenKeeping = TRUE;
+				$calInt = TRUE;
+			}
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
 				$calInt = TRUE;
