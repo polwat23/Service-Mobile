@@ -32,7 +32,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayDetailLoan["IS_REQ"] = FALSE;
 					$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
 				}else{
-					$arrayDetailLoan["IS_REQ"] = TRUE;
+					if($rowIntRate["LOANTYPE_CODE"] =='10'){
+						$fetchContractGroup = $conmssql->prepare("SELECT LM.LOANCONTRACT_NO ,LM.LOANTYPE_CODE ,LT.LOANGROUP_CODE
+																FROM LNCONTMASTER LM 
+																LEFT JOIN LNLOANTYPE LT ON LT.LOANTYPE_CODE = LM.LOANTYPE_CODE
+																WHERE LM.MEMBER_NO = :member_no  AND LT.LOANGROUP_CODE ='01' AND LM.LOANTYPE_CODE ='13'
+																AND LM.CONTRACT_STATUS > 0 AND LM.CONTRACT_STATUS <> 8");
+						$fetchContractGroup->execute([
+							':member_no' => $member_no
+						]);
+						$rowContractGroup = $fetchContractGroup->fetch(PDO::FETCH_ASSOC);		
+						
+						if(isset($rowContractGroup["LOANCONTRACT_NO"])){
+							$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_FLAG_LOAN"][0][$lang_locale];
+							$arrayDetailLoan["IS_REQ"] = FALSE;
+							$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
+						}else{
+							$arrayDetailLoan["IS_REQ"] = TRUE;
+						}
+					}else{
+						$arrayDetailLoan["IS_REQ"] = TRUE;
+					}
 				}
 				$arrayDetailLoan["LOANTYPE_CODE"] = $rowIntRate["LOANTYPE_CODE"];
 				$arrayDetailLoan["LOANTYPE_DESC"] = $rowIntRate["LOANTYPE_DESC"];

@@ -70,6 +70,16 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 					$fee_amt = 0;
 				}
 				if($fee_amt > 0){
+					$getBalanceAccFee = $conmssql->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+					$getBalanceAccFee->execute([':deptaccount_no' => $rowDataWithdraw["account_payfee"]]);
+					$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
+					$dataAccFee = $cal_dep->getConstantAcc($rowDataWithdraw["account_payfee"]);
+					if($rowBalFee["PRNCBAL"] - $fee_amt < $dataAccFee["MINPRNCBAL"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0100";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
 					$arrOther["LABEL"] = 'ค่าธรรมเนียม';
 					$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;

@@ -118,6 +118,7 @@
 	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
 	"WS0120" : [{"th" : "เงินเดือนคงเหลือของท่านไม่เพียงพอ","en" : "Salary remain is insufficient for installment"}],
 	"WS0122" : [{"th" : "ไม่สามารถผูกบัญชีได้เนื่องจากท่านไม่มีบัญชีเงินฝากออมทรัพย์","en" : "Cannot bind account because you not have saving account (10)"}],
+	"WS0132" : [{"th" : "ไม่สามารถอัปโหลดไฟล์ได้กรุณาลองใหม่อีกครั้งหรือติดต่อสหกรณ์","en" : "Cannot upload file please try again or contact cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -158,6 +159,7 @@
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],
+	"WS4005" : [{"th" : "ไม่สามารถกู้ได้เนื่องจากมีเงินกู้ฉุกเฉินพร้อมเปย์ประเภทอื่นอยู่แล้ว","en" : "It cannot be borrowed because another type of ordinary loan is already in place."}],
 	"KBANK_ERR" : [{
 		"1001" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
@@ -247,6 +249,7 @@
 			"0" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}]
 		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
+		"REQ_FLAG_LOAN" : [{"th" : "เนื่องจากท่านมีสัญญาเงินกู้ฉุกเฉินพร้อมเปย์อยู่แล้ว ไม่สามารถขอกู้ฉุกเฉินประเภทอื่นได้","en" : "Cannot loan request cause you have already loan contract"}],
 		"RECEIVE_LOAN_RETRY_BEFORE" : [{"th" : "อายุของท่านไม่สามารถรับเงินกู้เพิ่มได้","en" : "Your age cannot withdraw loan"}],
 		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
 		"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}],

@@ -22,7 +22,7 @@ class CalculateLoan {
 		$constLoan = $this->getLoanConstant();
 		$interest = 0;
 		if($constLoanContract["CHECK_KEEPING"] == '1'){
-			$calInt = TRUE;
+			$calInt = FALSE;
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
 				$calInt = TRUE;
@@ -151,8 +151,12 @@ class CalculateLoan {
 		$betweenKeeping = FALSE;
 		$interest = 0;
 		if($constLoanContract["CHECK_KEEPING"] == '1'){
-			$betweenKeeping = TRUE;
-			$calInt = TRUE;
+			if($constLoanContract["PRINCIPAL_BALANCE"] == 0){
+				$calInt = FALSE;
+			}else{
+				$betweenKeeping = TRUE;
+				$calInt = TRUE;
+			}
 		}else{
 			if($constLoanContract["SPACE_KEEPING"] == 0){
 				$calInt = TRUE;
@@ -599,9 +603,9 @@ class CalculateLoan {
 		}else{
 			$prinPay = $amt_transfer;
 		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
+		if($dataCont["CHECK_KEEPING"] == '1'){
 			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = $this->calculateIntReturn($contract_no,$prinPay,$interest);
+				$int_returnSrc = $this->calculateIntReturn($contract_no,$prinPay,$interest) + $int_return;
 				$int_returnFull = $int_returnSrc;
 			}
 		}
@@ -619,7 +623,8 @@ class CalculateLoan {
 					$intArr = $dataCont["INTEREST_ARREAR_SRC"] - $dataCont["INTEREST_ARREAR"];
 				}
 			}
-			
+			$prinPay = number_format($prinPay,2,'.',''); 
+			$dataCont["PRINCIPAL_BALANCE"] = number_format($dataCont["PRINCIPAL_BALANCE"],2,'.','');
 			if($interestPeriod > 0){
 				$executeLnSTM = [
 					$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,'LPX',$slipdocno,
@@ -971,6 +976,8 @@ class CalculateLoan {
 	$log,$payload,$from_account_no,$payinslip_no,$slipitemtype,$shrloantype_code,$contract_no,$prinPay=0,$interest=0
 	,$intarrear=0,$int_returnSrc=0,$interestPeriod=0,$slipseq_no=1){
 		$lastperiod = $dataCont["LAST_PERIODPAY"];
+		$prinPay = number_format($prinPay,2,'.','');
+		$dataCont["PRINCIPAL_BALANCE"] = number_format($dataCont["PRINCIPAL_BALANCE"],2,'.','');
 		if($interestPeriod > 0){
 			$executeSlDet = [
 				$config["COOP_ID"],$payinslip_no,$slipitemtype,$slipseq_no,$shrloantype_code,$config["COOP_ID"],
