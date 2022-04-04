@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												WHERE
 													trans.trans_flag = '-1'
 													AND transfer_mode ='9'
-												ORDER BY trans.operate_date DESC");
+												ORDER BY trans.operate_date DESC LIMIT 150000");
 												
 		$fetLogTransection->execute();
 		$formatDept = $func->getConstant('dep_format');

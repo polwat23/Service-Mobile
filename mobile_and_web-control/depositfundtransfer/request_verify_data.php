@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 				$getMemberType->execute([':member_no' => $member_no]);
 				$rowmbType = $getMemberType->fetch(PDO::FETCH_ASSOC);
 				if($rowmbType["MEMBER_TYPE"] == '1'){
-					$checkLimitDeptPerMonth = $conoracle->prepare("SELECT LIMITDEPTPERSON_AMT FROM DPDEPTCONSTANT WHERE COOP_ID = '001001'");
+					/*$checkLimitDeptPerMonth = $conoracle->prepare("SELECT LIMITDEPTPERSON_AMT FROM DPDEPTCONSTANT WHERE COOP_ID = '001001'");
 					$checkLimitDeptPerMonth->execute();
 					$rowLimitDept = $checkLimitDeptPerMonth->fetch(PDO::FETCH_ASSOC);
 					if($amt_transfer > $rowLimitDept["LIMITDEPTPERSON_AMT"]){
@@ -54,11 +54,14 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 						
-					}
+					}*/
 				}else{
 					$limit_dept = $func->getConstant("limit_deposit_asso");
 					if($amt_transfer > $limit_dept){
 						$remain_amount_deposit_per_month = intval($limit_dept) - $rowSumTran["NETAMT"];
+						if($remain_amount_deposit_per_month < 0){
+							$remain_amount_deposit_per_month = 0;
+						}
 						$arrayResult['RESPONSE_CODE'] = "WS0085";
 						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${remain_amount_deposit_per_month}',number_format($remain_amount_deposit_per_month,2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 						$arrayResult['RESULT'] = FALSE;
