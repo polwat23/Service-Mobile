@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchEndDate->execute();
 		$rowEndDate = $fetchEndDate->fetch(PDO::FETCH_ASSOC);
 		
-		$getBalancedate = $conoracle->prepare("select max(doc_date) as NOTICE_DATE , LONCONNO from CMNOTATIONREGISFILE where  member_no =  :member_no  GROUP BY LONCONNO");
+		$getBalancedate = $conoracle->prepare("select max(doc_date) as NOTICE_DATE , NOTICE_DOCNO from CMNOTATIONREGISFILE where  member_no =  :member_no  GROUP BY NOTICE_DOCNO");
 		$getBalancedate->execute([':member_no' => $member_no]);
 		$rowBalMaster = $getBalancedate->fetch(PDO::FETCH_ASSOC);
 		$year = date('Y',strtotime($rowBalMaster["NOTICE_DATE"]))+543;
@@ -36,14 +36,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$datenow = date('Ymd',strtotime(date("Y-m-d")));
 		
 		if($end_date > $datenow){
-			$getBalancedate = $conoracle->prepare("select is_view ,file_name FROM  CMNOTATIONREGISFILE where  member_no= :member_no AND lonconno =:lonconno ");
+			$getBalancedate = $conoracle->prepare("select is_view ,file_name FROM  CMNOTATIONREGISFILE where  member_no= :member_no AND notice_docno =:notice_docno ");
 			$getBalancedate->execute([':member_no' => $member_no , 
-									  ':lonconno' => $rowBalMaster["LONCONNO"]
+									  ':notice_docno' => $rowBalMaster["NOTICE_DOCNO"]
 									]);
 			$rowBalIs_VIEW= $getBalancedate->fetch(PDO::FETCH_ASSOC);
 			if($rowBalIs_VIEW["IS_VIEW"] == '1'){
 				if($Contractno == "0"){
-					$arrayResult['REPORT_URL'] = "https://apim.fsct.com/internal/Debt_".$rowBalIs_VIEW["FILE_NAME"].".?v=".time();
+					$arrayResult['REPORT_URL'] = "https://apim.fsct.com/internal/".$rowBalIs_VIEW["FILE_NAME"]."";
 					$arrayResult['RESULT'] = TRUE;
 					$arrayResult['ADVICE'] = "หากสหกรณ์มีการรับเงินกู้หรือมีการชำระเงินกู้พิเศษหลังจากวันที่พิมพ์ด้านมุมบนขวา  กรุณาตรวจสอบยอดชำระอีกครั้ง หลังจากสหกรณ์ทำรายการเสร็จสิ้นเเล้วถัดไปอีก  5  วันทำการ  หรือติดต่อเจ้าหน้าที่  ชสอ.";
 					require_once('../../include/exit_footer.php');
