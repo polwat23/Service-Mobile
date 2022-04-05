@@ -57,6 +57,7 @@ if($rowMemb["MEMBTYPE_CODE"] <= "10"){
 	$canRequest = FALSE;
 	$maxloan_amt = 0;
 }
+$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 if($loanRequest === TRUE){
 	$receive_net -= $oldBal;
 }
