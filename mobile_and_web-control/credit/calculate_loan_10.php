@@ -167,6 +167,7 @@ if($rowMemb["MEMBGROUP_CONTROL"] != "82500000" && $rowMemb["MEMBTYPE_CODE"] <= '
 		$rights_desc = "ประเภทสมาชิก ไม่สามารถขอกู้ฉุกเฉินได้";
 	}
 }
+$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 if($loanRequest === TRUE){
 	$receive_net -= $oldBal;
 }

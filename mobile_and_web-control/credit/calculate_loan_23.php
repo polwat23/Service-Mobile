@@ -24,7 +24,7 @@ $fetchCredit->execute([
 	':loantype_code' => $loantype_code
 ]);
 $rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
-if($rowCredit["MEMBGROUP_CONTROL"] < '82500000'){
+if($rowMemb["MEMBGROUP_CONTROL"] < '82500000'){
 	$maxloan_amt = $rowMemb["SALARY_AMOUNT"] * $rowCredit["PERCENTSALARY"];
 	if($maxloan_amt < 500000){
 		$shareShouldHave = $rowMemb["SHARE_AMT"] * 0.12;
@@ -80,6 +80,7 @@ if($rowCredit["MEMBGROUP_CONTROL"] < '82500000'){
 	$rights_desc = "หน่วยเก็บเอง ไม่สามารถขอกู้ฉุกเฉินได้";
 	$maxloan_amt = 0;
 }
+$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 $arrSubOther["VALUE"] = "หมายเหตุ สิทธิการกู้ที่แสดงในระบบเป็นเพียงการประมาณการเท่านั้น มิใช่สิทธิการกู้จริงที่จะได้รับ ต้องผ่านการพิจารณาจากเจ้าหน้าที่สหกรณ์อีกครั้ง";
 $arrSubOther["VALUE_TEXT_PROPS"] = ["color" => "red"];
 $arrOtherInfo[] = $arrSubOther;

@@ -52,7 +52,7 @@ if($maxloan_amt > 0){
 	}
 	$arrCredit["OLD_CONTRACT"] = $arrOldContract;
 }
-
+$arrCredit["FLAG_SHOW_RECV_NET"] = FALSE;
 if($loanRequest === TRUE){
 	$receive_net -= $oldBal;
 }
