@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
 			$oldBal = 0;
+			$maxsalary = 0;
 			$period_payment = 0;
 			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
 				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
@@ -43,10 +44,29 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			//$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
+			$maxsalary = ($maxsalary * 30) /100 ;
+			if($dataComing["loantype_code"] == '38' && $dataComing["remain_salary"] < $maxsalary){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถขอกู้ได้ เนื่องจากเงินเดือนคงเหลือน้อยกว่า 30 % ";
+				$arrayResult['REVERT_VALUE'] = TRUE;
+				$arrayResult['RESULT'] = FALSE; 
+				require_once('../../include/exit_footer.php');
+			}else if($dataComing["loantype_code"] !='42' && $dataComing["loantype_code"] !='38' && $dataComing["remain_salary"] < 5000){						
+				$arrayResult['RESULT'] = FALSE; 
+				if($dataComing["remain_salary"] == 0){
+					$arrayResult['RESPONSE_MESSAGE'] = "กรุณากรอกเงินเดือนคงเหลือ";
+					$arrayResult['REVERT_VALUE'] = TRUE;
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = "เงินเดือนคงเหลือน้อยกว่าหลักเกณฑ์การกู้ขอกู้";
+					$arrayResult['REVERT_VALUE'] = TRUE;
+				}	
+				require_once('../../include/exit_footer.php');
+			}else{
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');		
+			}	
 		}else{
 			$maxloan_amt = 0;
+			$maxsalary  = 0;
 			$oldBal = 0;
 			$loanRequest = TRUE;
 			$period_payment = 0;
@@ -67,7 +87,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			/*if($request_amt < $oldBal){
 				$request_amt = $oldBal;
 			}*/
-			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
+			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD ,LOANGROUP_CODE
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
 															WHERE :request_amt >= lnd.MONEY_FROM and :request_amt <= lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
 			$getMaxPeriod->execute([
@@ -93,7 +113,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 															ORDER BY lnt.loantype_code");
 					$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 					$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-					$period = $max_period == 0 ? (string)$rowMaxPeriod["MAX_PERIOD"] : (string)$max_period;
+					
+					if($dataComing["loantype_code"] == '20' || $dataComing["loantype_code"] == '23'){
+						$period = 240;
+					}else{
+						$period = $max_period == 0 ? (string)$rowMaxPeriod["MAX_PERIOD"] : (string)$max_period;
+					}
 					$int_rate = ($rowIntRate["INTEREST_RATE"] / 100);
 					$typeCalDate = $func->getConstant("cal_start_pay_date");
 					$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
@@ -125,21 +150,27 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				//$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				if($dataComing["loantype_code"] == "32"){
-					$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
-					$arrayResult["IS_REMAIN_SALARY"] = TRUE;
-					$arrayResult["REQ_SALARY"] = FALSE;
-					$arrayResult["REQ_CITIZEN"] = FALSE;
-					$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-					$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-				}else{
-					$arrayResult["REQ_SALARY"] = FALSE;
-					$arrayResult["REQ_CITIZEN"] = FALSE;
-					$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
-					$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
+				$arrayResult["IS_REMAIN_SALARY"] = TRUE;
+				$arrayResult["REQ_SALARY"] = TRUE;
+				$arrayResult["REQ_CITIZEN"] = TRUE;
+				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
+				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+				if($dataComing["loantype_code"] == '23' || $dataComing["loantype_code"] == '27' || $dataComing["loantype_code"] == '38' || $dataComing["loantype_code"] == '42' || $dataComing["loantype_code"] == '27'){
+					$fetchCollReqgrt = $conoracle->prepare("SELECT USEMAN_AMT FROM LNLOANTYPEREQGRT WHERE loantype_code = :loantype_code 
+															 AND  :request_amt between money_from AND  money_to");
+					$fetchCollReqgrt->execute([':loantype_code' => $dataComing["loantype_code"],
+												':request_amt' => $request_amt]);
+					$rowCollReqgrt =  $fetchCollReqgrt->fetch(PDO::FETCH_ASSOC);				
+					$arrayResult["IS_GUARANTEE"] = TRUE;
+					$arrayResult["GUARANTOR"] = $rowCollReqgrt["USEMAN_AMT"];
 				}
 				
-				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+				if($dataComing["loantype_code"] == '28' || $dataComing["loantype_code"] == '43' || $dataComing["loantype_code"] == '33'){
+					$arrayResult['NOTE_DESC'] = "หมายเหตุ :  ยอดวงกู้จะได้ไม่เกิน 80% ของราคาประเมิน";
+					$arrayResult['NOTE_DESC_COLOR'] = "red";
+				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

@@ -324,8 +324,26 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					
 					$arrData["request_amt"] = $dataComing["request_amt"];
 					$arrData["period_payment"] = $dataComing["period_payment"];
-					$arrData["period"] = $dataComing["period"];
+					$arrData["period"] = $dataComing["period"];					
 					$arrData["recv_account"] = $deptaccount_no_bank;
+					$contcollArr = array();
+					//ดึงชื่อคนค้ำ
+					foreach($dataComing["guarantor"] as $guarantor){
+						$member = strtolower($lib->mb_str_pad($guarantor));
+						$getContcoll = $conoracle->prepare("SELECT mp.prename_desc, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME ,mg.MEMBGROUP_DESC,mbp.POSITION_DESC,MB.SALARY_AMOUNT
+															FROM mbmembmaster mb  LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+															LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
+															LEFT JOIN mbucfposition mbp ON mb.position_code = mbp.position_code
+															WHERE mb.member_no  = :member_no");
+						$getContcoll->execute([':member_no' => $member]);
+						$rowContcoll = $getContcoll->fetch(PDO::FETCH_ASSOC);
+						$contcollArr["MEMBER_NO"] = $rowContcoll["MEMBER_NO"];
+						$contcollArr["FULLNAME"] = $rowContcoll["PRENAME_DESC"].$rowContcoll["MEMB_NAME"].' '.$rowContcoll["MEMB_SURNAME"];
+						$contcollArr["MEMBGROUP_DESC"] = $rowContcoll["MEMBGROUP_DESC"];	
+						$contcollArr["POSITION_DESC"] = $rowContcoll["POSITION_DESC"];
+						$contcollArr["SALARY_AMOUNT"] = number_format($rowContcoll["SALARY_AMOUNT"],2);							
+						$arrData["guarantor"][] = $contcollArr;
+					}
 					if(file_exists('form_request_loan.php')){
 						include('form_request_loan.php');
 						$arrayPDF = GeneratePDFContract($arrData,$lib);

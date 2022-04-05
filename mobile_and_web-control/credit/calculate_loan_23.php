@@ -3,17 +3,38 @@ require_once(__DIR__.'/../../autoloadConnection.php');
 require_once(__DIR__.'/../../include/validate_input.php');
 
 $member_no = $member_no ?? $dataComing["member_no"];
-$loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $receive_net = 0;
-$maxloanpermit_amt = 100000;
-$getShareBF = $conoracle->prepare("SELECT (SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT FROM shsharemaster WHERE member_no = :member_no");
-$getShareBF->execute([':member_no' => $member_no]);
-$rowShareBF = $getShareBF->fetch(PDO::FETCH_ASSOC);
-$maxloan_amt = $rowShareBF["SHAREBEGIN_AMT"] * 0.055;
-if($maxloan_amt > $maxloanpermit_amt){
-	$maxloan_amt = $maxloanpermit_amt;
+$maxloanpermit_amt = 0;
+$sharestk_amt  = 0;
+$salary_amt  = 0 ;
+
+$getShare = $conoracle->prepare("SELECT  (sharestk_amt * 10) as SHARE_AMT FROM shsharemaster WHERE member_no = :member_no");
+$getShare->execute([':member_no' => $member_no]);
+$rowShare = $getShare->fetch(PDO::FETCH_ASSOC);
+
+
+$getMemberInfo = $conoracle->prepare("SELECT lc.maxloan_amt,lc.multiple_salary,lc.multiple_share,NVL(mb.salary_amount,15000) as salary_amount,lc.startmember_time,mb.member_date
+									FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb
+									WHERE mb.member_no = :member_no and 
+									LT.LOANTYPE_CODE = :loantype_code
+									and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
+$getMemberInfo->execute([':member_no' => $member_no,
+						 ':loantype_code' => $dataComing["loantype_code"] ?? $rowCanCal["loantype_code"]
+					]);
+$rowMemberInfo = $getMemberInfo->fetch(PDO::FETCH_ASSOC);
+$member_date_count = $lib->count_duration($rowMemberInfo["MEMBER_DATE"],"m");
+$salary_amt = $rowMemberInfo["SALARY_AMOUNT"] * $rowMemberInfo["MULTIPLE_SALARY"];
+
+if($member_date_count < 2){
+	$maxloan_amt = 0;	
+}else{
+	if($salary_amt > $rowMemberInfo["MAXLOAN_AMT"]){
+		$maxloan_amt = $rowMemberInfo["MAXLOAN_AMT"];
+	}else{
+		$maxloan_amt = $salary_amt ;
+	}	
 }
 $maxloan_amt = intval($maxloan_amt - ($maxloan_amt % 100));
 $receive_net = $maxloan_amt;

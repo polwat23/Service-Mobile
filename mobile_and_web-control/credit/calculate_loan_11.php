@@ -10,7 +10,7 @@ $maxloanpermit_amt = 0;
 $sharestk_amt  = 0;
 
 $fetchmaxloan = $conoracle->prepare("SELECT maxloan_amt FROM lnloantype WHERE loantype_code = :loantype_code");
-$fetchmaxloan->execute([':loantype_code' => $dataComing["loantype_code"]]);
+$fetchmaxloan->execute([':loantype_code' => $dataComing["loantype_code"] ?? $rowCanCal["loantype_code"]]);
 $rowMaxloan = $fetchmaxloan->fetch(PDO::FETCH_ASSOC);
 $maxloanpermit_amt = $rowMaxloan["MAXLOAN_AMT"];
 

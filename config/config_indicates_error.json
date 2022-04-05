@@ -1,6 +1,6 @@
 {
 	"WS0001" : [{"th" : "ไม่สามารถยืนยันการเข้าใช้งานได้เพราะเวลาในเครื่องไม่ตรง กรุณาตรวจสอบเวลาในเครื่องของท่าน","en" : "Unauthenticated because the time in device not correct please check time in your device"}],
-	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง","en" : "Invalid password please check password again"}],
+	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หากบัญชีถูกล็อคต้องติดต่อสหกรณ์เท่านั้น กรุณา คลิก ลืมรหัสผ่านเพื่อทำตามขั้นตอนของระบบ","en" : "Invalid password please check password again if account was locked you must contact cooperative only please click forget password for step by step of system"}],
 	"WS0003" : [{"th" : "ไม่พบข้อมูลผู้ใช้นี้ในระบบ กรุณาตรวจสอบเลขสมาชิก","en" : "Not found this user in system please check member no"}],
 	"WS0004" : [{"th" : "รหัสผ่านที่ท่านกรอกไม่ตรงกับรหัสผ่านเดิม","en" : "Password does not match"}],
 	"WS0005" : [{"th" : "ไม่พบบัญชีที่สามารถผูกได้ หากท่านต้องการผูกบัญชีกรุณาไปอนุญาตบัญชีที่สามารถทำธุรกรรมได้ที่หน้าจัดการบัญชีสหกรณ์","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
@@ -90,7 +90,6 @@
 	"WS0072" : [{"th" : "สิทธิ์การกู้ของท่านไม่เพียงพอ หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Loan rights is not enough if you suspect please contact cooperative"}],
 	"WS0073" : [{"th" : "ไม่สามารถทำรายการขอกู้ได้ ท่านต้องไปลงทะเบียนขอกู้ออนไลน์กับทางสหกรณ์ก่อนทำรายการขอกู้","en" : "Cannot loan request you must to register loan request online at cooperative before loan request"}],
 	"WS0074" : [{"th" : "ยอดรับของท่านเกินกว่ายอดรับสูงสุดที่สหกรณ์กำหนดต่อเดือน","en" : "Receive amount is over more than max receive amount that cooperative has define"}],
-	"WS0075" : [{"th" : "ไม่สามาถซื้อหุ้นได้เนื่องจากเหตุผลบางประการ กรุณาติดต่อสหกรณ์เพื่อสอบถามเพิ่มเติม","en" : "Cannot buy shares because something was wronged please contact cooperative for more information"}],
 	"WS0076" : [{"th" : "สหกรณ์กำลังตรวจสอบเอกสารการขอทุนของท่าน ท่านสามารถติดตามสถานะใบคำขอได้ที่เมนูสถานะใบคำขอสวัสดิการ","en" : "The cooperative has been considering your request. You can track request in Welfare request menu"}],
 	"WS0077" : [{"th" : "สหกรณ์ได้อนุมัติการขอทุนของท่านแล้วตอนนี้กำลังอยู่ในระหว่างการตรวจสอบเอกสารใช้เวลาประมาณ 3-5 วันทำการ ท่านสามารถติดตามผลการขอทุนได้ที่เมนูสวัสดิการ","en" : "The cooperative has approved your request. Current status is considering about 3-5 days of work. You can follow the result of request in Welfare menu"}],
 	"WS0078" : [{"th" : "คำขอทุนของท่านไม่ผ่านการอนุมัติ เนื่องจาก${REMARK}","en" : "Your welfare request not approve because ${REMARK}"}],
@@ -103,23 +102,9 @@
 	"WS0088" : [{"th" : "ไม่สามารถคำนวณงวดการกู้ของท่านได้ กรุณาติดต่อสหกรณ์","en" : "Cannot calculate period of loan please contact cooperative"}],
 	"WS0089" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากบัญชีของท่านได้ถูกปิดบัญชีไปแล้ว","en" : "Cannot transaction because your account was closed"}],
 	"WS0090" : [{"th" : "ประเภทบัญชีเงินฝากของท่านไม่สามารถทำรายการโอนเงินภายในสหกรณ์ได้","en" : "This deposit type not allow to transfer inside cooperative"}],
-	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัดบัญชี จำนวนที่อายัด ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
-	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากมีการอายัดบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
+	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัติบัญชี จำนวนที่อายัติ ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
+	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เ เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
 	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
-	"WS0098" : [{"th" : "ยอดทำรายการมากกว่า หนี้คงเหลือของท่าน กรุณาตรวจสอบข้อมูลอีกครั้งก่อนทำรายการ","en" : "Your transfer amount more than loan balance please recheck before transaction"}],
-	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
-	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
-	"WS0101" : [{"th" : "จำนวนครั้งในการทำรายการต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of day over than the cooperative is define"}],
-	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
-	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
-	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
-	"WS0107" : [{"th" : "ไม่พบรหัสรายการ QR ดังกล่าว กรุณาลองอีกครั้ง","en" : "Not found this transaction id please try again"}],
-	"WS0108" : [{"th" : "รายการนี้เสร็จสิ้นแล้ว ไม่สามารถทำรายการซ้ำได้","en" : "This transaction was completed cannot repeat transaction"}],
-	"WS0109" : [{"th" : "รายการหมดอายุ กรุณาสร้างรายการใหม่ที่แอปฯ สหกรณ์","en" : "Transaction has expired please create qr on cooperatives application"}],
-	"WS0110" : [{"th" : "ประเภทสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member type is not allowed to payment monthly special"}],
-	"WS0111" : [{"th" : "กลุ่มสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member group is not allowed to payment monthly special"}],
-	"WS0112" : [{"th" : "ยอดทำรายการของท่านไม่ตรงกับที่ระบุใน QR","en" : "Transaction amount not match on the QR"}],
-	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -226,13 +211,9 @@
 				"9" : [{"th" : "ต้องการเอกสารเพิ่มเติม","en" : "Officer want more your document"}],
 				"11" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
 				"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
-				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
+				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}],
+				"99" : [{"th" : "หมดเวลายื่นขอทุนสวัสดิการออนไลน์แล้ว","en" : "End of time for request scholarship online"}]
 			}]
-		}],
-		"BUY_SHARES_ERR" : [{
-			"0001" : [{"th" : "ไม่สามารถถือหุ้นเกิน ${MAXHOLD_AMT} ได้","en" : "Cannot hold shares over ${MAXHOLD_AMT}"}],
-			"0002" : [{"th" : "ไม่สามารถซื้อหุ้นต่อครั้งเกิน ${MAXSHAREPX_AMT} ได้","en" : "Cannot buy shares per times over ${MAXSHAREPX_AMT}"}],
-			"0003" : [{"th" : "ขั้นต่ำที่สามารถซื้อได้คือ ${SHAREROUND_FACTOR} บาท","en" : "Minimum can buy is ${SHAREROUND_FACTOR} baht"}]
 		}],
 		"REQ_LOAN_STATUS" : [{
 			"8" : [{"th" : "รอลงรับ","en" : "Wait for accept"}],
@@ -241,7 +222,7 @@
 			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
 			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
 		}],
-		"REQ_HAVE_OLD_CONTRACT" : [{"th" : "ท่านมีสัญญาเงินกู้ประเภทนี้อยู่แล้วไม่สามารถกู้ซ้ำได้","en" : "Your have contract already exist cannot request repeat"}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
-		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}]
+		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
+		"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}]
 }

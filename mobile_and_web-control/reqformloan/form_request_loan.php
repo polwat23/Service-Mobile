@@ -48,12 +48,7 @@ $data["อื่นๆ"] = '111,000.00';
 $data["ชื่อบัญชี"] = 'ชื่อบัญชีเงินฝาก';
 $data["เลขบัญชีธนาคาร"] = '1545854571';
 $data["ดอกเบี้ย"] = 'คงยอด';
-$data["จำนวนเงินขอกู้"] = '100,000.00';
-$guarantor[0]["ชื่อ"] = 'ชื่อ นามสกุล';
-$guarantor[0]["เลขทะเบียน"] = '000451';  
-$guarantor[0]["ตำแหน่ง"] = 'ผู้อำนวยการ';  
-$guarantor[0]["หน่วยงาน"] = 'โรงเรียน';  
-$guarantor[0]["เงินเดือน"] = '30,000.00';  
+$data["จำนวนเงินขอกู้"] = '100,000.00'; 
 $data["ประเภทเงินกู้"] ="เงินกู้เพื่อการลงทุนประกอบวิชาชีพ";
 $data["สถานะภาพปัจจุบัน"] ="อื่นๆ" ;
 $data["ที่เดียวกับที่อยู่ตามทะเบียนบ้าน"] = '';
@@ -77,41 +72,44 @@ if($status == "โสด"){
 	$อื่นๆ = "checked";
 }*/
 
-//ประเภทเงินกู้
+//กลุ่มเงินกุ้เงินกู้
 $loantype_code =  $data["loantype_code"]??null;
 $loangroup_code =  $data["loangroup_code"]??null;
 if($loangroup_code == "01"){
 	$เงินกู้เพื่อเหตุฉุกเฉิน = "checked";
 }else if($loangroup_code == "03"){
 	$เงินกู้พิเศษ = "checked";  //
+}else if($loangroup_code == "02" && $loantype_code !="42" || $loantype_code !="43"){
+	$เงินกู้สามัญเพื่อการอันจำเป็น = "checked";
+}else if($loangroup_code == "02" && $loantype_code =="42" || $loantype_code =="43"){
+	$เงินกู้สามัญเพื่อชำระหนี้สถาบันการเงินอื่น = "checked";
 }
-
+//ประเภทเงินกู้
 if($loantype_code =="10"){
 	$เงินกู้ฉุกเฉิน = "checked"; //
 }else if($loantype_code =="11"){
 	$เงินกู้ฉุกเฉินเบิกผ่านระบบATM ="checked";
-}else if($loantype_code == "เงินกู้สามัญเพื่อการอันจำเป็นฯ"){
-	$เงินกู้สามัญเพื่อการอันจำเป็น = "checked";
-}else if($loantype_code == "เงินกู้สามัญเพื่อชำระหนี้สถาบันการเงินอื่น"){
-	$เงินกู้สามัญเพื่อชำระหนี้สถาบันการเงินอื่น = "checked";
-}else if($loantype_code =="หุ้นค้ำประกัน"){
+}else if($loantype_code =="20"){
 	$หุ้นค้ำประกันเงินฝากค้ำประกัน = "checked";
-}else if($loantype_code == "บุคคลค้ำประกัน"){
+}else if($loantype_code == "23"){
 	$บุคคลค้ำประกัน="checked";
-}else if($loantype_code == "หลักทรัพย์ค้ำประกัน"){
+}else if($loantype_code == "28"){
 	$หลักทรัพย์ค้ำประกัน = "checked";
-}else if($loantype_code == "เงินกู้พัฒนาวิชาชีพ"){
+}else if($loantype_code == "38"){
 	$เงินกู้พัฒนาวิชาชีพ ="checked";
-}else if($loantype_code == "เงินกู้กองทุนเพื่อความมั่นคง"){
+}else if($loantype_code == "27"){
 	$เงินกู้กองทุนเพื่อความมั่นคง = "checked";
-}else if($loantype_code == "เงินกู้พิเศษอื่นๆ"){
+}else if($loantype_code == "31"){
 	$เงินกู้พิเศษอื่นๆ = "checked";
-}else if($loantype_code =="เงินกู้เพื่อการเคหะสงเคราะห์"){
+}else if($loantype_code =="33"){
 	$เงินกู้เพื่อการเคหะสงเคราะห์ ="checked";
-}else if($loantype_code == "เงินกู้เพื่อการลงทุนประกอบวิชาชีพ"){
+}else if($loantype_code == "34"){
 	$เงินกู้เพื่อการลงทุนประกอบวิชาชีพ ="checked";
+}else if($loantype_code == "42"){
+	$บุคคลค้ำประกัน="checked";
+}else if($loantype_code == "43"){
+	$หลักทรัพย์ค้ำประกัน = "checked";
 }
-
 
 //ดอกเบี้ย
 /*$insterest = ($data["ดอกเบี้ย"]??null);
@@ -250,7 +248,7 @@ $html .= '<div class="wrapper-page">';
 $html .= '
 	<div>
 		<div>
-			<div style=" text-align: left; "><img src="../../resource/logo/logo.jpg" alt="" width="80" height="0"></div>
+			<div style=" text-align: left; "><img src="../../resource/logo/logo.jpg" alt="" width="80" height="80"></div>
 			<div class="absolute bold center" style="top:55px; margin-left:70px; font-size:20pt; width:225px;">คำขอกู้เงิน</div>
 		</div>
 		<div class="bold" style="margin-left:60px; font-size:16pt">
@@ -639,15 +637,16 @@ $html .= '
 							<td class="center">ลายมือชื่อผู้ค้ำประกัน</td>
 						</tr>';
 
-			for($i=0; $i<9; $i++){
+			for($i=0; $i < 9; $i++){
+				
 					$html .='
 						<tr>
 							<td class="center" style="height:32px;">'.($i+1).'</td>
-							<td>'.($guarantor[$i][""]??null).'</td>
-							<td class="center">'.($guarantor[$i][""]??null).'</td>
-							<td class="center">'.($guarantor[$i][""]??null).'</td>
-							<td>'.($guarantor[$i][""]??null).'</td>
-							<td class="right">'.($guarantor[$i][""]??null).'</td>
+							<td>'.($data["guarantor"][$i]["FULLNAME"]??null).'</td>
+							<td class="center">'.($data["guarantor"][$i]["MEMBER_NO"]??null).'</td>
+							<td class="center">'.($data["guarantor"][$i]["POSITION_DESC"]??null).'</td>
+							<td>'.($data["guarantor"][$i]["MEMBGROUP_DESC"]??null).'</td>
+							<td class="right">'.($data["guarantor"][$i]["SALARY_AMOUNT"]??null).'</td>
 							<td></td>
 						</tr>
 					';
@@ -843,7 +842,7 @@ $html .= '<div class="wrapper-page " >
 						</tr>
 						<tr>
 							<td>เงินได้รายเดือน</td>
-							<td class="right"></td>
+							<td  style="width:90px;"class="right">&nbsp;</td>
 							<td>เงินฝากค้ำประกัน</td>
 							<td></td>
 						</tr>

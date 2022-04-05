@@ -10,10 +10,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
-			$arrGrpAccFee = array();
+			/*$arrGrpAccFee = array();
 			$getDepositAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
 												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '88'");
+												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '10'");
 			$getDepositAcc->execute([':member_no' => $member_no]);
 			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccFee = array();
@@ -22,9 +22,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccFee['BALANCE'] = number_format($rowDepAcc["PRNCBAL"],2);
 				$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
 				$arrGrpAccFee[] = $arrAccFee;
-			}
+			}*/
 			$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
-			$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
+			//$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
 			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 			if($payload["member_no"] == 'etnmode3'){
 				$arrayResult['CITIZEN_ID'] = '1530400073734';
