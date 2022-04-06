@@ -1,6 +1,27 @@
 <?php
 require_once('../autoload.php');
 
+$dbhost = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "EXAT2022";
+$dbname = "mobile_exat_test";
+
+$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+$conmysql->exec("set names utf8mb4");
+
+
+$dbnameOra = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = iorcl)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+
 if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptaccount_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
@@ -22,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 		$arrarDataAcc = array();
 		$getDataAcc = $conoracle->prepare("SELECT dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code
 												FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-												WHERE dpm.deptaccount_no = :deptaccount_no and dpm.acccont_type = '01'");
+												WHERE dpm.deptaccount_no = :deptaccount_no");
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
 		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataAcc["DEPTTYPE_DESC"])){

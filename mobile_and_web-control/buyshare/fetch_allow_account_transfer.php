@@ -1,6 +1,27 @@
 <?php
 require_once('../autoload.php');
 
+$dbhost = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "EXAT2022";
+$dbname = "mobile_exat_test";
+
+$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+$conmysql->exec("set names utf8mb4");
+
+
+$dbnameOra = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = iorcl)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -8,7 +29,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayAcc = array();
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_transaction = '1' and gad.is_use = '1'");
+													WHERE gat.member_no = :member_no and gat.is_use = '1'  and gad.allow_buyshare = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
@@ -16,7 +37,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-													and dpm.membcat_code = dpt.membcat_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).")");
 			$getDataBalAcc->execute();
 			while($rowDataAccAllow = $getDataBalAcc->fetch(PDO::FETCH_ASSOC)){
@@ -34,11 +54,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$fetchShare->execute([':member_no' => $member_no]);
 			$rowShare = $fetchShare->fetch(PDO::FETCH_ASSOC);
 			$arrayShare = array();
-			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*10,2);
+			$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*50,2);
 			$arrayShare["MEMBER_NO"] = $payload["member_no"];
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['SHARE'] = $arrayShare;
+				$arrayResult['STEP_MOD_AMT'] = 50;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

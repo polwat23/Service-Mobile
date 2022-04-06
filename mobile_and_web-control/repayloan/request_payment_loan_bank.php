@@ -22,48 +22,30 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$dateOper = date('c');
 		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
 		$dataCont = $cal_loan->getContstantLoanContract($dataComing["contract_no"]);
-		$int_returnSrc = 0;
+		
 		$int_return = $dataCont["INTEREST_RETURN"];
 		$prinPay = 0;
-		$interest = 0;
-		$int_returnFull = 0;
 		$interestPeriod = 0;
 		$withdrawStatus = FALSE;
-		if($dataComing["amt_transfer"] > $dataCont["INTEREST_ARREAR"]){
-			$intarrear = $dataCont["INTEREST_ARREAR"];
-		}else{
-			$intarrear = $dataComing["amt_transfer"];
-		}
-		$interest = $cal_loan->calculateInterest($dataComing["contract_no"],$dataComing["amt_transfer"]);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$intarrear = $dataCont["INTEREST_ARREAR"];
+		$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+		$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($int_return >= $interest){
-			$int_return = $int_return - $interest;
-			$interest = 0;
-		}else{
-			$interest = $interest - $int_return;
-			$int_return = 0;
-		}
-		if($interest > 0){
-			if($dataComing["amt_transfer"] < $interest){
-				$interest = $dataComing["amt_transfer"];
+		$int_returnSrc = $interest["INT_RETURN"];
+		$interestFull = $interest["INT_PERIOD"];
+		if($interestFull > 0){
+			if($dataComing["amt_transfer"] < $interestFull){
+				$interestFull = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $dataComing["amt_transfer"] - $interest;
+				$prinPay = $dataComing["amt_transfer"] - $interestFull;
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
 			}
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
-		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = 0;
-				$int_returnFull = $int_returnSrc;
-			}
 		}
 		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
@@ -160,7 +142,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 							':id_userlogin' => $payload["id_userlogin"],
 							':operate_date' => $dateOperC,
 							':sigma_key' => $dataComing["sigma_key"],
-							':amt_transfer' => $rowReceiveAmt["RECEIVE_AMT"],
+							':amt_transfer' => $dataComing["amt_transfer"],
 							':response_code' => $arrayResult['RESPONSE_CODE'],
 							':response_message' => $responseAPI["RESPONSE_MESSAGE"] ?? "ไม่สามารถติดต่อ CoopDirect Server ได้เนื่องจากไม่ได้ Allow IP ไว้"
 						];
@@ -255,7 +237,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 							':id_userlogin' => $payload["id_userlogin"],
 							':operate_date' => $dateOperC,
 							':sigma_key' => $dataComing["sigma_key"],
-							':amt_transfer' => $rowReceiveAmt["RECEIVE_AMT"],
+							':amt_transfer' => $dataComing["amt_transfer"],
 							':response_code' => $arrResponse->RESPONSE_CODE,
 							':response_message' => $arrResponse->RESPONSE_MESSAGE
 						];

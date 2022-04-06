@@ -1,10 +1,12 @@
 {
 	"NAME_APP" : "EXAT Saving",
 	"COOP_KEY" : "exat-test",
+	"COOP_KEY_PROD" : "exat",
 	"COOP_ID" : "022001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.exat.mobile",
 	"URL_SERVICE" : "https://proxy.thaicoop.co/EXATCOOP-TEST/",
+	"URL_CONSTANT" : "https://api-node.thaicoop.co/constant-Test/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAAtRcldzM:APA91bFJLId43ZOq-wdZ56HbfucSV426OEKgvWi0WZn9XeIf5RoGiqFxIhLJYiQnj0YUPZl1sAn7BH2VfEFxaBYtLzdzycW4LpPslThLSi8mCsEu3hS7CJJDSAktLYPy0Cvau97Idodx",

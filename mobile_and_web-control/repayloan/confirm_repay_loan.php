@@ -1,6 +1,27 @@
 <?php
 require_once('../autoload.php');
 
+$dbhost = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "EXAT2022";
+$dbname = "mobile_exat_test";
+
+$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+$conmysql->exec("set names utf8mb4");
+
+
+$dbnameOra = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = iorcl)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+
 if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -23,32 +44,23 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 															WHERE loancontract_no = :loancontract_no");
 					$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 					$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-					$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-					if($interest > 0){
-						$int_return = $rowLoan["INTEREST_RETURN"];
-						if($int_return >= $interest){
-							$int_return = $int_return - $interest;
-							$interest = 0;
+					$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+					if($interest["INT_PERIOD"] > 0){
+						$prinPay = 0;
+						if($dataComing["amt_transfer"] < $interest["INT_PERIOD"]){
+							$interest["INT_PERIOD"] = $dataComing["amt_transfer"];
 						}else{
-							$interest = $interest - $int_return;
-							$int_return = 0;
-						}
-						if($dataComing["amt_transfer"] < $interest){
-							$interest = $dataComing["amt_transfer"];
-						}else{
-							$prinPay = $dataComing["amt_transfer"] - $interest;
+							$prinPay = $dataComing["amt_transfer"] - $interest["INT_PERIOD"];
 						}
 						if($prinPay < 0){
 							$prinPay = 0;
 						}
-						if($interest > 0){
-							$arrayResult["PAYMENT_INT"] = $interest;
-						}
+						$arrayResult["PAYMENT_INT"] = $interest["INT_PERIOD"];
 						$arrayResult["PAYMENT_PRIN"] = $prinPay;
 					}else{
 						$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 					}
-					if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+					if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PERIOD"]){
 						$arrayResult['RESPONSE_CODE'] = "WS0098";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
@@ -172,32 +184,23 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 													WHERE loancontract_no = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-			if($interest > 0){
-				$int_return = $rowLoan["INTEREST_RETURN"];
-				if($int_return >= $interest){
-					$int_return = $int_return - $interest;
-					$interest = 0;
+			$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+			if($interest["INT_PERIOD"] > 0){
+				$prinPay = 0;
+				if($dataComing["amt_transfer"] < $interest["INT_PERIOD"]){
+					$interest["INT_PERIOD"] = $dataComing["amt_transfer"];
 				}else{
-					$interest = $interest - $int_return;
-					$int_return = 0;
-				}
-				if($dataComing["amt_transfer"] < $interest){
-					$interest = $dataComing["amt_transfer"];
-				}else{
-					$prinPay = $dataComing["amt_transfer"] - $interest;
+					$prinPay = $dataComing["amt_transfer"] - $interest["INT_PERIOD"];
 				}
 				if($prinPay < 0){
 					$prinPay = 0;
 				}
-				if($interest > 0){
-					$arrayResult["PAYMENT_INT"] = $interest;
-				}
+				$arrayResult["PAYMENT_INT"] = $interest["INT_PERIOD"];
 				$arrayResult["PAYMENT_PRIN"] = $prinPay;
 			}else{
 				$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 			}
-			if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+			if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PERIOD"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

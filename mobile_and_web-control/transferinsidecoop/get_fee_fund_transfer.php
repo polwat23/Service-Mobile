@@ -1,6 +1,27 @@
 <?php
 require_once('../autoload.php');
 
+$dbhost = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "EXAT2022";
+$dbname = "mobile_exat_test";
+
+$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+$conmysql->exec("set names utf8mb4");
+
+
+$dbnameOra = "(DESCRIPTION =
+			(ADDRESS_LIST =
+			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
+			)
+			(CONNECT_DATA =
+			  (SERVICE_NAME = iorcl)
+			)
+		  )";
+$conoracle = new PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
+$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){	
@@ -15,12 +36,16 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$checkSeqAmt = $cal_dep->getSequestAmt($to_deptaccount_no,'DIM');
 					if($checkSeqAmt["CAN_DEPOSIT"]){
 						if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
-							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+							$arrayResult['RESPONSE_CODE'] = "WS0102";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+							/*$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
 							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
 							$arrayResult['CAUTION'] = $arrayCaution;
 							$arrayResult['PENALTY_AMT'] = $arrInitDep["PENALTY_AMT"];
-							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
+							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);*/
 						}
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
