@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,mb.BIRTH_DATE,mb.CARD_PERSON,
-													mb.MEMBER_DATE,MPS.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,
+													mb.MEMBER_DATE,MPS.POSITION_DESC,mg.MEMBGROUP_DESC,mt.MEMBTYPE_DESC,mb.MEMBER_REF,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
 													mb.ADDRESS_SOI as ADDR_SOI,
@@ -61,6 +61,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$refAssoInvite = $conmssql->prepare("SELECT mp.PRENAME_SHORT, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME
+																				FROM  mbmembmaster mb
+																				LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+																				WHERE mb.member_no = :member_no");
+			$refAssoInvite->execute([':member_no' => $rowMember["MEMBER_REF"]]);
+			$asslnvitData = array();
+			while($rowRefAssoInvite = $refAssoInvite->fetch(PDO::FETCH_ASSOC)){
+				$arrAsslnvit = array();
+				$arrAsslnvit["REF_MEMBER_NO"] = $rowRefAssoInvite["MEMBER_NO"];
+				$arrAsslnvit["REF_MEMBER_NAME"] = $rowRefAssoInvite["PRENAME_SHORT"].$rowRefAssoInvite["MEMB_NAME"]." ".$rowRefAssoInvite["MEMB_SURNAME"];
+				$asslnvitData[] =$arrAsslnvit;
+			}
 			$arrayResult["PHONE"] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
@@ -70,11 +82,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["CARD_PERSON"] = $lib->formatcitizen($rowMember["CARD_PERSON"]);
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
-			$arrayResult["POSITION_DESC"] = $rowMember["POSITION_DESC"];
+			$arrayResult["POSITION_DESC"] =  $rowRefAssoInvite["MEMB_NAME"];//$rowMember["POSITION_DESC"] ;
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
+			$arrayResult["REF_ASSO_INVITE"] = $rowRefAssoInvite;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["REF_ASSO_INVITE"] = $asslnvitData;
+			
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
