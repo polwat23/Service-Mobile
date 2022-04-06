@@ -5,6 +5,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
+		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBER_REF
+												FROM MBMEMBMASTER 
+												WHERE member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$arrMemberNoRef = array();
+		while($rowName = $fetchName->fetch(PDO::FETCH_ASSOC)){
+			$arrMemberNoRef[] = "'".$rowName["MEMBER_REF"]."'";
+		}
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,KEEPING_STATUS 
 															from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");
@@ -37,8 +47,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$arrKpmonth["IS_CANCEL"] = FALSE;
 			}
+			$getPaymentDetailRef = $conmssql->prepare("SELECT RECEIVE_AMT ,MEMBER_NO  FROM KPMASTRECEIVE WHERE MEMBER_NO IN(".implode(',',$arrMemberNoRef).") AND recv_period = :recv_period");
+			$getPaymentDetailRef->execute([':recv_period' => $rowPeriod["RECV_PERIOD"]]);
+			$asslnvitData = array();
+			while($rowRefAssoInvite = $getPaymentDetailRef->fetch(PDO::FETCH_ASSOC)){
+				$arrAsslnvit = array();
+				$arrAsslnvit["REF_MEMBER_NO"] = $rowRefAssoInvite["MEMBER_NO"];
+				$arrAsslnvit["REF_AMOUNT"] = $rowRefAssoInvite["RECEIVE_AMT"];
+				$asslnvitData[] =$arrAsslnvit;
+			}
+			if(sizeof($asslnvitData) > 0){
+				$arrKpmonth['REF_ASSO_INVITE'] = $asslnvitData;
+			}
 			$arrayGroupPeriod[] = $arrKpmonth;
 		}
+		//เรียกเก็บของ บุคคลอ้างอิง
 		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

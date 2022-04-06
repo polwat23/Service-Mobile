@@ -4,36 +4,17 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON,MEMBCAT_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember = $conmssql->prepare("SELECT RTRIM(LTRIM(card_person)) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$arrGrpAccFee = array();
-			if($rowDataMember["MEMBCAT_CODE"] == '20'){
-				$getHaveDeptNormal = $conmssql->prepare("SELECT COUNT(dp.DEPTACCOUNT_NO) as C_DEPT
-												FROM dpdeptmaster dp
-												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '01'");
-				$getHaveDeptNormal->execute([':member_no' => $member_no]);
-				$rowDept = $getHaveDeptNormal->fetch(PDO::FETCH_ASSOC);
-				if($rowDept["C_DEPT"] > 0){
-					$getDepositAcc = $conmssql->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
+			$getDepositAcc = $conmssql->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
 												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
 												and dp.membcat_code = dt.membcat_code
 												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '01'");
-				}else{
-					$getDepositAcc = $conmssql->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
-												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-												and dp.membcat_code = dt.membcat_code
-												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '02'");
-				}
-			}else{
-				$getDepositAcc = $conmssql->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
-												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-												and dp.membcat_code = dt.membcat_code
-												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '01'");
-			}
 			$getDepositAcc->execute([':member_no' => $member_no]);
 			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccFee = array();

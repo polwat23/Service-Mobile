@@ -43,13 +43,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
 		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
-		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE
-												FROM MBMEMBMASTER 
-												WHERE member_no = :member_no");
-		$fetchName->execute([
-			':member_no' => $member_no
-		]);
-		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		
 		$getPaymentDetail = $conmssql->prepare("SELECT 
 																	CASE kut.system_code 
 																	WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
@@ -77,6 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':membcat_code' => $rowName["MEMBCAT_CODE"],
 			':recv_period' => $rowLastRecv["MAX_RECV"]
 		]);
+	
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
@@ -102,6 +97,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;
 		}
+		
+		
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;
