@@ -257,5 +257,6 @@
 			"NOT_HAVE_ACC" : [{"th" : "ท่านต้องมีบัญชีเงินฝากกับสหกรณ์อย่างน้อย 1 บัญชีถึงจะสามารถยื่นคำขอเปิดบัญชีออนไลน์ได้","en" : "You must have least 1 deposit account"}],
 			"CANNOT_INSERT" : [{"th" : "ไม่สามารถขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot request open account online please contact the cooperative"}],
 			"CANNOT_CREATEDOC" : [{"th" : "ไม่สามารถสร้างใบคำขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot generate request document for open account online please contact the cooperative"}]
-		}]
+		}],
+		"LOAN_BALANCE_FOR_REPAY" : [{"th" : "หากต้องการปิดสัญญาเงินกู้ให้ชำระตามยอดที่แสดงข้างบน แต่หากต้องการชำระบางส่วนให้ชำระต่ำกว่ายอดหนี้คงเหลือ ${LOAN_BALANCE}","en" : "If you will close the contract please paid on amount is show but if you will pay some debt please paid amount lower than principal balance ${LOAN_BALANCE}"}]
 }

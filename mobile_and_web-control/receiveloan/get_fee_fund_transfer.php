@@ -18,11 +18,11 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$interest = $cal_loan->calculateInterestArr($contract_no,$dataComing["amt_transfer"]);
+				$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
 				$arrOther = array();
-				if($interest > 0){
+				if($interest["INT_ARREAR"] > 0){
 					$arrOther["LABEL"] = 'ดอกเบี้ย';
-					$arrOther["VALUE"] = number_format($interest,2)." บาท";
+					$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
 				}
 				$arrOther["LABEL"] = 'หนี้คงเหลือหลังทำรายการ';
@@ -45,11 +45,11 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$interest = $cal_loan->calculateInterestArr($contract_no,$dataComing["amt_transfer"]);
+				$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
 				$arrOther = array();
-				if($interest > 0){
+				if($interest["INT_ARREAR"] > 0){
 					$arrOther["LABEL"] = 'ดอกเบี้ย';
-					$arrOther["VALUE"] = number_format($interest,2)." บาท";
+					$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
 				}
 				$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,

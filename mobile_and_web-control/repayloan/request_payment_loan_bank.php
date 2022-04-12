@@ -30,34 +30,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$int_returnFull = 0;
 		$interestPeriod = 0;
 		$withdrawStatus = FALSE;
-		if($dataComing["amt_transfer"] > $dataCont["INTEREST_ARREAR"]){
-			$intarrear = $dataCont["INTEREST_ARREAR"];
-		}else{
-			$intarrear = $dataComing["amt_transfer"];
-		}
-		$interest = $cal_loan->calculateInterest($dataComing["contract_no"],$dataComing["amt_transfer"]);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interest = $cal_loan->calculateIntAPI($dataComing["contract_no"],$dataComing["amt_transfer"]);
+		$intarrear = $interest["INT_ARREAR"];
+		$int_returnFull = $interest["INT_RETURN"];
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($interest > 0){
-			if($dataComing["amt_transfer"] < $interest){
-				$interest = $dataComing["amt_transfer"];
+		if($interest["INT_PAYMENT"] > 0){
+			if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $dataComing["amt_transfer"] - $interest;
+				$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
 			}
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
-		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = 0;
-				$int_returnFull = $int_returnSrc;
-			}
 		}
 		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
@@ -91,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
 		if($payslip["RESULT"]){
 			$payslipdet = $cal_loan->paySlipLonDet($conmssql,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
-			$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
+			$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest["INT_PAYMENT"],
 			$intarrear,$int_returnSrc,$interestPeriod,'1');
 			if($payslipdet["RESULT"]){
 				$repayloan = $cal_loan->repayLoan($conmssql,$dataComing["contract_no"],$dataComing["amt_transfer"],0,

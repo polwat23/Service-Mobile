@@ -24,26 +24,26 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 															WHERE loancontract_no = :loancontract_no");
 					$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 					$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-					$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-					if($interest > 0){
-						if($dataComing["amt_transfer"] < $interest){
-							$interest = $dataComing["amt_transfer"];
+					$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+					if($interest["INT_PAYMENT"] > 0){
+						if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+							$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 						}else{
-							$prinPay = $dataComing["amt_transfer"] - $interest;
+							$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 						}
 						if($prinPay < 0){
 							$prinPay = 0;
 						}
-						if($interest > 0){
-							$arrayResult["PAYMENT_INT"] = $interest;
+						if($interest["INT_PAYMENT"] > 0){
+							$arrayResult["PAYMENT_INT"] = $interest["INT_PAYMENT"];
 						}
 						$arrayResult["PAYMENT_PRIN"] = $prinPay;
 					}else{
 						$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 					}
-					if(number_format($dataComing["amt_transfer"],2,'.','') > number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest,2,'.','')){
+					if(number_format($dataComing["amt_transfer"],2,'.','') > number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"],2,'.','')){
 						$arrayResult['RESPONSE_CODE'] = "WS0098";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${LOAN_BALANCE}',number_format($rowLoan["PRINCIPAL_BALANCE"],2),$configError["LOAN_BALANCE_FOR_REPAY"][0][$lang_locale]);
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 					}
@@ -183,26 +183,26 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 													WHERE loancontract_no = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-			if($interest > 0){
-				if($dataComing["amt_transfer"] < $interest){
-					$interest = $dataComing["amt_transfer"];
+			$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+			if($interest["INT_PAYMENT"] > 0){
+				if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+					$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 				}else{
-					$prinPay = $dataComing["amt_transfer"] - $interest;
+					$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 				}
 				if($prinPay < 0){
 					$prinPay = 0;
 				}
-				if($interest > 0){
-					$arrayResult["PAYMENT_INT"] = $interest;
+				if($interest["INT_PAYMENT"] > 0){
+					$arrayResult["PAYMENT_INT"] = $interest["INT_PAYMENT"];
 				}
 				$arrayResult["PAYMENT_PRIN"] = $prinPay;
 			}else{
 				$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 			}
-			if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+			if(number_format($dataComing["amt_transfer"],2,'.','') > number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"],2,'.','')){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${LOAN_BALANCE}',number_format($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"],2),$configError["LOAN_BALANCE_FOR_REPAY"][0][$lang_locale]);
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
