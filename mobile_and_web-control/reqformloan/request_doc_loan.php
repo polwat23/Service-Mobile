@@ -73,12 +73,22 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				}
 			}
 		}
-		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,
-												md.district_desc,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT
+		
+		$getPhone = $conmysql->prepare("SELECT phone_number FROM gcmemberaccount where member_no =:member_no");
+		$getPhone->execute([
+			':member_no' => $payload["member_no"]
+		]);
+		$rowPhone = $getPhone->fetch(PDO::FETCH_ASSOC);
+		
+		$fetchData = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mb.position_desc,mg.membgroup_desc,mb.salary_amount,mb.addr_phone,mb.addr_no,
+												mb.birth_date,md.district_desc,mpv.province_desc,mb.addr_postcode,MBTR.TAMBOL_DESC,(sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT, 
+												NVL(TO_CHAR(mb.retry_date,'YYYY')+543,'') as retry_date,mb.addr_moo,mb.addr_soi,mb.addr_road
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
-												LEFT JOIN mbucfdistrict md ON mg.ADDR_AMPHUR = md.DISTRICT_CODE
+												LEFT JOIN mbucfdistrict md ON mb.AMPHUR_CODE = md.DISTRICT_CODE
+												LEFT JOIN mbucfprovince mpv ON mb.province_code = mpv.province_code
+												LEFT JOIN MBUCFTAMBOL MBTR ON mb.TAMBOL_CODE = MBTR.TAMBOL_CODE
 												LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 												WHERE mb.member_no = :member_no");
 		$fetchData->execute([
@@ -112,11 +122,24 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			$arrData["name"] = $rowData["MEMB_NAME"].' '.$rowData["MEMB_SURNAME"];
 			$arrData["member_no"] = $payload["member_no"];
 			$arrData["position"] = $rowData["POSITION_DESC"];
-			$arrData["pos_group"] = $rowData["MEMBGROUP_DESC"];
-			$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
+			$arrData["membgroup_desc"] = $rowData["MEMBGROUP_DESC"];	
 			$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
 			$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 			$arrData["request_amt"] = $dataComing["request_amt"];
+			$arrData["addr_phone"] = $rowPhone["phone_number"];
+			$arrData["birth_date"] = $rowData["BIRTH_DATE"];
+			$arrData["retry_date"] = $rowData["RETRY_DATE"];
+			$arrData["addr_no"] = $rowData["ADDR_NO"];
+			$arrData["district_desc"] = $rowData["DISTRICT_DESC"];
+			$arrData["province_desc"] = $rowData["PROVINCE_DESC"];
+			$arrData["tambol_desc"] = $rowData["TAMBOL_DESC"];
+			$arrData["addr_postcode"] = $rowData["ADDR_POSTCODE"];
+			$arrData["addr_moo"] = $rowData["ADDR_MOO"];
+			$arrData["addr_soi"] = $rowData["ADDR_SOI"];
+			$arrData["addr_road"] = $rowData["ADDR_ROAD"];
+			$arrData["objective"] = $dataComing["objective"];
+			$arrData["period_payment"] = $dataComing["period_payment"];
+			$arrData["period"] = $dataComing["period"];
 			if(file_exists('form_request_loan_'.$dataComing["loantype_code"].'.php')){
 				include('form_request_loan_'.$dataComing["loantype_code"].'.php');
 				$arrayPDF = GeneratePDFContract($arrData,$lib);
@@ -125,7 +148,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 			}
 			if($arrayPDF["RESULT"]){
 				$conmysql->commit();
-				$arrayResult['REPORT_URL'] = $pathFile;
+				$arrayResult['SHOW_SLIP'] = TRUE;
+				//$arrayResult['REPORT_URL'] = $pathFile;
 				$arrayResult['APV_DOCNO'] = $reqloan_doc;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

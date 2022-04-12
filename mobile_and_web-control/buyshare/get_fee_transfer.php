@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WTX');
+		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WFS');
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($arrRightDep["RESULT"]){

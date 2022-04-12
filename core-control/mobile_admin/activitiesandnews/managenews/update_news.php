@@ -197,7 +197,6 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 				':news_html' => $detail_html ?? null,
 			])){
 				$last_id = $dataComing["id_news"];
-				
 				// start เพิ่มไฟล์เเนบ
 				if(isset($dataComing["file_upload"]) && $dataComing["file_upload"] != null){
 					$destination = __DIR__.'/../../../../resource/news';
@@ -208,7 +207,7 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 					}
 					$createImage = $lib->base64_to_pdf($dataComing["file_upload"],$file_name,$destination,null);
 					if($createImage){
-						$pathFile = $config["URL_SERVICE"]."resource/news/".$createImage["normal_path"];
+						$pathFile = $config["URL_SERVICE"]."/resource/news/".$createImage["normal_path"];
 						
 						if(isset($pathFile) && $pathFile != null){
 							$pathFile = $pathFile."?".$random_text;

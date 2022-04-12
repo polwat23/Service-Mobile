@@ -113,6 +113,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
@@ -146,7 +147,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["membgroup_code"] = $rowName["MEMBGROUP_CODE"];
 		$header["buyshare_more"] = "";
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D/n/Y');
 		$arrUCollWho = array();
 		$getUCollWho = $conoracle->prepare("SELECT
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME
@@ -298,7 +299,7 @@ $html .= '
         <img src="../../resource/logo/logo.jpg" style="width:100px" />
       </div>
       <div style="margin-left:110px; padding-top:10px;">
-        <div style="font-size:14pt; font-weight:bold; color:#7e9ded;">สหกรณ์ออมทรัพย์กรมชลประธาน</div>
+        <div style="font-size:14pt; font-weight:bold; color:#7e9ded;">สหกรณ์ออมทรัพย์กรมชลประทาน จำกัด</div>
         <div style="display:flex">
           <div style="font-size:14pt; font-weight:bold; color:#7e9ded; padding-top:30px;">ใบเสร็จรับเงิน</div>
           <div style="margin-left:87px;  width:260px; padding-top:10px;" >

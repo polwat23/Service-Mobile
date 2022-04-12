@@ -23,7 +23,7 @@ class CalculateShare {
 		$rowContShare = $getConstantShare->fetch(\PDO::FETCH_ASSOC);
 		return $rowContShare;
 	}
-	private function getShareInfo($member_no){
+	public function getShareInfo($member_no){
 		$getCurrShare = $this->conora->prepare("SELECT SHARESTK_AMT,(SHARESTK_AMT * 10) as SHARE_AMT,LAST_PERIOD,LAST_STM_NO
 												FROM SHSHAREMASTER WHERE member_no = :member_no");
 		$getCurrShare->execute([':member_no' => $member_no]);
@@ -32,20 +32,20 @@ class CalculateShare {
 	}
 	public function buyShare($conoracle,$member_no,$amt_transfer,$penalty_amt,$config,$shslip_docno,$operate_date,
 	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$shslip_no,$ref_no,$is_paymonth=false){
-		$rowContShare = $this->getConstShare();
+		//$rowContShare = $this->getConstShare();
 		$dataShare = $this->getShareInfo($member_no);
 		$sharereq_value = $dataShare["SHARE_AMT"] + $amt_transfer;
 		$getMemberInfo = $conoracle->prepare("SELECT MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMemberInfo->execute([':member_no' => $member_no]);
 		$rowMember = $getMemberInfo->fetch(\PDO::FETCH_ASSOC);
-		if($sharereq_value > $rowContShare["MAXSHARE_HOLD"]){
+		/*if($sharereq_value > $rowContShare["MAXSHARE_HOLD"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0075";
 			$arrayResult['TYPE_ERR'] = "MAXSHARE_HOLD";
 			$arrayResult['SHARE_ERR'] = "0001";
 			$arrayResult['AMOUNT_ERR'] = $rowContShare["MAXSHARE_HOLD"];
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
-		}
+		}*/
 		if($is_paymonth){
 			$arrExecuteShStm = [
 				':coop_id' => $config["COOP_ID"],
@@ -102,6 +102,7 @@ class CalculateShare {
 					':response_message' => 'UPDATE shsharemaster ไม่ได้'.$updateMaster->queryString."\n".json_encode($arrExecuteMaster)
 				];
 				$log->writeLog('buyshare',$arrayStruc);
+				file_put_contents('test.txt',json_encode($arrayStruc));
 				$arrayResult["RESPONSE_CODE"] = 'WS0065';
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
@@ -119,6 +120,7 @@ class CalculateShare {
 				':response_message' => 'INSERT shsharestatement ไม่ได้'.$insertSTMShare->queryString."\n".json_encode($arrExecuteShStm)
 			];
 			$log->writeLog('buyshare',$arrayStruc);
+			file_put_contents('test.txt',json_encode($arrayStruc));
 			$arrayResult["RESPONSE_CODE"] = 'WS0065';
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
