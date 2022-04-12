@@ -14,38 +14,27 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$int_return = $dataCont["INTEREST_RETURN"];
 		$prinPay = 0;
 		$interest = 0;
-		$int_returnFull = 0;
 		$interestPeriod = 0;
 		$withdrawStatus = FALSE;
 		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
-		if($dataComing["amt_transfer"] > $dataCont["INTEREST_ARREAR"]){
-			$intarrear = $dataCont["INTEREST_ARREAR"];
-		}else{
-			$intarrear = $dataComing["amt_transfer"];
-		}
-		$interest = $cal_loan->calculateInterest($dataComing["contract_no"],$dataComing["amt_transfer"]);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interest = $cal_loan->calculateIntAPI($dataComing["contract_no"],$dataComing["amt_transfer"]);
+		$intarrear = $interest["INT_ARREAR"];
+		$int_returnFull = $interest["INT_RETURN"];
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($interest > 0){
-			if($dataComing["amt_transfer"] < $interest){
-				$interest = $dataComing["amt_transfer"];
+		if($interest["INT_PAYMENT"] > 0){
+			if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $dataComing["amt_transfer"] - $interest;
+				$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
 			}
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
-		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = 0;
-				$int_returnFull = $int_returnSrc;
-			}
 		}
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
@@ -86,7 +75,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
 				if($payslip["RESULT"]){
 					$payslipdet = $cal_loan->paySlipLonDet($conmssql,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
-					$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
+					$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest["INT_PAYMENT"],
 					$intarrear,$int_returnSrc,$interestPeriod,'1');
 					if($payslipdet["RESULT"]){
 						$repayloan = $cal_loan->repayLoan($conmssql,$dataComing["contract_no"],$dataComing["amt_transfer"],$dataComing["penalty_amt"],
@@ -126,7 +115,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
 							$dataMerge["CONTRACT_NO"] = $dataComing["contract_no"];
 							$dataMerge["AMOUNT"] = number_format($dataComing["amt_transfer"],2);
-							$dataMerge["INT_PAY"] = number_format($interest,2);
+							$dataMerge["INT_PAY"] = number_format($interest["INT_PAYMENT"],2);
 							$dataMerge["PRIN_PAY"] = number_format($prinPay,2);
 							$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 							$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
