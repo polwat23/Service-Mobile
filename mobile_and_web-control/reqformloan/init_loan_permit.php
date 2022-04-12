@@ -11,8 +11,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
 			$period_payment = round($dataComing["request_amt"] * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($dataComing["period"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
-			if($period_payment % 10 > 0){
-				$period_payment =$period_payment  + (10 - ($period_payment % 10));
+			if($period_payment % 100 > 0){
+				$period_payment =$period_payment  + (100 - ($period_payment % 100));
 			}
 			
 			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
@@ -49,13 +49,38 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMaxPeriod["MAX_PERIOD"])){
-				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE,lnt.LOANGROUP_CODE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 														WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
 				$period_payment = round($maxloan_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
-				$period_payment =$period_payment  + (10 - ($period_payment % 10));
+				$period_payment =$period_payment  + (100 - ($period_payment % 100));
+				
+				//อัปโหลดไฟล์เเนบ
+				$arrayUploadFileGroup = array();
+				if(isset($rowIntRate["LOANGROUP_CODE"]) && $rowIntRate["LOANGROUP_CODE"] != ''){
+					$fetchConstUploadFile = $conmysql->prepare("SELECT fmap.filemapping_id, fmap.file_id, fmap.loangroup_code, fmap.max, fmap.is_require, fmap.update_date,
+														fatt.file_name
+														FROM gcreqfileattachmentmapping fmap 
+														LEFT JOIN gcreqfileattachment fatt ON fmap.file_id = fatt.file_id
+														WHERE fmap.is_use = '1' AND fmap.loangroup_code = :loangroup_code");
+					$fetchConstUploadFile->execute([
+						":loangroup_code" => $rowIntRate["LOANGROUP_CODE"]
+					]);
+					while($rowConstUploadFile = $fetchConstUploadFile->fetch(PDO::FETCH_ASSOC)){
+						$arrConst = array();
+						$arrConst["FILEMAPPING_ID"] = $rowConstUploadFile["filemapping_id"];
+						$arrConst["FILE_ID"] = $rowConstUploadFile["file_id"];
+						$arrConst["FILE_NAME"] = $rowConstUploadFile["file_name"];
+						$arrConst["LOANGROUP_CODE"] = $rowConstUploadFile["loangroup_code"];
+						$arrConst["MAX"] = $rowConstUploadFile["max"];
+						$arrConst["IS_REQUIRE"] = $rowConstUploadFile["is_require"] == "1";
+						$arrConst["UPDATE_DATE"] = $rowConstUploadFile["update_date"];
+						$arrayUploadFileGroup[] = $arrConst;
+					}
+				}
+
 				
 				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
 				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
@@ -64,10 +89,16 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_SALARY"] = TRUE;
+				$arrayResult["SALARY"] = $dataComing["salary"];
+				$arrayResult["SALARY_INPUT_NOTE"] = "กรุณากรอกเงินเดือนรวมกับเงินได้อื่นๆ";
+				$arrayResult["IS_INPUT_SALARY"] = TRUE;
+				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
+				$arrayResult["IS_REMAIN_SALARY"] = TRUE;
+				$arrayResult["REQ_SALARY"] = FALSE;
 				$arrayResult["REQ_CITIZEN"] = TRUE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
+				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
+				$arrayResult['UPLOADFILE_GRP'] = $arrayUploadFileGroup;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
