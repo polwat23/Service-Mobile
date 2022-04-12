@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute[':end_date'] = $dataComing["end_date"];
 		}
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
+			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,remark,request_date,approve_date,contractdoc_url
 															FROM gcreqloan WHERE req_status = :req_status". 
 															($dataComing["is_filtered"] ? (
 															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
@@ -61,7 +61,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
 				$arrDocno["LOANTYPE_DESC"] = $arrayType[$rowDocno["loantype_code"]];
 				$arrDocno["REQUEST_AMT"] = number_format($rowDocno["request_amt"],2);
-				//$arrDocno["PERIOD_PAYMENT"] = number_format($rowDocno["period_payment"],2);
+				$arrDocno["REMARK"] = $rowDocno["remark"];
 				$arrDocno["REQUEST_DATE"] = $lib->convertdate($rowDocno["request_date"],'d m Y',true);
 				if($rowDocno["req_status"] == '1'){
 					$arrDocno["APPROVE_DATE"] = $lib->convertdate($rowDocno["approve_date"],'d m Y',true);
@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGrp[] = $arrDocno;
 			}
 		}else{
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
+			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,remark,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
 															FROM gcreqloan WHERE 1=1". 
 															($dataComing["is_filtered"] ? (
 															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["LOANTYPE_CODE"] = $rowDocno["loantype_code"];
 				$arrDocno["LOANTYPE_DESC"] = $arrayType[$rowDocno["loantype_code"]];
 				$arrDocno["REQUEST_AMT"] = number_format($rowDocno["request_amt"],2);
-				//$arrDocno["PERIOD_PAYMENT"] = number_format($rowDocno["period_payment"],2);
+				$arrDocno["REMARK"] = $rowDocno["remark"];
 				$arrDocno["REQUEST_DATE"] = $lib->convertdate($rowDocno["request_date"],'d m Y',true);
 				if($rowDocno["req_status"] == '1'){
 					$arrDocno["APPROVE_DATE"] = $lib->convertdate($rowDocno["approve_date"],'d m Y',true);
