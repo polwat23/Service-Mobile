@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
 	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
@@ -171,6 +171,14 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								':member_no' => $member_no
 							]);
 							$arrayResult['RESULT'] = TRUE;
+							
+							if ($forceNewSecurity == true) {
+								$newArrayResult = array();
+								$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+								$arrayResult = array();
+								$arrayResult = $newArrayResult;
+							}
+							
 							require_once('../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();
