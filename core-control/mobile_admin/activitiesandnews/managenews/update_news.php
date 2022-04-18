@@ -197,7 +197,6 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 				':news_html' => $detail_html ?? null,
 			])){
 				$last_id = $dataComing["id_news"];
-				
 				// start เพิ่มไฟล์เเนบ
 				if(isset($dataComing["file_upload"]) && $dataComing["file_upload"] != null){
 					$destination = __DIR__.'/../../../../resource/news';

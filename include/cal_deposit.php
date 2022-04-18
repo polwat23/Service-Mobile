@@ -344,7 +344,7 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
 			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$menucheckrights = "and gca.allow_buyshare = '1'";
 			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan' || $menu_component == 'PayMonthlyFull'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";

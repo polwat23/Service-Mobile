@@ -48,6 +48,8 @@ $func = new functions();
 $log = new insertLog();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
+$jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
+$configError = json_decode($jsonConfigError,true);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();

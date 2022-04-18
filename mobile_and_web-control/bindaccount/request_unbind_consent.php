@@ -31,30 +31,60 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 				':sigma_key' => $dataComing["sigma_key"],
 				':id_bindaccount' => $dataComing["id_bindaccount"]
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowChk["link_unbindaccount"],$arrSendData);
-				if(!$responseAPI["RESULT"]){
-					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "WS0029";
-					$arrayStruc = [
-						':member_no' => $payload["member_no"],
-						':id_userlogin' => $payload["id_userlogin"],
-						':unbind_status' => '-9',
-						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => $responseAPI["RESPONSE_MESSAGE"],
-						':id_bindaccount' => $dataComing["id_bindaccount"],
-						':query_flag' => '1'
-					];
-					$log->writeLog('unbindaccount',$arrayStruc);
-					$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"].$rowChk['link_unbindaccount']." ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
-					$lib->sendLineNotify($message_error);
-					$func->MaintenanceMenu($dataComing["menu_component"]);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-				$arrResponse = json_decode($responseAPI);
-				if($arrResponse->RESULT){
+				if($rowChk["bank_code"] != "999"){
+					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowChk["link_unbindaccount"],$arrSendData);
+					if(!$responseAPI["RESULT"]){
+						$conmysql->rollback();
+						$arrayResult['RESPONSE_CODE'] = "WS0029";
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':unbind_status' => '-9',
+							':response_code' => $arrayResult['RESPONSE_CODE'],
+							':response_message' => $responseAPI["RESPONSE_MESSAGE"],
+							':id_bindaccount' => $dataComing["id_bindaccount"],
+							':query_flag' => '1'
+						];
+						$log->writeLog('unbindaccount',$arrayStruc);
+						$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"].$rowChk['link_unbindaccount']." ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+						$lib->sendLineNotify($message_error);
+						$func->MaintenanceMenu($dataComing["menu_component"]);
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}
+					$arrResponse = json_decode($responseAPI);
+					if($arrResponse->RESULT){
+						$conmysql->commit();
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':id_bindaccount' => $dataComing["id_bindaccount"],
+							':unbind_status' => '1'
+						];
+						$log->writeLog('unbindaccount',$arrayStruc);
+						$arrayResult['RESULT'] = TRUE;
+						require_once('../../include/exit_footer.php');
+					}else{
+						$conmysql->rollback();
+						$arrayResult['RESPONSE_CODE'] = "WS0040";
+						$arrayStruc = [
+							':member_no' => $payload["member_no"],
+							':id_userlogin' => $payload["id_userlogin"],
+							':unbind_status' => '-9',
+							':response_code' => $arrayResult['RESPONSE_CODE'],
+							':response_message' => $arrResponse->RESPONSE_MESSAGE,
+							':id_bindaccount' => $dataComing["id_bindaccount"],
+							':query_flag' => '1'
+						];
+						$log->writeLog('unbindaccount',$arrayStruc);
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}	
+				}else{
 					$conmysql->commit();
 					$arrayStruc = [
 						':member_no' => $payload["member_no"],
@@ -65,24 +95,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 					$log->writeLog('unbindaccount',$arrayStruc);
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
-				}else{
-					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = "WS0040";
-					$arrayStruc = [
-						':member_no' => $payload["member_no"],
-						':id_userlogin' => $payload["id_userlogin"],
-						':unbind_status' => '-9',
-						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => $arrResponse->RESPONSE_MESSAGE,
-						':id_bindaccount' => $dataComing["id_bindaccount"],
-						':query_flag' => '1'
-					];
-					$log->writeLog('unbindaccount',$arrayStruc);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}			
+				}				
 			}else{
 				$conmysql->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS1021";
