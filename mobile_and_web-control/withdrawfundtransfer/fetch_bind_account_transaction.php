@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
-				$arrayResult['SCHEDULE']["ENABLED"] = TRUE;
+				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

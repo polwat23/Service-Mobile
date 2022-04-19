@@ -36,6 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrVerifyToken['coop_account_no'] = $coop_account_no;
 		$arrVerifyToken['operate_date'] = $dateOperC;
 		$arrVerifyToken['ref_trans'] = $ref_no;
+		$arrVerifyToken['destination'] = $rowDataWithdraw["deptaccount_no_bank"];
 		$refbank_no = null;
 		$etnrefbank_no = null;
 		$vccAccID = null;
@@ -61,6 +62,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
+		if($rowDataWithdraw["bank_code"] == '999'){
+			$arrSendData["client_timestamp"] = $dataComing["CLIENT_TIMESTAMP"];
+			$arrSendData["client_trans_no"] = $dataComing["CLIENT_TRANS_NO"];
+		}
 		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		if($fee_amt > 0){
@@ -195,7 +200,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':fee_amt' => $dataComing["fee_amt"],
 					':deptaccount_no' => $coop_account_no,
 					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => $arrResponse->RESPONSE_MESSAGE
+					':response_message' => json_encode($arrResponse->RETRUN_RAW)
 				];
 				$log->writeLog('withdrawtrans',$arrayStruc);
 				if(isset($configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){

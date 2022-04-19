@@ -15,10 +15,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["bank_code"]);
 			if($arrRightDep["RESULT"]){
 				$amt_transfer = $dataComing["amt_transfer"];
-				$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
-													and member_no = :member_no and bindaccount_status = '1'");
+				$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '1'");
 				$getDataUser->execute([
-					':deptaccount_no' => $payload["member_no"],
 					':member_no' => $payload["member_no"]
 				]);
 				$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
@@ -213,6 +211,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
+						$arrayResult['CLIENT_TIMESTAMP'] = $arrResponse->CLIENT_TIMESTAMP;
+						$arrayResult['CLIENT_TRANS_NO'] = $arrResponse->CLIENT_TRANS_NO;
 						$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 						if($fee_amt > 0){
 							$arrayResult['FEE_AMT'] = $fee_amt;

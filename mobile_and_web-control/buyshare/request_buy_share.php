@@ -64,10 +64,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 							$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 							$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 							$dataMerge = array();
-							$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($deptaccount_no,$func->getConstant('hidden_dep'));
+							$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($deptaccount_no,$func->getConstant('hidden_dep'));
 							$dataMerge["AMT_TRANSFER"] = number_format(($dataComing["amt_transfer"]/10),2);
-							$dataMerge["AMT_TRASFER_BAHT"] = number_format($dataComing["amt_transfer"],2);
-							$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+							$dataMerge["AMT_TRANSFER_BAHT"] = number_format($dataComing["amt_transfer"],2);
+							$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 							$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 							foreach($arrToken["LIST_SEND"] as $dest){
 								if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
@@ -123,10 +123,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 								$arrToken = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
 								$templateMessage = $func->getTemplateSystem('TransferDepBuyShare',1);
 								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($to_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
 								$dataMerge["AMT_TRANSFER"] = number_format(($dataComing["amt_transfer"]/10),2);
-								$dataMerge["AMT_TRASFER_BAHT"] = number_format($dataComing["amt_transfer"],2);
-								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$dataMerge["AMT_TRANSFER_BAHT"] = number_format($dataComing["amt_transfer"],2);
+								$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 								foreach($arrToken["LIST_SEND"] as $dest){
 									if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){

@@ -247,24 +247,18 @@ class CalculateLoan {
 		}
 		$int_returnSrc = 0;
 		$int_returnFull = 0;
-		$interest = $this->calculateInterest($contract_no,$amt_transfer);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interest = $this->calculateIntAPI($contract_no,$amt_transfer);
+		$interestFull = $interest["INT_PAYMENT"];
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($int_return >= $interest){
-			$int_return = $int_return - $interest;
-			$interest = 0;
-		}else{
-			$interest = $interest - $int_return;
-			$int_return = 0;
-		}
-		if($interest > 0){
-			if($amt_transfer < $interest){
-				$interest = $amt_transfer;
+		$prinPay = 0;
+		if($interest["INT_PAYMENT"] > 0){
+			if($amt_transfer < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $amt_transfer;
 			}else{
-				$prinPay = $amt_transfer - $interest;
+				$prinPay = $amt_transfer - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
@@ -272,20 +266,15 @@ class CalculateLoan {
 		}else{
 			$prinPay = $amt_transfer;
 		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = $this->calculateIntReturn($contract_no,$prinPay,$interest);
-				$int_returnFull = $int_returnSrc;
-			}
-		}
+
 		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$updateInterestAccum = $conoracle->prepare("UPDATE mbmembmaster SET ACCUM_INTEREST = :int_accum WHERE member_no = :member_no");
 		if($updateInterestAccum->execute([
-			':int_accum' => $interest_accum + $interest,
+			':int_accum' => $interest_accum + $interest["INT_PAYMENT"],
 			':member_no' => $member_no
 		])){
-			$intArr = $interestFull - $amt_transfer - $int_returnFull;
+			$intArr = $interest["INT_ARREAR"];
 			if($intArr < 0){
 				$intArr = 0;
 				if($dataCont["INTEREST_ARREAR_SRC"] - $dataCont["INTEREST_ARREAR"] > 0){
@@ -301,7 +290,7 @@ class CalculateLoan {
 				':lastperiod' => $lastperiod,
 				':prin_pay' => $prinPay,
 				':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] - $prinPay,
-				':int_pay' => $interest,
+				':int_pay' => $interest["INT_PAYMENT"],
 				':principal' => $dataCont["PRINCIPAL_BALANCE"],
 				':calint_from' => date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
 				':bfintarr' => $dataCont["INTEREST_ARREAR_SRC"],
@@ -341,10 +330,10 @@ class CalculateLoan {
 					':loancontract_no' => $contract_no,
 					':lastperiod_pay' => $lastperiod,
 					':int_arr' => $intArr,
-					':int_accum' => $interest_accum + $interest,
+					':int_accum' => $interest_accum + $interest["INT_PAYMENT"],
 					':prinpay' => $prinPay,
 					':int_return' => $int_returnSrc,
-					':int_pay' => $interest,
+					':int_pay' => $interest["INT_PAYMENT"],
 					':laststmno' => $dataCont["LAST_STM_NO"] + 1,
 				];
 				if($interestPeriod > 0){
@@ -423,7 +412,7 @@ class CalculateLoan {
 							':amount' => $amt_transfer,
 							':penalty_amt' => $penalty_amt,
 							':principal' => $prinPay,
-							':interest' => $interest,
+							':interest' => $interest["INT_PAYMENT"],
 							':interest_return' => $int_returnSrc,
 							':interest_arrear' => $intArr,
 							':bfinterest_return' => $dataCont["INTEREST_RETURN"],
@@ -448,7 +437,7 @@ class CalculateLoan {
 							':amount' => $amt_transfer,
 							':penalty_amt' => $penalty_amt,
 							':principal' => $prinPay,
-							':interest' => $interest,
+							':interest' => $interest["INT_PAYMENT"],
 							':interest_return' => $int_returnSrc,
 							':interest_arrear' => $intArr,
 							':bfinterest_return' => $dataCont["INTEREST_RETURN"],
@@ -508,7 +497,7 @@ class CalculateLoan {
 				':destination' => $contract_no,
 				':response_code' => "WS0066",
 				':response_message' => 'UPDATE mbmembmaster ไม่ได้'.$updateInterestAccum->queryString."\n".json_encode([
-					':int_accum' => $interest_accum + $interest,
+					':int_accum' => $interest_accum + $interest["INT_PAYMENT"],
 					':member_no' => $member_no
 				])
 			];
