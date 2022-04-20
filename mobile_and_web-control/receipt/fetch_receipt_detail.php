@@ -59,6 +59,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+			}else if($rowDetail["TYPE_GROUP"] == "KEP"){
+				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
