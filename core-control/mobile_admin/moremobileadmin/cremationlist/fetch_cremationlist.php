@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$month=date("m",$time);
 		$year=date("Y",$time);
 	
-		$fetchCremationList = $conmysql->prepare("SELECT cremation_id, full_name, data_date, update_date, update_user FROM gccremationlist WHERE is_use = '1' AND MONTH(data_date) = :month AND YEAR(data_date) = :year");
+		$fetchCremationList = $conmysql->prepare("SELECT cremation_id, full_name, data_date, update_date, update_user,cremation_amt FROM gccremationlist WHERE is_use = '1' AND MONTH(data_date) = :month AND YEAR(data_date) = :year");
 		$fetchCremationList->execute([
 			':month' => $month,
 			':year' => $year
@@ -19,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup = array();
 			$arrayGroup["CREMATION_ID"] = $rowCremation["cremation_id"];
 			$arrayGroup["FULL_NAME"] = $rowCremation["full_name"];
+			$arrayGroup["CREMATION_AMT"] = number_format($rowCremation["cremation_amt"],2);
 			$arrayGroup["DATA_DATE"] = $rowCremation["data_date"];
 			$arrayGroup["UPDATE_DATE"] = $rowCremation["update_date"];
 			$arrayGroup["UPDATE_USER"] = $rowCremation["update_user"];
