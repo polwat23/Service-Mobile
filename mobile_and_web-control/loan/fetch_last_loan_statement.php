@@ -1,6 +1,8 @@
 <?php
 require_once('../autoload.php');
 
+$conoracle = $con->connecttooldoracle();
+
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];

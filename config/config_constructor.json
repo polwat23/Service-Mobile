@@ -6,7 +6,7 @@
 	"APP_ID" : "com.egat.mobile",
 	"URL_SERVICE" : "https://proxy.thaicoop.co/EGATCOOP/",
 	"URL_SERVICE_PASS" : "http://devmb-saving.egat.co.th/service-egat/",
-	"URL_CORE_COOP" : "http://10.20.240.78/CORE/GCOOP/wcfService125/",
+	"URL_CORE_COOP" : "http://127.0.0.1/CORE/GCOOP/wcfService125/",
 	"URL_SERVICE_EGAT" : "http://mb-saving.egat.co.th/Egatsavingapi/Api/",
 	"WS_PASS" : "Data Source=10.20.240.79:1521/gcoop;Persist Security Info=True;User ID=iscoegat;Password=iscoegat;Unicode=True;coop_id=065001;coop_control=065001;db_type=1;",
 	"FIREBASE_API_KEY" : "AIzaSyDFueStFucYPiB6m6yVH_rWkSVCgHRDuzs",

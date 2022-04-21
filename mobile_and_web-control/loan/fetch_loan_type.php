@@ -1,6 +1,8 @@
 <?php
 require_once('../autoload.php');
 
+$conoracle = $con->connecttooldoracle();
+
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -20,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
 			$arrContract = array();
-			$getIntRate = $conoracle->prepare("SELECT * FROM(SELECT INTEREST_RATE from lnloantype ln LEFT JOIN lncfloanintratedet lit ON 
+			$getIntRate = $conoracle->prepare("SELECT * FROM(SELECT (INTEREST_RATE * 100) as INTEREST_RATE from lnloantype ln LEFT JOIN lncfloanintratedet lit ON 
 												ln.inttabrate_code = lit.loanintrate_code
 												WHERE TRUNC(SYSDATE) > TRUNC(lit.EFFECTIVE_DATE) and ln.loantype_code = :loantype_code
 												ORDER BY lit.EFFECTIVE_DATE DESC)
