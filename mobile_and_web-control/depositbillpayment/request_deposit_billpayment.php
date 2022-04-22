@@ -29,6 +29,10 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$payload["member_no"] = $rowCheckBill["member_no"];
 				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
 				$payload["app_version"] = $rowCheckBill["app_version"];
+				$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+				$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+				$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
 													LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
 													WHERE gba.member_no = :member_no 
@@ -46,7 +50,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
 					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 					$arrDpSlip[$rowDetailDP["ref_account"]] = $arrSlipDPnoDest["SLIP_NO"];
-					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 2;
+					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
 					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				}
@@ -180,9 +184,6 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				}else{
 					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 					$depositMoney["DEPTSLIP_NO"] = $arrSlipDPnoDest["SLIP_NO"];
-					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 					$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
 					$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
 				}
