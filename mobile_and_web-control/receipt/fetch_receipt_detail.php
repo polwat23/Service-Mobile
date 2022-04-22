@@ -27,7 +27,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
 													NVL(kpd.interest_payment,0) AS INT_BALANCE,
-													TRIM(lt.loantype_code) as LOANTYPE_CODE
+													TRIM(lt.loantype_code) as LOANTYPE_CODE,
+													TO_CHAR(kpd.POSTING_DATE,'YYYYMMDD') as OPERATE_DATE
 													FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
 													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -60,8 +61,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				}
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
-				$getBalance = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
-				$getBalance->execute([':deptaccount_no' => $rowDetail["PAY_ACCOUNT"]]);
+				$getBalance = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptstatement WHERE deptaccount_no = :deptaccount_no 
+													and deptitemtype_code = 'DTM' and TO_CHAR(operate_date,'YYYYMMDD') = :operate_date");
+				$getBalance->execute([
+					':deptaccount_no' => $rowDetail["PAY_ACCOUNT"],
+					':operate_date' => $rowDetail["OPERATE_DATE"]
+				]);
 				$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
 				$arrDetail["ITEM_BALANCE"] = number_format($rowBalance["PRNCBAL"],2);
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
