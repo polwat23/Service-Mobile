@@ -9,49 +9,58 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS0057";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
+		$duplicateDigit = $func->getConstant('check_duplicate_pin');
+		$sequestDigit = $func->getConstant('pin_sequest_digit');
 		$pin_split = str_split($dataComing["pin"]);
 		$countSeqNumber = 1;
 		$countReverseSeqNumber = 1;
 		foreach($pin_split as $key => $value){
-			if(($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key + 1]) || 
-			($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key - 2])){
-				$arrayResult['RESPONSE_CODE'] = "WS0057";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+			if($duplicateDigit == "0"){
+				if(($value == $dataComing["pin"][($key - 1) < 0 ? 7 : $key - 1] && $value == $dataComing["pin"][$key + 1]) || 
+				($value == $dataComing["pin"][($key - 1) < 0 ? 7 : $key - 1] && $value == $dataComing["pin"][($key - 2) < 0 ? 7 : $key - 2])){
+					$arrayResult['RESPONSE_CODE'] = "WS0057";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+					
+				}
 			}
 			if($key < strlen($dataComing["pin"]) - 1){
 				if($value == ($dataComing["pin"][$key + 1] - 1)){
 					$countSeqNumber++;
 				}else{
-					$countSeqNumber = 1;
+					if($countSeqNumber < 3){
+						$countSeqNumber = 1;
+					}
 				}
 				if($value - 1 == $dataComing["pin"][$key + 1]){
 					$countReverseSeqNumber++;
 				}else{
-					$countReverseSeqNumber = 1;
+					if($countReverseSeqNumber < 3){
+						$countReverseSeqNumber = 1;
+					}
 				}
 			}
 		}
-		if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
-			$arrayResult['RESPONSE_CODE'] = "WS0057";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+		if($sequestDigit == "0"){
+			if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
+				$arrayResult['RESPONSE_CODE'] = "WS0057";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
+			}
 		}
-		
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
 		if($updatePin->execute([
 			':pin' => password_hash($dataComing["pin"], PASSWORD_DEFAULT),
 			':member_no' => $payload["member_no"]
 		])){
 			$arrayResult['RESULT'] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -69,16 +78,16 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 			$arrayResult['RESPONSE_CODE'] = "WS1015";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -95,7 +104,7 @@ if($lib->checkCompleteArgument(['pin','menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

@@ -9,7 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$header = array();
-		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+		$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE,mb.MEMBCAT_CODE
 												FROM mbmembmaster mb LEFT JOIN 
 												mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
@@ -44,12 +44,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code and dp.membcat_code = :membcat_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																		and kpd.seq_no = :seq_no
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
+				':membcat_code' => $rowName["MEMBCAT_CODE"],
 				':recv_period' => $dataComing["recv_period"],
 				':seq_no' => $dataComing["seq_no"]
 			]);
@@ -77,11 +78,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+																		LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code and dp.membcat_code = :membcat_code
 																		WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 																		ORDER BY kut.SORT_IN_RECEIVE ASC");
 			$getPaymentDetail->execute([
 				':member_no' => $member_no,
+				':membcat_code' => $rowName["MEMBCAT_CODE"],
 				':recv_period' => $dataComing["recv_period"]
 			]);
 		}
@@ -187,18 +189,20 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
-			@font-face {
-				font-family: THSarabun;
-				src: url(../../resource/fonts/THSarabun.ttf);
-			}
-			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
-				font-weight: bold;
-			}
-			* {
-			  font-family: THSarabun;
-			}
+			
+				@font-face {
+				  font-family: TH Niramit AS;
+				  src: url(../../resource/fonts/TH Niramit AS.ttf);
+				}
+				@font-face {
+					font-family: TH Niramit AS;
+					src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+					font-weight: bold;
+				}
+				* {
+				  font-family: TH Niramit AS;
+				}
+
 			body {
 			  padding: 0 30px;
 			}
@@ -215,11 +219,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูประจวบคีรีขันธ์ จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">5/1 ถนนประจวบศิริ ตำบลประจวบ</p>
-				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมือง จังหวัดประจวบคีรีขันธ์ 77000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร.0-3261-1212</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.pkn-coop.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ข้าราชการสหกรณ์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">20 ถนนพิชัย แขวงดุสิต</p>
+				<p style="margin-top: -25px;font-size: 18px;">เขตดุสิต กรุงเทพมหานคร 10300</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร.0-2244-8720-1, 0-2241-4711-2</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">cpd.upbean.co.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -339,7 +343,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="font-size: 18px;margin-left: 840px;margin-top:-160px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();

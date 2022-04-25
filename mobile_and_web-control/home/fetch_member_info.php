@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		$arrayResult = array();
+		
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_desc as PRENAME_SHORT,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,
+													mb.member_date,mbp.position_desc,mg.membgroup_desc,mt.membtype_desc,
 													mb.ADDRESS_NO as ADDR_NO,
 													mb.ADDRESS_MOO as ADDR_MOO,
 													mb.ADDRESS_SOI as ADDR_SOI,
@@ -32,6 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
 													MB.POSTCODE AS ADDR_POSTCODE
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+ 													LEFT JOIN mbucfposition mbp ON mb.position_code = mbp.position_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
