@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		
 	}else{
 		$checkValid = $conmssql->prepare("SELECT mb.memb_name as MEMB_NAME,mb.memb_surname as MEMB_SURNAME,mb.resign_status as RESIGN_STATUS
-											,mp.prename_desc as PRENAME_DESC,rtrim(ltrim(mb.card_person)) as CARD_PERSON
+											,mp.prename_desc as PRENAME_DESC,rtrim(ltrim(mb.card_person)) as CARD_PERSON,mb.MEMBGROUP_CODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											WHERE mb.member_no = :member_no");
 		$checkValid->execute([
@@ -38,6 +38,13 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowMember["MEMB_NAME"])){
+			if($rowMember["MEMBGROUP_CODE"] == '444'){
+				$arrayResult['RESPONSE_CODE'] = "WS0006";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				http_response_code(403);
+				require_once('../../include/exit_footer.php');
+			}
 			if($rowMember["RESIGN_STATUS"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
