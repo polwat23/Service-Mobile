@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_name','id_submenu'],$dataComing)){

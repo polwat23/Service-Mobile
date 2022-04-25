@@ -1,3 +1,3 @@
 @echo off
 
-C:\Program1\php7.4\php7.4\php.exe C:\Mobile\Service-pjt\external_service\notification_deposit_trigger.php
+C:\Mobile\php7.4\php.exe C:\Mobile\service-cgd\external_service\notification_deposit_trigger.php
