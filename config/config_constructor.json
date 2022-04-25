@@ -4,7 +4,7 @@
 	"COOP_ID" : "072001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.rvc.mobile",
-	"URL_SERVICE" : "https://proxy.thaicoop.co/RVCCOOP",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/RVCCOOP/",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAABck_vyI:APA91bFNsQ6r8eIOKWiyhCgIJUL2NO5nL8MjBCWabYlo-RpqxJsktpo85J6eeC7pNxyDsOZoMnarDgESB8KE0UFlg6AuR_OwkY7toY0Z9IrR_4LfTEk1ZSG27C1HZFtSie8fSSiAR1aJ",
 	"SECRET_KEY_JWT" : "RVC!/-Gcoop+Connect^072001*!&",
