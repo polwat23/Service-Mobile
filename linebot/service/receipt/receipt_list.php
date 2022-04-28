@@ -4,7 +4,7 @@ if($lineLib->checkBindAccount($user_id)){
 	$themeColor = $lineLib->getLineConstant('theme_color');
 	$member_no = $configAS[$data] ?? $data;
 	
-	$limit_period = $func->getConstant('limit_kpmonth');
+	$limit_period = 12;
 	$arrayGroupPeriod = array();
 	$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,KEEPING_STATUS 
 														from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");

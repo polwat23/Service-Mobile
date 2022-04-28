@@ -188,7 +188,7 @@ if($lineLib->checkBindAccount($user_id)){
 				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][0]["size"] = "xs";
 				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][0]["color"] = "#000000";
 				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][1]["type"] = "text";
-				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][1]["text"] = "2,000.00 บาท";
+				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][1]["text"] = ($dividendData["SUMPAY"]??'-')." บาท";
 				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][1]["size"] = "xs";
 				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][1]["weight"] = "bold";
 				$datas["contents"]["contents"][0]["body"]["contents"][0]["contents"][4]["contents"][3]["contents"][1]["color"] = "#000000";

@@ -1,10 +1,11 @@
 {
-	"LINEBOT_NAME" : "NKBK Link",
+	"LINEBOT_NAME" : "NKBKConnext",
 	"COOP_ID" : "059001",
 	"COOP_NAME" : "สหกรณ์ออมทรัพย์สาธารณสุขหนองคาย จำกัด",
 	"COOP_KEY" : "NKH",
 	"LIFF_ID" : "1656729415-nDx8JYBP",
 	"LINE_ID" : "@006vwzdx",
+	"LINE_REGISTER_LINK":"https://liff.line.me/1656729415-nDx8JYBP?page=register",
 	"LINK_BIND" : "nkhsaving://app/home?qrdata=",
 	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
 	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",

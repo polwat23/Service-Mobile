@@ -1,5 +1,8 @@
 <?php
 $filename = basename(__FILE__, '.php');
+
+
+
 $member_no = $lineLib->getMemberNo($user_id);
 if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' || $member_no =='etnmode4' || $member_no =='dev@mode' || $member_no =='salemode'){
 	//none

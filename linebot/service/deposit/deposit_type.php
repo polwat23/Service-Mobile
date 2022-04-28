@@ -3,7 +3,7 @@ if($lineLib->checkBindAccount($user_id)){
 	$data = $lineLib->getMemberNo($user_id);
 	$themeColor = $lineLib->getLineConstant('theme_color');
 	$member_no = $configAS[$data] ?? $data;
-	
+
 	$arrayResult = array();
 	$arrdepositData = array();
 	$getSumdepositData = $conmssql->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status <> 1");
@@ -31,7 +31,7 @@ if($lineLib->checkBindAccount($user_id)){
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 			]);
 		$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
+		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? $deptNo;
 		if(isset($rowAlias["path_alias_img"])){
 			$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
 			$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
@@ -122,14 +122,15 @@ if($lineLib->checkBindAccount($user_id)){
 			$indexContents++;
 
 		}
-	
+		$arrPostData["messages"][0] = $datas;
+		$arrPostData["replyToken"] = $reply_token; 
 	}else{
-		$datas["contents"]["contents"][0]["type"] = "text";
-		$datas["contents"]["contents"][0]["text"]["type"] = "ไม่พบข้อมูล";
-		$datas["contents"]["contents"][0]["text"]["margin"] = "md";
+		$messageResponse = "ไม่พบข้อมูล".$depttype;
+		$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+		$arrPostData["messages"] = $dataPrepare;
+		$arrPostData["replyToken"] = $reply_token;
 	}
-	$arrPostData["messages"][0] = $datas;
-	$arrPostData["replyToken"] = $reply_token; 
+	
 
 }else{
 	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อดูข้อมูล";

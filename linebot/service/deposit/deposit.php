@@ -82,7 +82,7 @@ if($lineLib->checkBindAccount($user_id)){
 		$depositData["contents"]["contents"][0]["body"]["contents"][2]["size"] = "md";
 		$depositData["contents"]["contents"][0]["body"]["contents"][2]["align"] = "end";
 		$depositData["contents"]["contents"][0]["body"]["contents"][3]["type"] = "text";
-		$depositData["contents"]["contents"][0]["body"]["contents"][3]["text"] = (number_format($rowSumAllbalance["SUM_BALANCE"])??'-').' บาท';
+		$depositData["contents"]["contents"][0]["body"]["contents"][3]["text"] = (number_format($rowSumAllbalance["SUM_BALANCE"],2)??'-').' บาท';
 		$depositData["contents"]["contents"][0]["body"]["contents"][3]["weight"] = "bold";
 		$depositData["contents"]["contents"][0]["body"]["contents"][3]["size"] = "lg";
 		$depositData["contents"]["contents"][0]["body"]["contents"][3]["color"] = "#35B84B";

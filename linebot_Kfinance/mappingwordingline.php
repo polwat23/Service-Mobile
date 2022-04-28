@@ -86,6 +86,8 @@ if(sizeof($arrMessage) == 2){
 		require_once('./service/confirm_otp.php');
 	}else if($message == "ยกเลิกผูกบัญชี"){
 		require_once('./service/unbindaccoun.php');
+	}else if($message == "otp_test"){
+		require_once('./service/send_otp.php');
 	}else{
 		//	$data = "ไม่พบข้อมูล  กรุณาเลือกเมนู";
 		//	$dataTemplate = $lineLib->mergeTextMessage($data);

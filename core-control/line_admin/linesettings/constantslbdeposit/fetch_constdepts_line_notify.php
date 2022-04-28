@@ -2,22 +2,22 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'line','constantsmsdeposit')){
+	if($func->check_permission_core($payload,'line','constantslinenotifydeposit')){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conmysql->prepare("SELECT
-																		id_smsconstantdept,
-																		dept_itemtype_code,
-																		allow_smsconstantdept
-																	FROM
-																		smsconstantdept
-																	ORDER BY dept_itemtype_code ASC");
+													id_constantdept,
+													dept_itemtype_code,
+													allow_lbconstantdept
+												FROM
+													lbconstantdept
+												ORDER BY dept_itemtype_code ASC");
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["ID_SMSCONSTANTDEPT"] = $rowMenuMobile["id_smsconstantdept"];
 			$arrConstans["DEPTITEMTYPE_CODE"] = $rowMenuMobile["dept_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTDEPT"] = $rowMenuMobile["allow_smsconstantdept"];
+			$arrConstans["ALLOW_SMSCONSTANTDEPT"] = $rowMenuMobile["allow_lbconstantdept"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conmssql->prepare("SELECT DEPTITEMTYPE_CODE,DEPTITEMTYPE_DESC FROM DPUCFDEPTITEMTYPE ORDER BY DEPTITEMTYPE_CODE ASC");
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGroup[] = $arrayDepttype;
 		}
 		
-		$arrayResult["ACCOUNT_DATA"] = $arrayGroup;
+		$arrayResult["LINE_NOTIFY_DEPOSIT_DATA"] = $arrayGroup;
 		
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');

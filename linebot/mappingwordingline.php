@@ -70,7 +70,7 @@ if($message == "จัดการบัญชี"){
 			require_once('./service/report/report_problem.php');
 		}else{
 			//บันทึกลงข้อความไม่ได้ตอบ
-			require_once('./service/notrespondmessage.php');
+			//require_once('./service/notrespondmessage.php');
 		}
 	}else if($incomeWord == "แจ้งปัญหา"){
 		require_once('./service/report/report_problem.php');
@@ -79,7 +79,7 @@ if($message == "จัดการบัญชี"){
 	}
 }
 //00007368
-require_once('./service/incomtext.php');
+//require_once('./service/incomtext.php');
 require_once(__DIR__.'./replyresponse.php');
 	
 ?>
