@@ -103,7 +103,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$amount_baht =  $lib->baht_text($amount_amt);
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib , $sum_principal ,$sum_interest , $sum_principalbf , $amount ,$amount_baht);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			$arrayResult['RESULT_AD'] = $amount_baht;
 			require_once('../../include/exit_footer.php');

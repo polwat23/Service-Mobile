@@ -39,7 +39,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrPrepare["consentPointId"] = $config["CONSENT_POINTID_EN"];
 				}
-				$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
+				if($payload["member_no"] == 'etnmode1' || $payload["member_no"] == 'etnmode2'){
+					$arrAuth["data_loopback"]["tel_mobile"] = '0883995571';
+				}else{
+					$arrAuth["data_loopback"]["tel_mobile"] = preg_replace('/-/','',$rowTelMobile["phone_number"]);
+				}
 				$arrPrepare["identifier"] = $arrAuth["data_loopback"]["tel_mobile"];
 				$arrPrepare["langCode"] = $lang_locale;
 				$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];
@@ -67,7 +71,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrPrepare["consentPointId"] = $config["CONSENT_POINTID_EN"];
 				}
-				$arrAuth["data_loopback"]["tel_mobile"] = $rowTelMobile["phone_number"];
+				if($payload["member_no"] == 'etnmode1' || $payload["member_no"] == 'etnmode2'){
+					$arrAuth["data_loopback"]["tel_mobile"] = '0883995571';
+				}else{
+					$arrAuth["data_loopback"]["tel_mobile"] = preg_replace('/-/','',$rowTelMobile["phone_number"]);
+				}
 				$arrPrepare["identifier"] = $arrAuth["data_loopback"]["tel_mobile"];
 				$arrPrepare["langCode"] = $lang_locale;
 				$arrAuth["HEADER"] = (object)["Authorization" => "Bearer ".$accessToken];

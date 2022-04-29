@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$date_now = date('Y-m-d');
 			}
 			$getShareStatement = $conmssqlcoop->prepare("SELECT stm.paydate as OPERATE_DATE,(stm.stock * 10) as PERIOD_SHARE_AMOUNT,
-														stm.stock_onhand as SUM_SHARE_AMT,crt.description as SHRITEMTYPE_DESC,stm.receipt_no as REF_SLIPNO
+														(stm.stock_onhand * 10) as SUM_SHARE_AMT,crt.description as SHRITEMTYPE_DESC,stm.receipt_no as REF_SLIPNO
 														FROM coreceipt stm LEFT JOIN coReceiptType crt ON stm.type = crt.type
 														WHERE stm.member_id = ? and stm.type  = '10'  and stm.status ='2'
 														and stm.paydate BETWEEN CONVERT(varchar, ? , 23) and CONVERT(varchar, ? , 23) 

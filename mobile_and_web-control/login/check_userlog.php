@@ -48,6 +48,14 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		}
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
+		
+		if ($forceNewSecurity == true) {
+			$newArrayResult = array();
+			$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+			$arrayResult = array();
+			$arrayResult = $newArrayResult;
+		}
+
 		require_once('../../include/exit_footer.php');
 		
 	}
@@ -79,6 +87,14 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			];
 			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
+			
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
+
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0011";

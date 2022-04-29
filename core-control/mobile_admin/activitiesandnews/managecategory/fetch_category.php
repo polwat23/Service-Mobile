@@ -5,8 +5,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','managecategory')){
 		$getCategory = $conmssql->prepare("SELECT category_code,category_desc,is_use FROM gccategory ");
 		$getCategory->execute();
+		$arrGrpCategory = array();
 		while($rowCate = $getCategory->fetch(PDO::FETCH_ASSOC)){
-			$arrGrpCategory = array();
 			$arrCategory["CATEGORY_CODE"] = $rowCate["category_code"];
 			$arrCategory["CATEGORY_DESC"] = $rowCate["category_desc"];
 			$arrCategory["IS_USE"] = $rowCate["is_use"];
