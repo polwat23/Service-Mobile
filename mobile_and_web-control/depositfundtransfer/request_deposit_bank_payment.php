@@ -29,13 +29,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}else if($rowDataDeposit["bank_code"] == '006'){
 			$vccAccID = $func->getConstant('map_account_id_ktb');
 		}
-		$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
 		$getBalanceAccFee = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$getBalanceAccFee->execute([':deptaccount_no' => $rowDataDeposit["account_payfee"]]);
 		$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
 		$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 2;
-		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 		$conoracle->beginTransaction();
 		$conmysql->beginTransaction();

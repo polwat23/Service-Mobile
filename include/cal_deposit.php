@@ -1069,7 +1069,6 @@ class CalculateDep {
 	}
 	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
 	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
 			if($constFromAcc["MINPRNCBAL"] > $constFromAcc["PRNCBAL"] - ($checkSeqAmtSrc["SEQUEST_AMOUNT"] + $constFromAcc["CHECKPEND_AMT"] + $amt_transfer)){
@@ -1150,7 +1149,7 @@ class CalculateDep {
 			if($insertStatement->execute($arrExecuteStm)){
 				if($penalty_amt > 0){
 					$rowMapAccFee = $this->getVcMapID('00');
-					$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+					$deptslip_noPenalty = $penaltyslip;
 					$lastStmSrcNo += 1;
 					$arrExecutePenalty = [
 						':deptslip_no' => $deptslip_noPenalty,
@@ -1249,9 +1248,8 @@ class CalculateDep {
 		}
 	}
 	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+	$operate_date,$config,$deptslip_no=null,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null,$deptfeeslip_no){
+		$deptslip_noPenalty = $deptfeeslip_no;
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		$arrExecutePenalty = [

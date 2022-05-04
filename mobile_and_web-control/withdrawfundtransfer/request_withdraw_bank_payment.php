@@ -66,21 +66,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrSendData["client_timestamp"] = $dataComing["CLIENT_TIMESTAMP"];
 			$arrSendData["client_trans_no"] = $dataComing["CLIENT_TRANS_NO"];
 		}
-		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
+		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		if($fee_amt > 0){
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-		}else{
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+			$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 		}
 		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
-		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
 		$conoracle->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
-		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noFee);
 		if($wtdResult["RESULT"]){
 			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);

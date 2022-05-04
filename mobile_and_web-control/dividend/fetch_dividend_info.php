@@ -28,7 +28,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getMethpay = $conoracle->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
 													CM.BANK_DESC AS BANK,
-													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
+													(CASE WHEN YM.EXPENSE_AMT = 0
+													  THEN YM.DIV_AMT + YM.AVG_AMT
+													  ELSE YM.EXPENSE_AMT END)
+													 AS RECEIVE_AMT ,		
 													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
 													YM.METHPAYTYPE_CODE
 												FROM 
