@@ -738,12 +738,18 @@ class CalculateDep {
 		$arrPosString["R"] = strpos($rowLastSlip["DOCUMENT_FORMAT"] , 'R' , 0);
 		asort($arrPosString);
 		foreach($arrPosString as $key => $value){
-			if($key == 'P' && $value){
-				$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
-			}else if($key == 'Y' && $value){
-				$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
-			}else if($key == 'R' && $value){
-				$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1,$countRunning));
+			if($key == 'P'){
+				if($countPrefix > 0){
+					$deptslip_no .= $lib->mb_str_pad($rowLastSlip["DOCUMENT_PREFIX"],$countPrefix);
+				}
+			}else if($key == 'Y'){
+				if($countYear > 0){
+					$deptslip_no .= substr($rowLastSlip["DOCUMENT_YEAR"],$countYear*-1);
+				}
+			}else if($key == 'R'){
+				if($countRunning > 0){
+					$deptslip_no .= strtolower($lib->mb_str_pad($rowLastSlip["LAST_DOCUMENTNO"] + 1 + $more,$countRunning));
+				}
 			}
 		}
 		$arrayResult["SLIP_NO"] = $deptslip_no;
@@ -1136,7 +1142,6 @@ class CalculateDep {
 	}
 	public function WithdrawMoneyInside($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
 	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$count_wtd=null){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
 			if($constFromAcc["MINPRNCBAL"] > $constFromAcc["PRNCBAL"] - ($checkSeqAmtSrc["SEQUEST_AMOUNT"] + $constFromAcc["CHECKPEND_AMT"] + $amt_transfer)){
@@ -1229,9 +1234,8 @@ class CalculateDep {
 		}
 	}
 	public function insertFeeTransaction($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$oneway_fee=false,$slslip=null,$count_wtd=null){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+	$operate_date,$config,$deptslip_no=null,$lib,$max_seqno,$constFromAcc,$oneway_fee=false,$slslip=null,$count_wtd=null,$penaltyslip=null){
+		$deptslip_noPenalty = $penaltyslip;
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		if($oneway_fee){
@@ -1328,9 +1332,8 @@ class CalculateDep {
 		}
 	}
 	public function insertFeePromotion($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$count_wtd=null){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+	$operate_date,$config,$deptslip_no=null,$lib,$max_seqno,$constFromAcc,$count_wtd=null,$penaltyslip=null){
+		$deptslip_noPenalty = $penaltyslip;
 		$lastStmSrcNo = $max_seqno;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		$arrExecutePenalty = [

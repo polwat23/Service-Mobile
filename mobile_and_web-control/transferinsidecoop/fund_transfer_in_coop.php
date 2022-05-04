@@ -25,21 +25,17 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
-			if($dataComing["penalty_amt"] > 0){
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-			}else{
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			}
+			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
+			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 			$getlastseq_no = $cal_dep->getLastSeqNo($from_account_no);
 			$getlastseq_noDest = $cal_dep->getLastSeqNo($to_account_no);
-			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-			$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+			$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
 			$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
 			$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 			$conmssql->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
@@ -49,8 +45,13 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$constFromAcc["PRNCBAL"] = $constFromAcc["PRNCBAL"] - $dataComing["amt_transfer"];
 					$constFromAcc["WITHDRAWABLE_AMT"] = $constFromAcc["WITHDRAWABLE_AMT"] - $dataComing["amt_transfer"];
 					$vccamtPenalty = $cal_dep->getVcMapID('00','DEP','FEE');
+					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+					$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty["ACCOUNT_ID"],'FMB',
-					$dataComing["amt_transfer"],$dataComing["penalty_amt"],$dateOperC,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAcc);
+					$dataComing["amt_transfer"],$dataComing["penalty_amt"],$dateOperC,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAcc,false,null,null,$deptslip_noFee);
 					if($penaltyWtd["RESULT"]){
 						
 					}else{
