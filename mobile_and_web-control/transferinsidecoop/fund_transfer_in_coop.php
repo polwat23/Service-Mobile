@@ -25,24 +25,27 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
+			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			if($dataComing["penalty_amt"] > 0){
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-			}else{
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+				$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 			}
 			$getlastseq_no = $cal_dep->getLastSeqNo($from_account_no);
-			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-			$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+			$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
 			$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
 			$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 			$conoracle->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
-			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
+			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noFee);
 			if($wtdResult["RESULT"]){
 				$getlastseq_noDest = $cal_dep->getLastSeqNo($to_account_no);
 				$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$to_account_no,$srcvcid["ACCOUNT_ID"],$itemtypeDepositDest,

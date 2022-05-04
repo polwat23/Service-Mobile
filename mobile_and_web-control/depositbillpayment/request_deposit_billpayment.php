@@ -29,10 +29,11 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$payload["member_no"] = $rowCheckBill["member_no"];
 				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
 				$payload["app_version"] = $rowCheckBill["app_version"];
-				$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-				$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-				$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
+				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+				$slipnoFee = $arrSlipDPnoFee["SLIP_NO"];
+				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 				$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
 													LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
 													WHERE gba.member_no = :member_no 
@@ -48,21 +49,21 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$arrDpSlip = array();
 				while($rowDetailDP = $getDetailTranDP->fetch(PDO::FETCH_ASSOC)){
 					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
-					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+					$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
 					$arrDpSlip[$rowDetailDP["ref_account"]] = $arrSlipDPnoDest["SLIP_NO"];
 					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				}
-				$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 				$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 				$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$conoracle->beginTransaction();
 				$conmysql->beginTransaction();
@@ -182,14 +183,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
 					}
 				}else{
-					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-					$depositMoney["DEPTSLIP_NO"] = $arrSlipDPnoDest["SLIP_NO"];
 					$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
 					$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
 				}
 				$vccamtPenalty = $cal_dep->getVcMapID('00');
 				$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowPayFee["account_payfee"],$vccamtPenalty["ACCOUNT_ID"],'FEE',
-				$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$maxno_deptfee,$dataAccFee);
+				$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,null,$lib,$maxno_deptfee,$dataAccFee,null,null,$slipnoFee);
 				if($penaltyWtd["RESULT"]){
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
