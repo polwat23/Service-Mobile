@@ -25,21 +25,21 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.ADDR_EMAIL AS EMAIL,MB.ADDR_MOBILEPHONE AS MEM_TELMOBILE,
+		$fetchMember = $conoracle->prepare("SELECT MP.PRENAME_SHORT,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.EMAIL AS EMAIL,MB.MEM_TEL AS MEM_TELMOBILE,
 											MB.MEMBER_DATE,MB.MEMBER_NO,
-											MB.ADDR_NO AS ADDR_NO,
-											MB.ADDR_MOO AS ADDR_MOO,
-											MB.ADDR_SOI AS ADDR_SOI,
-											MB.ADDR_VILLAGE AS ADDR_VILLAGE,
-											MB.ADDR_ROAD AS ADDR_ROAD,
+											MB.ADDRESS_NO AS ADDR_NO,
+											MB.ADDRESS_MOO AS ADDR_MOO,
+											MB.ADDRESS_SOI AS ADDR_SOI,
+											MB.ADDRESS_VILLAGE AS ADDR_VILLAGE,
+											MB.ADDRESS_ROAD AS ADDR_ROAD,
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,
 											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.ADDR_POSTCODE AS ADDR_POSTCODE
+											MB.POSTCODE AS ADDR_POSTCODE
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.AMPHUR_CODE = MBD.district_code
+											LEFT JOIN mbucfdistrict MBD ON mb.DISTRICT_CODE = MBD.district_code
 											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).

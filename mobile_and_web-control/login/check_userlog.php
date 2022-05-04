@@ -46,12 +46,26 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 			
 		}
+		
+		$checkAccountStatus = $conmysql->prepare("SELECT account_status,phone_number,email FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+		$checkAccountStatus->execute([':member_no' => $payload["member_no"]]);
+		$rowCheckAccountStatus = $checkAccountStatus->fetch(PDO::FETCH_ASSOC);
+		if ($rowCheckAccountStatus["account_status"] == '-9'){
+			$arrayResult['TEMP_PASSWORD'] = TRUE;
+		}else{
+			$arrayResult['TEMP_PASSWORD'] = FALSE;
+		}
+		
+		if (!isset($rowCheckAccountStatus["phone_number"]) && !isset($rowCheckAccountStatus["email"])) {
+			$arrayResult['UPDATE_MEMBER_INFO'] = TRUE;
+		}
+
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+	$checkPinNull = $conmysql->prepare("SELECT pin,account_status,phone_number,email  FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 	$rowPinNull = $checkPinNull->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowPinNull["pin"])){
@@ -61,6 +75,11 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			}else{
 				$arrayResult['TEMP_PASSWORD'] = FALSE;
 			}
+			
+			if (!isset($rowPinNull["phone_number"]) && !isset($rowPinNull["email"])) {
+				$arrayResult['UPDATE_MEMBER_INFO'] = TRUE;
+			}
+			
 			$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
 			$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
 			if(!$is_refreshToken_arr){
