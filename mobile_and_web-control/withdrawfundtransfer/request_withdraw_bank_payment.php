@@ -74,11 +74,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 		$arrSendData["verify_token"] = $verify_token;
 		$arrSendData["app_id"] = $config["APP_ID"];
-		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
-		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
+		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
-		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
 		$from_account_no = $rowDataWithdraw["account_payfee"];
@@ -97,8 +97,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$wtdResult["MAX_SEQNO"] = $getlastseqFeeAcc["MAX_SEQ_NO"];
 			}
 			if($fee_amt > 0){
+				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+				$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+
 				$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
-				$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1);
+				$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 				if($penaltyWtd["RESULT"]){
 					
 				}else{
@@ -123,8 +129,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}else{
 				if($rowCountFee["C_TRANS"] + 1 > 2){
 				}else{
+					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+					$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyPromo,'FWM',
-					$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1);
+					$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 					if($penaltyWtdPromo["RESULT"]){
 						
 					}else{

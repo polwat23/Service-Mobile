@@ -72,21 +72,16 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		}
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
 		$destvcid = $cal_dep->getVcMapID($dataCont["LOANTYPE_CODE"],'LON');
-		$arrSlipnoPayout = $cal_dep->generateDocNo('SLSLIPPAYOUT',$lib);
+		$arrSlipnoPayout = $cal_dep->generateDocNo('ONLINETXLON',$lib);
 		$payoutslip_no = $arrSlipnoPayout["SLIP_NO"];
 		$lastdocument_noPayout = $arrSlipnoPayout["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_no = $arrSlipDPno["SLIP_NO"];
-		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$from_account_no = $rowDataWithdraw["account_payfee"];
 		$constFromAccFee = $cal_dep->getConstantAcc($from_account_no);
 		$vccamtPenalty = $func->getConstant("accidfee_receive");
 		$vccamtPenaltyPromo = $func->getConstant("accidfee_promotion");
 		
 		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataWithdraw["account_payfee"]);
-		$updateDocuControlPayout = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYOUT'");
+		$updateDocuControlPayout = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 		$updateDocuControlPayout->execute([':lastdocument_no' => $lastdocument_noPayout]);
 		$conmssql->beginTransaction();
 		$slipPayout = $cal_loan->paySlipLonOut($conmssql,$config,$payoutslip_no,$member_no,'LWD',null,$dateOper,$dataCont["LOANTYPE_CODE"],
@@ -96,8 +91,13 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 			$payoutslip_no,$ref_no,$deptaccount_no,0,$payload,$dataComing["app_version"],$dateOper,$log);
 			if($receiveLon["RESULT"]){
 				if($fee_amt > 0){
+					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+					$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
-					$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee,true,$payoutslip_no,$rowCountFee["C_TRANS"] + 1);
+					$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,null,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee,true,$payoutslip_no,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 					if($penaltyWtd["RESULT"]){
 						
 					}else{
@@ -122,8 +122,13 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				}else{
 					if($rowCountFee["C_TRANS"] + 1 > 2){
 					}else{
+						$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+						$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+						$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+						$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+						$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 						$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyPromo,'FWM',
-						$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1);
+						$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,null,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 						if($penaltyWtdPromo["RESULT"]){
 							
 						}else{

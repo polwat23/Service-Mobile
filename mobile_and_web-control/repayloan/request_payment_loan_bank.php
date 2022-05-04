@@ -49,9 +49,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
 		}
-		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_no = $arrSlipDPno["SLIP_NO"];
-		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
 		$getBalanceAccFee = $conmssql->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$getBalanceAccFee->execute([':deptaccount_no' => $rowBankDisplay["account_payfee"]]);
 		$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
@@ -62,17 +59,15 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 			':member_no' => $payload["member_no"]
 		]);
 		$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
-		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-		$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-		$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+		$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+		$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 		$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 		$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 		$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		$updateDocuControlPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+		$updateDocuControlPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 		$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-		$updateDocuControlDocPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+		$updateDocuControlDocPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 		$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowBankDisplay["account_payfee"]);
 		$conmssql->beginTransaction();
@@ -99,8 +94,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 								require_once('../../include/exit_footer.php');
 							}
 							$vccamtPenalty = $func->getConstant("accidfee_receive");
+							$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+							$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+							$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+							$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+							$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 							$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FDM',
-							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,$rowCountFee["C_TRANS"] + 1);
+							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,null,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 							if($penaltyWtd["RESULT"]){
 								
 							}else{
@@ -125,8 +125,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 					}else{
 						if($rowBankDisplay["fee_deposit"] > 0){
 							$vccamtPenaltyDepPromo = $func->getConstant("accidfee_promotion");
+							$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+							$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+							$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+							$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+							$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 							$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$rowBankDisplay["account_payfee"],$vccamtPenaltyDepPromo,'FDM',
-							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOper,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,$rowCountFee["C_TRANS"] + 1);
+							$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOper,$config,null,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 							if($penaltyWtdPromo["RESULT"]){
 								
 							}else{

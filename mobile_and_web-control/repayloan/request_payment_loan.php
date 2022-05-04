@@ -47,25 +47,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
+			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
+			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 			if($dataComing["penalty_amt"] > 0){
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-			}else{
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				
 			}
 			$getlastseq_no = $cal_dep->getLastSeqNo($from_account_no);
-			$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-			$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-			$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+			$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+			$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 			$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 			$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 			$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControlPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+			$updateDocuControlPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 			$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-			$updateDocuControlDocPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+			$updateDocuControlDocPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 			$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 			$conmssql->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
