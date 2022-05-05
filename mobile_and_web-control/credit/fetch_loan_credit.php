@@ -9,30 +9,40 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
 		$fetchLoanCanCal->execute();
 		while($rowCanCal = $fetchLoanCanCal->fetch(PDO::FETCH_ASSOC)){
-			$arrCanCal[] = $rowCanCal["loantype_code"];
-		}
-		$fetchCredit = $conoracle->prepare("SELECT lt.loantype_code as LOANTYPE_CODE,lt.loantype_desc AS LOANTYPE_DESC,lc.maxloan_amt,lc.percentshare,lc.percentsalary,mb.salary_amount,(sh.sharestk_amt*10) as SHARE_AMT
-													FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb 
-													LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-													WHERE mb.member_no = :member_no and 
-													LT.LOANTYPE_CODE IN(".implode(',',$arrCanCal).")
-													and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
-		$fetchCredit->execute([':member_no' => $member_no]);
-		while($rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC)){
+			$arrOtherInfo = array();
+			$fetchLoanType = $conoracle->prepare("SELECT loantype_desc FROM lnloantype WHERE loantype_code = :loantype_code");
+			$fetchLoanType->execute([
+				':loantype_code' => $rowCanCal["loantype_code"]
+			]);
+			$rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC);
 			$arrCredit = array();
 			$maxloan_amt = 0;
-			$salaryPercent = $rowCredit["SALARY_AMOUNT"] * $rowCredit["PERCENTSALARY"];
-			$sharePercent = $rowCredit["SHARE_AMT"] * $rowCredit["PERCENTSHARE"];
-			if($salaryPercent > $sharePercent){
-				$maxloan_amt = $salaryPercent;
+			$canRequest = FALSE;
+			if(file_exists('calculate_loan_'.$rowCanCal["loantype_code"].'.php')){
+				include('calculate_loan_'.$rowCanCal["loantype_code"].'.php');
 			}else{
-				$maxloan_amt = $sharePercent;
+				include('calculate_loan_etc.php');
 			}
-			if($maxloan_amt > $rowCredit["MAXLOAN_AMT"]){
-				$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
+			if($canRequest === TRUE){
+				$canRequest = $rowCanCal["is_loanrequest"] == '1' ? TRUE : FALSE;
+				$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
+															FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+				$CheckIsReq->execute([
+					':loantype_code' => $rowCanCal["loantype_code"],
+					':member_no' => $member_no
+				]);
+				if($CheckIsReq->rowCount() > 0 || $maxloan_amt <= 0){
+					$canRequest = FALSE;
+				}else {
+					if(!$func->check_permission($payload["user_type"],'LoanRequestForm','LoanRequestForm')){
+						$canRequest = FALSE;
+					}
+				}
 			}
-			$arrCredit["LOANTYPE_CODE"] = $rowCredit["LOANTYPE_CODE"];
-			$arrCredit["LOANTYPE_DESC"] = $rowCredit["LOANTYPE_DESC"];
+			$arrCredit["OTHER_INFO"] = $arrOtherInfo;
+			$arrCredit["ALLOW_REQUEST"] = $canRequest;
+			$arrCredit["LOANTYPE_CODE"] = $rowCanCal["loantype_code"];
+			$arrCredit["LOANTYPE_DESC"] = $rowLoanType["LOANTYPE_DESC"];
 			$arrCredit["LOAN_PERMIT_AMT"] = $maxloan_amt;
 			$arrGroupCredit[] = $arrCredit;
 		}

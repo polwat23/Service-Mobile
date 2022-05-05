@@ -6,6 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		if(isset($dataComing["deptaccount_no"]) && $dataComing["deptaccount_no"] != ""){
 			$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+			$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 			$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT
 													FROM lncontmaster
 													WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
@@ -17,11 +18,11 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$interest = $cal_loan->calculateInterestArr($contract_no,$dataComing["amt_transfer"]);
+				$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
 				$arrOther = array();
-				if($interest > 0){
+				if($interest["INT_ARREAR"] > 0){
 					$arrOther["LABEL"] = 'ดอกเบี้ย';
-					$arrOther["VALUE"] = number_format($interest,2)." บาท";
+					$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
 				}
 				$arrOther["LABEL"] = 'หนี้คงเหลือหลังทำรายการ';
@@ -31,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				require_once('../../include/exit_footer.php');
 			}
 		}else{
-			/*$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
+			$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
 			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 			$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT
 													FROM lncontmaster
@@ -44,11 +45,11 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$interest = $cal_loan->calculateInterestArr($contract_no,$dataComing["amt_transfer"]);
+				$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
 				$arrOther = array();
-				if($interest > 0){
+				if($interest["INT_ARREAR"] > 0){
 					$arrOther["LABEL"] = 'ดอกเบี้ย';
-					$arrOther["VALUE"] = number_format($interest,2)." บาท";
+					$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
 				}
 				$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
@@ -69,6 +70,16 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 					$fee_amt = 0;
 				}
 				if($fee_amt > 0){
+					$getBalanceAccFee = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+					$getBalanceAccFee->execute([':deptaccount_no' => $rowDataWithdraw["account_payfee"]]);
+					$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
+					$dataAccFee = $cal_dep->getConstantAcc($rowDataWithdraw["account_payfee"]);
+					if($rowBalFee["PRNCBAL"] - $fee_amt < $dataAccFee["MINPRNCBAL"]){
+						$arrayResult['RESPONSE_CODE'] = "WS0100";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
 					$arrOther["LABEL"] = 'ค่าธรรมเนียม';
 					$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
@@ -78,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$arrayResult["OTHER_INFO"][] = $arrOther;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
-			}*/
+			}
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

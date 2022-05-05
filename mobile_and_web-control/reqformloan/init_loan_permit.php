@@ -5,32 +5,43 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
+			$getOldContract = $conoracle->prepare("SELECT PRINCIPAL_BALANCE FROM LNCONTMASTER
+										WHERE member_no = :member_no and loantype_code = '21' and contract_status = '1'");
+			$getOldContract->execute([':member_no' => $member_no]);
+			$rowOldCont = $getOldContract->fetch(PDO::FETCH_ASSOC);
+			$oldBal = $rowOldCont["PRINCIPAL_BALANCE"] ?? 0;
 			$period_payment = $dataComing["request_amt"] / $dataComing["period"];
+			if($dataComing["request_amt"] - $oldBal < 0){
+				$arrayResult['REVERT_VALUE'] = TRUE;
+				$arrayResult['RESPONSE_CODE'] = "WS0086";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"] - $oldBal;
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
-			$fetchCredit = $conoracle->prepare("SELECT lc.maxloan_amt,lc.percentshare,lc.percentsalary,mb.salary_amount,(sh.sharestk_amt*10) as SHARE_AMT
-														FROM lnloantypecustom lc LEFT JOIN lnloantype lt ON lc.loantype_code = lt.loantype_code,mbmembmaster mb 
-														LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-														WHERE mb.member_no = :member_no and LT.LOANTYPE_CODE = :loantype_code
-														and TRUNC(MONTHS_BETWEEN (SYSDATE,mb.member_date ) /12 *12) BETWEEN lc.startmember_time and lc.endmember_time");
-			$fetchCredit->execute([
-				':member_no' => $member_no,
-				':loantype_code' => $dataComing["loantype_code"]
-			]);
-			$rowCredit = $fetchCredit->fetch(PDO::FETCH_ASSOC);
 			$maxloan_amt = 0;
-			$salaryPercent = $rowCredit["SALARY_AMOUNT"] * $rowCredit["PERCENTSALARY"];
-			$sharePercent = $rowCredit["SHARE_AMT"] * $rowCredit["PERCENTSHARE"];
-			if($salaryPercent > $sharePercent){
-				$maxloan_amt = $salaryPercent;
+			$oldBal = 0;
+			$loanRequest = TRUE;
+			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
+				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
 			}else{
-				$maxloan_amt = $sharePercent;
+				include(__DIR__.'/../credit/calculate_loan_etc.php');
 			}
-			if($maxloan_amt > $rowCredit["MAXLOAN_AMT"]){
-				$maxloan_amt = $rowCredit["MAXLOAN_AMT"];
+			if($maxloan_amt <= 0){
+				$arrayResult['RESPONSE_CODE'] = "WS0084";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
+			}
+			$request_amt = $dataComing["request_amt"] ?? $maxloan_amt;
+			if($request_amt < $oldBal){
+				$request_amt = $oldBal;
 			}
 			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
 															FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
@@ -40,13 +51,19 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				':loantype_code' => $dataComing["loantype_code"]
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
-			$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
 			
+			$period_payment = $maxloan_amt / $rowMaxPeriod["MAX_PERIOD"];
+			$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
+			$arrayResult["RECEIVE_NET"] = $receive_net;
+			$arrayResult["REQUEST_AMT"] = $request_amt;
 			$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-			$arrayResult["REQUEST_AMT"] = $maxloan_amt;
-			//$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
-			$arrayResult["MAX_PERIOD"] = 12;
+			$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+			$arrayResult["SPEC_REMARK"] = $configError["SPEC_REMARK"][0][$lang_locale];
+			$arrayResult["REQ_SALARY"] = FALSE;
+			$arrayResult["REQ_CITIZEN"] = FALSE;
+			$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
+			$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}

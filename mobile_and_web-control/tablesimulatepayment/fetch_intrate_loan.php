@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$fetchIntrate = $conoracle->prepare("select (lir.interest_rate * 100) as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
+		$fetchIntrate = $conoracle->prepare("select lir.interest_rate  as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
 												ON lp.inttabrate_code = lir.loanintrate_code where to_char(sysdate,'YYYY-MM-DD') BETWEEN 
 												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
 		$fetchIntrate->execute();
@@ -15,6 +15,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
 			$arrIntGroup[] = $arrIntrate;
 		}
+		$arrOption = array();
+		$arrOption[0]["VALUE"] = '0';
+		$arrOption[0]["DESC"] = 'ชำระต้นคงที่';
+		$arrOption[0]["VALUE"] = '1';
+		$arrOption[0]["DESC"] = 'ชำระยอดคงที่';
+		$arrayResult['OPTION_PAY_TYPE'] = $arrOption;
 		$arrayResult['INT_RATE'] = $arrIntGroup;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
