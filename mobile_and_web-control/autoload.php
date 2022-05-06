@@ -113,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							->validateExpiration()
 							->parse();
 						$payload = $parsed_token->getPayload();
+						
 						if(!$lib->checkCompleteArgument(['id_userlogin','member_no','exp','id_token','user_type'],$payload)){
 							$arrayResult['RESPONSE_CODE'] = "WS4004";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -121,6 +122,39 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}
+						if($dataComing["is_root"] == "1"){
+							$insertBlackList = $conmssql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist)
+																VALUES(:unique_id,:member_no,'1')");
+							if($insertBlackList->execute([
+								':unique_id' => $dataComing["unique_id"],
+								':member_no' => $payload["member_no"]
+							])){
+								$arrayResult['RESPONSE_CODE'] = "WS0069";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								http_response_code(401);
+								require_once('../../include/exit_footer.php');
+								
+							}
+						}
+						$getMemberLogged = $conmssql->prepare("SELECT id_token FROM gcuserlogin 
+															WHERE member_no = :member_no and channel = :channel and is_login = '1' and id_userlogin <> :id_userlogin");
+						$getMemberLogged->execute([
+							':member_no' => $payload["member_no"],
+							':channel' => $adataComing["channel"],
+							':id_userlogin' => $payload["id_userlogin"]
+						]);
+						while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
+							$arrayIdToken[] = $rowIdToken["id_token"];
+						}
+						$updateLoggedOneDeviceGU = $conmssql->prepare("UPDATE gcuserlogin SET 
+																	is_login = '-5',logout_date = GETDATE()
+																	WHERE id_token IN(".implode(',',$arrayIdToken).")");
+						$updateLoggedOneDeviceGU->execute();
+						$updateLoggedOneDeviceGT = $conmssql->prepare("UPDATE gctoken SET rt_is_revoke = '-6',
+																	at_is_revoke = '-6',rt_expire_date = GETDATE() ,at_expire_date = GETDATE()
+																	WHERE id_token IN(".implode(',',$arrayIdToken).")");
+						$updateLoggedOneDeviceGT->execute();
 						$rowLogin = $func->checkLogin($payload["id_token"]);
 						if(!$rowLogin["RETURN"]){
 							if($rowLogin["IS_LOGIN"] == '-9' || $rowLogin["IS_LOGIN"] == '-10') {

@@ -179,6 +179,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						unset($blukInsertNot);
 						$blukInsertNot = array();
 					}
+					$arrayResult['SMS'] = $arrPayloadNotify;
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../../include/exit_footer.php');
 				}else{
