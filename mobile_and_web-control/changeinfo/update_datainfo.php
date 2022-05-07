@@ -79,9 +79,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						':member_no' => $member_no,
 						':phone_number' => $dataComing["tel"] ?? "-"
 					])){
-						$conoracle->commit();
 						$log->writeLog('editinfo',$logStruc);
-						$arrayResult["RESULT"] = TRUE;
 					}else{
 						$filename = basename(__FILE__, '.php');
 						$logStruc = [
@@ -171,9 +169,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':post_code' => $dataComing["address"]["addr_postcode"] ?? $rowAddr["ADDR_POSTCODE"],
 					':member_no' => $member_no
 				])){
-					$conoracle->commit();
 					$arrayResult["RESULT_ADDRESS"] = TRUE;
-					$arrayResult["RESULT"] = TRUE;
 				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
@@ -235,6 +231,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 		
 		}
+		$conoracle->commit();
+		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
