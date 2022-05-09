@@ -15,16 +15,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 													kpd.SEQ_NO,
 													kut.keepitemtype_grp as TYPE_GROUP,
 													kpd.MONEY_RETURN_STATUS,
-													kpd.ITEM_KEPTAMT AS ADJUST_ITEMAMT,
-													kpd.PRINCIPAL_KEPTAMT as ADJUST_PRNAMT,
-													kpd.INTEREST_KEPTAMT as ADJUST_INTAMT,
+													kpd.ADJUST_ITEMAMT,
+													kpd.ADJUST_PRNAMT,
+													kpd.ADJUST_INTAMT,
 													case kut.keepitemtype_grp 
 														WHEN 'DEP' THEN kpd.description
 														WHEN 'LON' THEN kpd.loancontract_no
 													ELSE kpd.description END as PAY_ACCOUNT,
-													kpd.PERIOD,
-													kpd.KEEPITEM_STATUS,
-													kpd.BFPRINBALANCE_AMT,
+													kpd.period,
 													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
@@ -67,9 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else{
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			}
-			if($rowDetail["KEEPITEM_STATUS"] == '-99'){
-				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["BFPRINBALANCE_AMT"] - $rowDetail["ADJUST_PRNAMT"],2);
-			}else{
+			if($rowDetail["ITEM_BALANCE"] > 0){
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}
 			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];

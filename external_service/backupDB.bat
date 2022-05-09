@@ -10,9 +10,9 @@ set DAY_OF_LIFE=3
 set DBHOST=localhost
 set DBPORT=3306
 set DBUSER=root
-set DBPASS=@MSK2021
-set DBNAME=mobile_msk_test
-set PROJECT_PATH=C:\Mobile\service-msk-test\
+set DBPASS=@NAN2021
+set DBNAME=mobile_nan_test
+set PROJECT_PATH=C:\Mobile\service-nan-test\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%

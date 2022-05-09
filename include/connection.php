@@ -28,7 +28,6 @@ class connection {
 			exit();
 		}
 	}
-
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);

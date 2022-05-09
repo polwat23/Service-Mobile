@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		if($lib->checkCompleteArgument(['period'],$dataComing)){
 			$period = $dataComing["period"];
 		}else{
-			if($calint_type === "1"){ // คงต้น
+			if($calint_type === "1"){ // 
 				$period = ceil($payment_sumbalance / $period_payment);
 			}else{ 
 				$period = 0;
@@ -68,7 +68,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
 			$pay_period = $period_payment;
 		}else{
-			if($calint_type === "1"){ // คงต้น
+			if($calint_type === "1"){ // 
 				$pay_period = $payment_sumbalance / $period;
 			}else{ 
 				$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
@@ -90,7 +90,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		
 		for($i = 1;$i <= $period;$i++){
 			$arrPaymentPerPeriod = array();
-			if($calint_type === "1"){ // คงต้น
+			if($calint_type === "1"){ // 
 				if($i == 1){
 					if($cal_start_pay_date == "next"){
 						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
@@ -123,7 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment,2);
 				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
 				
-			}else if($calint_type === "2"){ // คงยอด ต้น + ดอก เท่ากันทุกเดือน
+			}else if($calint_type === "2"){ // อด  + อก ากันุกอน
 				if($i == 1){
 					if($cal_start_pay_date == "next"){
 						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
@@ -202,11 +202,11 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
+		":error_desc" => " Argument รบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
+	$message_error = " ".$filename."  Argument รบ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

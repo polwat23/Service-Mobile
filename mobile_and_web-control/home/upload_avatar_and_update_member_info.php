@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		
+		$arrayResult = array();
 		$member_no = $payload["member_no"];
 		$encode_avatar = $dataComing["encode_avatar"];
 		$destination = __DIR__.'/../../resource/avatar/'.$member_no;

@@ -10,44 +10,26 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 		$rowRights = $checkRightsReq->fetch(PDO::FETCH_ASSOC);
 		if(empty($rowRights["CHILD_NAME"])){
 			$checkReqStatus = $conoracle->prepare("SELECT CHILDCARD_ID,REQUEST_STATUS, CANCEL_REMARK FROM asnreqschshiponline 
-															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and REQUEST_STATUS NOT IN(8,9)");
+															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and REQUEST_STATUS <> 8");
 			$checkReqStatus->execute([':child_id' => $dataComing["childcard_id"]]);
 			$rowReqStatus = $checkReqStatus->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowReqStatus["CHILDCARD_ID"])){
 				if($rowReqStatus["REQUEST_STATUS"] == 1){
-					$arrayResult['CAN_CLEAR'] = TRUE;
 					$arrayResult['RESPONSE_CODE'] = "WS0077";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 					
 				}else if($rowReqStatus["REQUEST_STATUS"] == 11){
-					$checkChildHave = $conoracle->prepare("SELECT asch.childcard_id as CHILDCARD_ID FROM ASNREQSCHOLARSHIP asch
-																		WHERE asch.approve_status = 1 and asch.scholarship_year = (EXTRACT(year from sysdate) +543) and asch.childcard_id = :childcard_id");
-					$checkChildHave->execute([':childcard_id' => $rowReqStatus["CHILDCARD_ID"]]);
-					$rowChild = $checkChildHave->fetch(PDO::FETCH_ASSOC);
-					if(isset($rowChild["CHILDCARD_ID"]) && $rowChild["CHILDCARD_ID"] != ""){
-						$arrayResult['RESPONSE_CODE'] = "WS0077";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-						
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0081";
-						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${URL_COOP}',$config["URL_COOP"],$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-						
-					}
-				}else if($rowReqStatus["REQUEST_STATUS"] == -1){
-					$arrayResult['RESPONSE_CODE'] = "WS0078";
-					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${REMARK}',($rowReqStatus["CANCEL_REMARK"] ?? "เหตุผลบางประการ"),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+					$arrayResult['CAN_CLEAR'] = TRUE;
+					$arrayResult['RESPONSE_CODE'] = "WS0077";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 					
-				}else if($rowReqStatus["REQUEST_STATUS"] == -9){
-					$arrayResult['RESPONSE_CODE'] = "WS0080";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}else if($rowReqStatus["REQUEST_STATUS"] == -1){
+					$arrayResult['RESPONSE_CODE'] = "WS0078";
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${REMARK}',($rowReqStatus["CANCEL_REMARK"] ?? "เหตุผลบางประการ"),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 					
@@ -59,8 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 					
 				}
 			}else{
-				$conoracle->beginTransaction();
-				$delOldSchShip = $conoracle->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status IN(8,9)");
+				$delOldSchShip = $conoracle->prepare("DELETE FROM asnreqschshiponline WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and request_status = 8");
 				$delOldSchShip->execute([
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
@@ -71,160 +52,21 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 					':member_no' => $member_no,
 					':child_id' => $dataComing["childcard_id"]
 				])){
+					$conoracle->beginTransaction();
 					foreach($dataComing["upload_list"] as $list){
-						if(isset($list["upload_base64"]) && $list["upload_base64"] != ""){
-							$subpath = $dataComing["childcard_id"].date('Ym');
-							$destination = __DIR__.'/../../resource/reqwelfare/'.$subpath;
-							$data_Img = explode(',',$list["upload_base64"]);
-							$info_img = explode('/',$data_Img[0]);
-							$ext_img = str_replace('base64','',$info_img[1]);
-							if(!file_exists($destination)){
-								mkdir($destination, 0777, true);
-							}
-							if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
-								$createImage = $lib->base64_to_img($list["upload_base64"],$list["upload_name"],$destination,null);
-								if($createImage == 'oversize'){
-									$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
-									$deleteDocSch->execute([
-										':member_no' => $member_no,
-										':child_id' => $dataComing["childcard_id"],
-										':seq_no' => $list["upload_seq"]
-									]);
-									$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
-																									VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,8,:filename)");
-									if($insertSchShipOnlineDoc->execute([
-										':member_no' => $member_no,
-										':child_id' => $dataComing["childcard_id"],
-										':seq_no' => $list["upload_seq"],
-										':document_desc' => $list["upload_label"],
-										':filename' => null
-									])){
-									}else{
-										$filename = basename(__FILE__, '.php');
-										$logStruc = [
-											":error_menu" => $filename,
-											":error_code" => "WS1032",
-											":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-												':member_no' => $member_no,
-												':child_id' => $dataComing["childcard_id"],
-												':seq_no' => $list["upload_seq"],
-												':document_desc' => $list["upload_label"],
-												':filename' => null
-											]),
-											":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-										];
-										$log->writeLog('errorusage',$logStruc);
-										$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-											':member_no' => $member_no,
-											':child_id' => $dataComing["childcard_id"],
-											':seq_no' => $list["upload_seq"],
-											':document_desc' => $list["upload_label"],
-											':filename' => null
-										]);
-										$lib->sendLineNotify($message_error);
-										$arrayResult['RESPONSE_CODE'] = "WS1032";
-										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-										$arrayResult['RESULT'] = FALSE;
-										require_once('../../include/exit_footer.php');
-										
-									}
-								}else{
-									if($createImage){
-										$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
-										$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
-										$deleteDocSch->execute([
-											':member_no' => $member_no,
-											':child_id' => $dataComing["childcard_id"],
-											':seq_no' => $list["upload_seq"]
-										]);
-										$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
-																										VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,1,:filename)");
-										if($insertSchShipOnlineDoc->execute([
-											':member_no' => $member_no,
-											':child_id' => $dataComing["childcard_id"],
-											':seq_no' => $list["upload_seq"],
-											':document_desc' => $list["upload_label"],
-											':filename' => $pathImgShowClient
-										])){
-											
-										}else{
-											$filename = basename(__FILE__, '.php');
-											$logStruc = [
-												":error_menu" => $filename,
-												":error_code" => "WS1032",
-												":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-													':member_no' => $member_no,
-													':child_id' => $dataComing["childcard_id"],
-													':seq_no' => $list["upload_seq"],
-													':document_desc' => $list["upload_label"],
-													':filename' => $pathImgShowClient
-												]),
-												":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-											];
-											$log->writeLog('errorusage',$logStruc);
-											$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-												':member_no' => $member_no,
-												':child_id' => $dataComing["childcard_id"],
-												':seq_no' => $list["upload_seq"],
-												':document_desc' => $list["upload_label"],
-												':filename' => $pathImgShowClient
-											]);
-											$lib->sendLineNotify($message_error);
-											$arrayResult['RESPONSE_CODE'] = "WS1032";
-											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-											$arrayResult['RESULT'] = FALSE;
-											require_once('../../include/exit_footer.php');
-											
-										}
-									}else{
-										$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
-										$deleteDocSch->execute([
-											':member_no' => $member_no,
-											':child_id' => $dataComing["childcard_id"],
-											':seq_no' => $list["upload_seq"]
-										]);
-										$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
-																										VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,8,:filename)");
-										if($insertSchShipOnlineDoc->execute([
-											':member_no' => $member_no,
-											':child_id' => $dataComing["childcard_id"],
-											':seq_no' => $list["upload_seq"],
-											':document_desc' => $list["upload_label"],
-											':filename' => null
-										])){
-										}else{
-											$filename = basename(__FILE__, '.php');
-											$logStruc = [
-												":error_menu" => $filename,
-												":error_code" => "WS1032",
-												":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-													':member_no' => $member_no,
-													':child_id' => $dataComing["childcard_id"],
-													':seq_no' => $list["upload_seq"],
-													':document_desc' => $list["upload_label"],
-													':filename' => null
-												]),
-												":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-											];
-											$log->writeLog('errorusage',$logStruc);
-											$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-												':member_no' => $member_no,
-												':child_id' => $dataComing["childcard_id"],
-												':seq_no' => $list["upload_seq"],
-												':document_desc' => $list["upload_label"],
-												':filename' => null
-											]);
-											$lib->sendLineNotify($message_error);
-											$arrayResult['RESPONSE_CODE'] = "WS1032";
-											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-											$arrayResult['RESULT'] = FALSE;
-											require_once('../../include/exit_footer.php');
-											
-										}
-									}
-								}
-							}else if($ext_img == 'pdf'){
-								$createImage = $lib->base64_to_pdf($list["upload_base64"],$list["upload_name"],$destination);
+						$subpath = $dataComing["childcard_id"].date('Ym');
+						$destination = __DIR__.'/../../resource/reqwelfare/'.$subpath;
+						$data_Img = explode(',',$list["upload_base64"]);
+						$info_img = explode('/',$data_Img[0]);
+						$ext_img = str_replace('base64','',$info_img[1]);
+						$full_file_name = $list["upload_name"].$ext_img;
+						if(!file_exists($destination)){
+							mkdir($destination, 0777, true);
+						}
+						if($ext_img == 'png' || $ext_img == 'jpg' || $ext_img == 'jpeg'){
+							$createImage = $lib->base64_to_img($list["upload_base64"],$list["upload_name"],$destination,null);
+							if($createImage == 'oversize'){
+							}else{
 								if($createImage){
 									$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
 									$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
@@ -242,6 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 										':document_desc' => $list["upload_label"],
 										':filename' => $pathImgShowClient
 									])){
+										
 									}else{
 										$filename = basename(__FILE__, '.php');
 										$logStruc = [
@@ -271,63 +114,12 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 										require_once('../../include/exit_footer.php');
 										
 									}
-								}else{
-									$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
-									$deleteDocSch->execute([
-										':member_no' => $member_no,
-										':child_id' => $dataComing["childcard_id"],
-										':seq_no' => $list["upload_seq"]
-									]);
-									$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
-																									VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,8,:filename)");
-									if($insertSchShipOnlineDoc->execute([
-										':member_no' => $member_no,
-										':child_id' => $dataComing["childcard_id"],
-										':seq_no' => $list["upload_seq"],
-										':document_desc' => $list["upload_label"],
-										':filename' => null
-									])){
-									}else{
-										$filename = basename(__FILE__, '.php');
-										$logStruc = [
-											":error_menu" => $filename,
-											":error_code" => "WS1032",
-											":error_desc" => "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-												':member_no' => $member_no,
-												':child_id' => $dataComing["childcard_id"],
-												':seq_no' => $list["upload_seq"],
-												':document_desc' => $list["upload_label"],
-												':filename' => null
-											]),
-											":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-										];
-										$log->writeLog('errorusage',$logStruc);
-										$message_error = "ไม่สามารถ Insert ลง insertSchShipOnlineDoc ได้ "."\n".$insertSchShipOnlineDoc->queryString."\n".json_encode([
-											':member_no' => $member_no,
-											':child_id' => $dataComing["childcard_id"],
-											':seq_no' => $list["upload_seq"],
-											':document_desc' => $list["upload_label"],
-											':filename' => null
-										]);
-										$lib->sendLineNotify($message_error);
-										$arrayResult['RESPONSE_CODE'] = "WS1032";
-										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-										$arrayResult['RESULT'] = FALSE;
-										require_once('../../include/exit_footer.php');
-										
-									}
 								}
 							}
-						}else{
-							$checkHavingDet = $conoracle->prepare("SELECT filename FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
-							$checkHavingDet->execute([
-								':member_no' => $member_no,
-								':child_id' => $dataComing["childcard_id"],
-								':seq_no' => $list["upload_seq"]
-							]);
-							$rowHavingDet = $checkHavingDet->fetch(PDO::FETCH_ASSOC);
-							if(isset($rowHavingDet["FILENAME"]) && $rowHavingDet["FILENAME"] != ""){
-							}else{
+						}else if($ext_img == 'pdf'){
+							$createImage = $lib->base64_to_pdf($list["upload_base64"],$list["upload_name"],$destination);
+							if($createImage){
+								$pathImgShowClient = $config["URL_SERVICE"]."resource/reqwelfare/".$subpath."/".$createImage["normal_path"];
 								$deleteDocSch = $conoracle->prepare("DELETE FROM asnreqschshiponlinedet WHERE scholarship_year = (EXTRACT(year from sysdate) +543) and member_no = :member_no and childcard_id = :child_id and seq_no = :seq_no");
 								$deleteDocSch->execute([
 									':member_no' => $member_no,
@@ -335,13 +127,13 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 									':seq_no' => $list["upload_seq"]
 								]);
 								$insertSchShipOnlineDoc = $conoracle->prepare("INSERT INTO asnreqschshiponlinedet(scholarship_year, member_no, childcard_id, seq_no, document_desc, upload_status,filename)
-																								VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,8,:filename)");
+																								VALUES((EXTRACT(year from sysdate) +543),:member_no,:child_id,:seq_no,:document_desc,1,:filename)");
 								if($insertSchShipOnlineDoc->execute([
 									':member_no' => $member_no,
 									':child_id' => $dataComing["childcard_id"],
 									':seq_no' => $list["upload_seq"],
 									':document_desc' => $list["upload_label"],
-									':filename' => null
+									':filename' => $pathImgShowClient
 								])){
 								}else{
 									$filename = basename(__FILE__, '.php');
@@ -353,7 +145,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 											':child_id' => $dataComing["childcard_id"],
 											':seq_no' => $list["upload_seq"],
 											':document_desc' => $list["upload_label"],
-											':filename' => null
+											':filename' => $pathImgShowClient
 										]),
 										":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 									];
@@ -363,7 +155,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 										':child_id' => $dataComing["childcard_id"],
 										':seq_no' => $list["upload_seq"],
 										':document_desc' => $list["upload_label"],
-										':filename' => null
+										':filename' => $pathImgShowClient
 									]);
 									$lib->sendLineNotify($message_error);
 									$arrayResult['RESPONSE_CODE'] = "WS1032";

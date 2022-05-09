@@ -22,16 +22,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
-																		CASE kut.system_code 
+																		CASE kut.system_code
 																		WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
 																		WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 																		ELSE kut.keepitemtype_desc
 																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
 																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ITEM_KEPTAMT AS ADJUST_ITEMAMT,
-																		kpd.PRINCIPAL_KEPTAMT as ADJUST_PRNAMT,
-																		kpd.INTEREST_KEPTAMT as ADJUST_INTAMT,
+																		kpd.ADJUST_ITEMAMT,
+																		kpd.ADJUST_PRNAMT,
+																		kpd.ADJUST_INTAMT,
 																		case kut.keepitemtype_grp 
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
@@ -62,9 +62,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		END as TYPE_DESC,
 																		kut.keepitemtype_grp as TYPE_GROUP,
 																		kpd.MONEY_RETURN_STATUS,
-																		kpd.ITEM_KEPTAMT AS ADJUST_ITEMAMT,
-																		kpd.PRINCIPAL_KEPTAMT as ADJUST_PRNAMT,
-																		kpd.INTEREST_KEPTAMT as ADJUST_INTAMT,
+																		kpd.ADJUST_ITEMAMT,
+																		kpd.ADJUST_PRNAMT,
+																		kpd.ADJUST_INTAMT,
 																		case kut.keepitemtype_grp 
 																			WHEN 'DEP' THEN kpd.description
 																			WHEN 'LON' THEN kpd.loancontract_no
@@ -116,16 +116,17 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
-																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
-																kpd.KEEPING_STATUS,
-																kpd.KEPT_AMT
-																FROM kpmastreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+													kpd.RECEIPT_NO,
+													kpd.OPERATE_DATE,
+													kpd.KEEPING_STATUS
+													FROM kpmastreceive kpd
+													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -134,12 +135,16 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["kept_amt"] = $rowKPHeader["KEPT_AMT"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -201,7 +206,6 @@ function GenerateReport($dataReport,$header,$lib){
 			* {
 			  font-family: TH Niramit AS;
 			}
-
 			body {
 			  padding: 0 30px;
 			}
@@ -211,22 +215,17 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="90" height="90" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
-		if($header["kept_amt"] > 0){
-			$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;">ใบเสร็จรับเงิน</p>';
-		}else{
-			$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
-		}
+		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมหาสารคาม จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1102/6 ถ.สมถวิลราษฏร์ ต.ตลาด </p>
-			<p style="margin-top: -25px;font-size: 18px;">อ.เมือง จ.มหาสารคาม 44000 </p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร : 043 711557  โทรสาร : 043 722731</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.mkttc.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกาฬสินธุ์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">8/1 ถนนสนามบิน  ตำบลกาฬสินธุ์  อำเภอเมือง  จังหวัดกาฬสินธุ์ 46000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 043-840-126</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.kalasintsc.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -331,12 +330,20 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 750px;display:flex;">
-			<img src="../../resource/utility_icon/signature/fn.png" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 770px;display:flex;">
+			<img src="../../resource/utility_icon/signature/payee.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 770px;margin-top:-30px;">เจ้าหน้าที่รับเงิน</div>
+			
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 805px;margin-top:-90px;">ผู้รับเงิน</div>
+			
 			';
+			//<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 550px;">( นายปัญญา สุรินทร์ )</div>
+			//<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 773px;">( นางอนงนุช สิทธิชัย )</div>
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
@@ -345,6 +352,7 @@ function GenerateReport($dataReport,$header,$lib){
 	]);
 
 	$dompdf->set_paper('A4', 'landscape');
+
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathfile = __DIR__.'/../../resource/pdf/keeping_monthly';
