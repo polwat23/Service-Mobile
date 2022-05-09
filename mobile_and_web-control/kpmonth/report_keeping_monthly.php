@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		if($recv_now == trim($dataComing["recv_period"])){
 			if($dateNow >= $date_process){
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -40,11 +40,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 											ORDER BY kut.sort_in_receive ASC";
 			}else{
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -57,13 +58,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 											ORDER BY kut.sort_in_receive ASC";
 			}
 		}else{
 			if(trim($dataComing["recv_period"]) > $recv_now){
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -76,11 +78,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 											ORDER BY kut.sort_in_receive ASC";
 			}else{
 				$qureyKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -93,6 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
 											ORDER BY kut.sort_in_receive ASC";
 			}
@@ -150,6 +154,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 												kpd.OPERATE_DATE
 												FROM kpmastreceive kpd
 												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
+
 			}
 		}
 		$getDetailKPHeader = $conoracle->prepare($qureyKpHeader);
@@ -237,11 +242,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมุกดาหาร จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">30/1 ถนนชยางกูร ก. ตำบลมุกดาหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองมุกดาหาร จังหวัดมุกดาหาร</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 042-611-454</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.muktc.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูน่าน  จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 3 ถนนอชิตวงศ์</p>
+				<p style="margin-top: -25px;font-size: 18px;">ต.ในเวียง อ.เมือง จ.น่าน 55000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 0 5471 0233, 0 5477 1656</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.coopkrunan.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -346,11 +351,15 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
-			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/receive_money.png" width="100" height="50" style="margin-top:10px;"/>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 750px;display:flex;">
+			<img src="../../resource/utility_icon/signature/staff_recv.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">เหรัญญิก</div>
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">เจ้าหน้าที่รับเงิน</div>
 			';
 
 	$dompdf = new DOMPDF();

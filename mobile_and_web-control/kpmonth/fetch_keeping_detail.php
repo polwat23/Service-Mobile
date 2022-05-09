@@ -9,8 +9,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$dateNow = date('d');
 		if($recv_now == trim($dataComing["recv_period"])){
 			if($dateNow >= $date_process){
-				$queryKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+				$qureyKpDetail = "SELECT 
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -23,10 +23,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$queryKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+				$qureyKpDetail = "SELECT 
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -39,12 +40,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}
 		}else{
 			if(trim($dataComing["recv_period"]) > $recv_now){
-				$queryKpDetail = "SELECT 
-											kut.keepitemtype_desc as TYPE_DESC,
+				$qureyKpDetail = "SELECT 
+											NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 											kut.keepitemtype_grp as TYPE_GROUP,
 											case kut.keepitemtype_grp 
 												WHEN 'DEP' THEN kpd.description
@@ -57,10 +59,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 											NVL(kpd.interest_payment,0) AS INT_BALANCE
 											FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 											kpd.keepitemtype_code = kut.keepitemtype_code
+											LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}else{
-				$queryKpDetail = "SELECT 
-										kut.keepitemtype_desc as TYPE_DESC,
+				$qureyKpDetail = "SELECT 
+										NVL(lt.loantype_desc,kut.keepitemtype_desc) as TYPE_DESC,
 										kut.keepitemtype_grp as TYPE_GROUP,
 										case kut.keepitemtype_grp 
 											WHEN 'DEP' THEN kpd.description
@@ -73,11 +76,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 										NVL(kpd.interest_payment,0) AS INT_BALANCE
 										FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 										kpd.keepitemtype_code = kut.keepitemtype_code
+										LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
 										WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period";
 			}	
 		}
 		$arrGroupDetail = array();
-		$getDetailKP = $conoracle->prepare($queryKpDetail);
+		$getDetailKP = $conoracle->prepare($qureyKpDetail);
 		$getDetailKP->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -89,17 +93,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrGroupDetail[] = $arrDetail;

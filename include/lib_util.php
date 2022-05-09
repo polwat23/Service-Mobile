@@ -89,8 +89,6 @@ class library {
 			return (($date_duration->y)*12)+($date_duration->m);			
 		}else if($format == "d"){
 			return $date_duration->days;			
-		}else if($format == "y"){
-			return $date_duration->y;			
 		}     
 	}
 	public function formatcitizen($idcard,$separate=" "){
@@ -288,6 +286,7 @@ class library {
 			return $arrRes;
 		}
 	}
+
 	public function base64_to_img($encode_string,$file_name,$output_file,$webP=null) {
 		if(self::getBase64ImageSize($encode_string) < 10000){
 			$data_Img = explode(',',$encode_string);
@@ -590,7 +589,7 @@ class library {
 			return false;
 		}
 	}
-
+		
 	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
 		return $jwt_function->getPayload($token, $secret_key);
 	}
@@ -793,6 +792,19 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
 	}
 }
 ?>

@@ -8,11 +8,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getLoanPause = $conoracle->prepare("SELECT A.MORATORIUM_DOCNO, A.LOANCONTRACT_NO,
 															(CASE WHEN A.REQUEST_DATE <= TO_DATE('27042020','DDMMYYYY') THEN 1 ELSE 2 END) AS REGIS_ROUND , 
 															A.REQUEST_STATUS
-															FROM LNREQMORATORIUM A LEFT JOIN LNCONTMASTER B ON A.LOANCONTRACT_NO = B.LOANCONTRACT_NO
-															WHERE 
+															FROM LNREQMORATORIUM A, LNCONTMASTER B 
+															WHERE A.LOANCONTRACT_NO = B.LOANCONTRACT_NO AND
 															B.CONTRACT_STATUS = 1 AND
 															A.REQUEST_STATUS IN (1, -1) AND
-															trunc(a.entry_date) > to_date('27042020','ddmmyyyy') AND
 															A.COOP_ID = '000000' AND A.MEMBER_NO = :member_no");
 		$getLoanPause->execute([':member_no' => $member_no]);
 		while($rowLoanPuase = $getLoanPause->fetch(PDO::FETCH_ASSOC)){

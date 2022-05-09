@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,KEPT_AMT
+															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
 															from kpmastreceive where member_no = :member_no
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
@@ -31,15 +31,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
 			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["RECEIPT_DATE"],'d m Y');
 			if(isset($rowPeriod["RECEIVE_AMT"]) && $rowPeriod["RECEIVE_AMT"] != ""){
-				if($rowPeriod["KEEPING_STATUS"] == '-99'){
-					$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["KEPT_AMT"],2);
-				}else{
-					$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);
-				}
+				$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);
 			}else{
 				$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["ITEM_PAYMENT"],2);
 			}
-			if(($rowPeriod["KEEPING_STATUS"] == '-99' || $rowPeriod["KEEPING_STATUS"] == '-9') && $rowPeriod["KEPT_AMT"] == 0){
+			if($rowPeriod["KEEPING_STATUS"] == '-99' || $rowPeriod["KEEPING_STATUS"] == '-9'){
 				$arrKpmonth["IS_CANCEL"] = TRUE;
 			}else{
 				$arrKpmonth["IS_CANCEL"] = FALSE;

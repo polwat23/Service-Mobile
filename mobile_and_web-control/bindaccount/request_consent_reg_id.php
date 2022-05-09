@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-			
+				
 			}
 			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '8'");
 			$checkBeenBindForPending->execute([
@@ -71,7 +71,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':bind_status' => '-9',
-						':mobile_no' => $mobile_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $responseAPI["RESPONSE_MESSAGE"],
 						':coop_account_no' => $coop_account_no,
@@ -84,7 +83,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-				
+					
 				}
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
@@ -93,7 +92,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':bind_status' => '1',
-						':mobile_no' => $mobile_no,
 						':coop_account_no' => $coop_account_no
 					];
 					$log->writeLog('bindaccount',$arrayStruc);
@@ -107,7 +105,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':id_userlogin' => $payload["id_userlogin"],
 						':bind_status' => '-9',
-						':mobile_no' => $mobile_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
 						':response_message' => $arrResponse->RESPONSE_MESSAGE,
 						':coop_account_no' => $coop_account_no,
@@ -117,7 +114,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-				
+					
 				}
 			}else{
 				$conmysql->rollback();
@@ -158,7 +155,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-			
+				
 			}
 		}catch(Throwable $e) {
 			$arrayResult['RESPONSE_CODE'] = "WS0039";
@@ -166,7 +163,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 				':member_no' => $payload["member_no"],
 				':id_userlogin' => $payload["id_userlogin"],
 				':bind_status' => '-9',
-				':mobile_no' => $mobile_no,
 				':response_code' => $arrayResult['RESPONSE_CODE'],
 				':response_message' => $e->getMessage(),
 				':query_flag' => '1'
@@ -175,7 +171,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-		
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -183,7 +179,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-	
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -201,6 +197,6 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-
+	
 }
 ?>

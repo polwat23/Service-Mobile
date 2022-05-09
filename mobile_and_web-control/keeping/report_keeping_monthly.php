@@ -65,7 +65,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
@@ -86,7 +88,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -133,7 +140,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	
 }
 
-
 function GenerateReport($dataReport,$header,$lib){
 	$sumBalance = 0;
 	$html = '<style>
@@ -149,7 +155,6 @@ function GenerateReport($dataReport,$header,$lib){
 				* {
 				  font-family: TH Niramit AS;
 				}
-
 				body {
 				  padding: 0 30px;
 				}
@@ -158,14 +163,13 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมหาสารคาม จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1102/6 ถ.สมถวิลราษฏร์ ต.ตลาด </p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.เมือง จ.มหาสารคาม 44000 </p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 043 711557  โทรสาร : 043 722731 </p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.mkttc.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูน่าน จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 3 ถ.อชิตวงศ์ ต.ในเวียง อ.เมือง จ.น่าน 55000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. 0 5471 0233, 0 5477 1656</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.coopkrunan.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -174,7 +178,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<tr>
 			<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
 			<td style="width: 350px;">'.$header["member_no"].'</td>
-			<td style="width: 50px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
+			<td style="width: 50px;font-size: 18px;">เลขที่ใบเรียกเก็บ :</td>
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
@@ -268,20 +272,30 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			</div>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 770px;display:flex;">
+			<img src="../../resource/utility_icon/signature/payee.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">
-			.........................................................
-			<p style="margin-left: 50px;">เจ้าหน้าที่รับเงิน</p></div>
+			
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 805px;margin-top:-90px;">ผู้รับเงิน</div>
+			
+			
 			';
+			
+			//<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 550px;">( นายปัญญา สุรินทร์ )</div>
+			//<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 773px;">( นางอนงนุช สิทธิชัย )</div>
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
-
 	$dompdf->set_paper('A4', 'landscape');
 	$dompdf->load_html($html);
 	$dompdf->render();

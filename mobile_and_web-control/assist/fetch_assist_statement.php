@@ -56,7 +56,7 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-	
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -74,6 +74,6 @@ if($lib->checkCompleteArgument(['menu_component','asscontract_no'],$dataComing))
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-
+	
 }
 ?>

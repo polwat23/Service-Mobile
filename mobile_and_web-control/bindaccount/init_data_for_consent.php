@@ -11,8 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
-															LEFT JOIN gcconstantaccountdept gcd ON gat.id_accountconstant = gcd.id_accountconstant
-															WHERE gat.member_no = :member_no and gat.is_use = '1' and gcd.allow_deposit_outside = '1' and gcd.allow_withdraw_outside = '1'");
+															WHERE gat.member_no = :member_no and gat.is_use = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
 			]);
@@ -65,21 +64,21 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
-				
+					
 				}
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0005";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
-			
+				
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-		
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -87,7 +86,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-	
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -105,6 +104,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-
+	
 }
 ?>
