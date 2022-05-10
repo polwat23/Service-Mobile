@@ -4,6 +4,17 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		
+		$getMembtype = $conoracle->prepare("SELECT TRIM(member_type) as MEMBER_TYPE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMembtype->execute([':member_no' => $member_no]);
+		$rowMembType = $getMembtype->fetch(PDO::FETCH_ASSOC);
+		if($rowMembType["MEMBER_TYPE"] == '2'){
+			$arrayResult['RESPONSE_CODE'] = "WS0006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			require_once('../../include/exit_footer.php');
+		}
 		$arrGrpLoan = array();
 		$arrCanCal = array();
 		$fetchLoanCanCal = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
