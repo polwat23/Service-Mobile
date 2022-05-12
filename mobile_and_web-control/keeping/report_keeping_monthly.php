@@ -166,10 +166,10 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูน่าน จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 3 ถ.อชิตวงศ์ ต.ในเวียง อ.เมือง จ.น่าน 55000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0 5471 0233, 0 5477 1656</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.coopkrunan.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกาฬสินธุ์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">8/1 ถนนสนามบิน  ตำบลกาฬสินธุ์  อำเภอเมือง  จังหวัดกาฬสินธุ์ 46000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. โทร. 043-840-126</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.kalasintsc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
