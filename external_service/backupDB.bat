@@ -1,16 +1,30 @@
 @echo off
 
+for /f "skip=1" %%x in ('wmic os get localdatetime') do if not defined MyDate set MyDate=%%x
+for /f %%x in ('wmic path win32_localtime get /format:list ^| findstr "="') do set %%x
+set fmonth=00%Month%
+set fday=00%Day%
+set today=%Year%%fmonth:~-2%%fday:~-2%
 
-del C:\Mobile\Service-ARD\external_service\backupDB_ard.zip
+set DAY_OF_LIFE=7
+set DBHOST=localhost
+set DBPORT=3306
+set DBUSER=root
+set DBPASS=@Ard2020
+set DBNAME=mobile_ard
+set PROJECT_PATH=C:\Mobile\Service-ARD\
+set BACKUP_PATH=%PROJECT_PATH%backup\
 
-cd C:\Program Files\MariaDB 10.5\bin & mysqldump.exe -hlocalhost -P3306 -u root -p@Ard2020 mobile_ard > C:\Mobile\Service-ARD\external_service\backupDB_ard.sql
+IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%
 
-"C:\Program Files\7-Zip\7z.exe" a -r C:\Mobile\Service-ARD\external_service\backupDB_ard.zip C:\Mobile\Service-ARD\external_service\backupDB_ard.sql
+"C:\Program Files\MariaDB 10.5\bin\mysqldump.exe" -h%DBHOST% -P%DBPORT% -u %DBUSER% -p%DBPASS% %DBNAME% > %BACKUP_PATH%%DBNAME%.sql
 
-del C:\Mobile\Service-ARD\external_service\backupDB_ard.sql
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_db.zip %BACKUP_PATH%%DBNAME%.sql
 
-cd C:\Program Files (x86)\WinSCP
+del %BACKUP_PATH%%DBNAME%.sql
 
-winscp.exe /command "open ftp://ftp_backup:@Gensoft2018@203.154.140.14/incoming" "put C:\Mobile\service-ard\external_service\backupDB_ard.zip" "exit"
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_resource.zip %PROJECT_PATH%resource\alias_account_dept %PROJECT_PATH%resource\announce %PROJECT_PATH%resource\avatar %PROJECT_PATH%resource\gallery %PROJECT_PATH%resource\news
 
-del C:\Mobile\Service-ARD\external_service\backupDB_ard.zip
+forfiles /P %BACKUP_PATH% /S /M *.* /D -%DAY_OF_LIFE% /C "cmd /c del @path"
+
+::@pause
