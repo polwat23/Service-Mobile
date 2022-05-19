@@ -23,7 +23,7 @@ $fetchAnn = $conmysql->prepare("SELECT priority,announce_cover,announce_title,an
 													DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s')
 												ELSE   
 													DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') BETWEEN DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(due_date,'%Y-%m-%d %H:%i:%s')
-												END ) OR first_time = :first_time) and flag_granted <> :flag_granted");
+												END ) OR first_time = :first_time) and flag_granted <> :flag_granted ORDER BY UPDATE_DATE DESC");
 $fetchAnn->execute([
 	':first_time' => $firstapp,
 	':flag_granted' => $flag_granted
@@ -48,7 +48,7 @@ while($rowAnn = $fetchAnn->fetch(PDO::FETCH_ASSOC)){
 			$arrAnn["CHECK_TEXT"] = $rowAnn["check_text"];
 			$arrAnn["ACCEPT_TEXT"] = $rowAnn["accept_text"];
 			$arrAnn["CANCEL_TEXT"] = $rowAnn["cancel_text"];
-			$arrAnn["ANNOUNCE_HTML"] = $rowAnn["announce_html"];
+			$arrAnn["ANNOUNCE_HTML"] = $lib->HTMLMinifier($rowAnn["announce_html"]);
 			$arrGroupAnn[] = $arrAnn;
 	}
 }

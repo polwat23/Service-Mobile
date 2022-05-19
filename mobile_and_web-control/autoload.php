@@ -3,7 +3,7 @@ ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -25,6 +25,8 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}else if($header_key == "HTTP_LANG_LOCALE") {
 		$headers["Lang_locale"] = $header_value;
+	} else if ($header_key == "HTTP_REQUEST_TOKEN") {
+		$headers["Request_token"] = $header_value;
 	}
 }
 if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
@@ -36,7 +38,10 @@ if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACC
 // Require files
 require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
+require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/cal_deposit.php');
+require_once(__DIR__.'/../include/cal_loan.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/authorized.php');
@@ -46,6 +51,8 @@ use Utility\Library;
 use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
+use CalculateDeposit\CalculateDep;
+use CalculateLoan\CalculateLoan;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
@@ -58,6 +65,8 @@ $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
 $log = new insertLog();
+$cal_dep = new CalculateDep();
+$cal_loan = new CalculateLoan();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
@@ -78,6 +87,15 @@ if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"
 	$func->MaintenanceMenu("System");
 	http_response_code(500);
 	
+}
+
+//เช็คว่าข้อมูลถูกเปลี่ยนแปลงระหว่างทางหรือไม่
+if ($forceNewSecurity == true && $isValidateRequestToken == false) {
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	require_once(__DIR__.'/../include/exit_footer.php');
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {

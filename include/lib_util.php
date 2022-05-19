@@ -271,7 +271,7 @@ class library {
 		$mailFunction->addAddress($email);
 		$mailFunction->isHTML(true);
 		$mailFunction->Subject = $subject;
-		$mailFunction->Body = $body;
+		$mailFunction->Body = $this->HTMLMinifier($body);
 		if(sizeof($attachment_path) > 0){
 			foreach($attachment_path as $attch_path){
 				$mailFunction->addAttachment($attch_path);
@@ -792,6 +792,19 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
 	}
 }
 ?>
