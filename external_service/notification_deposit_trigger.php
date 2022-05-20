@@ -20,7 +20,7 @@ $templateMessage = $func->getTemplateSystem('DepositInfo',1);
 $fetchDataSTM = $conmssql->prepare("SELECT DSM.PRNCBAL,DSM.DEPTACCOUNT_NO,DIT.DEPTITEMTYPE_DESC,DSM.DEPTITEM_AMT AS AMOUNT,DM.MEMBER_NO,DSM.OPERATE_DATE,DSM.SEQ_NO
 									FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
 									LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no and dsm.coop_id = dm.coop_id
-									WHERE dsm.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (dsm.sync_notify_flag IS NULL OR dsm.sync_notify_flag = '0') and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
+									WHERE dsm.operate_date BETWEEN (GETDATE() - 5) and GETDATE() and (dsm.sync_notify_flag IS NULL OR dsm.sync_notify_flag = '0') and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);

@@ -19,7 +19,7 @@ $templateMessage = $func->getTemplateSystem('ShareInfo',1);
 $fetchDataSTM = $conmssql->prepare("SELECT SHS.SEQ_NO,SHS.OPERATE_DATE,SHS.MEMBER_NO,(SHS.SHARE_AMOUNT * 10) AS AMOUNT,
 												(SHS.SHARESTK_AMT * 10) AS SHARE_BALANCE,SHI.SHRITEMTYPE_DESC
 												FROM SHSHARESTATEMENT SHS LEFT JOIN SHUCFSHRITEMTYPE SHI ON SHS.SHRITEMTYPE_CODE = SHI.SHRITEMTYPE_CODE
-												WHERE SHS.OPERATE_DATE BETWEEN (GETDATE() - 2) and GETDATE() AND (SHS.sync_notify_flag IS NULL OR SHS.sync_notify_flag = '0') AND SHS.SHRITEMTYPE_CODE IN(".implode(',',$arrayStmItem).")");
+												WHERE SHS.OPERATE_DATE BETWEEN (GETDATE() - 5) and GETDATE() AND (SHS.sync_notify_flag IS NULL OR SHS.sync_notify_flag = '0') AND SHS.SHRITEMTYPE_CODE IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);

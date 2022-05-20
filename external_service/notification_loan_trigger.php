@@ -20,7 +20,7 @@ $fetchDataSTM = $conmssql->prepare("SELECT LUT.LOANITEMTYPE_DESC,LCN.LOANCONTRAC
 									LCN.PRINCIPAL_PAYMENT,LCN.INTEREST_PAYMENT,LCN.PRINCIPAL_BALANCE
 									from lncontstatement lcn LEFT JOIN lncontmaster lcm ON lcn.loancontract_no = lcm.loancontract_no
 									LEFT JOIN lnucfloanitemtype lut ON lcn.loanitemtype_code = lut.loanitemtype_code
-									WHERE lcn.operate_date BETWEEN (GETDATE() - 2) and GETDATE() and (lcn.sync_notify_flag IS NULL OR lcn.sync_notify_flag = '0') and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
+									WHERE lcn.operate_date BETWEEN (GETDATE() - 5) and GETDATE() and (lcn.sync_notify_flag IS NULL OR lcn.sync_notify_flag = '0') and lcn.loanitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
