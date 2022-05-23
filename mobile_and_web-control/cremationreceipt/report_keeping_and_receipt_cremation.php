@@ -47,7 +47,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupDetail["DONATE_FEE"] = number_format($rowDetailSlip["DONATE_FEE"],2);
 			$arrayPDF = GenerateReportExtra($arrGroupDetail,$header,$lib);
 			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				if ($forceNewSecurity == true) {
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+					$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				}
+
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -116,7 +122,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$header["operate_date"] = $lib->convertdate($rowKeeping["OPERATE_DATE"],'D/n/Y');
 			$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				if ($forceNewSecurity == true) {
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+					$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				}
+				
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
