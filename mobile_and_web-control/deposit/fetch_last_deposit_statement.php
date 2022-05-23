@@ -116,6 +116,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["HEADER"] = $arrAccount;
 		}
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["LIMIT_FETCH_STM_DEPT"] = $rownum;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
