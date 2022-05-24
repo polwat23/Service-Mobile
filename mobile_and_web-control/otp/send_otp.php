@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
+if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrPayload = $auth->check_apitoken($dataComing["api_token"],$config["SECRET_KEY_JWT"]);
 	if(!$arrPayload["VALIDATE"]){
 		$filename = basename(__FILE__, '.php');
@@ -21,8 +21,15 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
-	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
+	$getTel = $conmssql->prepare("SELECT MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
+	$getTel->execute([':member_no' => $member_no]);
+	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
+	if($dataComing["tel"] != $rowTel["MEM_TELMOBILE"]){
+		$arrayResult['RESPONSE_CODE'] = "WS0095";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		require_once('../../include/exit_footer.php');
+	}
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
 	$reference = $lib->randomText('all',6);

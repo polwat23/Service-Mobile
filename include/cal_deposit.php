@@ -910,7 +910,7 @@ class CalculateDep {
 		$lastStmDestNo = $max_seqno + 1;
 		$deptslip_no = $deptslip;
 		$arrExecuteDest = [
-			$deptslip_no,$config["COOP_ID"],$deptaccount_no,$constToAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constToAcc["DEPTGROUP_CODE"],$constFromAcc["MEMBCAT_CODE"],
+			$deptslip_no,$config["COOP_ID"],$deptaccount_no,$constToAcc["DEPTTYPE_CODE"],$config["COOP_ID"],$constToAcc["DEPTGROUP_CODE"],$constToAcc["MEMBCAT_CODE"],
 			$itemtype_dpt,$amt_transfer,$rowDepPayDest["MONEYTYPE_SUPPORT"],$constToAcc["PRNCBAL"],$constToAcc["WITHDRAWABLE_AMT"],
 			$constToAcc["CHECKPEND_AMT"],$operate_date,$lastStmDestNo,$itemtype_dpt,date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),$penalty_amt,
 			$tofrom_accid,$slipWithdraw ?? null,$amt_transfer,$operate_date
@@ -1230,9 +1230,7 @@ class CalculateDep {
 		}
 	}
 	public function insertFeeTransaction($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$oneway_fee=false){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$deptslip_noPenalty,$oneway_fee=false){
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		if($oneway_fee){
