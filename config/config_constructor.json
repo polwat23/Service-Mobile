@@ -4,7 +4,7 @@
 	"COOP_ID" : "023001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.tntsaving.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/TNTCOOP/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/TNTCOOP/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAAYyaCzAY:APA91bHRSS2trrADtpaPW16X6oC67yHqJUjvtFxeTodBdV1392BL56RX6W42tnO-bWp8qnVfxuYEJfCxLH_xLaVJZG_s8zalnmdTZyg_oKHrNXxitBCdMSjGXyj-5MbxMTK4wBCx6dQJ",
