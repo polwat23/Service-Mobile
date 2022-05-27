@@ -1,6 +1,8 @@
 <?php
 require_once('../autoload.php');
 
+$conoracle = $con->connecttooldoracle();
+
 if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
 		
@@ -82,6 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["LIMIT_FETCH_STM_LOAN"] = $rownum;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

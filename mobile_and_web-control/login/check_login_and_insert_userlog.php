@@ -177,6 +177,14 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								':member_no' => $member_no
 							]);
 							$arrayResult['RESULT'] = TRUE;
+							
+							if ($forceNewSecurity == true) {
+								$newArrayResult = array();
+								$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+								$arrayResult = array();
+								$arrayResult = $newArrayResult;
+							}
+
 							require_once('../../include/exit_footer.php');
 						}else{
 							$conmysql->rollback();

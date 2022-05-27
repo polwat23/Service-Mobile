@@ -25,11 +25,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$date_now = date('Y-m-d');
 			}
-			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT,
+			
+			$orderByFlag = "DESC";
+			if($dataComing["channel"] == "web"){
+				if($lib->checkCompleteArgument(["date_start"],$dataComing)){
+					$date_before = $lib->convertdate($dataComing["date_start"],'y-n-d');
+				}else{
+					$date_before = date('Y')."01-01";
+				}
+				if($lib->checkCompleteArgument(["date_end"],$dataComing)){
+					$date_now = $lib->convertdate($dataComing["date_end"],'y-n-d');
+				}else{
+					$date_now = date('Y')."12-31";
+				}
+				$orderByFlag = "ASC";
+			}
+			
+			$getShareStatement = $conoracle->prepare("SELECT stm.operate_date,(stm.share_amount * 10) as PERIOD_SHARE_AMOUNT, stm.SLIP_DATE, stm.MONEYTYPE_CODE, cmt.MONEYTYPE_DESC,
 														(stm.sharestk_amt*10) as SUM_SHARE_AMT,sht.shritemtype_desc,stm.period,stm.ref_slipno
 														FROM shsharestatement stm LEFT JOIN shucfshritemtype sht ON stm.shritemtype_code = sht.shritemtype_code
-														WHERE stm.member_no = :member_no and stm.shritemtype_code NOT IN ('B/F','DIV') and stm.operate_date
-														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no DESC");
+														LEFT JOIN CMUCFMONEYTYPE cmt ON stm.MONEYTYPE_CODE = cmt.MONEYTYPE_CODE
+														WHERE stm.member_no = :member_no and stm.operate_date
+														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.seq_no ".$orderByFlag);
 			$getShareStatement->execute([
 				':member_no' => $member_no,
 				':datebefore' => $date_before,
@@ -43,8 +60,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
 				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
 				$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
+				$arrayStm["SLIP_DATE"] = $lib->convertdate($rowStm["SLIP_DATE"],'D m Y');
+				$arrayStm["MONEYTYPE_DESC"] = $rowStm["MONEYTYPE_DESC"];
+				$arrayStm["MONEYTYPE_CODE"] = $rowStm["MONEYTYPE_CODE"];
 				$arrGroupStm[] = $arrayStm;
 			}
+			
 			$arrayResult['STATEMENT'] = $arrGroupStm;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

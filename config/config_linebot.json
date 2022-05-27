@@ -1,0 +1,14 @@
+{
+	"LINEBOT_NAME" : "EGAT Saving",
+	"COOP_ID" : "008001",
+	"COOP_NAME" : "สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด",
+	"COOP_KEY" : "EGAT",
+	"LIFF_ID" : "1657094022-B2NAD0G4",
+	"LINE_ID" : "@217osjpw",
+	"LINK_BIND" : "egatsaving://app/home?qrdata=",
+	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
+	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",
+	"LINEBOT_CHANNELID" : "1657093928",
+	"LINEBOT_SECRETKEY" : "8c068396af29a1650b6753fbbd67a6a9",
+	"LINE_AUTH_KEY" : "f2I/tXmnol5vDjqH3rmKVMBO8nE+EWGA2TPTIRHlzO5jIewmIgHi5reKY0s8vAxCQ7JEYwa92XKjII/Jmd0dgLsEW3jmvrHUAhV1MDouXRwzA+F3wZGo7qhkDAJN4FR8w6DkxNBj1koE0GYiTGcVGAdB04t89/1O/w1cDnyilFU="
+}
