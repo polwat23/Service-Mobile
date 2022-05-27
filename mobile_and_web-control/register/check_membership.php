@@ -47,6 +47,14 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
 			$arrayResult['MEMBER_FULLNAME'] = $rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 			$arrayResult['RESULT'] = TRUE;
+			
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
+
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";

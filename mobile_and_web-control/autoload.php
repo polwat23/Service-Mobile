@@ -3,7 +3,7 @@ ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -27,6 +27,8 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Lang_locale"] = $header_value;
 	}else if($header_key == "HTTP_TRANSACTION_SCHEDULER") {
 		$headers["transaction_scheduler"] = $header_value;
+	}else if ($header_key == "HTTP_REQUEST_TOKEN") {
+		$headers["Request_token"] = $header_value;
 	}
 }
 
@@ -43,6 +45,7 @@ require_once(__DIR__.'/../extension/vendor/autoload.php');
 require_once(__DIR__.'/../autoloadConnection.php');
 require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/lib_line.php');
 require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/cal_deposit.php');
 require_once(__DIR__.'/../include/cal_loan.php');
@@ -51,6 +54,7 @@ require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
 use Utility\Library;
+use Line\libraryLine;
 use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
@@ -65,6 +69,7 @@ use WebPConvert\WebPConvert;
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
+$lineLib = new libraryLine();
 $auth = new Authorization();
 $jwt_token = new Token();
 $func = new functions();
@@ -92,6 +97,16 @@ if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"
 	http_response_code(500);
 	
 }
+
+//เช็คว่าข้อมูลถูกเปลี่ยนแปลงระหว่างทางหรือไม่
+if ($forceNewSecurity == true && $isValidateRequestToken == false) {
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	require_once(__DIR__.'/../include/exit_footer.php');
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
 	// Complete Argument

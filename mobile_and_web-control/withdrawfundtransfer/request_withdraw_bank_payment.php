@@ -58,6 +58,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		// Withdraw Inside --------------------------------------
 		$ref_slipno = null;
 		try{
+			$arrayData = array();
+			$arrayData["serviceName"] = 'withdraw';
+			$arrHeader[] = "requestId: ".$lib->randomText('all',10);
+			$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 			$fetchRecpPaytype = $conoracle->prepare("SELECT default_accid FROM dpucfrecppaytype WHERE recppaytype_code = :itemtype_dep");
 			$fetchRecpPaytype->execute([':itemtype_dep' => $rowDataWithdraw["itemtype_wtd"]]);

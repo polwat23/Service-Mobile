@@ -12,6 +12,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$checkDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($checkDeposit["RESULT"]){
 				try {
+					$arrayData = array();
+					$arrayData["serviceName"] = 'verifytransfer';
+					$arrHeader[] = "requestId: ".$lib->randomText('all',10);
+					$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 					try{
 						$argumentWS = [

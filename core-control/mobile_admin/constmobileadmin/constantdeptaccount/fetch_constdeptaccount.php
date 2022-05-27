@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["ALLOW_SHOWDETAIL"] = $rowMenuMobile["allow_showdetail"];
 			$arrayChkG[] = $arrConstans;
 		}
-		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE WHERE MEMBCAT_CODE = '10' ORDER BY DEPTTYPE_CODE ASC  ");
+		$fetchDepttype = $conoracle->prepare("SELECT DEPTTYPE_CODE,DEPTTYPE_DESC FROM DPDEPTTYPE ORDER BY DEPTTYPE_CODE ASC  ");
 		$fetchDepttype->execute();
 		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
 			$arrayDepttype = array();
