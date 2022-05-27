@@ -29,7 +29,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		]);
 	    $rowUserloginMobile = $fetchUserloginMobile->fetch(PDO::FETCH_ASSOC);
 		
-		$fetchUserNotRegis = $conoracle->prepare("SELECT COUNT(member_no) AS C_USERNOTREGIS FROM shsharemaster WHERE sharestk_amt > 0 ");
+		$fetchUserNotRegis = $conoracle->prepare("SELECT COUNT(memb.member_no) AS C_USERNOTREGIS FROM mbmembmaster memb
+		JOIN shsharemaster shr ON memb.member_no = shr.member_no WHERE shr.sharestk_amt >  0 AND memb.resign_status = '0'");
 		$fetchUserNotRegis->execute();
 		$rowUserNotRegis = $fetchUserNotRegis->fetch(PDO::FETCH_ASSOC);
 		
