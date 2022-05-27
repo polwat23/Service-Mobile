@@ -40,8 +40,9 @@ if(!$anonymous){
 													ISNULL(stm.BALANCE,0) as  BALANCE, ISNULL(stm.DEPOSIT,0) as DEPOSIT,
 													(SELECT COUNT(deposit_id) FROM codeposit_master WHERE member_id = ? and status = 'A') as C_ACCOUNT
 													FROM codeposit_master dp LEFT JOIN codeposit_type dt ON dp.deposit_type = dt.deposit_type
-													LEFT JOIN codeposit_transaction stm  ON dp.lastseq = stm.transaction_seq AND dp.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
-													WHERE dp.deposit_id = ? ");
+													LEFT JOIN codeposit_transaction stm  ON dp.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
+													WHERE dp.deposit_id = ? and stm.transaction_seq = (SELECT MAX(transaction_seq) 
+													FROM codeposit_transaction WHERE deposit_id = stm.deposit_id)");
 				$fetchMenuDep->execute([$member_no, $account_no]);
 				$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 				$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
@@ -54,8 +55,11 @@ if(!$anonymous){
 					$arrMenuDep["ACCOUNT_NO"] = "close";
 				}
 			}else {
-				$fetchMenuDep = $conmssqlcoop->prepare("SELECT SUM(stm.BALANCE) as BALANCE,COUNT(dm.deposit_id) as C_ACCOUNT FROM codeposit_master dm LEFT JOIN codeposit_transaction stm  ON dm.lastseq = stm.transaction_seq AND dm.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
-												WHERE dm.member_id = ? and status = 'A'");
+				$fetchMenuDep = $conmssqlcoop->prepare("SELECT SUM(stm.balance) as BALANCE,COUNT(dm.deposit_id) as C_ACCOUNT 
+														FROM codeposit_master dm LEFT JOIN codeposit_transaction stm  
+														 ON dm.deposit_id = stm.deposit_id  AND stm.transaction_subseq = 0
+														WHERE dm.member_id = ? and status = 'A'
+														and stm.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = stm.deposit_id)");
 				$fetchMenuDep->execute([$member_no]);
 				$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 				$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
@@ -216,11 +220,11 @@ if(!$anonymous){
 							if(isset($dataComing["home_deposit_account"])) {
 								$account_no = $dataComing["home_deposit_account"];
 								$fetchMenuDep = $conmssqlcoop->prepare("SELECT dp.deposit_id as DEPTACCOUNT_NO,dp.status as DEPTCLOSE_STATUS, dt.description as DEPTTYPE_DESC, 
-															ISNULL(stm.balance,0) as  BALANCE, ISNULL(stm.DEPOSIT,0) as DEPOSIT,
-															(SELECT COUNT(deposit_id) FROM codeposit_master WHERE member_id = ? and status = 'A') as C_ACCOUNT
-															FROM codeposit_master dp LEFT JOIN codeposit_type dt ON dp.deposit_type = dt.deposit_type
-															LEFT JOIN codeposit_transaction stm  ON dp.lastseq = stm.transaction_seq AND dp.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
-															WHERE dp.deposit_id = ? ");
+																		ISNULL(stm.balance,0) as  BALANCE, ISNULL(stm.DEPOSIT,0) as DEPOSIT,
+																		(SELECT COUNT(deposit_id) FROM codeposit_master WHERE member_id = ? and status = 'A') as C_ACCOUNT
+																		FROM codeposit_master dp LEFT JOIN codeposit_type dt ON dp.deposit_type = dt.deposit_type
+																		LEFT JOIN codeposit_transaction stm  ON dp.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
+																		WHERE dp.deposit_id = ? and stm.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = stm.deposit_id)  ");
 								$fetchMenuDep->execute([$member_no , $account_no]);
 								$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
@@ -233,8 +237,11 @@ if(!$anonymous){
 									$arrMenuDep["ACCOUNT_NO"] = "close";
 								}
 							}else {
-								$fetchMenuDep = $conmssqlcoop->prepare("SELECT SUM(stm.balance) as BALANCE,COUNT(dm.deposit_id) as C_ACCOUNT FROM codeposit_master dm LEFT JOIN codeposit_transaction stm  ON dm.lastseq = stm.transaction_seq AND dm.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
-																	WHERE dm.member_id = ? and status = 'A'");
+								$fetchMenuDep = $conmssqlcoop->prepare("SELECT SUM(stm.balance) as BALANCE,COUNT(dm.deposit_id) as C_ACCOUNT 
+																	FROM codeposit_master dm LEFT JOIN codeposit_transaction stm  
+																	 ON dm.deposit_id = stm.deposit_id  AND stm.transaction_subseq = 0
+																	WHERE dm.member_id = ? and status = 'A'
+																	and stm.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = stm.deposit_id)");
 								$fetchMenuDep->execute([$member_no]);
 								$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 								$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
@@ -295,12 +302,13 @@ if(!$anonymous){
 																ISNULL(stm.balance,0) as  BALANCE, ISNULL(stm.DEPOSIT,0) as DEPOSIT,
 																(SELECT COUNT(deposit_id) FROM codeposit_master WHERE member_id = ? and status = 'A') as C_ACCOUNT
 																FROM codeposit_master dp LEFT JOIN codeposit_type dt ON dp.deposit_type = dt.deposit_type
-																LEFT JOIN codeposit_transaction stm  ON dp.lastseq = stm.transaction_seq AND dp.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
-																WHERE dp.deposit_id = ? ");
+																LEFT JOIN codeposit_transaction stm  ON dp.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
+																WHERE dp.deposit_id = ?
+																and stm.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = stm.deposit_id)");
 							$fetchMenuDep->execute([$member_no, $account_no]);
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
-							if($rowMenuDep["DEPTCLOSE_STATUS"] != '1'){
+							if($rowMenuDep["DEPTCLOSE_STATUS"] == 'A'){
 								$arrMenuDep["ACCOUNT_NO"] = $rowMenuDep["DEPTACCOUNT_NO"];
 								$arrMenuDep["ACCOUNT_NO_HIDDEN"] = $rowMenuDep["DEPTACCOUNT_NO"];
 								$arrMenuDep["ACCOUNT_DESC"] = $rowMenuDep["DEPTTYPE_DESC"];
@@ -309,8 +317,11 @@ if(!$anonymous){
 								$arrMenuDep["ACCOUNT_NO"] = "close";
 							}
 						}else {
-							$fetchMenuDep = $conmssqlcoop->prepare("SELECT SUM(stm.balance) as BALANCE,COUNT(dm.deposit_id) as C_ACCOUNT FROM codeposit_master dm LEFT JOIN codeposit_transaction stm  ON dm.lastseq = stm.transaction_seq AND dm.deposit_id = stm.deposit_id  AND  stm.transaction_subseq = 0
-																WHERE dm.member_id = ? and status = 'A'");
+							$fetchMenuDep = $conmssqlcoop->prepare("SELECT SUM(stm.balance) as BALANCE,COUNT(dm.deposit_id) as C_ACCOUNT 
+																	FROM codeposit_master dm LEFT JOIN codeposit_transaction stm  
+																	 ON dm.deposit_id = stm.deposit_id  AND stm.transaction_subseq = 0
+																	WHERE dm.member_id = ? and status = 'A'
+																	and stm.transaction_seq = (SELECT MAX(transaction_seq) FROM codeposit_transaction WHERE deposit_id = stm.deposit_id)");
 							$fetchMenuDep->execute([ $member_no]);
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
