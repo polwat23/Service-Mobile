@@ -131,7 +131,6 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
 						$arrPayloadNew['refresh_amount'] = 0;
 						$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
-						file_put_contents('test.txt',json_encode($arrPayloadNew). PHP_EOL, FILE_APPEND);
 						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 							if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
 								$updateFCMToken = $conmssql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");

@@ -21,7 +21,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getTelMobile->execute([':member_no' => $member_no]);
 			$rowTelMobile = $getTelMobile->fetch(PDO::FETCH_ASSOC);
 		}
-		$arrayResult['PHONE'] = $rowTelMobile["phone_number"];
+		if($payload["member_no"] == 'etnmode1'){
+			$arrayResult['PHONE'] = "0820161367";
+		}else{
+			$arrayResult['PHONE'] = $rowTelMobile["phone_number"];
+		}
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

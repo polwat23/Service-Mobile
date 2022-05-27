@@ -863,5 +863,25 @@ class library {
         }
         return $res;
     }
+	public function verify_captcha_token($captcha = "") {
+		$data = array(
+            'secret' => "0x4a9E041EC6b923488A6c6a6d68Cd80c987F20d11",
+            'response' => $captcha
+        );
+		$verify = curl_init();
+		curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+		curl_setopt($verify, CURLOPT_POST, true);
+		curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($data));
+		curl_setopt($verify, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($verify, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
+
+		$responseData = json_decode(curl_exec($verify));
+
+		if($responseData->success) { 
+			return true;
+		}
+		return false;
+	}
 }
 ?>

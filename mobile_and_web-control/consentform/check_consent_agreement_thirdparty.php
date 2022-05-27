@@ -34,8 +34,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			if($payload["member_no"] == '6729'){
-				$rowTelMobile["phone_number"] ='0944841875';
+			if($payload["member_no"] == 'etnmode1'){
+				$rowTelMobile["phone_number"] ='0820161367';
 			}
 			if(isset($rowRefreshToken["refresh_token"]) && $rowRefreshToken["refresh_token"] != ""){
 				if($rowRefreshToken["token_expire"] <= date('Y-m-d H:i:s')){
@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAuth["URL"] = $config["CONSENT_API"].'/TokenAuth/RefreshToken';
 					$arrayResult["CONSENT_STEP"] = '2';
 					if($payload["member_no"] == 'etnmode1' || $payload["member_no"] == 'etnmode2'){
-						$arrAuth["data_loopback"]["tel_mobile"] = '0883995571';
+						$arrAuth["data_loopback"]["tel_mobile"] = '0820161367';
 					}else{
 						$arrAuth["data_loopback"]["tel_mobile"] = preg_replace('/-/','',$rowTelMobile["phone_number"]);
 					}
@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					require_once('../../include/exit_footer.php');
 				}else{
 					if($payload["member_no"] == 'etnmode1' || $payload["member_no"] == 'etnmode2'){
-						$arrAuth["data_loopback"]["tel_mobile"] = '0883995571';
+						$arrAuth["data_loopback"]["tel_mobile"] = '0820161367';
 					}else{
 						$arrAuth["data_loopback"]["tel_mobile"] = preg_replace('/-/','',$rowTelMobile["phone_number"]);
 					}
@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAuth["BODY"] = $arrPrepare;
 				$arrAuth["URL"] = $config["CONSENT_API"].'/TokenAuth/Authenticate';
 				if($payload["member_no"] == 'etnmode1' || $payload["member_no"] == 'etnmode2'){
-					$arrAuth["data_loopback"]["tel_mobile"] = '0883995571';
+					$arrAuth["data_loopback"]["tel_mobile"] = '0820161367';
 				}else{
 					$arrAuth["data_loopback"]["tel_mobile"] = preg_replace('/-/','',$rowTelMobile["phone_number"]);
 				}

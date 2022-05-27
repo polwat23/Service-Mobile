@@ -5,7 +5,31 @@ error_reporting(E_ERROR);
 
 header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Origin: *.mbkgroup.co.th");
+function getAllowOrigin() {
+    $httpOrigin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+    $siteAllowOrigin = [
+        "https://proxy.thaicoop.co",
+        "https://mobilecore.gensoft.co.th",
+		"https://uatmbkcoop.mbkgroup.co.th",
+		"https://mbkcoop.mbkgroup.co.th"
+    ];
+    $siteAllowOriginWildcard = [
+        "icoopsiam.com",
+        "icoopsiam.local"
+    ];
+    $defaultAllowOrigin = "https://mbkcoop.mbkgroup.co.th";
+
+    if (in_array($httpOrigin, $siteAllowOrigin)) {
+        return $httpOrigin;
+    } else if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', isset(parse_url($httpOrigin)['host']) ? parse_url($httpOrigin)['host'] : '', $regs)) {
+        if (in_array($regs['domain'], $siteAllowOriginWildcard)) {
+            return $httpOrigin;
+        }
+    }
+    return $defaultAllowOrigin;
+}
+$allowOrigin = getAllowOrigin();
+header("Access-Control-Allow-Origin: $allowOrigin");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Max-Age: 86400");
 header('Content-Type: application/json;charset=utf-8');

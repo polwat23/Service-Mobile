@@ -19,6 +19,23 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','email','dev
 		require_once('../../include/exit_footer.php');
 		
 	}
+	if(isset($dataComing["captcha"])){
+		if(!$lib->verify_captcha_token($dataComing["captcha"])){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0001",
+				":error_desc" => "ไม่สามารถยืนยันข้อมูลได้"."\n".json_encode($dataComing),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$arrayResult['RESPONSE_CODE'] = "WS0001";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(401);
+			require_once('../../include/exit_footer.php');
+		}
+	}
 	$member_no = $dataComing["member_no"];
 	$checkMember = $conmssql->prepare("SELECT account_status,email FROM gcmemberaccount 
 										WHERE member_no = :member_no");
