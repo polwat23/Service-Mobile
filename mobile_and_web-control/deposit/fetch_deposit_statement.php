@@ -109,6 +109,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		}else{
 			$arrayResult["REQUEST_TAX"] = FALSE;
 		}
+		$arrayResult["LIMIT_FETCH_STM_DEPT"] = $rownum;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

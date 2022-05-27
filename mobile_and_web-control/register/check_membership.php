@@ -29,8 +29,9 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person,mb.sms_mobilephone
+		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person,mb.sms_mobilephone,sh.SHARESTK_AMT
 											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+											LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 											WHERE mb.member_no = :member_no");
 		$checkValid->execute([
 			':member_no' => $member_no
@@ -51,7 +52,13 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				require_once('../../include/exit_footer.php');
 				
 			}
-			if(isset($dataComing["phone"]) && $dataComing["phone"] != ""){
+			if($rowMember["SHARESTK_AMT"] <= 0){
+				$arrayResult['RESPONSE_CODE'] = "WS0003";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+			if(isset($dataComing["phone"]) && $dataComing["phone"] != "" && isset($rowMember["SMS_MOBILEPHONE"]) && $rowMember["SMS_MOBILEPHONE"] != ""){
 				if($dataComing["phone"] != $rowMember["SMS_MOBILEPHONE"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0059";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -63,6 +70,14 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
 			$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			$arrayResult['RESULT'] = TRUE;
+			
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
+
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";

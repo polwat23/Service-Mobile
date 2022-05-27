@@ -46,13 +46,13 @@ $header["elec_year"] = '2565';
 $textRan = $lib->randomText('all',10);
 $passwordFirst = substr($textRan,0,5);
 $passwordSecon = substr($textRan,5);
-$password = $passwordFirst.$passwordSecon;
+$password = '1234';//$passwordFirst.$passwordSecon;
 $arrayPDF = GenerateReport($arrGrpCan,$header,$password,$lib);
 $arrayAttach = array();
 if($arrayPDF["RESULT"]){
 	$arrayAttach[] = $arrayPDF["PATH"];
 }
-
+/*
 $arrayDataTemplate = array();
 $arrayDataTemplate["TEXT"] = "ชุดแรก ของชื่อไฟล์ : ".$arrayPDF["FILE_NAME"];
 $arrayDataTemplate["PASSWORD"] = $passwordFirst;
@@ -68,7 +68,7 @@ $arrMailStatus2 = $lib->sendMail('yoot_ne@yahoo.com',$arrResponse2["SUBJECT"],$a
 $mailFunction = new PHPMailer(false);
 $arrResponse3["SUBJECT"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์";
 $arrResponse3["BODY"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์อยู่ในไฟล์แนบ";
-$arrMailStatus23 = $lib->sendMail('it.support@musaving.com',$arrResponse3["SUBJECT"],$arrResponse3["BODY"],$mailFunction,$arrayAttach);
+$arrMailStatus23 = $lib->sendMail('it.support@musaving.com',$arrResponse3["SUBJECT"],$arrResponse3["BODY"],$mailFunction,$arrayAttach);*/
 
 
 function GenerateReport($dataReport,$header,$password,$lib){
