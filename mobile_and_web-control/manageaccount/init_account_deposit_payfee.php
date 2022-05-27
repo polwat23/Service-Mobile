@@ -5,7 +5,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGrpAccFee = array();
-		$getDepositAcc = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
+		
+		$getDeptAtm = $conoracle->prepare("SELECT COOP_ACC FROM atmdept WHERE member_no = :member_no");
+		$getDeptAtm->execute([':member_no' => $member_no]);
+		$rowDeptAtm = $getDeptAtm->fetch(PDO::FETCH_ASSOC);
+		
+		if(isset($rowDeptAtm["COOP_ACC"])){
+			$getDepositAcc = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
+											where d.member_no=m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
+											from   atmdept a LEFT JOIN  dpdeptmaster d  ON d.member_no = a.member_no  
+											AND  d.deptaccount_no = a.coop_acc 
+											AND d.depttype_code = a.depttype_code
+											LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
+											where d.depttype_code in ( '01') AND  trim(d.member_no) = :member_no
+											and d.deptclose_status= '0'
+											order by deptaccount_no desc");
+		}else{
+			$getDepositAcc = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
 											where d.member_no=m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
 											from dpdeptmaster d LEFT JOIN   atmdept a ON d.member_no = a.member_no 
 											AND  d.deptaccount_no = a.coop_acc 
@@ -14,6 +30,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											where d.depttype_code in ( '01') AND  trim(d.member_no) = :member_no
 											and d.deptclose_status= '0'
 											order by deptaccount_no desc");
+			
+		}
 		$getDepositAcc->execute([':member_no' => $member_no]);
 		while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
 			$checkAccJoint = $conmysql->prepare("SELECT deptaccount_no FROM gcdeptaccountjoint WHERE deptaccount_no = :deptaccount_no and is_joint = '1'");

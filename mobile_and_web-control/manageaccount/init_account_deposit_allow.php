@@ -19,10 +19,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowAccountAllowed = $InitDeptAccountAllowed->fetch(PDO::FETCH_ASSOC)){
 			$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 		}
+		$getDeptAtm = $conoracle->prepare("SELECT COOP_ACC FROM atmdept WHERE member_no = :member_no");
+		$getDeptAtm->execute([':member_no' => $member_no]);
+		$rowDeptAtm = $getDeptAtm->fetch(PDO::FETCH_ASSOC);
 		if(sizeof($arrAccAllowed) > 0){
-			$getAccountAllinCoop = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
-														where d.member_no=m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
-														from dpdeptmaster d LEFT JOIN   atmdept a ON d.member_no = a.member_no 
+			if(isset($rowDeptAtm["COOP_ACC"])){
+				$getAccountAllinCoop = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
+														where d.member_no = m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
+														from   atmdept a LEFT JOIN  dpdeptmaster d  ON d.member_no = a.member_no 
 														AND  d.deptaccount_no = a.coop_acc 
 														AND d.depttype_code = a.depttype_code
 														LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
@@ -30,16 +34,53 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														and d.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
 														and d.deptclose_status= '0'
 														order by deptaccount_no desc");
-		}else{
-			$getAccountAllinCoop = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
-														where d.member_no=m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
-														from dpdeptmaster d LEFT JOIN   atmdept a ON d.member_no = a.member_no 
+			}else{
+				$getDeptmaster= $conoracle->prepare("SELECT  deptaccount_no FROM dpdeptmaster WHERE member_no = :member_no");	
+				$getDeptmaster->execute([':member_no' => $member_no]);
+				while($rowAccIncoop = $getDeptmaster->fetch(PDO::FETCH_ASSOC)){
+					$arrDept[] = $rowAccIncoop["DEPTACCOUNT_NO"];
+				}
+						
+				$getAccountAllinCoop = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
+														where d.member_no = m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
+														from   dpdeptmaster d LEFT JOIN  atmdept a  ON d.member_no = a.member_no 
 														AND  d.deptaccount_no = a.coop_acc 
 														AND d.depttype_code = a.depttype_code
 														LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
-														where d.depttype_code in ( '01') AND  trim(d.member_no) = :member_no
+														where d.depttype_code in ( '01')
+														and d.deptaccount_no IN(".implode(',',$arrDept).")
+														and d.deptclose_status= '0'
+														order by deptaccount_no desc");
+			}
+		}else{
+			if(isset($rowDeptAtm["COOP_ACC"])){
+				$getAccountAllinCoop = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
+														where d.member_no=m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
+														from   atmdept a LEFT JOIN  dpdeptmaster d  ON d.member_no = a.member_no 
+														AND  d.deptaccount_no = a.coop_acc 
+														AND d.depttype_code = a.depttype_code
+														LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
+														where d.depttype_code in ( '01') AND trim(d.member_no) = :member_no
 														and d.deptclose_status= '0'
 														order by deptaccount_no desc");	
+			}else{
+				$getDeptmaster= $conoracle->prepare("SELECT  deptaccount_no FROM dpdeptmaster WHERE member_no = :member_no");	
+				$getDeptmaster->execute([':member_no' => $member_no]);
+				while($rowAccIncoop = $getDeptmaster->fetch(PDO::FETCH_ASSOC)){
+					$arrDept[] = $rowAccIncoop["DEPTACCOUNT_NO"];
+				}
+				
+				$getAccountAllinCoop = $conoracle->prepare("select (select concat(concat(m.memb_name,' '),m.memb_surname) from mbmembmaster m 
+														where d.member_no = m.member_no ) as DEPTACCOUNT_NAME,DEPTACCOUNT_NO,d.DEPTTYPE_CODE,dt.DEPTTYPE_DESC,PRNCBAL
+														from   dpdeptmaster d LEFT JOIN  atmdept a  ON d.member_no = a.member_no 
+														AND  d.deptaccount_no = a.coop_acc 
+														AND d.depttype_code = a.depttype_code
+														LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
+														where d.depttype_code in ( '01')
+														and d.deptaccount_no IN(".implode(',',$arrDept).")
+														and d.deptclose_status= '0'
+														order by deptaccount_no desc");	
+			}	
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);
 		while($rowAccIncoop = $getAccountAllinCoop->fetch(PDO::FETCH_ASSOC)){
