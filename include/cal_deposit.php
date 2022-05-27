@@ -73,7 +73,7 @@ class CalculateDep {
 		$getLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_deposit_each_member'");
 		$getLimitDept->execute();
 		$rowLimitDept = $getLimitDept->fetch(\PDO::FETCH_ASSOC);
-		$getSumDept = $this->conora->prepare("SELECT SUM(dps.DEPTITEM_AMT) as SUM_AMT
+		/*$getSumDept = $this->conora->prepare("SELECT SUM(dps.DEPTITEM_AMT) as SUM_AMT
 										FROM dpdeptmaster dpm LEFT JOIN dpdeptstatement dps ON dpm.deptaccount_no = dps.deptaccount_no
 										WHERE dpm.member_no = :member_no and to_char(dps.operate_date,'YYYYMM') = to_char(SYSDATE,'YYYYMM')
 										and SUBSTR(dps.deptitemtype_code,1,1) = 'D'");
@@ -83,7 +83,7 @@ class CalculateDep {
 			$arrayResult['RESPONSE_CODE'] = "WS0093";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
-		}
+		}*/
 		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0093";
