@@ -76,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					if(isset($rowRecvPeriod["RECV_PERIOD"]) && $rowRecvPeriod["RECV_PERIOD"] != ""){
 						$arrSendKP = array();
 						$arrSTM["IS_KEEPING"] = TRUE;
-						$arrSTM["RECV_PERIOD"] = $rowRecvPeriod["RECV_PERIOD"];
+						$arrSTM["RECV_PERIOD"] = TRIM($rowRecvPeriod["RECV_PERIOD"]);
 						$arrSendKP["MONTH_RECEIVE"] = $lib->convertperiodkp(trim($rowRecvPeriod["RECV_PERIOD"]));
 						$arrSendKP["SLIP_NO"] = $rowStm["REF_DOCNO"];
 						$arrSendKP["RECEIVE_AMT"] = number_format($rowRecvPeriod["RECEIVE_AMT"],2);

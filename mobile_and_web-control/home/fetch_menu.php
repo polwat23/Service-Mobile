@@ -411,14 +411,14 @@ if(!$anonymous){
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
-					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
+					$arrayResult['MENU_FAVORITE'] = [];//$arrFavMenuGroup;
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 				}else{
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
 					$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
-					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
+					$arrayResult['MENU_FAVORITE'] = [];//$arrFavMenuGroup;
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 

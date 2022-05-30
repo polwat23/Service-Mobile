@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["deptaccount_no"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
 				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"],$func->getConstant('hidden_dep'));
-				$arrAccBeenAllow["STATUS_ALLOW"] = $rowDeptTypeAllow["is_use"];
+				$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
 				$arrGroupAccAllow[] = $arrAccBeenAllow;
 			}
 		}

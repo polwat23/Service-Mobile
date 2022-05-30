@@ -1,6 +1,7 @@
 {
 	"NAME_APP" : "EGAT Saving",
 	"COOP_KEY" : "egat",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=egat",
 	"COOP_ID" : "008001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/",
 	"APP_ID" : "com.egat.mobile",

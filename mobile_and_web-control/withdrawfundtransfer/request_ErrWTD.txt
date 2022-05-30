@@ -82,3 +82,8 @@
 {"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
 {"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
 {"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
+{"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
+{"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
+{"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
+{"faultstring":"Error Fetching http headers","faultcode":"HTTP"}
+{"faultstring":"SOAP-ERROR: Parsing WSDL: Couldn't load from 'http:\/\/10.20.240.78\/CORE\/GCOOP\/wcfService125\/n_deposit.svc?singleWsdl' : failed to load external entity \"http:\/\/10.20.240.78\/CORE\/GCOOP\/wcfService125\/n_deposit.svc?singleWsdl\"\n","faultcode":"WSDL"}
