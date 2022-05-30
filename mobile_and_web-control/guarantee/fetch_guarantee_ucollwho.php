@@ -26,7 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											AND LCC.COLL_STATUS = '1'
 											AND LCC.REF_COLLNO = :member_no");
 		$getUcollwho->execute([':member_no' => $member_no]);
+		$sumCollAmt = 0;
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
+			$sumCollAmt += $rowUcollwho["COLLACTIVE_AMT"];
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
@@ -98,7 +100,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 		$arrayResult['LIMIT_GUARANTEE'] = $maxcredit - $rowCredit["COLLACTIVE_AMT"];
 		$arrayResult['MAX_CREDIT'] = $maxcredit;
-		if($rowMembType["MEMBGROUP_CONTROL"] != '06'){
+		if($rowMembType["MEMBTYPE_CODE"] != '30'){
 			$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
 												and loantype_code IN('60','61','62') and contract_status > '0' and contract_status <> '8'");
 			$getBalance->execute([':member_no' => $member_no]);
@@ -127,7 +129,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getLoantypeCustom->execute([':member_no' => $member_no]);
 			$rowCustom = $getLoantypeCustom->fetch(PDO::FETCH_ASSOC);
 			$getBalance = $conoracle->prepare("SELECT NVL(SUM(principal_balance),0) as BALANCE_ALL FROM lncontmaster WHERE member_no = :member_no 
-												and loantype_code IN('53','58') and contract_status > '0' and contract_status <> '8'");
+												and loantype_code IN('53') and contract_status > '0' and contract_status <> '8'");
 			$getBalance->execute([':member_no' => $member_no]);
 			$rowBalance = $getBalance->fetch(PDO::FETCH_ASSOC);
 			$percentSalary = $rowMembType['SALARY_AMOUNT'] * $rowCustom["MULTIPLE_SALARY"];
@@ -136,7 +138,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$valueNormalRate = $valueNormal * 0.30;
 			$valueNormalRate = $valueNormalRate - $percentShare;
 			$valueNormal -= $valueNormalRate;
-			$valueNormal -= $rowBalance["BALANCE_ALL"];
+			$valueNormal -= $rowBalance["BALANCE_ALL"]; //sumCollAmt
 			if($valueNormal < 0){
 				$valueNormal = 0;
 			}
