@@ -4,6 +4,7 @@
 	"COOP_NAME" : "สหกรณ์ออมทรัพย์ครูระยอง จำกัด",
 	"COOP_KEY" : "RYT",
 	"LIFF_ID" : "1656990983-gvX9v4jL",
+	"LIFF_CONSENT_ID":"1656990983-wlMKBnVx",
 	"LINE_ID" : "@784paxpa",
 	"LINK_BIND" : "rytsaving://app/home?qrdata=",
 	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",

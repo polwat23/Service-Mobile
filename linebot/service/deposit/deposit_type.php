@@ -31,7 +31,7 @@ if($lineLib->checkBindAccount($user_id)){
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 			]);
 		$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
+		$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? 'บัญชี';
 		if(isset($rowAlias["path_alias_img"])){
 			$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
 			$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
@@ -61,6 +61,7 @@ if($lineLib->checkBindAccount($user_id)){
 	$datas["type"] = "flex";
 	$datas["altText"] = ($groupDeposit[0]["TYPE_ACCOUNT"])??'ไม่พบข้อมูล';
 	$datas["contents"]["type"] = "carousel";
+   
 	if(sizeof($depositTypeGroup)>0){
 		$indexContents = 0;
 		foreach($depositTypeGroup as $rowDeposit){
@@ -131,7 +132,6 @@ if($lineLib->checkBindAccount($user_id)){
 		$arrPostData["messages"] = $dataPrepare;
 		$arrPostData["replyToken"] = $reply_token;
 	}
-	//$arrPostData["replyToken"] = $groupDeposit; 
 
 }else{
 	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อดูข้อมูล";

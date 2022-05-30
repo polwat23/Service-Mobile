@@ -4,6 +4,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','period_payment','period','loanpermit_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
+		$conmysql->beginTransaction();
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$getDocSystemPrefix = $conmysql->prepare("SELECT prefix_docno FROM docsystemprefix WHERE menu_component = :menu_component and is_use = '1'");
 		$getDocSystemPrefix->execute([':menu_component' => $dataComing["menu_component"]]);
@@ -209,15 +210,93 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 				}
 				
 				$pathFile = $config["URL_SERVICE"].'/resource/pdf/request_loan/'.$reqloan_doc.'.pdf?v='.time();
-				$conmysql->beginTransaction();
 				$getDeptacc = $conmysql->prepare("SELECT bank_account_no FROM gcallowmemberreqloan WHERE member_no = :member_no and is_allow = '1'");
 				$getDeptacc->execute([':member_no' => $payload["member_no"]]);
 				$rowDeptAcc = $getDeptacc->fetch(PDO::FETCH_ASSOC);
 				$deptaccount_no_bank = $rowDeptAcc["bank_account_no"];
+				
+				//อัปโหลดไฟล์เเนบ
+				
+				$fetchLoanGrp = $conoracle->prepare("SELECT loangroup_code FROM lnloantype where loantype_code = :loantype_code");
+				$fetchLoanGrp->execute([
+					':loantype_code' => $dataComing["loantype_code"]
+				]);
+				$rowLoanGrp = $fetchLoanGrp->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowLoanGrp["LOANGROUP_CODE"]) && $rowLoanGrp["LOANGROUP_CODE"] != ''){
+					$fetchConstUploadFile = $conmysql->prepare("SELECT fmap.filemapping_id, fmap.file_id, fmap.loangroup_code, fmap.max, fmap.is_require, fmap.update_date,
+														fatt.file_name
+														FROM gcreqfileattachmentmapping fmap 
+														LEFT JOIN gcreqfileattachment fatt ON fmap.file_id = fatt.file_id
+														WHERE fmap.is_use = '1' AND fmap.loangroup_code = :loangroup_code");
+					$fetchConstUploadFile->execute([
+						":loangroup_code" => $rowLoanGrp["LOANGROUP_CODE"]
+					]);
+					while($rowConstUploadFile = $fetchConstUploadFile->fetch(PDO::FETCH_ASSOC)){
+
+						if(isset($dataComing["uploadfile_list"])){
+							if(isset($dataComing["uploadfile_list"][$rowConstUploadFile["file_id"]])){
+								$file_index = 0;
+								foreach ($dataComing["uploadfile_list"][$rowConstUploadFile["file_id"]] as $uploadData) {
+									$uploadTypeArr = explode(".",$uploadData);
+									$uploadType = $uploadTypeArr[1];
+									
+									$subpath = $rowConstUploadFile["file_id"]."_".$file_index;
+									$destination = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+									$tempImg = __DIR__.'/../../resource/reqloan_doc_temp/'.$uploadData;
+									if(!file_exists($destination)){
+										mkdir($destination, 0777, true);
+									}
+									$directory = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc;
+									$fullPathUpload = __DIR__.'/../../resource/reqloan_doc/'.$reqloan_doc.'/'.$subpath.".".$uploadType;
+									
+									if(copy($tempImg, $destination."/".$rowConstUploadFile["file_id"]."_".$file_index.".".$uploadType)){
+										$uploadCopy = $config["URL_SERVICE"]."resource/reqloan_doc/".$reqloan_doc."/".$subpath.".".$uploadType;
+										$getControlFolderUpload = $conmysql->prepare("SELECT docgrp_no FROM docgroupcontrol WHERE is_use = '1' and menu_component = :menu_component");
+										$getControlFolderUpload->execute([':menu_component' => 'loan_attachment']);
+										$rowControlCitizen = $getControlFolderUpload->fetch(PDO::FETCH_ASSOC);
+										$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+																				VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
+										$insertDocMaster->execute([
+											':doc_no' => $reqloan_doc.$subpath,
+											':docgrp_no' => $rowControlCitizen["docgrp_no"],
+											':doc_filename' => $reqloan_doc.$subpath,
+											':doc_type' => $uploadType,
+											':doc_address' => $uploadCopy,
+											':member_no' => $payload["member_no"]
+										]);
+										$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
+																				VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
+										$insertDocList->execute([
+											':doc_no' => $reqloan_doc.$subpath,
+											':member_no' => $payload["member_no"],
+											':file_name' => $subpath.".".$uploadType,
+											':id_userlogin' => $payload["id_userlogin"]
+										]);
+										
+										$insertDocAttachment = $conmysql->prepare("INSERT INTO gcreqloanattachment(file_id, reqdoc_no, file_path, member_no) 
+																			VALUES (:file_id, :reqdoc_no, :file_path, :member_no)");
+										$insertDocAttachment->execute([
+											':file_id' => $rowConstUploadFile["file_id"],
+											':reqdoc_no' => $reqloan_doc,
+											':file_path' => $uploadCopy,
+											':member_no' => $payload["member_no"]
+										]);
+									}else{
+										$arrayResult['RESPONSE_CODE'] = "WS0132";
+										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+										$arrayResult['RESULT'] = FALSE;
+										require_once('../../include/exit_footer.php');
+									}
+									$file_index++;
+								}
+							}
+						}
+					}
+				}
 				$InsertFormOnline = $conmysql->prepare("INSERT INTO gcreqloan(reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,receive_net,
-																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank)
+																		int_rate_at_req,salary_at_req,salary_img,citizen_img,id_userlogin,contractdoc_url,deptaccount_no_bank,remark)
 																		VALUES(:reqloan_doc,:member_no,:loantype_code,:request_amt,:period_payment,:period,:loanpermit_amt,:request_amt,:int_rate
-																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank)");
+																		,:salary,:salary_img,:citizen_img,:id_userlogin,:contractdoc_url,:deptaccount_no_bank,:remark)");
 				if($InsertFormOnline->execute([
 					':reqloan_doc' => $reqloan_doc,
 					':member_no' => $payload["member_no"],
@@ -233,6 +312,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':id_userlogin' => $payload["id_userlogin"],
 					':contractdoc_url' => $pathFile,
 					':deptaccount_no_bank' => $deptaccount_no_bank ?? null,
+					':remark' => $dataComing["remark"]
+					
 				])){
 				//if(true){
 					$arrData = array();
@@ -327,21 +408,53 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					
 					//ดึงชื่อคนค้ำ
 					$contcollArr = array();
+					$arrDataMember = array();
+					$arrMember = array();
 					foreach($dataComing["guarantor"] as $guarantor){
-						$member = strtolower($lib->mb_str_pad($guarantor));
-						$getContcoll = $conoracle->prepare("SELECT mp.prename_desc, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME ,mg.MEMBGROUP_DESC,mbp.POSITION_DESC,MB.SALARY_AMOUNT
+						$memberno = strtolower($lib->mb_str_pad($guarantor));
+						$getContcoll = $conoracle->prepare("SELECT mp.prename_desc, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME ,mg.MEMBGROUP_DESC,
+															mbp.POSITION_DESC,MB.SALARY_AMOUNT,MB.ADDR_MOBILEPHONE
 															FROM mbmembmaster mb  LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 															LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
 															LEFT JOIN mbucfposition mbp ON mb.position_code = mbp.position_code
 															WHERE mb.member_no  = :member_no");
-						$getContcoll->execute([':member_no' => $member]);
-						$rowContcoll = $getContcoll->fetch(PDO::FETCH_ASSOC);
-						$contcollArr["MEMBER_NO"] = $rowContcoll["MEMBER_NO"];
+						$getContcoll->execute([':member_no' => $memberno]);
+						$rowContcoll = $getContcoll->fetch(PDO::FETCH_ASSOC);	
+						
+					
+						if(strlen($memberno) <= 8 ){
+							$insertDocList = $conmysql->prepare("INSERT INTO gccontcoll(loancontract_no,member_no,refcoll_no)
+																VALUES(:doc_no,:member_no,:refcoll_no)");
+							$insertDocList->execute([
+								':doc_no' => $reqloan_doc,
+								':member_no' => $payload["member_no"],
+								':refcoll_no' => $rowContcoll["MEMBER_NO"]
+							]);
+						}else{
+							$arrayResult['RESPONSE_CODE'] = "WS4005";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+						
+						if(isset($rowContcoll["MEMBER_NO"])){
+							$contcollArr["MEMBER_NO"] = $rowContcoll["MEMBER_NO"];
+						}else{
+							$arrDataMember[] = $memberno;
+						}				
 						$contcollArr["FULLNAME"] = $rowContcoll["PRENAME_DESC"].$rowContcoll["MEMB_NAME"].' '.$rowContcoll["MEMB_SURNAME"];
+						$contcollArr["ADDR_MOBILEPHONE"] = $rowContcoll["ADDR_MOBILEPHONE"];
 						$contcollArr["MEMBGROUP_DESC"] = $rowContcoll["MEMBGROUP_DESC"];	
 						$contcollArr["POSITION_DESC"] = $rowContcoll["POSITION_DESC"];
 						$contcollArr["SALARY_AMOUNT"] = number_format($rowContcoll["SALARY_AMOUNT"],2);							
 						$arrData["guarantor"][] = $contcollArr;
+					}
+					if(sizeof($arrDataMember) > 0){
+						$massageerror = implode(" , ",$arrDataMember);
+						$arrayResult['RESPONSE_MESSAGE'] = "กรอกเลขสมาชิกคนค้ำไม่ถูกต้อง  ".$massageerror." กรุณาทำรายการใหม่ ";
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
 					}
 					if(file_exists('form_request_loan.php')){
 						include('form_request_loan.php');
@@ -351,7 +464,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					}
 					
 					if($arrayPDF["RESULT"]){
-						/*$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+						$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 																VALUES(:doc_no,:docgrp_no,:doc_filename,'pdf',:doc_address,:member_no)");
 						$insertDocMaster->execute([
 							':doc_no' => $reqloan_doc,
@@ -359,7 +472,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':doc_filename' => $reqloan_doc,
 							':doc_address' => $pathFile,
 							':member_no' => $payload["member_no"]
-						]);*/
+						]);
 						$insertDocList = $conmysql->prepare("INSERT INTO doclistdetail(doc_no,member_no,new_filename,id_userlogin)
 																VALUES(:doc_no,:member_no,:file_name,:id_userlogin)");
 						$insertDocList->execute([

@@ -629,12 +629,13 @@ $html .= '
 					<table style="border-collapse: collapse; width:100%  ">
 						<tr>
 							<td class="center" style="width:20px">ที่</td>
-							<td class="center" style="width:150px">ชื่อ - สกุล</td>
+							<td class="center" style="width:145px">ชื่อ - สกุล</td>
 							<td class="center">เลขทะเบียน</td>
 							<td class="center">ตำแหน่ง</td>
 							<td class="center" style="width:130px">โรงเรียน / หน่วยงาน</td>
 							<td class="center">เงินเดือน</td>
-							<td class="center">ลายมือชื่อผู้ค้ำประกัน</td>
+							<td class="center">เบอร์โทร</td>
+							<td class="center">ลายมือชื่อ</td>
 						</tr>';
 
 			for($i=0; $i < 9; $i++){
@@ -647,6 +648,7 @@ $html .= '
 							<td class="center">'.($data["guarantor"][$i]["POSITION_DESC"]??null).'</td>
 							<td>'.($data["guarantor"][$i]["MEMBGROUP_DESC"]??null).'</td>
 							<td class="right">'.($data["guarantor"][$i]["SALARY_AMOUNT"]??null).'</td>
+							<td class="center">'.($data["guarantor"][$i]["ADDR_MOBILEPHONE"]??null).'</td>
 							<td></td>
 						</tr>
 					';
