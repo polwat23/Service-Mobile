@@ -25,13 +25,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.email as email,mb.mem_telmobile as MEM_TELMOBILE,
+		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.ADDR_email as email,mb.mem_telmobile as MEM_TELMOBILE,
 											mb.member_date,mb.member_no,
-											mb.ADDRESS_NO as ADDR_NO,
-											mb.ADDRESS_MOO as ADDR_MOO,
-											mb.ADDRESS_SOI as ADDR_SOI,
-											mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
-											mb.ADDRESS_ROAD as ADDR_ROAD,
+											mb.ADDR_NO as ADDR_NO,
+											mb.ADDR_MOO as ADDR_MOO,
+											mb.ADDR_SOI as ADDR_SOI,
+											mb.ADDR_VILLAGE as ADDR_VILLAGE,
+											mb.ADDR_ROAD as ADDR_ROAD,
 											MBT.TAMBOL_DESC AS TAMBOL_DESC,
 											MBD.DISTRICT_DESC AS DISTRICT_DESC,
 											MB.PROVINCE_CODE,

@@ -93,7 +93,7 @@ if($checkBeenBind->rowCount() > 0){
 	$dataContent["contents"][0]["body"]["contents"][2]["type"] = "button";
 	$dataContent["contents"][0]["body"]["contents"][2]["action"]["type"] = "uri";
 	$dataContent["contents"][0]["body"]["contents"][2]["action"]["label"] = "ใช้งานผ่านมือถือ";
-	$dataContent["contents"][0]["body"]["contents"][2]["action"]["uri"] = "https://liff.line.me/1656729415-aV6qLvZK?page=register";
+	$dataContent["contents"][0]["body"]["contents"][2]["action"]["uri"] = "https://liff.line.me/".$configLine["LIFF_CONSENT_ID"]."?page=regiter";
 	$dataContent["contents"][0]["body"]["contents"][2]["color"] = $themeColor;
 	$dataContent["contents"][0]["body"]["contents"][2]["margin"] = "lg";
 	$dataContent["contents"][0]["body"]["contents"][2]["height"] = "sm";

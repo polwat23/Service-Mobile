@@ -175,39 +175,39 @@ function GenerateReport($dataReport,$header,$lib){
 	
 	
 	$header = array();
-	$fetchName = $conmssql->prepare("SELECT MB.MEMB_NAME,MB.MEMB_SURNAME,MP.PRENAME_DESC,MBG.MEMBGROUP_DESC,MBG.MEMBGROUP_CODE
-											FROM MBMEMBMASTER MB LEFT JOIN 
-											MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
-											LEFT JOIN MBUCFMEMBGROUP MBG ON MB.MEMBGROUP_CODE = MBG.MEMBGROUP_CODE
-											WHERE mb.member_no = :member_no");
+	$fetchName = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mp.prename_desc,mbg.MEMBGROUP_DESC,mbg.MEMBGROUP_CODE
+									FROM mbmembmaster mb LEFT JOIN 
+									mbucfprename mp ON mb.prename_code = mp.prename_code
+									LEFT JOIN mbucfmembgroup mbg ON mb.MEMBGROUP_CODE = mbg.MEMBGROUP_CODE
+									WHERE mb.member_no = :member_no");
 	$fetchName->execute([
 		':member_no' => $member_no
 	]);
 	$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 	$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 	$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
-	$getPaymentDetail = $conmssql->prepare("SELECT 
-												CASE kut.system_code 
-												WHEN 'LON' THEN ISNULL(LT.LOANTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-												WHEN 'DEP' THEN ISNULL(DP.DEPTTYPE_DESC,KUT.KEEPITEMTYPE_DESC)
-												ELSE kut.keepitemtype_desc
-												END as TYPE_DESC,
-												KUT.KEEPITEMTYPE_GRP AS TYPE_GROUP,
-												CASE KUT.KEEPITEMTYPE_GRP 
-													WHEN 'DEP' THEN KPD.DESCRIPTION
-													WHEN 'LON' THEN KPD.LOANCONTRACT_NO
-												ELSE KPD.DESCRIPTION END AS PAY_ACCOUNT,
-												KPD.PERIOD,
-												ISNULL(KPD.ITEM_PAYMENT * KUT.SIGN_FLAG,0) AS ITEM_PAYMENT,
-												ISNULL(KPD.ITEM_BALANCE,0) AS ITEM_BALANCE,
-												ISNULL(KPD.PRINCIPAL_PAYMENT,0) AS PRN_BALANCE,
-												ISNULL(KPD.INTEREST_PAYMENT,0) AS INT_BALANCE
-												FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-												kpd.keepitemtype_code = kut.keepitemtype_code
-												LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
-												LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
-												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
-												ORDER BY kut.SORT_IN_RECEIVE ASC");
+	$getPaymentDetail = $conoracle->prepare("SELECT 
+													CASE kut.system_code 
+													WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
+													WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
+													ELSE kut.keepitemtype_desc
+													END as TYPE_DESC,
+													kut.keepitemtype_grp as TYPE_GROUP,
+													case kut.keepitemtype_grp 
+														WHEN 'DEP' THEN kpd.description
+														WHEN 'LON' THEN kpd.loancontract_no
+													ELSE kpd.description END as PAY_ACCOUNT,
+													kpd.period,
+													NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
+													NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
+													NVL(kpd.principal_payment,0) AS PRN_BALANCE,
+													NVL(kpd.interest_payment,0) AS INT_BALANCE
+													FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
+													kpd.keepitemtype_code = kut.keepitemtype_code
+													LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
+													LEFT JOIN dpdepttype dp ON kpd.shrlontype_code = dp.depttype_code
+													WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period
+													ORDER BY kut.SORT_IN_RECEIVE ASC");
 	$getPaymentDetail->execute([
 		':member_no' => $member_no,
 		':recv_period' => $recv_period
@@ -236,11 +236,11 @@ function GenerateReport($dataReport,$header,$lib){
 		$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 		$arrGroupDetail[] = $arrDetail;
 	}
-	$getDetailKPHeader = $conmssql->prepare("SELECT 
-															kpd.RECEIPT_NO,
-															kpd.OPERATE_DATE
-															FROM kptempreceive kpd
-															WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+	$getDetailKPHeader = $conoracle->prepare("SELECT 
+												kpd.RECEIPT_NO,
+												kpd.OPERATE_DATE
+											FROM kptempreceive kpd
+											WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 	$getDetailKPHeader->execute([
 		':member_no' => $member_no,
 		':recv_period' => $recv_period

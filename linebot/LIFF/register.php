@@ -26,7 +26,7 @@ $config = json_decode($json,true);
 
 </head>
 
-<body>
+<body class="body">
 	<div id="toast"><div id="desc"></div></div>
 	<div id="loader">
 	  <div id="shadow"></div>

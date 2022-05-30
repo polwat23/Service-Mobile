@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 		':member_no' => $dataComing["member_no"]
 	]);
 	if($checkBillAvailable->rowCount() > 0){
-		if($dataComing["tran_id"] == '202202231057045420'){
+		if($dataComing["tran_id"] == '202203211948451840'){
 			$arrayResult['RESULT'] = TRUE;
 			ob_flush();
 			echo json_encode($arrayResult);

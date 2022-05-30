@@ -43,10 +43,25 @@ class insertLog {
 				$this->logRepayLoan($log_struc);
 			}else if($type_log == 'buyshare'){
 				$this->logBuyShare($log_struc);
+			}else if($type_log == 'receiveloan'){
+				$this->logReceiveLoan($log_struc);
 			}
 
+
+
 		}
-		
+		private function logReceiveLoan($log_struc){
+			if($log_struc[":status_flag"] == '1'){
+				$insertLog = $this->con->prepare("INSERT INTO logreceiveloan(member_no,request_amt,deptaccount_no,loancontract_no,status_flag,id_userlogin) 
+													VALUES(:member_no,:request_amt,:deptaccount_no,:loancontract_no,:status_flag,:id_userlogin)");
+				$insertLog->execute($log_struc);
+			}else{
+				$insertLog = $this->con->prepare("INSERT INTO logreceiveloan(member_no,request_amt,deptaccount_no,loancontract_no,status_flag,response_code,response_message,id_userlogin) 
+													VALUES(:member_no,:request_amt,:deptaccount_no,:loancontract_no,:status_flag,:response_code,:response_message,:id_userlogin)");
+				$insertLog->execute($log_struc);
+			}
+		}
+
 		private function logBuyShare($log_struc){
 			$insertLog = $this->con->prepare("INSERT INTO logbuyshare(member_no,id_userlogin,transaction_date,deptaccount_no,amt_transfer,status_flag
 											,destination,response_code,response_message) 

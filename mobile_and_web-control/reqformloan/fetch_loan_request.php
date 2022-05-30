@@ -47,6 +47,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_HAVE_OLD_CONTRACT"][0][$lang_locale];
 						$arrayDetailLoan["IS_REQ"] = FALSE;
 					}
+					if($rowIntRate["LOANTYPE_CODE"] == '11' && isset($rowOldCont["LOANCONTRACT_NO"])){
+						$arrayDetailLoan["FLAG_NAME"] = $configError["REQ_FLAG_LOAN"][0][$lang_locale];
+						$arrayDetailLoan["IS_REQ"] = FALSE;
+						$arrayDetailLoan["REQ_STATUS"] = $configError["REQ_LOAN_STATUS"][0][$rowIsReq["req_status"]][0][$lang_locale];
+					}else{
+						$arrayDetailLoan["IS_REQ"] = TRUE;
+					}
+
 				}else{
 					$arrayDetailLoan["IS_REQ"] = TRUE;
 				}

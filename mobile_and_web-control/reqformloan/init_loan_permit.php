@@ -45,15 +45,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$arrayResult["PERIOD"] = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 			$maxsalary = ($maxsalary * 30) /100 ;
-			if($dataComing["loantype_code"] == '38' && $dataComing["remain_salary"] < $maxsalary){
+			if($dataComing["loantype_code"] == '38' && $dataComing["salary"] < $maxsalary){
 				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถขอกู้ได้ เนื่องจากเงินเดือนคงเหลือน้อยกว่า 30 % ";
 				$arrayResult['REVERT_VALUE'] = TRUE;
 				$arrayResult['RESULT'] = FALSE; 
 				require_once('../../include/exit_footer.php');
-			}else if($dataComing["loantype_code"] !='42' && $dataComing["loantype_code"] !='38' && $dataComing["remain_salary"] < 5000){						
+			}else if($dataComing["loantype_code"] !='42' && $dataComing["loantype_code"] !='38' && $dataComing["salary"] < 5000){						
 				$arrayResult['RESULT'] = FALSE; 
-				if($dataComing["remain_salary"] == 0){
-					$arrayResult['RESPONSE_MESSAGE'] = "กรุณากรอกเงินเดือนคงเหลือ";
+				if($dataComing["salary"] == 0){
+					$arrayResult['RESPONSE_MESSAGE'] = "กรุณากรอกเงินเดือน";
 					$arrayResult['REVERT_VALUE'] = TRUE;
 				}else{
 					$arrayResult['RESPONSE_MESSAGE'] = "เงินเดือนคงเหลือน้อยกว่าหลักเกณฑ์การกู้ขอกู้";
@@ -107,7 +107,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$typeCalDate = $func->getConstant("cal_start_pay_date");
 				if($max_period == 0){
-					$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+					$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE,lnt.LOANGROUP_CODE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 															ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 															WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE
 															ORDER BY lnt.loantype_code");
@@ -139,24 +139,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					}
 				}
 				
-				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal == 0 ? null : $oldBal;
-				$arrayResult["LOANREQ_AMT_STEP"] = 100;
-				$arrayResult["RECEIVE_NET"] = $maxloan_amt - $oldBal;
-				$arrayResult["REQUEST_AMT"] = (string)$request_amt;
-				$arrayResult["PAY_DATE"] = $lib->convertdate(date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d')))),'d M Y');
-				$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
-				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-				$arrayResult["MAX_PERIOD"] = $period ?? "0";
-				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-				//$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
-				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
-				$arrayResult["IS_REMAIN_SALARY"] = TRUE;
-				$arrayResult["REQ_SALARY"] = TRUE;
-				$arrayResult["REQ_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
-				$arrayResult['OBJECTIVE'] = $arrGrpObj;
+
+				$iscountcoll = 0;
 				if($dataComing["loantype_code"] == '23' || $dataComing["loantype_code"] == '27' || $dataComing["loantype_code"] == '38' || $dataComing["loantype_code"] == '42' || $dataComing["loantype_code"] == '27'){
 					$fetchCollReqgrt = $conoracle->prepare("SELECT USEMAN_AMT FROM LNLOANTYPEREQGRT WHERE loantype_code = :loantype_code 
 															 AND  :request_amt between money_from AND  money_to");
@@ -164,6 +148,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 												':request_amt' => $request_amt]);
 					$rowCollReqgrt =  $fetchCollReqgrt->fetch(PDO::FETCH_ASSOC);				
 					$arrayResult["IS_GUARANTEE"] = TRUE;
+					$iscountcoll = $rowCollReqgrt["USEMAN_AMT"];
 					$arrayResult["GUARANTOR"] = $rowCollReqgrt["USEMAN_AMT"];
 				}
 				
@@ -171,6 +156,61 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrayResult['NOTE_DESC'] = "หมายเหตุ :  ยอดวงกู้จะได้ไม่เกิน 80% ของราคาประเมิน";
 					$arrayResult['NOTE_DESC_COLOR'] = "red";
 				}
+				//อัปโหลดไฟล์เเนบ
+				
+				$arrayUploadFileGroup = array();
+				if(isset($rowIntRate["LOANGROUP_CODE"]) && $rowIntRate["LOANGROUP_CODE"] != '' ){
+					$fetchConstUploadFile = $conmysql->prepare("SELECT fmap.filemapping_id, fmap.file_id, fmap.loangroup_code, fmap.max, fmap.is_require, fmap.update_date,
+														fatt.file_name
+														FROM gcreqfileattachmentmapping fmap 
+														LEFT JOIN gcreqfileattachment fatt ON fmap.file_id = fatt.file_id
+														WHERE fmap.is_use = '1' AND fmap.loangroup_code = :loangroup_code");
+					$fetchConstUploadFile->execute([
+						":loangroup_code" => $rowIntRate["LOANGROUP_CODE"]
+					]);
+					while($rowConstUploadFile = $fetchConstUploadFile->fetch(PDO::FETCH_ASSOC)){
+						$arrConst = array();
+						$arrConst["FILEMAPPING_ID"] = $rowConstUploadFile["filemapping_id"];
+						$arrConst["FILE_ID"] = $rowConstUploadFile["file_id"];
+						$arrConst["FILE_NAME"] = $rowConstUploadFile["file_name"];
+						$arrConst["LOANGROUP_CODE"] = $rowConstUploadFile["loangroup_code"];
+						$arrConst["MAX"] = $rowConstUploadFile["max"];
+						$arrConst["IS_REQUIRE"] = $rowConstUploadFile["is_require"] == "1";
+						$arrConst["UPDATE_DATE"] = $rowConstUploadFile["update_date"];
+						$arrayUploadFileGroup[] = $arrConst;
+					}
+				}
+				
+				//$arrayResult["DIFFOLD_CONTRACT"] = $oldBal == 0 ? null : $oldBal;
+				$arrayResult["LOANREQ_AMT_STEP"] = 100;
+				$arrayResult["RECEIVE_NET"] = $maxloan_amt - $oldBal;
+				$arrayResult["REQUEST_AMT"] = (string)$request_amt;
+				//$arrayResult["PAY_DATE"] = $lib->convertdate(date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d')))),'d M Y');
+				$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $request_amt;
+				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
+				$arrayResult["MAX_PERIOD"] = $period ?? "0";
+				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+				//$arrayResult["OPTION_PAYTYPE"] = $arrGrpPayType;
+				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
+				if($rowIntRate["LOANGROUP_CODE"] !="01"){
+					$arrayResult['NOTE_DESC'] = "หมายเหตุ :  เงินกู้ประเภทที่มีคนค้ำกรุณาเเนบสำเนาบัตรผู้ค้ำให้ครบตามจำนวนผู้ค้ำ";
+					$arrayResult['NOTE_DESC_COLOR'] = "red";
+				}
+				$arrayResult["SALARY"] = $dataComing["salary"];
+				$arrayResult["REMARK"] = $dataComing["remark"];
+				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
+				$arrayResult["IS_INPUT_REMARK"] = TRUE;
+				$arrayResult["IS_INPUT_SALARY"] = TRUE;
+				$arrayResult["REQ_SALARY"] = TRUE;
+				$arrayResult["REQ_CITIZEN"] = TRUE;
+				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
+				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;		
+				$arrayResult["HIDE_PERIOD_INFO"] = TRUE;
+				$arrayResult["HIDE_PERIOD_PAYMENT"] = TRUE;
+				$arrayResult["HIDE_LOAN_PERMIT_BALANCE"] = TRUE;
+				$arrayResult["HIDE_RECEIVE_NET"] = TRUE;
+				$arrayResult['UPLOADFILE_GRP'] = $arrayUploadFileGroup;		
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;			
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
