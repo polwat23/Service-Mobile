@@ -20,16 +20,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccAllowed[] = $rowAccountAllowed["deptaccount_no"];
 		}
 		if(sizeof($arrAccAllowed) > 0){
-			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
-														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
-														and dpm.member_no = :member_no and dpm.deptclose_status = 0 ORDER BY dpm.deptaccount_no");
+			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.account_no as deptaccount_no,TRIM(dpm.account_name) as deptaccount_name,dpt.ACC_DESC as depttype_desc,dpm.ACC_TYPE as depttype_code
+														FROM BK_H_SAVINGACCOUNT dpm LEFT JOIN BK_M_ACC_TYPE dpt ON dpm.ACC_TYPE = dpt.ACC_TYPE
+														WHERE dpm.ACC_TYPE IN(".implode(',',$arrDeptAllowed).")
+														and dpm.account_no NOT IN(".implode(',',$arrAccAllowed).")
+														and dpm.account_id = :member_no and dpm.ACC_STATUS = 'O' ORDER BY dpm.account_no");
 		}else{
-			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
-														and dpm.member_no = :member_no and dpm.deptclose_status = 0 ORDER BY dpm.deptaccount_no");
+			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.account_no as deptaccount_no,TRIM(dpm.account_name) as deptaccount_name,dpt.ACC_DESC as depttype_desc,dpm.ACC_TYPE as depttype_code
+														FROM BK_H_SAVINGACCOUNT dpm LEFT JOIN BK_M_ACC_TYPE dpt ON dpm.ACC_TYPE = dpt.ACC_TYPE
+														WHERE dpm.ACC_TYPE IN(".implode(',',$arrDeptAllowed).")
+														and dpm.account_id = :member_no and dpm.ACC_STATUS = 'O' ORDER BY dpm.account_no");
 
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);
@@ -64,10 +64,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if($rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
 				$arrAccInCoop["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
 			}
-			$depSeq = $cal_dep->getSequestAmt($rowAccIncoop["DEPTACCOUNT_NO"]);
-			if($depSeq["CAN_WITHDRAW"] || $depSeq["CAN_DEPOSIT"]){
-				$arrAllowAccGroup[] = $arrAccInCoop;
-			}
+			$arrAllowAccGroup[] = $arrAccInCoop;
 		}
 		$arrayResult['ACCOUNT_ALLOW'] = $arrAllowAccGroup;
 		$arrayResult['RESULT'] = TRUE;

@@ -46,6 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$getTypeGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 			$rowTypeGuarantee = $getTypeGuarantee->fetch(PDO::FETCH_ASSOC);
 			if($rowTypeGuarantee["IS_DEED"] == '1'){
+				$arrGroupAll = [];
 				$arrGroupAll['LOANCOLLTYPE_CODE'] = '04';
 				$arrGroupAll['COLLTYPE_DESC'] = "สินทรัพย์ค้ำประกัน";
 				$getDeed = $conoracle->prepare("SELECT LD_TDEED_NO as COLLMAST_REFNO,LD_PLAND_NO as LAND_LANDNO,
@@ -53,6 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												FROM LOAN_T_DEED WHERE LCONT_ID = :contract_no");
 				$getDeed->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 				while($rowDeed = $getDeed->fetch(PDO::FETCH_ASSOC)){
+					$arrGroupAllMember = [];
 					$address =  isset($rowDeed["COLLMAST_REFNO"]) && $rowDeed["COLLMAST_REFNO"] != "" ? "โฉนดเลขที่ ".$rowDeed["COLLMAST_REFNO"] : "";
 					$address .= isset($rowDeed["LAND_LANDNO"]) && $rowDeed["LAND_LANDNO"] != "" ? " บ้านเลขที่ ".$rowDeed["LAND_LANDNO"] : "";
 					$address .= isset($rowDeed["POS_TUMBOL"]) && $rowDeed["POS_TUMBOL"] != "" ? " ต.".$rowDeed["POS_TUMBOL"] : "";
@@ -61,14 +63,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAllMember["DESCRIPTION"] = $address;
 					$arrGroupAll['ASSET'][] = $arrGroupAllMember;
 				}
+				$arrGrpAllLoan[] = $arrGroupAll;
 			}
 			if($rowTypeGuarantee["IS_GUR"] == '1'){
+				$arrGroupAll = [];
 				$arrGroupAll['LOANCOLLTYPE_CODE'] = '01';
 				$arrGroupAll['COLLTYPE_DESC'] = "คนค้ำประกัน";
 				$getGuarantee = $conoracle->prepare("SELECT BR_NO_OTHER,MEM_ID,LG_FULLNAME
 													FROM LOAN_T_GUAR WHERE LCONT_ID = :contract_no and MEM_CHK = 'N'");
 				$getGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 				while($rowGuarantee = $getGuarantee->fetch(PDO::FETCH_ASSOC)){
+					$arrGroupAllMember = [];
 					$getUcollwho = $conoracle->prepare("SELECT
 														MEMB.FNAME as MEMB_NAME,MEMB.LNAME as MEMB_SURNAME,PRE.PTITLE_NAME as PRENAME_DESC,MEMB.ACCOUNT_ID
 														FROM
@@ -88,14 +93,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAllMember["MEMBER_NO"] = $rowCollMember["ACCOUNT_ID"];
 					$arrGroupAll['ASSET'][] = $arrGroupAllMember;
 				}
+				$arrGrpAllLoan[] = $arrGroupAll;
 			}
 			if($rowTypeGuarantee["IS_SAVING"] == '1'){
+				$arrGroupAll = [];
 				$arrGroupAll['LOANCOLLTYPE_CODE'] = '03';
 				$arrGroupAll['COLLTYPE_DESC'] = "เงินฝากค้ำประกัน";
 				$getGuarantee = $conoracle->prepare("SELECT LS_ACCNO as REF_COLLNO,LS_SAL_HOLD
 													FROM LOAN_T_SAVING WHERE LCONT_ID = :contract_no and (FLAG = 'N' OR FLAG IS NULL)");
 				$getGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 				while($rowColl = $getGuarantee->fetch(PDO::FETCH_ASSOC)){
+					$arrGroupAllMember = [];
 					$getDataAcc = $conoracle->prepare("SELECT ACCOUNT_NAME FROM BK_H_SAVINGACCOUNT WHERE account_no = :account_no");
 					$getDataAcc->execute([':account_no' => $rowColl["REF_COLLNO"]]);
 					$rowAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
@@ -104,8 +112,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAllMember["DEPT_AMT"] = number_format($rowColl["LS_SAL_HOLD"],2);
 					$arrGroupAll['ASSET'][] = $arrGroupAllMember;
 				}
+				$arrGrpAllLoan[] = $arrGroupAll;
 			}
-			$arrGrpAllLoan[] = $arrGroupAll;
+			//gold
+			$arrGroupAll = [];
+			$arrGroupAll['LOANCOLLTYPE_CODE'] = '06';
+			$arrGroupAll['COLLTYPE_DESC'] = "ทองค้ำประกัน";
+			$getGuarantee = $conoracle->prepare("select td.lcont_id,td.br_no,td.lreg_recno,td.code,lmg.g_name,td.ltg_cost_appraisal  
+												from loan_t_gold td INNER JOIN loan_m_contact c on c.lcont_id = td.lcont_id and c.br_no = td.br_no 
+												INNER JOIN mem_h_member m on m.id_card = c.id_card INNER JOIN mem_m_ptitle p ON p.ptitle_id = m.ptitle_id 
+												INNER JOIN loan_m_type_gold lmg ON lmg.g_code = td.ltg_type 
+												WHERE c.lcont_amount_sal > 0 and td.lcont_id = :contract_no and (m.tried_flg ='0' or m.tried_flg ='N')");
+			$getGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
+			while($rowColl = $getGuarantee->fetch(PDO::FETCH_ASSOC)){
+				$arrGroupAllMember = [];
+				$arrGroupAllMember["CATEGORY_NAME"] = $rowColl["G_NAME"];
+				$arrGroupAllMember["COST_APPRAISAL"] = number_format($rowColl["LTG_COST_APPRAISAL"],2);
+				$arrGroupAll['ASSET'][] = $arrGroupAllMember;
+			}
+			if(count($arrGroupAll['ASSET']) > 0){
+				$arrGrpAllLoan[] = $arrGroupAll;
+			}
 			$arrayGroupLoan["GUARANTEE"] = $arrGrpAllLoan;
 			$arrayResult['CONTRACT_COLL'][] = $arrayGroupLoan;
 			$arrayResult['RESULT'] = TRUE;
@@ -150,6 +177,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$rowTypeGuarantee = $getTypeGuarantee->fetch(PDO::FETCH_ASSOC);
 				$arrGroupAll = array();
 				if($rowTypeGuarantee["IS_DEED"] == '1'){
+					$arrGroupAll = [];
 					$arrGroupAll['LOANCOLLTYPE_CODE'] = '04';
 					$arrGroupAll['COLLTYPE_DESC'] = "สินทรัพย์ค้ำประกัน";
 					$getDeed = $conoracle->prepare("SELECT LD_TDEED_NO as COLLMAST_REFNO,LD_PLAND_NO as LAND_LANDNO,
@@ -157,6 +185,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM LOAN_T_DEED WHERE LCONT_ID = :contract_no");
 					$getDeed->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 					while($rowDeed = $getDeed->fetch(PDO::FETCH_ASSOC)){
+						$arrGroupAllMember = [];
 						$address =  isset($rowDeed["COLLMAST_REFNO"]) && $rowDeed["COLLMAST_REFNO"] != "" ? "โฉนดเลขที่ ".$rowDeed["COLLMAST_REFNO"] : "";
 						$address .= isset($rowDeed["LAND_LANDNO"]) && $rowDeed["LAND_LANDNO"] != "" ? " บ้านเลขที่ ".$rowDeed["LAND_LANDNO"] : "";
 						$address .= isset($rowDeed["POS_TUMBOL"]) && $rowDeed["POS_TUMBOL"] != "" ? " ต.".$rowDeed["POS_TUMBOL"] : "";
@@ -165,14 +194,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrGroupAllMember["DESCRIPTION"] = $address;
 						$arrGroupAll['ASSET'][] = $arrGroupAllMember;
 					}
+					$arrGrpAllLoan[] = $arrGroupAll;
 				}
 				if($rowTypeGuarantee["IS_GUR"] == '1'){
+					$arrGroupAll = [];
 					$arrGroupAll['LOANCOLLTYPE_CODE'] = '01';
 					$arrGroupAll['COLLTYPE_DESC'] = "คนค้ำประกัน";
 					$getGuarantee = $conoracle->prepare("SELECT BR_NO_OTHER,MEM_ID,LG_FULLNAME
 														FROM LOAN_T_GUAR WHERE LCONT_ID = :contract_no and MEM_CHK = 'N'");
 					$getGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 					while($rowGuarantee = $getGuarantee->fetch(PDO::FETCH_ASSOC)){
+						$arrGroupAllMember = [];
 						$getUcollwho = $conoracle->prepare("SELECT
 															MEMB.FNAME as MEMB_NAME,MEMB.LNAME as MEMB_SURNAME,PRE.PTITLE_NAME as PRENAME_DESC,MEMB.ACCOUNT_ID
 															FROM
@@ -192,14 +224,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrGroupAllMember["MEMBER_NO"] = $rowCollMember["ACCOUNT_ID"];
 						$arrGroupAll['ASSET'][] = $arrGroupAllMember;
 					}
+					$arrGrpAllLoan[] = $arrGroupAll;
 				}
 				if($rowTypeGuarantee["IS_SAVING"] == '1'){
+					$arrGroupAll = [];
 					$arrGroupAll['LOANCOLLTYPE_CODE'] = '03';
 					$arrGroupAll['COLLTYPE_DESC'] = "เงินฝากค้ำประกัน";
 					$getGuarantee = $conoracle->prepare("SELECT LS_ACCNO as REF_COLLNO,LS_SAL_HOLD
 														FROM LOAN_T_SAVING WHERE LCONT_ID = :contract_no and (FLAG = 'N' OR FLAG IS NULL)");
 					$getGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
 					while($rowColl = $getGuarantee->fetch(PDO::FETCH_ASSOC)){
+						$arrGroupAllMember = [];
 						$getDataAcc = $conoracle->prepare("SELECT ACCOUNT_NAME FROM BK_H_SAVINGACCOUNT WHERE account_no = :account_no");
 						$getDataAcc->execute([':account_no' => $rowColl["REF_COLLNO"]]);
 						$rowAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
@@ -208,11 +243,33 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrGroupAllMember["DEPT_AMT"] = number_format($rowColl["LS_SAL_HOLD"],2);
 						$arrGroupAll['ASSET'][] = $arrGroupAllMember;
 					}
+					$arrGrpAllLoan[] = $arrGroupAll;
 				}
-				$arrGrpAllLoan[] = $arrGroupAll;
+				
+				//gold
+				$arrGroupAll = [];
+				$arrGroupAll['LOANCOLLTYPE_CODE'] = '06';
+				$arrGroupAll['COLLTYPE_DESC'] = "ทองค้ำประกัน";
+				$getGuarantee = $conoracle->prepare("select td.lcont_id,td.br_no,td.lreg_recno,td.code,lmg.g_name,td.ltg_cost_appraisal  
+													from loan_t_gold td INNER JOIN loan_m_contact c on c.lcont_id = td.lcont_id and c.br_no = td.br_no 
+													INNER JOIN mem_h_member m on m.id_card = c.id_card INNER JOIN mem_m_ptitle p ON p.ptitle_id = m.ptitle_id 
+													INNER JOIN loan_m_type_gold lmg ON lmg.g_code = td.ltg_type 
+													WHERE c.lcont_amount_sal > 0 and td.lcont_id = :contract_no and (m.tried_flg ='0' or m.tried_flg ='N')");
+				$getGuarantee->execute([':contract_no' => $rowWhocollu["LOANCONTRACT_NO"]]);
+				while($rowColl = $getGuarantee->fetch(PDO::FETCH_ASSOC)){
+					$arrGroupAllMember = [];
+					$arrGroupAllMember["CATEGORY_NAME"] = $rowColl["G_NAME"];
+					$arrGroupAllMember["COST_APPRAISAL"] = number_format($rowColl["LTG_COST_APPRAISAL"],2);
+					$arrGroupAll['ASSET'][] = $arrGroupAllMember;
+				}
+				if(count($arrGroupAll['ASSET']) > 0){
+					$arrGrpAllLoan[] = $arrGroupAll;
+				}
+				
 				$arrayGroupLoan["GUARANTEE"] = $arrGrpAllLoan;
 				$arrGroupAllLoan[] = $arrayGroupLoan;
 			}
+			
 			$arrayResult['CONTRACT_COLL'] = $arrGroupAllLoan;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

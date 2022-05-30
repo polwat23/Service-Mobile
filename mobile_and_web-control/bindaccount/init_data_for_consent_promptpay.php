@@ -4,12 +4,28 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember = $conoracle->prepare("SELECT id_card as CARD_PERSON FROM MEM_H_MEMBER WHERE account_id = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
+			$getDepositAcc = $conoracle->prepare("SELECT dp.account_no as DEPTACCOUNT_NO,dp.account_name as DEPTACCOUNT_NAME,dp.BALANCE as PRNCBAL,
+												dt.ACC_DESC as DEPTTYPE_DESC 
+												FROM BK_H_SAVINGACCOUNT dp LEFT JOIN BK_M_ACC_TYPE dt ON dp.ACC_TYPE = dt.ACC_TYPE
+												WHERE dp.account_id = :member_no and dp.ACC_STATUS = 'O'");
+			$getDepositAcc->execute([':member_no' => $member_no]);
+			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
+				$arrAccFee = array();
+				$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+				$arrAccFee['ACCOUNT_NAME'] = TRIM($rowDepAcc["DEPTACCOUNT_NAME"]);
+				$arrAccFee['BALANCE'] = number_format($rowDepAcc["PRNCBAL"],2);
+				$arrAccFee['DEPTTYPE_DESC'] = $rowDepAcc["DEPTTYPE_DESC"];
+				$arrGrpAccFee[] = $arrAccFee;
+			}
+			$arrayResult['REMARK_PAYFEE'] = $configError["REMARK_PAYFEE"][0][$lang_locale];
+			$arrayResult['ACCOUNT_PAYFEE'] = $arrGrpAccFee;
+
 			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 			$arrayResult['RESULT'] = TRUE;

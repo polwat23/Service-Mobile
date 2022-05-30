@@ -6,30 +6,14 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){	
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$to_deptaccount_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
-		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WIM');
+		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WTO');
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($arrRightDep["RESULT"]){
 				$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 				if($arrRightDeposit["RESULT"]){
-					$checkSeqAmt = $cal_dep->getSequestAmt($to_deptaccount_no,'DIM');
-					if($checkSeqAmt["CAN_DEPOSIT"]){
-						if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
-							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
-							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
-							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
-							$arrayResult['CAUTION'] = $arrayCaution;
-							$arrayResult['PENALTY_AMT'] = $arrInitDep["PENALTY_AMT"];
-							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
-						}
-						$arrayResult['RESULT'] = TRUE;
-						require_once('../../include/exit_footer.php');
-					}else{
-						$arrayResult['RESPONSE_CODE'] = "WS0092";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
 				}else{
 					$arrayResult['RESPONSE_CODE'] = $arrRightDeposit["RESPONSE_CODE"];
 					if($arrRightDeposit["RESPONSE_CODE"] == 'WS0056'){

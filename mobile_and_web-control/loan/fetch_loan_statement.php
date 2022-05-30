@@ -35,15 +35,24 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			':contract_no' => $contract_no
 		]);
 		$rowContract = $getAccount->fetch(PDO::FETCH_ASSOC);
+		
+		$getAmtPass = $conoracle->prepare("SELECT CASE WHEN (AMOUNTPAST2 < 0) THEN '0' ELSE TO_CHAR(AMOUNTPAST2) END AS AMOUNTPAST 
+									FROM VIEW_DAY_PASS WHERE LCONT_ID=:contract_no");
+		$getAmtPass->execute([
+			':contract_no' => $contract_no
+		]);
+		$rowAmtPass = $getAmtPass->fetch(PDO::FETCH_ASSOC);
+		
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+		$arrayHeaderAcc["OVERDUE_BALANCE"] = number_format($rowAmtPass["AMOUNTPAST"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lsm.REMARK AS TYPE_DESC,lsm.LPD_DATE as operate_date,
-											lsm.LPD_SAL as PRN_PAYMENT,lsm.LPD_NUM_INST as SEQ_NO,
+											lsm.LPD_SAL as PRN_PAYMENT,lsm.LPD_NUM_INST as SEQ_NO,lsm.LPD_NO as SLIP_NO,
 											lsm.LPD_INTE as INT_PAYMENT,lsm.LCONT_BAL_AMOUNT as loan_balance
 											FROM LOAN_M_PAYDEPT lsm 
 											WHERE lsm.LCONT_ID = :contract_no and lsm.LPD_DATE
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											ORDER BY lsm.LPD_NUM_INST DESC) WHERE rownum <= ".$rownum." ");
+											ORDER BY lsm.LPD_DATE DESC ) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,
@@ -53,6 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
+			$arrSTM["SLIP_NO"] = $rowStm["SLIP_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["PRN_PAYMENT"] = number_format($rowStm["PRN_PAYMENT"],2);
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);

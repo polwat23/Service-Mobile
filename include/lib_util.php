@@ -831,5 +831,57 @@ class library {
 		}
 		return $amtRaw + floatval($roundFrac);
 	}
+	public function generateQrCodeImg($qrData){
+		$data = [
+			"theme" => "default",
+			"QR_TYPE_DESC" => $qrData["QR_TYPE_DESC"],
+			"ACC_NAME" => $qrData["ACC_NAME"],
+			"ACC_NO" => $qrData["ACC_NO"],
+			"AMT_TRANSFER" => $qrData["AMT_TRANSFER"],
+			"datainQR" => $qrData["datainQR"],
+			"FEE" => $qrData["FEE"],
+			"OPERATE_DATE" => $qrData["OPERATE_DATE"],
+		];     
+		$ch = curl_init();  
+		$headers = [
+			 'Content-Type: application/json'
+		];  
+		
+		curl_setopt( $ch,CURLOPT_URL, 'https://api-node.thaicoop.co/genSlip/genslipqr/ibnu' );                                                                  
+		curl_setopt( $ch,CURLOPT_POST, true );  
+		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode($data));                                                                  
+																												 
+		$result = curl_exec($ch);
+		
+		if(isset($result) && $result !== FALSE){
+			$resultQr = json_decode($result);
+			curl_close ($ch);
+			if(isset($resultQr)){
+				return $resultQr;
+			}else{
+				return false;
+			}
+		}else{
+			curl_close ($ch);
+			return false;
+		}
+	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
+	}
 }
 ?>

@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		$getConstantYear = $conoracle->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
 		$getConstantYear->execute();
 		$rowConstant = $getConstantYear->fetch(PDO::FETCH_ASSOC);
-		if($rowConstant["DAYINYEAR"] == 0){
+		if($rowConstant["DAYINYEAR"] == 0 || !isset($rowConstant["DAYINYEAR"])){
 			$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
 		}else{
 			$dayinYear = $rowConstant["DAYINYEAR"];
@@ -65,6 +65,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 			}
 		}
+		
 		if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
 			$pay_period = $period_payment;
 		}else{
@@ -146,6 +147,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				
 				if (($payment_sumbalance) < $pay_period) {
 				  $prn_amount = $payment_sumbalance;
+				}else if($i == $period){
+				  $prn_amount = $payment_sumbalance;
 				}
 				$periodPaymentRaw = $prn_amount + $period_int;
 				if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
@@ -187,7 +190,61 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 			if($prn_amount > 0){
 				$arrPayment[] = $arrPaymentPerPeriod;
 			}
+		
+		
+		//ibaf
+		/*if($dataComing["loantype_code"] == 0){
+			//----------เงินต้นและเงินต้นสุดท้าย
+			$Per_Stair = ceil($payment_sumbalance / $period);
+			$Per_Stair_last = $payment_sumbalance - ((ceil($payment_sumbalance / $period)) * ($period - 1));
+			
+			$PerFeeL= 0;
+			$PerFeeLLast = 0;
+			if($int_rate == 0){
+				$PayUnitL = ($payment_sumbalance * (((($int_rate / 100) * ($period +1)) / (24 / 1)+1) / $period));// ชำระต่องวด
+				$PerFeeL = $PayUnitL;
+				$PerFeeLLast = $PayUnitL;
+			}else{
+				$PayUnitL = Round($payment_sumbalance * (((($int_rate / 100) * ($period +1)) / (24 / 1)+1) / $period));// ชำระต่องวด
+				$PerFeeL = $PayUnitL;
+				$PerFeeLLast = $PayUnitL;
+			}
+			
+			//loop table simulate
+			for($i = 1;$i <= $period;$i++){
+				$arrPaymentPerPeriod = array();
+				if($i == 1){
+					if($cal_start_pay_date == "next"){
+						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
+					}else{
+						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
+					}
+					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
+				}else {
+					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
+					$dayOfMonth = date('d',strtotime($lastDate));
+				}
+				if(date('Y',strtotime("+".($i-1)." months",$lastDateofMonth)) % 4 == 0){
+					$dayinYear = 366;
+				}else{
+					$dayinYear = 365;
+				}
+				$period_int= $payment_sumbalance * ($int_rate/100) * $dayOfMonth / $dayinYear;
+				$prn_amount = $PerFeeL - $period_int;
+				$payment_sumbalance = $payment_sumbalance - ($prn_amount);
+				$sumInt += $period_int;
+				$sumPayment += $PerFeeL;
+				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
+				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
+				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
+				$arrPaymentPerPeriod["PERIOD"] = $i;
+				$arrPaymentPerPeriod["INTEREST"] = number_format($period_int,2);
+				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($PerFeeL,2);
+				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
+				$arrPayment[] = $arrPaymentPerPeriod;
+			}*/
 		}
+		
 		include(__DIR__.'/show_table_payment.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

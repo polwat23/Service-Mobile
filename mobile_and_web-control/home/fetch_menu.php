@@ -477,6 +477,7 @@ if(!$anonymous){
 			}
 		}
 		if(isset($arrayAllMenu)){
+			$arrayResult['LOGIN_BANNER'] = $config["URL_SERVICE"].'/resource/logo/login_banner.webp?v=2';
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

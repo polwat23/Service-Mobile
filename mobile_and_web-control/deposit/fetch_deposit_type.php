@@ -29,6 +29,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrGroupAccount["COVER_IMG"] = null;
 				}
+			}else{
+				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
+					$arrGroupAccount["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
+				}else{
+					$arrGroupAccount["DEPT_TYPE_IMG"] = null;
+				}
 			}
 			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE deptaccount_no = :account_no");
 			$fetchAlias->execute([
@@ -44,6 +50,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ALIAS_PATH_IMG"] = null;
 				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
 			}
+			$arrAccount["DEPTTYPE_CODE"] = $rowAccount["DEPTTYPE_CODE"];
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$formatDeptHidden);
 			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccount["DEPTACCOUNT_NAME"]));

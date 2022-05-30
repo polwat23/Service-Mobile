@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
@@ -56,6 +56,12 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
 			$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			$arrayResult['RESULT'] = TRUE;
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";

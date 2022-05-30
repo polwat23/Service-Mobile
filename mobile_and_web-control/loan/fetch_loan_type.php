@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllContract->execute([':member_no' => $member_no]);
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
-		$getContract = $conoracle->prepare("SELECT lt.L_TYPE_NAME AS LOAN_TYPE,ln.LCONT_ID as loancontract_no,
+		$getContract = $conoracle->prepare("SELECT lt.L_TYPE_NAME AS LOAN_TYPE,ln.LCONT_ID as loancontract_no,lt.L_TYPE_CODE as LOAN_TYPE_CODE,
 											ln.LCONT_AMOUNT_SAL as LOAN_BALANCE,
 											ln.LCONT_APPROVE_SAL as APPROVE_AMT,ln.LCONT_DATE as startcont_date,
 											ln.LCONT_SAL as period_payment,ln.LCONT_MAX_INSTALL as PERIOD,
@@ -23,6 +23,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupContract = array();
 			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 			$arrContract = array();
+			if($dataComing["channel"] == 'web'){
+				if(file_exists(__DIR__.'/../../resource/cover-loan/'.$rowContract["LOAN_TYPE_CODE"].'.jpg')){
+					$arrGroupContract["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-loan/'.$rowContract["LOAN_TYPE_CODE"].'.jpg?v='.date('Ym');
+				}else{
+					$arrGroupContract["COVER_IMG"] = null;
+				}
+			}else{
+				if(file_exists(__DIR__.'/../../resource/cover-loan/'.$rowAccount["LOAN_TYPE_CODE"].'.jpg')){
+					$arrGroupAccount["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/cover-loan/'.$rowAccount["LOAN_TYPE_CODE"].'.jpg?v='.date('Ym');
+				}else{
+					$arrGroupAccount["LOAN_TYPE_IMG"] = null;
+				}
+			}
 			$arrContract["CONTRACT_NO"] = $contract_no;
 			$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 			$arrContract["APPROVE_AMT"] = number_format($rowContract["APPROVE_AMT"],2);
@@ -31,6 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 			$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 			$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+			$arrContract["LOAN_TYPE_CODE"] = $rowContract["LOAN_TYPE_CODE"];
 			$arrGroupContract['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;

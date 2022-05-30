@@ -8,9 +8,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													FROM SHR_MEM WHERE account_id = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
+		$getShareBegin = $conoracle->prepare("select SHR_SUM_BTH
+									FROM (select * from SHR_T_SHARE ORDER BY SHR_SEN DESC)
+									where ACCOUNT_ID = :member_no 
+									and TMP_YEAR < TO_CHAR(SYSDATE, 'yyyy','NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') 
+									AND ROWNUM <= 1");
+		$getShareBegin->execute([':member_no' => $member_no]);
+		$rowShareBegin = $getShareBegin->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
-			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
+			$arrayResult['BRING_FORWARD'] = number_format($rowShareBegin["SHR_SUM_BTH"],2);
 			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
 			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
 			$limit = $func->getConstant('limit_stmshare');
@@ -29,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														stm.SHR_SUM_BTH as SUM_SHARE_AMT,stm.TYPE_SH_ID as shritemtype_desc,
 														stm.TMP_YEAR || stm.TMP_MONTH as period,stm.SLIP_NO as ref_slipno
 														FROM SHR_T_SHARE stm
-														WHERE stm.account_id = :member_no and stm.TMP_DATE_REC
+														WHERE stm.account_id = :member_no and stm.TYPE_SH_ID <> 'E' and stm.TMP_DATE_REC
 														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.SHR_SEN DESC");
 			$getShareStatement->execute([
 				':member_no' => $member_no,

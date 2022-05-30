@@ -21,13 +21,13 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_dept');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.LINE_NO > ".$dataComing["old_seq_no"] : "and dsm.LINE_NO > 0";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.BOOK_ID > ".$dataComing["old_seq_no"] : "and dsm.BOOK_ID > 0";
 			}else{
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.LINE_NO < ".$dataComing["old_seq_no"] : "and dsm.LINE_NO < 999999";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.BOOK_ID < ".$dataComing["old_seq_no"] : "and dsm.BOOK_ID > 0";
 			}
 		}else{
 			$rownum = 999999;
-			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.LINE_NO < ".$dataComing["old_seq_no"] : "and dsm.LINE_NO < 999999";
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and dsm.BOOK_ID < ".$dataComing["old_seq_no"] : "and dsm.BOOK_ID > 0";
 		}
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
 		$getAccount = $conoracle->prepare("SELECT BALANCE as BALANCE FROM BK_H_SAVINGACCOUNT
@@ -41,12 +41,12 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT dit.TRANS_DESC AS TYPE_TRAN,dsm.PAGE_NO || dsm.LINE_NO as seq_no,
 											dsm.CURR_DATE as operate_date,(dsm.DEP_CASH + dsm.WDL_CASH) as TRAN_AMOUNT,
-											dsm.N_BALANCE as PRNCBAL,dsm.T_TRNS_TYPE as SIGN_FLAG,dsm.BOOK_ID
+											dsm.N_BALANCE as PRNCBAL,dsm.T_TRNS_TYPE as SIGN_FLAG,dsm.BOOK_ID,dsm.TRANS_CODE
 											FROM BK_T_NOBOOK dsm LEFT JOIN BK_M_TRANSCODE dit
 											ON dsm.TRANS_CODE = dit.TRANS_CODE 
 											WHERE dsm.account_no = :account_no and TRUNC(dsm.CURR_DATE) 
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											ORDER BY PAGE_NO DESC,LINE_NO DESC) WHERE rownum <= ".$rownum." ");
+											ORDER BY dsm.BOOK_ID DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':account_no' => $account_no,
 			':datebefore' => $date_before,
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
-			if($rowStm["SIGN_FLAG"] == 'R'){
+			if(substr($rowStm["TRANS_CODE"],0,1) == 'D' || substr($rowStm["TRANS_CODE"],0,1) == 'O' || substr($rowStm["TRANS_CODE"],0,1) == 'T'){
 				$arrSTM["SIGN_FLAG"] = '1';
 			}else{
 				$arrSTM["SIGN_FLAG"] = '-1';

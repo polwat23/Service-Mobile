@@ -14,15 +14,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowBindAcc = $checkBindAccount->fetch(PDO::FETCH_ASSOC);
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrAccBeenAllow = array();
-				$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
+				$getDetailAcc = $conoracle->prepare("SELECT dp.ACC_TYPE as depttype_code,dt.ACC_DESC as depttype_desc,dp.account_no as deptaccount_no,
+													dp.account_name as deptaccount_name,dp.BALANCE as BALANCE,
+													dp.LAST_DATE as LAST_OPERATE_DATE
+													FROM BK_H_SAVINGACCOUNT dp LEFT JOIN BK_M_ACC_TYPE dt ON dp.ACC_TYPE = dt.ACC_TYPE
+													WHERE dp.account_no = :deptaccount_no and dp.ACC_STATUS = 'O'");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
-					if($rowDetailAcc["TRANSONLINE_FLAG"] == '0'){
-						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_JOIN_FLAG_OFF'][0][$lang_locale];
-					}
 					$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
 																			FROM gcconstantaccountdept
 																			WHERE dept_type_code = :depttype_code");

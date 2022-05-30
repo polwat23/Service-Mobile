@@ -12,9 +12,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
-				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				if ($forceNewSecurity == true) {
+					$arrayResult['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($rowInfoMobile["path_avatar"], $jwt_token, $config["SECRET_KEY_JWT"]);
+					
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $explodePathAvatar[0].'.webp');
+					$arrayResult["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($explodePathAvatar[0].'.webp', $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				}
 			}else{
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
@@ -56,6 +65,40 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			
+			$memberInfoView = $conoracle->prepare("SELECT ADDRESS_MAIL,MOO_ADDR_MAIL,TANON_MAIL,SOI_MAIL,TUMBOL_MAIL,DISTRICT_NAME,PROVINCE_NAME,
+										PROVINCE_ID,ZIPCODE_MAIL 
+										FROM VIEW_MEMBER_FULL 
+										WHERE ACCOUNT_ID = :member_no");
+			$memberInfoView->execute([':member_no' => $member_no]);
+			$rowMemberView = $memberInfoView->fetch(PDO::FETCH_ASSOC);
+			$addressDoc = (isset($rowMemberView["ADDRESS_MAIL"]) ? $rowMemberView["ADDRESS_MAIL"] : null);
+			if(isset($rowMemberView["PROVINCE_ID"]) && $rowMemberView["PROVINCE_ID"] == '10'){
+				$addressDoc .= (isset($rowMemberView["MOO_ADDR_MAIL"]) ? ' ม.'.$rowMemberView["MOO_ADDR_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["SOI_MAIL"]) ? ' ซอย'.$rowMemberView["SOI_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["TANON_MAIL"]) ? ' ถนน'.$rowMemberView["TANON_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["TUMBOL_MAIL"]) ? ' แขวง'.$rowMemberView["TUMBOL_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["DISTRICT_NAME"]) ? ' เขต'.$rowMemberView["DISTRICT_NAME"] : null);
+				$addressDoc .= (isset($rowMemberView["PROVINCE_NAME"]) ? ' '.$rowMemberView["PROVINCE_NAME"] : null);
+				$addressDoc .= (isset($rowMemberView["ZIPCODE_MAIL"]) ? ' '.$rowMemberView["ZIPCODE_MAIL"] : null);
+			}else{
+				$addressDoc .= (isset($rowMemberView["MOO_ADDR_MAIL"]) ? ' ม.'.$rowMemberView["MOO_ADDR_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["SOI_MAIL"]) ? ' ซอย'.$rowMemberView["SOI_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["TANON_MAIL"]) ? ' ถนน'.$rowMemberView["TANON_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["TUMBOL_MAIL"]) ? ' ต.'.$rowMemberView["TUMBOL_MAIL"] : null);
+				$addressDoc .= (isset($rowMemberView["DISTRICT_NAME"]) ? ' อ.'.$rowMemberView["DISTRICT_NAME"] : null);
+				$addressDoc .= (isset($rowMemberView["PROVINCE_NAME"]) ? ' จ.'.$rowMemberView["PROVINCE_NAME"] : null);
+				$addressDoc .= (isset($rowMemberView["ZIPCODE_MAIL"]) ? ' '.$rowMemberView["ZIPCODE_MAIL"] : null);
+			}
+			
+			$memberSalary = $conoracle->prepare("select LINEPOST_NAME,SALARY from VIEW_MEM_OFFICE where MEM_ID = :mem_id and br_no = :br_no");
+			$memberSalary->execute([
+				':br_no' => substr($member_no,0,3),
+				':mem_id' => substr($member_no,-5,5),
+			]);
+			$rowMemberSalary = $memberSalary->fetch(PDO::FETCH_ASSOC);
+			
+			
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
@@ -65,7 +108,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_DATE"] = $lib->convertdate($rowMember["MEMBER_DATE"],"D m Y");
 			$arrayResult["MEMBER_DATE_COUNT"] = $lib->count_duration($rowMember["MEMBER_DATE"],"ym");
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
+			$arrayResult["FULL_ADDRESS_DOC"] = $addressDoc;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["OCCUPATION"] = $rowMemberSalary["LINEPOST_NAME"];
+			$arrayResult["SALARY"] = $rowMemberSalary["SALARY"] ? number_format($rowMemberSalary["SALARY"], 2) : "-";
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
