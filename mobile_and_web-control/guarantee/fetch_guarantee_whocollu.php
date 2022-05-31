@@ -34,8 +34,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
 					$arrayAvarTar = $func->getPathpic($rowColl["REF_COLLNO"]);
-					$arrGroupAllMember["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
-					$arrGroupAllMember["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
+					
+					if ($forceNewSecurity == true) {
+						$arrGroupAllMember["AVATAR_PATH"] = null;
+						$arrGroupAllMember["AVATAR_PATH_WEBP"] = null;
+						
+						if (isset($arrayAvarTar["AVATAR_PATH"])) {
+							$arrGroupAllMember['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayAvarTar["AVATAR_PATH"]);
+							$arrGroupAllMember["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($arrayAvarTar["AVATAR_PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+						if (isset($arrayAvarTar["AVATAR_PATH_WEBP"])) {
+							$arrGroupAllMember["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayAvarTar["AVATAR_PATH_WEBP"]);
+							$arrGroupAllMember["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($arrayAvarTar["AVATAR_PATH_WEBP"], $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}else{
+						$arrGroupAllMember["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
+						$arrGroupAllMember["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
+					}
+					
 					$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
@@ -118,8 +134,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
 						$arrayAvarTar = $func->getPathpic($rowColl["REF_COLLNO"]);
-						$arrGroupAllMember["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
-						$arrGroupAllMember["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
+						
+						if ($forceNewSecurity == true) {
+							$arrGroupAllMember["AVATAR_PATH"] = null;
+							$arrGroupAllMember["AVATAR_PATH_WEBP"] = null;
+							
+							if (isset($arrayAvarTar["AVATAR_PATH"])) {
+								$arrGroupAllMember['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayAvarTar["AVATAR_PATH"]);
+								$arrGroupAllMember["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($arrayAvarTar["AVATAR_PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+							}
+							if (isset($arrayAvarTar["AVATAR_PATH_WEBP"])) {
+								$arrGroupAllMember["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayAvarTar["AVATAR_PATH_WEBP"]);
+								$arrGroupAllMember["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($arrayAvarTar["AVATAR_PATH_WEBP"], $jwt_token, $config["SECRET_KEY_JWT"]);
+							}
+						}else{
+							$arrGroupAllMember["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
+							$arrGroupAllMember["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
+						}
+						
 						$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 						$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 					}else if($rowColl["LOANCOLLTYPE_CODE"] == '02'){
