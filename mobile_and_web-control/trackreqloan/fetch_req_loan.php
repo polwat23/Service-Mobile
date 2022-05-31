@@ -28,10 +28,39 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
 				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
-				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
-				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
+				
+				if ($forceNewSecurity == true) {
+					if ($rowReqLoan["salary_img"]) {
+						$path_explode = explode('/resource/', $rowReqLoan["salary_img"]);
+						$resource_path = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						if ($resource_path) {
+							$arrayReq['SALARY_IMG'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $resource_path);
+							$arrayReq["SALARY_IMG_TOKEN"] = $lib->generate_token_access_resource($resource_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}
+					if ($rowReqLoan["citizen_img"]) {
+						$path_explode = explode('/resource/', $rowReqLoan["citizen_img"]);
+						$resource_path = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						if ($resource_path) {
+							$arrayReq['CITIZEN_IMG'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $resource_path);
+							$arrayReq["CITIZEN_IMG_TOKEN"] = $lib->generate_token_access_resource($resource_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}
+					if ($rowReqLoan["contractdoc_url"]) {
+						$path_explode = explode('/resource/', $rowReqLoan["contractdoc_url"]);
+						$resource_path = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						if ($resource_path) {
+							$arrayReq['CONTRACTDOC_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $resource_path);
+							$arrayReq["CONTRACTDOC_URL_TOKEN"] = $lib->generate_token_access_resource($resource_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}
+				} else {
+					$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
+					$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
+					$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
+				}
+				
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
-				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
 				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
@@ -57,10 +86,39 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["loanpermit_amt"];
 				$arrayReq["DIFFOLD_CONTRACT"] = $rowReqLoan["diff_old_contract"];
 				$arrayReq["RECEIVE_NET"] = $rowReqLoan["receive_net"];
-				$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
-				$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
+
+				if ($forceNewSecurity == true) {
+					if ($rowReqLoan["salary_img"]) {
+						$path_explode = explode('/resource/', $rowReqLoan["salary_img"]);
+						$resource_path = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						if ($resource_path) {
+							$arrayReq['SALARY_IMG'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $resource_path);
+							$arrayReq["SALARY_IMG_TOKEN"] = $lib->generate_token_access_resource($resource_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}
+					if ($rowReqLoan["citizen_img"]) {
+						$path_explode = explode('/resource/', $rowReqLoan["citizen_img"]);
+						$resource_path = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						if ($resource_path) {
+							$arrayReq['CITIZEN_IMG'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $resource_path);
+							$arrayReq["CITIZEN_IMG_TOKEN"] = $lib->generate_token_access_resource($resource_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}
+					if ($rowReqLoan["contractdoc_url"]) {
+						$path_explode = explode('/resource/', $rowReqLoan["contractdoc_url"]);
+						$resource_path = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						if ($resource_path) {
+							$arrayReq['CONTRACTDOC_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $resource_path);
+							$arrayReq["CONTRACTDOC_URL_TOKEN"] = $lib->generate_token_access_resource($resource_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+						}
+					}
+				} else {
+					$arrayReq["SALARY_IMG"] = $rowReqLoan["salary_img"];
+					$arrayReq["CITIZEN_IMG"] = $rowReqLoan["citizen_img"];
+					$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
+				}
+
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
-				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
 				$arrayReq["DEPTACCOUNT_NO_BANK"] = $rowReqLoan["deptaccount_no_bank"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
 				$arrGrpReq[] = $arrayReq;
