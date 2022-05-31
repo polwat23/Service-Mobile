@@ -2,3 +2,4 @@ log/*
 backup/
 web.config
 website/*
+reqloan_doc_temp/*
