@@ -20,7 +20,7 @@ $templateMessage = $func->getTemplateSystem('DepositInfo',1);
 $fetchDataSTM = $conoracle->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,TRIM(dm.MEMBER_NO) as MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO
 									FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
 									LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no
-									WHERE dsm.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and dsm.sync_notify_flag = '0' 
+									WHERE dsm.operate_date BETWEEN (SYSDATE - 1) and SYSDATE and dsm.sync_notify_flag = '0' 
 									and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
