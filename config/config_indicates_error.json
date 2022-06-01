@@ -209,6 +209,22 @@
 		"R0502" :
 			[{"th" : "ยอดคงเหลือในบัญชีธนาคารของท่านไม่พอหักเพื่อทำรายการฝาก กรุณาตรวจสอบยอดเงินก่อนทำรายการ","en" : "Balance of bank account  not enough for deposit to cooperative please check your balance before transaction"}]
 		}],
+		"KTB_ERR" : [{
+			"EM004" :
+				[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Your balance is insufficient"}],
+			"EM006" :
+				[{"th" : "สถานะบัญชีของท่านไม่ตรงตามเงื่อนในการทำธุรกรรมกับธนาคาร กรุณาติดต่อสหกรณ์","en" : "Account status is not allowed please contact cooperative"}],
+			"EM013" :
+				[{"th" : "ไม่พบการผูกบัญชีของท่าน กรุณาผูกบัญชีก่อนทำรายการ","en" : "Not found your bind account please bind account before transaction"}],
+			"EM032" :
+				[{"th" : "เลขบัญชีของท่านไม่ถูกต้องหรือสถานะบัญชีไม่ตรงกับเงื่อนไขของธนาคาร กรุณาติดต่อสหกรณ์","en" : "Your account number incorrect or account status not allow for bank of condition please contact cooperative"}],
+			"EM037" :
+				[{"th" : "สถานะบัญชีของท่านไม่สามารถใช้งานได้ กรุณาติดต่อสหกรณ์","en" : "Your account status was not allowed please contact cooperative"}],
+			"EM043" :
+				[{"th" : "ท่านทำรายการเกินวงเงินที่ธนาคารกำหนด","en" : "The Bank Limit Amount Exceeded"}],
+			"EM053" :
+				[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Your balance is insufficient"}]
+		}],
 		"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
 		"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
 		"ACC_OUTSIDE_FLAG_OFF" : [{"th" : "ท่านมีการผูกบัญชีกับธนาคารแล้วทำให้บัญชีนี้ไม่สามารถทำรายการกับธนาคารได้","en" : "This account has been bind account with bank account. You cannot transaction with bank on this account"}],
