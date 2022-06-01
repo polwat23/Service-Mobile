@@ -1,6 +1,7 @@
 <?php
 require_once('../autoload.php');
 
+
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		if($dataComing["allow_status"] == '-9'){
@@ -17,8 +18,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','allow_status'
 				
 			}
 		}
-		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status WHERE deptaccount_no = :deptaccount_no AND is_use <> '-9'");
+		$updateAccountBeenAllow = $conmysql->prepare("UPDATE gcuserallowacctransaction SET is_use = :allow_status 
+													WHERE member_no = :member_no and deptaccount_no = :deptaccount_no AND is_use <> '-9'");
 		if($updateAccountBeenAllow->execute([
+			':member_no' => $payload["member_no"],
 			':allow_status' => $dataComing["allow_status"],
 			':deptaccount_no' => $dataComing["deptaccount_no"]
 		])){
