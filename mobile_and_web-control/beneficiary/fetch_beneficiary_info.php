@@ -7,8 +7,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupBNF = array();
 		$getBeneficiaryReg = $conmysql->prepare("SELECT reqdoc_no, form_value, document_url, update_date 
 										FROM gcreqdoconline 
-										WHERE documenttype_code = 'RRGT' and member_no = :member_no and req_status = '1' ORDER BY update_date desc LIMIT 1");
-		$getBeneficiaryReg->execute([':member_no' => $payload["member_no"]]);
+										WHERE (documenttype_code = 'RRGT' or documenttype_code = 'CBNF') and member_no = :member_no and req_status = '1' ORDER BY update_date desc LIMIT 1");
+		$getBeneficiaryReg->execute([':member_no' => $member_no]);
 		while($rowBeneficiaryReg = $getBeneficiaryReg->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
 			$arrBenefit["REQDOC_NO"] = $rowBeneficiaryReg["reqdoc_no"];
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		
-		if($arrGroupBNF == 0){
+		/*if($arrGroupBNF == 0){
 			$getBeneficiary = $conmysql->prepare("SELECT reqdoc_no, form_value, document_url, update_date 
 											FROM gcreqdoconline 
 											WHERE documenttype_code = 'CBNF' and member_no = :member_no and req_status = '1' ORDER BY update_date desc LIMIT 1");
@@ -31,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrBenefit["UPDATE_DATE"] = $lib->convertdate($rowBenefit["update_date"],"D m Y",true);
 				$arrGroupBNF[] = $arrBenefit;
 			}
-		}
+		}*/
 		
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
 		$arrGroupRemark = array();

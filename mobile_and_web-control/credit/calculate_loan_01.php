@@ -121,9 +121,13 @@ $percent_max =  59.99 - (($sum_old_payment / ($rowMember["SALARY_AMOUNT"]*0.6) *
 $cal_maxloan_amt = floor((($maxloan_amt * $percent_max)/100) * $cal_period);
 	
 $temp_period_payment = (($rowMember["SALARY_AMOUNT"]*0.6) - $sum_old_payment);
+$arrayResult["1"] = $temp_period_payment;
+$arrayResult["2"] = ($rowMember["SALARY_AMOUNT"]*0.6);
+$arrayResult["3"] = ($cal_maxloan_amt);
+$arrayResult["4"] = ($maxloan_amt);
 
 //เช็คว่าชำระต่องวดเกินไหม ถ้าไม่เกินให้ปรับสิทธิ์กู้สูงสุด
-if((($temp_period_payment) < ($rowMember["SALARY_AMOUNT"]*0.6)) && $cal_maxloan_amt < $maxloan_amt){
+if((($temp_period_payment) < ($rowMember["SALARY_AMOUNT"]*0.6))){
 	if(($temp_period_payment * $cal_period) < $maxloan_amt){
 		$maxloan_amt = $temp_period_payment * $cal_period;
 	}else{
@@ -145,7 +149,7 @@ if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != ""){
 		$dataComing["request_amt"] = $maxloan_amt;
 	}
 }
-
+$maxloan_amt = floor($maxloan_amt);
 $receive_net = $maxloan_amt;
 $calculate_arr = array();
 $calculate_arr["SHARESTK_AMT"] = $rowShareBF["SHARESTK_AMT"];

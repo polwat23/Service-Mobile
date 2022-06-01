@@ -1,6 +1,7 @@
 {
 	"NAME_APP" : "KBT Saving",
 	"COOP_KEY" : "kbt-test",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=kbt",
 	"COOP_ID" : "066001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.kbtsaving.mobile",

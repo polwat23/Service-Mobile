@@ -78,12 +78,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						if(date('d-m-Y') == '19-01-2022'){
 							$arrayDetailLoan["IS_REQ"] = FALSE;
 							$arrayDetailLoan["FLAG_NAME"] = "ปิดปรับปรุงบริการขอกู้สามัญฯ กรุณาทำรายการใหม่อีกครั้งในวันถัดไป ขออภัยในความไม่สะดวก";
-						}else if(date('d')==31){
+						}else if(date('d')==31 || date('d-m-Y')=="30-03-2022"){
 							$arrayDetailLoan["IS_REQ"] = FALSE;
-							$arrayDetailLoan["FLAG_NAME"] = "อยู่ระหว่างประมวลผลข้อมูลบริการขอกู้สามัญฯ กรุณาทำรายการใหม่อีกครั้งในวันถัดไป ขออภัยในความไม่สะดวก";
+							$arrayDetailLoan["FLAG_NAME"] = "ปิดรับคำขอกู้แล้ว กรุณาทำรายการใหม่อีกครั้งในวันถัดไป ขออภัยในความไม่สะดวก";
 						}else if(date('d')>=11 && date('d')<=19){
 							$arrayDetailLoan["IS_REQ"] = FALSE;
 							$arrayDetailLoan["FLAG_NAME"] = "ปิดบริการขอกู้สามัญฯ ในช่วงวันที่ 11 - 19  กรุณาทำรายการใหม่อีกครั้งหลังวันเวลาดังกล่าว";
+						}else if(date('Y') == 2022 && date('m') == 4 && date('d')>=9 && date('d')<=19){
+							$arrayDetailLoan["IS_REQ"] = FALSE;
+							$arrayDetailLoan["FLAG_NAME"] = "ปิดบริการขอกู้สามัญฯ ในช่วงวันที่ 9 - 19  กรุณาทำรายการใหม่อีกครั้งหลังวันเวลาดังกล่าว";
 						}else{
 							if($share_period >= 4){
 								$getOldLoanBal = $conmssql->prepare("SELECT lnm.LAST_PERIODPAY, lnm.LOANCONTRACT_NO FROM lncontmaster lnm

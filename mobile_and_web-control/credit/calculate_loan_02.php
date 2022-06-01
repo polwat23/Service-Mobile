@@ -125,6 +125,7 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 			$dataComing["request_amt"] = $maxloan_amt;
 		}
 	}
+	$maxloan_amt = floor($maxloan_amt);
 	$receive_net = $maxloan_amt;
 	$calculate_arr = array();
 	$calculate_arr["SHARESTK_AMT"] = $rowShareBF["SHARESTK_AMT"];

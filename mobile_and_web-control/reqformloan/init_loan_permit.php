@@ -258,7 +258,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["DISABLE_PERIOD"] = TRUE;
 				$arrayResult["PERIOD_PAYMENT"] = ceil($period_payment);
-				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
+				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".strtoupper((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
 				$arrayResult["RECV_ACC"] = $arrGrpReceive;
 				$arrayResult["REQ_SALARY"] = FALSE;
@@ -275,15 +275,29 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult['OLD_GROUPBAL_02'] = $oldGroupBal02;
 				$arrayResult['CALCULATE_VALUE'] = $calculate_arr;
 				$receive_date = null;
+				//วันหยุด
+				$holiday_date = "2022-06-03";
+				//วันที่เลื่อน
+				$holiday_change_date = "2022-06-02";
 				if($rowLoanGroup["LOANGROUP_CODE"] == '01'){
 					if(date('w') > 3 || date('w') == 0){
 						$receive_date = date( 'Y-m-d', strtotime( 'friday next week' ) );
-						$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
-						$arrayResult['RECEIVE_DATE'] = $receive_date;
+						if($receive_date == $holiday_date){
+							$arrayResult['RECEIVE_DATE'] = $holiday_change_date;
+							$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($holiday_change_date,'D m Y');
+						}else{
+							$arrayResult['RECEIVE_DATE'] = $receive_date;
+							$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
+						}
 					}else{
 						$receive_date = date( 'Y-m-d', strtotime( 'friday this week' ) );
-						$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
-						$arrayResult['RECEIVE_DATE'] = $receive_date;
+						if($receive_date == $holiday_date){
+							$arrayResult['RECEIVE_DATE'] = $holiday_change_date;
+							$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($holiday_change_date,'D m Y');
+						}else{
+							$arrayResult['RECEIVE_DATE'] = $receive_date;
+							$arrayResult['RECEIVE_DATE_TEXT'] = $lib->convertdate($receive_date,'D m Y');
+						}
 					}
 				}else{
 					if(date('d')>=1 && date('d')<=10){
