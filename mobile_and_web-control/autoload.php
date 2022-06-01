@@ -3,7 +3,7 @@ ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token,Request_token");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -25,6 +25,8 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}else if($header_key == "HTTP_LANG_LOCALE") {
 		$headers["Lang_locale"] = $header_value;
+	}else if ($header_key == "HTTP_REQUEST_TOKEN") {
+		$headers["Request_token"] = $header_value;
 	}
 }
 if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
