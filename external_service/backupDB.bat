@@ -1,17 +1,30 @@
 @echo off
 
+for /f "skip=1" %%x in ('wmic os get localdatetime') do if not defined MyDate set MyDate=%%x
+for /f %%x in ('wmic path win32_localtime get /format:list ^| findstr "="') do set %%x
+set fmonth=00%Month%
+set fday=00%Day%
+set today=%Year%%fmonth:~-2%%fday:~-2%
 
-del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip
+set DAY_OF_LIFE=1
+set DBHOST=localhost
+set DBPORT=3306
+set DBUSER=root
+set DBPASS=@NSTH2020
+set DBNAME=mobile_nsth
+set PROJECT_PATH=D:\Mobile\Service-NSTH\
+set BACKUP_PATH=%PROJECT_PATH%backup\
 
-cd C:\Program Files\MariaDB 10.5\bin
-C:
-mysqldump.exe -hlocalhost -P3306 -u root -p@NSTH2020 mobile_nsth > D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
+IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%
 
-"C:\Program Files\7-Zip\7z.exe" a -r D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
+"D:\Mobile\MariaDB\bin\mysqldump.exe" -h%DBHOST% -P%DBPORT% -u %DBUSER% -p%DBPASS% %DBNAME% > %BACKUP_PATH%%DBNAME%.sql
 
-del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.sql
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_db.zip %BACKUP_PATH%%DBNAME%.sql
 
-ftp -i -s:D:\Mobile\Service-NSTH\external_service\ftp_upload.bat
+del %BACKUP_PATH%%DBNAME%.sql
 
-del D:\Mobile\Service-NSTH\external_service\backupDB_nsth.zip
+"C:\Program Files\7-Zip\7z.exe" a -r %BACKUP_PATH%%today%_resource.zip %PROJECT_PATH%resource\alias_account_dept %PROJECT_PATH%resource\announce %PROJECT_PATH%resource\avatar %PROJECT_PATH%resource\gallery %PROJECT_PATH%resource\news
 
+forfiles /P %BACKUP_PATH% /S /M *.* /D -%DAY_OF_LIFE% /C "cmd /c del @path"
+
+::@pause
