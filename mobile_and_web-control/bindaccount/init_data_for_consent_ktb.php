@@ -26,6 +26,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												where d.depttype_code in ( '01') AND  trim(d.member_no) = :member_no
 												and d.deptclose_status= '0'
 												order by deptaccount_no desc");
+				
+				$getDepositAcc->execute([':member_no' => $member_no]);
 			}else{
 				
 				$getDeptmaster= $conoracle->prepare("SELECT  deptaccount_no FROM dpdeptmaster WHERE member_no = :member_no");	
@@ -42,10 +44,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LEFT JOIN dpdepttype dt ON  d.depttype_code = dt.depttype_code
 												where d.depttype_code in ( '01') 
 												and d.deptaccount_no IN(".implode(',',$arrDept).")
-												and d.deptclose_status = '0'
+												and d.deptclose_status= '0'
 												order by deptaccount_no desc");
+				$getDepositAcc->execute();
 			}
-			$getDepositAcc->execute();
 			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccFee = array();
 				$arrAccFee['ACCOUNT_NO'] = $lib->formataccount($rowDepAcc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
