@@ -1,6 +1,7 @@
 {
 	"NAME_APP" : "SMNK Coop",
 	"COOP_KEY" : "smnk",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=smnk",
 	"COOP_ID" : "029001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co-test/coopdirect/control/",
 	"APP_ID" : "com.smnk.mobile",
