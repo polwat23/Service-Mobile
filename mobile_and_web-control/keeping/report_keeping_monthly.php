@@ -75,12 +75,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
-																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
-																kpd.SHARESTK_VALUE,
-																kpd.INTEREST_ACCUM
-																FROM kptempreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+													kpd.RECEIPT_NO,
+													kpd.OPERATE_DATE,
+													kpd.SHARESTK_VALUE,
+													kpd.INTEREST_ACCUM,
+													kpd.SHARESTKBF_VALUE
+												FROM kptempreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -88,13 +89,19 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTK_VALUE"] + $shareinPeriod,2);
+		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTKBF_VALUE"],2);
 		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"] + $intinPeriod,2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -195,7 +202,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ทุนเรือนหุ้น :</td>
+			<td style="width: 50px;font-size: 18px;">หุ้นยกมาต้นปี :</td>
 			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
 			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
 			<td style="width: 101px;">'.$header["interest_accum"].'</td>
