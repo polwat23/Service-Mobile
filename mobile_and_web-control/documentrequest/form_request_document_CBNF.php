@@ -45,7 +45,7 @@ function GenerateReport($dataReport,$lib){
 				</div>
 				<div style="text-align: center;padding-top: 24px;">
 					<div>
-					วันที<span class="input-zone"><span class="input-value" style="left: 285px;">'.$lib->convertdate(date("Y-m-d"),"D m Y").'
+					วันที่<span class="input-zone"><span class="input-value" style="left: 285px;">'.$lib->convertdate(date("Y-m-d"),"D m Y").'
 					</span>…………………………………</span>
 					</div>
 				</div>
@@ -54,7 +54,7 @@ function GenerateReport($dataReport,$lib){
 				</div>
 				<div style="padding-left: 60px;padding-top: 24px;">
 					ข้าพเจ้า (นาย/ นาง/ น.ส.) <span class="input-zone"><span class="input-value">'.$dataReport["MEMBER_FULLNAME"].'
-					</span>…………………………………………..</span> รหัสพนักงาน <span class="input-zone"><span class="input-value">'.$dataReport["EMP_NO"].'
+					</span>………………………………………….................</span> รหัสพนักงาน <span class="input-zone"><span class="input-value">'.$dataReport["EMP_NO"].'
 					</span>.........................</span>
 				</div>
 				<div style="padding-top: 12px;">
@@ -98,9 +98,6 @@ function GenerateReport($dataReport,$lib){
 					</span</span></div>
 					</div>
 				</div>
-				<div style="text-align: center;padding-top: 72px;padding-left: 110px;">
-					ลงชื่อ …………………………………ผู้แจ้งความประสงค์
-				</div>
 			</div>
 			';
 
@@ -112,12 +109,12 @@ function GenerateReport($dataReport,$lib){
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();
-	$pathfile = __DIR__.'/../../resource/pdf/req_document/req_cbnf';
+	$pathfile = __DIR__.'/../../resource/pdf/req_document';
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
 	$pathfile = $pathfile.'/'.$dataReport["REQDOC_NO"].'.pdf';
-	$pathfile_show = '/resource/pdf/req_document/req_cbnf/'.$dataReport["REQDOC_NO"].'.pdf?v='.time();
+	$pathfile_show = '/resource/pdf/req_document/'.$dataReport["REQDOC_NO"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){

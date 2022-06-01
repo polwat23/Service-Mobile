@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$fetchReqLoan = $conmysql->prepare("SELECT rl.reqloan_doc,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,req_status,rl.loanpermit_amt,
-											rl.diff_old_contract,rl.receive_net,rl.bookbank_img,rl.bookcoop_img,rl.salary_img,rl.citizen_img,rl.remark,rl.approve_date,rl.contractdoc_url,
+											rl.diff_old_contract,rl.receive_net,rl.bookbank_img,rl.bookcoop_img,rl.salary_img,rl.citizen_img,rl.remark,rl.approve_date,rl.contractdoc_url,rl.receive_date,
 											rl.int_rate_at_req,rl.salary_at_req,rl.request_date,rl.deptaccount_no_bank,rl.bank_desc,rl.deptaccount_no_coop,rl.objective,pay_date,ep.extra_credit_name as extra_credit_project,
 											rl.old_contract
 											FROM gcreqloan  rl
@@ -49,11 +49,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["PAY_DATE"] = $rowReqLoan["pay_date"];
 				$arrayReq["EXTRA_CREDIT_PROJECT"] = $rowReqLoan["extra_credit_project"];
 				$arrayReq["OLD_CONTRACT"] = $rowReqLoan["old_contract"];
+				if(isset($rowReqLoan["receive_date"])){
+					$arrayReq["RECEIVE_DATE"] = $lib->convertdate($rowReqLoan["receive_date"],'d m Y');
+				}else{
+					$arrayReq["RECEIVE_DATE"] = "-";
+				}
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
 			$fetchReqLoan = $conmysql->prepare("SELECT rl.reqloan_doc,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,req_status,rl.loanpermit_amt,
-											rl.diff_old_contract,rl.receive_net,rl.bookbank_img,rl.bookcoop_img,rl.salary_img,rl.citizen_img,rl.remark,rl.approve_date,rl.contractdoc_url,
+											rl.diff_old_contract,rl.receive_net,rl.bookbank_img,rl.bookcoop_img,rl.salary_img,rl.citizen_img,rl.remark,rl.approve_date,rl.contractdoc_url,rl.receive_date,
 											rl.int_rate_at_req,rl.salary_at_req,rl.request_date,rl.deptaccount_no_bank,rl.bank_desc,rl.deptaccount_no_coop,rl.objective,pay_date,ep.extra_credit_name as extra_credit_project,
 											rl.old_contract
 											FROM gcreqloan  rl
@@ -93,6 +98,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["PAY_DATE"] = $rowReqLoan["pay_date"];
 				$arrayReq["EXTRA_CREDIT_PROJECT"] = $rowReqLoan["extra_credit_project"];
 				$arrayReq["OLD_CONTRACT"] = $rowReqLoan["old_contract"];
+				if(isset($rowReqLoan["receive_date"])){
+					$arrayReq["RECEIVE_DATE"] = $lib->convertdate($rowReqLoan["receive_date"],'d m Y');
+				}else{
+					$arrayReq["RECEIVE_DATE"] = "-";
+				}
 				$arrGrpReq[] = $arrayReq;
 			}
 		}

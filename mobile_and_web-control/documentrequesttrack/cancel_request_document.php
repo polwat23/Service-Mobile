@@ -5,13 +5,40 @@ if($lib->checkCompleteArgument(['menu_component', 'reqdoc_no'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocumentRequestTrack')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		
+		$conmysql->beginTransaction();
 		$updateReqDoc = $conmysql->prepare("UPDATE gcreqdoconline SET req_status = '9' WHERE reqdoc_no  = :reqdoc_no");
 		if($updateReqDoc->execute([
 			':reqdoc_no' => $dataComing["reqdoc_no"]
 		])){
+			//Start ยกเลิกสลิปชำระหนี้
+			$cancelReq = $conmysql->prepare("UPDATE gcslippaydept SET req_status = '9' WHERE reqdoc_no  = :reqdoc_no");
+			if($cancelReq->execute([':reqdoc_no' => $dataComing["reqdoc_no"]])){
+			
+			}else{
+				$conmysql->rollback();
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1037",
+					":error_desc" => "ยกเลิกรายการอัปโหลดสลิปชำระหนี้ไม่ได้เพราะไม่สามารถ Update ลง gcslippaydept ได้"."\n"."Query => ".$cancelReq->queryString."\n"."Param => ". json_encode([':reqdoc_no' => $dataComing["reqdoc_no"]]),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "ยกเลิกรายการอัปโหลดสลิปชำระหนี้ไม่ได้เพราะไม่สามารถ Update ลง gcslippaydept ได้"."\n"."Query => ".$cancelReq->queryString."\n"."Param => ". json_encode([':reqdoc_no' => $dataComing["reqdoc_no"]]);
+				$lib->sendLineNotify($message_error);
+				$arrayResult['RESPONSE_CODE'] = "WS1037";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
+			}
+			//End ยกเลิกสลิปชำระหนี้
+			
+			$conmysql->commit();
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
+			$conmysql->rollback();
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,

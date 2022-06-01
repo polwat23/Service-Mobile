@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			}
 		}
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conmssql->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign = $conmssql->prepare("SELECT RESIGN_STATUS FROM mbmembmaster WHERE member_no = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 		if($rowResign["RESIGN_STATUS"] == '1'){
@@ -267,15 +267,16 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$getCounter->execute([':member_no' => $member_no]);
 			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
 			if($rowCounter["counter_wrongpass"] >= 5){
-				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				/*$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
 				$updateAccountStatus->execute([':member_no' => $member_no]);
 				$struc = [
 					':member_no' =>  $member_no,
 					':device_name' =>  $arrPayload["PAYLOAD"]["device_name"],
 					':unique_id' =>  $dataComing["unique_id"]
 				];
-				$log->writeLog("lockaccount",$struc);
-				$arrayResult['RESPONSE_CODE'] = "WS0048";
+				$log->writeLog("lockaccount",$struc);*/
+				$arrayResult['SHOW_FORGETPASS'] = true;
+				$arrayResult['RESPONSE_CODE'] = "WS0002";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');

@@ -215,16 +215,12 @@ function GeneratePDFContract($data,$lib) {
             </div>
             <div  class="line-margin" style="margin-top: 4px;display: block;">
 				<span class="padding-text" style="display: inline-block;">ข้อ 4.</span>
-				<span class="padding-text" style="display: inline-block;">ข้าพเจ้าต้องการรับกู้เงินกับทางสหกรณ์ฯ</span>
-				<span class="padding-text" style="display: inline-block;transform: translateY(2px);margin-left: 30px;"><input type="checkbox" /></span>
-				<span class="padding-text" style="display: inline-block; padding-right: 4px;font-size: 11pt;">ในรอบวันที่ 15 ของเดือน(ส่งเอกสาร
-						ภายในวันที่ 30 ของเดือน) นัดเซ็นสัญญาภายในวันที่ 12 ของเดือน</span>
+				<span class="padding-text" style="display: inline-block;">รอบจ่ายเงินกู้สามัญ</span>
+				<span class="padding-text" style="display: inline-block; padding-right: 4px;margin-left: 89px;font-size: 12;">1 ในรอบวันที่ 15 ของเดือน(ส่งคำขอกู้ วันที่ 20 - 30 ของเดือน) นัดเซ็นสัญญาภายในวันที่ 12 ของเดือน</span>
             </div>
-			<div  class="line-margin" style="margin-top: 4px;display: block;padding-left: 260px;">
+			<div  class="line-margin" style="margin-top: 4px;display: block;padding-left: 220px;">
                     <div class="padding-text">
-                        <span style="display: inline-block;transform: translateY(2px);"><input type="checkbox" /></span>
-                        <span style="display: inline-block; padding-right: 4px;font-size: 11pt;"">ในรอบวันที่ 28 ของเดือน(ส่งเอกสาร
-								ภายในวันที่ 15 ของเดือน) นัดเซ็นสัญญาภายในวันที่ 25 ของเดือน</span>
+                        <span style="display: inline-block; padding-right: 4px;font-size: 12;">2 ในรอบวันที่ 28 ของเดือน(ส่งคำขอกู้ ภายในวันที่ 1 - 10 ของเดือน) นัดเซ็นสัญญาภายในวันที่ 25 ของเดือน</span>
                     </div>
 			</div>
             <div  class="line-margin">
@@ -338,18 +334,12 @@ function GeneratePDFContract($data,$lib) {
                                 <span style="display: inline-block; padding-left: 16px;">ไม่เข้าโครงการพิเศษ</span>
                             </div>
                         </div>
-                        <div class="line-margin" style="padding-left: 2px;">
-                            กรณีเข้าร่วมโครงการพิเศษกรุณาแนบหนังสือรับรองขอสินเชื่อพิเศษ
-                        </div>
-                        <div class="line-margin" style="padding-left: 2px;">
-                            และเอกสารประกอบการเข้าโครงการตามเงื่อนไขในหนังสือรับรองขอเข้าโครงการ
-                        </div>
                     </div>
                 </div>
                 <!-- Right -->
                 <div
                     style="display: table-cell;margin-left: -4px;margin-right: -2px;width: 45%;">
-                    <div style="border-bottom: 1px solid #000000;border-top: 1px solid #000000;width: 100%;padding-bottom: 55px;">
+                    <div style="border-bottom: 1px solid #000000;border-top: 1px solid #000000;width: 100%;padding-bottom: 3px;">
                         <div style="font-weight: bold;padding-left: 2px;">
                             <span style="text-decoration: underline;">ส่วนที่ 1</span> ข้อมูลประกอบการพิจารณาเงินกู้ (สำหรับเจ้าหน้าที่)
                         </div>
@@ -410,7 +400,10 @@ function GeneratePDFContract($data,$lib) {
 							</span>.........................บาท</span>
                         </div>
                         <div class="line-margin" style="padding-top: 24px;padding-bottom: 21px;">
-                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;">รวมหนี้ค้างชำระทั้งหมด</span><span style="display: inline-block;"><span style="position: absolute;padding-left: 5px;">'.number_format($data["old_groupbal_01"] + $data["old_groupbal_02"],2).'</span>.........................บาท</span>
+                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;width: 50%;">รวมหนี้ค้างชำระทั้งหมด</span>
+                            <span style="display: inline-block; padding-right: 2px;padding-left: 2px;text-align: right;width: 46%;">=.........................บาท<span style="position: absolute;left: 690px;text-align: left;">
+								'.number_format($data["old_groupbal_01"] + $data["old_groupbal_02"],2).'
+							</span></span>
                         </div>
                     </div>
                 </div>

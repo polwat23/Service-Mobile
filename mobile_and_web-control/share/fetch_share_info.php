@@ -4,13 +4,15 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getSharemasterinfo = $conmssql->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,SHAREBEGIN_AMT
-													FROM shsharemaster WHERE member_no = :member_no");
+		$getSharemasterinfo = $conmssql->prepare("SELECT  (sm.sharestk_amt * 10) as SHARE_AMT,(sm.periodshare_amt * 10) as PERIOD_SHARE_AMT,(stm.sharestk_amt*10) as SHAREBEGIN_AMT
+							FROM shsharemaster sm
+							LEFT JOIN shsharestatement stm ON sm.lastpayment_date = stm.OPERATE_DATE and sm.member_no = stm.member_no
+							WHERE sm.member_no = :member_no");
 		$getSharemasterinfo->execute([':member_no' => $member_no]);
 		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
 		if($rowMastershare){
 			$arrGroupStm = array();
-			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
+			$arrayResult['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"],2);
 			$arrayResult['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
 			$arrayResult['PERIOD_SHARE_AMT'] = number_format($rowMastershare["PERIOD_SHARE_AMT"],2);
 			$limit = $func->getConstant('limit_stmshare');

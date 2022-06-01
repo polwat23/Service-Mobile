@@ -16,7 +16,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		$getAllReqDocno =  $conmysql->prepare("SELECT id_mora, member_no, loancontract_no, loangroup_code, request_date, cancel_date, is_moratorium 
 		FROM gcmoratorium 
-		WHERE is_moratorium <> '8'".
+		WHERE ".
+		(isset($dataComing["req_status"]) && $dataComing["req_status"] == "1" ? " is_moratorium = '1'" : "is_moratorium <> '8'").
 		(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') >= :start_date" : null).
 		(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? " and date_format(request_date,'%Y-%m-%d') <= :end_date" : null).
 		" ORDER BY request_date desc");

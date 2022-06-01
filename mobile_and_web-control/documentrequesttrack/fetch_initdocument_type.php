@@ -7,10 +7,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAssistGrp = array();
 		$arrayGrpForm = array();
 		
-		$arrAssist = array();
-		$arrAssist["DOCUMENTTYPE_CODE"] = "CBNF";
-		$arrAssist["DOCUMENTTYPE_DESC"] = "เปลี่ยนแปลงผู้รับผลประโยชน์";
-		$arrAssistGrp[] = $arrAssist;
+		
+		$getDocumentType = $conmysql->prepare("SELECT documenttype_code, documenttype_desc FROM gcreqdoctype
+										WHERE is_use = '1' and documenttype_code != 'RRGT'");
+		$getDocumentType->execute();
+		
+		while($rowType = $getDocumentType->fetch(PDO::FETCH_ASSOC)){
+			$arrType = array();
+			$arrType["DOCUMENTTYPE_CODE"] = $rowType["documenttype_code"];
+			$arrType["DOCUMENTTYPE_DESC"] = $rowType["documenttype_desc"];
+			$arrAssistGrp[] = $arrType;
+		}
 		
 		$getFormatForm = $conmysql->prepare("SELECT id_format_req_doc, documenttype_code, form_label, form_key, group_id, max_value, min_value,
 										form_type, colspan, fullwidth, required, placeholder, default_value, form_option, maxwidth 
@@ -26,6 +33,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayForm["FORM_OPTION"] = $rowForm["form_option"];
 			$arrayGrpForm[$rowForm["documenttype_code"]][] = $arrayForm;
 		}
+		$arrayForm = array();
+		$arrayForm["FORM_LABEL"] = "รายละเอียดเงินกู้สามัญ";
+		$arrayForm["FORM_KEY"] = "CONTRACT";
+		$arrayForm["FORM_TYPE"] = "contract";
+		$arrayForm["FORM_OPTION"] = null;
+		$arrayGrpForm["PAYD"][] = $arrayForm;
 		
 		$arrayResult['DOCUMENTTYPE_LIST'] = $arrAssistGrp;
 		$arrayResult['FORMINPUT_LIST'] = $arrayGrpForm;

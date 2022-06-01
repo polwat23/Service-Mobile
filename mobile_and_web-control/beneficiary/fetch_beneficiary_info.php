@@ -5,20 +5,41 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conmssql->prepare("SELECT mg.GAIN_NAME,mg.GAIN_SURNAME,mg.GAIN_ADDR,mc.GAIN_CONCERN
-												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
-												WHERE mg.member_no = :member_no ORDER BY mg.SEQ_NO");
-		$getBeneficiary->execute([':member_no' => $member_no]);
-		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
+		$getBeneficiaryReg = $conmysql->prepare("SELECT reqdoc_no, form_value, document_url, update_date 
+										FROM gcreqdoconline 
+										WHERE (documenttype_code = 'RRGT' or documenttype_code = 'CBNF') and member_no = :member_no and req_status = '1' ORDER BY update_date desc LIMIT 1");
+		$getBeneficiaryReg->execute([':member_no' => $member_no]);
+		while($rowBeneficiaryReg = $getBeneficiaryReg->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			if(isset($rowBenefit["GAIN_ADDR"])){
-				$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			}
-			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
+			$arrBenefit["REQDOC_NO"] = $rowBeneficiaryReg["reqdoc_no"];
+			$arrBenefit["FORM_VALUE"] = $rowBeneficiaryReg["form_value"];
+			$arrBenefit["DOCUMENT_URL"] = $rowBeneficiaryReg["document_url"];
+			$arrBenefit["UPDATE_DATE"] = $lib->convertdate($rowBeneficiaryReg["update_date"],"D m Y",true);
 			$arrGroupBNF[] = $arrBenefit;
 		}
+		
+		/*if($arrGroupBNF == 0){
+			$getBeneficiary = $conmysql->prepare("SELECT reqdoc_no, form_value, document_url, update_date 
+											FROM gcreqdoconline 
+											WHERE documenttype_code = 'CBNF' and member_no = :member_no and req_status = '1' ORDER BY update_date desc LIMIT 1");
+			$getBeneficiary->execute([':member_no' => $payload["member_no"]]);
+			while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
+				$arrBenefit = array();
+				$arrBenefit["REQDOC_NO"] = $rowBenefit["reqdoc_no"];
+				$arrBenefit["FORM_VALUE"] = $rowBenefit["form_value"];
+				$arrBenefit["DOCUMENT_URL"] = $rowBenefit["document_url"];
+				$arrBenefit["UPDATE_DATE"] = $lib->convertdate($rowBenefit["update_date"],"D m Y",true);
+				$arrGroupBNF[] = $arrBenefit;
+			}
+		}*/
+		
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
+		$arrGroupRemark = array();
+		$arrGroupRemark["1"] = 'ตามส่วนเท่ากัน';
+		$arrGroupRemark["2"] = 'ตามลำดับก่อนหลัง';
+		$arrGroupRemark["3"] = '';
+		$arrayResult['REMARK_OPTION'] = $arrGroupRemark;
+		$arrayResult['IS_REQFORM'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

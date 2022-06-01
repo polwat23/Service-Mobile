@@ -7,8 +7,10 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 		$arrayGrp = array();
 		$arrayDocGrp = array();
 		
-		$getReqDocument = $conmysql->prepare("SELECT reqdoc_no, member_no, documenttype_code, form_value, document_url, req_status, request_date, update_date 
-										FROM gcreqdoconline WHERE req_status NOT IN('9','-9') and documenttype_code = :documenttype_code and member_no = :member_no");
+		$getReqDocument = $conmysql->prepare("SELECT  rd.reqdoc_no, rd.member_no, rd.documenttype_code, rd.form_value, rd.document_url, rd.req_status, rd.request_date, rd.update_date,dt.documenttype_desc
+										FROM gcreqdoconline rd 
+										LEFT JOIN gcreqdoctype dt ON dt.documenttype_code = rd.documenttype_code 
+										WHERE rd.req_status NOT IN('9','-9') and rd.documenttype_code = :documenttype_code and rd.member_no = :member_no");
 		$getReqDocument->execute([
 			':documenttype_code' => $dataComing["documenttype_code"],
 			':member_no' => $payload["member_no"],
@@ -18,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 			$arrayDoc["REQDOC_NO"] = $rowReqDocument["reqdoc_no"];
 			$arrayDoc["MEMBER_NO"] = $rowReqDocument["member_no"];
 			$arrayDoc["DOCUMENTTYPE_CODE"] = $rowReqDocument["documenttype_code"];
-			$arrayDoc["DOCUMENTTYPE_DESC"] = "เปลี่ยนแปลงผู้รับผลประโยชน์";
+			$arrayDoc["DOCUMENTTYPE_DESC"] =  $rowReqDocument["documenttype_desc"];
 			$arrayDoc["FORM_VALUE"] = $rowReqDocument["form_value"];
 			$arrayDoc["DOCUMENT_URL"] = $rowReqDocument["document_url"];
 			$arrayDoc["REQ_STATUS"] = $rowReqDocument["req_status"];

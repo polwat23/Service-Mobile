@@ -29,8 +29,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$getAllReqDocno = $conmysql->prepare("SELECT rl.reqloan_doc,rl.member_no,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,rl.loanpermit_amt,rl.salary_img,rl.citizen_img,rl.bookbank_img,rl.req_status,
-															rl.request_date,rl.approve_date,rl.contractdoc_url,
-															ep.extra_credit_name as extra_credit_project
+															rl.request_date,rl.approve_date,rl.contractdoc_url,rl.receive_date,
+															ep.extra_credit_name as extra_credit_project,rl.objective,rl.diff_old_contract,rl.receive_net,
+															rl.old_contract_prn,rl.old_contract_int
 															FROM gcreqloan rl
 															LEFT JOIN gcconstantextracreditproject ep ON rl.extra_credit_project = ep.id_extra_credit
 															WHERE rl.req_status = :req_status". 
@@ -76,6 +77,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["CITIZEN_IMG"] = $rowDocno["citizen_img"];
 				$arrDocno["BOOKBANK_IMG"] = $rowDocno["bookbank_img"];
 				$arrDocno["CONTRACTDOC_URL"] = $rowDocno["contractdoc_url"];
+				$arrDocno["OBJECTIVE"] = $rowDocno["objective"];
+				$arrDocno["DIFF_OLD_CONTRACT"] = $rowDocno["diff_old_contract"];
+				$arrDocno["RECEIVE_NET"] = $rowDocno["receive_net"];
+				$arrDocno["OLD_CONTRACT_PRN"] = $rowDocno["old_contract_prn"];
+				$arrDocno["OLD_CONTRACT_INT"] = $rowDocno["old_contract_int"];
+				if(isset($rowDocno["receive_date"])){
+					$arrDocno["RECEIVE_DATE"] = $lib->convertdate($rowDocno["receive_date"],'d m Y');
+				}else{
+					$arrDocno["RECEIVE_DATE"] = "-";
+				}
 				$arrDocno["REQ_STATUS"]  = $rowDocno["req_status"];
 				$arrDocno["EXTRA_CREDIT_PROJECT"]  = $rowDocno["extra_credit_project"];
 				if($rowDocno["req_status"] == '8'){
@@ -86,6 +97,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrDocno["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
 				}else if($rowDocno["req_status"] == '7'){
 					$arrDocno["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
+				}else if($rowDocno["req_status"] == '-99'){
+					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิกอนุมัติ";
 				}else{
 					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิก";
 				}
@@ -93,8 +106,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 		}else{
 			$getAllReqDocno = $conmysql->prepare("SELECT rl.reqloan_doc,rl.member_no,rl.loantype_code,rl.request_amt,rl.period_payment,rl.period,rl.loanpermit_amt,rl.salary_img,rl.citizen_img,rl.bookbank_img,rl.req_status,
-															rl.request_date,rl.approve_date,rl.contractdoc_url,
-															ep.extra_credit_name as extra_credit_project
+															rl.request_date,rl.approve_date,rl.contractdoc_url,rl.receive_date,
+															ep.extra_credit_name as extra_credit_project,rl.objective,rl.diff_old_contract,rl.receive_net,
+															rl.old_contract_prn,rl.old_contract_int
 															FROM gcreqloan rl
 															LEFT JOIN gcconstantextracreditproject ep ON rl.extra_credit_project = ep.id_extra_credit
 															WHERE 1=1". 
@@ -140,6 +154,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["CITIZEN_IMG"] = $rowDocno["citizen_img"];
 				$arrDocno["BOOKBANK_IMG"] = $rowDocno["bookbank_img"];
 				$arrDocno["CONTRACTDOC_URL"] = $rowDocno["contractdoc_url"];
+				$arrDocno["OBJECTIVE"] = $rowDocno["objective"];
+				$arrDocno["DIFF_OLD_CONTRACT"] = $rowDocno["diff_old_contract"];
+				$arrDocno["RECEIVE_NET"] = $rowDocno["receive_net"];
+				$arrDocno["OLD_CONTRACT_PRN"] = $rowDocno["old_contract_prn"];
+				$arrDocno["OLD_CONTRACT_INT"] = $rowDocno["old_contract_int"];
+				if(isset($rowDocno["receive_date"])){
+					$arrDocno["RECEIVE_DATE"] = $lib->convertdate($rowDocno["receive_date"],'d m Y');
+				}else{
+					$arrDocno["RECEIVE_DATE"] = "-";
+				}
 				$arrDocno["REQ_STATUS"]  = $rowDocno["req_status"];
 				$arrDocno["EXTRA_CREDIT_PROJECT"]  = $rowDocno["extra_credit_project"];
 				if($rowDocno["req_status"] == '8'){
@@ -150,6 +174,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					$arrDocno["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
 				}else if($rowDocno["req_status"] == '7'){
 					$arrDocno["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
+				}else if($rowDocno["req_status"] == '-99'){
+					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิกอนุมัติ";
 				}else{
 					$arrDocno["REQ_STATUS_DESC"] = "ยกเลิก";
 				}

@@ -1,6 +1,7 @@
 {
 	"NAME_APP" : "KBT Saving",
 	"COOP_KEY" : "kbt",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=kbt",
 	"COOP_ID" : "066001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.kbtsaving.mobile",
@@ -43,5 +44,9 @@
 			"LIMIT_AMOUNT_COOP" : "2000000",
 			"IS_USE" : "true"
 		}
-	}
+	},
+	"SMS_APIKEY" : "51975de4af2d18dcc00e728828309bdd",
+	"SMS_APISECRET" : "bcPsG2zkddGQGnwR",
+	"SMS_URL" : "https://portal-otp.smsmkt.com/api/send-message",
+	"SMS_SENDER" : "COOPKUBOTA"
 }

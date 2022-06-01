@@ -224,44 +224,25 @@ class library {
 	public function sendSMS($arrayDestination,$bulk=false) {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($json,true);
-		$arrayGrpSms = array();
-		try{
-			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
-			try {
-				if($bulk){
-					foreach($arrayDestination as $dest){
-						$argumentWS = [
-							"Member_No" => $dest["member_no"],
-							"MobilePhone" => $dest["tel"],
-							"Message" => $dest["message"]
-						];
-						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-						$responseSoap = $resultWS->RqSendOTPResult;
-						$arraySms["MEMBER_NO"] = $dest["member_no"];
-						$arraySms["RESULT"] = $responseSoap;
-						$arrayGrpSms[] = $arraySms;
-					}
-					return $arrayGrpSms;
-				}else{
-					$argumentWS = [
-						"Member_No" => $arrayDestination["member_no"],
-						"MobilePhone" => $arrayDestination["tel"],
-						"Message" => $arrayDestination["message"]
-					];
-					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-					$responseSoap = $resultWS->RqSendOTPResult;
-					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
-					$arrayGrpSms["RESULT"] = $responseSoap;
-					return $arrayGrpSms;
-				}
-			}catch(SoapFault $e){
-				$arrayGrpSms["RESULT"] = FALSE;
-				return $arrayGrpSms;
-			}
-		}catch(Throwable $e){
+		$ch = curl_init();
+		curl_setopt( $ch,CURLOPT_URL, $config["SMS_URL"] );                                                                  
+		curl_setopt( $ch,CURLOPT_POST, true );  
+		curl_setopt( $ch,CURLOPT_HTTPHEADER, array("Content-Type: application/json","api_key:".$config["SMS_APIKEY"],"secret_key:".$config["SMS_APISECRET"]) );
+		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch,CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode($arrayDestination));                                                                  
+																												 
+		$result = curl_exec($ch);
+		$responseSMS = json_decode($result);
+		if(isset($result) && $responseSMS->code == '000'){
+			$arrayGrpSms["RESULT"] = TRUE;
+			return $arrayGrpSms;
+		}else{
+			curl_close($ch);
+			$arrayGrpSms["RESPONSE_MESSAGE"] = $responseSMS;
 			$arrayGrpSms["RESULT"] = FALSE;
 			return $arrayGrpSms;
-			return false;
 		}
 	}
 	public function sendMail($email,$subject,$body,$mailFunction,$attachment_path=[]) {
@@ -794,6 +775,19 @@ class library {
 				//ปัดเต็มบาท
 
 				if ($fraction > 0.49)
+				{
+					$roundFrac = 1.00;
+				}
+				else
+				{
+					$roundFrac = 0.00;
+				}
+
+				break;
+			case 5:
+				//ปัดหมด
+
+				if ($fraction > 0.00)
 				{
 					$roundFrac = 1.00;
 				}

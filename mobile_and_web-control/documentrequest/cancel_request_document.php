@@ -2,7 +2,35 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component', 'reqdoc_no'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocumentRequest')){
+	if($dataComing["document_code"] == 'CBNF'){
+		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocumentBeneciaryRequest')){
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			require_once('../../include/exit_footer.php');
+		}
+	}else if($dataComing["document_code"] == 'CSHR'){
+		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocumentShrPaymentRequest')){
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			require_once('../../include/exit_footer.php');
+		}
+	}else if($dataComing["document_code"] == 'RRSN'){
+		if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocumentResignRequest')){
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			require_once('../../include/exit_footer.php');
+		}
+	}
+	
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		
 		$updateReqDoc = $conmysql->prepare("UPDATE gcreqdoconline SET req_status = '9' WHERE reqdoc_no  = :reqdoc_no");
@@ -30,13 +58,6 @@ if($lib->checkCompleteArgument(['menu_component', 'reqdoc_no'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 			
 		}
-	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-	}
 }else{
 	$filename = basename(__FILE__, '.php');
 	$logStruc = [

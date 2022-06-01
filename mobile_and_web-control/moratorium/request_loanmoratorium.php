@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','loangroup_code'],$dataComing))
 		$insertSchShipOnlineDoc = $conmysql->prepare("INSERT INTO gcmoratorium(member_no,loancontract_no,loangroup_code,is_moratorium)
 								VALUES(:member_no,:loancontract_no,:loangroup_code,'8')");
 		if($insertSchShipOnlineDoc->execute([
-			':member_no' => $member_no,
+			':member_no' => $payload["member_no"],
 			':loancontract_no' => $dataComing["loancontract_no"],
 			':loangroup_code' => $dataComing["loangroup_code"]
 		])){
