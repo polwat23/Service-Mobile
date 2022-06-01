@@ -2,6 +2,7 @@
 	"NAME_APP" : "TAK Saving Connect",
 	"COOP_KEY" : "tak",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=tak",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=tak",
 	"COOP_ID" : "038001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.taksaving.mobile",
