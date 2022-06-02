@@ -90,7 +90,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -170,7 +175,7 @@ function GenerateReport($dataReport,$header,$lib){
 				<p style="margin-top: -27px;font-size: 18px;">5/1 ถนนประจวบศิริ ตำบลประจวบ</p>
 				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมือง จังหวัดประจวบคีรีขันธ์ 77000</p>
 				<p style="margin-top: -25px;font-size: 18px;">โทร.0-3261-1212</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.pkn-coop.com</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.pktsc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -223,43 +228,43 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
 			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
 			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 350px;text-align: left;font-size: 14px">
 			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 100px;text-align: center;font-size: 14px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
+			<div style="width: 110px;text-align: right;font-size: 14px;margin-left: 465px;">
 			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
+			<div style="width: 110px;text-align: right;font-size: 14px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
+			<div style="width: 120px;text-align: right;font-size: 14px;margin-left: 700px;">
 			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
 			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
+			<div style="width: 150px;text-align: right;font-size: 14px;margin-left: 814px;">
 			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
 			</div>
 			</div>';
 		}else{
 			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
+			<div style="width: 350px;text-align: left;font-size: 14px">
 				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
+			<div style="width: 100px;text-align: center;font-size: 14px;margin-left: 355px;">
 			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
+			<div style="width: 110px;text-align: right;font-size: 14px;margin-left: 465px;">
 			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
+			<div style="width: 110px;text-align: right;font-size: 14px;margin-left: 580px;">
 			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
 			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
+			<div style="width: 120px;text-align: right;font-size: 14px;margin-left: 700px;">
 			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
 			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
+			<div style="width: 150px;text-align: right;font-size: 14px;margin-left: 814px;">
 			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
 			</div>
 			</div>';
