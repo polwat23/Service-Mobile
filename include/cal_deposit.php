@@ -603,7 +603,7 @@ class CalculateDep {
 			}else if($rowSeqAmt["SEQUEST_STATUS"] == '0'){ // ไม่อายัด
 				$arrSequest["CAN_WITHDRAW"] = TRUE;
 				$arrSequest["CAN_DEPOSIT"] = TRUE;
-				$arrSequest["SEQUEST_AMOUNT"] = $rowSeqAmt["SEQUEST_AMOUNT"];
+				$arrSequest["SEQUEST_AMOUNT"] = 0;
 			}else{
 				$arrSequest["CAN_WITHDRAW"] = FALSE;
 				$arrSequest["CAN_DEPOSIT"] = FALSE;
