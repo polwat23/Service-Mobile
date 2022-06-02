@@ -1,10 +1,11 @@
 {
 	"NAME_APP" : "NKT Saving Connect",
 	"COOP_KEY" : "nkt",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=nkt",
 	"COOP_ID" : "062001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.nktcoop.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/NKTCOOP/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/NKTCOOP/",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
 	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=001001;coop_control=001001;",
