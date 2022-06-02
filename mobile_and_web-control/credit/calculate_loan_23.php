@@ -20,13 +20,7 @@ if($rowShare < 3){
 	$maxloan_amt = 0;
 	return;
 }
-$getDeptATM = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE member_no = :member_no and depttype_code = '88' and deptclose_status = '0'");
-$getDeptATM->execute([':member_no' => $member_no]);
-$rowDeptATM = $getDeptATM->fetch(PDO::FETCH_ASSOC);
-if(empty($rowDeptATM["DEPTACCOUNT_NO"]) || $rowDeptATM["DEPTACCOUNT_NO"] == ""){
-	$maxloan_amt = 0;
-	return;
-}
+
 $getLoanCustomCredit = $conoracle->prepare("SELECT lc.maxloan_amt FROM lnloantypecustom lc,mbmembmaster mb 
 											WHERE mb.member_no = :member_no and lc.LOANTYPE_CODE = :loantype_code 
 											and mb.salary_amount BETWEEN lc.startsalary_amt and lc.endsalary_amt");
