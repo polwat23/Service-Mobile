@@ -45,7 +45,8 @@ if(isset($rowOldContract["LOANCONTRACT_NO"]) && $rowOldContract["LOANCONTRACT_NO
 		$arrContract['LOANTYPE_DESC'] = $rowOldContract["LOANTYPE_DESC"];
 		$arrContract["CONTRACT_NO"] = $rowOldContract["LOANCONTRACT_NO"];
 		$arrContract['BALANCE'] = $rowOldContract["PRINCIPAL_BALANCE"];
-		$oldBal += $rowOldContract["PRINCIPAL_BALANCE"] + $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
+		$interest = $cal_loan->calculateIntAPI($rowOldContract["LOANCONTRACT_NO"]);
+		$oldBal += $rowOldContract["PRINCIPAL_BALANCE"] + $interest["INT_PAYMENT"];
 		$arrOldContract[] = $arrContract;
 		$canRequest = TRUE;
 	}else{

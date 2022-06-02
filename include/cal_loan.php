@@ -27,18 +27,39 @@ class CalculateLoan {
 		$intRate = $this->getRateInt($dataCont["INT_CONTINTTABCODE"],date('Y-m-d'));
 		$dataReq = array();
 		$dataReq["condition"] = [$dataCont["LOANTYPE_CODE"]];
+		$arrTxKeeping = array();
+		$getDataBetweenKeeping = $this->conms->prepare("SELECT principal_payment,CONVERT(varchar,slip_date , 23) as slip_date,loanitemtype_code,interest_period
+												FROM lncontstatement 
+												WHERE loancontract_no = :loancontract_no and 
+												CONVERT(varchar,SLIP_DATE , 23) >= (SELECT MAX(CONVERT(VARCHAR,process_date,23)) FROM kptempreceive WHERE member_no = :member_no)
+												ORDER BY seq_no DESC");
+		$getDataBetweenKeeping->execute([
+			':loancontract_no' => $loancontract_no,
+			':member_no' => $dataCont["MEMBER_NO"]
+		]);
+		while($rowDataKeeping = $getDataBetweenKeeping->fetch(\PDO::FETCH_ASSOC)){
+			if($rowDataKeeping["loanitemtype_code"] == 'LRC'){
+				$arrayKeeping = array();
+				$arrayKeeping["prinPayment"] = (float)$rowDataKeeping["principal_payment"];
+				$arrayKeeping["slipDate"] = $rowDataKeeping["slip_date"];
+				$arrayKeeping["intArrOld"] = (float)$rowDataKeeping["interest_period"];
+				$arrTxKeeping[] = $arrayKeeping;
+			}
+		}
 		$dataReq["data"] = [
 			"amount" => (float)($amount ?? $dataCont["PRINCIPAL_BALANCE"]),
 			"loanBalance" => (float)$dataCont["PRINCIPAL_BALANCE"],
 			"keepingAmount" => (float)$dataCont["SPACE_KEEPING"],
 			"prinKeepingAmount" => (float)$dataCont["RKEEP_PRINCIPAL"],
 			"calintFrom" => date('Y-m-d',strtotime($dataCont["LASTCALINT_DATE"])),
+			"keepingDate" => date('Y-m-d',strtotime($dataCont["LASTPROCESS_DATE"])),
 			"calintTo" => date('Y-m-d'),
 			"intArrear" => (float)$dataCont["INTEREST_ARREAR_SRC"],
 			"intRate" => (float)$intRate["INTEREST_RATE"],
 			"changeRateInt" => $dataInt["is_change"],
 			"changeRateInfo" => $dataInt,
-			"intReturn" => (float)$dataCont["INTEREST_RETURN"]
+			"intReturn" => (float)$dataCont["INTEREST_RETURN"],
+			"listTxBetweenKeeping" => $arrTxKeeping
 			
 		];
 		$interestResult = $this->lib->posting_data($url,$dataReq,$header);
@@ -77,6 +98,7 @@ class CalculateLoan {
 				"prinKeepingAmount" => (float)$dataCont["RKEEP_PRINCIPAL"],
 				"calintFrom" => date('Y-m-d'),
 				"calintTo" => date('Y-m-d',strtotime($dataCont["LASTPROCESS_DATE"])),
+				"processDate" => date('Y-m-d',strtotime($dataCont["LASTPROCESS_DATE"])),
 				"intArrear" => (float)$dataCont["INTEREST_ARREAR_SRC"],
 				"intRate" => (float)$intRate["INTEREST_RATE"],
 				"changeRateInt" => $dataInt["is_change"],
@@ -318,7 +340,7 @@ class CalculateLoan {
 		return $change_rate;
 	}
 	public function getContstantLoanContract($loancontract_no){
-		$contLoan = $this->conms->prepare("SELECT LNM.LOANAPPROVE_AMT,LNM.PRINCIPAL_BALANCE,LNM.PERIOD_PAYMENT,LNM.PERIOD_PAYAMT,LNM.LAST_PERIODPAY,LNM.WITHDRAWABLE_AMT,
+		$contLoan = $this->conms->prepare("SELECT LNM.MEMBER_NO,LNM.LOANAPPROVE_AMT,LNM.PRINCIPAL_BALANCE,LNM.PERIOD_PAYMENT,LNM.PERIOD_PAYAMT,LNM.LAST_PERIODPAY,LNM.WITHDRAWABLE_AMT,
 											LNM.LOANTYPE_CODE,LNM.INTEREST_ARREAR as BFINTEREST_ARREAR,(LNM.INTEREST_ARREAR - (LNM.RKEEP_INTEREST - LNM.NKEEP_INTEREST)) as INTEREST_ARREAR,
 											LNM.INTEREST_ARREAR as INTEREST_ARREAR_SRC
 											,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
@@ -355,7 +377,6 @@ class CalculateLoan {
 		}else{
 			$intarrear = $amt_transfer;
 		}
-		$int_returnSrc = 0;
 		$int_returnFull = 0;
 		$interest = $this->calculateIntAPI($contract_no,$amt_transfer);
 		$interestFull = $interest["INT_PAYMENT"];
@@ -363,6 +384,7 @@ class CalculateLoan {
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
+		$int_returnSrc = $interest["INT_RETURN"] ?? 0;
 		$prinPay = 0;
 		if($interest["INT_PAYMENT"] > 0){
 			if($amt_transfer < $interest["INT_PAYMENT"]){
