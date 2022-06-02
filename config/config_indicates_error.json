@@ -207,55 +207,72 @@
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
 		"R0502" :
 			[{"th" : "ยอดคงเหลือในบัญชีธนาคารของท่านไม่พอหักเพื่อทำรายการฝาก กรุณาตรวจสอบยอดเงินก่อนทำรายการ","en" : "Balance of bank account  not enough for deposit to cooperative please check your balance before transaction"}]
+	}],
+	"KTB_ERR" : [{
+		"EM004" :
+			[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Your balance is insufficient"}],
+		"EM006" :
+			[{"th" : "สถานะบัญชีของท่านไม่ตรงตามเงื่อนในการทำธุรกรรมกับธนาคาร กรุณาติดต่อสหกรณ์","en" : "Account status is not allowed please contact cooperative"}],
+		"EM013" :
+			[{"th" : "ไม่พบการผูกบัญชีของท่าน กรุณาผูกบัญชีก่อนทำรายการ","en" : "Not found your bind account please bind account before transaction"}],
+		"EM032" :
+			[{"th" : "เลขบัญชีของท่านไม่ถูกต้องหรือสถานะบัญชีไม่ตรงกับเงื่อนไขของธนาคาร กรุณาติดต่อสหกรณ์","en" : "Your account number incorrect or account status not allow for bank of condition please contact cooperative"}],
+		"EM037" :
+			[{"th" : "สถานะบัญชีของท่านไม่สามารถใช้งานได้ กรุณาติดต่อสหกรณ์","en" : "Your account status was not allowed please contact cooperative"}],
+		"EM043" :
+			[{"th" : "ท่านทำรายการเกินวงเงินที่ธนาคารกำหนด","en" : "The Bank Limit Amount Exceeded"}],
+		"EM053" :
+			[{"th" : "ยอดเงินในบัญชีธนาคารของท่านไม่เพียงพอ","en" : "Your balance is insufficient"}]
+	}],
+	"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
+	"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
+	"ACC_OUTSIDE_FLAG_OFF" : [{"th" : "ท่านมีการผูกบัญชีกับธนาคารแล้วทำให้บัญชีนี้ไม่สามารถทำรายการกับธนาคารได้","en" : "This account has been bind account with bank account. You cannot transaction with bank on this account"}],
+	"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมภายในเท่านั้น","en" : "Only transaction inside"}],
+	"ALLOW_TRANS_ALL_MENU" : [{"th" : "สามารถทำธุรกรรมได้ทั้งภายในและธนาคาร","en" : "Can transaction inside and transaction with bank"}],
+	"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
+	"BUTTON_TEXT" : [{
+		"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
+		"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
+	}],
+	"STATUS_REQ_SCHOLAR" : [{
+		"APPROVE_STATUS" : [{
+			"REQUESTED" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
 		}],
-		"ACC_JOIN_FLAG_OFF" : [{"th" : "สหกรณ์ไม่อนุญาตให้บัญชีที่ไม่ใช่เจ้าของคนเดียวทำรายการได้","en" : "The cooperative has not allowed joint account can be transactions"}],
-		"ACC_TRANS_FLAG_OFF" : [{"th" : "สหกรณ์ปิดไม่ให้บัญชีประเภทนี้สามารถทำธุกรรมได้","en" : "This deposit type was closed transaction online from cooperative"}],
-		"ACC_OUTSIDE_FLAG_OFF" : [{"th" : "ท่านมีการผูกบัญชีกับธนาคารแล้วทำให้บัญชีนี้ไม่สามารถทำรายการกับธนาคารได้","en" : "This account has been bind account with bank account. You cannot transaction with bank on this account"}],
-		"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมภายในเท่านั้น","en" : "Only transaction inside"}],
-		"ALLOW_TRANS_ALL_MENU" : [{"th" : "สามารถทำธุรกรรมได้ทั้งภายในและธนาคาร","en" : "Can transaction inside and transaction with bank"}],
-		"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
-		"BUTTON_TEXT" : [{
-			"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
-			"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]
-		}],
-		"STATUS_REQ_SCHOLAR" : [{
-			"APPROVE_STATUS" : [{
-				"REQUESTED" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}]
-			}],
-			"REQUEST_STATUS" : [{
-				"8" : [{"th" : "รอส่งเอกสารเพิ่มเติม","en" : "Wait for send more document"}],
-				"1" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
-				"9" : [{"th" : "ต้องการเอกสารเพิ่มเติม","en" : "Officer want more your document"}],
-				"11" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
-				"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
-				"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}],
-				"99" : [{"th" : "หมดเวลายื่นขอทุนสวัสดิการออนไลน์แล้ว","en" : "End of time for request scholarship online"}]
-			}]
-		}],
-		"REQ_LOAN_STATUS" : [{
-			"8" : [{"th" : "ส่งคำขอกู้","en" : "Wait for accept"}],
-			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
-			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
-			"7" : [{"th" : "รออนุมัติ","en" : "Accept for check rights"}],
-			"6" : [{"th" : "พิมพ์คำขอกู้","en" : "Print form loan request"}],
-			"2" : [{"th" : "ผู้ค้ำประกันยืนยัน","en" : "Guarantor Confirm"}],
-			"3" : [{"th" : "ระบบตรวจสอบคำขอกู้ พิมพ์สัญญา","en" : "Review the loan request"}],
-			"4" : [{"th" : "รอเซ็นต์สัญญา/รอประกัน","en" : "Waiting for sign or guarantor"}],
-			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
-		}],
-		"REQ_OPENACC_STATUS" : [{
-			"8" : [{"th" : "รอดำเนินการ","en" : "Wait for accept"}],
-			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
-			"0" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}]
-		}],
-		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
-		"REQ_FLAG_LOAN" : [{"th" : "เนื่องจากท่านมีสัญญาเงินกู้ฉุกเฉินพร้อมเปย์อยู่แล้ว ไม่สามารถขอกู้ฉุกเฉินประเภทอื่นได้","en" : "Cannot loan request cause you have already loan contract"}],
-		"RECEIVE_LOAN_RETRY_BEFORE" : [{"th" : "อายุของท่านไม่สามารถรับเงินกู้เพิ่มได้","en" : "Your age cannot withdraw loan"}],
-		"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
-		"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}],
-		"OPEN_ACCOUNT" : [{
-			"NOT_HAVE_ACC" : [{"th" : "ท่านต้องมีบัญชีเงินฝากกับสหกรณ์อย่างน้อย 1 บัญชีถึงจะสามารถยื่นคำขอเปิดบัญชีออนไลน์ได้","en" : "You must have least 1 deposit account"}],
-			"CANNOT_INSERT" : [{"th" : "ไม่สามารถขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot request open account online please contact the cooperative"}],
-			"CANNOT_CREATEDOC" : [{"th" : "ไม่สามารถสร้างใบคำขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot generate request document for open account online please contact the cooperative"}]
+		"REQUEST_STATUS" : [{
+			"8" : [{"th" : "รอส่งเอกสารเพิ่มเติม","en" : "Wait for send more document"}],
+			"1" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
+			"9" : [{"th" : "ต้องการเอกสารเพิ่มเติม","en" : "Officer want more your document"}],
+			"11" : [{"th" : "รอเจ้าหน้าที่ตรวจสอบเอกสาร","en" : "Wait for officer check your document"}],
+			"-1" : [{"th" : "คำขอของท่านไม่ผ่านเกณฑ์","en" : "Your request is not criterion"}],
+			"-9" : [{"th" : "ยื่นเอกสารขอทุนเรียบร้อยแล้ว","en" : "You had submitted a scholarship form"}],
+			"99" : [{"th" : "หมดเวลายื่นขอทุนสวัสดิการออนไลน์แล้ว","en" : "End of time for request scholarship online"}]
 		}]
+	}],
+	"REQ_LOAN_STATUS" : [{
+		"8" : [{"th" : "ส่งคำขอกู้","en" : "Wait for accept"}],
+		"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
+		"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
+		"7" : [{"th" : "รออนุมัติ","en" : "Accept for check rights"}],
+		"6" : [{"th" : "พิมพ์คำขอกู้","en" : "Print form loan request"}],
+		"2" : [{"th" : "ผู้ค้ำประกันยืนยัน","en" : "Guarantor Confirm"}],
+		"3" : [{"th" : "ระบบตรวจสอบคำขอกู้ พิมพ์สัญญา","en" : "Review the loan request"}],
+		"4" : [{"th" : "รอเซ็นต์สัญญา/รอประกัน","en" : "Waiting for sign or guarantor"}],
+		"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+	}],
+	"REQ_OPENACC_STATUS" : [{
+		"8" : [{"th" : "รอดำเนินการ","en" : "Wait for accept"}],
+		"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
+		"0" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}]
+	}],
+	"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
+	"REQ_FLAG_LOAN" : [{"th" : "เนื่องจากท่านมีสัญญาเงินกู้ฉุกเฉินพร้อมเปย์อยู่แล้ว ไม่สามารถขอกู้ฉุกเฉินประเภทอื่นได้","en" : "Cannot loan request cause you have already loan contract"}],
+	"RECEIVE_LOAN_RETRY_BEFORE" : [{"th" : "อายุของท่านไม่สามารถรับเงินกู้เพิ่มได้","en" : "Your age cannot withdraw loan"}],
+	"SPEC_REMARK" : [{"th" : "ทั้งนี้ยอดชำระต่อเดือนของท่านอาจจะไม่ได้เป็นไปตามที่สหกรณ์เรียกเก็บจริง ๆ หากท่านอ่านและรับทราบกรุณายอมรับข้อตกลงก่อนทำรายการขอกู้","en" : "Payment per period maybe not corresponding that the cooperative is charge per month please read & consent specification before request loan"}],
+	"REMARK_PAYFEE" : [{"th" : "บัญชีนี้จะถูกหักค่าธรรมเนียมการทำรายการกับธนาคารไว้ทั้งขาฝากเงินและถอนเงิน กรุณาตรวจสอบบัญชีให้ดีก่อนทำรายการต่อไป","en" : "This account will be payment for fee when you transfer money abount bank transaction please check before continue"}],
+	"OPEN_ACCOUNT" : [{
+		"NOT_HAVE_ACC" : [{"th" : "ท่านต้องมีบัญชีเงินฝากกับสหกรณ์อย่างน้อย 1 บัญชีถึงจะสามารถยื่นคำขอเปิดบัญชีออนไลน์ได้","en" : "You must have least 1 deposit account"}],
+		"CANNOT_INSERT" : [{"th" : "ไม่สามารถขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot request open account online please contact the cooperative"}],
+		"CANNOT_CREATEDOC" : [{"th" : "ไม่สามารถสร้างใบคำขอเปิดบัญชีออนไลน์ได้ กรุณาติดต่อสหกรณ์","en" : "Canot generate request document for open account online please contact the cooperative"}]
+	}],
+	"LOAN_BALANCE_FOR_REPAY" : [{"th" : "หากต้องการปิดสัญญาเงินกู้ให้ชำระตามยอดที่แสดงข้างบน แต่หากต้องการชำระบางส่วนให้ชำระต่ำกว่ายอดหนี้คงเหลือ ${LOAN_BALANCE}","en" : "If you will close the contract please paid on amount is show but if you will pay some debt please paid amount lower than principal balance ${LOAN_BALANCE}"}]
 }
