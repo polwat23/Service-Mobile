@@ -32,14 +32,22 @@ class functions {
 			}
 		}
 		public function checkAccStatus($member_no) {
-			$checkStatus = $this->con->prepare("SELECT account_status FROM gcmemberaccount 
+			$checkStatus = $this->con->prepare("SELECT ref_memno ,account_status FROM gcmemberaccount 
 												WHERE member_no = :member_no");
 			$checkStatus->execute([
 				':member_no' => $member_no
 			]);
 			$rowStatus = $checkStatus->fetch(\PDO::FETCH_ASSOC);
+			
+			$checkStatusMember = $this->con->prepare("SELECT service_status FROM gcmembonlineregis 
+												WHERE member_no = :member_no");
+			$checkStatusMember->execute([
+				':member_no' => $rowStatus["ref_memno"]
+			]);
+			$rowStatusMember = $checkStatusMember->fetch(\PDO::FETCH_ASSOC);
+			
 			$arrayStatus = array();
-			if($rowStatus["account_status"] == '1' || $rowStatus["account_status"] == '-9'){
+			if(($rowStatus["account_status"] == '1' || $rowStatus["account_status"] == '-9') && ($rowStatusMember["service_status"] == '1')){
 				return TRUE;
 			}else{
 				return FALSE;

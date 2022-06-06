@@ -113,7 +113,7 @@ class library {
 			return '-';
 		}
 	}
-	public function formataccount($account_no,$format) {
+	public function formataccountReport($account_no,$format) {
 		if(isset($account_no) && isset($format)){
 			$formatArray = explode('-',$format);
 			$account_text = '';
@@ -128,6 +128,39 @@ class library {
 		}else{
 			return '-';
 		}
+	}
+	public function formataccount($account_no,$format) {
+		if(isset($account_no) && isset($format)){
+			$formatArray = explode('/',$format);
+			$account_text = '';
+			for($i = 0;$i < sizeof($formatArray);$i++){
+				if($i == 0){
+					$account_text = substr($account_no,$i,strlen($formatArray[$i]));
+				}else{
+					$account_text .= '/'.substr($account_no,strlen(preg_replace('/-/','',$account_text)),strlen($formatArray[$i]));
+				}
+			}
+			return $account_text;
+		}else{
+			return '-';
+		}
+	}
+	public function formataccountbank($account_no,$format) {
+		if(isset($account_no) && isset($format)){
+			$formatArray = explode('-',$format);
+			$account_text = '';
+			for($i = 0;$i < sizeof($formatArray);$i++){
+				if($i == 0){
+					$account_text = substr($account_no,$i,strlen($formatArray[$i]));
+				}else{
+					$account_text .= '-'.substr($account_no,strlen(preg_replace('/-/','',$account_text)),strlen($formatArray[$i]));
+				}
+			}
+			return $account_text;
+		}else{
+			return '-';
+		}
+
 	}
 	public function formataccount_hidden($account_no,$format) {
 		if(isset($account_no) && isset($format)){
@@ -256,7 +289,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mail.gensoft.co.th';
+		$mailFunction->Host = '203.150.107.193';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -705,10 +738,10 @@ class library {
 	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
-	public function sendLineNotify($message){
-		/*$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+	public function sendLineNotify($message, $lineToken=null){
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
-		$token = $json_data["LINE_NOTIFY"];
+		$token = $lineToken ?? $json_data["LINE_NOTIFY"];
 		$headers = array();
 		$headers[] = 'content-type: application/x-www-form-urlencoded';
 		$headers[] = 'Authorization: Bearer '.$token;
@@ -720,9 +753,9 @@ class library {
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
+		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message=".$message);                                                                  
 																													 
-		curl_exec($ch);*/
+		curl_exec($ch);
 	}
 	public function truncateDecimal($amt,$precision){
 		$step = pow(10,$precision);
@@ -790,6 +823,11 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	function round_up($number, $precision = 3)
+	{
+		$fig = (int) str_pad('1', $precision, '0');
+		return (ceil($number * $fig) / $fig);
 	}
 }
 ?>

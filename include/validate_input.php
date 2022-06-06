@@ -17,9 +17,7 @@ if(isset($jsonData) && is_array($jsonData)){
 				$dataComing[$key] = $data;
 			}
 		}else{
-			$dataComing[$key] = array_map(function($text){
-				return preg_replace('/[^\p{Thai}A-Za-z0-9 \/\-@_${}(),#<>=:+!?.]/u','', $text);
-			},$data);
+			$dataComing[$key] = $data;
 		}
 	}
 }

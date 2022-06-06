@@ -106,6 +106,7 @@
 	"WS0091" : [{"th" : "ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้มีการอายัติบัญชี จำนวนที่อายัติ ${sequest_amt} บาท ทำให้ยอดคงเหลือต่ำกว่าเกณฑ์ที่กำหนด","en" : "Cannot transaction because this account has been sequest. Amount of sequest is ${sequest_amt} baht cause principal balance in your account lower than the cooperative is defined"}],
 	"WS0092" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากมีการอายัติบัญชีตามเงื่อนไขของสหกรณ์ สอบถามข้อมูลเพิ่มเติมติดต่อสหกรณ์","en" : "Cannot transaction because this account has been sequest by condition any question more please contact cooperative"}],
 	"WS0093" : [{"th" : "ยอดทำรายการของท่านเกินกว่าที่กำหนด","en" : "Amount of transfer more than the cooperative is defined"}],
+	"WS0097" : [{"th" : "ขออภัยท่านได้ยืนยันยอดเรียบร้อยแล้ว ไม่สามารถยืนยันยอดซ้ำได้","en" : "Sorry, your balance has been confirmed. Can not repeat confirm"}],
 	"WS0098" : [{"th" : "ยอดทำรายการมากกว่า หนี้คงเหลือของท่าน กรุณาตรวจสอบข้อมูลอีกครั้งก่อนทำรายการ","en" : "Your transfer amount more than loan balance please recheck before transaction"}],
 	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
 	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
@@ -147,10 +148,14 @@
 	"WS1035" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถปฏิเสธรายการอนุมัติเงินฝากได้ ตอนนี้โปรแกรมเมอร์ได้รับเรื่องแล้วกำลังดำเนินการแก้ไข #WS1035","en" : "Something was wronged that cannot deny approve deposit list. Now programmer has received the issue #WS1035"}],
 	"WS1036" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยื่นใบคำขอกู้ออนไลน์ได้ กรุณาติดต่อสหกรณ์ #WS1036","en" : "Something was wronged that cannot request loan online please contact cooperative #WS1036"}],
 	"WS1037" : [{"th" : "เกิดข้อผิดพลาดทำให้ไม่สามารถยกเลิกใบคำขอกู้ได้ กรุณาติดต่อสหกรณ์ #WS1037","en" : "Something was wronged that cannot cancel request loan online please contact cooperative #WS1037"}],
+	"WS1038" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถยืนยันยอดในเอกสารได้ กรุณาติดต่อสหกรณ์ #WS1038","en" : "Something was crashed that cannot confirm balance in document please contact cooperative #WS1038"}],
+	"WS1039" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขที่อยู่ได้ กรุณาติดต่อสหกรณ์ #WS1039","en" : "Something was wronged that cannot change adress please contact cooperative #WS1039"}],
+	"WS1043" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขข้อมูลบริหารจัดการได้ กรุณาติดต่อสหกรณ์ #WS1043","en" : "Something was wronged that cannot change management info please contact cooperative #WS1043"}],
 	"WS9999" : [{"th" : "เกิดข้อผิดพลาดบางประการกรุณาติดต่อสหกรณ์ #WS9999","en" : "Something wrong please contact cooperative #WS9999"}],
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],
+	"WS0114" : [{"th" : "ไม่สามารถดูข้อมูลเงินกู้ได้ กรุณาติดต่อเจ้าหน้าที่ ชสอ. โทร.02-4961199 ต่อ 212 - 216 ,226 และ 227","en" : "Unable to view loan information, contact cooperative staff"}],
 	"KBANK_ERR" : [{
 		"1001" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
@@ -224,11 +229,10 @@
 			}]
 		}],
 		"REQ_LOAN_STATUS" : [{
-			"8" : [{"th" : "รอลงรับ","en" : "Wait for accept"}],
-			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
-			"-9" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
-			"7" : [{"th" : "ลงรับรอตรวจสิทธิ์เพิ่มเติม","en" : "Accept for check rights"}],
-			"9" : [{"th" : "ยกเลิกใบคำขอ","en" : "Cancel form loan request"}]
+			"1" : [{"th" : "อนุมัติ/รอทำสัญญา","en" : "Wait for Approve"}],
+			"2" : [{"th" : "ทำสัญญาแล้ว","en" : "Contracted"}],
+			"0" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}],
+			"8" : [{"th" : "อยู่ระหว่างดำเนินการ","en" : "Pending"}]
 		}],
 		"REQ_HAVE_OLD_CONTRACT" : [{"th" : "ท่านมีสัญญาเงินกู้ประเภทนี้อยู่แล้วไม่สามารถกู้ซ้ำได้","en" : "Your have contract already exist cannot request repeat"}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],

@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$DayForCheck = date('d');
 		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
 															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
-		$getLastReceive->execute([':member_no' => $member_no]);
+		$getLastReceive->execute([':member_no' => $payload["ref_memno"]]);
 		$rowLastRecv = $getLastReceive->fetch(PDO::FETCH_ASSOC);
 		$checkHasBeenPay = $conoracle->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no and recv_period = :max_recv and keeping_status = 1");
 		$checkHasBeenPay->execute([

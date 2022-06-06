@@ -20,11 +20,20 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup["tambol"] = "ตำบล";
 		$arrayGroup["email"] = "อีเมลล์";
 		$arrayGroup["tel"] = "เบอร์โทรศัพท์";
+		$arrayGroup["addr_fax"] = "โทรสาร";
 		$arrayGroup["website"] = "เว็บไซต์";
 		$arrayGroup["coopregis_date"] = "วันที่จดทะเบียน";
 		$arrayGroup["coopregis_no"] = "เลขทะเบียนสหกรณ์";
 		$arrayGroup["memb_regno"] = "เลข 13 หลักสหกรณ์";
 		$arrayGroup["tax_id"] = "เลขประจำตัวผู้เสียภาษีอากร";
+		$arrayGroup["accyearclose_date"] = "วันสิ้นปีทางบัญชี";
+		$arrayGroup["share_stk"] = "ทุนเรือนหุ้น";
+		
+		$arrayGroup["BOARD"] = "คณะกรรมการ";
+		$arrayGroup["BUSINESS"] = "ผู้ตรวจสอบกิจการ";
+		$arrayGroup["COOP_OFFICER"] = "จำนวนเจ้าหน้าที่";
+		$arrayGroup["MEMBER_COUNT"] = "จำนวนสมาชิก";
+		
 		$arrayResult["EDIT_MEMBER_LABEL"] = $arrayGroup;
 
 		$arrayResult["RESULT"] = TRUE;

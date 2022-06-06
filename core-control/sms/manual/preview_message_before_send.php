@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				$arrGroupAllFailed = array();
 				$destination = array();
 				foreach($dataComing["message_importData"] as $target){
-					$destination[] = strtolower($lib->mb_str_pad($target["DESTINATION"]));
+					$destination[] = $target["DESTINATION"];
 				}
 				$arrToken = $func->getFCMToken('person',$destination);
 				foreach($dataComing["message_importData"] as $dest){
@@ -91,7 +91,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				if($dataComing["type_send"] == "person"){
 					$destination = array();
 					foreach($dataComing["destination"] as $target){
-						$destination[] = strtolower($lib->mb_str_pad($target));
+						$destination[] = $target;
 					}
 					$arrToken = $func->getFCMToken('person',$destination);
 					foreach($arrToken["LIST_SEND"] as $dest){
@@ -196,7 +196,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				$arrDestGRPNotCorrect = array();
 				foreach($dataComing["message_importData"] as $target){
 					if(mb_strlen($target["DESTINATION"]) <= 8){
-						$destination[] = strtolower($lib->mb_str_pad($target["DESTINATION"]));
+						$destination[] = $target["DESTINATION"];
 					}else if(mb_strlen($target["DESTINATION"]) == 10){
 						$destination_temp = array();
 						$destination_temp["MEMBER_NO"] = null;
@@ -222,7 +222,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					if($indexFound !== false){
 						$member_no = $arrayMerge[$indexFound]["MEMBER_NO"];
 						$telMember = $arrayMerge[$indexFound]["TEL"];
-						if(strtolower($lib->mb_str_pad($dest["DESTINATION"]))){
+						if($dest["DESTINATION"]){
 							if(isset($telMember) && $telMember != ""){
 								$arrGroupSuccess["DESTINATION"] = $member_no;
 								$arrGroupSuccess["REF"] = $dest["DESTINATION"];
@@ -243,7 +243,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				}
 				foreach($dataComing["message_importData"] as $target){
 					if(mb_strlen($target["DESTINATION"]) <= 8){
-						$target_dest = strtolower($lib->mb_str_pad($target["DESTINATION"]));
+						$target_dest = $target["DESTINATION"];
 					}else if(mb_strlen($target) == 10){
 						$target_dest = $lib->formatphone($target["DESTINATION"],'-');
 					}
@@ -276,7 +276,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrDestGRPNotCorrect = array();
 					foreach($dataComing["destination"] as $target){
 						if(mb_strlen($target) <= 8){
-							$destination[] = strtolower($lib->mb_str_pad($target));
+							$destination[] = $target;
 						}else if(mb_strlen($target) == 10){
 							$destination_temp = array();
 							$destination_temp["MEMBER_NO"] = null;
@@ -314,7 +314,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					}
 					foreach($dataComing["destination"] as $target){
 						if(mb_strlen($target) <= 8){
-							$target_format = strtolower($lib->mb_str_pad($target));
+							$target_format = $target;
 						}else if(mb_strlen($target) == 10){
 							$target_format = $lib->formatphone($target,'-');
 						}

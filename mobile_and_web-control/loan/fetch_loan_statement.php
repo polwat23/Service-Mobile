@@ -38,11 +38,14 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
+											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance ,
+											(case when  lit.loanitemtype_grp = 'LWD' then lsm.REF_SLIPNO else lsm.REF_DOCNO end ) as SLIP_NO,
+											lit.SIGN_FLAG ,lit.LOANITEMTYPE_GRP ,lsm.FINELATE_PAYMENT
 											FROM lccontstatement lsm LEFT JOIN LCUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
-											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
+											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' 
+											and lsm.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD')  
+											and lsm.ref_docno is not null ".$old_seq_no." 
 											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
@@ -50,7 +53,10 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			':datenow' => $date_now
 		]);
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
-			$arrSTM = array();
+			$arrSTM = array();		
+			$arrSTM["FINELATE_PAYMENT"] = $rowStm["FINELATE_PAYMENT"];
+			$arrSTM["LOANITEMTYPE_GRP"] = $rowStm["LOANITEMTYPE_GRP"];
+			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
@@ -58,8 +64,22 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);
 			$arrSTM["SUM_PAYMENT"] = number_format($rowStm["INT_PAYMENT"] + $rowStm["PRN_PAYMENT"],2);
 			$arrSTM["LOAN_BALANCE"] = number_format($rowStm["LOAN_BALANCE"],2);
+			$arrSTM["SLIP_NO"] = TRIM($rowStm["SLIP_NO"]);
+			
+			if($arrSTM["LOANITEMTYPE_GRP"] == "LWD"){
+				$arrSTM["IS_REPORTPAYMENT"] =  true;
+			}else {
+				$arrSTM["IS_REPORTPAYMENT"] =  false;
+			}
+			
+			if($arrSTM["LOANITEMTYPE_GRP"] == "PAY"){
+				$arrSTM["PENALTY"]	 = number_format(($arrSTM["FINELATE_PAYMENT"] * $arrSTM["SIGN_FLAG"])  * -1,2);
+			}else{
+				$arrSTM["PENALTY"] = '0.00';	
+			}
 			$arrayGroupSTM[] = $arrSTM;
 		}
+
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["RESULT"] = TRUE;

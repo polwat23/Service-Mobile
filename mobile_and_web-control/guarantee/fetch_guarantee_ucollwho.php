@@ -3,11 +3,20 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $payload["ref_memno"];
 		$arrayResult = array();
 		$arrayGroupLoan = array();
-		$getUcollwho = $conoracle->prepare("SELECT 
+		
+		$fetchContractTypeCheck = $conmysql->prepare("SELECT balance_status FROM gcconstantbalanceconfirm WHERE member_no = :member_no");
+		$fetchContractTypeCheck->execute([':member_no' => $payload["ref_memno"]]);
+		$rowContractnoCheck = $fetchContractTypeCheck->fetch(PDO::FETCH_ASSOC);
+		$Contractno  = $rowContractnoCheck["balance_status"] ||"0" ;
+		if($Contractno == "0"){
+			$getUcollwho = $conoracle->prepare("SELECT 
 											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
+											LCC.REF_COLLNO,
+											LCC.COLL_AMT,   
+											LCC.BASE_AMT, 
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_ENAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
@@ -19,27 +28,33 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
 											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
 											LEFT JOIN lCCFLOANTYPE LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
-											WHERE
-											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
-											AND LCC.LOANCOLLTYPE_CODE = '01'
+											WHERE LCM.CONTRACT_STATUS = 1
+											AND LCC.LOANCOLLTYPE_CODE IN('01','02','03','04')
 											AND LCC.REF_COLLNO = :member_no");
-		$getUcollwho->execute([':member_no' => $payload["member_no"]]);
-		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
-			$arrayColl = array();
-			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
-			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
-			$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
-			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
-			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
-			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
-			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOAN_BALANCE"],2);
-			$arrayColl["LAST_PERIOD"] = $rowUcollwho["LAST_PERIOD"].' / '.$rowUcollwho["PERIOD"];
-			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
-			$arrayGroupLoan[] = $arrayColl;
+			$getUcollwho->execute([':member_no' => $member_no]);
+			while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
+				$arrayColl = array();
+				$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
+				$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
+				$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
+				$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
+				$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
+				$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
+				$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["COLL_AMT"],2);
+				$arrayColl["LAST_PERIOD"] = $rowUcollwho["LAST_PERIOD"].' / '.$rowUcollwho["PERIOD"];
+				$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"];
+				$arrayGroupLoan[] = $arrayColl;
+			}
+			$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');                                                       
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0114";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			http_response_code(403);
+			require_once('../../include/exit_footer.php');
 		}
-		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
-		$arrayResult['RESULT'] = TRUE;
-		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

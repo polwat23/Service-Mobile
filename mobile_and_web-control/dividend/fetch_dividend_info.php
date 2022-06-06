@@ -3,10 +3,10 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DividendInfo')){
-		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$member_no = $configAS[$payload["ref_memno"]] ?? $payload["ref_memno"];
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
+		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR FROM YRBGMASTER yrm LEFT JOIN yrcfrate yr 
 												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.LOCKPROC_FLAG = '1' 
 												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
@@ -15,7 +15,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$getDivMaster = $conoracle->prepare("SELECT div_amt,avg_amt FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
+			$getDivMaster = $conoracle->prepare("SELECT yr.div_amt,yr.avg_amt ,yf.divpercent_rate , yf.avgpercent_rate FROM yrdivmaster yr LEFT JOIN yrcfrate yf ON yr.div_year = yf.div_year
+												 WHERE yr.member_no = :member_no and yr.div_year = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -24,13 +25,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
+			$arrDividend["DIVPERCENT_RATE"] = number_format($rowDiv["DIVPERCENT_RATE"] *100,2) ;
+			$arrDividend["AVGPERCENT_RATE"] = number_format($rowDiv["AVGPERCENT_RATE"] *100 ,2) ;
+			$arrDividend["DIV_RATE"] = number_format($rowDiv["DIVPERCENT_RATE"] * 100 ,2) .' %';
+			$arrDividend["AVG_RATE"] = number_format($rowDiv["AVGPERCENT_RATE"] * 100 ,2) .' %';
+			
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
 			$getMethpay = $conoracle->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
 													CM.BANK_DESC AS BANK,
 													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
 													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
-													YM.METHPAYTYPE_CODE
+													YM.METHPAYTYPE_CODE,
+													YM.METHPAY_STATUS
 												FROM 
 													YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
 													YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
@@ -52,6 +59,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}else{
 						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format'));
 					}
+				}
+				if($rowMethpay["METHPAY_STATUS"] != "1"){
+					$arrDividend["REMARK"] = "รอจัดสรรจากที่ประชุมใหญ่ ";
 				}
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);

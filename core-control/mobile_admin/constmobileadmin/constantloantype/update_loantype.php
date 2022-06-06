@@ -5,13 +5,13 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,IS_NOTIFY FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;
 			$arrayLoanCheckGrp[] = $arrayLoanCheck;
 		}
-		$fetchLoantype = $conoracle->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LNLOANTYPE ORDER BY LOANTYPE_CODE ASC");
+		$fetchLoantype = $conoracle->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LCCFLOANTYPE ORDER BY LOANTYPE_CODE ASC");
 		$fetchLoantype->execute();
 		while($rowLoantype = $fetchLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoantype = array();
@@ -19,12 +19,16 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 				$arrayLoantype["IS_CREDITLOAN"] = "0";
 				$arrayLoantype["IS_LOANREQUEST"] = "0";
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = "0";
+				$arrayLoantype["IS_NOTIFY"] = "0";
 				
 			}else{
-				$arrayLoantype["IS_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_CREDITLOAN"];
-				$arrayLoantype["IS_LOANREQUEST"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_LOANREQUEST"];
-				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_ESTIMATE_CREDITLOAN"];
+				$arrayLoantype["IS_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_CREDITLOAN"] ?? "0";
+				$arrayLoantype["IS_LOANREQUEST"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_LOANREQUEST"] ?? "0";
+				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_ESTIMATE_CREDITLOAN"] ?? "0";
+				$arrayLoantype["IS_NOTIFY"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_NOTIFY"] ?? "0";
 			}
+			
+			
 			$arrayLoantype["LOANTYPE_CODE"] = $rowLoantype["LOANTYPE_CODE"];
 			$arrayLoantype["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_DESC"];
 			$arrayGroup[] = $arrayLoantype;
@@ -39,21 +43,21 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 			});
 			foreach($resultUDiff as $value_diff){
 				if(array_search($value_diff["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE')) === False){
-					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_ESTIMATE_CREDITLOAN"]."')";
-					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN ='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
+					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".($value_diff["IS_CREDITLOAN"] ?? "0")."','".($value_diff["IS_LOANREQUEST"] ?? "0")."','".($value_diff["IS_ESTIMATE_CREDITLOAN"] ?? "0")."','".($value_diff["IS_NOTIFY"] ?? "0")."')";
+					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_NOTIFY ='.$value_diff["IS_NOTIFY"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN ='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
 				}else{
-					$updateConst = $conmysql->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST, IS_ESTIMATE_CREDITLOAN = :IS_ESTIMATE_CREDITLOAN WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
+					$updateConst = $conmysql->prepare("UPDATE gcconstanttypeloan SET IS_NOTIFY = :IS_NOTIFY,IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST, IS_ESTIMATE_CREDITLOAN = :IS_ESTIMATE_CREDITLOAN WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
 					$updateConst->execute([
-						':IS_CREDITLOAN' => $value_diff["IS_CREDITLOAN"],
-						':IS_LOANREQUEST' => $value_diff["IS_LOANREQUEST"],
-						':IS_ESTIMATE_CREDITLOAN' => $value_diff["IS_ESTIMATE_CREDITLOAN"],
+						':IS_NOTIFY' => $value_diff["IS_NOTIFY"] ?? "0",
+						':IS_CREDITLOAN' => $value_diff["IS_CREDITLOAN"] ?? "0",
+						':IS_LOANREQUEST' => $value_diff["IS_LOANREQUEST"] ?? "0",
+						':IS_ESTIMATE_CREDITLOAN' => $value_diff["IS_ESTIMATE_CREDITLOAN"] ?? "0",
 						':LOANTYPE_CODE' => $value_diff["LOANTYPE_CODE"]
 					]);
-					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
+					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_NOTIFY ='.$value_diff["IS_NOTIFY"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
 				}
 			}
-			$insertConst = $conmysql->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN)
-															VALUES".implode(',',$insertBulkCont));
+			$insertConst = $conmysql->prepare("INSERT INTO gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,IS_NOTIFY) VALUES".implode(',',$insertBulkCont));
 			$insertConst->execute();
 			$arrayStruc = [
 				':menu_name' => "constanttypeloan",
