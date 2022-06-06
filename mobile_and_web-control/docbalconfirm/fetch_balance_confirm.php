@@ -541,7 +541,12 @@ function GeneratePdfDoc($arrHeader,$arrDetail,$sum_balance,$arrDetailDept,$sum_d
 		</div>';
 	}
 	//<div style="position: absolute;bottom: 0;">ฝ่ายสินเชื่อ ต่อ 212-216 , 223, 226 และ 227</div>
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	$dompdf->set_paper('A4');
 	$dompdf->load_html($html);
 	$dompdf->render();

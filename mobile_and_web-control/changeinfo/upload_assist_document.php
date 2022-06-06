@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component','docgrp_no','document_data','fi
 			foreach($arrPrefixSort as $prefix){
 				$reqloan_doc .= $arrPrefixRaw[$prefix];
 			}
+			
 			if(isset($reqloan_doc) && $reqloan_doc != ""){
 				$destination = __DIR__.'/../../resource/coopdocument/'.$member_no;
 				$data_Img = explode(',',$dataComing["document_data"]);

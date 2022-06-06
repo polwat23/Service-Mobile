@@ -26,8 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 											LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 											LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-											'8' as REQ_STATUS,					
-											8 as request_flag 
+											LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,					
+											8 as request_flag ,
+											LCREQLOAN.CONTSIGN_INTRATE,
 											from lcreqloan LEFT  JOIN   LCCFLOANTYPE  ON  lcreqloan.LOANTYPE_CODE = LCCFLOANTYPE.LOANTYPE_CODE
 											where 
 											lcreqloan.member_no= :member_no and  lcreqloan.loanrequest_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') and 
@@ -48,6 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
 					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
 					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"],2)." %";
 					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
 					$arrGrpReq[] = $arrayReq;
 				}
@@ -61,7 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 										LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 										LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-										'-9' as REQ_STATUS,
+										LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 										LCREQLOAN.REMARK as REMARK,
 										0 as request_flag,
 										LCREQLOAN.CONTSIGN_INTRATE
@@ -88,7 +90,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayReq["REQ_STATUS"] = $rowReqLoan["REQ_STATUS"];
 					$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["REQUEST_FLAG"]][0][$lang_locale];
 					//$arrayReq["LOANPERMIT_AMT"] = $rowReqLoan["LOANPERMIT_AMT"];
-					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"])." %";
+					$arrayReq["CONTSIGN_INTRATE"] = number_format($rowReqLoan["CONTSIGN_INTRATE"],2)." %";
 					$arrayReq["REMARK"] = $rowReqLoan["REMARK"];
 					$arrGrpReq[] = $arrayReq;
 				}
@@ -101,13 +103,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 										LCREQLOAN.PERIOD_PAYMENT  as PERIOD_PAYMENT, 
 										LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 										LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-										'0' as REQ_STATUS,
+										LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 										LCREQLOAN.REMARK as REMARK,
 										1 as request_flag ,
-										LCREQLOAN.CONTSIGN_INTRATE,
+										LCREQLOAN.CONTSIGN_INTRATE
 										from lcreqloan LEFT JOIN LCCFLOANTYPE ON lcreqloan.loantype_code  = LCCFLOANTYPE.loantype_code
 										where lcreqloan.member_no= :member_no
-										and lcreqloan.loanrequest_date  BETWEEN TO_DATE(:datebefore,'YYYY-MM-DD') and TO_DATE(:datenow,'YYYY-MM-DD')
+										and lcreqloan.LOANAPPROVE_DATE  BETWEEN TO_DATE(:datebefore,'YYYY-MM-DD') and TO_DATE(:datenow,'YYYY-MM-DD')
 										and lcreqloan.approve_date is not null and lcreqloan.loanrequest_status = 1  
 										and  ( select count(lccontmaster.contsign_status) from lccontmaster 
 										where lccontmaster.contsign_status = 1 and lccontmaster.contsign_date is not null 
@@ -142,7 +144,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 													LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 													LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-													'1'as REQ_STATUS,
+													LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 													LCREQLOAN.REMARK as REMARK,
 													lccontmaster.CONTSIGN_DATE,,
 													LCREQLOAN.CONTSIGN_INTRATE,
@@ -188,7 +190,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-												'8' as REQ_STATUS,
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 												SYSDATE as CONTSIGN_DATE,
 												LCREQLOAN.REMARK as REMARK,
 												LCREQLOAN.CONTSIGN_INTRATE as  INT_CONTINTRATE,
@@ -208,7 +210,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-												'-9' as REQ_STATUS,
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 												SYSDATE as CONTSIGN_DATE,
 												LCREQLOAN.REMARK as REMARK,
 												LCREQLOAN.CONTSIGN_INTRATE as  INT_CONTINTRATE,
@@ -231,7 +233,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-												'0' as REQ_STATUS,
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 												SYSDATE as CONTSIGN_DATE,
 												LCREQLOAN.REMARK as REMARK,
 												LCREQLOAN.CONTSIGN_INTRATE as  INT_CONTINTRATE,
@@ -253,7 +255,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LCREQLOAN.PERIOD_INSTALLMENT as PERIOD, 
 												LCCFLOANTYPE.LOANTYPE_CODE as LOANTYPE_CODE,
 												LCCFLOANTYPE.LOANTYPE_DESC as LOANTYPE_DESC,         
-												'1' as REQ_STATUS,
+												LCREQLOAN.LOANREQUEST_STATUS as REQ_STATUS,
 												lccontmaster.CONTSIGN_DATE,
 												LCREQLOAN.REMARK as REMARK,
 												FT_GETCONTINTRATE(LCCONTMASTER.branch_id,LCCONTMASTER.loancontract_no,sysdate) as INT_CONTINTRATE,

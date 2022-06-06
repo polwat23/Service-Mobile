@@ -62,8 +62,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			require_once('../../include/exit_footer.php');
 			
 		}
-
-				
+	
 		if($rowPassword['service_status'] == '8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -191,7 +190,14 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								$updateWrongPassCount->execute([
 									':member_no' => $member_no
 								]);
-								$arrayResult['RESULT'] = TRUE;
+								$arrayResult['RESULT'] = TRUE;							
+								if ($forceNewSecurity == true) {
+									$newArrayResult = array();
+									$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+									$arrayResult = array();
+									$arrayResult = $newArrayResult;
+								}
+
 								require_once('../../include/exit_footer.php');
 							}else{
 								$conmysql->rollback();
