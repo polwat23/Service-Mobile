@@ -26,7 +26,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchEndDate->execute();
 		$rowEndDate = $fetchEndDate->fetch(PDO::FETCH_ASSOC);
 		
-		$getBalancedate = $conoracle->prepare("select max(doc_date) as NOTICE_DATE , NOTICE_DOCNO from CMNOTATIONREGISFILE where  member_no =  :member_no  GROUP BY NOTICE_DOCNO");
+		$getBalancedate = $conoracle->prepare("SELECT max(doc_date) as NOTICE_DATE , NOTICE_DOCNO  ,doc_date from CMNOTATIONREGISFILE where  member_no = :member_no
+												AND  doc_date = (SELECT  max(doc_date) FROM  CMNOTATIONREGISFILE WHERE  member_no = :member_no ) 
+												GROUP BY NOTICE_DOCNO ,doc_date");
 		$getBalancedate->execute([':member_no' => $member_no]);
 		$rowBalMaster = $getBalancedate->fetch(PDO::FETCH_ASSOC);
 		$year = date('Y',strtotime($rowBalMaster["NOTICE_DATE"]))+543;
@@ -57,6 +59,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				
 			}else{
 				$arrayResult['WAITING_CONFIRM '] = "หากสหกรณ์มีการรับเงินกู้หรือมีการชำระเงินกู้พิเศษหลังจากวันที่พิมพ์ด้านมุมบนขวา  กรุณาตรวจสอบยอดชำระอีกครั้ง หลังจากสหกรณ์ทำรายการเสร็จสิ้นเเล้วถัดไปอีก  5  วันทำการ  หรือติดต่อเจ้าหน้าที่  ชสอ.";
+				$arrayResult['WAITING_ '] = [':member_no' => $member_no , 
+									  ':notice_docno' => $rowBalMaster["NOTICE_DOCNO"]
+									];
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}

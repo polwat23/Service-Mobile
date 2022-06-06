@@ -9,15 +9,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$rowEndDate = $fetchEndDate->fetch(PDO::FETCH_ASSOC);
 		
 		
-		$getBalanceLoan = $conoracle->prepare("SELECT  CM.MEMBER_NO , MP.PRENAME_DESC,   MB.MEMB_NAME,   MP.SUFFNAME_DESC,CM.DOC_DATE ,
-											CM.FILE_NAME ,CM.SERVER_PATH , CM.DOC_ID , CM.NOTICE_DOCNO as NOTICE_DOCNO, CM.IS_VIEW 
+		$getBalanceLoan = $conoracle->prepare("SELECT  DISTINCT  CM.MEMBER_NO , MP.PRENAME_DESC,   MB.MEMB_NAME,   MP.SUFFNAME_DESC,CM.DOC_DATE ,CM.ENTRY_DATE,
+											CM.FILE_NAME ,CM.SERVER_PATH  , CM.NOTICE_DOCNO as NOTICE_DOCNO, CM.IS_VIEW 
 											FROM CMNOTATIONREGISFILE CM,MBMEMBMASTER MB,   MBUCFPRENAME MP
 											WHERE CM.MEMBER_NO = MB.MEMBER_NO
-											AND MB.PRENAME_CODE = MP.PRENAME_CODE  ");
+											AND MB.PRENAME_CODE = MP.PRENAME_CODE 
+											AND CM.DOC_DATE = (select max(DOC_DATE) from CMNOTATIONREGISFILE  where member_no =  CM.MEMBER_NO)
+										   ORDER BY  CM.MEMBER_NO,CM.ENTRY_DATE DESC");
 		$getBalanceLoan->execute();
 		while($rowInvoiceLoan = $getBalanceLoan->fetch(PDO::FETCH_ASSOC)){
 			$arrBalDetail = array();
 			$arrBalDetail["NOTICE_DATE"] = $lib->convertdate($rowInvoiceLoan["DOC_DATE"],'d M Y');
+			$arrBalDetail["ENTRY_DATE"] = $lib->convertdate($rowInvoiceLoan["ENTRY_DATE"],'d M Y');
 			$arrBalDetail["NOTICE_DOCNO"] = $rowInvoiceLoan["NOTICE_DOCNO"];
 			$arrBalDetail["MEMBER_NO"] = $rowInvoiceLoan["MEMBER_NO"];
 			$arrBalDetail["IS_VIEW"] = $rowInvoiceLoan["IS_VIEW"];
