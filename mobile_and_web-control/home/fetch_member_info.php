@@ -26,9 +26,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_NO"] = $payload["member_no"];
 			$arrayResult["REF_MEMNO"] = $payload["ref_memno"];
 			if(isset($rowInfoMobile["path_avatar"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
-				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				if ($forceNewSecurity == true) {
+					$arrayResult['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($rowInfoMobile["path_avatar"], $jwt_token, $config["SECRET_KEY_JWT"]);
+					
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $explodePathAvatar[0].'.webp');
+					$arrayResult["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($explodePathAvatar[0].'.webp', $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				}
 			}else{
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
