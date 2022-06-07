@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 	if($checkBillAvailable->rowCount() > 0){
 		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
 		if($rowCheckBill["member_no"] == $dataComing["member_no"]){
-			if($dataComing["tran_id"] == '202202231057045420'){
+			if($dataComing["tran_id"] == '202203211948451840'){
 				$arrayResult['RESULT'] = TRUE;
 				ob_flush();
 				echo json_encode($arrayResult);
@@ -22,6 +22,8 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 			if($rowCheckBill["qrtransfer_amt"] == $dataComing["amt_transfer"]){
 				if($rowCheckBill["transfer_status"] == '0'){
 					if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
+						
+						
 						$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
 															WHERE qrgenerate = :tran_id");
 						$getDetailTran->execute([':tran_id' => $dataComing["tran_id"]]);
