@@ -29,17 +29,6 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$payload["member_no"] = $rowCheckBill["member_no"];
 				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
 				$payload["app_version"] = $rowCheckBill["app_version"];
-				$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-				$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
-				$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
-				$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
-													LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
-													WHERE gba.member_no = :member_no 
-													and gba.bindaccount_status = '1' and gba.bank_code = '999'");
-				$getPayAccFee->execute([':member_no' => $payload["member_no"]]);
-				$rowPayFee = $getPayAccFee->fetch(PDO::FETCH_ASSOC);
-				$dataAccFee = $cal_dep->getConstantAcc($rowPayFee["account_payfee"]);
 				$amt_transferLon = $dataComing["amt_transfer"];
 				$vccAccID = $func->getConstant('map_account_id_ktb');
 				$getDetailTranDP = $conmysql->prepare("SELECT ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
@@ -48,21 +37,21 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$arrDpSlip = array();
 				while($rowDetailDP = $getDetailTranDP->fetch(PDO::FETCH_ASSOC)){
 					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
-					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+					$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
 					$arrDpSlip[$rowDetailDP["ref_account"]] = $arrSlipDPnoDest["SLIP_NO"];
 					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				}
-				$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 				$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 				$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$conoracle->beginTransaction();
 				$conmysql->beginTransaction();
@@ -79,7 +68,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
 						$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
 						$getlastseq_noDest = $cal_dep->getLastSeqNo($deptaccount_no);
-						$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$vccAccID,'DTX',
+						$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$vccAccID,'DTE',
 						$rowDetail["qrtransferdt_amt"],0,$dateOper,$config,$log,$dataComing["bank_ref"],$payload,
 						$arrDpSlip[$rowDetail["ref_account"]],$lib,$getlastseq_noDest["MAX_SEQ_NO"],"TransactionDeposit",null,'006');
 						if($depositMoney["RESULT"]){
@@ -173,107 +162,71 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					}
 				}
 				
-				if($have_dep){
-					$depositMoney = $depositMoney;
-					if(isset($maxno_deptfee) && $maxno_deptfee != ""){
-						
-					}else{
-						$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
-						$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
-					}
-				}else{
-					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
-					$depositMoney["DEPTSLIP_NO"] = $arrSlipDPnoDest["SLIP_NO"];
-					$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
-					$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
-				}
-				$vccamtPenalty = $cal_dep->getVcMapID('00');
-				$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowPayFee["account_payfee"],$vccamtPenalty["ACCOUNT_ID"],'FEE',
-				$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$maxno_deptfee,$dataAccFee);
-				if($penaltyWtd["RESULT"]){
-					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-																coop_slip_no,id_userlogin,ref_no_source)
-																VALUES(:ref_no,:slip_type,:from_account,:destination,'5',:amount,:penalty_amt,
-																:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:source_no)");
-					$insertTransactionLog->execute([
-						':ref_no' => $ref_no,
-						':slip_type' => 'DTX',
-						':from_account' => $dataComing["bank_ref"],
-						':destination' => $dataComing["tran_id"],
-						':amount' => $dataComing["amt_transfer"],
-						':penalty_amt' => 0,
-						':amount_receive' => $dataComing["amt_transfer"],
-						':operate_date' => $dateOper,
-						':member_no' => $payload["member_no"],
-						':slip_no' => $payinslip_no,
-						':source_no' => $dataComing["source_ref"],
-						':id_userlogin' => $payload["id_userlogin"]
-					]);
-					$conoracle->commit();
-					$conmysql->commit();
-					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
-					$templateMessage = $func->getTemplateSystem("Billpayment",1);
-					$dataMerge = array();
-					$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
-					$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
-					$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-					foreach($arrToken["LIST_SEND"] as $dest){
-						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-							$arrMessage["BODY"] = $message_endpoint["BODY"];
-							$arrMessage["PATH_IMAGE"] = null;
-							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-							$arrPayloadNotify["SEND_BY"] = 'system';
-							$arrPayloadNotify["TYPE_NOTIFY"] = '2';
-							if($func->insertHistory($arrPayloadNotify,'2')){
-								$lib->sendNotify($arrPayloadNotify,"person");
-							}
+				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+															,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+															coop_slip_no,id_userlogin,ref_no_source)
+															VALUES(:ref_no,:slip_type,:from_account,:destination,'5',:amount,:penalty_amt,
+															:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:source_no)");
+				$insertTransactionLog->execute([
+					':ref_no' => $ref_no,
+					':slip_type' => 'DTX',
+					':from_account' => $dataComing["bank_ref"],
+					':destination' => $dataComing["tran_id"],
+					':amount' => $dataComing["amt_transfer"],
+					':penalty_amt' => 0,
+					':amount_receive' => $dataComing["amt_transfer"],
+					':operate_date' => $dateOper,
+					':member_no' => $payload["member_no"],
+					':slip_no' => $payinslip_no,
+					':source_no' => $dataComing["source_ref"],
+					':id_userlogin' => $payload["id_userlogin"]
+				]);
+				$conoracle->commit();
+				$conmysql->commit();
+				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
+				$templateMessage = $func->getTemplateSystem("Billpayment",1);
+				$dataMerge = array();
+				$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+				$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+				foreach($arrToken["LIST_SEND"] as $dest){
+					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+						$arrMessage["BODY"] = $message_endpoint["BODY"];
+						$arrMessage["PATH_IMAGE"] = null;
+						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = 'system';
+						$arrPayloadNotify["TYPE_NOTIFY"] = '2';
+						if($func->insertHistory($arrPayloadNotify,'2')){
+							$lib->sendNotify($arrPayloadNotify,"person");
 						}
 					}
-					foreach($arrToken["LIST_SEND_HW"] as $dest){
-						if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
-							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
-							$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
-							$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-							$arrMessage["BODY"] = $message_endpoint["BODY"];
-							$arrMessage["PATH_IMAGE"] = null;
-							$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-							$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
-							$arrPayloadNotify["SEND_BY"] = 'system';
-							$arrPayloadNotify["TYPE_NOTIFY"] = '2';
-							if($func->insertHistory($arrPayloadNotify,'2')){
-								$lib->sendNotifyHW($arrPayloadNotify,"person");
-							}
+				}
+				foreach($arrToken["LIST_SEND_HW"] as $dest){
+					if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+						$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+						$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+						$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+						$arrMessage["BODY"] = $message_endpoint["BODY"];
+						$arrMessage["PATH_IMAGE"] = null;
+						$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+						$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+						$arrPayloadNotify["SEND_BY"] = 'system';
+						$arrPayloadNotify["TYPE_NOTIFY"] = '2';
+						if($func->insertHistory($arrPayloadNotify,'2')){
+							$lib->sendNotifyHW($arrPayloadNotify,"person");
 						}
 					}
-					$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
-					$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
-					$arrayResult['RESULT'] = TRUE;
-					ob_flush();
-					echo json_encode($arrayResult);
-					exit();
-				}else{
-					$conoracle->rollback();
-					$conmysql->rollback();
-					$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayStruc = [
-						':member_no' => $payload["member_no"],
-						':id_userlogin' => $payload["id_userlogin"],
-						':operate_date' => $dateOper,
-						':sigma_key' => $dataComing["sigma_key"],
-						':amt_transfer' => $amt_transfer,
-						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
-					];
-					$log->writeLog('deposittrans',$arrayStruc);
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
 				}
+				$updateQRCodeMaster = $conmysql->prepare("UPDATE gcqrcodegenmaster SET transfer_status = '1' WHERE qrgenerate = :tran_id");
+				$updateQRCodeMaster->execute([':tran_id' => $dataComing["tran_id"]]);
+				$arrayResult['RESULT'] = TRUE;
+				ob_flush();
+				echo json_encode($arrayResult);
+				exit();
 				
 			}else{
 				$arrayResult['RESPONSE_CODE'] = "WS0109";
