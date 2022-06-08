@@ -103,22 +103,26 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new DOMPDF();
+	$dompdf = new Dompdf([
+		'fontDir' => realpath('../../resource/fonts'),
+		'chroot' => realpath('/'),
+		'isRemoteEnabled' => true
+	]);
+
 	//style table
 	  $html = '<style>
-
-		  @font-face {
-			  font-family: THSarabun;
-				 src: url(../../resource/fonts/THSarabun.ttf);
+			@font-face {
+			  font-family: TH Niramit AS;
+			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
 			@font-face {
-				font-family: "THSarabun";
-				src: url(../../resource/fonts/THSarabun Bold.ttf);
+				font-family: TH Niramit AS;
+				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
 				font-weight: bold;
 			}
-		  * {
-			font-family: THSarabun;
-		  }
+			* {
+			  font-family: TH Niramit AS;
+			}
 		  body {
 			margin-top: 3.6cm;
 			margin-bottom:0.5cm;
@@ -242,25 +246,25 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	foreach($arrayData["STATEMENT"] as $stm){
 		$count_sumall++;
 		$sum_all += $stm["TRAN_AMOUNT"];
-	  $html .= '
-		<tr>
-		  <td style="text-align:center;width:70px;">'.$stm["OPERATE_DATE"].'</td>
-		  <td style="text-align:left">'.$stm["TYPE_TRAN"].'</td>';
-			if($stm["SIGN_FLAG"] == '1'){
-				$count_deposit++;
-				$sum_deposit += $stm["TRAN_AMOUNT"];
-				$html .= '<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>
-				 <td style="text-align:right"></td>';
-			}else{
-				$count_withdraw++;
-				$sum_withdraw += $stm["TRAN_AMOUNT"];
-				$html .= ' <td style="text-align:right"></td>
-				<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>';
-			}
-		  $html .= '<td style="text-align:right">'.number_format($stm["PRNCBAL"],2).'</td>
-		  <td style="text-align:center">'.($stm["DEPTSLIP_NO"] ?? "-").'</td>
-		</tr>
-	';
+		$html .= '
+			<tr>
+			  <td style="text-align:center;width:70px;">'.$stm["OPERATE_DATE"].'</td>
+			  <td style="text-align:left">'.$stm["TYPE_TRAN"].'</td>';
+				if($stm["SIGN_FLAG"] == '1'){
+					$count_deposit++;
+					$sum_deposit += $stm["TRAN_AMOUNT"];
+					$html .= '<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>
+					 <td style="text-align:right"></td>';
+				}else{
+					$count_withdraw++;
+					$sum_withdraw += $stm["TRAN_AMOUNT"];
+					$html .= ' <td style="text-align:right"></td>
+					<td style="text-align:right">'.number_format($stm["TRAN_AMOUNT"],2).'</td>';
+				}
+			  $html .= '<td style="text-align:right">'.number_format($stm["PRNCBAL"],2).'</td>
+			  <td style="text-align:center">'.($stm["DEPTSLIP_NO"] ?? "-").'</td>
+			</tr>
+		';
 	}
 	//list sum
 	$html .='
@@ -299,7 +303,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	//$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
+	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;

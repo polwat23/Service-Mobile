@@ -1,0 +1,156 @@
+<?php
+require_once('../../../autoload.php');
+
+if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
+	
+	$urlImg = array();
+	$pathImg = array();
+	if(isset($dataComing["img_head"]) && $dataComing["img_head"] != null){
+		$destination = __DIR__.'/../../../../resource/gallery_web_coop/news';
+		$file_name = $lib->randomText('all',6);
+		if(!file_exists($destination)){
+			mkdir($destination, 0777, true);
+		}
+		$createImage = $lib->base64_to_img($dataComing["img_head"],$file_name,$destination,null);
+		if($createImage == 'oversize'){
+			$arrayResult['RESPONSE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}else{
+			if($createImage){
+				$pathImgHeadNews = "resource/gallery_web_coop/news/".$createImage["normal_path"];
+				$urlImgHeadNews = $config["URL_SERVICE"]."resource/gallery_web_coop/news/".$createImage["normal_path"];
+			}else{
+				$arrayResult['RESPONSE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+		}
+	}
+	
+	if(isset($dataComing["html_root_"])){
+	$detail_html = '<!DOCTYPE HTML>
+							<html>
+							<head>
+						  <meta charset="UTF-8">
+						  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+						  '.$dataComing["html_root_"].'
+						  </body>
+							</html>';
+	}
+	  $insert_gallery = $conmysql->prepare("INSERT INTO webcoopgallary(
+										gallery_name,
+										img_gallery_path,
+										img_gallery_url,
+										create_by)
+									VALUES(
+										:gallery_name,
+										:img_gallery_path,
+										:img_gallery_url,
+										:create_by
+									)");
+		if($insert_gallery->execute([
+			':gallery_name' =>  $dataComing["gallery_name"],
+			':img_gallery_path' => $pathImgHeadNews ?? null,
+			':img_gallery_url' => $urlImgHeadNews ?? null,
+			':create_by' =>  $payload["username"]
+		])){
+			$groupTag = $dataComing["tag"];
+			$tag = implode(",",$groupTag);
+		
+			$fetchIdGallery = $conmysql->prepare("SELECT
+														id_gallery
+													FROM
+														webcoopgallary
+													WHERE gallery_name = :gallery_name
+													");
+			$fetchIdGallery->execute([':gallery_name' => $dataComing["gallery_name"]]);
+			$id_Gallery = $fetchIdGallery->fetch(PDO::FETCH_ASSOC);	
+			$insert_news_web_coop = $conmysql->prepare("INSERT INTO messagefrompresident(
+															title, 
+															detail_html, 
+															id_gallery, 
+															create_by)
+														VALUES
+															(
+															:title, 
+															:detail_html, 
+															:id_gallery, 
+															:create_by)
+													");
+			if($insert_news_web_coop->execute([
+				':title' =>  $dataComing["title"],
+				':detail_html' =>  $detail_html?? null,
+				':id_gallery' =>  $id_Gallery["id_gallery"],
+				':create_by' =>  $payload["username"]
+
+			])){
+				if(isset($dataComing["file"]) && $dataComing["file"] != null){
+					
+					$groupFile=[];
+					$file_news = $dataComing["file"];
+					foreach($file_news as $file64){
+						$destination = __DIR__.'/../../../../resource/gallery_web_coop/news/';
+						$file_name = $file64["name"];
+						if(!file_exists($destination)){
+							mkdir($destination, 0777, true);
+						}
+						$createImage = $lib->base64_to_pdf($file64["file"],$file_name,$destination,null);
+						if($createImage){
+							$path_file["url"] = $config["URL_SERVICE"]."resource/gallery_web_coop/news/".$createImage["normal_path"];
+							$path_file["path"] = "resource/gallery_web_coop/news/".$createImage["normal_path"];
+							$path_file["name"] = $file_name;
+							$groupFile[]=$path_file;
+						}else{
+							$arrayResult['RESPONSE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
+							$arrayResult['RESULT'] = FALSE;
+							echo json_encode($arrayResult);
+							exit();
+						}
+					}
+						foreach($groupFile as $path_file){
+						$InsertPatchFile[] = "('".$id_Gallery["id_gallery"]."','".$path_file["path"]."','".$path_file["url"]."','".$path_file["name"]."')";
+					}
+					$insert_gallery = $conmysql->prepare("INSERT INTO webcoopfiles(id_gallery,file_patch,file_url,file_name)
+											VALUES".implode(',',$InsertPatchFile));
+					if($insert_gallery->execute()){
+						$arrayResult["RESULT"] = TRUE;
+						echo json_encode($arrayResult);
+					}else{
+						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข้อมูลได้ กรุณาติดต่อผู้พัฒนา ";
+						$arrayResult['RESULT'] = FALSE;
+						echo json_encode($arrayResult);
+						exit();
+					}	
+				
+						
+				}else{
+					$arrayResult["RESULT"] = TRUE;
+					echo json_encode($arrayResult);
+				}
+				
+			}else{
+				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
+				$arrayResult['RESULT'] = FALSE;
+				echo json_encode($arrayResult);
+				exit();
+			}
+								
+		}else{
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
+			$arrayResult["datacoming"] = $dataComing;
+			$arrayResult["payload"] =  $payload["username"];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
+	
+}else{
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	echo json_encode($arrayResult);
+	exit();
+}
+?>

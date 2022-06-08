@@ -205,42 +205,71 @@ class library {
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$config = json_decode($json,true);
 		$arrayGrpSms = array();
-		try{
-			$clientWS = new \SoapClient($config["URL_CORE_SMS"]."SMScore.svc?wsdl");
-			try {
-				if($bulk){
-					foreach($arrayDestination as $dest){
-						$argumentWS = [
-							"Member_No" => $dest["member_no"],
-							"MobilePhone" => $dest["tel"],
-							"Message" => $dest["message"]
-						];
-						$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-						$responseSoap = $resultWS->RqSendOTPResult;
-						$arraySms["MEMBER_NO"] = $dest["member_no"];
-						$arraySms["RESULT"] = $responseSoap;
-						$arrayGrpSms[] = $arraySms;
-					}
-					return $arrayGrpSms;
-				}else{
-					$argumentWS = [
-						"Member_No" => $arrayDestination["member_no"],
-						"MobilePhone" => $arrayDestination["tel"],
-						"Message" => $arrayDestination["message"]
-					];
-					$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-					$responseSoap = $resultWS->RqSendOTPResult;
-					$arrayGrpSms["MEMBER_NO"] = $dest["member_no"];
-					$arrayGrpSms["RESULT"] = $responseSoap;
-					return $arrayGrpSms;
-				}
-			}catch(SoapFault $e){
-				$arrayGrpSms["RESULT"] = FALSE;
+		if($bulk){
+			foreach($arrayDestination as $dest){
+				$trans_id = time().$this->randomText('all',7);
+				$xml = "<transaction>
+							<id>".$trans_id."</id>
+							<msisdn></msisdn>
+							<msnlist>".$dest["tel"]."</msnlist>
+							<msgtype>T</msgtype>
+							<msdata>".iconv("UTF-8","TIS-620",$dest["message"])."</msdata>
+							<sender>Sahakorn</sender>
+						</transaction>
+				";
+			}
+		}else{
+			$trans_id = time().$this->randomText('all',7);
+			$xml = "<transaction>
+						<id>".$trans_id."</id>
+						<msisdn>".$arrayDestination["tel"]."</msisdn>
+						<msgtype>T</msgtype>
+						<msdata>".iconv("UTF-8","TIS-620",$arrayDestination["message"])."</msdata>
+						<sender>Sahakorn</sender>
+					</transaction>
+			";
+			$header[] = "Authorization: ".base64_encode($config["UN_SMS"].':'.$config["PW_SMS"]);
+			$resultXML = $this->postingSoap_data($config["URL_CORE_SMS"],$xml,null,null,$header);
+			$beautyXML = simplexml_load_string($resultXML);
+			if($beautyXML->status == '0'){
+				$arrayGrpSms["TEL"] = $arrayDestination["tel"];
+				$arrayGrpSms["MEMBER_NO"] = $arrayDestination["member_no"];
+				$arrayGrpSms["MESSAGE"] = $beautyXML->desc;
+				$arrayGrpSms["RESULT"] = TRUE;
+				return $arrayGrpSms;
+			}else{
+				$arrayGrpSms["TEL"] = $arrayDestination["tel"];
+				$arrayGrpSms["MEMBER_NO"] = $arrayDestination["member_no"];
+				$arrayGrpSms["MESSAGE"] = $beautyXML->desc;
+				$arrayGrpSms["RESULT"] = TRUE;
 				return $arrayGrpSms;
 			}
-		}catch(Throwable $e){
-			$arrayGrpSms["RESULT"] = FALSE;
-			return $arrayGrpSms;
+			
+		}
+	}
+	public function postingSoap_data($url,$payload,$cert=null,$key=null,$header) {
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_PORT, parse_url($url, PHP_URL_PORT) );
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, $payload );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array_merge(array('Content-Type: text/xml'),$header));
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, "POST" );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 180);
+		if(isset($cert) && isset($key)){
+			curl_setopt($ch, CURLOPT_SSLCERT, $cert);
+			curl_setopt($ch, CURLOPT_SSLKEY, $key);
+		}
+		$result = curl_exec($ch);
+		if($result){
+			curl_close($ch);
+			return $result;
+		}else{
+			$text = '#PostData Error : '.date("Y-m-d H:i:s").' > '.$url.' | '.curl_error($ch);
+			file_put_contents(__DIR__.'/../log/log_api_error.txt', $text . PHP_EOL, FILE_APPEND);
+			curl_close ($ch);
 			return false;
 		}
 	}
@@ -792,6 +821,19 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
 	}
 }
 ?>

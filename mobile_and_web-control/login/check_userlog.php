@@ -46,8 +46,26 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 			
 		}
+		
+		$checkAccountStatus = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+		$checkAccountStatus->execute([':member_no' => $payload["member_no"]]);
+		$rowCheckAccountStatus = $checkAccountStatus->fetch(PDO::FETCH_ASSOC);
+		if ($rowCheckAccountStatus["account_status"] == '-9'){
+			$arrayResult['TEMP_PASSWORD'] = TRUE;
+		}else{
+			$arrayResult['TEMP_PASSWORD'] = FALSE;
+		}
+
 		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
 		$arrayResult['RESULT'] = TRUE;
+		
+		if ($forceNewSecurity == true) {
+			$newArrayResult = array();
+			$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+			$arrayResult = array();
+			$arrayResult = $newArrayResult;
+		}
+
 		require_once('../../include/exit_footer.php');
 		
 	}
@@ -79,6 +97,14 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			];
 			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
+			
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
+
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0011";
@@ -96,36 +122,46 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			
 		}
 		$pin_split = str_split($dataComing["pin"]);
+		$duplicateDigit = $func->getConstant('check_duplicate_pin');
+		$sequestDigit = $func->getConstant('pin_sequest_digit');
 		$countSeqNumber = 1;
 		$countReverseSeqNumber = 1;
 		foreach($pin_split as $key => $value){
-			if(($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key + 1]) || 
-			($value == $dataComing["pin"][$key - 1] && $value == $dataComing["pin"][$key - 2])){
+			if($duplicateDigit == "0"){
+				if(($value == $dataComing["pin"][($key - 1) < 0 ? 7 : $key - 1] && $value == $dataComing["pin"][$key + 1]) || 
+				($value == $dataComing["pin"][($key - 1) < 0 ? 7 : $key - 1] && $value == $dataComing["pin"][($key - 2) < 0 ? 7 : $key - 2])){
+					$arrayResult['RESPONSE_CODE'] = "WS0057";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+					
+				}
+			}
+			if($key < strlen($dataComing["pin"]) - 1){
+				if($value == ($dataComing["pin"][$key + 1] - 1)){
+					$countSeqNumber++;
+				}else{
+					if($countSeqNumber < 3){
+						$countSeqNumber = 1;
+					}
+				}
+				if($value - 1 == $dataComing["pin"][$key + 1]){
+					$countReverseSeqNumber++;
+				}else{
+					if($countReverseSeqNumber < 3){
+						$countReverseSeqNumber = 1;
+					}
+				}
+			}
+		}
+		if($sequestDigit == "0"){
+			if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
 				$arrayResult['RESPONSE_CODE'] = "WS0057";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
 			}
-			if($key < strlen($dataComing["pin"]) - 1){
-				if($value == ($dataComing["pin"][$key + 1] - 1)){
-					$countSeqNumber++;
-				}else{
-					$countSeqNumber = 1;
-				}
-				if($value - 1 == $dataComing["pin"][$key + 1]){
-					$countReverseSeqNumber++;
-				}else{
-					$countReverseSeqNumber = 1;
-				}
-			}
-		}
-		if($countSeqNumber > 3 || $countReverseSeqNumber > 3){
-			$arrayResult['RESPONSE_CODE'] = "WS0057";
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
 		}
 		$pin = password_hash($dataComing["pin"], PASSWORD_DEFAULT);
 		$updatePin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = :pin WHERE member_no = :member_no");
@@ -156,6 +192,14 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			];
 			$log->writeLog('use_application',$arrayStruc);
 			$arrayResult['RESULT'] = TRUE;
+			
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
+
 			require_once('../../include/exit_footer.php');
 		}else{
 			$filename = basename(__FILE__, '.php');

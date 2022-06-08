@@ -369,7 +369,9 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					foreach($arrayMerge as $dest){
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 							$message_body = $dataComing["message_emoji_"];
-							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+							$arrayDest["tel"] = $dest["TEL"];
+							$arrayDest["member_no"] = $dest["MEMBER_NO"];
+							$arrayDest["message"] = $message_body;
 							$arraySendSMS = $lib->sendSMS($arrayDest);
 							if($arraySendSMS["RESULT"]){
 								$arrGRPAll[$dest["MEMBER_NO"]] = $dataComing["message_emoji_"];
