@@ -116,7 +116,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
-		$header["member_no"] = $payload["member_no"];
+		$header["member_no"] = $member_no;
 		$header["receipt_no"] = TRIM($rowKp["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKp["RECEIPT_DATE"],'D/n/Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -335,8 +335,8 @@ function GenerateReport($dataReport,$header,$lib){
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$header["member_no"].$header["receipt_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/keeping_monthly/'.urlencode($header["member_no"]).$header["receipt_no"].'.pdf?v='.time();
+	$pathfile = $pathfile.'/'.$header["receipt_no"].'.pdf';
+	$pathfile_show = '/resource/pdf/keeping_monthly/'.$header["receipt_no"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){
