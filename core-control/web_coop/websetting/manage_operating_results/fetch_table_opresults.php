@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['unique_id','year','view'],$dataComing)){
 					]);
 					
 					while($rowData = $fetchOpResultsData->fetch(PDO::FETCH_ASSOC)){
-						$arrList["DATA_0"] = $rowData["data_0"];
+						//$arrList["DATA_0"] = $rowData["data_0"];
 						$arrList["DATA_1"] = $rowData["data_1"];
 						$arrList["DATA_2"] = $rowData["data_2"];
 						$arrList["DATA_3"] = $rowData["data_3"];

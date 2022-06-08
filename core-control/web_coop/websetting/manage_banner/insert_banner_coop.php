@@ -33,8 +33,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		
 	}
-	
-	$insertBanner = $conmysql->prepare("INSERT INTO webcoopbanner(
+	if($dataComing["type_link"] == "0"){
+		$insertBanner = $conmysql->prepare("INSERT INTO webcoopbanner(
 													news_id,
 													img_path,
 													img_url,
@@ -47,25 +47,75 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													:img_url,
 													:type,
 													:create_by)");	
-	if($insertBanner->execute([
-			':news_id' =>  $dataComing["news_id"],
-			':img_path' =>  $imgPaht,
-			':img_url' =>  $imgUrl,
-			':type' =>  $dataComing["type"],
-			':create_by' =>  $payload["username"]	
-	])){
-		$arrayResult["RESULT"] = TRUE;
-		echo json_encode($arrayResult);
-		
-	
+		if($insertBanner->execute([
+				':news_id' =>  $dataComing["news_id"],
+				':img_path' =>  $imgPaht,
+				':img_url' =>  $imgUrl,
+				':type' =>  $dataComing["type"],
+				':create_by' =>  $payload["username"]	
+		])){
+			$arrayResult["RESULT"] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE'] = "ทำรายการได้ กรุณาติดต่อผู้พัฒนา ";
+			$arrayResult['DATA'] = [
+				':news_id' =>  $dataComing["news_id"],
+				':img_path' =>  $imgPaht,
+				':img_url' =>  $imgUrl,
+				':type' =>  $dataComing["type"],
+				':type_link' =>  $dataComing["type_link"],
+				':create_by' =>  $payload["username"]	
+		];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 	}else{
-		$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
-		$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
-		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
-	}
+		$insertBanner = $conmysql->prepare("INSERT INTO webcoopbanner(
+													news_id,
+													img_path,
+													img_url,
+													type,
+													url,
+													type_link,
+													create_by
+													)
+										  VALUES (
+													:news_id,
+													:img_path,
+													:img_url,
+													:type,
+													:url,
+													:type_link,
+													:create_by)");	
+		if($insertBanner->execute([
+				':news_id' =>  $dataComing["news_id"],
+				':img_path' =>  $imgPaht,
+				':img_url' =>  $imgUrl,
+				':type' =>  $dataComing["type"],
+				':url' =>  $dataComing["url"],
+				':type_link' =>  $dataComing["type_link"],
+				':create_by' =>  $payload["username"]	
+		])){
+			$arrayResult["RESULT"] = TRUE;
+			echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE'] = "ทำรายการได้ กรุณาติดต่อผู้พัฒนา ";
+			$arrayResult['DATA'] = [
+				':news_id' =>  $dataComing["news_id"],
+				':img_path' =>  $imgPaht,
+				':img_url' =>  $imgUrl,
+				':type' =>  $dataComing["type"],
+				':type_link' =>  $dataComing["type_link"],
+				':create_by' =>  $payload["username"]	
+		];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 	
+		
+	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);

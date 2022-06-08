@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','id_opresultsgroup'],$dataComing)){
 	$conmysql->beginTransaction();
 	
-	$update_opresultsgroup = $conmysql->prepare("UPDATE webcoopopresultslist SET is_use = '0', update_by = :update_by
+	$update_opresultsgroup = $conmysql->prepare("UPDATE webcoopopresultsgroup SET is_use = '0', update_by = :update_by
 								WHERE id_opresultsgroup = :id_opresultsgroup");
 	if($update_opresultsgroup->execute([
 		':id_opresultsgroup' => $dataComing["id_opresultsgroup"],

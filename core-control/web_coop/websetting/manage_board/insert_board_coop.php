@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										year,
 										img_path,
 										img_url,
-										department
+										department_id
 										)
 									VALUES(
 										:fullname,
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		if($insert_board->execute([
 			':fullname' =>  $dataComing["fullname"],
 			':position1' =>  $dataComing["position1"],
-			':position2' =>  $dataComing["position2"],
+			':position2' =>  $dataComing["position2"]??NULL,
 			':year' =>  $dataComing["year"],
 			':img_path' => $pathImg ?? null,
 			':img_url' => $urlImg ?? null,

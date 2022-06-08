@@ -29,60 +29,33 @@ if($lib->checkCompleteArgument(['unique_id','name'],$dataComing)){
 			}
 		}
 	}
-	
-	$insert_gallery = $conmysql->prepare("INSERT INTO webcoopgallary(
-										gallery_name,
-										img_gallery_path,
-										img_gallery_url,
-										create_by)
-									VALUES(
-										:gallery_name,
-										:img_gallery_path,
-										:img_gallery_url,
-										:create_by
-									)");
-	if($insert_gallery->execute([
-			':gallery_name' =>  $dataComing["name"],
-			':img_gallery_path' => $pathImg ?? null,
-			':img_gallery_url' => $urlImg ?? null,
-			':create_by' =>  $payload["username"]
-	])){	
-			$fetchIdGallery = $conmysql->prepare("SELECT
-														id_gallery
-													FROM
-														webcoopgallary
-													WHERE gallery_name = :gallery_name
-													");
-			$fetchIdGallery->execute([':gallery_name' => $dataComing["name"]]);
-			$id_Gallery = $fetchIdGallery->fetch(PDO::FETCH_ASSOC);	
-			$dfdfdf="text_color = :text_color,
-												background_color = :background_color,";
-			$insert_partner_webcoop = $conmysql->prepare("INSERT INTO webcooppartner(name,link,id_gallery,text_color, background_color,create_by)
-									VALUES(:name, :link, :id_gallery, :text_color, :background_color, :create_by)");
-			if($insert_partner_webcoop->execute([
-				':name' =>  $dataComing["name"],
-				':link' =>  $dataComing["link"],
-				':id_gallery' =>  $id_Gallery["id_gallery"],
-				':background_color' =>  $dataComing["bg_color"],
-				':text_color' =>  $dataComing["text_color"],
-				':create_by' =>  $payload["username"]
-			])){
-				
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
-			}else{
-				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา  ";
-				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
-			}
-								
-		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
-			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
-		} 
+
+	$insert_partner_webcoop = $conmysql->prepare("INSERT INTO webcooppartner
+												(name,link,text_color, background_color,img_url,img_patch,create_by,update_by)
+							                    VALUES
+												(:name, :link, :text_color, :background_color,:img_url,:img_patch, :create_by, :update_by)");
+	if($insert_partner_webcoop->execute([
+		':name' =>  $dataComing["name"],
+		':link' =>  $dataComing["link"],
+		':background_color' =>  $dataComing["bg_color"],
+		':text_color' =>  $dataComing["text_color"],
+		':create_by' =>  $payload["username"],
+		':update_by' =>  $payload["username"],
+		':img_patch' =>  $pathImg,
+		':img_url' =>  $urlImg
+		
+	])){
+		
+		$arrayResult['RESULT'] = TRUE;
+		echo json_encode($arrayResult);
+	}else{
+		$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา  ";
+		$arrayResult['RESULT'] = FALSE;
+		echo json_encode($arrayResult);
+		exit();
+	}
+						
+
 		
 
 }else{

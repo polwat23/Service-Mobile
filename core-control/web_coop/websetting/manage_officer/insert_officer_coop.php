@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$createImage = $lib->base64_to_img($dataComing["img"],$file_name,$destination,null);
 		if($createImage == 'oversize'){
-			$arrayResult['RESPONSE_MESSAGE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
+			$arrayResult['RESPONSE'] = "รูปภาพที่ต้องการส่งมีขนาดใหญ่เกินไป";
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$pathImg = "resource/gallery_web_coop/officer/".$createImage["normal_path"];
 				$urlImg = $config["URL_SERVICE"]."resource/gallery_web_coop/officer/".$createImage["normal_path"];
 			}else{
-				$arrayResult['RESPONSE_MESSAGE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
+				$arrayResult['RESPONSE'] = "นามสกุลไฟล์ไม่ถูกต้อง";
 				$arrayResult['RESULT'] = FALSE;
 				echo json_encode($arrayResult);
 				exit();
@@ -38,30 +38,44 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										year,
 										img_path,
 										img_url,
+										department_id,
 										emp_type,
-										department
+										branch_id
 										)
 									VALUES(
-										:f_name,
+										:fullname,
 										:position1,
 										:position2,
 										:year,
 										:img_path,
 										:img_url,
+										:department,
 										:emp_type,
-										:department
+										:branch_id
 									)");
 		if($insert_board->execute([
-			':f_name' =>  $dataComing["f_name"],
+			':fullname' =>  $dataComing["fullname"],
 			':position1' =>  $dataComing["position1"],
-			':position2' =>  $dataComing["position2"],
+			':position2' =>  $dataComing["position2"]??NULL,
 			':year' =>  $dataComing["year"],
-			':emp_type' => '1',
-			':department' =>  $dataComing["department"]??null,
 			':img_path' => $pathImg ?? null,
-			':img_url' => $urlImg ?? null
+			':img_url' => $urlImg ?? null,
+			':department' =>  $dataComing["department"]??null,
+			':emp_type' =>  '1',
+			':branch_id' =>  $dataComing["branch"],
 		])){	
 			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['DATA-insert'] = [
+			':fullname' =>  $dataComing["fullname"],
+			':position1' =>  $dataComing["position1"],
+			':position2' =>  $dataComing["position2"]??NULL,
+			':year' =>  $dataComing["year"],
+			':img_path' => $pathImg ?? null,
+			':img_url' => $urlImg ?? null,
+			':department' =>  $dataComing["department"]??null,
+			':emp_type' =>  '1',
+			':branch_id' =>  $dataComing["branch"],
+		];
 			echo json_encode($arrayResult);
 								
 		}else{
@@ -87,7 +101,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										:img_url,
 										:type,
 										:emp_type
-										
 									)");
 		if($insert_board->execute([
 			':year' =>  $dataComing["year"],
@@ -103,14 +116,24 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}else{
 			$del_file="../../../../".$pathImg;
 			$del=unlink($del_file);
-			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข้อมูลได้ กรุณาติดต่อผู้พัฒนา ";
+						$arrayResult['data'] = [
+			':year' =>  $dataComing["year"],
+			':img_path' => $pathImg ?? null,
+			':img_url' => $urlImg ?? null,
+			':type' => $dataComing["type"] ?? null,
+			':emp_type' => '1'
+			
+		];
+
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข้อมูลได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['pathImg'] = $pathImg;
+			$arrayResult['pathImg'] = $pathImg;
+			$arrayResult['urlImg'] = $urlImg;
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();
 		} 
 	}											
-		
-
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);

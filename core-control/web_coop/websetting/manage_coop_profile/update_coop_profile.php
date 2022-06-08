@@ -25,6 +25,7 @@ if($lib->checkCompleteArgument(['unique_id',
 	$groupmission = $dataComing["mission"];
 	$mission = implode(",",$groupmission);
 	$objective = implode(",",$dataComing["objective"]);
+	$policy = implode(",",$dataComing["policy"]);
 	$tel = implode(",", $dataComing["tel"]);
 	
 	if($dataComing["edit"]=="location"){
@@ -63,13 +64,16 @@ if($lib->checkCompleteArgument(['unique_id',
 														line_url = :line_url,
 														email = :email,
 														vision = :vision,
+														policy = :policy,
 														mission = :mission,
 														objective = :objective,
 														history = :history,
 														playstore = :playstore,
 														appstore = :appstore,
 														huawei = :huawei,
-														web_url = :web_url
+														web_url = :web_url,
+														youtube_name = :youtube_name,
+														youtube_url = :youtube_url
 													WHERE
 														id_webcoopprofile = :id_webcoopprofile
 													");
@@ -83,6 +87,7 @@ if($lib->checkCompleteArgument(['unique_id',
 				':line_url' =>  $dataComing["line_url"],
 				':email' =>  $dataComing["email"],
 				':vision' =>  $dataComing["vision"],
+				':policy' =>  $policy,
 				':mission' => $mission,
 				':objective' => $objective,
 				':history' => $history,
@@ -90,7 +95,9 @@ if($lib->checkCompleteArgument(['unique_id',
 				':playstore' =>  $dataComing["playstore"],
 				':appstore' =>  $dataComing["appstore"],
 				':huawei' =>  $dataComing["huawei"],
-				':web_url' =>  $dataComing["web_url"],
+				':youtube_url' =>  $dataComing["youtube_url"],
+				':youtube_name' =>  $dataComing["youtube_name"],
+				':web_url' =>  $dataComing["web_url"]
 				
 		])){
 				$arrayResult['RESULT'] = True;

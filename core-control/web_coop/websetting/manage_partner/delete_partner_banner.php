@@ -1,19 +1,19 @@
 <?php
 require_once('../../../autoload.php');
 
-if($lib->checkCompleteArgument(['unique_id','id_gallery'],$dataComing)){
+if($lib->checkCompleteArgument(['unique_id','webcooppartner_id'],$dataComing)){
 	
-	$del_partner = $conmysql->prepare("DELETE FROM webcoopgallary WHERE id_gallery = :id_gallery");						
+	$del_partner = $conmysql->prepare("UPDATE webcooppartner SET is_use ='-9' WHERE webcooppartner_id = :webcooppartner_id");						
 	if($del_partner->execute([
-			':id_gallery' =>  $dataComing["id_gallery"]
+			':webcooppartner_id' =>  $dataComing["webcooppartner_id"]
 		])){
-		$imgPath = $dataComing["imgPath"];
-		$del_file="../../../../".$imgPath;
-		unlink($del_file);
+		//$imgPath = $dataComing["imgPath"];
+		//$del_file="../../../../".$imgPath;
+		//unlink($del_file);
 		$arrayResult["RESULT"] = TRUE;
 		echo json_encode($arrayResult);
 	}else{
-		$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
+		$arrayResult['RESPONSE'] = "ไม่สามารถทำรายการได้ กรุณาติดต่อผู้พัฒนา ";
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();

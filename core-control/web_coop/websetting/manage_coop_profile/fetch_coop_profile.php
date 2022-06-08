@@ -26,7 +26,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												appstore,
 												huawei,
 												web_url,
-												policy
+												policy,
+												youtube_name,
+												youtube_url
 											 FROM
 											 webcoopprofile
 											 
@@ -52,6 +54,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrCoopProfile["HISTORY"] = $rowCoopProfile["history"];
 		$arrCoopProfile["WEB_URL"] = $rowCoopProfile["web_url"];
 		$arrCoopProfile["UPDATE_DATE"] = $rowCoopProfile["update_date"];
+		$arrCoopProfile["YOUTUBE_NAME"] = $rowCoopProfile["youtube_name"];
+		$arrCoopProfile["YOUTUBE_URL"] = $rowCoopProfile["youtube_url"];
 		
 	
 		

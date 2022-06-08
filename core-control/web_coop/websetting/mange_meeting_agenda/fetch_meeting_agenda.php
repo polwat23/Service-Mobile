@@ -9,11 +9,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												id_meettingagenda,	
 												title,	
 												detail,
+												file_name,
 												file_url,
 												file_patch,
 												date,
 												create_by
 											FROM webcoopmeetingagenda
+											WHERE is_use <> '-9'
 											ORDER BY date DESC");
 	$fetchMeetingAgenda->execute();
 	while($rowFileForm = $fetchMeetingAgenda->fetch(PDO::FETCH_ASSOC)){
@@ -21,11 +23,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrFile = [];
 		$file = array();
 		if(isset($rowFileForm["file_url"]) && $rowFileForm["file_url"] != null){
+			$arrFile["name"] = $rowFileForm["file_name"];
 			$arrFile["FILE_URL"] = $rowFileForm["file_url"];
 			$arrFile["FILE_PATH"] = $rowFileForm["file_patch"];
 			$arrFile["url"] = $rowFileForm["file_url"];
-			$arrFile["name"] = $name[3];
-			
+			$arrFile["status"] = "old";
 			$file[]=$arrFile;
 		}
 		$name = explode('/',$rowFileForm["file_patch"]);

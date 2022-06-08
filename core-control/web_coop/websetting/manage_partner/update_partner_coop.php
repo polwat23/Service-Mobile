@@ -29,70 +29,53 @@ if($lib->checkCompleteArgument(['unique_id','id_partner','text_color'],$dataComi
 			}
 		}
 		
-		$fetchImgPath = $conmysql->prepare("SELECT  img_gallery_path
-													FROM webcoopgallary
-													WHERE 
-													id_gallery = :id_gallery");
-		$fetchImgPath->execute([':id_gallery' =>  $dataComing["id_gallery"]]);
-		$ImgData = $fetchImgPath->fetch(PDO::FETCH_ASSOC);
-		$imgPath = $ImgData["img_gallery_path"];
-		$del_file="../../../../".$imgPath;
-
-		$updategallery = $conmysql->prepare("UPDATE webcoopgallary SET 
-													gallery_name = :gallery_name, 
-													img_gallery_url = :img_gallery_url, 
-													img_gallery_path = :img_gallery_path,
-													create_by = :create_by
-												WHERE id_gallery = :id_gallery
-											");
+		unlink($del_file);
+		$updategallery = $conmysql->prepare("UPDATE 
+										webcooppartner
+									SET 
+										img_url = :img_url,
+										img_patch = :img_patch,
+										name = :name,
+										link = :link,
+										text_color = :text_color,
+										background_color = :background_color,
+										create_by = :create_by,
+										update_by = :update_by
+									WHERE
+										webcooppartner_id = :id_partner
+									");
 		if($updategallery->execute([
-		':id_gallery' =>  $dataComing["id_gallery"],
-		':gallery_name' =>  $dataComing["name"],
-		':img_gallery_url' =>  $urlImg,
-		':img_gallery_path' => $pathImg,
-		':create_by' =>  $payload["username"]
-
+		':img_patch' =>  $pathImg,
+		':img_url' =>  $urlImg,
+		':id_partner' =>  $dataComing["id_partner"],
+		':name' =>  $dataComing["name"],
+		':link' =>  $dataComing["link"],
+		':text_color' =>  $dataComing["text_color"],
+		':background_color' =>  $dataComing["bg_color"],
+		':create_by' =>  $payload["username"],
+		':update_by' =>  $payload["username"]
 		])){	
-			unlink($del_file);
-			$updategallery = $conmysql->prepare("UPDATE 
-											webcooppartner
-										SET 
-											name = :name,
-											link = :link,
-											text_color = :text_color,
-											background_color = :background_color,
-											create_by = :create_by
-										WHERE
-											webcooppartner_id = :id_partner
-										");
-			if($updategallery->execute([
-			':id_partner' =>  $dataComing["id_partner"],
-			':name' =>  $dataComing["name"],
-			':link' =>  $dataComing["link"],
-			':text_color' =>  $dataComing["text_color"],
-			':background_color' =>  $dataComing["bg_color"],
-			':create_by' =>  $payload["username"]
-
-			])){	
-				
-				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);	
-				
-			}else{
-				$arrayResult['RESPONSE'] = "ไม่สามารถอัพเดทหน่วยงานได้ กรุณาติดต่อผู้พัฒนา  ";
-				$arrayResult['RESULT'] = FALSE;
-				
-				echo json_encode($arrayResult);
-				exit();
-			}	
+			$arrayResult['RESULT'] = TRUE;
+			echo json_encode($arrayResult);	
 			
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถอัพเดทหน่วยงานได้ กรุณาติดต่อผู้พัฒนา  ";
+			$arrayResult['DATA'] = [
+		':img_patch' =>  $pathImg,
+		':img_url' =>  $urlImg,
+		':id_partner' =>  $dataComing["id_partner"],
+		':name' =>  $dataComing["name"],
+		':link' =>  $dataComing["link"],
+		':text_color' =>  $dataComing["text_color"],
+		':background_color' =>  $dataComing["bg_color"],
+		':create_by' =>  $payload["username"]
+		];
 			$arrayResult['RESULT'] = FALSE;
 			
 			echo json_encode($arrayResult);
 			exit();
-		}				
+		}	
+				
 	}else{
 		$updategallery = $conmysql->prepare("UPDATE 
 												webcooppartner
@@ -101,7 +84,8 @@ if($lib->checkCompleteArgument(['unique_id','id_partner','text_color'],$dataComi
 												link = :link,
 												text_color = :text_color,
 												background_color = :background_color,
-												create_by = :create_by
+												create_by = :create_by,
+												update_by = :update_by
 											WHERE
 												webcooppartner_id = :id_partner
 											");
@@ -112,7 +96,7 @@ if($lib->checkCompleteArgument(['unique_id','id_partner','text_color'],$dataComi
 		':create_by' =>  $payload["username"],
 		':background_color' =>  $dataComing["bg_color"],
 		':text_color' =>  $dataComing["text_color"],
-		':create_by' =>  $payload["username"]
+		':update_by' =>  $payload["username"]
 
 		])){	
 			

@@ -2,25 +2,24 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	
 	$arrayGroup = array();
 	$arrayGroupFile = array();
 	$img_head_web_news = array();
 	$fetchImgPartner = $conmysql->prepare("SELECT
-												p.webcooppartner_id,
-												p.name,
-												p.link,
-												p.id_gallery,
-												p.text_color,
-												p.background_color,
-												g.img_gallery_url,
-												g.img_gallery_path
+												webcooppartner_id,
+												name,
+												link,
+												text_color,
+												background_color,
+												img_url,
+												img_patch
 											FROM
-												webcooppartner p
-											LEFT JOIN webcoopgallary g ON
-												p.id_gallery = g.id_gallery
-											ORDER BY  p.webcooppartner_id DESC
-											");
+												webcooppartner
+											WHERE is_use ='1'
+											ORDER BY
+												create_date
+											DESC
+	");
 	$fetchImgPartner->execute();
 	$arrayGroupPartner=[];		
 	while($rowData = $fetchImgPartner->fetch(PDO::FETCH_ASSOC)){
@@ -28,10 +27,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrPartner["NAME"]=$rowData["name"];
 			$arrPartner["LINK"]=$rowData["link"];
 			$arrPartner["TEXT_COLOR"]=$rowData["text_color"];
-			$arrPartner["IMG_GALLERY_URL"]=$rowData["img_gallery_url"];
-			$arrPartner["IMG_GALLERY_PATH"]=$rowData["img_gallery_path"];
+			$arrPartner["IMG_URL"]=$rowData["img_url"];
+			$arrPartner["IMG_PATCH"]=$rowData["img_patch"];
 			$arrPartner["BG_COLOR"]=$rowData["background_color"];
-			$arrPartner["ID_GALLERY"]=$rowData["id_gallery"];
 			$arrayGroupPartner[]=$arrPartner;
 	}
 	$arrayResult["PARTNER_DATA"] = $arrayGroupPartner;

@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										webcoopnews
 									WHERE is_use !='-9'
 									ORDER BY
-										update_date
+										create_date
 									DESC");
 	$fetchNewsWebCoop->execute();
 	while($rowNewsWebCoop = $fetchNewsWebCoop->fetch(PDO::FETCH_ASSOC)){

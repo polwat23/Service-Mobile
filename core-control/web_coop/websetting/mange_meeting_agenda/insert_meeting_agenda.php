@@ -25,32 +25,47 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	}
 	$insert_file = $conmysql->prepare("INSERT INTO webcoopmeetingagenda(
 															title,
+															file_name,
 															file_patch,
 															file_url,
 															detail,
 															create_by,
-															date
+															date,
+															update_by
 														)
 														VALUES(
 															:title,
+															:file_name,
 															:file_patch,
 															:file_url,
 															:detail,
 															:create_by,
-															:date
+															:date,
+															:update_by
 														)");
 	if($insert_file->execute([
 			':title' =>  $dataComing["title"],
+			':file_name' => $file_name ?? null,
 			':file_patch' => $filePath ?? null,
 			':file_url' => $fileUrl ?? null,
 			':detail' => $dataComing["detail"]?? '',
 			':create_by' =>  $payload["username"],
+			':update_by' =>  $payload["username"],
 			':date' =>  $dataComing["date"],
 		])){
 				$arrayResult['RESULT'] = True;
 				echo json_encode($arrayResult);
 	}else{
 		$arrayResult['RESPONSE'] = "ไม่สามารถอัพโหลดไฟล์ได้ กรุณาติดต่อผู้พัฒนา ";
+		$arrayResult['DataInsert'] = [
+			':title' =>  $dataComing["title"],
+			':file_name' => $file_name ?? null,
+			':file_patch' => $filePath ?? null,
+			':file_url' => $fileUrl ?? null,
+			':detail' => $dataComing["detail"]?? '',
+			':create_by' =>  $payload["username"],
+			':date' =>  $dataComing["date"],
+		];
 		$arrayResult['RESULT'] = FALSE;
 		echo json_encode($arrayResult);
 		exit();

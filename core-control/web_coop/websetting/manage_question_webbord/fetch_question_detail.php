@@ -33,17 +33,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												creat_date,
 												update_date,
 												is_edit,
-												avatar
+												avatar,
+												is_use
 											FROM
 												reply
 											WHERE
-												is_use = '1' AND question_id = :question_id AND id_momment_parent ='0'
+												 question_id = :question_id AND id_momment_parent ='0'
 											ORDER BY 
 												creat_date DESC
 		");
 		$fetchComment->execute(['question_id' => $rowWebboard["question_id"]]);
 		while($rowComment = $fetchComment->fetch(PDO::FETCH_ASSOC)){
-			
 			$groupReply = [];
 			$fetchReply = $conmysql->prepare("
 												SELECT
@@ -54,11 +54,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													creat_date,
 													update_date,
 													is_edit,
-													avatar
+													avatar,
+													is_use
 												FROM
 													reply
 												WHERE
-													is_use = '1' AND  id_momment_parent = :reply_id
+													 id_momment_parent = :reply_id
 												ORDER BY creat_date DESC
 			");
 			$fetchReply->execute([
@@ -76,12 +77,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrReply["UPDATE_DATE_FORMAT"] = $lib->convertdate($rowReply["update_date"],'d m Y',true);  
 				$arrReply["IS_EDIT"] = $rowReply["is_edit"];
 				$arrReply["AVATAR"] = $rowReply["avatar"];
+				$arrReply["IS_USE"] = $rowReply["is_use"];
 				$groupReply[]=$arrReply;
 			}
 	
 			
 			$arrComment["PARENT_COMMENT_ID"] = $rowComment["id_momment_parent"];
+			$arrComment["QUESTION_ID"] = $rowWebboard["question_id"];
 			$arrComment["REPLY_ID"] = $rowComment["reply_id"];
+			$arrComment["IS_USE"] = $rowComment["is_use"];
 			$arrComment["DETAIL"] = $rowComment["detail"];
 			$arrComment["NAME"] = $rowComment["name"];
 			$arrComment["AVATAR"] = $rowComment["avatar"];
@@ -93,14 +97,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$groupComment[] = $arrComment;
 		}
 		
-		
 		$fetchTotalComment = $conmysql->prepare("
 											SELECT
 												reply_id
 											FROM
 												reply
 											WHERE
-												is_use = '1' AND question_id = :question_id 
+												question_id = :question_id 
 		");
 		$fetchTotalComment->execute([
 			':question_id' => $rowWebboard["question_id"]

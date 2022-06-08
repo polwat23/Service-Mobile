@@ -17,6 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												img,
 												create_by,
 												member_no,
+												avatar,
 												is_use
 											FROM
 												question
@@ -77,7 +78,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								FROM
 									reply
 								WHERE
-									is_use = '1' AND question_id = :question_id 
+									question_id = :question_id 
 		");
 		$fetchTotalComment->execute([
 			':question_id' => $rowWebboard["question_id"]

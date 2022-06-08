@@ -15,7 +15,6 @@ if($lib->checkCompleteArgument(['unique_id','banner_id'],$dataComing)){
 			
 		}else{
 			
-		
 			$del_file="../../../../".$dataComing["old_file"];
 			$del=unlink($del_file);
 		
@@ -47,34 +46,85 @@ if($lib->checkCompleteArgument(['unique_id','banner_id'],$dataComing)){
 			
 		}
 	}
+	if($dataComing["type_link"] == "0"){
+		
+		$update_coop_banner = $conmysql->prepare("UPDATE
+															webcoopbanner
+														SET
+															news_id = :news_id,
+															type = :type,
+															img_path = :img_path,
+															img_url = :img_url
+															
+														WHERE
+															banner_id = :banner_id
+													");
+		if($update_coop_banner->execute([
+			':img_path' => $img_path??null,
+			':img_url' =>  $img_url??null,
+			':news_id' =>  $dataComing["news_id"],
+			':type' =>  $dataComing["type"],
+			':banner_id' =>  $dataComing["banner_id"]
 
-	$update_coop_banner = $conmysql->prepare("UPDATE
-														webcoopbanner
-													SET
-														news_id = :news_id,
-														type = :type,
-														img_path = :img_path,
-														img_url = :img_url
-													WHERE
-														banner_id = :banner_id
-												");
-	if($update_coop_banner->execute([
-		':img_path' => $img_path??null,
-		':img_url' =>  $img_url??null,
-		':news_id' =>  $dataComing["news_id"],
-		':type' =>  $dataComing["type"],
-		':banner_id' =>  $dataComing["banner_id"]
-
-	
-	])){
-			$arrayResult['RESULT'] = True;
+		])){
+				$arrayResult['RESULT'] = True;
+				echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพเดทได้ กรุณาติดต่อผู้พัฒนา ";
+				$arrayResult['dataComing'] = [
+				':img_path' => $img_path??NULL,
+				':img_url' =>  $img_url??NULL,
+				':news_id' =>  $dataComing["news_id"],
+				':type' =>  $dataComing["type"],
+				':banner_id' =>  $dataComing["banner_id"],
+				':url' =>  $dataComing["url"]??NULL,
+				':type_link' =>  $dataComing["type_link"]
+			];
+			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
+			exit();
+		}
 	}else{
-		$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพเดทได้ กรุณาติดต่อผู้พัฒนา ";
-		$arrayResult['dataComing'] = $dataComing;
-		$arrayResult['RESULT'] = FALSE;
-		echo json_encode($arrayResult);
-		exit();
+		
+		$update_coop_banner = $conmysql->prepare("UPDATE
+															webcoopbanner
+														SET
+															news_id = :news_id,
+															type = :type,
+															img_path = :img_path,
+															img_url = :img_url,
+															type_link = :type_link,
+															url = :url
+														WHERE
+															banner_id = :banner_id
+													");
+		if($update_coop_banner->execute([
+			':img_path' => $img_path??null,
+			':img_url' =>  $img_url??null,
+			':news_id' =>  $dataComing["news_id"],
+			':type' =>  $dataComing["type"],
+			':banner_id' =>  $dataComing["banner_id"],
+			':type_link' =>  $dataComing["type_link"],
+			':url' =>  $dataComing["url"]??NULL,
+
+		])){
+				$arrayResult['RESULT'] = True;
+				echo json_encode($arrayResult);
+		}else{
+			$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพเดทได้ กรุณาติดต่อผู้พัฒนา ";
+				$arrayResult['dataComing'] = [
+				':img_path' => $img_path??NULL,
+				':img_url' =>  $img_url??NULL,
+				':news_id' =>  $dataComing["news_id"],
+				':type' =>  $dataComing["type"],
+				':banner_id' =>  $dataComing["banner_id"],
+				':url' =>  $dataComing["url"]??NULL,
+				':type_link' =>  $dataComing["type_link"]
+			];
+			$arrayResult['RESULT'] = FALSE;
+			echo json_encode($arrayResult);
+			exit();
+		}
 	}
 	
 }else{

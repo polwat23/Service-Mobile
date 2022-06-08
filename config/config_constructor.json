@@ -1,10 +1,12 @@
 {
 	"NAME_APP" : "DOAE Connect",
 	"COOP_KEY" : "doae",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=doae",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=doae",
 	"COOP_ID" : "057001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/kbank",
 	"APP_ID" : "com.doaecoop.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/DOAECOOP/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/DOAECOOP/",
 	"URL_CORE_COOP" : "http://192.168.10.241/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://tunnel.911itwist.com:8080/servlet/sendSMS.do",
 	"UN_SMS" : "savco",

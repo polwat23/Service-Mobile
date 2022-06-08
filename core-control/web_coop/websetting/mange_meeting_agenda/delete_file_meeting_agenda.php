@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id'],$dataComing)){
 	
-	$del_img = $conmysql->prepare("DELETE FROM webcoopmeetingagenda WHERE id_meettingagenda = :id");						
+	$del_img = $conmysql->prepare("UPDATE webcoopmeetingagenda SET is_use ='-9' WHERE id_meettingagenda = :id");						
 	if($del_img->execute([
 			':id' =>  $dataComing["id"]
 		])){

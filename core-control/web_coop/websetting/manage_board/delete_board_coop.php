@@ -1,14 +1,15 @@
 <?php
 require_once('../../../autoload.php');
-
 if($lib->checkCompleteArgument(['unique_id','id_board'],$dataComing)){
 
-	$del_img = $conmysql->prepare("DELETE FROM webcoopboardofdirectors WHERE id_board = :id_board");						
+	$del_img = $conmysql->prepare("UPDATE webcoopboardofdirectors SET is_use ='-9' WHERE id_board = :id_board");						
 	if($del_img->execute([
 			':id_board' =>  $dataComing["id_board"]
 		])){
-			$del_file="../../../../".$dataComing["file_patch"];
-			$del=unlink($del_file);
+			
+			//ลบ รูป
+			//$del_file="../../../../".$dataComing["file_patch"];
+			//$del=unlink($del_file);
 			
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["delFile"] = $del;
