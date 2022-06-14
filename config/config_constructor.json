@@ -2,6 +2,7 @@
 	"NAME_APP" : "STK Saving",
 	"COOP_KEY" : "stk",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=stk",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=stk",
 	"COOP_ID" : "040001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.stksaving.mobile",
