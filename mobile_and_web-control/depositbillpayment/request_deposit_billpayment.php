@@ -33,15 +33,15 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				while($rowDetailDP = $getDetailTranDP->fetch(PDO::FETCH_ASSOC)){
 					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
 				}
-				$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 				$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 				$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
 				$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
@@ -123,17 +123,18 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}
 						$int_returnSrc = 0;
 						$int_returnFull = 0;
-						$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
-						$interestFull = $interest;
-						$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+						$interest = $cal_loan->calculateIntAPI($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+						$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
 						if($interestPeriod < 0){
 							$interestPeriod = 0;
 						}
-						if($interest > 0){
-							if($rowDetail["qrtransferdt_amt"] < $interest){
-								$interest = $rowDetail["qrtransferdt_amt"];
+						$int_returnSrc = $interest["INT_RETURN"];
+						$interestFull = $interest["INT_PERIOD"];
+						if($interestFull > 0){
+							if($rowDetail["qrtransferdt_amt"] < $interestFull){
+								$interestFull = $rowDetail["qrtransferdt_amt"];
 							}else{
-								$prinPay = $rowDetail["qrtransferdt_amt"] - $interest;
+								$prinPay = $rowDetail["qrtransferdt_amt"] - $interestFull;
 							}
 							if($prinPay < 0){
 								$prinPay = 0;
@@ -141,14 +142,9 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}else{
 							$prinPay = $rowDetail["qrtransferdt_amt"];
 						}
-						if($dataCont["CHECK_KEEPING"] == '0'){
-							if($dataCont["SPACE_KEEPING"] != 0){
-								$int_returnSrc = 0;
-								$int_returnFull = $int_returnSrc;
-							}
-						}
+
 						$paykeepingdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
-						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
+						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest["INT_PAYMENT"],
 						$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
 						if($paykeepingdet["RESULT"]){
 							if(($dataCont["LOANTYPE_CODE"] == '12' || $dataCont["LOANTYPE_CODE"] == '30') && $dataCont["LAST_PERIODPAY"] < 24){
@@ -158,7 +154,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 								if(TRIM($rowMembType["MEMBGROUP_CODE"]) != '0110'){
 									$fee_amt = $prinPay * 0.02;
 									$paykeepingFeedet = $cal_loan->paySlipFeeDet($conoracle,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
-									$dataComing["bank_ref"],$payinslip_no,'FBD',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
+									$dataComing["bank_ref"],$payinslip_no,'FBD',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest["INT_PAYMENT"],
 									$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
 								}
 							}
@@ -166,6 +162,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							$repayloan = $cal_loan->repayLoan($conoracle,$rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"],0,$config,$payinslipdoc_no,$dateOper,
 							$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_noLN,$payload["app_version"]);
 							if($repayloan["RESULT"]){
+								$can_pay[] = $rowDetail["ref_account"];
 							}else{
 								$can_notpay[] = $rowDetail["ref_account"];
 							}

@@ -36,6 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'D m Y');
 		$arrAccount["DATA_TIME"] = date('H:i');
+		$arrAccount["DATA_DATE"] = $lib->convertdate(date('Y-m-d'),'D m Y');
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_dept');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
