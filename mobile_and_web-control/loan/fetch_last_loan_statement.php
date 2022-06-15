@@ -31,6 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrContract["PERIOD_PAYMENT"] = number_format($rowLoanLastSTM["PERIOD_PAYMENT"],2);
 		$arrContract["PERIOD"] = $rowLoanLastSTM["LAST_PERIOD"].' / '.$rowLoanLastSTM["PERIOD"];
 		$arrContract["DATA_TIME"] = date('H:i');
+		$arrContract["DATA_DATE"] = $lib->convertdate(date('Y-m-d'),'D m Y');
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){

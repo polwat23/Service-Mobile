@@ -37,6 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		$rowContract = $getAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
+		$arrayHeaderAcc["DATA_DATE"] = $lib->convertdate(date('Y-m-d'),'D m Y');
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
