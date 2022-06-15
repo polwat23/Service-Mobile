@@ -430,6 +430,11 @@ if(!$anonymous){
 				$arrayLiveMenu["LIVE_URL"] = $rowLive["live_url"];
 				$arrayLiveMenu["LIVE_TITLE"] = $rowLive["live_title"];
 				$arrayResult['MENU_LIVE'] = $arrayLiveMenu;
+				
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '1171' || $dataComing["channel"] == 'web'){
+					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+				}
+			
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -498,6 +503,11 @@ if(!$anonymous){
 		}
 		if(isset($arrayAllMenu)){
 			$arrayResult['MENU'] = $arrayAllMenu;
+			
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '1171' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
