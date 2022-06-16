@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 	if($checkBillAvailable->rowCount() > 0){
 		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
 		if($rowCheckBill["member_no"] == $dataComing["member_no"]){
-			if($dataComing["tran_id"] == '202203211948451840'){
+			if($dataComing["tran_id"] == '202206011803544423'){
 				$arrayResult['RESULT'] = TRUE;
 				ob_flush();
 				echo json_encode($arrayResult);

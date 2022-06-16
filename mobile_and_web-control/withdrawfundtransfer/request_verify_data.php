@@ -211,6 +211,14 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
+						if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
+							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+							$arrayResult['CAUTION'] = $arrayCaution;
+							$arrayResult['PENALTY_AMT'] = $arrInitDep["PENALTY_AMT"];
+							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
+						}
 						$arrayResult['CLIENT_TIMESTAMP'] = $arrResponse->CLIENT_TIMESTAMP;
 						$arrayResult['CLIENT_TRANS_NO'] = $arrResponse->CLIENT_TRANS_NO;
 						$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;

@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "RID Saving Connect",
 	"COOP_KEY" : "rid-test",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=rid",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=rid",
 	"COOP_KEY_PROD" : "rid",
 	"COOP_ID" : "031001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control",

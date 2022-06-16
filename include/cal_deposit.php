@@ -96,11 +96,31 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		if($amt_transfer < $dataConst["MINDEPT_AMT"]){
-			$arrayResult['RESPONSE_CODE'] = "WS0056";
-			$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
+		if($dataConst["DEPTTYPE_CODE"] == '04' || $dataConst["DEPTTYPE_CODE"] == '05'){
+			if($dataConst["DEPTTYPE_CODE"] == '04'){
+				if($amt_transfer < 200){
+					$arrayResult['RESPONSE_CODE'] = "WS0056";
+					$arrayResult['MINDEPT_AMT'] = 200;
+					$arrayResult['RESULT'] = FALSE;
+					return $arrayResult;
+				}
+				
+			}else if($dataConst["DEPTTYPE_CODE"] == '05'){
+				if($amt_transfer < 1000){
+					$arrayResult['RESPONSE_CODE'] = "WS0056";
+					$arrayResult['MINDEPT_AMT'] = 1000;
+					$arrayResult['RESULT'] = FALSE;
+					return $arrayResult;
+				}
+				
+			}
+		}else{
+			if($amt_transfer < $dataConst["MINDEPT_AMT"]){
+				$arrayResult['RESPONSE_CODE'] = "WS0056";
+				$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
 		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
