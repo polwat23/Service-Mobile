@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "RID Saving Connect",
 	"COOP_KEY" : "rid",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=rid",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=rid",
 	"COOP_KEY_PROD" : "rid",
 	"COOP_ID" : "031001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control",
@@ -24,7 +26,7 @@
 	"LINE_NOTIFY" : "pWgMSjTu9E3rnIv4ESlDSGAGhv2zl1blctFywsYFf5u",
 	"MAIL" : "noreply@gensoft.co.th",
 	"PASS_MAIL" : "h>-^yM3cPd3&",
-	"CROSSBANK_TAX_SUFFIX" : "012554400708901",
+	"CROSSBANK_TAX_SUFFIX" : "099400016699101",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
 	"HW_APPID" : "104696649",
     "HW_APPSECRET": "7f572f60800b7767de7f62289e727494fee468d13392e2a3b65c0a5d926d59e0",
