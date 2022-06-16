@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 		$conmysql->beginTransaction();	
 		$year = date(Y) +543;
 		$arrayGroup = $dataComing["editMember"];
-		
+		$arrayResult["sdsd"] = $dataComing["editMember"];
 
 		foreach ($arrayGroup as $value) {
 			$member_no = $value["MEMBER_NO"];
@@ -86,6 +86,7 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 					}else{
 						$conoracle->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถบันทึกได้ กรุณาติดต่อผู้พัฒนา";
+						
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
@@ -129,6 +130,7 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 					}else{
 						$conoracle->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถบันทึกได้ กรุณาติดต่อผู้พัฒนา";
+						$arrayResult['RESPONSE'] = "1";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 					}
@@ -232,6 +234,7 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 					$seq_no++;
 					}else{
 						$conoracle->rollback();
+						$arrayResult['RESPONSE'] = "2";
 						$arrayResult['RESPONSE'] = "ไม่สามารถบันทึกได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
@@ -272,7 +275,7 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 				$website = $value["INCOMING_DATA_JSON"]["website"];
 				
 				
-				$update_coop = $conoracle->prepare("UPDATE mbmembmaster SET addr_no =:addr_no ,addr_moo =:addr_moo ,addr_village =:addr_village ,addr_soi =:addr_soi , addr_road =:addr_road ,
+				/*$update_coop = $conoracle->prepare("UPDATE mbmembmaster SET addr_no =:addr_no ,addr_moo =:addr_moo ,addr_village =:addr_village ,addr_soi =:addr_soi , addr_road =:addr_road ,
 								tambol_code =:tambol_code,district_code =:district_code ,province_code =:province_code, addr_postcode=:addr_postcode ,coopregis_no =:coopregis_no,
 								coopregis_date =  TRUNC(TO_DATE(:coopregis_date,'yyyy-mm-dd hh24:mi:ss')),accyearclose_date = TRUNC(TO_DATE(:accyearclose_date ,'yyyy-mm-dd hh24:mi:ss')) , 
 								memb_regno =:memb_regno ,addr_email =:email ,tax_id =:tax_id ,addr_phone =:tel ,addr_fax =:addr_fax
@@ -300,6 +303,27 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 				}else{
 					$conoracle->rollback();
 					$arrayResult['RESPONSE'] = "ไม่สามารถบันทึกได้ กรุณาติดต่อผู้พัฒนา";
+					
+					$arrayResult['RESPONSEs'] = [
+						':addr_no' => $addr_no,
+						':addr_moo' => $addr_moo,
+						':addr_village' => $addr_village,
+						':addr_soi' => $addr_soi,
+						':addr_road' => $addr_road,
+						':tambol_code' => $tambol_code,
+						':district_code' => $district_code,
+						':province_code' => $province_code,
+						':addr_postcode' => $addr_postcode,
+						':coopregis_no' => $coopregis_no,
+						':coopregis_date' => $coopregis_date,
+						':accyearclose_date' => $accyearclose_date,
+						':memb_regno' => $memb_regno,
+						':email' => $email,
+						':tax_id' => $tax_id,
+						':tel' => $tel,
+						':addr_fax' => $addr_fax,
+						':member_no' => $member_no
+					];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../../../include/exit_footer.php');
 				}
@@ -317,7 +341,7 @@ if($lib->checkCompleteArgument(['unique_id','editMember'],$dataComing)){
 					$arrayResult['RESPONSE'] = "ไม่สามารถบันทึกได้ กรุณาติดต่อผู้พัฒนา";
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../../../include/exit_footer.php');
-				}
+				}*/
 			}			
 		}
 		
