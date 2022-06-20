@@ -247,7 +247,7 @@ function GenerateReport($dataReport,$header,$lib){
 	]);
 	$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 	$header["recv_period"] = $lib->convertperiodkp(trim($recv_period));
-	$header["member_no"] = $data["member_no"];
+	$header["member_no"] = $data;
 	$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 	$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 	$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);	

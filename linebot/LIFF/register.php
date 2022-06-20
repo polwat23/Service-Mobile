@@ -33,7 +33,7 @@ $config = json_decode($json,true);
 	  <div id="box"></div>
 	</div>
 	<div id="warning">
-	กรุณาใช้งานผ่านแอปพลิเคชัน Line Version มือถือเท่านั้น
+	กรุณาใช้งานผ่านแอปพลิเคชัน Line Version มือถือเท่านั้น 
 	</div>
 	<!--
 	<div class="box-logo">
@@ -46,7 +46,6 @@ $config = json_decode($json,true);
 		<div class="container-login100" >
 			<div class="wrap-login100 p-b-30">
 				<div class="login100-form validate-form">
-				
 					<div class="login100-form-avatar">
 						<img src="https://cdn.thaicoop.co/coop/<?=$config["COOP_KEY"]?>.jpg" id="avatar" alt="logo">
 					</div>
@@ -54,7 +53,7 @@ $config = json_decode($json,true);
 						สมัครใช้บริการ <?=$config["LINEBOT_NAME"]?>
 					</span>
 					<span class="login100-form-title p-t-20 p-b-45" >
-						สวัสดี <span id="nameline"></span>
+						สวัสดี <span id="nameline"></span> <?php echo $_GET["id"]??null  ?> 
 					</span>
 					<div class="container-login100-form-btn p-t-10" id="showwhenload" style="display:none;">
 					<a href="#" class="login100-form-btn" id="deeplink">

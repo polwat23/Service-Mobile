@@ -3,14 +3,22 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
+		$arrayLoanType = array();
+		$fetchLoanType = $conmysql->prepare("SELECT loantype_code FROM gcconstanttypeloan WHERE is_creditloan = '1'");
+		$fetchLoanType->execute();		
+		while($rowLoanType = $fetchLoanType->fetch(PDO::FETCH_ASSOC)){
+			$arrayLoanType[] = $rowLoanType["loantype_code"];
+		}
+		
 		$fetchIntrate = $conoracle->prepare("select lir.interest_rate as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
 												ON lp.inttabrate_code = lir.loanintrate_code where to_char(sysdate,'YYYY-MM-DD') BETWEEN 
-												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
+												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD') 
+												AND lp.loantype_code IN(".implode(',',$arrayLoanType).") ");
 		$fetchIntrate->execute();
 		$arrIntGroup = array();
 		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
 			$arrIntrate = array();
-			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
+			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"] * 100;
 			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];
 			$arrIntrate["LOANTYPE_DESC"] = $rowIntrate["LOANTYPE_DESC"];
 			$arrIntGroup[] = $arrIntrate;
