@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conmssql->prepare("SELECT mg.GAIN_NAME,mg.GAIN_SURNAME,mg.GAIN_ADDR,mc.GAIN_CONCERN
+		$getBeneficiary = $conmssql->prepare("SELECT mg.GAIN_NAME,mg.GAIN_SURNAME,mg.GAIN_ADDRESS AS GAIN_ADDR,mc.GAIN_CONCERN
 												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
 												WHERE mg.member_no = :member_no ORDER BY mg.SEQ_NO");
 		$getBeneficiary->execute([':member_no' => $member_no]);

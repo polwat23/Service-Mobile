@@ -3,7 +3,6 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
@@ -12,9 +11,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
-				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				if ($forceNewSecurity == true) {
+					$arrayResult['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($rowInfoMobile["path_avatar"], $jwt_token, $config["SECRET_KEY_JWT"]);
+					
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $explodePathAvatar[0].'.webp');
+					$arrayResult["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($explodePathAvatar[0].'.webp', $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				}
+
 			}else{
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;

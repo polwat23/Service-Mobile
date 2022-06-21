@@ -1,5 +1,5 @@
 
 
-C:\Mobile\php7.4\php.exe C:\Mobile\Service-MHD-Test\external_service\notification_share_trigger.php
+C:\Mobile\php7.4\php.exe C:\Mobile\Service-nkh\external_service\line_notication_deposit_trigger.php
 
 pause

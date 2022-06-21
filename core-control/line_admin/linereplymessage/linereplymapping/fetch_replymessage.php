@@ -5,164 +5,169 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'line','linereplymapping')){
 		$arrayGroup = array();
 		$arrayTextMapType = array();
-		
-		
-		$fetchMsg = $conmysql->prepare("SELECT lmt.id_textmaptype,lmt.id_textincome,lmt.id_ref,lmt.type_message,li.text_income,lot.text_message,loq.id_action,loi.image_url,lol.title,lol.address,lol.latitude,lol.longtitude
-													FROM lbtextmaptype lmt
-													JOIN lbincoming li ON li.id_textincome = lmt.id_textincome
-													 LEFT OUTER JOIN lbtextmessage lot ON (lot.id_textmessage = lmt.id_ref AND lmt.type_message = 'text')
-													 LEFT OUTER JOIN lbquickmessage loq ON (loq.id_quickmsg = lmt.id_ref AND lmt.type_message = 'quick_reply')
-													 LEFT OUTER JOIN lbimagemessage loi ON (loi.id_imagemsg = lmt.id_ref AND lmt.type_message = 'image')
-													 LEFT OUTER JOIN lblocation lol ON (lol.id_location = lmt.id_ref AND lmt.type_message = 'location')
-													 WHERE lmt.is_use = '1' AND li.is_use ='1' AND
-													 ((lmt.type_message = 'text' AND lot.is_use = '1') OR 
-													  (lmt.type_message = 'quick_reply' AND loq.is_use = '1') OR 
-													  (lmt.type_message = 'image' AND loi.is_use = '1') OR 
-													  (lmt.type_message = 'location' AND lol.is_use = '1'))
-													  ORDER BY lmt.create_date DESC");
-		$fetchMsg->execute();
-		while($rowMsg = $fetchMsg->fetch(PDO::FETCH_ASSOC)){
-			$arrMsg = array();
-			$arrMsg["ID_TEXTMAPTYPE"] = $rowMsg["id_textmaptype"];
-			$arrMsg["ID_TEXTINCOME"] = $rowMsg["id_textincome"];
-			$arrMsg["ID_REF"] = $rowMsg["id_ref"];
-			$arrMsg["TYPE_MESSAGE"] = $rowMsg["type_message"];
-			$arrMsg["TEXT_INCOME"] = $rowMsg["text_income"];
-			$arrMsg["TEXT_MESSAGE"] = $rowMsg["text_message"];
-			$arrMsg["ID_ACTION"] = $rowMsg["id_action"];
-			$arrMsg["IMAGE_URL"] = $rowMsg["image_url"];
-			$arrMsg["TITLE"] = $rowMsg["title"];
-			$arrMsg["ADDRESS"] = $rowMsg["address"];
-			$arrMsg["LATITUDE"] = $rowMsg["latitude"];
-			$arrMsg["LONGTITUDE"] = $rowMsg["longtitude"];
-			$arrMsg["ACTIONS"] = array();
-			
-			if($rowMsg["type_message"] == "quick_reply"){
-				$fetchQuickMsg = $conmysql->prepare("SELECT qm.id_quickmsg, at.id_action, at.type, at.text, at.url, at.area_x, at.area_y, at.width, at.height, at.label, at.data, at.mode, at.initial, at.max, at.min, qm.create_date, qm.update_date, qm.update_by, at.is_use as is_use_action
-													FROM lbquickmessage qm
-													JOIN lbaction at ON qm.id_action = at.id_action
-													WHERE qm.is_use = '1' AND qm.id_action = :id_action");
-				$fetchQuickMsg->execute([
-					':id_action' => $rowMsg["id_action"]
-				]);
-				
-				while($rowQuickMsg= $fetchQuickMsg->fetch(PDO::FETCH_ASSOC)){
-					$arrAction = array();
-					$arrAction["TYPE"] = $rowQuickMsg["type"];
-					$arrAction["TEXT"] = $rowQuickMsg["text"];
-					$arrAction["URL"] = $rowQuickMsg["url"];
-					$arrAction["LABEL"] = $rowQuickMsg["label"];
-					$arrAction["DATA"] = $rowQuickMsg["data"];
-					$arrAction["MODE"] = $rowQuickMsg["mode"];
-					$arrAction["INITIAL"] = $rowQuickMsg["initial"];
-					$arrAction["MAX"] = $rowQuickMsg["max"];
-					$arrAction["MIN"] = $rowQuickMsg["min"];
-					$arrAction["AREA_X"] = $rowQuickMsg["area_x"];
-					$arrAction["AREA_Y"] = $rowQuickMsg["area_y"];
-					$arrAction["WIDTH"] = $rowQuickMsg["width"];
-					$arrAction["HEIGHT"] = $rowQuickMsg["height"];
-					$arrAction["IS_USE_ACTION"] = $rowQuickMsg["is_use_action"];
-					$arrMsg["ACTIONS"][] = $arrAction;
-				}			
-			}
-			
-			$arrayGroup[] = $arrMsg;
-		}
-		
-		
-		
-		//service new
 		$fetchTextmapType  = $conmysql->prepare("SELECT DISTINCT
-													lmt.id_textincome,
-													li.text_income
-												FROM
-													lbtextmaptype lmt
-												LEFT JOIN lbincoming li ON
-													li.id_textincome = lmt.id_textincome
-												WHERE lmt.is_use = '1' AND li.is_use ='1'
-												ORDER BY  lmt.update_date DESC");
+								lmt.id_textincome,
+								li.text_income
+							FROM
+								lbtextmaptype lmt
+							LEFT JOIN lbincoming li ON
+								li.id_textincome = lmt.id_textincome
+							WHERE lmt.is_use = '1' AND li.is_use ='1'
+							ORDER BY  lmt.update_date DESC");
 		$fetchTextmapType->execute();
 		$arrayTextMapType = [];
 		while($rowtextmapType = $fetchTextmapType->fetch(PDO::FETCH_ASSOC)){
-	
-			$fetchMsgMap = $conmysql->prepare("SELECT lmt.id_textmaptype,lmt.id_textincome,lmt.id_ref,lmt.type_message,li.text_income,lot.text_message,loq.id_action,loi.image_url,lol.title,lol.address,lol.latitude,lol.longtitude
-													FROM lbtextmaptype lmt
-													JOIN lbincoming li ON li.id_textincome = lmt.id_textincome
-													 LEFT OUTER JOIN lbtextmessage lot ON (lot.id_textmessage = lmt.id_ref AND lmt.type_message = 'text')
-													 LEFT OUTER JOIN lbquickmessage loq ON (loq.id_quickmsg = lmt.id_ref AND lmt.type_message = 'quick_reply')
-													 LEFT OUTER JOIN lbimagemessage loi ON (loi.id_imagemsg = lmt.id_ref AND lmt.type_message = 'image')
-													 LEFT OUTER JOIN lblocation lol ON (lol.id_location = lmt.id_ref AND lmt.type_message = 'location')
-													 WHERE lmt.is_use = '1' AND li.is_use ='1' AND lmt.id_textincome =:id_textincome AND
-													 ((lmt.type_message = 'text' AND lot.is_use = '1') OR 
-													  (lmt.type_message = 'quick_reply' AND loq.is_use = '1') OR 
-													  (lmt.type_message = 'image' AND loi.is_use = '1') OR 
-													  (lmt.type_message = 'location' AND lol.is_use = '1'))
-													  ORDER BY lmt.create_date DESC");
+		
+			$fetchMsgMap = $conmysql->prepare("SELECT id_textmaptype,id_textincome,id_ref,type_message
+											FROM
+												lbtextmaptype
+											WHERE
+												id_textincome = :id_textincome AND is_use = '1'			
+											ORDER BY update_date DESC");
 			$fetchMsgMap->execute([
 				':id_textincome' => $rowtextmapType["id_textincome"]
 			]);
 			$arrayGroupIncomming=[];
-			while($rowMsg2 = $fetchMsgMap->fetch(PDO::FETCH_ASSOC)){
-				
+			while($rowMsg = $fetchMsgMap->fetch(PDO::FETCH_ASSOC)){
 				$arrMsg = [];
-				$arrMsg["ID_TEXTMAPTYPE"] = $rowMsg2["id_textmaptype"];
-				$arrMsg["ID_TEXTINCOME"] = $rowMsg2["id_textincome"];
-				$arrMsg["ID_REF"] = $rowMsg2["id_ref"];
-				$arrMsg["TYPE_MESSAGE"] = $rowMsg2["type_message"];
-				$arrMsg["TEXT_INCOME"] = $rowMsg2["text_income"];
-				$arrMsg["TEXT_MESSAGE"] = $rowMsg2["text_message"];
-				$arrMsg["ID_ACTION"] = $rowMsg2["id_action"];
-				$arrMsg["IMAGE_URL"] = $rowMsg2["image_url"];
-				$arrMsg["TITLE"] = $rowMsg2["title"];
-				$arrMsg["ADDRESS"] = $rowMsg2["address"];
-				$arrMsg["LATITUDE"] = $rowMsg2["latitude"];
-				$arrMsg["LONGTITUDE"] = $rowMsg2["longtitude"];
-				$arrMsg["ACTIONS"] = array();
-				
-				if($rowMsg2["type_message"] == "quick_reply"){
-					$fetchQuickMsg2 = $conmysql->prepare("SELECT qm.id_quickmsg, at.id_action, at.type, at.text, at.url, at.area_x, at.area_y, at.width, at.height, at.label, at.data, at.mode, at.initial, at.max, at.min, qm.create_date, qm.update_date, qm.update_by, at.is_use as is_use_action
-														FROM lbquickmessage qm
-														JOIN lbaction at ON qm.id_action = at.id_action
-														WHERE qm.is_use = '1' AND qm.id_action = :id_action");
-					$fetchQuickMsg2->execute([
-						':id_action' => $rowMsg2["id_action"]
+				$arrMsg["ID_TEXTMAPTYPE"] = $rowMsg["id_textmaptype"];
+				$arrMsg["ID_TEXTINCOME"] = $rowMsg["id_textincome"];
+				$arrMsg["ID_REF"] = $rowMsg["id_ref"];
+				$arrMsg["TYPE_MESSAGE"] = $rowMsg["type_message"];
+				$arrMsg["TEXT_INCOME"] = $rowMsg["text_income"];
+			
+
+				if($rowMsg["type_message"] == "quick_reply"){
+					$actions = array();
+					$fetchAction = $conmysql->prepare("SELECT ac.id_action,ac.type,ac.url,ac.area_x,ac.area_y,ac.width,ac.height,ac.label,ac.data,ac.data,ac.mode,ac.initial,ac.max,ac.min FROM  lbquickmessagemap qmm
+									   LEFT JOIN lbaction ac ON ac.id_action = qmm.action_id
+									   WHERE qmm.is_use = '1' AND ac.is_use ='1' AND qmm.quickmessage_id = :id_ref");
+					$fetchAction->execute([
+						':id_ref' => $rowMsg["id_ref"]
 					]);
-					
-					while($rowQuickMsg= $fetchQuickMsg2->fetch(PDO::FETCH_ASSOC)){
-						$arrAction = [];
-						$arrAction["TYPE"] = $rowQuickMsg["type"];
-						$arrAction["TYPE_MESSAGE"] = $rowMsg2["type_message"];
-						$arrAction["TEXT"] = $rowQuickMsg["text"];
-						$arrAction["URL"] = $rowQuickMsg["url"];
-						$arrAction["LABEL"] = $rowQuickMsg["label"];
-						$arrAction["DATA"] = $rowQuickMsg["data"];
-						$arrAction["MODE"] = $rowQuickMsg["mode"];
-						$arrAction["INITIAL"] = $rowQuickMsg["initial"];
-						$arrAction["MAX"] = $rowQuickMsg["max"];
-						$arrAction["MIN"] = $rowQuickMsg["min"];
-						$arrAction["AREA_X"] = $rowQuickMsg["area_x"];
-						$arrAction["AREA_Y"] = $rowQuickMsg["area_y"];
-						$arrAction["WIDTH"] = $rowQuickMsg["width"];
-						$arrAction["HEIGHT"] = $rowQuickMsg["height"];
-						$arrAction["IS_USE_ACTION"] = $rowQuickMsg["is_use_action"];
-						$arrAction["ID_TEXTINCOME"] = $rowMsg2["id_textincome"];;
-						$arrMsg["ACTIONS"][] = $arrAction;
-					}			
-				}
+					while($rowAction = $fetchAction->fetch(PDO::FETCH_ASSOC)){
+						$arrAction = array();
+						$arrAction["ACTION_ID"] = $rowAction["id_action"];
+						$arrAction["TYPE"] = $rowAction["type"];
+						$arrAction["URL"] = $rowAction["url"];
+						$arrAction["AREA_X"] = $rowAction["area_x"];
+						$arrAction["AREA_Y"] = $rowAction["area_y"];
+						$arrAction["WIDTH"] = $rowAction["width"];
+						$arrAction["HEIGHT"] = $rowAction["height"];
+						$arrAction["LABEL"] = $rowAction["label"];
+						$arrAction["DATA"] = $rowAction["data"];
+						$arrAction["MODE"] = $rowAction["mode"];
+						$arrAction["INITIAL"] = $rowAction["initial"];
+						$arrAction["MAX"] = $rowAction["max"];
+						$arrAction["MIN"] = $rowAction["min"];
+						$actions[]= $arrAction;
+					}
+					$arrMsg = array();
+					$arrMsg["ID_QUICKMSG"] = $rowMsg["id_quickmsg"];
+					$arrMsg["ID_REF"] = $rowMsg["id_ref"];
+					$arrMsg["TEXT"] = $rowMsg["text"];
+					$arrMsg["TYPE_MESSAGE"] = $rowMsg["type_message"];
+					$arrMsg["ACTIONS"] = $actions;
+					$arrMsg["UPDATE_DATE"] = $rowMsg["update_date"];
+					$arrayGroup[] = $arrMsg;		
+				}else if($rowMsg["type_message"] == "text"){
 				
+					$fetchTextMsg = $conmysql->prepare("SELECT text_message FROM lbtextmessage WHERE is_use ='1' AND id_textmessage =:id_ref");
+					$fetchTextMsg->execute([
+						':id_ref' => $rowMsg["id_ref"]
+					]);
+					while($rowTextMsg = $fetchTextMsg->fetch(PDO::FETCH_ASSOC)){
+						$arrMsg["TEXT_MESSAGE"] = $rowTextMsg["text_message"];
+					}
+				}else if($rowMsg["type_message"] == "location"){
+				
+					$fetchLocationMsg = $conmysql->prepare("SELECT title,address,latitude,longtitude FROM lblocation WHERE is_use ='1' AND id_location =:id_ref");
+					$fetchLocationMsg->execute([
+						':id_ref' => $rowMsg["id_ref"]
+					]);
+					while($rowLocationMsg = $fetchLocationMsg->fetch(PDO::FETCH_ASSOC)){
+						$arrMsg["TITLE"] = $rowLocationMsg["title"];
+						$arrMsg["ADDRESS"] = $rowLocationMsg["address"];
+						$arrMsg["LATITUDE"] = $rowLocationMsg["latitude"];
+						$arrMsg["LONGTITUDE"] = $rowLocationMsg["longtitude"];
+					}
+				}else if($rowMsg["type_message"] == "image"){
+					$fetchImageMsg = $conmysql->prepare("SELECT image_url FROM lbimagemessage WHERE is_use ='1' AND id_imagemsg = :id_ref");
+					$fetchImageMsg->execute([
+						':id_ref' => $rowMsg["id_ref"]
+					]);
+					while($rowfetchImageMsg = $fetchImageMsg->fetch(PDO::FETCH_ASSOC)){
+						$arrMsg["IMAGE_URL"] = $rowfetchImageMsg["image_url"];
+					}
+				}else if($rowMsg["type_message"] == "image_carousel"){
+					$fetctImageCarousel = $conmysql->prepare("SELECT id_imagecarousel,update_date,update_by FROM lbimagecarouseltemplate  WHERE is_use ='1' AND id_imagecarousel = :id_ref  ORDER BY update_date DESC");
+					$fetctImageCarousel->execute([':id_ref' => $rowMsg["id_ref"]]);
+					while($rowImageCarousel = $fetctImageCarousel->fetch(PDO::FETCH_ASSOC)){
+					//	$arrMsg = array();
+						$fetctColumn = $conmysql->prepare("SELECT co.id_columns,co.	image_url,co.action_id 
+														   FROM lbimagecarouselmap tem
+														   LEFT JOIN lbimagecarouselcolumns co ON co.id_columns = tem.columns_id
+														   WHERE imagecarousel_id = :imagecarousel_id AND co.is_use ='1' AND tem.is_use = '1' 
+														   ORDER BY tem.update_date DESC");
+
+						$fetctColumn->execute([
+							':imagecarousel_id' => $rowImageCarousel["id_imagecarousel"]
+						]);
+						$column = array();
+						while($rowColumn = $fetctColumn->fetch(PDO::FETCH_ASSOC)){
+							$fetchActions = $conmysql->prepare("SELECT id_action,type,text,url,area_x,area_y,width,height,label,data,mode,initial,max,min 
+																FROM lbaction 
+																WHERE id_action = :action_id AND is_use = '1'");
+							$fetchActions->execute([
+								':action_id' => $rowColumn["action_id"]
+							]);
+							$actions = array();
+							$type = null;
+							$arrColumn = array();
+							while($rowAction = $fetchActions->fetch(PDO::FETCH_ASSOC)){
+								$arrColumn = array();
+								$arrColumn["ACTION_ID"] = $rowAction["id_action"];
+								$arrColumn["ID"] = $rowAction["id_action"];
+								$arrColumn["TYPE"] = $rowAction["type"];
+								$arrColumn["TEXT"] = $rowAction["text"];
+								$arrColumn["URL"] = $rowAction["url"];
+								$arrColumn["AREA_X"] = $rowAction["area_x"];
+								$arrColumn["AREA_Y"] = $rowAction["area_y"];
+								$arrColumn["WIDTH"] = $rowAction["width"];
+								$arrColumn["HEIGHT"] = $rowAction["height"];
+								$arrColumn["LABEL"] = $rowAction["label"];
+								$arrColumn["DATA"] = $rowAction["data"];
+								$arrColumn["MODE"] = $rowAction["mode"];
+								$arrColumn["INITIAL"] = $rowAction["initial"];
+								$arrColumn["MAX"] = $rowAction["max"];
+								$arrColumn["MIN"] = $rowAction["min"];
+								$quickmessagemap_id = $rowAction["quickmessagemap_id"];
+							}
+							$arrColumn["ID_COLUMNS"] =  $rowColumn["id_columns"];
+							$arrColumn["IMAGE_URL"] =  $rowColumn["image_url"];
+							$column[] = $arrColumn;
+						}
+						
+						$arrMsg["ID_IMAGECAROUSEL"] = $rowImageCarousel["id_imagecarousel"];
+						$arrMsg["ID_TEXTINCOME"] = $rowtextmapType["id_textincome"];;
+						$arrMsg["TYPE_MESSAGE"] = $rowMsg["type_message"];
+						$arrMsg["COLUMN"] = $column;
+						$arrMsg["UPDATE_BY"] = $rowImageCarousel["update_by"];
+						$arrMsg["UPDATE_DATE"] = $rowImageCarousel["update_date"];
+						$arrMsg["ID_REF"] = $rowMsg["id_ref"];
+					
+					}
+				}
 				$arrayGroupIncomming[] = $arrMsg;
 			}
-					
 				$arrTextmapType = array();
 				$arrTextmapType["ID_TEXTINCOME"] = $rowtextmapType["id_textincome"];
 				$arrTextmapType["TEXT_INCOME"] = $rowtextmapType["text_income"];
 				$arrTextmapType["ID_TEXTMAPTYPE"] = $rowtextmapType["id_textmaptype"];
+				$arrTextmapType["ID_REF"] = $rowMsg["id_ref"];
 				$arrTextmapType["DATA"]= $arrayGroupIncomming;
 				$arrayTextMapType[] = $arrTextmapType;
-		}
-				
-		$arrayResult["REPLY_DATA"] = $arrayGroup;
-		//$arrayResult["REPLY_DATA"] = $arrayTextMapType;
+		}	
 		$arrayResult["INCOMMING_DATA"] = $arrayTextMapType;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');
@@ -170,7 +175,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../../../include/exit_footer.php');
-		
 	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
