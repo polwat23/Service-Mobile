@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGroupMonth = array();
 		$fetchUserlogin = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
-				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH)
-				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
+				WHERE login_date > curdate() - interval (dayofmonth(curdate()) - 1) day - interval 6 month
+				GROUP BY DATE_FORMAT(login_date,'%m%Y') ORDER BY login_date ASC");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
@@ -21,8 +21,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		$fetchUserloginWeb = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
-				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH) AND channel = 'web'
-				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
+				WHERE login_date > curdate() - interval (dayofmonth(curdate()) - 1) day - interval 6 month AND channel = 'web'
+				GROUP BY DATE_FORMAT(login_date,'%m%Y') ORDER BY login_date ASC");
 		$fetchUserloginWeb->execute();
 		while($rowUserlogin = $fetchUserloginWeb->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
@@ -34,8 +34,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		$fetchUserloginMobile = $conmysql->prepare("SELECT COUNT(MEMBER_NO) as C_NAME,DATE_FORMAT(login_date,'%m') as MONTH,DATE_FORMAT(login_date,'%Y') as YEAR
 			FROM gcuserlogin
-				WHERE login_date <= DATE_SUB(login_date,INTERVAL -6 MONTH) AND channel = 'mobile_app'
-				GROUP BY DATE_FORMAT(login_date,'%m') ORDER BY login_date ASC");
+				WHERE login_date > curdate() - interval (dayofmonth(curdate()) - 1) day - interval 6 month AND channel = 'mobile_app'
+				GROUP BY DATE_FORMAT(login_date,'%m%Y') ORDER BY login_date ASC");
 		$fetchUserloginMobile->execute();
 		while($rowUserlogin = $fetchUserloginMobile->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupRootUserlogin = array();
@@ -60,4 +60,4 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	http_response_code(400);
 	require_once('../../../include/exit_footer.php');
 }
-?>
+?>S

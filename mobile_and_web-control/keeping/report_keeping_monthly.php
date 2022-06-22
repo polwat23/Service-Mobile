@@ -55,6 +55,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$shareinPeriod += $rowDetail["ITEM_PAYMENT"];
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
+				$header["interest_accum"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
@@ -90,7 +91,6 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTKBF_VALUE"],2);
-		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"] + $intinPeriod,2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -204,7 +204,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<tr>
 			<td style="width: 50px;font-size: 18px;">หุ้นยกมาต้นปี :</td>
 			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
-			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 50px;font-size: 18px;">หุ้นสะสม :</td>
 			<td style="width: 101px;">'.$header["interest_accum"].'</td>
 			</tr>
 			</tbody>

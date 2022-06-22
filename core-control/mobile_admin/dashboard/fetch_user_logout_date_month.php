@@ -48,9 +48,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											FROM
 												gcuserlogin
 											WHERE
-												login_date <= DATE_SUB(login_date, INTERVAL -6 MONTH)
+												login_date > curdate() - interval (dayofmonth(curdate()) - 1) day - interval 6 month
 											GROUP BY
-												DATE_FORMAT(login_date, '%m')
+												DATE_FORMAT(login_date,'%m%Y') 
 											ORDER BY login_date ASC");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
