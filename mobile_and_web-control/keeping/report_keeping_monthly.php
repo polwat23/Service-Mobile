@@ -161,11 +161,11 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูระยอง จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">444 หมู่ 4 ตำบลเชิงเนิน</p>
-				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองระยอง จังหวัดระยอง 21000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 038 017 156 8</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.rycoop.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กระทรวงการพัฒนาสังคมและความมั่นคงของมนุษย์ จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">255 ตึกอาทิตย์ทิพอาภา (หน้าสนามบาส) ภายในสถานสงเคราะหฺเด็กหญิงบ้านราชวิถี</p>
+			<p style="margin-top: -25px;font-size: 18px;">ถนนราชวิถี แขวงพญาไท เขตราชเทวี กรุงเทพฯ 10400</p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร :  02-354-7486 ถึง 02-354-7492</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.coopmsds.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">

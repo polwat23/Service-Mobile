@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
 				':member_no' => $member_no,
-				':limit_period' => $limit_period
+				':limit_period' => 10
 		]);
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();

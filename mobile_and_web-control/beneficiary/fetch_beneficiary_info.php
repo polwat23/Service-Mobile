@@ -15,11 +15,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
 			$arrBenefit["TYPE_PERCENT"] = 'text';
-			$arrBenefit["PERCENT_TEXT"] = $rowBenefit["REMARK"];
+			$arrBenefit["PERCENT_TEXT"] = $rowBenefit["REMARK"];	
 			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;
+		$arrayResult["REMARK"] = "ต้องการแก้ไขเปลี่ยนแปลงผู้รับผลประโยชน์ กรุณา ติดต่อสหกรณ์ ( เอกสารดังนี้ ) \n- ใบเปลี่ยนแปลงผู้รับโอน \n- สําเนาบัตรประชาชนของสมาชิกและผู้รับผลประโยชน์";
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
