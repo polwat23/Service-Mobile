@@ -256,5 +256,6 @@
 			"ELECTION_KEYCODE_WRONG" : [{"th": "รหัสผ่านสำหรับการสรรหาไม่ถูกต้อง กรุณาลองใหม่อีกคร้ง","en" : "Password for election online was wronged please try again"}],
 			"ELECTION_NOTFOUND" : [{"th" : "ไม่พบรายชื่อของท่านในการสรรหาออนไลน์","en" : "You do not have permission for election online"}],
 			"ELECTION_REPEAT" : [{"th" : "ไม่สามารถลงทะเบียนสรรหาออนไลน์ซ้ำได้","en" : "Cannot election online duplicate"}]
-		}]
+		}],
+		"CANCEL_ATM" : [{"th" : "ไม่สามารถอายัดบัตร ATM ได้ กรุณาติดต่อสหกรณ์","en" : "Cannot cancel ATM please contact cooperative"}]
 }

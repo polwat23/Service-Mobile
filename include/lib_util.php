@@ -109,6 +109,18 @@ class library {
 			return '-';
 		}
 	}
+	
+	public function formatatmcard($idcard,$separate=" "){
+		if(isset($idcard)){
+			$str1 = substr($idcard,0,4);
+			$str2 = substr($idcard,4,4);
+			$str3 = substr($idcard,8,4);
+			$str4 = substr($idcard,12,4);
+			return $str1.$separate.$str2.$separate.$str3.$separate.$str4;
+		}else{
+			return '-';
+		}
+	}
 	public function formatphone($phone,$separate=" "){
 		if(isset($phone)){
 			$str1 = substr($phone,0,3);
@@ -144,6 +156,24 @@ class library {
 			for($i = 0; $i < strlen($account_no);$i++){
 				if($format[$i] == 'h'){
 					$account_text .= 'x';
+				}else{
+					$account_text .= $account_no[$i];
+				}
+			}
+			return $account_text;
+		}else{
+			return '-';
+		}
+	}
+	public function formataccount_hidden_atm($account_no,$format) {
+		if(isset($account_no) && isset($format)){
+			$account_text = '';
+			if(strpos($account_no,'-') === FALSE){
+				$account_no = $this->formataccount($account_no,$format);
+			}
+			for($i = 0; $i < strlen($account_no);$i++){
+				if($format[$i] == 'h'){
+					$account_text .= 'X';
 				}else{
 					$account_text .= $account_no[$i];
 				}

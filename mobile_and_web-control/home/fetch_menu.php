@@ -518,6 +518,7 @@ if(!$anonymous){
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= '1164' || $dataComing["channel"] == 'web'){
 					$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
 					$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] = "https://policy.thaicoop.co/privacy.html?coop=mhd";
 				}
 				$arrayResult['rowRegisteredData'] = isset($rowRegisteredData["MEMBER_NO"]);
 				$arrayResult['RESULT'] = TRUE;
@@ -582,6 +583,7 @@ if(!$anonymous){
 			if(preg_replace('/\./','',$dataComing["app_version"]) >= '1164' || $dataComing["channel"] == 'web'){
 				$arrayResult["APP_CONFIG"]["LOGIN_REQ_CARD_PERSON"] = TRUE;
 				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] = "https://policy.thaicoop.co/privacy.html?coop=mhd";
 			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
