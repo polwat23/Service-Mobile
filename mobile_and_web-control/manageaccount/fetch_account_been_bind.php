@@ -8,15 +8,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													gba.bank_account_name,gba.bank_account_name_en,gba.bank_code
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 													LEFT JOIN gcpalettecolor gpl ON csb.id_palette = gpl.id_palette and gpl.is_use = '1'
-													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9')");
+													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9','9')");
 		$fetchAccountBeenBind->execute([
 			':member_no' => $payload["member_no"]
 		]);
 		$arrBindAccount = array();
 		while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
-			$fetchAccountBeenAllow = $conoracle->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
+			$fetchAccountBeenAllow = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
 			$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccountBind["DEPTACCOUNT_NO_COOP"]]);
-			if($fetchAccountBeenAllow->rowCount() > 0){
+			$rowAccountBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowAccountBeenAllow["DEPTACCOUNT_NO"])){
 				$getDetailAcc = $conoracle->prepare("SELECT deptaccount_name FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccountBind["DEPTACCOUNT_NO_COOP"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);

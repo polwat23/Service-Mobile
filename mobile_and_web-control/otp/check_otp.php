@@ -20,13 +20,13 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		
 	}
 	$callfile_now = strtotime(date('Y-m-d H:i:s'));
-	$checkOTP = $conoracle->prepare("SELECT otp_status,expire_date FROM gcotp WHERE otp_password = :otp_pass and refno_otp = :ref_no");
+	$checkOTP = $conoracle->prepare("SELECT otp_status,expire_date FROM gcotp WHERE TRIM(otp_password) = :otp_pass and TRIM(refno_otp) = :ref_no");
 	$checkOTP->execute([
 		':otp_pass' => $dataComing["otp"],
 		':ref_no' => $dataComing["ref_no"]
 	]);
-	if($checkOTP->rowCount() > 0){
-		$rowOTP = $checkOTP->fetch(PDO::FETCH_ASSOC);
+	$rowOTP = $checkOTP->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowOTP["EXPIRE_DATE"])){
 		$expire = strtotime($rowOTP["EXPIRE_DATE"]);
 		if($expire >= $callfile_now){
 			if($rowOTP["OTP_STATUS"] == '-9'){

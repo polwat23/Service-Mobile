@@ -22,7 +22,7 @@ $arrSMSCont = array();
 $getSMSConstant = $conoracle->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 $getSMSConstant->execute();
 while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
-	$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["SMSCS_VALUE"];
+	$arrSMSCont[$rowSMSConstant["SMSCS_NAME"]] = $rowSMSConstant["SMSCS_VALUE"];
 }
 $formatDept = $func->getConstant('hidden_dep');
 $templateMessage = $func->getTemplateSystem('DepositInfo',1);
@@ -47,7 +47,7 @@ if(isset($templateMessage)){
 			$durationIdle = 0;
 		}
 		if($rowSTM["SIGN_FLAG"] == '1'){
-			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_dept_send_free"] || $durationIdle >= 180){
+			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_dept_send_free"] || $durationIdle >= '90'){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
@@ -74,7 +74,7 @@ if(isset($templateMessage)){
 					':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 				]);
 				$rowRights = $checkRights->fetch(PDO::FETCH_ASSOC);
-				if(isset($rowRights["IS_MINDEPOSIT"])){					
+				if(isset($rowRights["IS_MINDEPOSIT"])){		
 					if($rowRights["IS_MINDEPOSIT"] == '1'){
 						if($rowSTM["AMOUNT"] >= $rowRights["SMSCSP_MINDEPOSIT"]){
 							if($rowRights["smscsp_pay_type"] == '1'){
@@ -190,7 +190,7 @@ if(isset($templateMessage)){
 				}
 			}
 		}else{
-			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_withdraw_send_free"] || $durationIdle >= 180){
+			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_withdraw_send_free"] || $durationIdle >= '180'){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);

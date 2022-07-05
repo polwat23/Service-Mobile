@@ -20,9 +20,10 @@ $fetchAnn = $conoracle->prepare("SELECT priority,announce_cover,announce_title,a
 												WHERE effect_date IS NOT NULL and 
 												((CASE WHEN priority = 'high' OR priority = 'ask'
 												THEN 
-													DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') <= DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s')
+													TO_DATE(effect_date,'YYYY-MM-DD HH24:MI:SS') <= TO_DATE(SYSDATE,'YYYY-MM-DD HH24:MI:SS')
 												ELSE   
-													DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') BETWEEN DATE_FORMAT(effect_date,'%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(due_date,'%Y-%m-%d %H:%i:%s')
+													TO_DATE(SYSDATE,'YYYY-MM-DD HH24:MI:SS') BETWEEN TO_DATE(effect_date,'YYYY-MM-DD HH24:MI:SS') 
+												AND TO_DATE(due_date,'YYYY-MM-DD HH24:MI:SS')
 												END ) OR first_time = :first_time) and flag_granted <> :flag_granted");
 $fetchAnn->execute([
 	':first_time' => $firstapp,

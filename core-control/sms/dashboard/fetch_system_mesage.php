@@ -1,7 +1,6 @@
 <?php
 require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms',null,$conoracle)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
 		$fetchSMSsystemSend = $conoracle->prepare("SELECT
@@ -23,11 +22,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["SYSTEM_SEND_SMS_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../include/exit_footer.php');
-	}else{
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../../include/exit_footer.php');
-	}
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);

@@ -74,7 +74,7 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 					}
 				}else{
 					$insertSmsQuery = $conoracle->prepare("INSERT INTO smsquery(id_smsquery,sms_query,column_selected,target_field,condition_target,is_bind_param,create_by)
-															VALUES(:sms_query,:column_selected,:target_field,:condition_target,'1',:username)");
+															VALUES(:id_smsquery,:sms_query,:column_selected,:target_field,:condition_target,'1',:username)");
 					if($insertSmsQuery->execute([
 						':id_smsquery' => $id_smsquery,
 						':sms_query' => $dataComing["query_template_spc_"],
@@ -86,7 +86,14 @@ if($lib->checkCompleteArgument(['unique_id','template_name','template_body'],$da
 	
 					}else{
 						$conoracle->rollback();
-						$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
+						$arrayResult['RESPONSE'] = json_encode([
+						':id_smsquery' => $id_smsquery,
+						':sms_query' => $dataComing["query_template_spc_"],
+						':column_selected' => implode(',',$dataComing["column_selected"]),
+						':target_field' => $dataComing["target_field"],
+						':condition_target' => $dataComing["condition_target"],
+						':username' => $payload["username"]
+					]);//"ไม่สามารถเพิ่มคิวรี่เทมเพลตได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 						

@@ -2,7 +2,7 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
+	if($func->check_permission_core($payload,'admincontrol','permissionmenu',$conoracle)){
 		$arrayGroup = array();
 		$fetchUser = $conoracle->prepare("SELECT USER_NAME FROM amsecusers");
 		$fetchUser->execute();

@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare','input_type','inp
 				':details' => "add row ".$dataComing["input_name"]." (".$dataComing["id_const_welfare"].")"
 			];
 			
-			$log->writeLog('manageapplication',$arrayStruc);	
+			//$log->writeLog('manageapplication',$arrayStruc,$conoracle);
 
 			$arrayResult["RESULT"] = TRUE;
 			$arrayResult["INPUT_LENGTH"] = $dataComing["input_length_spc_"];

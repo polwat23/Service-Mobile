@@ -72,7 +72,7 @@ class functions {
 			while($rowMember = $getMemberlogin->fetch(\PDO::FETCH_ASSOC)){
 				$arrMember[] = $rowMember["ID_TOKEN"];
 			}
-			$logout = $this->conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() 
+			$logout = $this->conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = SYSDATE 
 									WHERE member_no = :member_no and id_token <> :id_token and is_login = '1'");
 			if($logout->execute([
 				':type_login' => $type_login,
@@ -89,8 +89,8 @@ class functions {
 		}
 		public function revoke_alltoken($id_token,$type_revoke,$is_notlogout=false){
 			if($is_notlogout){
-				$revokeAllToken = $this->conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
-											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+				$revokeAllToken = $this->conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = SYSDATE,
+											rt_is_revoke = :type_revoke,rt_expire_date = SYSDATE
 											WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
 					':type_revoke' => $type_revoke,
@@ -116,10 +116,10 @@ class functions {
 					case '-6' : $type_login = '-5';
 						break;
 				}
-				$revokeAllToken = $this->conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
-												rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+				$revokeAllToken = $this->conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = SYSDATE,
+												rt_is_revoke = :type_revoke,rt_expire_date = SYSDATE
 												WHERE id_token = :id_token");
-				$forceLogout = $this->conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW()
+				$forceLogout = $this->conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = SYSDATE
 												WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
 					':type_revoke' => $type_revoke,
@@ -135,7 +135,7 @@ class functions {
 			}
 		}
 		public function revoke_accesstoken($id_token,$type_revoke){
-			$revokeAT = $this->conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW() WHERE id_token = :id_token");
+			$revokeAT = $this->conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = SYSDATE WHERE id_token = :id_token");
 			if($revokeAT->execute([
 				':type_revoke' => $type_revoke,
 				':id_token' => $id_token
@@ -146,7 +146,7 @@ class functions {
 			}
 		}
 		public function revoke_refreshtoken($id_token,$type_revoke){
-			$revokeRT = $this->conora->prepare("UPDATE gctoken SET rt_is_revoke = :type_revoke,rt_expire_date = NOW() WHERE id_token = :id_token");
+			$revokeRT = $this->conora->prepare("UPDATE gctoken SET rt_is_revoke = :type_revoke,rt_expire_date = SYSDATE WHERE id_token = :id_token");
 			if($revokeRT->execute([
 				':type_revoke' => $type_revoke,
 				':id_token' => $id_token

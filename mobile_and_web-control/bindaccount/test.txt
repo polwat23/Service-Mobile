@@ -1,0 +1,1 @@
+["HY000",1400,"OCIStmtExecute: ORA-01400: cannot insert NULL into (\"ISCORFSC\".\"GCBINDACCOUNT\".\"ID_BINDACCOUNT\")\n (ext\\pdo_oci\\oci_statement.c:157)"]

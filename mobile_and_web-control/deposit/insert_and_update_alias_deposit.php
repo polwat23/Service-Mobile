@@ -23,7 +23,6 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$arrExecute = array();
 		if(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != ""){
 			$encode_avatar = $dataComing["base64_img"];
 			$destination = __DIR__.'/../../resource/alias_account_dept';
@@ -50,19 +49,46 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$path_alias_img = '/resource/alias_account_dept/'.$createAvatar["normal_path"].'?v='.$lib->randomText('all',6);
 			$arrExecute["path_alias_img"] = $path_alias_img;
 		}
-		if(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != ""){
-			$arrExecute["alias_name"] = $dataComing["alias_name_emoji_"];
-		}
-		$arrExecute["deptaccount_no"] = $account_no;
-		$updateMemoDept = $conoracle->prepare("UPDATE gcdeptalias SET update_date = SYSDATE,".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
-												".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
-												WHERE deptaccount_no = :deptaccount_no");
+		$getDeptAlias = $conoracle->prepare("SELECT id_acc_alias FROM gcdeptalias WHERE deptaccount_no = :deptaccount_no");
+		$getDeptAlias->execute([
+			':deptaccount_no' => $account_no
+		]);
+		$rowDeptAlias = $getDeptAlias->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowDeptAlias["ID_ACC_ALIAS"])){
 			
-		if($updateMemoDept->execute($arrExecute)){
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
+			if(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != ""){
+				$arrExecute["alias_name"] = $dataComing["alias_name_emoji_"];
+			}
+			$arrExecute["deptaccount_no"] = $account_no;
+			$arrExecute["id_acc_alias"] = $rowDeptAlias["ID_ACC_ALIAS"];
+			$updateMemoDept = $conoracle->prepare("UPDATE gcdeptalias SET update_date = SYSDATE,".(isset($dataComing["alias_name_emoji_"]) && $dataComing["alias_name_emoji_"] != "" ? "alias_name = :alias_name," : null)."deptaccount_no = :deptaccount_no
+													".(isset($dataComing["base64_img"]) && $dataComing["base64_img"] != "" ? ",path_alias_img = :path_alias_img" : null)." 
+													WHERE id_acc_alias = :id_acc_alias");
+				
+			if($updateMemoDept->execute($arrExecute)){
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1027",
+					":error_desc" => "แก้ไขชื่อเล่นบัญชีไม่ได้ "."\n".json_encode($dataComing),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "แก้ไขชื่อเล่นบัญชีไม่ได้เพราะ update ลงตาราง gcdeptalias ไม่ได้ "."\n"."Query => ".$updateMemoDept->queryString."\n"." Param =>".json_encode([
+					':alias_name' => $dataComing["alias_name_emoji_"] == "" ? null : $dataComing["alias_name_emoji_"],
+					':path_alias_img' => $path_alias_img ?? null,
+					':deptaccount_no' => $account_no
+				]);
+				$lib->sendLineNotify($message_error);
+				$arrayResult['RESPONSE_CODE'] = "WS1027";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 		}else{
-			
 			$id_acc_alias  = $func->getMaxTable('id_acc_alias' , 'gcdeptalias');
 			$insertMemoDept = $conoracle->prepare("INSERT INTO gcdeptalias(id_acc_alias,alias_name,path_alias_img,deptaccount_no)
 													VALUES(:id_acc_alias , :alias_name,:path_alias_img,:deptaccount_no)");

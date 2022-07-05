@@ -395,6 +395,31 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
+		$getLimitAllDay->execute();
+		$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
+		if($rowLimitAllDay["FIXED_UNIT"] == '1'){
+			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
+												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		}else{
+			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
+												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		}
+		$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
+		$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $amt_transfer;
+		if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
+			$arrayResult["RESPONSE_CODE"] = 'WS0043';
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
 			$transfer_mode = "1";

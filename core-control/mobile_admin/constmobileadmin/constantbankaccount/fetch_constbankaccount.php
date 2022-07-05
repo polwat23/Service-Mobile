@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										bank.fee_withdraw
 									FROM
 										csbankdisplay bank
-									INNER JOIN gcpalettecolor color ON
+									LEFT JOIN gcpalettecolor color ON
 										bank.id_palette = color.id_palette");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
@@ -43,7 +43,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			
 			$arrConstans["BANK_CONSTANT"] = [];
 			$fetchBankMapping = $conoracle->prepare("SELECT bc.id_bankconstant,
-											bc.transaction_name,
 											bc.transaction_cycle,
 											bc.max_numof_deposit,
 											bc.max_numof_withdraw,

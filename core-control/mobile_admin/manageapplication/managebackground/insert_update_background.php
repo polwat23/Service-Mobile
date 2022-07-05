@@ -21,7 +21,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$encode_image = $dataComing["image"];
 			$destination = __DIR__.'/../../../../resource/background';
 			$random_text = $lib->randomText('all',6);
-			$file_name = 'appbg';
+			$file_name = 'appbg2';
+			unlink(__DIR__.'/../../../../resource/background/appbg2.jpeg');
 			if(!file_exists($destination)){
 				mkdir($destination, 0777, true);
 			}

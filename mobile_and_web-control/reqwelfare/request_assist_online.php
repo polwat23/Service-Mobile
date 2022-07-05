@@ -6,13 +6,17 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$insertBulkColumn = array();
 		$insertBulkData = array();
-		$getColumnFormat = $conoracle->prepare("SELECT input_name
+		$getColumnFormat = $conoracle->prepare("SELECT input_name , input_type
 												FROM gcformatreqwelfare
 												WHERE id_const_welfare = :id_const_welfare and is_use = '1'");
 		$getColumnFormat->execute([':id_const_welfare' => $dataComing["id_const_welfare"]]);
 		while($rowColumn = $getColumnFormat->fetch(PDO::FETCH_ASSOC)){
 			$insertBulkColumn[] = $rowColumn["INPUT_NAME"];
-			$insertBulkData[] = ':'.$rowColumn["INPUT_NAME"];
+			if($rowColumn["INPUT_TYPE"] == 'date'){	
+				$insertBulkData[] = "TO_DATE(:".$rowColumn["INPUT_NAME"].",'YYYY-MM-DD')";
+			}else {
+				$insertBulkData[] = ':'.$rowColumn["INPUT_NAME"];
+			}
 		}
 		$insertBulkColumn[] = "member_no";
 		$insertBulkColumn[] = "assisttype_code";
@@ -20,12 +24,14 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 		$insertBulkColumn[] = "req_status";
 		$insertBulkColumn[] = "assist_docno";
 		$insertBulkColumn[] = "assist_year";
+		$insertBulkColumn[] = "req_date";
 		$insertBulkData[] = ":member_no";
 		$insertBulkData[] = ":assisttype_code";
 		$insertBulkData[] = ":coop_id";
 		$insertBulkData[] = ":req_status";
 		$insertBulkData[] = ":assist_docno";
 		$insertBulkData[] = ":assist_year";
+		$insertBulkData[] = "TO_DATE(:req_date,'YYYY-MM-DD')";
 		$textColumnInsert = "(".implode(",",$insertBulkColumn).")";
 		$textDataInsert = "(".implode(",",$insertBulkData).")";
 		$arrayExecute = array();
@@ -40,6 +46,8 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 				$arrayExecute[':'.$keyExe] = substr(time(),0,10);
 			}else if($keyExe == 'assist_year'){
 				$arrayExecute[':'.$keyExe] = date('Y');
+			}else if($keyExe == 'req_date'){
+				$arrayExecute[':'.$keyExe] = date('Y-m-d');
 			}else{
 				$arrayExecute[':'.$keyExe] = $dataComing[$keyExe];
 			}
@@ -59,6 +67,8 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare','assisttype_
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไฟล์ ".$filename." ไม่สามารถขอทุนสวัสดิการได้"."\n"."Query => ".$insertToAssistMast->queryString."\n"."DATA => ".json_encode($arrayExecute);
 			$lib->sendLineNotify($message_error);
+			$arrayResult['RESPONSE']  = json_encode($insertToAssistMast);
+			$arrayResult['arrayExecute']  = json_encode($arrayExecute);
 			$arrayResult['RESPONSE_CODE'] = "WS0055";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

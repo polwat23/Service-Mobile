@@ -62,7 +62,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 				':details' => implode(',',$insertBulkContLog).' '.$updateConstLog
 			];
 			$arrayResult['dataOld'] = $arrayGroup;
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,$conoracle);	
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{

@@ -28,8 +28,8 @@ class functions {
 		}
 		public function revoke_alltoken($id_token,$type_revoke,$is_notlogout=false,$conora){
 			if($is_notlogout){
-				$revokeAllToken = $conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
-											rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+				$revokeAllToken = $conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = SYSDATE,
+											rt_is_revoke = :type_revoke,rt_expire_date = SYSDATE
 											WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
 					':type_revoke' => $type_revoke,
@@ -55,10 +55,10 @@ class functions {
 					case '-6' : $type_login = '-5';
 						break;
 				}
-				$revokeAllToken = $conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = NOW(),
-												rt_is_revoke = :type_revoke,rt_expire_date = NOW()
+				$revokeAllToken = $conora->prepare("UPDATE gctoken SET at_is_revoke = :type_revoke,at_expire_date = SYSDATE,
+												rt_is_revoke = :type_revoke,rt_expire_date = SYSDATE
 												WHERE id_token = :id_token");
-				$forceLogout = $conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW()
+				$forceLogout = $conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = SYSDATE
 												WHERE id_token = :id_token");
 				if($revokeAllToken->execute([
 					':type_revoke' => $type_revoke,
@@ -168,48 +168,18 @@ class functions {
 			}
 		}
 		public function check_permission_core($payload,$root_menu,$page_name=null,$conora){
-			if(isset($payload["section_system"]) && isset($payload["username"])){
-				if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
+			if(isset($payload["username"])){
+				$getConstructorMenu = $conora->prepare("SELECT amp.WINDOW_ID FROM amsecwins amw LEFT JOIN amsecpermiss amp ON amw.window_id = amp.window_id
+													WHERE amp.application = 'user' and amp.check_flag = '1' and amp.user_name = :username and amw.win_object = :page_name");
+				$getConstructorMenu->execute([
+					':username' => $payload["username"],
+					':page_name' => $page_name
+				]);
+				$rowrootMenu = $getConstructorMenu->fetch(\PDO::FETCH_ASSOC);
+				if(isset($rowrootMenu["WINDOW_ID"])){
 					return true;
 				}else{
-					if(isset($page_name)){
-						$getConstructorMenu = $conora->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
-															WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
-						$getConstructorMenu->execute([
-							':username' => $payload["username"],
-							':root_menu' => $root_menu
-						]);
-						$rowrootMenu = $getConstructorMenu->fetch(\PDO::FETCH_ASSOC);
-						if(isset($rowrootMenu["ID_COREMENU"])){
-							$checkMenuinRoot = $conora->prepare("SELECT csm.id_submenu FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm ON csm.id_submenu = cpsm.id_submenu
-																WHERE cpsm.is_use = '1' and csm.id_coremenu = :id_coremenu and csm.menu_status = '1' and csm.page_name = :page_name");
-							$checkMenuinRoot->execute([
-								':id_coremenu' => $rowrootMenu["ID_COREMENU"],
-								':page_name' => $page_name
-							]);
-							$rowrootMenuinRoot = $checkMenuinRoot->fetch(\PDO::FETCH_ASSOC);
-							if(isset($rowrootMenuinRoot["ID_SUBMENU"])){
-								return true;
-							}else{
-								return false;
-							}
-						}else{
-							return false;
-						}
-					}else{
-						$checkPermit = $conora->prepare("SELECT cm.id_coremenu FROM corepermissionmenu cpm LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu
-														WHERE cpm.is_use = '1' and cm.coremenu_status = '1' and cpm.username = :username and cm.root_path = :root_menu");
-						$checkPermit->execute([
-							':username' => $payload["username"],
-							':root_menu' => $root_menu
-						]);
-						$rowCheckPermit = $checkPermit->fetch(\PDO::FETCH_ASSOC);
-						if(isset($rowCheckPermit["ID_COREMENU"])){
-							return true;
-						}else{
-							return false;
-						}
-					}
+					return false;
 				}
 			}else{
 				return false;
@@ -224,15 +194,16 @@ class functions {
 			if($type_target == 'person'){
 				if(isset($member_no) && $member_no != ""){
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchFCMToken = $conora->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchFCMToken = $conora->prepare("SELECT HMS_TOKEN,FCM_TOKEN,RECEIVE_NOTIFY_NEWS,RECEIVE_NOTIFY_TRANSACTION,MEMBER_NO FROM gcmemberaccount WHERE member_no IN('".implode("','",$member_no)."')");
 						$fetchFCMToken->execute();
 					}else{
-						$fetchFCMToken = $conora->prepare("SELECT hms_token,fcm_token,receive_notify_news,receive_notify_transaction,member_no FROM gcmemberaccount WHERE member_no = :member_no");
+						$fetchFCMToken = $conora->prepare("SELECT HMS_TOKEN,FCM_TOKEN,RECEIVE_NOTIFY_NEWS,RECEIVE_NOTIFY_TRANSACTION,MEMBER_NO FROM gcmemberaccount WHERE member_no = :member_no");
 						$fetchFCMToken->execute([':member_no' => $member_no]);
 					}
 					while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 						if(!in_array($rowFCMToken["MEMBER_NO"],$arrayMember)){
 							$arrayMT = array();
+							$arrayHW = array();
 							if(isset($rowFCMToken["FCM_TOKEN"]) && $rowFCMToken["FCM_TOKEN"] != ""){
 								$arrayMT["TOKEN"] = $rowFCMToken["FCM_TOKEN"];
 								$arrayMT["MEMBER_NO"] = $rowFCMToken["MEMBER_NO"];
@@ -240,35 +211,54 @@ class functions {
 								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["RECEIVE_NOTIFY_TRANSACTION"];
 								$arrayMember[] = $rowFCMToken["MEMBER_NO"];
 								$arrayMemberGRP[] = $arrayMT;
+								$arrayHW["TOKEN"] = null;
+								$arrayHW["MEMBER_NO"] = null;
+								$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
+								$arrayHW["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["RECEIVE_NOTIFY_TRANSACTION"];
+								$arrayMemberGRPHW[] = $arrayHW;
 							}else{
-								$arrayMT["TOKEN"] = $rowFCMToken["HMS_TOKEN"];
-								$arrayMT["MEMBER_NO"] = $rowFCMToken["MEMBER_NO"];
+								$arrayMT["TOKEN"] = null;
+								$arrayMT["MEMBER_NO"] = null;
 								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
 								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["RECEIVE_NOTIFY_TRANSACTION"];
+								$arrayMemberGRP[] = $arrayMT;
+								$arrayHW["TOKEN"] = $rowFCMToken["HMS_TOKEN"];
+								$arrayHW["MEMBER_NO"] = $rowFCMToken["MEMBER_NO"];
+								$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
+								$arrayHW["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["RECEIVE_NOTIFY_TRANSACTION"];
 								$arrayMember[] = $rowFCMToken["MEMBER_NO"];
-								$arrayMemberGRPHW[] = $arrayMT;
+								$arrayMemberGRPHW[] = $arrayHW;
 							}
 						}
 					}
 				}
 			}else{
-				$fetchFCMToken = $conora->prepare("SELECT hms_token,fcm_token,receive_notify_news,member_no FROM gcmemberaccount");
+				$fetchFCMToken = $conora->prepare("SELECT HMS_TOKEN,FCM_TOKEN,RECEIVE_NOTIFY_NEWS,MEMBER_NO FROM gcmemberaccount");
 				$fetchFCMToken->execute();
 				while($rowFCMToken = $fetchFCMToken->fetch(\PDO::FETCH_ASSOC)){
 					if(!in_array($rowFCMToken["MEMBER_NO"],$arrayMember)){
 						$arrayMT = array();
+						$arrayHW = array();
 						if(isset($rowFCMToken["FCM_TOKEN"]) && $rowFCMToken["FCM_TOKEN"] != ""){
 							$arrayMT["TOKEN"] = $rowFCMToken["FCM_TOKEN"];
 							$arrayMT["MEMBER_NO"] = $rowFCMToken["MEMBER_NO"];
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
 							$arrayMember[] = $rowFCMToken["MEMBER_NO"];
 							$arrayMemberGRP[] = $arrayMT;
+							$arrayHW["TOKEN"] = null;
+							$arrayHW["MEMBER_NO"] = null;
+							$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
+							$arrayMemberGRPHW[] = $arrayHW;
 						}else{
-							$arrayMT["TOKEN"] = $rowFCMToken["HMS_TOKEN"];
-							$arrayMT["MEMBER_NO"] = $rowFCMToken["MEMBER_NO"];
+							$arrayMT["TOKEN"] = null;
+							$arrayMT["MEMBER_NO"] = null;
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
+							$arrayMemberGRP[] = $arrayMT;
+							$arrayHW["TOKEN"] = $rowFCMToken["HMS_TOKEN"];
+							$arrayHW["MEMBER_NO"] = $rowFCMToken["MEMBER_NO"];
+							$arrayHW["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["RECEIVE_NOTIFY_NEWS"];
 							$arrayMember[] = $rowFCMToken["MEMBER_NO"];
-							$arrayMemberGRPHW[] = $arrayMT;
+							$arrayMemberGRPHW[] = $arrayHW;
 						}
 					}
 				}
@@ -295,7 +285,7 @@ class functions {
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
 								$arrayMT = array();
-								$arrayMT["TEL"] = '0875514386';//$rowDataOra["MEM_TELMOBILE"];
+								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
@@ -313,13 +303,13 @@ class functions {
 						if($check_tel){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
 								$arrayMT = array();
-								$arrayMT["TEL"] = '0875514386';//$rowDataOra["MEM_TELMOBILE"];
+								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}else{
 							$arrayMT = array();
-							$arrayMT["TEL"] = '0875514386';//$rowDataOra["MEM_TELMOBILE"];
+							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 							$arrayMemberGRP[] = $arrayMT;
 						}
@@ -330,7 +320,7 @@ class functions {
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMT = array();
-						$arrayMT["TEL"] = '0875514386';//$rowDataOra["MEM_TELMOBILE"];
+						$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 						$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 						$arrayMemberGRP[] = $arrayMT;
 				}

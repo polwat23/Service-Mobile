@@ -38,9 +38,11 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	$bulkInsert = array();
 	$arrayDest = array();
 	if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != "" && mb_strlen($arrayTel[0]["TEL"]) == 10){
-		$insertOTP = $conoracle->prepare("INSERT INTO gcotp(refno_otp,otp_password,destination_number,expire_date,otp_text)
-											VALUES(:ref_otp,:otp_pass,:destination,:expire_date,:otp_text)");
+		$max_id_otp  = $func->getMaxTable('id_otp','gcotp');
+		$insertOTP = $conoracle->prepare("INSERT INTO gcotp(id_otp,refno_otp,otp_password,destination_number,expire_date,otp_text)
+											VALUES(:id_otp,:ref_otp,:otp_pass,:destination,TO_DATE(:expire_date ,'YYYY-MM-DD HH24:MI:SS'),:otp_text)");
 		if($insertOTP->execute([
+			':id_otp' => $max_id_otp,
 			':ref_otp' => $reference,
 			':otp_pass' => $otp_password,
 			':destination' => $arrayTel[0]["TEL"],

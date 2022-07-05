@@ -35,7 +35,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	NVL(kpd.interest_payment,0) AS INT_BALANCE
+																	NVL(kpd.interest_payment,0) AS INT_BALANCE,
+																	kpd.KEEPITEMTYPE_CODE,
+																	kpd.SHRLONTYPE_CODE
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																	kpd.keepitemtype_code = kut.keepitemtype_code
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -47,9 +49,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$arrGroupDetail = array();
+		$sumAmount = 0;
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			$arrDetail["KEY"] = $rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"].$rowDetail["PAY_ACCOUNT"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
@@ -65,13 +69,22 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
+			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
+				$itemPayment = $rowDetail["ADJUST_ITEMAMT"];
+			}else{
+				$itemPayment = $rowDetail["ITEM_PAYMENT"];
+			}
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
-			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
-			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
-			$arrGroupDetail[] = $arrDetail;
+			$arrDetail["ITEM_PAYMENT"] = number_format($itemPayment,2);
+			$sumAmount += $itemPayment;
+			if(array_search($rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"].$rowDetail["PAY_ACCOUNT"],array_column($arrGroupDetail,'KEY')) === False){
+				$arrGroupDetail[] = $arrDetail;
+			}else{
+				$arrGroupDetail[array_search($rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"],array_column($arrGroupDetail,'KEY'))]["ITEM_PAYMENT"] = number_format(preg_replace('/,/','',$arrGroupDetail[array_search($rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"],array_column($arrGroupDetail,'KEY'))]["ITEM_PAYMENT"]) + $itemPayment,2);
+			}
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
-																kpd.RECEIPT_NO,
+																kpd.KPSLIP_NO,
 																kpd.OPERATE_DATE
 																FROM kptempreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
@@ -82,11 +95,18 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
-		$header["receipt_no"] = trim($rowKPHeader["RECEIPT_NO"]);
+		$header["sum_amount"] = $sumAmount;
+		$header["receipt_no"] = trim($rowKPHeader["KPSLIP_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -233,7 +253,6 @@ function GenerateReport($dataReport,$header){
 					</div>
 				</div>';
 		}
-		$sumBalance += $dataReport[$i]["ITEM_PAYMENT_NOTFORMAT"];
 	}
 		$html .= '</div>';
 				// Footer
@@ -242,7 +261,7 @@ function GenerateReport($dataReport,$header){
 							<div style="width: 590px;text-align: right;font-size: 18px;border-right : 0.5px solid black;padding-top: 0px;height:32px;">
 								รวมเงิน
 							</div>
-							<div style="width: 90px;text-align: right;font-size: 18px;font-weight: bold;margin-left:600px;padding-top: 0px;">'.number_format($sumBalance,2).'</div>
+							<div style="width: 90px;text-align: right;font-size: 18px;font-weight: bold;margin-left:600px;padding-top: 0px;">'.number_format($header["sum_amount"],2).'</div>
 					</div>';
 
 	$dompdf = new Dompdf([

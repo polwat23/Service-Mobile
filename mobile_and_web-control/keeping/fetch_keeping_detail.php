@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$MonthForCheck = date('m');
 		$DayForCheck = date('d');
-		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
-															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
+		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,KPSLIP_NO,RECEIVE_AMT
+															FROM kptempreceive WHERE member_no = :member_no GROUP BY KPSLIP_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
 		$getLastReceive->execute([':member_no' => $member_no]);
 		$rowLastRecv = $getLastReceive->fetch(PDO::FETCH_ASSOC);
 		$checkHasBeenPay = $conoracle->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no and recv_period = :max_recv and keeping_status = 1");
@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
-		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
+		$arrayResult["SLIP_NO"] = $rowLastRecv["KPSLIP_NO"];
 		$arrayResult["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowLastRecv["MAX_RECV"]));
 		$getPaymentDetail = $conoracle->prepare("SELECT 
 																	CASE kut.system_code 
@@ -49,6 +49,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 																	ELSE kut.keepitemtype_desc
 																	END as TYPE_DESC,
+																	kpd.SEQ_NO,
 																	kut.keepitemtype_grp as TYPE_GROUP,
 																	case kut.keepitemtype_grp 
 																		WHEN 'DEP' THEN kpd.description
@@ -58,7 +59,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	NVL(kpd.interest_payment,0) AS INT_BALANCE
+																	NVL(kpd.interest_payment,0) AS INT_BALANCE,
+																	kpd.KEEPITEMTYPE_CODE,
+																	kpd.SHRLONTYPE_CODE
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																	kpd.keepitemtype_code = kut.keepitemtype_code
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -73,6 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
+			$arrDetail["KEY"] = $rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"].$rowDetail["PAY_ACCOUNT"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
@@ -91,8 +95,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if($rowDetail["ITEM_BALANCE"] > 0){
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			}
-			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
-			$arrGroupDetail[] = $arrDetail;
+			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
+				$itemPayment = $rowDetail["ADJUST_ITEMAMT"];
+			}else{
+				$itemPayment = $rowDetail["ITEM_PAYMENT"];
+			}
+			$arrDetail["ITEM_PAYMENT"] = number_format($itemPayment,2);
+			$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
+			if(array_search($rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"].$rowDetail["PAY_ACCOUNT"],array_column($arrGroupDetail,'KEY')) === False){
+				$arrGroupDetail[] = $arrDetail;
+			}else{
+				$arrGroupDetail[array_search($rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"],array_column($arrGroupDetail,'KEY'))]["ITEM_PAYMENT"] = number_format(preg_replace('/,/','',$arrGroupDetail[array_search($rowDetail["SHRLONTYPE_CODE"].$rowDetail["KEEPITEMTYPE_CODE"],array_column($arrGroupDetail,'KEY'))]["ITEM_PAYMENT"]) + $itemPayment,2);
+			}
 		}
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;

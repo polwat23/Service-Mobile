@@ -19,7 +19,25 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
+	if($member_no != "00004034" && $member_no != "00004184" && $member_no != "00006966" && $member_no != "00008579" && $member_no != "00008580"
+	&& $member_no != "00010227" && $member_no != "00012327" && $member_no != "00012329" && $member_no != "00012330"
+	&& $member_no != "00016111" && $member_no != "00016128" && $member_no != "00016247" && $member_no != "00016633"
+	&& $member_no != "00016667" && $member_no != "00016939" && $member_no != "00016973" && $member_no != "00017581"
+	&& $member_no != "00017583" && $member_no != "00017770" && $member_no != "00017771" && $member_no != "00017774"
+	&& $member_no != "00017775" && $member_no != "00018237" && $member_no != "00018238" && $member_no != "00018744"
+	&& $member_no != "00018762" && $member_no != "00018790" && $member_no != "00018978" && $member_no != "00019107" && $member_no != "00019290"
+	&& $member_no != "00019850" && $member_no != "00019986" && $member_no != "00019987" && $member_no != "00019988"
+	&& $member_no != "00019989" && $member_no != "00020154" && $member_no != "00020244" && $member_no != "00020691"
+	&& $member_no != "00021007" && $member_no != "00021098" && $member_no != "00021357" && $member_no != "00021389"
+	&& $member_no != "00021390" && $member_no != "00005449" && $member_no != "etnmode1" && $member_no != "etnmode2" 
+	&& $member_no != "etnmode3" && $member_no != "etnmode4" && $member_no != "etnmode5" && $member_no != "00500002"){
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+	}
 	if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
 		$checkBlackList = $conoracle->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1'");
 		$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
@@ -45,6 +63,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			}
 		}
 	}
+	$tempInsert = 0;
 	$checkLogin = $conoracle->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
@@ -61,12 +80,12 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				require_once('../../include/exit_footer.php');
 				
 			}
-			if($dataComing["is_root"] == "1"){				
+			if($dataComing["is_root"] == "1"){
 				$max_id  = $func->getMaxTable('id_blacklist' , 'gcdeviceblacklist');			
 				$insertBlackList = $conoracle->prepare("INSERT INTO gcdeviceblacklist(id_blacklist, unique_id,member_no,type_blacklist)
 													VALUES(:id_blacklist,:unique_id,:member_no,'1')");
 				if($insertBlackList->execute([
-					':id_blacklist' => $max_id,
+					':id_blacklist' => $max_id + $tempInsert,
 					':unique_id' => $dataComing["unique_id"],
 					':member_no' => $member_no
 				])){
@@ -76,6 +95,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					require_once('../../include/exit_footer.php');
 					
 				}
+				$tempInsert++;
 			}
 		}
 		$rowPassword = $rowcheckLogin;
@@ -126,33 +146,37 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				]);
 				$arrayIdToken = array();
 				$prev_unique_id = null;
+				$index = 0;
+				$bulkInsert = array();
 				while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
+					
 					$arrayIdToken[] = $rowIdToken["ID_TOKEN"];	
 					if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && $dataComing["unique_id"] != $rowIdToken["UNIQUE_ID"] && 
 					$prev_unique_id != $rowIdToken["UNIQUE_ID"]){
 						$prev_unique_id = $rowIdToken["UNIQUE_ID"];
 						
 						$id_blacklist  = $func->getMaxTable('id_blacklist' , 'gcdeviceblacklist');	
-						
-						$insertBacklist = $conoracle->prepare("INSERT INTO gcdeviceblacklist(id_blacklist,unique_id,type_blacklist,member_no,new_id_token,old_id_token)
-															VALUES(:id_blacklist,:unique_id,:is_root,:member_no,:new_id_token,:old_id_token)");
-						if($insertBacklist->execute([
-							':id_blacklist' => $id_blacklist ,
-							':unique_id' => $rowIdToken["UNIQUE_ID"],
-							':is_root' => $dataComing["is_root"] ?? 0,
-							':member_no' => $dataComing["member_no"],
-							':new_id_token' => $id_token,
-							':old_id_token' => $rowIdToken["ID_TOKEN"]
-						])){
-						}else{
-							$conoracle->rollback();
-							$arrayResult['RESPONSE_CODE'] = "WS1002";
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-							$arrayResult['RESULT'] = FALSE;
-							require_once('../../include/exit_footer.php');
-							
-						}
+						$bulkInsert[] = "INTO gcdeviceblacklist(id_blacklist,unique_id,type_blacklist,member_no,new_id_token,old_id_token)
+										VALUES(".($id_blacklist + $index + $tempInsert).",'".$rowIdToken["UNIQUE_ID"]."','".($dataComing["is_root"] ?? 0)."','".$dataComing["member_no"]."',".$id_token.",".$rowIdToken["ID_TOKEN"].")";
+						$index++;
+						$tempInsert = 0;
 					}
+				}
+				if(sizeof($bulkInsert) > 0){
+					
+					$insertBacklist = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)." SELECT * FROM dual");
+					$insertBacklist->execute();
+					/*if($insertBacklist->execute()){
+					}else{
+						
+						
+						$conoracle->rollback();
+						$arrayResult['RESPONSE_CODE'] = "WS1002";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}*/
 				}
 				if(sizeof($arrayIdToken) > 0){
 					$updateLoggedOneDevice = $conoracle->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',

@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id','loan_typecode'],$dataComing)){
 					':details' => ($dataComing["old_alias_name"] ?? ' ').' => '.$dataComing["alias_name"]
 				];
 				
-				$log->writeLog('manageuser',$arrayStruc);	
+				$log->writeLog('manageuser',$arrayStruc,$conoracle);	
 				$arrayResult["RESULT"] = TRUE;
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขข้อมูลได้ กรุณาติดต่อผู้พัฒนา";
@@ -47,7 +47,7 @@ if($lib->checkCompleteArgument(['unique_id','loan_typecode'],$dataComing)){
 					':details' => ($dataComing["old_alias_name"] ?? ' ').' => '.$dataComing["alias_name"]
 				];
 				
-				$log->writeLog('manageuser',$arrayStruc);	
+				$log->writeLog('manageuser',$arrayStruc,$conoracle);	
 				$arrayResult["RESULT"] = TRUE;
 				require_once('../../../../include/exit_footer.php');
 			}else{

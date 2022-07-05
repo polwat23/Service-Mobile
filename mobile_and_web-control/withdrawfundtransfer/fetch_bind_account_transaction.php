@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE gct.allow_withdraw_outside = '1' and gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 			$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["DEPTACCOUNT_NO_COOP"]]);
 			$rowDataAccAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC);
-			if(isset($arrAccBind["DEPTACCOUNT_NO"])){
+			if(isset($rowDataAccAllow["DEPTACCOUNT_NO"])){
 				$checkSeqAmt = $cal_dep->getSequestAmount($rowAccBind["DEPTACCOUNT_NO_COOP"],'WTX');
 				if($checkSeqAmt["RESULT"]){
 					if($checkSeqAmt["CAN_WITHDRAW"]){

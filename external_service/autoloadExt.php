@@ -13,7 +13,7 @@ use Connection\connection;
 
 $con = new connection();
 $lib = new library();
-$conoracle = $con->connecttomysql();
+$conoracle = $con->connecttooracle();
 
 header("Access-Control-Allow-Origin: ".$origin);
 header("Access-Control-Allow-Credentials: true");

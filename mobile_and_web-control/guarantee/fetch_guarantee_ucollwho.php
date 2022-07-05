@@ -81,8 +81,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
 			$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
 			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
-			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
-			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
+			if ($forceNewSecurity == true) {
+				$arrayColl['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayAvarTar["AVATAR_PATH"]);
+				$arrayColl["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($arrayAvarTar["AVATAR_PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+				
+				$explodePathAvatar = explode('.',$arrayAvarTar["AVATAR_PATH"]);
+				$arrayColl["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $explodePathAvatar[0].'.webp');
+				$arrayColl["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($explodePathAvatar[0].'.webp', $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayColl["AVATAR_PATH"] = $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"];
+				$explodePathAvatar = explode('.',$arrayAvarTar["AVATAR_PATH"]);
+				$arrayColl["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+			}
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
 			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOANBALANCE_AMT"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];

@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					':use_list' =>"delete gcmenuconstantmapping",
 					':details' => "id_constantmapping => ".$dataComing["id_constantmapping"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

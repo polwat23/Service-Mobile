@@ -45,7 +45,10 @@ class insertLog {
 				$this->logEditInfo($log_struc);
 			}else if($type_log == 'changepass'){
 				$this->logChangePassword($log_struc);
+			}else if($type_log == 'manageapplication'){
+				$this->logChangeAssist($log_struc);
 			}
+			
 		}
 		private function logChangePassword($log_struc){
 			$id_logchange = $this->func->getMaxTable('id_logchange' , 'logchangepassword');

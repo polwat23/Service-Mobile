@@ -13,14 +13,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			':id_bankconstant' => $dataComing["id_bankconstant"]
 		])){
 			$arrayStruc = [
-					':menu_name' => $id_bankconstantmapping,
 					':menu_name' => "constantbankaccount",
 					':username' => $payload["username"],
 					':use_list' =>"insert gcbankconstantmapping",
 					':details' => "bank_code => ".$dataComing["bank_code"].
 								" id_bankconstant => ".$dataComing["id_bankconstant"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

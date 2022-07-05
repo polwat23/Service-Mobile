@@ -31,16 +31,19 @@ require_once(__DIR__.'/../include/validate_input.php');
 require_once(__DIR__.'/../skipLoginFromCore.php');
 require_once(__DIR__.'/../include/function_util_core.php');
 require_once(__DIR__.'/../include/lib_util.php');
+require_once(__DIR__.'/../include/control_log_admin.php');
 
 // Call functions
 use Utility\library;
 use Component\functions;
+use ControlLog\insertLog;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
 
 $mailFunction = new PHPMailer(false);
 $lib = new library();
+$log = new insertLog();
 $func = new functions();
 $jwt_token = new Token();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');

@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						foreach($arrColumn as $column){
 							$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 						}
-						$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
+						$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["TARGET_FIELD"]],$conoracle);
 						$arrMessage = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 						if(isset($arrToken["LIST_SEND"][0]["TOKEN"]) && $arrToken["LIST_SEND"][0]["TOKEN"] != ""){
 							if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
@@ -117,9 +117,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 							}
 							if($condition[1] == $rowQuery["TARGET_FIELD"]){
-								$arrToken = $func->getFCMToken('person',$target);
+								$arrToken = $func->getFCMToken('person',$target,$conoracle);
 							}else{
-								$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
+								$arrToken = $func->getFCMToken('person',$rowTarget[$rowQuery["TARGET_FIELD"]],$conoracle);
 							}
 							$arrMessage = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 							if(isset($arrToken["LIST_SEND"][0]["TOKEN"]) && $arrToken["LIST_SEND"][0]["TOKEN"] != ""){
@@ -268,9 +268,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								$arrTarget[$column] = $rowTarget[strtoupper($column)] ?? null;
 							}
 							if($condition[1] == $rowQuery["TARGET_FIELD"]){
-								$arrayTel = $func->getSMSPerson('person',$destination);
+								$arrayTel = $func->getSMSPerson('person',$destination,$conoracle);
 							}else{
-								$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["TARGET_FIELD"]]);
+								$arrayTel = $func->getSMSPerson('person',$rowTarget[$rowQuery["TARGET_FIELD"]],$conoracle);
 							}
 							$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
 							foreach($arrayTel as $dest){

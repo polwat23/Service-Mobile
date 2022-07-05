@@ -49,10 +49,12 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','coop_account_no']
 			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
+			$bindaccount_no  = $func->getMaxTable('id_bindaccount' , 'gcbindaccount');
 			$conoracle->beginTransaction();
-			$insertPendingBindAccount = $conoracle->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token) 
-															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:bank_account_name,:bank_account_name_en,'006',:id_token)");
+			$insertPendingBindAccount = $conoracle->prepare("INSERT INTO gcbindaccount(id_bindaccount,sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token) 
+															VALUES(:id_bindaccount,:sigma_key,:member_no,:coop_account_no,:citizen_id,:bank_account_name,:bank_account_name_en,'006',:id_token)");
 			if($insertPendingBindAccount->execute([
+				':id_bindaccount' => $bindaccount_no,
 				':sigma_key' => $sigma_key,
 				':member_no' => $payload["member_no"],
 				':coop_account_no' => $coop_account_no,

@@ -36,21 +36,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrCredit["BUY_SHARE_MORE"] = $responseSoap->buyshr_amt ?? 0;
 					$arrCredit['LOAN_PERMIT_AMT'] = $responseSoap->loanpermiss_amt ?? 0;
 					$arrLoanClr = explode(',',$responseSoap->contclr_no);
+
 					$arrOldContract = array();
-					foreach($arrLoanClr as $loancontract_no){
-						if(isset($loancontract_no) && $loancontract_no != ""){
-							$getContDetail = $conoracle->prepare("SELECT lm.principal_balance,lt.loantype_desc FROM lncontmaster lm LEFT JOIN lnloantype lt 
-															ON lm.loantype_code = lt.loantype_code WHERE lm.loancontract_no = :contract_no");
-							$getContDetail->execute([':contract_no' => $loancontract_no]);
-							$rowContDetail = $getContDetail->fetch(PDO::FETCH_ASSOC);
-							$arrContract = array();
-							$arrContract['LOANTYPE_DESC'] = $rowContDetail["LOANTYPE_DESC"];
-							$arrContract['CONTRACT_NO'] = $loancontract_no;
-							$arrContract['BALANCE'] = $rowContDetail["PRINCIPAL_BALANCE"];
-							$arrOldContract[] = $arrContract;
+
+					if (sizeof($arrLoanClr) > 0) {
+						foreach($arrLoanClr as $loancontract_no){
+							if(isset($loancontract_no) && $loancontract_no != ""){
+								$getContDetail = $conoracle->prepare("SELECT lm.principal_balance,lt.loantype_desc FROM lncontmaster lm LEFT JOIN lnloantype lt 
+																ON lm.loantype_code = lt.loantype_code WHERE lm.loancontract_no = :contract_no");
+								$getContDetail->execute([':contract_no' => $loancontract_no]);
+								$rowContDetail = $getContDetail->fetch(PDO::FETCH_ASSOC);
+								$arrContract = array();
+								$arrContract['LOANTYPE_DESC'] = $rowContDetail["LOANTYPE_DESC"];
+								$arrContract['CONTRACT_NO'] = $loancontract_no;
+								$arrContract['BALANCE'] = $rowContDetail["PRINCIPAL_BALANCE"];
+								$arrDefaultCheckedGrp[] = $loancontract_no;
+								$arrOldContract[] = $arrContract;
+							}
 						}
 					}
+					
 					$arrCredit["OLD_CONTRACT"] = $arrOldContract;
+					$arrCredit["DEFAULT_CHECKED"] = $arrDefaultCheckedGrp;
 					$arrCreditGrp[] = $arrCredit;
 				}catch(SoapFault $e){
 					$filename = basename(__FILE__, '.php');

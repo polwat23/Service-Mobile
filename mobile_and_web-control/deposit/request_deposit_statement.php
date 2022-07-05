@@ -8,7 +8,7 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchMail = $conoracle->prepare("SELECT  email FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchMail = $conoracle->prepare("SELECT  'bell2271422714@gmail.com' as email FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchMail->execute([':member_no' => $member_no]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
 																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
 																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
-																		ORDER BY dps.SEQ_NO DESC");
+																		ORDER BY dps.SEQ_NO ASC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
 				':datebefore' => $date_between[0],
@@ -51,10 +51,12 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			}
 		}
 		$arrayDataTemplate = array();
-		$arrayDataTemplate["ACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
+		$arrayDataTemplate["ACCOUNT_NO"] = $lib->formataccount($account_no,$func->getConstant('dep_format'));
 		$template = $func->getTemplateSystem('DepositStatement');
 		$arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-		$arrMailStatus = $lib->sendMail($rowMail["EMAIL"],$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,$arrayAttach);
+		$html = file_get_contents(__DIR__.'/../../resource/html/sms11.html');
+		$arrResponseHtml = $lib->mergeTemplate(null,$html,$arrayDataTemplate);
+		$arrMailStatus = $lib->sendMail($rowMail["EMAIL"],$arrResponse["SUBJECT"],$arrResponseHtml["BODY"],$mailFunction,$arrayAttach);
 		if($arrMailStatus["RESULT"]){
 			foreach($arrayAttach as $path){
 				unlink($path);
@@ -77,6 +79,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			require_once('../../include/exit_footer.php');
 			
 		}
+		
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -270,28 +273,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	//list sum
 	$html .='
 	  <tr>
+		<td><b>รวม</b></td>
 		<td ></td>
-		<td ><b>รายการถอน '.$count_withdraw.' รายการ</b></td>
-		<td ></td>
+		<td style="text-align:right"><b>'.number_format($sum_deposit,2).'</b></td>
 		<td style="text-align:right"><b>'.number_format($sum_withdraw,2).'</b></td>
 		<td ></td>
 		<td ></td>
-	  </tr>
-	  <tr>
-		<td ></td>
-		<td ><b>รายการฝาก '.$count_deposit.' รายการ</b></td>
-		<td style="text-align:right"><b>'.number_format($sum_deposit,2).'</b></td>
-		<td ></td>
-		<td ></td>
-		<td ></td>
-	  </tr>
-	  <tr>
-		<td style="border-bottom:1px solid #000;" ></td>
-		<td style="border-bottom:1px solid #000;" ><b>ยอดรวมทุกรายการ '.$count_sumall.' รายการ</b></td>
-		<td style="border-bottom:1px solid #000;" ></td>
-		<td style="border-bottom:1px solid #000;" ></td>
-		<td style="border-bottom:1px solid #000; text-align:right;" ><b>'.number_format($sum_all,2).'</b></td>
-		<td style="border-bottom:1px solid #000;" ></td>
 	  </tr>
 	';
 

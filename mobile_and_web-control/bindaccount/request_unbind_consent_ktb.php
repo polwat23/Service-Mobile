@@ -13,8 +13,8 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			':id_bindaccount' => $dataComing["id_bindaccount"],
 			':member_no' => $payload["member_no"]
 		]);
-		if($check_account->rowCount() > 0){
-			$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
+		$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowAcc["CITIZEN_ID"])){	
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['member_no'] = $payload["member_no"];
 			$arrPayloadverify['exp'] = time() + 300;

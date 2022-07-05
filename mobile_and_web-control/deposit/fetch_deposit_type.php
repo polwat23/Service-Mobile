@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrayHeaderAcc = array();
-			$fetchAlias = $conoracle->prepare("SELECT alias_name,path_alias_img, update_date  as update_date 
+			$fetchAlias = $conoracle->prepare("SELECT alias_name,path_alias_img, to_char(update_date,'YYYYMMDDHH24MISS')  as update_date 
 											FROM gcdeptalias WHERE deptaccount_no = :account_no");
 			$fetchAlias->execute([
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]

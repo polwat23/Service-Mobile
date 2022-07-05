@@ -23,16 +23,44 @@ if($lib->checkCompleteArgument(['menu_component','seq_no','account_no'],$dataCom
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$updateMemoDept = $conoracle->prepare("UPDATE gcmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
-												WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
-		if($updateMemoDept->execute([
-			':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
-			':memo_icon_path' => $dataComing["memo_icon_path"] == "" ? null : $dataComing["memo_icon_path"],
+		$getMemo = $conoracle->prepare("SELECT id_memo FROM gcmemodept WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+		$getMemo->execute([
 			':deptaccount_no' => $account_no,
 			':seq_no' => $dataComing["seq_no"]
-		]) && $updateMemoDept->rowCount() > 0){
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
+		]);
+		$rowMemo = $getMemo->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowMemo["ID_MEMO"])){
+			$updateMemoDept = $conoracle->prepare("UPDATE gcmemodept SET memo_text = :memo_text,memo_icon_path = :memo_icon_path
+												WHERE id_memo = :id_memo");
+			if($updateMemoDept->execute([
+				':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
+				':memo_icon_path' => $dataComing["memo_icon_path"] == "" ? null : $dataComing["memo_icon_path"],
+				':id_memo' => $rowMemo["ID_MEMO"]
+			])){
+				$arrayResult['RESULT'] = TRUE;
+				require_once('../../include/exit_footer.php');
+			}else{
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS1005",
+					":error_desc" => "แก้ไขบันทึกช่วยจำไม่ได้ "."\n".json_encode($dataComing),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$message_error = "เพิ่มบันทึกช่วยจำไม่ได้เพราะ update ลงตาราง gcmemodept ไม่ได้ "."\n"."Query => ".$updateMemoDept->queryString."\n"."Param =>".json_encode([
+					':id_memo' => $id_memo,
+					':memo_text' => $dataComing["memo_text_emoji_"] == "" ? null : $dataComing["memo_text_emoji_"],
+					':memo_icon_path' => $dataComing["memo_icon_path"] == "" ? null : $dataComing["memo_icon_path"],
+					':deptaccount_no' => $account_no,
+					':seq_no' => $dataComing["seq_no"]
+				]);
+				$lib->sendLineNotify($message_error);
+				$arrayResult['RESPONSE_CODE'] = "WS1005";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 		}else{
 			$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
 			$insertMemoDept = $conoracle->prepare("INSERT INTO gcmemodept(id_memo,memo_text,memo_icon_path,deptaccount_no,seq_no) 

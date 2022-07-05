@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				
 				$arrAccBeenBind = array();
 				$InitDeptAccountBeenBind = $conoracle->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no 
-																and bindaccount_status NOT IN('6','7','8','-9') and deptaccount_no_coop IS NOT NULL");
+																and bindaccount_status NOT IN('6','7','8','-9','9') and deptaccount_no_coop IS NOT NULL");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 					$arrAccBeenBind[] = $rowAccountBeenbind["DEPTACCOUNT_NO_COOP"];

@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['sigma_key'],$payload)){
-	$updateBindAcc = $conoracle->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = NOW(),
+	$updateBindAcc = $conoracle->prepare("UPDATE gcbindaccount SET bindaccount_status = '-9',unbind_date = SYSDATE,
 										deptaccount_no_bank = :bank_acc WHERE sigma_key = :sigma_key");
 	if($updateBindAcc->execute([
 		':sigma_key' => $payload["sigma_key"],

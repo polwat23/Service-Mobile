@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
 											LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
 											WHERE dpm.member_no = :member_no and dpm.deptclose_status <> 1 
-											ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
+											ORDER BY LAST_OPERATE_DATE DESC) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);

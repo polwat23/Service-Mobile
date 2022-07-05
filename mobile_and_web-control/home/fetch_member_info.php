@@ -8,14 +8,153 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$memberInfoMobile = $conoracle->prepare("SELECT email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowInfoMobile["MEMBER_NO"])){		
+		if(isset($rowInfoMobile["MEMBER_NO"])){
 			if(isset($rowInfoMobile["PATH_AVATAR"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["PATH_AVATAR"];
-				$explodePathAvatar = explode('.',$rowInfoMobile["PATH_AVATAR"]);
-				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				if ($forceNewSecurity == true) {
+					$arrayResult['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $rowInfoMobile["PATH_AVATAR"]);
+					$arrayResult["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($rowInfoMobile["PATH_AVATAR"], $jwt_token, $config["SECRET_KEY_JWT"]);
+					
+					$explodePathAvatar = explode('.',$rowInfoMobile["PATH_AVATAR"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $explodePathAvatar[0].'.webp');
+					$arrayResult["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($explodePathAvatar[0].'.webp', $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["PATH_AVATAR"];
+					$explodePathAvatar = explode('.',$rowInfoMobile["PATH_AVATAR"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				}
 			}else{
-				$arrayResult["AVATAR_PATH"] = null;
-				$arrayResult["AVATAR_PATH_WEBP"] = null;
+				$getAvatar = $conoracle->prepare("SELECT fm.base64_img,fmt.mimetypes,fm.DATA_TYPE,to_char(fm.update_date,'YYYYMMDDHH24MI') as UPDATE_DATE 
+													FROM fomimagemaster fm LEFT JOIN fomucfmimetype fmt ON fm.data_type = fmt.typefile
+													where fm.system_code = 'mbshr' and fm.column_name = 'member_no' 
+													and fm.column_data = :member_no and fm.img_type_code = '001' and rownum <= 1 ORDER BY fm.seq_no DESC");
+				$getAvatar->execute([':member_no' => $member_no]);
+				$rowAvatar = $getAvatar->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowAvatar["DATA_TYPE"]) && $rowAvatar["DATA_TYPE"] != ""){
+					if($rowAvatar["DATA_TYPE"] == '.tif'){
+						$filename = $member_no.'.tif';
+						$filenameExpected = $member_no.'.jpg';
+						$pathname = __DIR__.'/../../resource/defaultAvatar/'.$filename;
+						$pathnameAcctual = __DIR__.'/../../resource/defaultAvatar/'.$filenameExpected;
+						$pathnameTmp = __DIR__.'/../../resource/defaultAvatar/temp_'.$filename;
+						if(file_exists($pathname)){
+							$fileModify = date("YmdHi", filemtime($pathname));
+							if($rowAvatar["UPDATE_DATE"] >= $fileModify){
+								unlink($pathnameAcctual);
+								unlink($pathname);
+								file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
+								$arrSendDataAPI["inputFile"] = $pathnameTmp;
+								$arrSendDataAPI["outputFile"] = $pathname;
+								$arrSendDataAPI["width"] = 900;
+								$arrSendDataAPI["height"] = 1280;
+								$responseAPIConvert = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendDataAPI);
+								if(!$responseAPIConvert["RESULT"]){
+									unlink($pathnameTmp);
+								}
+								$arrResponseAPI = json_decode($responseAPIConvert);
+								if($arrResponseAPI->RESULT){
+									unlink($pathnameTmp);
+									$arrSendData["prefix_file_name"] = $member_no;
+									$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg';
+									$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/defaultAvatar/'.$filename;
+									$responseAPI = $lib->posting_data($config["URL_CONVERT"],$arrSendData);
+									if(!$responseAPI["RESULT"]){
+										unlink($pathnameTmp);
+									}
+									$arrResponse = json_decode($responseAPI);
+									if($arrResponse->RESULT){
+										$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg?vd='.$rowAvatar["UPDATE_DATE"];
+									}else{
+										unlink($pathnameTmp);
+									}
+								}else{
+									unlink($pathnameTmp);
+								}
+							}else{
+								$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg';
+							}
+						}else{
+							file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
+							$arrSendDataAPI["inputFile"] = $pathnameTmp;
+							$arrSendDataAPI["outputFile"] = $pathname;
+							$arrSendDataAPI["width"] = 900;
+							$arrSendDataAPI["height"] = 1280;
+							$responseAPIConvert = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendDataAPI);
+							if(!$responseAPIConvert["RESULT"]){
+								unlink($pathnameTmp);
+							}
+							$arrResponseAPI = json_decode($responseAPIConvert);
+							if($arrResponseAPI->RESULT){
+								unlink($pathnameTmp);
+								$arrSendData["prefix_file_name"] = $member_no;
+								$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg';
+								$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/defaultAvatar/'.$filename;
+								$responseAPI = $lib->posting_data($config["URL_CONVERT"],$arrSendData);
+								if(!$responseAPI["RESULT"]){
+									unlink($pathname);
+								}
+								$arrResponse = json_decode($responseAPI);
+								if($arrResponse->RESULT){
+									$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg';
+								}else{
+									unlink($pathname);
+								}
+							}else{
+								unlink($pathnameTmp);
+							}
+						}
+					}else{
+						$filename = $member_no.$rowAvatar["DATA_TYPE"];
+						$pathnameTmp = __DIR__.'/../../resource/defaultAvatar/temp_'.$filename;
+						$pathname = __DIR__.'/../../resource/defaultAvatar/'.$filename;
+						if(file_exists($pathname)){
+							$fileModify = date("YmdHi", filemtime($pathname));
+							if($rowAvatar["UPDATE_DATE"] >= $fileModify){
+								unlink($pathname);
+								file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
+								$arrSendData["inputFile"] = $pathnameTmp;
+								$arrSendData["outputFile"] = $pathname;
+								$arrSendData["width"] = 900;
+								$arrSendData["height"] = 1280;
+								$responseAPI = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendData);
+								if(!$responseAPI["RESULT"]){
+									unlink($pathnameTmp);
+								}
+								$arrResponse = json_decode($responseAPI);
+								if($arrResponse->RESULT){
+									unlink($pathnameTmp);
+									$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
+								}else{
+									unlink($pathnameTmp);
+								}
+							}else{
+								$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
+							}
+						}else{
+							file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
+							$arrSendData["inputFile"] = $pathnameTmp;
+							$arrSendData["outputFile"] = $pathname;
+							$arrSendData["width"] = 900;
+							$arrSendData["height"] = 1280;
+							$responseAPI = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendData);
+							if(!$responseAPI["RESULT"]){
+								unlink($pathnameTmp);
+							}
+							$arrResponse = json_decode($responseAPI);
+							if($arrResponse->RESULT){
+								unlink($pathnameTmp);
+								$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
+							}else{
+								unlink($pathnameTmp);
+							}
+						}
+					}
+					
+					$arrayResult["AVATAR_PATH"] = $DataURLBase64;
+					$arrayResult["AVATAR_PATH_WEBP"] = null;
+				}else{
+					$arrayResult["AVATAR_PATH"] = null;
+					$arrayResult["AVATAR_PATH_WEBP"] = null;
+				}
 			}
 			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,mb.email,
 												mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.mem_telmobile,
@@ -101,16 +240,60 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayResult["FULL_ADDRESS_CURR"] = $address;
 				}
 			}
-			$getSignature = $conoracle->prepare("SELECT fm.base64_img,fmt.mimetypes,fm.data_type FROM fomimagemaster fm LEFT JOIN fomucfmimetype fmt ON fm.data_type = fmt.typefile
+			
+			$getSignature = $conoracle->prepare("SELECT fm.base64_img,fmt.mimetypes,fm.data_type,to_char(fm.update_date,'YYYYMMDDHH24MI') as UPDATE_DATE 
+												FROM fomimagemaster fm LEFT JOIN fomucfmimetype fmt ON fm.data_type = fmt.typefile
 												where fm.system_code = 'mbshr' and fm.column_name = 'member_no' 
 												and fm.column_data = :member_no and fm.img_type_code = '002' and rownum <= 1 ORDER BY fm.seq_no DESC");
 			$getSignature->execute([':member_no' => $member_no]);
 			$rowSignature = $getSignature->fetch(PDO::FETCH_ASSOC);
-			$DataURLBase64 = isset($rowSignature["BASE64_IMG"]) ? "data:".$rowSignature["MIMETYPES"].";base64,".base64_encode($rowSignature["BASE64_IMG"]) : null;
-			if(isset($DataURLBase64) && $DataURLBase64 != ''){
-				$arrayResult['DATA_TYPE'] = $rowSignature["DATA_TYPE"] ?? 'pdf';
-				$arrayResult['SIGNATURE'] = $DataURLBase64;
+			
+
+			$filename = $member_no.$rowSignature["DATA_TYPE"];
+			$pathnameTmp = __DIR__.'/../../resource/signature/temp_'.$filename;
+			$pathname = __DIR__.'/../../resource/signature/'.$filename;
+			if(file_exists($pathname)){
+				$fileModify = date("YmdHi", filemtime($pathname));
+				if($rowSignature["UPDATE_DATE"] >= $fileModify){
+					unlink($pathname);
+					file_put_contents($pathnameTmp,stream_get_contents($rowSignature["BASE64_IMG"]));
+					$arrSendData["inputFile"] = $pathnameTmp;
+					$arrSendData["outputFile"] = $pathname;
+					$arrSendData["width"] = 900;
+					$arrSendData["height"] = 500;
+					$responseAPI = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendData);
+					if(!$responseAPI["RESULT"]){
+						unlink($pathnameTmp);
+					}
+					$arrResponse = json_decode($responseAPI);
+					if($arrResponse->RESULT){
+						unlink($pathnameTmp);
+						$DataURLBase64 = $config["URL_SERVICE"].'/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
+					}else{
+						unlink($pathnameTmp);
+					}
+				}else{
+					$DataURLBase64 = $config["URL_SERVICE"].'/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
+				}
+			}else{
+				file_put_contents($pathnameTmp,stream_get_contents($rowSignature["BASE64_IMG"]));
+				$arrSendData["inputFile"] = $pathnameTmp;
+				$arrSendData["outputFile"] = $pathname;
+				$arrSendData["width"] = 900;
+				$arrSendData["height"] = 500;
+				$responseAPI = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendData);
+				if(!$responseAPI["RESULT"]){
+					unlink($pathnameTmp);
+				}
+				$arrResponse = json_decode($responseAPI);
+				if($arrResponse->RESULT){
+					unlink($pathnameTmp);
+					$DataURLBase64 = $config["URL_SERVICE"].'/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
+				}else{
+					unlink($pathnameTmp);
+				}
 			}
+			$arrayResult["SIGNATURE"] = $DataURLBase64 ?? "";
 			$arrayResult["PHONE"] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];

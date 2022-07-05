@@ -3,7 +3,8 @@ ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
+
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -25,8 +26,11 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}else if($header_key == "HTTP_LANG_LOCALE") {
 		$headers["Lang_locale"] = $header_value;
+	}else if ($header_key == "HTTP_REQUEST_TOKEN") {
+		$headers["Request_token"] = $header_value;
 	}
 }
+
 if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
    ob_start("ob_gzhandler");
 }else{
@@ -54,7 +58,6 @@ use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
 use ReallySimpleJWT\Exception\ValidateException;
 use WebPConvert\WebPConvert;
 
-
 $mailFunction = new PHPMailer(false);
 $webP = new WebPConvert();
 $lib = new library();
@@ -78,6 +81,15 @@ if(is_array($conoracle) && $conoracle["RESULT"] == FALSE){
 	http_response_code(500);
 	
 }
+
+if ($forceNewSecurity == true && $isValidateRequestToken == false) {
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	require_once(__DIR__.'/../include/exit_footer.php');
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
@@ -133,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						}
 						if($payload["exp"] <= time() + ($func->getConstant('limit_session_timeout') / 2)){
 							$regen_token = $auth->refresh_accesstoken($dataComing["refresh_token"],
-							$dataComing["unique_id"],$conmysql,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
+							$dataComing["unique_id"],$conoracle,$payload,$jwt_token,$config["SECRET_KEY_JWT"]);
 							if(!$regen_token){
 								$arrayResult['RESPONSE_CODE'] = "WS0014";
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -149,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							$arrayResult['RESPONSE_CODE'] = "WS0034";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							http_response_code(401);
+							http_response_code(500);
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}else if($errorCode === 4){

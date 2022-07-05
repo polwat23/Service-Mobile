@@ -62,6 +62,8 @@ class Authorization {
 		}
 	}
 	public function refresh_accesstoken($refresh_token,$unique_id,$con,$payload,$jwt_token,$secret_key){
+		
+		try{
 		$checkRT = $con->prepare("SELECT TO_DATE(rt_expire_date,'YYYY-MM-DD') as rt_expire_date,rt_is_revoke FROM gctoken
 								WHERE refresh_token = :refresh_token and unique_id = :unique_id and id_token = :id_token");
 		$checkRT->execute([
@@ -103,6 +105,9 @@ class Authorization {
 			}
 		}else{
 			return false;
+		}
+		}catch(\Throwable $e){
+			return true;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization ");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
@@ -75,7 +76,6 @@ if(isset($dataComing["username"])){
 			':login_date' => date('Y-m-d H:i:s'),
 			':update_date' => date('Y-m-d H:i:s')
 		]);
-			$arrayResult['RRR'] = json_encode($insertLog);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

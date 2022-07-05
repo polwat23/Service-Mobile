@@ -6,7 +6,7 @@ use Dompdf\Dompdf;
 $dompdf = new DOMPDF();
 
 if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','loanbillingemail')){
+	if($func->check_permission_core($payload,'sms','loanbillingemail',$conoracle)){
 		if(isset($dataComing["destination"]) && sizeof($dataComing["destination"]) > 0){
 			foreach($dataComing["destination"] as $key => $target){
 				if(!in_array($key,$dataComing["destination_revoke"])){
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 			if(sizeof($destination) > 0){
 				$bulkInsertNotSent = array();
 				$bulkInsertSent = array();
-				$id_mailsend = $func->getMaxTable('id_mailsend' , 'smslogmailsend');
+				$id_mailsend = $func->getMaxTable('id_mailsend' , 'smslogmailsend',$conoracle);
 				$getDataForPreview = $conoracle->prepare("SELECT kms.MEMBER_NO,mp.PRENAME_SHORT || mb.MEMB_NAME || ' ' || mb.MEMB_SURNAME as FULL_NAME,to_char(mb.BIRTH_DATE,'DDMMYYYY') as BIRTH_DATE
 														FROM kpkepnotenoughmoneytosms kms
 														LEFT JOIN mbmembmaster mb ON kms.member_no = mb.member_no
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 				while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
 					$conoracle->beginTransaction();
 					$mailAsset = array();
-					$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"]);
+					$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"],$conoracle);
 					if(isset($mailAsset[0]["EMAIL"]) && $mailAsset[0]["EMAIL"] != ""){
 						$arrayAttach = array();
 						$arrTarget = array();
@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 							}else{
 								$bulkInsertNotSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','0','".$payload["username"]."',null,'0','ไม่สามารถสร้างไฟล์ PDF ได้','".$rowDataPre["MEMBER_NO"]."')";
 								if(sizeof($bulkInsertNotSent) == 1000){
-									$func->logSendMail($bulkInsertNotSent);
+									$func->logSendMail($bulkInsertNotSent,$conoracle);
 								}
 								$conoracle->rollback();
 							}
@@ -96,20 +96,20 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 							if($sendMail["RESULT"]){
 								$bulkInsertSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','1','".$payload["username"]."',null,'0',null,'".$rowDataPre["MEMBER_NO"]."')";
 								if(sizeof($bulkInsertSent) == 1000){
-									$func->logSendMail($bulkInsertSent);
+									$func->logSendMail($bulkInsertSent,$conoracle);
 								}
 								$conoracle->commit();
 							}else{
 								$bulkInsertNotSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','0','".$payload["username"]."',null,'0','".$sendMail["MESSAGE_ERROR"]."','".$rowDataPre["MEMBER_NO"]."')";
 								if(sizeof($bulkInsertNotSent) == 1000){
-									$func->logSendMail($bulkInsertNotSent);
+									$func->logSendMail($bulkInsertNotSent,$conoracle);
 								}
 								$conoracle->rollback();
 							}
 						}else{
 							$bulkInsertNotSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','0','".$payload["username"]."',null,'0','ไม่สามารถสร้างไฟล์ PDF ได้','".$rowDataPre["MEMBER_NO"]."')";
 							if(sizeof($bulkInsertNotSent) == 1000){
-								$func->logSendMail($bulkInsertNotSent);
+								$func->logSendMail($bulkInsertNotSent,$conoracle);
 							}
 							$conoracle->rollback();
 						}
@@ -120,10 +120,10 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 				}
 				$arrayResult['RESULT_A'] = $AD;
 				if(sizeof($bulkInsertNotSent) > 0){
-					$func->logSendMail($bulkInsertNotSent);
+					$func->logSendMail($bulkInsertNotSent,$conoracle);
 				}
 				if(sizeof($bulkInsertSent) > 0){
-					$func->logSendMail($bulkInsertSent);
+					$func->logSendMail($bulkInsertSent,$conoracle);
 				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../../include/exit_footer.php');
@@ -136,7 +136,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 		}else{
 			$destination = array();
 			$arrDestTemp = array();
-			$id_mailsend = $func->getMaxTable('id_mailsend' , 'smslogmailsend');
+			$id_mailsend = $func->getMaxTable('id_mailsend' , 'smslogmailsend',$conoracle);
 			$getDataForPreview = $conoracle->prepare("SELECT MEMBER_NO
 													FROM kpkepnotenoughmoneytosms
 													WHERE mailpost_status = '0' and recv_period = (SELECT MAX(recv_period) FROM kpmastreceive) 
@@ -160,7 +160,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 			while($rowDataPre = $getDataForPreview->fetch(PDO::FETCH_ASSOC)){
 				$conoracle->beginTransaction();
 				$mailAsset = array();
-				$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"]);
+				$mailAsset = $func->getMailAddress($rowDataPre["MEMBER_NO"],$conoracle);
 				if(isset($mailAsset[0]["EMAIL"]) && $mailAsset[0]["EMAIL"] != ""){
 					$arrayAttach = array();
 					$arrTarget = array();
@@ -219,7 +219,7 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 						}else{
 							$bulkInsertNotSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','0','".$payload["username"]."',null,'0','ไม่สามารถสร้างไฟล์ PDF ได้','".$rowDataPre["MEMBER_NO"]."')";
 							if(sizeof($bulkInsertNotSent) == 1000){
-								$func->logSendMail($bulkInsertNotSent);
+								$func->logSendMail($bulkInsertNotSent,$conoracle);
 							}
 							$conoracle->rollback();
 						}
@@ -229,20 +229,20 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 						if($sendMail["RESULT"]){
 							$bulkInsertSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','1','".$payload["username"]."',null,'0',null,'".$rowDataPre["MEMBER_NO"]."')";
 							if(sizeof($bulkInsertSent) == 1000){
-								$func->logSendMail($bulkInsertSent);
+								$func->logSendMail($bulkInsertSent,$conoracle);
 							}
 							$conoracle->commit();
 						}else{
 							$bulkInsertNotSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','0','".$payload["username"]."',null,'0','".$sendMail["MESSAGE_ERROR"]."','".$rowDataPre["MEMBER_NO"]."')";
 							if(sizeof($bulkInsertNotSent) == 1000){
-								$func->logSendMail($bulkInsertNotSent);
+								$func->logSendMail($bulkInsertNotSent,$conoracle);
 							}
 							$conoracle->rollback();
 						}
 					}else{
 						$bulkInsertNotSent[] = "(".$id_mailsend.",'".$arrMessage["SUBJECT"]."','".$arrMessage["BODY"]."','".$mailAsset[0]["EMAIL"]."','0','".$payload["username"]."',null,'0','ไม่สามารถสร้างไฟล์ PDF ได้','".$rowDataPre["MEMBER_NO"]."')";
 						if(sizeof($bulkInsertNotSent) == 1000){
-							$func->logSendMail($bulkInsertNotSent);
+							$func->logSendMail($bulkInsertNotSent,$conoracle);
 						}
 						$conoracle->rollback();
 					}
@@ -252,10 +252,10 @@ if($lib->checkCompleteArgument(['unique_id','body_root_','subject'],$dataComing)
 				$id_mailsend++;
 			}
 			if(sizeof($bulkInsertNotSent) > 0){
-				$func->logSendMail($bulkInsertNotSent);
+				$func->logSendMail($bulkInsertNotSent,$conoracle);
 			}
 			if(sizeof($bulkInsertSent) > 0){
-				$func->logSendMail($bulkInsertSent);
+				$func->logSendMail($bulkInsertSent,$conoracle);
 			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../include/exit_footer.php');

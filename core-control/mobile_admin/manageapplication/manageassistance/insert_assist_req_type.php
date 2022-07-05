@@ -15,15 +15,13 @@ if($lib->checkCompleteArgument(['unique_id','assist_code','membtype_code'],$data
 			':welfare_type_code' => $dataComing["assist_code"],
 			':member_cate_code' => $dataComing["membtype_code"]
 		])){
-			
 			$arrayStruc = [
 				':menu_name' => "manageassistance",
 				':username' => $payload["username"],
 				':use_list' => "insert assistreq type",
 				':details' => "add welfare code ".$dataComing["assist_code"]
 			];
-			
-			$log->writeLog('manageapplication',$arrayStruc);
+			//$log->writeLog('manageapplication',$arrayStruc,$conoracle);
 			
 			$arrayResult["RESULT"] = TRUE;
 		}else{

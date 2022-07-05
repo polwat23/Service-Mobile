@@ -25,8 +25,8 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','card_person
 	$checkMember->execute([
 		':member_no' => $member_no
 	]);
-	if($checkMember->rowCount() > 0){
-		$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+	$rowChkMemb = $checkMember->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowChkMemb["ACCOUNT_STATUS"])){
 		if($rowChkMemb["ACCOUNT_STATUS"] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

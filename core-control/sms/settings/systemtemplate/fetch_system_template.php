@@ -12,8 +12,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arraySysTem["COMPONENT"] = $rowSysTemplate["COMPONENT_SYSTEM"];
 			$arraySysTem["SUBJECT"] = $rowSysTemplate["SUBJECT"];
 			
-			if($rowSysTemplate["ID_SYSTEMPLATE"] == '8'|| $rowSysTemplate["ID_SYSTEMPLATE"] == '11' || $rowSysTemplate["ID_SYSTEMPLATE"] =='28'){
-				$arraySysTem["BODY"] = file_get_contents(__DIR__.'/../../../..'.$rowSysTemplate["BODY"]);
+			if($rowSysTemplate["ID_SYSTEMPLATE"] == '8'|| $rowSysTemplate["ID_SYSTEMPLATE"] == '11' || $rowSysTemplate["ID_SYSTEMPLATE"] == '28'){
+				$arraySysTem["BODY"] = file_get_contents(__DIR__.'/../../../..'.$rowSysTemplate["BODY"]) ?? "";
+				//$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
 			}else{
 				$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
 			}

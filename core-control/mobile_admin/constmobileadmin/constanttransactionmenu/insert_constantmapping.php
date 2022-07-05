@@ -19,9 +19,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					':details' => "menu_component => ".$dataComing["menu_component"].
 								" id_bankconstant => ".$dataComing["id_bankconstant"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
-			echo json_encode($arrayResult);
+			require_once('../../include/exit_footer.php');
+			//echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มค่าคงที่ได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;

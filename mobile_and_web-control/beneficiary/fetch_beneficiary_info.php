@@ -12,11 +12,69 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC);
 		if($rowBenefit["DATA_TYPE"] == '.tif'){
 			$filename = $member_no.'.tif';
+			$filenameExpected = $member_no.'.jpg';
 			$pathname = __DIR__.'/../../resource/beneficiary/'.$filename;
+			$pathnameAcctual = __DIR__.'/../../resource/beneficiary/'.$filenameExpected;
+			$pathnameTmp = __DIR__.'/../../resource/beneficiary/temp_'.$filename;
 			if(file_exists($pathname)){
 				$fileModify = date("YmdHi", filemtime($pathname));
 				if($rowBenefit["UPDATE_DATE"] >= $fileModify){
-					file_put_contents($pathname,base64_decode(base64_encode($rowBenefit["BASE64_IMG"])));
+					unlink($pathnameAcctual);
+					unlink($pathname);
+					file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
+					$arrSendDataAPI["inputFile"] = $pathnameTmp;
+					$arrSendDataAPI["outputFile"] = $pathname;
+					$arrSendDataAPI["width"] = 900;
+					$arrSendDataAPI["height"] = 1280;
+					$responseAPIConvert = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendDataAPI);
+					if(!$responseAPIConvert["RESULT"]){
+						unlink($pathnameTmp);
+						http_response_code(204);
+					}
+					$arrResponseAPI = json_decode($responseAPIConvert);
+					if($arrResponseAPI->RESULT){
+						unlink($pathnameTmp);
+						$arrSendData["prefix_file_name"] = $member_no;
+						$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
+						$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$filename;
+						$responseAPI = $lib->posting_data($config["URL_CONVERT"],$arrSendData);
+						if(!$responseAPI["RESULT"]){
+							unlink($pathnameTmp);
+							$message_error = "ไม่สามารถติดต่อ CONVERT Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n";
+							$lib->sendLineNotify($message_error);
+							http_response_code(204);
+						}
+						$arrResponse = json_decode($responseAPI);
+						if($arrResponse->RESULT){
+							$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg?vd='.$rowBenefit["UPDATE_DATE"];
+						}else{
+							unlink($pathnameTmp);
+							$message_error = "ไม่สามารถ CONVERT ผู้รับผลได้ เพราะ ".json_encode($arrResponse->RESPONSE_MESSAGE);
+							$lib->sendLineNotify($message_error);
+							http_response_code(204);
+						}
+					}else{
+						unlink($pathnameTmp);
+						http_response_code(204);
+					}
+				}else{
+					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
+				}
+			}else{
+				file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
+				
+				$arrSendDataAPI["inputFile"] = $pathnameTmp;
+				$arrSendDataAPI["outputFile"] = $pathname;
+				$arrSendDataAPI["width"] = 900;
+				$arrSendDataAPI["height"] = 1280;
+				$responseAPIConvert = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendDataAPI);
+				if(!$responseAPIConvert["RESULT"]){
+					unlink($pathnameTmp);
+					http_response_code(204);
+				}
+				$arrResponseAPI = json_decode($responseAPIConvert);
+				if($arrResponseAPI->RESULT){
+					unlink($pathnameTmp);
 					$arrSendData["prefix_file_name"] = $member_no;
 					$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
 					$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$filename;
@@ -26,45 +84,68 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$message_error = "ไม่สามารถติดต่อ CONVERT Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n";
 						$lib->sendLineNotify($message_error);
 						http_response_code(204);
+						require_once('../../include/exit_footer.php');
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
-						$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg?vd='.$rowBenefit["UPDATE_DATE"];
+						$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
 					}else{
 						unlink($pathname);
 						$message_error = "ไม่สามารถ CONVERT ผู้รับผลได้ เพราะ ".json_encode($arrResponse->RESPONSE_MESSAGE);
 						$lib->sendLineNotify($message_error);
 						http_response_code(204);
+						require_once('../../include/exit_footer.php');
 					}
 				}else{
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
-				}
-			}else{
-				file_put_contents($pathname,base64_decode(base64_encode($rowBenefit["BASE64_IMG"])));
-				$arrSendData["prefix_file_name"] = $member_no;
-				$arrSendData["output"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
-				$arrSendData["file_name"] = $config["PATH_SERVICE"].'/resource/beneficiary/'.$filename;
-				$responseAPI = $lib->posting_data($config["URL_CONVERT"],$arrSendData);
-				if(!$responseAPI["RESULT"]){
-					unlink($pathname);
-					$message_error = "ไม่สามารถติดต่อ CONVERT Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n";
-					$lib->sendLineNotify($message_error);
+					unlink($pathnameTmp);
 					http_response_code(204);
-					require_once('../../include/exit_footer.php');
-				}
-				$arrResponse = json_decode($responseAPI);
-				if($arrResponse->RESULT){
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
-				}else{
-					unlink($pathname);
-					$message_error = "ไม่สามารถ CONVERT ผู้รับผลได้ เพราะ ".json_encode($arrResponse->RESPONSE_MESSAGE);
-					$lib->sendLineNotify($message_error);
-					http_response_code(204);
-					require_once('../../include/exit_footer.php');
 				}
 			}
 		}else{
-			$DataURLBase64 = isset($rowBenefit["BASE64_IMG"]) ? "data:".$rowBenefit["MIMETYPES"].";base64,".base64_encode($rowBenefit["BASE64_IMG"]) : null;
+			$filename = $member_no.$rowBenefit["DATA_TYPE"];
+			$pathnameTmp = __DIR__.'/../../resource/beneficiary/temp_'.$filename;
+			$pathname = __DIR__.'/../../resource/beneficiary/'.$filename;
+			if(file_exists($pathname)){
+				$fileModify = date("YmdHi", filemtime($pathname));
+				if($rowBenefit["UPDATE_DATE"] >= $fileModify){
+					unlink($pathname);
+					file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
+					$arrSendData["inputFile"] = $pathnameTmp;
+					$arrSendData["outputFile"] = $pathname;
+					$arrSendData["width"] = 900;
+					$arrSendData["height"] = 1280;
+					$responseAPI = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendData);
+					if(!$responseAPI["RESULT"]){
+						unlink($pathnameTmp);
+					}
+					$arrResponse = json_decode($responseAPI);
+					if($arrResponse->RESULT){
+						unlink($pathnameTmp);
+						$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
+					}else{
+						unlink($pathnameTmp);
+					}
+				}else{
+					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
+				}
+			}else{
+				file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
+				$arrSendData["inputFile"] = $pathnameTmp;
+				$arrSendData["outputFile"] = $pathname;
+				$arrSendData["width"] = 900;
+				$arrSendData["height"] = 1280;
+				$responseAPI = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendData);
+				if(!$responseAPI["RESULT"]){
+					unlink($pathnameTmp);
+				}
+				$arrResponse = json_decode($responseAPI);
+				if($arrResponse->RESULT){
+					unlink($pathnameTmp);
+					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
+				}else{
+					unlink($pathnameTmp);
+				}
+			}
 		}
 		if(isset($DataURLBase64) && $DataURLBase64 != ''){
 			$arrayResult['DATA_TYPE'] = $rowBenefit["DATA_TYPE"] ?? 'pdf';

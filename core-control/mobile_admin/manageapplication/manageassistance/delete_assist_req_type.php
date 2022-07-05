@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare'],$dataComing)){
 				':details' => "delete constwelfare (id ".$dataComing["id_const_welfare"].")"
 			];
 			
-			$log->writeLog('manageapplication',$arrayStruc);	
+			//$log->writeLog('manageapplication',$arrayStruc,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถเลบรายการนี้ได้ กรุณาติดต่อผู้พัฒนา";

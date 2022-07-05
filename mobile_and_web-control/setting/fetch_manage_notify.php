@@ -6,8 +6,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchSettingNotify = $conoracle->prepare("SELECT receive_notify_news,receive_notify_transaction,receive_login_email
 													FROM gcmemberaccount WHERE member_no = :member_no");
 		$fetchSettingNotify->execute([':member_no' => $payload["member_no"]]);
-		if($fetchSettingNotify->rowCount() > 0){
-			$rowSetting = $fetchSettingNotify->fetch(PDO::FETCH_ASSOC);
+		$rowSetting = $fetchSettingNotify->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowSetting["RECEIVE_NOTIFY_NEWS"]) && $rowSetting["RECEIVE_NOTIFY_NEWS"] != ""){
 			$arrayResult["RECEIVE_NOTIFY_NEWS"] = $rowSetting["RECEIVE_NOTIFY_NEWS"];
 			$arrayResult["RECEIVE_NOTIFY_TRANSACTION"] = $rowSetting["RECEIVE_NOTIFY_TRANSACTION"];
 			$arrayResult["RECEIVE_LOGIN_EMAIL"] = $rowSetting["RECEIVE_LOGIN_EMAIL"];
