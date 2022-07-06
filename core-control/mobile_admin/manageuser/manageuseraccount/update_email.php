@@ -17,10 +17,10 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_email'],$dataComing
 				':details' => $dataComing["old_email"] ?? "-".' , '.$dataComing["new_email"]
 			];
 			
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult["RESULT"] = TRUE;
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถเปลื่ยนอีเมลได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถทำรายการได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 			

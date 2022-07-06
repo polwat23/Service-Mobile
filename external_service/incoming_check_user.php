@@ -67,15 +67,15 @@ if(isset($dataComing["username"])){
 			echo json_encode($arrayResult);
 		}else{
 			$arrayResult['RESPONSE'] = json_encode([
-			':id_userlogin' => $id_userlogin,
-			':username' => $dataComing["username"],
-			':unique_id' => $dataComing["unique_id"],
-			':device_name' => $dataComing["device_name"],
-			':token' => $access_token,
-			':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour')),
-			':login_date' => date('Y-m-d H:i:s'),
-			':update_date' => date('Y-m-d H:i:s')
-		]);
+				':id_userlogin' => $id_userlogin,
+				':username' => $dataComing["username"],
+				':unique_id' => $dataComing["unique_id"],
+				':device_name' => $dataComing["device_name"],
+				':token' => $access_token,
+				':logout_date' => date('Y-m-d H:i:s', strtotime('+1 hour')),
+				':login_date' => date('Y-m-d H:i:s'),
+				':update_date' => date('Y-m-d H:i:s')
+			]);
 			$arrayResult['RESULT'] = FALSE;
 			echo json_encode($arrayResult);
 			exit();

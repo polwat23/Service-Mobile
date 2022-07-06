@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','managesystemtemplate',$conoracle)){
 		$arrGroupSysTemplate = array();
-		$fetchSysTemplate = $conoracle->prepare("SELECT component_system,subject,body,id_systemplate,is_use FROM smssystemtemplate WHERE is_use <> '-9'");
+		$fetchSysTemplate = $conoracle->prepare("SELECT component_system,subject,trim(body) as body,id_systemplate,is_use FROM smssystemtemplate WHERE is_use <> '-9'");
 		$fetchSysTemplate->execute();
 		
 		while($rowSysTemplate = $fetchSysTemplate->fetch(PDO::FETCH_ASSOC)){
@@ -13,8 +13,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arraySysTem["SUBJECT"] = $rowSysTemplate["SUBJECT"];
 			
 			if($rowSysTemplate["ID_SYSTEMPLATE"] == '8'|| $rowSysTemplate["ID_SYSTEMPLATE"] == '11' || $rowSysTemplate["ID_SYSTEMPLATE"] == '28'){
-				$arraySysTem["BODY"] = file_get_contents(__DIR__.'/../../../..'.$rowSysTemplate["BODY"]) ?? "";
-				//$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
+				//$arraySysTem["BODY"] = file_get_contents(__DIR__.'/../../../..'.$rowSysTemplate["BODY"]) ?? "";
+				$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
 			}else{
 				$arraySysTem["BODY"] = $rowSysTemplate["BODY"];
 			}

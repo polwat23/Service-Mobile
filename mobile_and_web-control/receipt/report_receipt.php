@@ -352,7 +352,7 @@ function GenerateReport($dataReport,$header,$lib){
 				</div>
 				<table style=" border-collapse: collapse; width:100%">
 					<tr>
-						<td class="center border" style="width:557px;">'.$lib->baht_text($sumBalance).'</td>
+						<td class="center border" style="width:557px;">'.$lib->baht_text($header["sum_amount"]).'</td>
 						<td class="border center" style="width:114.5px">รวมเงิน</td>
 						<td class="border right" style="width:128px; padding-right:5px;">'.number_format($header["sum_amount"],2).'</td>
 						<td class="border right" style="padding-right:5px;"></td>
@@ -368,10 +368,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
 			<div style="width:100px;margin-left: 570px;display:flex;">
 			<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
-			<div style="font-size: 18px;margin-left: 40px;margin-top:60px; white-space: nowrap;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 0px;margin-top:60px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 570px;margin-top:-25px;">(นางวรีย์พรรณ โหมดเทศ)</div>
+			<div style="font-size: 18px;margin-left: 610px;margin-top:-25px;">ผู้จัดการ</div>
 			';
 
 	$dompdf = new Dompdf([

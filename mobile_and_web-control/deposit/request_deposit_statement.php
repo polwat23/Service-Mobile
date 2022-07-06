@@ -8,7 +8,7 @@ $dompdf = new DOMPDF();
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchMail = $conoracle->prepare("SELECT  'bell2271422714@gmail.com' as email FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchMail = $conoracle->prepare("SELECT email FROM mbmembmaster WHERE member_no = :member_no");
 		$fetchMail->execute([':member_no' => $member_no]);
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
@@ -42,6 +42,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			}
 			$arrayData["STATEMENT"] = $arraySTMGrp;
 			$arrayData["MEMBER_NO"] = $payload["member_no"];
+			$arrayData["DEPTACCOUNT_NO_RAW"] = $lib->formataccount($account_no,$func->getConstant('dep_format'));
 			$arrayData["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
 			$arrayData["DATE_BETWEEN_FORMAT"] = $lib->convertdate($date_between[0],'d m Y').' - '.$lib->convertdate($date_between[1],'d m Y');
 			$arrayData["DATE_BETWEEN"] = $date_between[0].'-'.$date_between[1];
@@ -212,7 +213,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 					</div>
 					<div style="display:flex;width: 100%;">
 					<div class="label">เลขบัญชีเงินฝาก</div>
-					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
+					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO_RAW"].'</div>
 					</div>
 					<div style="display:flex;width: 100%">
 					<div class="label">ระหว่างวันที่</div>

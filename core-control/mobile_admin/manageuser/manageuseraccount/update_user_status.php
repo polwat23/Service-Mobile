@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 				':details' => $dataComing["member_no"]
 			];
 			
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{

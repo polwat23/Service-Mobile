@@ -84,7 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
-																kpd.KPSLIP_NO,
+																KPINVOICE_NO as KPSLIP_NO,
 																kpd.OPERATE_DATE
 																FROM kptempreceive kpd
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");

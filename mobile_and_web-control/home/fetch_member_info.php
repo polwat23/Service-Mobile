@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 								file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
 								$arrSendDataAPI["inputFile"] = $pathnameTmp;
 								$arrSendDataAPI["outputFile"] = $pathname;
-								$arrSendDataAPI["width"] = 900;
+								$arrSendDataAPI["width"] = 800;
 								$arrSendDataAPI["height"] = 1280;
 								$responseAPIConvert = $lib->posting_data($config["URL_CONVERT_IMG"],$arrSendDataAPI);
 								if(!$responseAPIConvert["RESULT"]){

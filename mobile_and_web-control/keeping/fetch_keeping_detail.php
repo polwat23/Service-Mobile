@@ -8,8 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$MonthForCheck = date('m');
 		$DayForCheck = date('d');
-		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV,KPSLIP_NO,RECEIVE_AMT
-															FROM kptempreceive WHERE member_no = :member_no GROUP BY KPSLIP_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
+		$getLastReceive = $conoracle->prepare("SELECT * FROM (SELECT MAX(recv_period) as MAX_RECV, KPINVOICE_NO as KPSLIP_NO,RECEIVE_AMT
+															FROM kptempreceive WHERE member_no = :member_no GROUP BY KPINVOICE_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC) WHERE rownum <= 1");
 		$getLastReceive->execute([':member_no' => $member_no]);
 		$rowLastRecv = $getLastReceive->fetch(PDO::FETCH_ASSOC);
 		$checkHasBeenPay = $conoracle->prepare("SELECT RECV_PERIOD FROM kpmastreceive WHERE member_no = :member_no and recv_period = :max_recv and keeping_status = 1");

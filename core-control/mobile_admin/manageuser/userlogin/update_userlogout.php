@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id','id_token','type_logout'],$dataComin
 				':details' => $dataComing["id_token"],
 			];
 			
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');	
 		}else{
