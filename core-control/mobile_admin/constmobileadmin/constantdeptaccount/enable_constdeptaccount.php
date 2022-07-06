@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_accountconstant','is_use'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
-		$updateConstants = $conmysql->prepare("UPDATE gcconstantaccountdept SET is_use = :is_use
+	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount',$conoracle)){
+		$updateConstants = $conoracle->prepare("UPDATE gcconstantaccountdept SET is_use = :is_use
 												WHERE id_accountconstant = :id_accountconstant");
 		if($updateConstants->execute([
 			':is_use' => $dataComing["is_use"],

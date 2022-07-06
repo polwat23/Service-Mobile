@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		$arrayResult = array();
+		
 		$member_no = $payload["member_no"];
 		$encode_avatar = $dataComing["encode_avatar"];
 		$destination = __DIR__.'/../../resource/avatar/'.$member_no;
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','encode_avatar','channel'],$dat
 		}else{
 			if($createAvatar){
 				$path_avatar = '/resource/avatar/'.$member_no.'/'.$createAvatar["normal_path"];
-				$insertIntoInfo = $conmysql->prepare("UPDATE gcmemberaccount SET path_avatar = :path_avatar,upload_from_channel = :channel,upload_date = NOW()
+				$insertIntoInfo = $conoracle->prepare("UPDATE gcmemberaccount SET path_avatar = :path_avatar,upload_from_channel = :channel,upload_date = SYSDATE
 														WHERE member_no = :member_no");
 				if($insertIntoInfo->execute([
 					':path_avatar' => $path_avatar,

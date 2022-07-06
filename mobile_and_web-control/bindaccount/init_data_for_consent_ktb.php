@@ -10,24 +10,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
-			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+			$fetchConstantAllowDept = $conoracle->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 															WHERE gat.member_no = :member_no and gat.is_use = '1' 
 															and gad.allow_deposit_outside = '1' and gad.allow_withdraw_outside = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
 			]);
-			if($fetchConstantAllowDept->rowCount() > 0){
-				$arrayDeptAllow = array();
-				while($rowAllowDept = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC)){
-					$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
-				}
+			$arrayDeptAllow = array();
+			while($rowAllowDept = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC)){
+				$arrayDeptAllow[] = $rowAllowDept["DEPTACCOUNT_NO"];
+			}
+			
+			if(sizeof($arrayDeptAllow) > 0){
+				
 				$arrAccBeenBind = array();
-				$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no 
-																and bindaccount_status NOT IN('6','7','8','-9') and deptaccount_no_coop IS NOT NULL");
+				$InitDeptAccountBeenBind = $conoracle->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no 
+																and bindaccount_status NOT IN('6','7','8','-9','9') and deptaccount_no_coop IS NOT NULL");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
-					$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
+					$arrAccBeenBind[] = $rowAccountBeenbind["DEPTACCOUNT_NO_COOP"];
 				}
 				if(sizeof($arrAccBeenBind) > 0){
 					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
@@ -65,6 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBank["ACCOUNT_CODE"],$rowAccBank["ACCOUNT_FORMAT"]);
 						$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 						$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+						$arrayResult['IS_CHOOSE_ACCOUNT'] = FALSE;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 					}else{
@@ -77,6 +80,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrayResult['ACCOUNT_BANK_FORMAT'] = $lib->formataccount($rowAccBankATM["ACCOUNT_CODE"],$rowAccBankATM["ACCOUNT_FORMAT"]);
 							$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 							$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+							$arrayResult['IS_CHOOSE_ACCOUNT'] = FALSE;
 							$arrayResult['RESULT'] = TRUE;
 							require_once('../../include/exit_footer.php');
 						}else{

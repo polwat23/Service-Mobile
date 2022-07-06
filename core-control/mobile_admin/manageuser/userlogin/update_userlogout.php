@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_token','type_logout'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','userlogin')){
-		if($func->logout($dataComing['id_token'],$dataComing['type_logout'])){
+	if($func->check_permission_core($payload,'mobileadmin','userlogin',$conoracle)){
+		if($func->logout($dataComing['id_token'],$dataComing['type_logout'],$conoracle)){
 			$arrayStruc = [
 				':menu_name' => "userlogin",
 				':username' => $payload["username"],
@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['unique_id','id_token','type_logout'],$dataComin
 				':details' => $dataComing["id_token"],
 			];
 			
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');	
 		}else{

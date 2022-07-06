@@ -2,11 +2,13 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("INSERT INTO gcbankconstantmapping
-		(bank_code, id_bankconstant)
-		VALUES (:bank_code, :id_bankconstant)");
+	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount',$conoracle)){
+		$id_bankconstantmapping = $func->getMaxTable('id_bankconstantmapping' , 'gcbankconstantmapping',$conoracle);
+		$updateConstants = $conoracle->prepare("INSERT INTO gcbankconstantmapping
+		(id_bankconstantmapping,bank_code, id_bankconstant)
+		VALUES (:id_bankconstantmapping, :bank_code, :id_bankconstant)");
 		if($updateConstants->execute([
+			':id_bankconstantmapping' => $id_bankconstantmapping,
 			':bank_code' => $dataComing["bank_code"],
 			':id_bankconstant' => $dataComing["id_bankconstant"]
 		])){
@@ -17,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					':details' => "bank_code => ".$dataComing["bank_code"].
 								" id_bankconstant => ".$dataComing["id_bankconstant"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

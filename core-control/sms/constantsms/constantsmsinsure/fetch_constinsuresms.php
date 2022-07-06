@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsinsure')){
+	if($func->check_permission_core($payload,'sms','constantsmsinsure',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 																		id_smsconstantinsure,
 																		insure_itemtype_code,
 																		allow_smsconstantinsure,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTINSURE"] = $rowMenuMobile["id_smsconstantinsure"];
-			$arrConstans["INSITEMTYPE_CODE"] = $rowMenuMobile["insure_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTINSURE"] = $rowMenuMobile["allow_smsconstantinsure"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTINSURE"] = $rowMenuMobile["ID_SMSCONSTANTINSURE"];
+			$arrConstans["INSITEMTYPE_CODE"] = $rowMenuMobile["INSURE_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTINSURE"] = $rowMenuMobile["ALLOW_SMSCONSTANTINSURE"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT INSITEMTYPE_CODE,INSITEMTYPE_DESC FROM INSUCFINSITEMTYPE ORDER BY INSITEMTYPE_CODE ASC");

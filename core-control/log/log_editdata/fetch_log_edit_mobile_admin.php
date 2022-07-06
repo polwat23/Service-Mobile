@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logeditmobileadmin')){
+	if($func->check_permission_core($payload,'log','logeditmobileadmin',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogAdminUsage = $conmysql->prepare("SELECT
+		$fetchLogAdminUsage = $conoracle->prepare("SELECT
 															admin.id_logeditmobileadmin,
 															admin.menu_name,
 															admin.username,
@@ -17,13 +17,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchLogAdminUsage->execute();
 		while($rowLogAdminUsage = $fetchLogAdminUsage->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogAdminUsage = array();
-			$arrGroupLogAdminUsage["ID_LOGAMINUAGE"] = $rowLogAdminUsage["id_logeditmobileadmin"];
-			$arrGroupLogAdminUsage["MENU_NAME"] = $rowLogAdminUsage["menu_name"];
-			$arrGroupLogAdminUsage["USERNAME"] = $rowLogAdminUsage["username"];
-			$arrGroupLogAdminUsage["DATE_USAGE"] =  $rowLogAdminUsage["date_usage"];
-			$arrGroupLogAdminUsage["DATE_USAGE_FORMAT"] =  $lib->convertdate($rowLogAdminUsage["date_usage"],'d m Y',true); 
-			$arrGroupLogAdminUsage["USE_LIST"] = $rowLogAdminUsage["use_list"];
-			$arrGroupLogAdminUsage["DETAILS"] = $rowLogAdminUsage["details"];
+			$arrGroupLogAdminUsage["ID_LOGAMINUAGE"] = $rowLogAdminUsage["ID_LOGEDITMOBILEADMIN"];
+			$arrGroupLogAdminUsage["MENU_NAME"] = $rowLogAdminUsage["MENU_NAME"];
+			$arrGroupLogAdminUsage["USERNAME"] = $rowLogAdminUsage["USERNAME"];
+			$arrGroupLogAdminUsage["DATE_USAGE"] =  $rowLogAdminUsage["DATE_USAGE"];
+			$arrGroupLogAdminUsage["DATE_USAGE_FORMAT"] =  $lib->convertdate($rowLogAdminUsage["DATE_USAGE"],'d m Y',true); 
+			$arrGroupLogAdminUsage["USE_LIST"] = $rowLogAdminUsage["USE_LIST"];
+			$arrGroupLogAdminUsage["DETAILS"] = $rowLogAdminUsage["DETAILS"];
 			
 			$arrayGroup[] = $arrGroupLogAdminUsage;
 		}

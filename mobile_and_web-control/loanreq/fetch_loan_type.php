@@ -5,11 +5,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequest')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayGrpLoan = array();
-		$getLoantype = $conmysql->prepare("SELECT loantype_code,loantype_alias_name FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
+		$getLoantype = $conoracle->prepare("SELECT loantype_code,loantype_alias_name FROM gcconstanttypeloan WHERE is_loanrequest = '1'");
 		$getLoantype->execute();
 		while($rowLoantype = $getLoantype->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoan = array();
-			$arrayLoan["LOANTYPE_CODE"] = $rowLoantype["loantype_code"];
+			$arrayLoan["LOANTYPE_CODE"] = $rowLoantype["LOANTYPE_CODE"];
 			$getLoanTypeData = $conoracle->prepare("SELECT ln.LOANTYPE_DESC,lnt.interest_rate,lp.max_period,ln.LOANGROUP_CODE
 													FROM lnloantype ln LEFT JOIN lncfloanintratedet lnt ON ln.inttabrate_code = lnt.loanintrate_code
 													and sysdate BETWEEN lnt.effective_date and lnt.expire_date
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													LEFT JOIN mbmembmaster mb ON lm.membtype_code = mb.membtype_code
 													WHERE ln.loantype_code = :loantype_code and mb.member_no = :member_no");
 			$getLoanTypeData->execute([
-				':loantype_code' => $rowLoantype["loantype_code"],
+				':loantype_code' => $rowLoantype["LOANTYPE_CODE"],
 				':member_no' => $member_no
 			]);
 			$rowLoanData = $getLoanTypeData->fetch(PDO::FETCH_ASSOC);
@@ -30,26 +30,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 															and MB.member_no = :member_no and LN.loantype_code = :loantype_code");
 					$checkRightsLoan->execute([
 						':member_no' => $member_no,
-						':loantype_code' => $rowLoantype["loantype_code"]
+						':loantype_code' => $rowLoantype["LOANTYPE_CODE"]
 					]);
 					$rowRights = $checkRightsLoan->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowRights["LOANTYPE_CODE"]) && $rowRights["LOANTYPE_CODE"] != ""){
-						$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["loantype_alias_name"] ?? $rowLoanData["LOANTYPE_DESC"];
+						$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_ALIAS_NAME"] ?? $rowLoanData["LOANTYPE_DESC"];
 						$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
 						$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
-						if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
-							$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["loantype_code"].'.png?v='.date('Ym');
+						if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["LOANTYPE_CODE"].'.png')){
+							$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["LOANTYPE_CODE"].'.png?v='.date('Ym');
 						}else{
 							$arrayLoan["LOAN_TYPE_IMG"] = null;
 						}
 						$arrayGrpLoan[] = $arrayLoan;
 					}
 				}else{
-					$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["loantype_alias_name"] ?? $rowLoanData["LOANTYPE_DESC"];
+					$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_ALIAS_NAME"] ?? $rowLoanData["LOANTYPE_DESC"];
 					$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
 					$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
-					if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["loantype_code"].'.png')){
-						$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["loantype_code"].'.png?v='.date('Ym');
+					$arrayLoan['TERMS_URL']  = "";
+					if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["LOANTYPE_CODE"].'.png')){
+						$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["LOANTYPE_CODE"].'.png?v='.date('Ym');
 					}else{
 						$arrayLoan["LOAN_TYPE_IMG"] = null;
 					}
@@ -57,10 +58,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 		}
-		$getLoanConst = $conoracle->prepare("SELECT ROUNDPERIODPOS_AMT FROM lnloanconstant");
-		$getLoanConst->execute();
-		$rowLoanConst = $getLoanConst->fetch(PDO::FETCH_ASSOC);
-		//$arrayResult['TYPE_DECIMAL'] = $rowLoanConst["ROUNDPERIODPOS_AMT"];
 		$arrayResult['LOAN_TYPE'] = $arrayGrpLoan;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

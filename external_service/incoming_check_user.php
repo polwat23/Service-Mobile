@@ -42,10 +42,10 @@ if(isset($dataComing["username"])){
 		$arrPayload['exp'] = time() + 21600;
 		$access_token = $jwt_token->customPayload($arrPayload, $config["SECRET_KEY_CORE"]);
 		if($rowUserInfo["USER_NAME"] != 'dev@mode'){
-			$updateOldUser = $conmysql->prepare("UPDATE coreuserlogin SET is_login = '0' WHERE username = :username");
+			$updateOldUser = $conoracle->prepare("UPDATE coreuserlogin SET is_login = '0' WHERE username = :username");
 			$updateOldUser->execute([':username' => $rowUserInfo["USER_NAME"]]);
 		}
-		$insertLog = $conmysql->prepare("INSERT INTO coreuserlogin(username,unique_id,device_name,auth_token,logout_date)
+		$insertLog = $conoracle->prepare("INSERT INTO coreuserlogin(username,unique_id,device_name,auth_token,logout_date)
 										VALUES(:username,:unique_id,:device_name,:token,:logout_date)");
 		if($insertLog->execute([
 			':username' => $rowUserInfo["USER_NAME"],

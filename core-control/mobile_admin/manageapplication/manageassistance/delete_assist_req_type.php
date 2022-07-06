@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_const_welfare'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
-		$updateform = $conmysql->prepare("UPDATE gcconstantwelfare SET is_use = '0' WHERE id_const_welfare = :id_const_welfare");
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
+		$updateform = $conoracle->prepare("UPDATE gcconstantwelfare SET is_use = '0' WHERE id_const_welfare = :id_const_welfare");
 		if($updateform->execute([
 			':id_const_welfare' => $dataComing["id_const_welfare"]
 		])){
@@ -14,7 +14,7 @@ if($lib->checkCompleteArgument(['unique_id','id_const_welfare'],$dataComing)){
 				':details' => "delete constwelfare (id ".$dataComing["id_const_welfare"].")"
 			];
 			
-			$log->writeLog('manageapplication',$arrayStruc);	
+			//$log->writeLog('manageapplication',$arrayStruc,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
 		}else{
 			$arrayResult['RESPONSE'] = "ไม่สามารถเลบรายการนี้ได้ กรุณาติดต่อผู้พัฒนา";

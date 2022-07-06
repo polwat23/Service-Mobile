@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$conmysql->beginTransaction();
+	$conoracle->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
@@ -35,10 +35,13 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrayTel[] = $arrayComing;
 	$bulkInsert = array();
 	$arrayDest = array();
+	
 	if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != "" && mb_strlen($arrayTel[0]["TEL"]) == 10){
-		$insertOTP = $conmysql->prepare("INSERT INTO gcotp(refno_otp,otp_password,destination_number,expire_date,otp_text)
-											VALUES(:ref_otp,:otp_pass,:destination,:expire_date,:otp_text)");
+		$max_id_otp  = $func->getMaxTable('id_otp','gcotp');
+		$insertOTP = $conoracle->prepare("INSERT INTO gcotp(id_otp,refno_otp,otp_password,destination_number,expire_date,otp_text)
+											VALUES(:id_otp,:ref_otp,:otp_pass,:destination,TO_DATE(:expire_date ,'YYYY-MM-DD HH24:MI:SS'),:otp_text)");
 		if($insertOTP->execute([
+			':id_otp' => $max_id_otp,
 			':ref_otp' => $reference,
 			':otp_pass' => $otp_password,
 			':destination' => $arrayTel[0]["TEL"],
@@ -49,7 +52,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			$arraySendSMS = $lib->sendSMS($arrayDest);
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
-				$conmysql->commit();
+				$conoracle->commit();
 				$arrayResult['REFERENCE_OTP'] = $reference;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -59,7 +62,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 				$func->logSMSWasNotSent($bulkInsert);
 				unset($bulkInsert);
 				$bulkInsert = array();
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0018";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -67,14 +70,6 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 				
 			}
 		}else{
-			$conmysql->rollback();
-			$filename = basename(__FILE__, '.php');
-			$logStruc = [
-				":error_menu" => $filename,
-				":error_code" => "WS1011",
-				":error_desc" => "ไม่สามารถ send OTP ได้"."\n".json_encode($dataComing),
-				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-			];
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "ไม่สามารถ send OTP ได้เพราะ Insert ลง gcotp ไม่ได้"."\n"."Query => ".$insertOTP->queryString."\n"."Param => ". json_encode([
 				':ref_otp' => $reference,

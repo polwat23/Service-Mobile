@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		]);
 		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataMember["CARD_PERSON"])){
-			$fetchConstantAllowDept = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+			$fetchConstantAllowDept = $conoracle->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1' 
 															and gad.allow_deposit_outside = '1' and gad.allow_withdraw_outside = '1'");
@@ -20,13 +20,13 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 			if($fetchConstantAllowDept->rowCount() > 0){
 				$arrayDeptAllow = array();
 				while($rowAllowDept = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC)){
-					$arrayDeptAllow[] = $rowAllowDept["deptaccount_no"];
+					$arrayDeptAllow[] = $rowAllowDept["DEPTACCOUNT_NO"];
 				}
 				$arrAccBeenBind = array();
-				$InitDeptAccountBeenBind = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
+				$InitDeptAccountBeenBind = $conoracle->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);
 				while($rowAccountBeenbind = $InitDeptAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
-					$arrAccBeenBind[] = $rowAccountBeenbind["deptaccount_no_coop"];
+					$arrAccBeenBind[] = $rowAccountBeenbind["DEPTACCOUNT_NO_COOP"];
 				}
 				if(sizeof($arrAccBeenBind) > 0){
 					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
@@ -54,10 +54,10 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 				}
 				if(sizeof($arrayGroupAccount) > 0){
 					$arrayResult['ACCOUNT'] = $arrayGroupAccount;
-					$getFormatBank = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
+					$getFormatBank = $conoracle->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
 					$getFormatBank->execute([':bank_code' => $dataComing["bank_code"]]);
 					$rowFormatBank = $getFormatBank->fetch(PDO::FETCH_ASSOC);
-					$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["bank_format_account"] ?? $config["ACCOUNT_BANK_FORMAT"];
+					$arrayResult['ACCOUNT_BANK_FORMAT'] = $rowFormatBank["BANK_FORMAT_ACCOUNT"] ?? $config["ACCOUNT_BANK_FORMAT"];
 					$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
 					$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
 					$arrayResult['RESULT'] = TRUE;

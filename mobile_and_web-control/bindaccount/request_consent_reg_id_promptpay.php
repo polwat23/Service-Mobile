@@ -4,7 +4,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-			$checkAccBankBeenbind = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
+			$checkAccBankBeenbind = $conoracle->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
 			$checkAccBankBeenbind->execute([':member_no' => $payload["member_no"]]);
 			if($checkAccBankBeenbind->rowCount() > 0){
 				$arrayResult['RESPONSE_CODE'] = "WS0036";
@@ -23,8 +23,8 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 			]);
 			$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,citizen_id,bank_account_name,bank_account_name_en,bank_code,bind_date,bindaccount_status,id_token) 
-															VALUES(:sigma_key,:member_no,:citizen_id,:bank_account_name,:bank_account_name,'999',NOW(),'1',:id_token)");
+			$insertPendingBindAccount = $conoracle->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,citizen_id,bank_account_name,bank_account_name_en,bank_code,bind_date,bindaccount_status,id_token) 
+															VALUES(:sigma_key,:member_no,:citizen_id,:bank_account_name,:bank_account_name,'999',SYSDATE,'1',:id_token)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
 				':member_no' => $payload["member_no"],

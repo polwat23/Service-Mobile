@@ -19,9 +19,9 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$conmysql->beginTransaction();
+	$conoracle->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
+	$updateOldOTP = $conoracle->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
 	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
@@ -38,9 +38,11 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	$bulkInsert = array();
 	$arrayDest = array();
 	if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != "" && mb_strlen($arrayTel[0]["TEL"]) == 10){
-		$insertOTP = $conmysql->prepare("INSERT INTO gcotp(refno_otp,otp_password,destination_number,expire_date,otp_text)
-											VALUES(:ref_otp,:otp_pass,:destination,:expire_date,:otp_text)");
+		$max_id_otp  = $func->getMaxTable('id_otp','gcotp');
+		$insertOTP = $conoracle->prepare("INSERT INTO gcotp(id_otp,refno_otp,otp_password,destination_number,expire_date,otp_text)
+											VALUES(:id_otp,:ref_otp,:otp_pass,:destination,TO_DATE(:expire_date ,'YYYY-MM-DD HH24:MI:SS'),:otp_text)");
 		if($insertOTP->execute([
+			':id_otp' => $max_id_otp,
 			':ref_otp' => $reference,
 			':otp_pass' => $otp_password,
 			':destination' => $arrayTel[0]["TEL"],
@@ -51,7 +53,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			$arraySendSMS = $lib->sendSMS($arrayDest);
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
-				$conmysql->commit();
+				$conoracle->commit();
 				$arrayResult['REFERENCE_OTP'] = $reference;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -61,7 +63,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 				$func->logSMSWasNotSent($bulkInsert);
 				unset($bulkInsert);
 				$bulkInsert = array();
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0018";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -69,7 +71,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 				
 			}
 		}else{
-			$conmysql->rollback();
+			$conoracle->rollback();
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
 				":error_menu" => $filename,

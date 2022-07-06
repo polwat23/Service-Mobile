@@ -2,7 +2,7 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	$fetchUserControl = $conmysql->prepare("SELECT am.DESCRIPTION,am.USER_NAME,hr.DEPTGRP_CODE FROM amsecusers am 
+	$fetchUserControl = $conoracle->prepare("SELECT am.DESCRIPTION,am.USER_NAME,hr.DEPTGRP_CODE FROM amsecusers am 
 											LEFT JOIN hremployee hr ON am.user_id = hr.emp_no");
 	$fetchUserControl->execute();
 	$arrayGroupAll = array();

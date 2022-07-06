@@ -19,17 +19,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 			$arrayHeaderAcc = array();
-			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date 
+			$fetchAlias = $conoracle->prepare("SELECT alias_name,path_alias_img, to_char(update_date,'YYYYMMDDHH24MISS')  as update_date 
 											FROM gcdeptalias WHERE deptaccount_no = :account_no");
 			$fetchAlias->execute([
 				':account_no' => $rowAccount["DEPTACCOUNT_NO"]
 			]);
 			$rowAlias = $fetchAlias->fetch(PDO::FETCH_ASSOC);
-			$arrAccount["ALIAS_NAME"] = $rowAlias["alias_name"] ?? null;
-			if(isset($rowAlias["path_alias_img"])){
-				$explodePathAliasImg = explode('.',$rowAlias["path_alias_img"]);
-				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["update_date"];
-				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["path_alias_img"].'?v='.$rowAlias["update_date"];
+			$arrAccount["ALIAS_NAME"] = $rowAlias["ALIAS_NAME"] ?? null;
+			if(isset($rowAlias["PATH_ALIAS_IMG"])){
+				$explodePathAliasImg = explode('.',$rowAlias["PATH_ALIAS_IMG"]);
+				$arrAccount["ALIAS_PATH_IMG_WEBP"] = $config["URL_SERVICE"].$explodePathAliasImg[0].'.webp?v='.$rowAlias["UPDATE_DATE"];
+				$arrAccount["ALIAS_PATH_IMG"] = $config["URL_SERVICE"].$rowAlias["PATH_ALIAS_IMG"].'?v='.$rowAlias["UPDATE_DATE"];
 			}else{
 				$arrAccount["ALIAS_PATH_IMG_WEBP"] = null;
 				$arrAccount["ALIAS_PATH_IMG"] = null;

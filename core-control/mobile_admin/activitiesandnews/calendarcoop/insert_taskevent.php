@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date','create_by'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','calendarcoop')){
+	if($func->check_permission_core($payload,'mobileadmin','calendarcoop',$conoracle)){
 		
 		if(isset($dataComing["news_html_root_"]) && $dataComing["news_html_root_"] != null){
 		$detail_html = '<!DOCTYPE HTML>
@@ -20,9 +20,12 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 								</html>';
 		}
 
-		$insertTaskEvent = $conmysql->prepare("INSERT INTO `gctaskevent`(`task_topic`, `task_detail`, `start_date`, `end_date`,`event_start_time`,`event_end_time`,`is_settime`,`is_notify`,`is_notify_before`,`create_by`,event_html) 
-							VALUES (:task_topic,:task_detail,:start_date,:end_date,:event_start_time,:event_end_time,:is_settime,:is_notify,:is_notify_before,:create_by,:event_html)");
+		$id_task = $func->getMaxTable('id_task' , 'gctaskevent',$conoracle);
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'event'.$id_task.'.html', $detail_html . PHP_EOL, FILE_APPEND);
+		$insertTaskEvent = $conoracle->prepare("INSERT INTO gctaskevent(id_task ,task_topic, task_detail, start_date, end_date,event_start_time,event_end_time,is_settime,is_notify,is_notify_before,create_by,event_html ) 
+							VALUES (:id_task,:task_topic,:task_detail,to_date(:start_date,'yyyy-mm-dd'),to_date(:end_date,'yyyy-mm-dd'),:event_start_time,:event_end_time,:is_settime,:is_notify,:is_notify_before,:create_by,:event_html)");
 		if($insertTaskEvent->execute([
+			':id_task' => $id_task,
 			':task_topic' => $dataComing["task_topic"],
 			':task_detail' => $dataComing["task_detail"],
 			':start_date' => $dataComing["start_date"],
@@ -33,12 +36,12 @@ if($lib->checkCompleteArgument(['unique_id','task_topic','start_date','end_date'
 			':is_notify'=> $dataComing["is_notify"],
 			':is_notify_before'=> $dataComing["is_notify_before"],
 			':create_by'=> $dataComing["create_by"],
-			':event_html'=>$detail_html ?? null
+			':event_html'=> '/resource/html/'.'event'.$id_task.'.html' ?? null
 		])){
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{
-			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มกิจกรรมได้ กรุณาติดต่อผู้พัฒนา";
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มกิจกรรมได้";
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}

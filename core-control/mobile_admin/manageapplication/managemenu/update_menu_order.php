@@ -2,25 +2,25 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','menu_list'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managemenu')){
-		$conmysql->beginTransaction();
+	if($func->check_permission_core($payload,'mobileadmin','managemenu',$conoracle)){
+		$conoracle->beginTransaction();
 		foreach($dataComing["menu_list"] as $menu_list){
-			$updatemenu = $conmysql->prepare("UPDATE gcmenu SET menu_order = :menu_order
+			$updatemenu = $conoracle->prepare("UPDATE gcmenu SET menu_order = :menu_order
 										 WHERE id_menu = :id_menu");
 			if($updatemenu->execute([
-				':menu_order' => $menu_list["order"],
-				':id_menu' => $menu_list["menu_id"]
+				':menu_order' => $menu_list["ORDER"],
+				':id_menu' => $menu_list["MENU_ID"]
 			])){
 				continue;
 			}else{
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$arrayResult['RESPONSE'] = "ไม่สามารถจัดเรียงเมนูได้ กรุณาติดต่อผู้พัฒนา";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
 				
 			}
 		}
-		$conmysql->commit();
+		$conoracle->commit();
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../../include/exit_footer.php');	
 	}else{

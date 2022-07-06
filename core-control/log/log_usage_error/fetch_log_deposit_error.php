@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logdepositerror')){
+	if($func->check_permission_core($payload,'log','logdepositerror',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogDepositError = $conmysql->prepare("SELECT  tb.id_deptransbankerr,
+		$fetchLogDepositError = $conoracle->prepare("SELECT  tb.id_deptransbankerr,
 															tb.member_no,
 															tb.transaction_date,
 															tb.sigma_key,
@@ -23,24 +23,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchLogDepositError->execute();
 		while($rowLogDepositError = $fetchLogDepositError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogDepositError = array();
-			$arrLogDepositError["ID_DPTRANSBANKERR"] = $rowLogDepositError["id_deptransbankerr"];
-			$arrLogDepositError["MEMBER_NO"] = $rowLogDepositError["member_no"];
-			$arrLogDepositError["CHANNEL"] = $rowLogDepositError["channel"];
-			$arrLogDepositError["ATTEMPT_BIND_DATE"] =  $lib->convertdate($rowLogDepositError["transaction_date"],'d m Y',true); 
-			$arrLogDepositError["DEVICE_NAME"] = $rowLogDepositError["device_name"];
-			$arrLogDepositError["AMT_TRANSFER"] = $rowLogDepositError["amt_transfer"];
-			$arrLogDepositError["AMT_TRANSFER_FORMAT"] = number_format($rowLogDepositError["amt_transfer"],2);
-			
-			$arrLogDepositError["SIGMA_KEY"] = $rowLogDepositError["sigma_key"];
-			$arrLogDepositError["RESPONSE_CODE"] = $rowLogDepositError["response_code"];
-			$arrLogDepositError["RESPONSE_MESSAGE"] = $rowLogDepositError["response_message"];
+			$arrLogDepositError["ID_DPTRANSBANKERR"] = $rowLogDepositError["ID_DEPTRANSBANKERR"];
+			$arrLogDepositError["MEMBER_NO"] = $rowLogDepositError["MEMBER_NO"];
+			$arrLogDepositError["CHANNEL"] = $rowLogDepositError["CHANNEL"];
+			$arrLogDepositError["ATTEMPT_BIND_DATE"] =  $lib->convertdate($rowLogDepositError["TRANSACTION_DATE"],'d m Y',true); 
+			$arrLogDepositError["DEVICE_NAME"] = $rowLogDepositError["DEVICE_NAME"];
+			$arrLogDepositError["AMT_TRANSFER"] = $rowLogDepositError["AMT_TRANSFER"];
+			$arrLogDepositError["AMT_TRANSFER_FORMAT"] = number_format($rowLogDepositError["AMT_TRANSFER"],2);			
+			$arrLogDepositError["SIGMA_KEY"] = $rowLogDepositError["SIGMA_KEY"];
+			$arrLogDepositError["RESPONSE_CODE"] = $rowLogDepositError["RESPONSE_CODE"];
+			$arrLogDepositError["RESPONSE_MESSAGE"] = $rowLogDepositError["RESPONSE_MESSAGE"];
 			if($rowLogDepositError["is_adj"] == '8'){
 				$checkAdj = $conoracle->prepare("SELECT DEPTSLIP_NO FROM dpdeptslip WHERE deptaccount_no = :deptaccount_no and amt_transfer = :amt_transfer
 												and deptitemtype_code = 'DTX' and to_char(deptslip_date,'YYYY-MM-DD') = :date_oper");
 				$checkAdj->execute([
-					':deptaccount_no' => $rowLogDepositError["deptaccount_no_coop"],
-					':amt_transfer' => $rowLogDepositError["amt_transfer"],
-					':date_oper' => date('Y-m-d',strtotime($rowLogDepositError["transaction_date"]))
+					':deptaccount_no' => $rowLogDepositError["DEPTACCOUNT_NO_COOP"],
+					':amt_transfer' => $rowLogDepositError["AMT_TRANSFER"],
+					':date_oper' => date('Y-m-d',strtotime($rowLogDepositError["TRANSACTION_DATE"]))
 				]);
 				$rowAdj = $checkAdj->fetch(PDO::FETCH_ASSOC);
 				if(empty($rowAdj["DEPTSLIP_NO"])){

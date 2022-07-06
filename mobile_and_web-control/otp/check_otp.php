@@ -20,29 +20,29 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		
 	}
 	$callfile_now = strtotime(date('Y-m-d H:i:s'));
-	$checkOTP = $conmysql->prepare("SELECT otp_status,expire_date FROM gcotp WHERE otp_password = :otp_pass and refno_otp = :ref_no");
+	$checkOTP = $conoracle->prepare("SELECT otp_status,expire_date FROM gcotp WHERE TRIM(otp_password) = :otp_pass and TRIM(refno_otp) = :ref_no");
 	$checkOTP->execute([
 		':otp_pass' => $dataComing["otp"],
 		':ref_no' => $dataComing["ref_no"]
 	]);
-	if($checkOTP->rowCount() > 0){
-		$rowOTP = $checkOTP->fetch(PDO::FETCH_ASSOC);
-		$expire = strtotime($rowOTP["expire_date"]);
+	$rowOTP = $checkOTP->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowOTP["EXPIRE_DATE"])){
+		$expire = strtotime($rowOTP["EXPIRE_DATE"]);
 		if($expire >= $callfile_now){
-			if($rowOTP["otp_status"] == '-9'){
+			if($rowOTP["OTP_STATUS"] == '-9'){
 				$arrayResult['RESPONSE_CODE'] = "WS0016";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
-			}else if($rowOTP["otp_status"] == '1'){
+			}else if($rowOTP["OTP_STATUS"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0015";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
-			}else if($rowOTP["otp_status"] == '0'){
-				$updateUseOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '1' WHERE refno_otp = :ref_no");
+			}else if($rowOTP["OTP_STATUS"] == '0'){
+				$updateUseOTP = $conoracle->prepare("UPDATE gcotp SET otp_status = '1' WHERE refno_otp = :ref_no");
 				$updateUseOTP->execute([':ref_no' => $dataComing["ref_no"]]);
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 				
 			}
 		}else{
-			$updateExpireOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-1' WHERE refno_otp = :ref_no");
+			$updateExpireOTP = $conoracle->prepare("UPDATE gcotp SET otp_status = '-1' WHERE refno_otp = :ref_no");
 			$updateExpireOTP->execute([':ref_no' => $dataComing["ref_no"]]);
 			$arrayResult['RESPONSE_CODE'] = "WS0013";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

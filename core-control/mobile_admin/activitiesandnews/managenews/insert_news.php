@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managenews')){
-		$conmysql->beginTransaction();
+	if($func->check_permission_core($payload,'mobileadmin','managenews',$conoracle)){
+		$conoracle->beginTransaction();
 		$pathImg1 = null;
 		$pathImg2 = null;
 		$pathImg3 = null;
@@ -169,9 +169,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							  </body>
 								</html>';
 		}
-		$insert_news = $conmysql->prepare("INSERT INTO gcnews (news_title, news_detail,path_img_header,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5,create_by,news_html)
-						  VALUES (:news_title, :news_detail,:path_img_header,:link_news_more,:path_img_1,:path_img_2,:path_img_3,:path_img_4,:path_img_5,:create_by,:news_html)");
+		$id_news = $func->getMaxTable('id_news' , 'gcnews',$conoracle);
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'news'.$id_news.'.html', $detail_html . PHP_EOL, FILE_APPEND);
+		$insert_news = $conoracle->prepare("INSERT INTO gcnews (id_news,news_title, news_detail,path_img_header,link_news_more,img_gallery_1,img_gallery_2,img_gallery_3,img_gallery_4,img_gallery_5,create_by,news_html)
+						  VALUES (:id_news, :news_title, :news_detail,:path_img_header,:link_news_more,:path_img_1,:path_img_2,:path_img_3,:path_img_4,:path_img_5,:create_by,:news_html)");
 			if($insert_news->execute([
+				':id_news' =>  $id_news,
 				':news_title' =>  $dataComing["news_title"]?? null,
 				':news_detail' =>  $dataComing["news_detail"]?? null,
 				':path_img_header' => $pathImgHeadNews ?? null,
@@ -182,10 +185,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				':path_img_4' => $pathImg4 ?? null,
 				':path_img_5' => $pathImg5 ?? null,
 				':create_by' => $payload["username"],
-				':news_html' => $detail_html ?? null
+				':news_html' => '/resource/html/'.'news'.$id_news.'.html' ?? null
 		
 			])){
-				$last_id = $conmysql->lastInsertId();
+				$last_id = $conoracle->lastInsertId();
 				
 				// start เพิ่มไฟล์เเนบ
 				if(isset($dataComing["file_upload"]) && $dataComing["file_upload"] != null){
@@ -203,26 +206,26 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							$pathFile = $pathFile."?".$random_text;
 						}
 						//update file sql
-						$update_news= $conmysql->prepare("UPDATE gcnews SET 
+						$update_news= $conoracle->prepare("UPDATE gcnews SET 
 															file_upload = :path_file
 													  WHERE id_news = :id_news");
 						if($update_news->execute([
 							':id_news' =>  $last_id,
 							':path_file' => $pathFile ?? null
 						])){
-							$conmysql->commit();
+							$conoracle->commit();
 							$arrayResult["RESULT"] = TRUE;
 							require_once('../../../../include/exit_footer.php');
 							
 						}else{
-							$conmysql->rollback();
+							$conoracle->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../../../include/exit_footer.php');
 							
 						}
 			
-						$conmysql->rollback();
+						$conoracle->rollback();
 						$arrayResult['DATA'] = [
 							':id_news' =>  $last_id,
 							':path_file' => $pathFile ?? null
@@ -231,14 +234,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						require_once('../../../../include/exit_footer.php');
 						
 					}else{
-						$conmysql->rollback();
+						$conoracle->rollback();
 						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 						
 					}
 				}else{
-					$conmysql->commit();
+					$conoracle->commit();
 					$arrayResult["RESULT"] = TRUE;
 					require_once('../../../../include/exit_footer.php');
 					

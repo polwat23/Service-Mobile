@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logrepayloanerror')){
+	if($func->check_permission_core($payload,'log','logrepayloanerror',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogRepayLoan = $conmysql->prepare("SELECT
+		$fetchLogRepayLoan = $conoracle->prepare("SELECT
 												pay.id_repayloan,
 												pay.member_no,
 												pay.transaction_date,
@@ -22,26 +22,25 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN gcuserlogin login ON
 												pay.id_userlogin = login.id_userlogin
 											WHERE pay.status_flag ='0'
-											ORDER BY pay.transaction_date");
+											ORDER BY pay.transaction_date DESC");
 												
 		$fetchLogRepayLoan->execute();
 		while($rowLogRepayLoan = $fetchLogRepayLoan->fetch(PDO::FETCH_ASSOC)){
-			$arrLogRepayLoan["MEMBER_NO"] = $rowLogRepayLoan["member_no"];
-			$arrLogRepayLoan["MEMBER_NO"] = $rowLogRepayLoan["member_no"];
-			$arrLogRepayLoan["CHANNEL"] = $rowLogRepayLoan["channel"];
-			$arrLogRepayLoan["TRANSACTION_DATE"] =  $lib->convertdate($rowLogRepayLoan["transaction_date"],'d m Y',true); 
-			$arrLogRepayLoan["DEVICE_NAME"] = $rowLogRepayLoan["device_name"];
-			$arrLogRepayLoan["AMT_TRANSFER"] = $rowLogRepayLoan["amt_transfer"];
-			$arrLogRepayLoan["PENALTY_AMT"] = $rowLogRepayLoan["penalty_amt"];
-			$arrLogRepayLoan["AMT_TRANSFER_FORMAT"] =number_format($rowLogRepayLoan["amt_transfer"],2);
-			$arrLogRepayLoan["PENALTY_AMT_FORMAT"] =number_format($rowLogRepayLoan["penalty_amt"],2);
-			$arrLogRepayLoan["RESPONSE_CODE"] = $rowLogRepayLoan["response_code"];
-			$arrLogRepayLoan["RESPONSE_MESSAGE"] = $rowLogRepayLoan["response_message"];
-			$arrLogRepayLoan["DEPTACCOUNT_NO"] = $rowLogRepayLoan["deptaccount_no"];
-			$arrLogRepayLoan["DESTINATION"] = $rowLogRepayLoan["destination"];
-			$arrLogRepayLoan["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowLogRepayLoan["deptaccount_no"],$func->getConstant('dep_format'));
-			$arrLogRepayLoan["UNIQE_ID"] = $rowLogRepayLoan["unique_id"];
-			$arrLogRepayLoan["STATUS_FLAG"] = $rowLogRepayLoan["status_flag"];
+			$arrLogRepayLoan["MEMBER_NO"] = $rowLogRepayLoan["MEMBER_NO"];
+			$arrLogRepayLoan["CHANNEL"] = $rowLogRepayLoan["CHANNEL"];
+			$arrLogRepayLoan["TRANSACTION_DATE"] =  $lib->convertdate($rowLogRepayLoan["TRANSACTION_DATE"],'d m Y',true); 
+			$arrLogRepayLoan["DEVICE_NAME"] = $rowLogRepayLoan["DEVICE_NAME"];
+			$arrLogRepayLoan["AMT_TRANSFER"] = $rowLogRepayLoan["AMT_TRANSFER"];
+			$arrLogRepayLoan["PENALTY_AMT"] = $rowLogRepayLoan["PENALTY_AMT"];
+			$arrLogRepayLoan["AMT_TRANSFER_FORMAT"] = number_format($rowLogRepayLoan["AMT_TRANSFER"],2);
+			$arrLogRepayLoan["PENALTY_AMT_FORMAT"] = number_format($rowLogRepayLoan["PENALTY_AMT"],2);
+			$arrLogRepayLoan["RESPONSE_CODE"] = $rowLogRepayLoan["RESPONSE_CODE"];
+			$arrLogRepayLoan["RESPONSE_MESSAGE"] = $rowLogRepayLoan["RESPONSE_MESSAGE"];
+			$arrLogRepayLoan["DEPTACCOUNT_NO"] = $rowLogRepayLoan["DEPTACCOUNT_NO"];
+			$arrLogRepayLoan["DESTINATION"] = $rowLogRepayLoan["DESTINATION"];
+			$arrLogRepayLoan["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowLogRepayLoan["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conoracle));
+			$arrLogRepayLoan["UNIQE_ID"] = $rowLogRepayLoan["UNIQUE_ID"];
+			$arrLogRepayLoan["STATUS_FLAG"] = $rowLogRepayLoan["STATUS_FLAG"];
 			$arrayGroup[] = $arrLogRepayLoan;
 		}
 		

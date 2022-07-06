@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
 		$arrayWelfare = array();
 		
 		$getNameWelfare = $conoracle->prepare("SELECT DISTINCT aud.ASSISTTYPE_CODE,aut.ASSISTTYPE_DESC,aud.MEMBTYPE_CODE from assucfassisttype aut 
@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayWef[$rowNameWelfare["ASSISTTYPE_CODE"]]["ASSISTTYPE_DESC"] = $rowNameWelfare["ASSISTTYPE_DESC"];
 			$arrayWef[$rowNameWelfare["ASSISTTYPE_CODE"]]["MEMBTYPE_CODE"] = $rowNameWelfare["MEMBTYPE_CODE"];
 		}
-		$fetchWelfare = $conmysql->prepare("SELECT 
+		$fetchWelfare = $conoracle->prepare("SELECT 
 												gwf.id_const_welfare,
 												gwf.welfare_type_code,
 												gwf.member_cate_code
@@ -22,10 +22,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchWelfare->execute();
 		while($dataWelfare = $fetchWelfare->fetch(PDO::FETCH_ASSOC)){
 			$welfare = array();
-			$welfare["ID_CONST_WELFARE"] = $dataWelfare["id_const_welfare"];
-			$welfare["WELFARE_TYPE_CODE"] = $dataWelfare["welfare_type_code"];
-			$welfare["WELFARE_TYPE_DESC"] = $arrayWef[$dataWelfare["welfare_type_code"]]["ASSISTTYPE_DESC"];
-			$welfare["MEMBER_CATE_CODE"] = $dataWelfare["member_cate_code"];
+			$welfare["ID_CONST_WELFARE"] = $dataWelfare["ID_CONST_WELFARE"];
+			$welfare["WELFARE_TYPE_CODE"] = $dataWelfare["WELFARE_TYPE_CODE"];
+			$welfare["WELFARE_TYPE_DESC"] = $arrayWef[$dataWelfare["WELFARE_TYPE_CODE"]]["ASSISTTYPE_DESC"];
+			$welfare["MEMBER_CATE_CODE"] = $dataWelfare["MEMBER_CATE_CODE"];
 			$arrayWelfare[] = $welfare;
 		}
 		$arrayResult['WELFARE_DATA'] = $arrayWelfare;

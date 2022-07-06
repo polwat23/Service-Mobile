@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrayResult = array();
+		
 		$arrGroupAccount = array();
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmdeposit');
@@ -19,12 +19,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dps.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
+		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dpm.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
 											LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
-											WHERE dpm.member_no = :member_no and dps.deptgroup_code IS NOT NULL and dpm.deptclose_status <> 1 
-											ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
+											WHERE dpm.member_no = :member_no and dpm.deptclose_status <> 1 
+											ORDER BY LAST_OPERATE_DATE DESC) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
-		$getMemoDP = $conmysql->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
+		$getMemoDP = $conoracle->prepare("SELECT memo_text,memo_icon_path,seq_no FROM gcmemodept 
 											WHERE deptaccount_no = :account_no");
 		$getMemoDP->execute([
 			':account_no' => $account_no
@@ -77,12 +77,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["TRAN_AMOUNT"] = number_format($rowStm["TRAN_AMOUNT"],2);
 			$arrSTM["PRIN_BAL"] = number_format($rowStm["PRNCBAL"],2);
-			if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no')) === False){
+			if(array_search($rowStm["SEQ_NO"],array_column($arrMemo,'SEQ_NO')) === False){
 				$arrSTM["MEMO_TEXT"] = null;
 				$arrSTM["MEMO_ICON_PATH"] = null;
 			}else{
-				$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_text"] ?? null;
-				$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'seq_no'))]["memo_icon_path"] ?? null;
+				$arrSTM["MEMO_TEXT"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'SEQ_NO'))]["MEMO_TEXT"] ?? null;
+				$arrSTM["MEMO_ICON_PATH"] = $arrMemo[array_search($rowStm["SEQ_NO"],array_column($arrMemo,'SEQ_NO'))]["MEMO_ICON_PATH"] ?? null;
 			}
 			$arrayGroupSTM[] = $arrSTM;
 		}

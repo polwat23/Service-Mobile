@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsshare')){
+	if($func->check_permission_core($payload,'sms','constantsmsshare',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 																		id_smsconstantshare,
 																		share_itemtype_code,
 																		allow_smsconstantshare,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTSHARE"] = $rowMenuMobile["id_smsconstantshare"];
-			$arrConstans["SHRITEMTYPE_CODE"] = $rowMenuMobile["share_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTSHARE"] = $rowMenuMobile["allow_smsconstantshare"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTSHARE"] = $rowMenuMobile["ID_SMSCONSTANTSHARE"];
+			$arrConstans["SHRITEMTYPE_CODE"] = $rowMenuMobile["SHARE_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTSHARE"] = $rowMenuMobile["ALLOW_SMSCONSTANTSHARE"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT SHRITEMTYPE_CODE,SHRITEMTYPE_DESC FROM SHUCFSHRITEMTYPE ORDER BY SHRITEMTYPE_CODE ASC");
@@ -47,12 +47,14 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						return ($loanChange>$loanOri) ? 1 : -1;
 					}
 				});
+				$id_smsconstantshare = $func->getMaxTable('id_smsconstantshare' , 'smsconstantshare',$conoracle);
 				foreach($resultUDiff as $value_diff){
-					if(array_search($value_diff["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTSHARE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+					if(array_search($value_diff["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE')) === False){		
+						$insertBulkCont[] =  "INTO smsconstantshare(id_smsconstantshare, share_itemtype_code,allow_smsconstantshare,allow_notify) VALUES(".$id_smsconstantshare.",'".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTSHARE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
 						$insertBulkContLog[]='SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE ='.$value_diff["ALLOW_SMSCONSTANTSHARE"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
+						$id_smsconstantshare++;
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE, allow_notify = :ALLOW_NOTIFY WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
+						$updateConst = $conoracle->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE, allow_notify = :ALLOW_NOTIFY WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTSHARE' => $value_diff["ALLOW_SMSCONSTANTSHARE"],
 							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
@@ -61,8 +63,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantshare(share_itemtype_code,allow_smsconstantshare,allow_notify)
-																VALUES".implode(',',$insertBulkCont));
+				$insertConst = $conoracle->prepare("INSERT ALL ".implode(' ',$insertBulkCont)."SELECT *  FROM DUAL");
 				$insertConst->execute();
 				$arrayStruc = [
 					':menu_name' => "constantsmsshare",
@@ -70,7 +71,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 					':use_list' =>"edit constant sms share",
 					':details' => implode(',',$insertBulkContLog).' '.$updateConstLog
 				];
-				$log->writeLog('editsms',$arrayStruc);	
+				//$log->writeLog('editsms',$arrayStruc);	
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../../../include/exit_footer.php');
 			}else{

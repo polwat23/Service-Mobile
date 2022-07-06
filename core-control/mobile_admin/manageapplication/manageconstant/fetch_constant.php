@@ -2,17 +2,17 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageconstant')){
+	if($func->check_permission_core($payload,'mobileadmin','manageconstant',$conoracle)){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT id_constant,constant_name,constant_desc,constant_value
+		$fetchConstant = $conoracle->prepare("SELECT id_constant,constant_name,constant_desc,constant_value
 											 FROM gcconstant WHERE is_use = '1'");
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch()){
 			$arrConstans = array();
-			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["id_constant"];
-			$arrConstans["CONSTANT_NAME"] = $rowMenuMobile["constant_name"];
-			$arrConstans["CONSTANT_DESC"] = $rowMenuMobile["constant_desc"];
-			$arrConstans["CONSTANT_VALUE"] = $rowMenuMobile["constant_value"];
+			$arrConstans["CONSTANT_ID"] = $rowMenuMobile["ID_CONSTANT"];
+			$arrConstans["CONSTANT_NAME"] = $rowMenuMobile["CONSTANT_NAME"];
+			$arrConstans["CONSTANT_DESC"] = $rowMenuMobile["CONSTANT_DESC"];
+			$arrConstans["CONSTANT_VALUE"] = $rowMenuMobile["CONSTANT_VALUE"];
 			$arrayGroup[] = $arrConstans;
 		}
 		$arrayResult["CONSTANT_DATA"] = $arrayGroup;

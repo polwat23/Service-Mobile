@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
+	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan',$conoracle)){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;
@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_ESTIMATE_CREDITLOAN"]."')";
 					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN ='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
 				}else{
-					$updateConst = $conmysql->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST, IS_ESTIMATE_CREDITLOAN = :IS_ESTIMATE_CREDITLOAN WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
+					$updateConst = $conoracle->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST, IS_ESTIMATE_CREDITLOAN = :IS_ESTIMATE_CREDITLOAN WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
 					$updateConst->execute([
 						':IS_CREDITLOAN' => $value_diff["IS_CREDITLOAN"],
 						':IS_LOANREQUEST' => $value_diff["IS_LOANREQUEST"],
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
 				}
 			}
-			$insertConst = $conmysql->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN)
+			$insertConst = $conoracle->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN)
 															VALUES".implode(',',$insertBulkCont));
 			$insertConst->execute();
 			$arrayStruc = [

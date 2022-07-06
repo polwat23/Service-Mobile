@@ -13,17 +13,18 @@ $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $MonthNow = date("Ym");
 $arrayStmItem = array();
-$getStmItemTypeAllow = $conmysql->prepare("SELECT dept_itemtype_code FROM smsconstantdept WHERE allow_smsconstantdept = '1'");
+$getStmItemTypeAllow = $conoracle->prepare("SELECT dept_itemtype_code FROM smsconstantdept WHERE allow_smsconstantdept = '1'");
 $getStmItemTypeAllow->execute();
 while($rowStmItemType = $getStmItemTypeAllow->fetch(PDO::FETCH_ASSOC)){
 	$arrayStmItem[] = "'".$rowStmItemType["dept_itemtype_code"]."'";
 }
 $arrSMSCont = array();
-$getSMSConstant = $conmysql->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
+$getSMSConstant = $conoracle->prepare("SELECT smscs_name,smscs_value FROM smsconstantsystem");
 $getSMSConstant->execute();
 while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
 	$arrSMSCont[$rowSMSConstant["smscs_name"]] = $rowSMSConstant["smscs_value"];
 }
+$formatDept = $func->getConstant('hidden_dep');
 $templateMessage = $func->getTemplateSystem('DepositInfo',1);
 if(isset($templateMessage)){
 	$fetchDataSTM = $conoracle->prepare("SELECT dit.SIGN_FLAG,dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,dm.MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO,
@@ -48,7 +49,7 @@ if(isset($templateMessage)){
 		if($rowSTM["SIGN_FLAG"] == '1'){
 			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_dept_send_free"] || $durationIdle >= 180){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 				$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -66,7 +67,7 @@ if(isset($templateMessage)){
 					]);
 				}
 			}else{
-				$checkRights = $conmysql->prepare("SELECT is_mindeposit,smscsp_mindeposit,smscsp_pay_type,request_flat_date
+				$checkRights = $conoracle->prepare("SELECT is_mindeposit,smscsp_mindeposit,smscsp_pay_type,request_flat_date
 												FROM smsconstantperson WHERE smscsp_member_no = :member_no and smscsp_account = :deptaccount_no and is_use = '1'");
 				$checkRights->execute([
 					':member_no' => $rowSTM["MEMBER_NO"],
@@ -83,7 +84,7 @@ if(isset($templateMessage)){
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conmysql->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
 																		VALUES(:message,:member_no,:tel_mobile,'0',:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
 										':message' => $message_endpoint["BODY"],
@@ -91,11 +92,11 @@ if(isset($templateMessage)){
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
 										':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 									])){
-										$lastId = $conmysql->lastInsertId();
+										$lastId = $conoracle->lastInsertId();
 										$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowSTM["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
 										$arraySendSMS = $lib->sendSMS($arrayDest);
 										if($arraySendSMS["RESULT"]){
-											$updateTrans = $conmysql->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
+											$updateTrans = $conoracle->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
 											$updateTrans->execute([
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
@@ -106,7 +107,7 @@ if(isset($templateMessage)){
 												':seq_no' => $rowSTM["SEQ_NO"]
 											]);
 										}else{
-											$delTrans = $conmysql->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
+											$delTrans = $conoracle->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
 											$delTrans->execute([':id_smssent' => $lastId]);
 										}
 									}
@@ -116,7 +117,7 @@ if(isset($templateMessage)){
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conmysql->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
 																	VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
 										':message' => $message_endpoint["BODY"],
@@ -124,11 +125,11 @@ if(isset($templateMessage)){
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
 										':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 									])){
-										$lastId = $conmysql->lastInsertId();
+										$lastId = $conoracle->lastInsertId();
 										$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowSTM["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
 										$arraySendSMS = $lib->sendSMS($arrayDest);
 										if($arraySendSMS["RESULT"]){
-											$updateTrans = $conmysql->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
+											$updateTrans = $conoracle->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
 											$updateTrans->execute([
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
@@ -139,7 +140,7 @@ if(isset($templateMessage)){
 												':seq_no' => $rowSTM["SEQ_NO"]
 											]);
 										}else{
-											$delTrans = $conmysql->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
+											$delTrans = $conoracle->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
 											$delTrans->execute([':id_smssent' => $lastId]);
 										}
 									}
@@ -150,7 +151,7 @@ if(isset($templateMessage)){
 								$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 								$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-								$insertSmsTran = $conmysql->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+								$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
 																VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 								if($insertSmsTran->execute([
 									':message' => $message_endpoint["BODY"],
@@ -158,11 +159,11 @@ if(isset($templateMessage)){
 									':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
 									':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 								])){
-									$lastId = $conmysql->lastInsertId();
+									$lastId = $conoracle->lastInsertId();
 									$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowSTM["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
 									$arraySendSMS = $lib->sendSMS($arrayDest);
 									if($arraySendSMS["RESULT"]){
-										$updateTrans = $conmysql->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
+										$updateTrans = $conoracle->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
 										$updateTrans->execute([
 											':smid' => $arraySendSMS["SMID"],
 											':lastId' => $lastId
@@ -173,7 +174,7 @@ if(isset($templateMessage)){
 											':seq_no' => $rowSTM["SEQ_NO"]
 										]);
 									}else{
-										$delTrans = $conmysql->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
+										$delTrans = $conoracle->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
 										$delTrans->execute([':id_smssent' => $lastId]);
 									}
 								}
@@ -203,7 +204,7 @@ if(isset($templateMessage)){
 					]);
 				}
 			}else{
-				$checkRights = $conmysql->prepare("SELECT is_minwithdraw,smscsp_minwithdraw,smscsp_pay_type,request_flat_date
+				$checkRights = $conoracle->prepare("SELECT is_minwithdraw,smscsp_minwithdraw,smscsp_pay_type,request_flat_date
 												FROM smsconstantperson WHERE smscsp_member_no = :member_no and smscsp_account = :deptaccount_no and is_use = '1'");
 				$checkRights->execute([
 					':member_no' => $rowSTM["MEMBER_NO"],
@@ -220,7 +221,7 @@ if(isset($templateMessage)){
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conmysql->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,payment_keep,deptaccount_no,send_by)
 																		VALUES(:message,:member_no,:tel_mobile,'0',:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
 										':message' => $message_endpoint["BODY"],
@@ -228,11 +229,11 @@ if(isset($templateMessage)){
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
 										':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 									])){
-										$lastId = $conmysql->lastInsertId();
+										$lastId = $conoracle->lastInsertId();
 										$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowSTM["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
 										$arraySendSMS = $lib->sendSMS($arrayDest);
 										if($arraySendSMS["RESULT"]){
-											$updateTrans = $conmysql->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
+											$updateTrans = $conoracle->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
 											$updateTrans->execute([
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
@@ -243,7 +244,7 @@ if(isset($templateMessage)){
 												':seq_no' => $rowSTM["SEQ_NO"]
 											]);
 										}else{
-											$delTrans = $conmysql->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
+											$delTrans = $conoracle->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
 											$delTrans->execute([':id_smssent' => $lastId]);
 										}
 									}
@@ -253,7 +254,7 @@ if(isset($templateMessage)){
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-									$insertSmsTran = $conmysql->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+									$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
 																	VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 									if($insertSmsTran->execute([
 										':message' => $message_endpoint["BODY"],
@@ -261,11 +262,11 @@ if(isset($templateMessage)){
 										':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
 										':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 									])){
-										$lastId = $conmysql->lastInsertId();
+										$lastId = $conoracle->lastInsertId();
 										$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowSTM["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
 										$arraySendSMS = $lib->sendSMS($arrayDest);
 										if($arraySendSMS["RESULT"]){
-											$updateTrans = $conmysql->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
+											$updateTrans = $conoracle->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
 											$updateTrans->execute([
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
@@ -276,7 +277,7 @@ if(isset($templateMessage)){
 												':seq_no' => $rowSTM["SEQ_NO"]
 											]);
 										}else{
-											$delTrans = $conmysql->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
+											$delTrans = $conoracle->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
 											$delTrans->execute([':id_smssent' => $lastId]);
 										}
 									}
@@ -287,7 +288,7 @@ if(isset($templateMessage)){
 								$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 								$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
-								$insertSmsTran = $conmysql->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
+								$insertSmsTran = $conoracle->prepare("INSERT INTO smstranwassent(sms_message,member_no,tel_mobile,deptaccount_no,send_by)
 																VALUES(:message,:member_no,:tel_mobile,:deptaccount_no,'system')");
 								if($insertSmsTran->execute([
 									':message' => $message_endpoint["BODY"],
@@ -295,11 +296,11 @@ if(isset($templateMessage)){
 									':tel_mobile' => $rowSTM["MEM_TELMOBILE"],
 									':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"]
 								])){
-									$lastId = $conmysql->lastInsertId();
+									$lastId = $conoracle->lastInsertId();
 									$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($rowSTM["MEM_TELMOBILE"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_endpoint["BODY"]);
 									$arraySendSMS = $lib->sendSMS($arrayDest);
 									if($arraySendSMS["RESULT"]){
-										$updateTrans = $conmysql->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
+										$updateTrans = $conoracle->prepare("UPDATE smstranwassent SET smid = :smid WHERE id_smssent = :lastId");
 										$updateTrans->execute([
 											':smid' => $arraySendSMS["SMID"],
 											':lastId' => $lastId
@@ -310,7 +311,7 @@ if(isset($templateMessage)){
 											':seq_no' => $rowSTM["SEQ_NO"]
 										]);
 									}else{
-										$delTrans = $conmysql->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
+										$delTrans = $conoracle->prepare("DELETE FROM smstranwassent WHERE id_smssent = :id_smssent");
 										$delTrans->execute([':id_smssent' => $lastId]);
 									}
 								}

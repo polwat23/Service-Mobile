@@ -4,15 +4,15 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'admincontrol','permissionmenu')){
 		$arrayGroup = array();
-		$fetchUser = $conmysql->prepare("SELECT  id_section_system, section_system, system_assign
+		$fetchUser = $conoracle->prepare("SELECT  id_section_system, section_system, system_assign
 										 FROM  coresectionsystem
 										 WHERE is_use ='1' and section_system <> 'root'");
 		$fetchUser->execute();
 		while($rowCoreSubMenu = $fetchUser->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupCoreSectionSystem = array();
-			$arrGroupCoreSectionSystem["ID_SECTION_SYSTEM"] = $rowCoreSubMenu["id_section_system"];
-			$arrGroupCoreSectionSystem["SECTION_SYSTEM"] = $rowCoreSubMenu["section_system"];
-			$arrGroupCoreSectionSystem["SYSTEM_ASSIGN"] = $rowCoreSubMenu["system_assign"];
+			$arrGroupCoreSectionSystem["ID_SECTION_SYSTEM"] = $rowCoreSubMenu["ID_SECTION_SYSTEM"];
+			$arrGroupCoreSectionSystem["SECTION_SYSTEM"] = $rowCoreSubMenu["SECTION_SYSTEM"];
+			$arrGroupCoreSectionSystem["SYSTEM_ASSIGN"] = $rowCoreSubMenu["SYSTEM_ASSIGN"];
 			$arrayGroup[] = $arrGroupCoreSectionSystem;
 		}
 		$arrayResult["CORE_SECTION_SYSTEM"] = $arrayGroup;

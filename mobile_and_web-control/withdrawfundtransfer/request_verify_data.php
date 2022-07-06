@@ -3,26 +3,26 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_no','amt_transfer','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionWithdrawDeposit')){
-		$fetchDataDeposit = $conmysql->prepare("SELECT csb.itemtype_wtd,csb.link_inquirywithd_coopdirect,gba.bank_code,csb.fee_withdraw,csb.bank_short_ename
+		$fetchDataDeposit = $conoracle->prepare("SELECT csb.itemtype_wtd,csb.link_inquirywithd_coopdirect,gba.bank_code,csb.fee_withdraw,csb.bank_short_ename
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.sigma_key = :sigma_key");
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
 		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$fee_amt = $rowDataDeposit["fee_withdraw"];
-		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],$rowDataDeposit["itemtype_wtd"],$fee_amt);
+		$fee_amt = $rowDataDeposit["FEE_WITHDRAW"];
+		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],$rowDataDeposit["ITEMTYPE_WTD"],$fee_amt);
 		if($arrInitDep["RESULT"]){
-			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["bank_code"]);
+			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataDeposit["BANK_CODE"]);
 			if($arrRightDep["RESULT"]){
 				$amt_transfer = $dataComing["amt_transfer"];
-				$getDataUser = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
+				$getDataUser = $conoracle->prepare("SELECT citizen_id FROM gcbindaccount WHERE deptaccount_no_coop = :deptaccount_no 
 													and member_no = :member_no and bindaccount_status = '1'");
 				$getDataUser->execute([
 					':deptaccount_no' => $deptaccount_no,
 					':member_no' => $payload["member_no"]
 				]);
 				$rowDataUser = $getDataUser->fetch(PDO::FETCH_ASSOC);
-				if($rowDataDeposit["bank_code"] == '006'){
+				if($rowDataDeposit["BANK_CODE"] == '006'){
 					$dateOperC = date('c');
 					$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 					$arrSendData = array();
@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$arrVerifyToken['exp'] = time() + 300;
 					$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 					$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
-					$arrVerifyToken['bank_code'] = $rowDataDeposit["bank_code"];
+					$arrVerifyToken['bank_code'] = $rowDataDeposit["BANK_CODE"];
 					$arrVerifyToken['tran_date'] = $dateOper;
 					$arrVerifyToken['amt_transfer'] = $amt_transfer;
 					$arrVerifyToken['bank_account'] = $dataComing["bank_account_no"];
@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 					$arrSendData["verify_token"] = $verify_token;
 					$arrSendData["app_id"] = $config["APP_ID"];
-					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataDeposit["link_inquirywithd_coopdirect"],$arrSendData);
+					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataDeposit["LINK_INQUIRYWITHD_COOPDIRECT"],$arrSendData);
 					if(!$responseAPI["RESULT"]){
 						$filename = basename(__FILE__, '.php');
 						$arrayResult['RESPONSE_CODE'] = "WS0027";
@@ -87,8 +87,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							':response_message' => $arrResponse->RESPONSE_MESSAGE
 						];
 						$log->writeLog('withdrawtrans',$arrayStruc);
-						if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+						if(isset($configError[$rowDataDeposit["BANK_SHORT_ENAME"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowDataDeposit["BANK_SHORT_ENAME"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
 						}else{
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						}
@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						require_once('../../include/exit_footer.php');
 						
 					}
-				}else if($rowDataDeposit["bank_code"] == '025'){
+				}else if($rowDataDeposit["BANK_CODE"] == '025'){
 					$fetchMemberName = $conoracle->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
 															FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
 															WHERE MB.member_no = :member_no");

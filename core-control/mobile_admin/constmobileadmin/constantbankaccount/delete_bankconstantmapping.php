@@ -2,10 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("UPDATE gcbankconstantmapping
-		SET is_use = '0'
-		WHERE id_bankconstantmapping = :id_bankconstantmapping");
+	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount',$conoracle)){
+		$updateConstants = $conoracle->prepare("UPDATE gcbankconstantmapping SET is_use = '0' WHERE id_bankconstantmapping = :id_bankconstantmapping");
 		if($updateConstants->execute([
 			':id_bankconstantmapping' => $dataComing["id_bankconstantmapping"]
 		])){
@@ -15,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					':use_list' =>"delete gcbankconstantmapping",
 					':details' => "id_bankconstantmapping => ".$dataComing["id_bankconstantmapping"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

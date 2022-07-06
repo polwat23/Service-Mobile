@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','bank_code','bank_name','bank_short_name','bank_format_account','bank_format_account_hide','id_palette'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
-		$updateConstants = $conmysql->prepare("UPDATE csbankdisplay 
+	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount',$conoracle)){
+		$updateConstants = $conoracle->prepare("UPDATE csbankdisplay 
 											   SET bank_name = :bank_name,
 												   bank_short_name = :bank_short_name,
 												   bank_format_account = :bank_format_account,
@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['unique_id','bank_code','bank_name','bank_short_
 			':fee_deposit' => $dataComing["fee_deposit"],
 			':fee_withdraw' => $dataComing["fee_withdraw"]
 		])){
-			$arrayStruc = [
+			/*$arrayStruc = [
 					':menu_name' => "constantbankaccount",
 					':username' => $payload["username"],
 					':use_list' =>"update csbankdisplay",
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['unique_id','bank_code','bank_name','bank_short_
 								" fee_deposit => ".$dataComing["fee_deposit"].
 								" fee_withdraw => ".$dataComing["fee_withdraw"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc);*/
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{

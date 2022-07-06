@@ -19,13 +19,31 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
+	if($member_no != "00004034" && $member_no != "00004184" && $member_no != "00006966" && $member_no != "00008579" && $member_no != "00008580"
+	&& $member_no != "00010227" && $member_no != "00012327" && $member_no != "00012329" && $member_no != "00012330"
+	&& $member_no != "00016111" && $member_no != "00016128" && $member_no != "00016247" && $member_no != "00016633"
+	&& $member_no != "00016667" && $member_no != "00016939" && $member_no != "00016973" && $member_no != "00017581"
+	&& $member_no != "00017583" && $member_no != "00017770" && $member_no != "00017771" && $member_no != "00017774"
+	&& $member_no != "00017775" && $member_no != "00018237" && $member_no != "00018238" && $member_no != "00018744"
+	&& $member_no != "00018762" && $member_no != "00018790" && $member_no != "00018978" && $member_no != "00019107" && $member_no != "00019290"
+	&& $member_no != "00019850" && $member_no != "00019986" && $member_no != "00019987" && $member_no != "00019988"
+	&& $member_no != "00019989" && $member_no != "00020154" && $member_no != "00020244" && $member_no != "00020691"
+	&& $member_no != "00021007" && $member_no != "00021098" && $member_no != "00021357" && $member_no != "00021389"
+	&& $member_no != "00021390" && $member_no != "00005449" && $member_no != "etnmode1" && $member_no != "etnmode2" 
+	&& $member_no != "etnmode3" && $member_no != "etnmode4" && $member_no != "etnmode5" && $member_no != "00500002"){
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+	}
 	if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
-		$checkBlackList = $conmysql->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1'");
+		$checkBlackList = $conoracle->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1'");
 		$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
-		if($checkBlackList->rowCount() > 0){
-			$rowBlackList = $checkBlackList->fetch(PDO::FETCH_ASSOC);
-			if($rowBlackList["type_blacklist"] == '0'){
+		$rowBlackList = $checkBlackList->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowBlackList["TYPE_BLACKLIST"])){
+			if($rowBlackList["TYPE_BLACKLIST"] == '0'){
 				$arrayResult['RESPONSE_CODE'] = "WS0068";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -33,7 +51,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				
 			}else{
 				if(isset($dataComing["is_root"]) && $dataComing["is_root"] == "0"){
-					$updateBlacklist = $conmysql->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
+					$updateBlacklist = $conoracle->prepare("UPDATE gcdeviceblacklist SET is_blacklist = '0' WHERE unique_id = :unique_id and type_blacklist = '1'");
 					$updateBlacklist->execute([':unique_id' => $dataComing["unique_id"]]);
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0069";
@@ -45,14 +63,17 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			}
 		}
 	}
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
+	$tempInsert = 0;
+	$checkLogin = $conoracle->prepare("SELECT password,user_type,pin,account_status,temppass FROM gcmemberaccount 
 										WHERE member_no = :member_no");
 	$checkLogin->execute([':member_no' => $member_no]);
-	if($checkLogin->rowCount() > 0){
+	$rowcheckLogin = $checkLogin->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowcheckLogin["USER_TYPE"])){
 		if($arrPayload["PAYLOAD"]["channel"] == "mobile_app" && isset($dataComing["is_root"])){
-			$checkBlackList = $conmysql->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1' and type_blacklist = '1'");
+			$checkBlackList = $conoracle->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1' and type_blacklist = '1'");
 			$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
-			if($checkBlackList->rowCount() > 0){
+			$rowBlackList = $checkBlackList->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowBlackList["TYPE_BLACKLIST"])){
 				$arrayResult['RESPONSE_CODE'] = "WS0069";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -60,9 +81,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				
 			}
 			if($dataComing["is_root"] == "1"){
-				$insertBlackList = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,member_no,type_blacklist)
-													VALUES(:unique_id,:member_no,'1')");
+				$max_id  = $func->getMaxTable('id_blacklist' , 'gcdeviceblacklist');			
+				$insertBlackList = $conoracle->prepare("INSERT INTO gcdeviceblacklist(id_blacklist, unique_id,member_no,type_blacklist)
+													VALUES(:id_blacklist,:unique_id,:member_no,'1')");
 				if($insertBlackList->execute([
+					':id_blacklist' => $max_id + $tempInsert,
 					':unique_id' => $dataComing["unique_id"],
 					':member_no' => $member_no
 				])){
@@ -72,9 +95,10 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					require_once('../../include/exit_footer.php');
 					
 				}
+				$tempInsert++;
 			}
 		}
-		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
+		$rowPassword = $rowcheckLogin;
 		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
@@ -82,68 +106,82 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			require_once('../../include/exit_footer.php');	
 		}
-		if($rowPassword['account_status'] == '-8'){
+		if($rowPassword['ACCOUNT_STATUS'] == '-8'){
 			$arrayResult['RESPONSE_CODE'] = "WS0048";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
-		}else if($rowPassword['account_status'] == '-9'){
-			$valid_pass = password_verify($dataComing["password"], $rowPassword['temppass']);
+		}else if($rowPassword['ACCOUNT_STATUS'] == '-9'){
+			$valid_pass = password_verify($dataComing["password"], $rowPassword['TEMPPASS']);
 		}else{
-			$valid_pass = password_verify($dataComing["password"], $rowPassword['password']);
+			$valid_pass = password_verify($dataComing["password"], $rowPassword['PASSWORD']);
 		}
 		if ($valid_pass) {
-			$conmysql->beginTransaction();
+			$conoracle->beginTransaction();
 			$refresh_token = $lib->generate_token();
-			$insertToken = $conmysql->prepare("INSERT INTO gctoken(refresh_token,unique_id,channel,device_name,ip_address) 
-												VALUES(:refresh_token,:unique_id,:channel,:device_name,:ip_address)");
+			$max_id_token  = $func->getMaxTable('id_token','gctoken');
+			
+			$insertToken = $conoracle->prepare("INSERT INTO gctoken(id_token,refresh_token,unique_id,channel,device_name,ip_address) 
+												VALUES(:id_token, :refresh_token,:unique_id,:channel,:device_name,:ip_address)");
 			if($insertToken->execute([
+				':id_token' => $max_id_token,
 				':refresh_token' => $refresh_token,
 				':unique_id' => $dataComing["unique_id"],
 				':channel' => $arrPayload["PAYLOAD"]["channel"],
 				':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 				':ip_address' => $arrPayload["PAYLOAD"]["ip_address"]
 			])){
-				$id_token = $conmysql->lastInsertId();
-				$getMemberLogged = $conmysql->prepare("SELECT id_token,unique_id FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
+				$getMemberToken = $conoracle->prepare("SELECT id_token FROM gctoken WHERE  id_token =(select max(id_token) from gctoken)");
+				$getMemberToken->execute();
+				$rowMemberToken = $getMemberToken->fetch(PDO::FETCH_ASSOC);
+				$id_token = $rowMemberToken["ID_TOKEN"];
+				
+				$getMemberLogged = $conoracle->prepare("SELECT id_token,unique_id FROM gcuserlogin WHERE member_no = :member_no and channel = :channel and is_login = '1'");
 				$getMemberLogged->execute([
 					':member_no' => $member_no,
 					':channel' => $arrPayload["PAYLOAD"]["channel"]
 				]);
-				if($getMemberLogged->rowCount() > 0){
-					$arrayIdToken = array();
-					$prev_unique_id = null;
-					while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
-						$arrayIdToken[] = $rowIdToken["id_token"];
-						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && $dataComing["unique_id"] != $rowIdToken["unique_id"] && 
-						$prev_unique_id != $rowIdToken["unique_id"]){
-							$prev_unique_id = $rowIdToken["unique_id"];
-							$insertBacklist = $conmysql->prepare("INSERT INTO gcdeviceblacklist(unique_id,type_blacklist,member_no,new_id_token,old_id_token)
-																VALUES(:unique_id,:is_root,:member_no,:new_id_token,:old_id_token)");
-							if($insertBacklist->execute([
-								':unique_id' => $rowIdToken["unique_id"],
-								':is_root' => $dataComing["is_root"] ?? 0,
-								':member_no' => $dataComing["member_no"],
-								':new_id_token' => $id_token,
-								':old_id_token' => $rowIdToken["id_token"]
-							])){
-							}else{
-								$conmysql->rollback();
-								$arrayResult['RESPONSE_CODE'] = "WS1002";
-								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-								$arrayResult['RESULT'] = FALSE;
-								require_once('../../include/exit_footer.php');
-								
-							}
-						}
+				$arrayIdToken = array();
+				$prev_unique_id = null;
+				$index = 0;
+				$bulkInsert = array();
+				while($rowIdToken = $getMemberLogged->fetch(PDO::FETCH_ASSOC)){
+					
+					$arrayIdToken[] = $rowIdToken["ID_TOKEN"];	
+					if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && $dataComing["unique_id"] != $rowIdToken["UNIQUE_ID"] && 
+					$prev_unique_id != $rowIdToken["UNIQUE_ID"]){
+						$prev_unique_id = $rowIdToken["UNIQUE_ID"];
+						
+						$id_blacklist  = $func->getMaxTable('id_blacklist' , 'gcdeviceblacklist');	
+						$bulkInsert[] = "INTO gcdeviceblacklist(id_blacklist,unique_id,type_blacklist,member_no,new_id_token,old_id_token)
+										VALUES(".($id_blacklist + $index + $tempInsert).",'".$rowIdToken["UNIQUE_ID"]."','".($dataComing["is_root"] ?? 0)."','".$dataComing["member_no"]."',".$id_token.",".$rowIdToken["ID_TOKEN"].")";
+						$index++;
+						$tempInsert = 0;
 					}
-					$updateLoggedOneDevice = $conmysql->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
-																gt.at_is_revoke = '-6',gt.rt_expire_date = NOW(),gt.at_expire_date = NOW(),
-																gu.is_login = '-5',gu.logout_date = NOW()
+				}
+				if(sizeof($bulkInsert) > 0){
+					
+					$insertBacklist = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)." SELECT * FROM dual");
+					$insertBacklist->execute();
+					/*if($insertBacklist->execute()){
+					}else{
+						
+						
+						$conoracle->rollback();
+						$arrayResult['RESPONSE_CODE'] = "WS1002";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}*/
+				}
+				if(sizeof($arrayIdToken) > 0){
+					$updateLoggedOneDevice = $conoracle->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',
+																gt.at_is_revoke = '-6',gt.rt_expire_date = SYSDATE ,gt.at_expire_date = SYSDATE,
+																gu.is_login = '-5',gu.logout_date = SYSDATE
 																WHERE gt.id_token IN(".implode(',',$arrayIdToken).") and gu.id_token IN(".implode(',',$arrayIdToken).")");
 					$updateLoggedOneDevice->execute();
 				}
@@ -152,9 +190,13 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				}else{
 					$firstapp = 1;
 				}
-				$insertLogin = $conmysql->prepare("INSERT INTO gcuserlogin(member_no,device_name,channel,unique_id,status_firstapp,id_token) 
-											VALUES(:member_no,:device_name,:channel,:unique_id,:firstapp,:id_token)");
+				
+				$max_id_userlogin  = $func->getMaxTable('id_userlogin' , 'gcuserlogin');
+				
+				$insertLogin = $conoracle->prepare("INSERT INTO gcuserlogin(id_userlogin ,member_no,device_name,channel,unique_id,status_firstapp,id_token) 
+											VALUES(:max_id_userlogin, :member_no,:device_name,:channel,:unique_id,:firstapp,:id_token)");
 				if($insertLogin->execute([
+					':max_id_userlogin' => $max_id_userlogin,
 					':member_no' => $member_no,
 					':device_name' => $arrPayload["PAYLOAD"]["device_name"],
 					':channel' => $arrPayload["PAYLOAD"]["channel"],
@@ -163,8 +205,8 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					':id_token' => $id_token
 				])){
 					$arrPayloadNew = array();
-					$arrPayloadNew['id_userlogin'] = $conmysql->lastInsertId();
-					$arrPayloadNew['user_type'] = $rowPassword['user_type'];
+					$arrPayloadNew['id_userlogin'] = $max_id_userlogin;
+					$arrPayloadNew['user_type'] = $rowPassword['USER_TYPE'];
 					$arrPayloadNew['id_token'] = $id_token;
 					$arrPayloadNew['member_no'] = $member_no;
 					$arrPayloadNew['exp'] = time() + intval($func->getConstant("limit_session_timeout"));
@@ -172,26 +214,26 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					$access_token = $jwt_token->customPayload($arrPayloadNew, $config["SECRET_KEY_JWT"]);
 					if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app'){
 						if(isset($dataComing["fcm_token"]) && $dataComing["fcm_token"] != ""){
-							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
+							$updateFCMToken = $conoracle->prepare("UPDATE gcmemberaccount SET fcm_token = :fcm_token  WHERE member_no = :member_no");
 							$updateFCMToken->execute([
 								':fcm_token' => $dataComing["fcm_token"] ?? null,
 								':member_no' => $member_no
 							]);
 						}
 						if(isset($dataComing["hms_token"]) && $dataComing["hms_token"] != ""){
-							$updateFCMToken = $conmysql->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
+							$updateFCMToken = $conoracle->prepare("UPDATE gcmemberaccount SET hms_token = :hms_token  WHERE member_no = :member_no");
 							$updateFCMToken->execute([
 								':hms_token' => $dataComing["hms_token"] ?? null,
 								':member_no' => $member_no
 							]);
 						}
 					}
-					$updateAccessToken = $conmysql->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
+					$updateAccessToken = $conoracle->prepare("UPDATE gctoken SET access_token = :access_token WHERE id_token = :id_token");
 					if($updateAccessToken->execute([
 						':access_token' => $access_token,
 						':id_token' => $id_token
 					])){
-						$conmysql->commit();
+						$conoracle->commit();
 						$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 						$arrayResult['ACCESS_TOKEN'] = $access_token;
 						// Pin Status : 9 => DEV, 1 => TRUE, 0 => FALSE
@@ -204,33 +246,33 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							$rowTele = $fetchTelephone->fetch(PDO::FETCH_ASSOC);
 							$arrayResult['TEL'] = $rowTele["MEM_TELMOBILE"];
 							$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowTele["MEM_TELMOBILE"]);
-							if($rowPassword['user_type'] == '9'){
-								$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 9 : 0);
+							if($rowPassword['USER_TYPE'] == '9'){
+								$arrayResult['PIN'] = (isset($rowPassword["PIN"]) ? 9 : 0);
 							}else{
-								$arrayResult['PIN'] = (isset($rowPassword["pin"]) ? 1 : 0);
+								$arrayResult['PIN'] = (isset($rowPassword["PIN"]) ? 1 : 0);
 							}
 						}else{
-							if($rowPassword['account_status'] == '-9'){
+							if($rowPassword['ACCOUNT_STATUS'] == '-9'){
 								$arrayResult['TEMP_PASSWORD'] = TRUE;
 							}else{
 								$arrayResult['TEMP_PASSWORD'] = FALSE;
 							}
 						}
 						$arrayResult['MEMBER_NO'] = $member_no;
-						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && ($rowPassword['user_type'] == '0' || 
-						$rowPassword['user_type'] == '1') && $member_no != "etnmode1" && $member_no != "etnmode2" && $member_no != "dev@mode" && $member_no != "etnmode3" && $member_no != "etnmode4" 
+						if($arrPayload["PAYLOAD"]["channel"] == 'mobile_app' && ($rowPassword['USER_TYPE'] == '0' || 
+						$rowPassword['USER_TYPE'] == '1') && $member_no != "etnmode1" && $member_no != "etnmode2" && $member_no != "dev@mode" && $member_no != "etnmode3" && $member_no != "etnmode4" 
 						&& $member_no != "etnmode5" && $member_no != "etnmode6" && $member_no != "etnmode7" && $member_no != "etnmode8" && 
 						$member_no != "etnmode9" && (empty($dataComing["auto_login"]) || $dataComing["auto_login"] === FALSE)){
 							$arrayResult['IS_OTP'] = TRUE;
 						}
-						$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
+						$updateWrongPassCount = $conoracle->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
 						$updateWrongPassCount->execute([
 							':member_no' => $member_no
 						]);
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');
 					}else{
-						$conmysql->rollback();
+						$conoracle->rollback();
 						$filename = basename(__FILE__, '.php');
 						$logStruc = [
 							":error_menu" => $filename,
@@ -251,7 +293,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						
 					}
 				}else{
-					$conmysql->rollback();
+					$conoracle->rollback();
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
 						":error_menu" => $filename,
@@ -276,7 +318,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 					
 				}
 			}else{
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$filename = basename(__FILE__, '.php');
 				$logStruc = [
 					":error_menu" => $filename,
@@ -286,6 +328,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				];
 				$log->writeLog('errorusage',$logStruc);
 				$message_error = "ไม่สามารถเข้าสู่ระบบได้เพราะไม่สามารถ Insert ลง gctoken"."\n"."Query => ".$insertToken->queryString."\n"."Data => ".json_encode([
+					':id_token' => $max_id_token,
 					':refresh_token' => $refresh_token,
 					':unique_id' => $dataComing["unique_id"],
 					':channel' => $arrPayload["PAYLOAD"]["channel"],
@@ -300,18 +343,18 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				
 			}
 		}else{
-			$updateCounter = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
+			$updateCounter = $conoracle->prepare("UPDATE gcmemberaccount SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
 			$updateCounter->execute([':member_no' => $member_no]);
-			$getCounter = $conmysql->prepare("SELECT counter_wrongpass FROM gcmemberaccount WHERE member_no = :member_no");
+			$getCounter = $conoracle->prepare("SELECT counter_wrongpass FROM gcmemberaccount WHERE member_no = :member_no");
 			$getCounter->execute([':member_no' => $member_no]);
 			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
 			if($rowCounter["counter_wrongpass"] >= 5){
-				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				$updateAccountStatus = $conoracle->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
 				$updateAccountStatus->execute([':member_no' => $member_no]);
 				$struc = [
 					':member_no' =>  $member_no,
 					':device_name' =>  $arrPayload["PAYLOAD"]["device_name"],
-					':unique_id' =>  $dataComing["unique_id"]
+					':unique_id' =>  $dataComing["UNIQUE_ID"]
 				];
 				$log->writeLog("lockaccount",$struc);
 				$arrayResult['RESPONSE_CODE'] = "WS0048";
@@ -328,7 +371,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			
 		}
 	}else{
-		$checkMember = $conoracle->prepare("SELECT resign_status,mem_telmobile FROM mbmembmaster WHERE member_no = :member_no and TRIM(card_person) = :card_person");
+		$checkMember = $conoracle->prepare("SELECT resign_status,mem_telmobile,email FROM mbmembmaster WHERE member_no = :member_no and TRIM(card_person) = :card_person");
 		$checkMember->execute([
 			':member_no' => $member_no,
 			':card_person' => $dataComing["password"]
@@ -345,7 +388,9 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				$arrayResult['MEMBER_NO'] = $member_no;
 				$arrayResult['TEL'] = $rowMember["MEM_TELMOBILE"];
 				$arrayResult['TEL_FORMAT'] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
+				$arrayResult['EMAIL'] = $rowMember["EMAIL"];
 				$arrayResult['VERIFY'] = TRUE;
+				$arrayResult['USE_EMAIL_FROM_COOP'] = TRUE;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}

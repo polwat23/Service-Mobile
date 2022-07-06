@@ -2,18 +2,18 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','loan_typecode'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan')){
-		$fetchLoanTypeCheck = $conmysql->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,LOANTYPE_ALIAS_NAME 
+	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan',$conoracle)){
+		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,LOANTYPE_ALIAS_NAME 
 												FROM gcconstanttypeloan
 												WHERE LOANTYPE_CODE = :loan_typecode");
 		$fetchLoanTypeCheck->execute([
 			':loan_typecode' => $dataComing["loan_typecode"] 
 		]);
-		
-		if($fetchLoanTypeCheck->rowCount() > 0){
-			$update_email = $conmysql->prepare("UPDATE gcconstanttypeloan 
+		$rowLoantype = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowLoantype["LOANTYPE_CODE"])){
+			$update_email = $conoracle->prepare("UPDATE gcconstanttypeloan 
 																	SET LOANTYPE_ALIAS_NAME = :alias_name
-																	WHERE  LOANTYPE_CODE = :loan_typecode;");
+																	WHERE  LOANTYPE_CODE = :loan_typecode");
 			if($update_email->execute([
 				':alias_name' => $dataComing["alias_name"],
 				':loan_typecode' => $dataComing["loan_typecode"] 
@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['unique_id','loan_typecode'],$dataComing)){
 				
 			}
 		}else{
-			$insertConstants = $conmysql->prepare("INSERT gcconstanttypeloan(LOANTYPE_ALIAS_NAME,LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN)
+			$insertConstants = $conoracle->prepare("INSERT gcconstanttypeloan(LOANTYPE_ALIAS_NAME,LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN)
 															VALUES (:alias_name,:loan_typecode,'0','0','0')");
 			if($insertConstants->execute([
 				':alias_name' => $dataComing["alias_name"],

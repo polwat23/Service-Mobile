@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 
 if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
+	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount',$conoracle)){
 		$menuName = "manageuseraccount";
 		$list_name = null;
 		if($dataComing["account_status"]=='1'){
@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 								WHERE member_no = :member_no';
 			$list_name = "lock account";
 		}
-		$updateStatus = $conmysql->prepare($queryString);
+		$updateStatus = $conoracle->prepare($queryString);
 		if($updateStatus->execute([
 			':account_status' => $dataComing["account_status"],
 			':member_no' => $dataComing["member_no"]
@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no','account_status'],$dataC
 				':details' => $dataComing["member_no"]
 			];
 			
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{

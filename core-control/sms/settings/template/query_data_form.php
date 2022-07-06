@@ -3,7 +3,7 @@ ini_set("memory_limit","-1");
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','managetemplate')){
+	if($func->check_permission_core($payload,'sms','managetemplate',$conoracle)){
 		if(strtolower(substr(trim($dataComing["query_message_spc_"]),0,6)) === "select"){
 			$arrayData = array();
 			$arrColumn = array();
@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['unique_id','query_message_spc_'],$dataComing)){
 			}
 			$arrayResult['DATA'] = $arrayData;
 			$arrayResult['COLUMN'] = $arrColumn;
-			$arrayResult['RESULT'] = TRUE;
+			$arrayResult['RESULT'] = $dataComing["query_message_spc_"];
 			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE'] = "คำสั่งนี้ ไม่ได้รับอนุญาตให้ใช้งานได้";

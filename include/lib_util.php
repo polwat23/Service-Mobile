@@ -224,19 +224,7 @@ class library {
 		$config = json_decode($json,true);
 		$arrayGrpSms = array();
 		if($bulk){
-			/*foreach($arrayDestination as $dest){
-				$argumentWS = [
-					"Member_No" => $dest["member_no"],
-					"MobilePhone" => $dest["tel"],
-					"Message" => $dest["message"]
-				];
-				$resultWS = $clientWS->__call("RqSendOTP", array($argumentWS));
-				$responseSoap = $resultWS->RqSendOTPResult;
-				$arraySms["MEMBER_NO"] = $dest["member_no"];
-				$arraySms["RESULT"] = $responseSoap;
-				$arrayGrpSms[] = $arraySms;
-			}
-			return $arrayGrpSms;*/
+			
 		}else{
 			$headers[] = 'Content-Type: text/xml';
 			$ch = curl_init();  
@@ -417,6 +405,7 @@ class library {
 		}
 		return $randomString;
 	}
+	
 	public function sendNotify($payload,$type_send){
 		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
@@ -726,7 +715,7 @@ class library {
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 	public function sendLineNotify($message,$lineToken=null){
-		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		/*$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$token = $lineToken ?? $json_data["LINE_NOTIFY"];
 		$headers = array();
@@ -742,7 +731,7 @@ class library {
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
 																													 
-		curl_exec($ch);
+		curl_exec($ch);*/
 	}
 
 	public function truncateDecimal($amt,$precision){
@@ -812,5 +801,19 @@ class library {
 		}
 		return $amtRaw + floatval($roundFrac);
 	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
+	}
+
 }
 ?>

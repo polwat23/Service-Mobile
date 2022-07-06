@@ -1,10 +1,11 @@
 <?php
 require_once('../autoload.php');
 
-$updateResetPin = $conmysql->prepare("UPDATE gcmemberaccount SET pin = null WHERE member_no = :member_no");
+$updateResetPin = $conoracle->prepare("UPDATE gcmemberaccount SET pin = null WHERE member_no = :member_no");
 if($updateResetPin->execute([
 	':member_no' => $payload["member_no"]
 ])){
+	$conoracle->commit();
 	if($func->logoutAll(null,$payload["member_no"],'-10')){
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
@@ -26,6 +27,7 @@ if($updateResetPin->execute([
 		
 	}
 }else{
+	$conoracle->rollback();
 	$filename = basename(__FILE__, '.php');
 	$logStruc = [
 		":error_menu" => $filename,

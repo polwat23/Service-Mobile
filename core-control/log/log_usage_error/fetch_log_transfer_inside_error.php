@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logtranferinsidecooperror')){
+	if($func->check_permission_core($payload,'log','logtranferinsidecooperror',$conoracle)){
 		$arrayGroup = array();
-		$fetchTranfertError = $conmysql->prepare("SELECT
+		$fetchTranfertError = $conoracle->prepare("SELECT
 																				tran.id_transferinsidecoop,
 																				tran.member_no,
 																				tran.transaction_date,
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																				ORDER BY   tran.transaction_date DESC
 																			 ");
 		$fetchTranfertError->execute();
-		$formatDept = $func->getConstant('dep_format');
+		$formatDept = $func->getConstant('dep_format',$conoracle);
 		while($rowLogTranferError = $fetchTranfertError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTranfertError = array();
 			$arrLogTranfertError["ID_TRANFER"] = $rowLogTranferError["id_transferinsidecoop"];

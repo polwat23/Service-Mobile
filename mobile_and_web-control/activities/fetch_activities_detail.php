@@ -4,31 +4,31 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','id_task'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Event')){
 		$arrayGroupNews = array();
-		$fetchEvent = $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
-										date_format(event_start_time,'%H:%i') as event_start_time,
-										date_format(event_end_time,'%H:%i') as event_end_time,
+		$fetchEvent = $conoracle->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
+										TO_DATE(event_start_time,'HH24:MI') as event_start_time,
+										TO_DATE(event_end_time,'HH24:MI') as event_end_time,
 										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html
 										FROM gctaskevent
 										WHERE id_task = :id_task");
 		$fetchEvent->execute([':id_task' => $dataComing["id_task"]]);
 		$rowEvent = $fetchEvent->fetch(PDO::FETCH_ASSOC);
 		$arrayEvent = array();
-		$arrayEvent["ID_TASK"] = $lib->text_limit($rowEvent["id_task"]);
-		$arrayEvent["TASK_TOPIC"] = $rowEvent["task_topic"];
-		$arrayEvent["TASK_DETAIL"] = $rowEvent["task_detail"];
-		$arrayEvent["START_DATE"] = $lib->convertdate($rowEvent["start_date"],'D m Y');
-		$arrayEvent["START_DATE_RAW"] = $lib->convertdate($rowEvent["start_date"],'D-n-y');
-		$arrayEvent["END_DATE"] = $lib->convertdate($rowEvent["end_date"],'D m Y');
-		$arrayEvent["END_DATE_RAW"] = $lib->convertdate($rowEvent["end_date"],'D-n-y');
-		$arrayEvent["START_TIME"] = $rowEvent["event_start_time"];
-		$arrayEvent["END_TIME"] = $rowEvent["event_end_time"];
-		$arrayEvent["IS_SETTIME"] = $rowEvent["is_settime"];
-		$arrayEvent["CREATE_DATE"] = $lib->convertdate($rowEvent["create_date"],'D m Y',true);
-		$arrayEvent["UPDATE_DATE"] = $lib->convertdate($rowEvent["update_date"],'D m Y',true);
-		$arrayEvent["IS_NOTIFY"] = $rowEvent["is_notify"];
-		$arrayEvent["IS_NOTIFY_BEFORE"] = $rowEvent["is_notify_before"];
-		$arrayEvent["CREATE_BY"] = $rowEvent["create_by"];
-		$arrayEvent["EVENT_HTML"] = $rowEvent["event_html"];
+		$arrayEvent["ID_TASK"] = $lib->text_limit($rowEvent["ID_TASK"]);
+		$arrayEvent["TASK_TOPIC"] = $rowEvent["TASK_TOPIC"];
+		$arrayEvent["TASK_DETAIL"] = $rowEvent["TASK_DETAIL"];
+		$arrayEvent["START_DATE"] = $lib->convertdate($rowEvent["START_DATE"],'D m Y');
+		$arrayEvent["START_DATE_RAW"] = $lib->convertdate($rowEvent["START_DATE"],'D-n-y');
+		$arrayEvent["END_DATE"] = $lib->convertdate($rowEvent["END_DATE"],'D m Y');
+		$arrayEvent["END_DATE_RAW"] = $lib->convertdate($rowEvent["END_DATE"],'D-n-y');
+		$arrayEvent["START_TIME"] = $rowEvent["EVENT_START_TIME"];
+		$arrayEvent["END_TIME"] = $rowEvent["EVENT_END_TIME"];
+		$arrayEvent["IS_SETTIME"] = $rowEvent["IS_SETTIME"];
+		$arrayEvent["CREATE_DATE"] = $lib->convertdate($rowEvent["CREATE_DATE"],'D m Y',true);
+		$arrayEvent["UPDATE_DATE"] = $lib->convertdate($rowEvent["UPDATE_DATE"],'D m Y',true);
+		$arrayEvent["IS_NOTIFY"] = $rowEvent["IS_NOTIFY"];
+		$arrayEvent["IS_NOTIFY_BEFORE"] = $rowEvent["IS_NOTIFY_BEFORE"];
+		$arrayEvent["CREATE_BY"] = $rowEvent["CREATE_BY"];
+		$arrayEvent["EVENT_HTML"] = $rowEvent["EVENT_HTML"];
 		$arrayResult['EVENT'] = $arrayEvent;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

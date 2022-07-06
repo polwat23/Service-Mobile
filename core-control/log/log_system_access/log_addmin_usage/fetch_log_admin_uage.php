@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logadminusege')){
+	if($func->check_permission_core($payload,'log','logadminusege',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogAdminUsage = $conmysql->prepare("SELECT
+		$fetchLogAdminUsage = $conoracle->prepare("SELECT
 																				admin.id_logadminusage,
 																				admin.username,
 																				admin.date_usage,

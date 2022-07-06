@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmswelfare')){
+	if($func->check_permission_core($payload,'sms','constantsmswelfare',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 											id_smsconstantwelfare,
 											welfare_itemtype_code,
 											allow_smsconstantwelfare,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTWELFARE"] = $rowMenuMobile["id_smsconstantwelfare"];
-			$arrConstans["ITEM_CODE"] = $rowMenuMobile["welfare_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTWELFARE"] = $rowMenuMobile["allow_smsconstantwelfare"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTWELFARE"] = $rowMenuMobile["ID_SMSCONSTANTWELFARE"];
+			$arrConstans["ITEM_CODE"] = $rowMenuMobile["WELFARE_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTWELFARE"] = $rowMenuMobile["ALLOW_SMSCONSTANTWELFARE"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT ITEM_CODE,ITEM_DESC FROM ASSUCFASSITEMCODE ORDER BY ITEM_CODE ASC");
@@ -49,10 +49,11 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["ITEM_CODE"],array_column($arrayChkG,'ITEM_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["ITEM_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTWELFARE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$id_smsconstantwelfare = $func->getMaxTable('id_smsconstantwelfare' , 'smsconstantwelfare',$conoracle);
+						$insertBulkCont[] = "('".$id_smsconstantwelfare."','".$value_diff["ITEM_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTWELFARE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
 						$insertBulkContLog[]='ITEM_CODE=> '.$value_diff["ITEM_CODE"].' ALLOW_SMSCONSTANTWELFARE ='.$value_diff["ALLOW_SMSCONSTANTWELFARE"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE  smsconstantwelfare SET allow_smsconstantwelfare = :ALLOW_SMSCONSTANTWELFARE, allow_notify = :ALLOW_NOTIFY WHERE welfare_itemtype_code = :ITEM_CODE");
+						$updateConst = $conoracle->prepare("UPDATE  smsconstantwelfare SET allow_smsconstantwelfare = :ALLOW_SMSCONSTANTWELFARE, allow_notify = :ALLOW_NOTIFY WHERE welfare_itemtype_code = :ITEM_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTWELFARE' => $value_diff["ALLOW_SMSCONSTANTWELFARE"],
 							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
@@ -61,7 +62,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'ITEM_CODE=> '.$value_diff["ITEM_CODE"].' ALLOW_SMSCONSTANTWELFARE='.$value_diff["ALLOW_SMSCONSTANTWELFARE"].' ALLOW_SMSCONSTANTWELFARE='.$value_diff["ALLOW_SMSCONSTANTWELFARE"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT  smsconstantwelfare(welfare_itemtype_code,allow_smsconstantwelfare,allow_notify)
+				$insertConst = $conoracle->prepare("INSERT  smsconstantwelfare(id_smsconstantwelfare,welfare_itemtype_code,allow_smsconstantwelfare,allow_notify)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

@@ -28,15 +28,16 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 		]);
 		$rowMember = $fetchMemberName->fetch(PDO::FETCH_ASSOC);
 		$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
-		$getBankDisplay = $conmysql->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename
+		$getBankDisplay = $conoracle->prepare("SELECT cs.link_inquirydep_coopdirect,cs.bank_short_ename,gc.bank_code,cs.fee_deposit,cs.bank_short_ename
 												FROM gcbindaccount gc LEFT JOIN csbankdisplay cs ON gc.bank_code = cs.bank_code
 												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
 		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
-		if($getBankDisplay->rowCount() > 0){
-			$rowBankDisplay = $getBankDisplay->fetch(PDO::FETCH_ASSOC);
-			$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowBankDisplay["bank_code"]);
+		$rowBankDisplay = $getBankDisplay->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowBankDisplay["LINK_INQUIRYDEP_COOPDIRECT"])){
+			
+			$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowBankDisplay["BANK_CODE"]);
 			if($arrRightDep["RESULT"]){
-				if($rowBankDisplay["bank_code"] == '025'){
+				if($rowBankDisplay["BANK_CODE"] == '025'){
 					$dateOperC = date('c');
 					$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 					$arrVerifyToken['exp'] = time() + 300;
@@ -47,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["SIGNATURE_KEY_VERIFY_API"]);
 					$arrSendData["verify_token"] = $verify_token;
 					$arrSendData["app_id"] = $config["APP_ID"];
-					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowBankDisplay["link_inquirydep_coopdirect"],$arrSendData);
+					$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowBankDisplay["LINK_INQUIRYDEP_COOPDIRECT"],$arrSendData);
 					if(!$responseAPI["RESULT"]){
 						$filename = basename(__FILE__, '.php');
 						$arrayResult['RESPONSE_CODE'] = "WS0027";
@@ -89,17 +90,17 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 							':response_message' => $arrResponse->RESPONSE_MESSAGE
 						];
 						$log->writeLog('deposittrans',$arrayStruc);
-						if(isset($configError[$rowBankDisplay["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowBankDisplay["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
+						if(isset($configError[$rowBankDisplay["BANK_SHORT_ENAME"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$rowBankDisplay["BANK_SHORT_ENAME"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale];
 						}else{
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						}
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 					}
-				}else if($rowBankDisplay["bank_code"] == '006'){
-					if($rowBankDisplay["fee_deposit"] > 0){
-						$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
+				}else if($rowBankDisplay["BANK_CODE"] == '006'){
+					if($rowBankDisplay["FEE_DEPOSIT"] > 0){
+						$arrayResult['FEE_AMT'] = $rowBankDisplay["FEE_DEPOSIT"];
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 					}
 					$arrayResult['ACCOUNT_NAME'] = $account_name_th;

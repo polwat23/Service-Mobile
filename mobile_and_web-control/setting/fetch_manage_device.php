@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingManageDevice')){
 		$arrGroupDevice = array();
-		$fetchSettingDevice = $conmysql->prepare("SELECT device_name,channel,unique_id,login_date,id_token,
+		$fetchSettingDevice = $conoracle->prepare("SELECT device_name,channel,unique_id,login_date,id_token,
 													(SELECT login_date FROM gcuserlogin WHERE is_login <> '1' and member_no = :member_no 
 													ORDER BY id_userlogin DESC LIMIT 1) as last_login_date
 													FROM gcuserlogin WHERE is_login = '1' and member_no = :member_no 
@@ -13,15 +13,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($fetchSettingDevice->rowCount() > 0){
 			while($rowSetting = $fetchSettingDevice->fetch(PDO::FETCH_ASSOC)){
 				$arrDevice = array();
-				$arrDevice["DEVICE_NAME"] = $rowSetting["device_name"];
-				$arrDevice["LAST_LOGIN_DATE"] = isset($rowSetting["last_login_date"]) ? $lib->convertdate($rowSetting["last_login_date"],'d m Y',true) : null;
-				$arrDevice["CHANNEL"] = $rowSetting["channel"];
-				if($rowSetting["unique_id"] == $dataComing["unique_id"]){
+				$arrDevice["DEVICE_NAME"] = $rowSetting["DEVICE_NAME"];
+				$arrDevice["LAST_LOGIN_DATE"] = isset($rowSetting["LAST_LOGIN_DATE"]) ? $lib->convertdate($rowSetting["LAST_LOGIN_DATE"],'d m Y',true) : null;
+				$arrDevice["CHANNEL"] = $rowSetting["CHANNEL"];
+				if($rowSetting["UNIQUE_ID"] == $dataComing["unique_id"]){
 					$arrDevice["THIS_DEVICE"] = true;
 				}
-				$arrDevice["LOGIN_DATE"] = isset($rowSetting["login_date"]) ? $lib->convertdate($rowSetting["login_date"],'D m Y',true) : null;
-				$arrDevice["ACCESS_DATE"] = isset($rowSetting["access_date"]) ? $lib->convertdate($rowSetting["access_date"],'D m Y',true) : null;
-				$arrDevice["ID_TOKEN"] = $rowSetting["id_token"];
+				$arrDevice["LOGIN_DATE"] = isset($rowSetting["LOGIN_DATE"]) ? $lib->convertdate($rowSetting["LOGIN_DATE"],'D m Y',true) : null;
+				$arrDevice["ACCESS_DATE"] = isset($rowSetting["ACCESS_DATE"]) ? $lib->convertdate($rowSetting["ACCESS_DATE"],'D m Y',true) : null;
+				$arrDevice["ID_TOKEN"] = $rowSetting["ID_TOKEN"];
 				$arrGroupDevice[] = $arrDevice;
 			}
 			$arrayResult["DEVICE"] = $arrGroupDevice;

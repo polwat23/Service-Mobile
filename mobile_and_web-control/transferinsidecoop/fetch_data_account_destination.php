@@ -18,13 +18,13 @@ if($lib->checkCompleteArgument(['menu_component','source_deptaccount_no','deptac
 		$getDataAcc->execute([':deptaccount_no' => $dataComing["deptaccount_no"]]);
 		$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
 		if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-			$fetchConstantAllowDept = $conmysql->prepare("SELECT allow_deposit_inside FROM gcconstantaccountdept 
+			$fetchConstantAllowDept = $conoracle->prepare("SELECT allow_deposit_inside FROM gcconstantaccountdept 
 														WHERE dept_type_code = :dept_type_code");
 			$fetchConstantAllowDept->execute([
 				':dept_type_code' => $rowDataAcc["DEPTTYPE_CODE"]
 			]);
 			$rowContAllow = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC);
-			if($rowContAllow["allow_deposit_inside"] == '1'){
+			if($rowContAllow["ALLOW_DEPOSIT_INSIDE"] == '1'){
 				$checkSeqAmt = $cal_dep->getSequestAmount($to_deptaccount_no,'DTX');
 				if($checkSeqAmt["RESULT"]){
 					if($checkSeqAmt["CAN_DEPOSIT"]){

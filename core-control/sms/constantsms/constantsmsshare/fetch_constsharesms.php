@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsshare')){
+	if($func->check_permission_core($payload,'sms','constantsmsshare',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 																		id_smsconstantshare,
 																		share_itemtype_code,
 																		allow_smsconstantshare,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTSHARE"] = $rowMenuMobile["id_smsconstantshare"];
-			$arrConstans["SHRITEMTYPE_CODE"] = $rowMenuMobile["share_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTSHARE"] = $rowMenuMobile["allow_smsconstantshare"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTSHARE"] = $rowMenuMobile["ID_SMSCONSTANTSHARE"];
+			$arrConstans["SHRITEMTYPE_CODE"] = $rowMenuMobile["SHARE_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTSHARE"] = $rowMenuMobile["ALLOW_SMSCONSTANTSHARE"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT SHRITEMTYPE_CODE,SHRITEMTYPE_DESC FROM SHUCFSHRITEMTYPE ORDER BY SHRITEMTYPE_CODE ASC");

@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsinsure')){
+	if($func->check_permission_core($payload,'sms','constantsmsinsure',$conoracle)){
 		$arrayGroup = array();
 		$arrayChkG = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 											id_smsconstantinsure,
 											insure_itemtype_code,
 											allow_smsconstantinsure,
@@ -16,10 +16,10 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTINSURE"] = $rowMenuMobile["id_smsconstantinsure"];
-			$arrConstans["INSITEMTYPE_CODE"] = $rowMenuMobile["insure_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTINSURE"] = $rowMenuMobile["allow_smsconstantinsure"];
-			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["allow_notify"];
+			$arrConstans["ID_SMSCONSTANTINSURE"] = $rowMenuMobile["ID_SMSCONSTANTINSURE"];
+			$arrConstans["INSITEMTYPE_CODE"] = $rowMenuMobile["INSURE_ITEMTYPE_CODE"];
+			$arrConstans["ALLOW_SMSCONSTANTINSURE"] = $rowMenuMobile["ALLOW_SMSCONSTANTINSURE"];
+			$arrConstans["ALLOW_NOTIFY"] = $rowMenuMobile["ALLOW_NOTIFY"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conoracle->prepare("SELECT INSITEMTYPE_CODE,INSITEMTYPE_DESC FROM INSUCFINSITEMTYPE ORDER BY INSITEMTYPE_CODE ASC");
@@ -49,10 +49,11 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["INSITEMTYPE_CODE"],array_column($arrayChkG,'INSITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["INSITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTINSURE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
+						$id_smsconstantinsure = $func->getMaxTable('id_smsconstantinsure' , 'smsconstantinsure',$conoracle);
+						$insertBulkCont[] = "('".$id_smsconstantinsure."','".$value_diff["INSITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTINSURE"]."','".$value_diff["ALLOW_NOTIFY"]."')";
 						$insertBulkContLog[]='INSITEMTYPE_CODE=> '.$value_diff["INSITEMTYPE_CODE"].' ALLOW_SMSCONSTANTINSURE ='.$value_diff["ALLOW_SMSCONSTANTINSURE"].' ALLOW_NOTIFY ='.$value_diff["ALLOW_NOTIFY"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantinsure SET allow_smsconstantinsure = :ALLOW_SMSCONSTANTINSURE, allow_notify = :ALLOW_NOTIFY WHERE insure_itemtype_code = :INSITEMTYPE_CODE");
+						$updateConst = $conoracle->prepare("UPDATE smsconstantinsure SET allow_smsconstantinsure = :ALLOW_SMSCONSTANTINSURE, allow_notify = :ALLOW_NOTIFY WHERE insure_itemtype_code = :INSITEMTYPE_CODE");
 						$updateConst->execute([
 							':ALLOW_SMSCONSTANTINSURE' => $value_diff["ALLOW_SMSCONSTANTINSURE"],
 							':ALLOW_NOTIFY' => $value_diff["ALLOW_NOTIFY"],
@@ -61,7 +62,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 						$updateConstLog = 'INSITEMTYPE_CODE=> '.$value_diff["INSITEMTYPE_CODE"].' ALLOW_SMSCONSTANTINSURE='.$value_diff["ALLOW_SMSCONSTANTINSURE"].' ALLOW_SMSCONSTANTINSURE='.$value_diff["ALLOW_SMSCONSTANTINSURE"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantinsure(insure_itemtype_code,allow_smsconstantinsure,allow_notify)
+				$insertConst = $conoracle->prepare("INSERT smsconstantinsure(id_smsconstantinsure,insure_itemtype_code,allow_smsconstantinsure,allow_notify)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [

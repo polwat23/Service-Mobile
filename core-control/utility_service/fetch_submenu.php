@@ -2,81 +2,37 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
-	if($func->check_permission_core($payload,$dataComing["rootmenu"],null,$conmysql)){
-		if($payload["section_system"] == "root" || $payload["section_system"] == "root_test"){
-			$arrayGroup = array();
-			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
-											ON css.id_coremenu = cm.id_coremenu
-											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status <> '-9' ORDER BY css.menu_order ASC");
-			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
-			while($rowMenu = $fetchMenu->fetch(PDO::FETCH_ASSOC)){
-				$arrGroupRootMenu = array();
-				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["menu_name"];
-				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
-				$fetchSubMenu = $conmysql->prepare("SELECT menu_name,page_name FROM coresubmenu
-													WHERE id_menuparent = :id_submenu and menu_status <> '-9'
-													ORDER BY menu_order ASC");
-				$fetchSubMenu->execute([
-					':id_submenu' => $rowMenu["id_submenu"]
-				]);
-				while($rowSubMenu = $fetchSubMenu->fetch(PDO::FETCH_ASSOC)){
-					if(isset($rowSubMenu["menu_name"])){
-						$arrayGroupSubMenu = array();
-						$arrayGroupSubMenu["SUB_MENU_NAME"] = $rowSubMenu["menu_name"];
-						$arrayGroupSubMenu["SUB_PAGE_NAME"] = '/'.$dataComing["rootmenu"].'/'.$rowMenu["page_name"].'/'.$rowSubMenu["page_name"];
-						($arrGroupRootMenu["SUB_MENU"])[] = $arrayGroupSubMenu;
-					}
-				}
-				if(isset($arrGroupRootMenu["SUB_MENU"])){
-					$arrayGroup[] = $arrGroupRootMenu;
-				}
-			}
-			$arrayResult["SUB_MENU"] = $arrayGroup;
-			$arrayResult["RESULT"] = TRUE;
-			require_once('../../include/exit_footer.php');
-		}else{
-			$arrayGroup = array();
-			$fetchMenu = $conmysql->prepare("SELECT css.menu_name,css.page_name,css.id_submenu FROM coresubmenu css LEFT JOIN coremenu cm 
-											ON css.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
-											WHERE css.id_menuparent = 0 and cm.root_path = :rootmenu and css.menu_status = '1' ORDER BY css.menu_order ASC");
-			$fetchMenu->execute([':rootmenu' => $dataComing["rootmenu"]]);
-			while($rowMenu = $fetchMenu->fetch(PDO::FETCH_ASSOC)){
-				$arrGroupRootMenu = array();
-				$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowMenu["menu_name"];
-				$arrGroupRootMenu["ROOT_PATH"] = $rowMenu["page_name"];
-				$fetchSubMenu = $conmysql->prepare("SELECT csm.menu_name,csm.page_name FROM coresubmenu csm LEFT JOIN corepermissionsubmenu cpsm 
-													ON csm.id_submenu = cpsm.id_submenu and cpsm.is_use = '1'
-													LEFT JOIN corepermissionmenu cpm ON cpsm.id_permission_menu = cpm.id_permission_menu and cpm.is_use = '1'
-													LEFT JOIN coremenu cm ON cpm.id_coremenu = cm.id_coremenu and cm.coremenu_status = '1'
-													WHERE csm.menu_status = '1' and csm.id_menuparent = :id_submenu and cpm.username = :username 
-													and csm.id_coremenu = cm.id_coremenu
-													ORDER BY csm.menu_order ASC");
-				$fetchSubMenu->execute([
-					':id_submenu' => $rowMenu["id_submenu"],
-					':username' => $payload["username"]
-				]);
-				while($rowSubMenu = $fetchSubMenu->fetch(PDO::FETCH_ASSOC)){
-					if(isset($rowSubMenu["menu_name"])){
-						$arrayGroupSubMenu = array();
-						$arrayGroupSubMenu["SUB_MENU_NAME"] = $rowSubMenu["menu_name"];
-						$arrayGroupSubMenu["SUB_PAGE_NAME"] = '/'.$dataComing["rootmenu"].'/'.$rowMenu["page_name"].'/'.$rowSubMenu["page_name"];
-						($arrGroupRootMenu["SUB_MENU"])[] = $arrayGroupSubMenu;
-					}
-				}
-				if(isset($arrGroupRootMenu["SUB_MENU"])){
-					$arrayGroup[] = $arrGroupRootMenu;
-				}
-			}
-			$arrayResult["SUB_MENU"] = $arrayGroup;
-			$arrayResult["RESULT"] = TRUE;
-			require_once('../../include/exit_footer.php');
+	$arrayGroup = array();
+	$getGroupSubMenu = $conoracle->prepare("SELECT asg.GROUP_DESC AS MENU_NAME,asg.PAGE_NAME,asg.GROUP_CODE
+										FROM amsecwinsgroup asg
+										WHERE asg.application = 'user' and asg.PAGE_NAME <> '0' and asg.ROOT_MENU = :rootmenu ORDER BY asg.GROUP_ORDER ASC");
+	$getGroupSubMenu->execute([
+		':rootmenu' => $dataComing["rootmenu"]
+	]);
+	while($rowGrpMenu = $getGroupSubMenu->fetch(PDO::FETCH_ASSOC)){
+		$arrGroupRootMenu = array();
+		$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowGrpMenu["MENU_NAME"];
+		$arrGroupRootMenu["ROOT_PATH"] = $rowGrpMenu["PAGE_NAME"];
+		$getSubMenu = $conoracle->prepare("SELECT ams.WIN_DESCRIPTION as MENU_NAME,ams.WIN_OBJECT as PAGE_NAME
+										FROM amsecwins ams
+										WHERE ams.application = 'user' and ams.used_flag = '1' and ams.GROUP_CODE = :grp_code ORDER BY ams.WIN_ORDER ASC");
+		$getSubMenu->execute([
+			':grp_code' => $rowGrpMenu["GROUP_CODE"]
+		]);
+		while($rowSubMenu = $getSubMenu->fetch(PDO::FETCH_ASSOC)){
+			$arrayGroupSubMenu = array();
+			$arrayGroupSubMenu["SUB_MENU_NAME"] = $rowSubMenu["MENU_NAME"];
+			$arrayGroupSubMenu["SUB_PAGE_NAME"] = '/'.$dataComing["rootmenu"].'/'.$rowGrpMenu["PAGE_NAME"].'/'.$rowSubMenu["PAGE_NAME"];
+			($arrGroupRootMenu["SUB_MENU"])[] = $arrayGroupSubMenu;
 		}
-	}else{
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-		
+		if(isset($arrGroupRootMenu["SUB_MENU"])){
+			$arrayGroup[] = $arrGroupRootMenu;
+		}
 	}
+	$arrayResult["SUB_MENU"] = $arrayGroup;
+	$arrayResult["RESULT"] = TRUE;
+	require_once('../../include/exit_footer.php');
+
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);

@@ -4,22 +4,22 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'FavoriteAccount')){
 		$arrGroupFavmenu = array();
-		$fetchFavMenu = $conmysql->prepare("SELECT gfl.fav_name,gpc.type_palette,gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.color_text
+		$fetchFavMenu = $conoracle->prepare("SELECT gfl.fav_name,gpc.type_palette,gpc.color_deg,gpc.color_main,gpc.color_secon,gpc.color_text
 											FROM gcfavoritemenu gfm LEFT JOIN gcpalettecolor gpc ON gfm.id_palette = gpc.id_palette and gpc.is_use = '1'
 											LEFT JOIN gcfavoritelist gfl ON gfm.fav_refno = gfl.fav_refno and gfl.is_use = '1'
 											WHERE gfl.member_no = :member_no ORDER BY gfm.seq_no ASC");
 		$fetchFavMenu->execute([':member_no' => $payload["member_no"]]);
 		while($rowFavMenu = $fetchFavMenu->fetch(PDO::FETCH_ASSOC)){
 			$arrayFavMenu = array();
-			$arrayFavMenu["FAV_NAME_MENU"] = $rowFavMenu["fav_name"];
-			$arrayFavMenu["FAV_ICON_MENU"] = mb_substr($rowFavMenu["fav_name"],0,1);
-			if(isset($rowFavMenu["type_palette"])){
-				if($rowFavMenu["type_palette"] == '2'){
-					$arrayFavMenu["ACCOUNT_COOP_COLOR"] = $rowFavMenu["color_deg"]."|".$rowFavMenu["color_main"].",".$rowFavMenu["color_secon"];
+			$arrayFavMenu["FAV_NAME_MENU"] = $rowFavMenu["FAV_NAME"];
+			$arrayFavMenu["FAV_ICON_MENU"] = mb_substr($rowFavMenu["FAV_NAME"],0,1);
+			if(isset($rowFavMenu["TYPE_PALETTE"])){
+				if($rowFavMenu["TYPE_PALETTE"] == '2'){
+					$arrayFavMenu["ACCOUNT_COOP_COLOR"] = $rowFavMenu["COLOR_DEG"]."|".$rowFavMenu["COLOR_MAIN"].",".$rowFavMenu["COLOR_SECON"];
 				}else{
-					$arrayFavMenu["ACCOUNT_COOP_COLOR"] = "90|".$rowFavMenu["color_main"].",".$rowFavMenu["color_main"];
+					$arrayFavMenu["ACCOUNT_COOP_COLOR"] = "90|".$rowFavMenu["COLOR_MAIN"].",".$rowFavMenu["COLOR_MAIN"];
 				}
-				$arrayFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $rowFavMenu["color_text"];
+				$arrayFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $rowFavMenu["COLOR_TEXT"];
 			}else{
 				$arrayFavMenu["ACCOUNT_COOP_COLOR"] = $config["DEFAULT_BANNER_COLOR_DEG"]."|".$config["DEFAULT_BANNER_COLOR_MAIN"].",".$config["DEFAULT_BANNER_COLOR_SECON"];
 				$arrayFavMenu["ACCOUNT_COOP_TEXT_COLOR"] = $config["DEFAULT_BANNER_COLOR_TEXT"];

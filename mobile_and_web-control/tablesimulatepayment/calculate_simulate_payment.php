@@ -90,7 +90,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		
 		for($i = 1;$i <= $period;$i++){
 			$arrPaymentPerPeriod = array();
-			if($calint_type === "1"){ // 
+			if($calint_type === "1"){
 				if($i == 1){
 					if($cal_start_pay_date == "next"){
 						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
@@ -113,6 +113,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}else{
 					$prn_amount = $pay_period;
 				}
+				$sumInt += $period_int;
+				$sumPayment += $periodPayment;
 				$periodPayment = $prn_amount + $period_int;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
@@ -123,7 +125,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment,2);
 				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
 				
-			}else if($calint_type === "2"){ // ʹ  + ͡ ҡѹء͹
+			}else if($calint_type === "2"){
 				if($i == 1){
 					if($cal_start_pay_date == "next"){
 						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
@@ -188,7 +190,18 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				$arrPayment[] = $arrPaymentPerPeriod;
 			}
 		}
+		ob_start();
 		include(__DIR__.'/show_table_payment.php');
+		$response = ob_get_clean();
+		
+		if ($forceNewSecurity == true) {
+			$signature = "";
+			openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+			header("Response_token: ".base64_encode($signature));
+		}
+		
+		echo $response;
+
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

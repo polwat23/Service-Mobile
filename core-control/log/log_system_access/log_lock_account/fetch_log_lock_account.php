@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','loglockaccount')){
+	if($func->check_permission_core($payload,'log','loglockaccount',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogLockAccount = $conmysql->prepare("SELECT
+		$fetchLogLockAccount = $conoracle->prepare("SELECT
 																			member_no,
 																			device_name,
 																			unique_id,
@@ -15,10 +15,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchLogLockAccount->execute();
 		while($rowLogLockAccount = $fetchLogLockAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupLogLockAcc = array();
-			$arrGroupLogLockAcc["MEMBER_NO"] = $rowLogLockAccount["member_no"];
-			$arrGroupLogLockAcc["DEVICE_NAME"] = $rowLogLockAccount["device_name"];
-			$arrGroupLogLockAcc["UNIQUE_ID"] = $rowLogLockAccount["unique_id"];
-			$arrGroupLogLockAcc["LOCK_DATE"] =  isset($rowLogLockAccount["lock_date"]) ? $lib->convertdate($rowLogLockAccount["lock_date"],'d m Y',true) : null;
+			$arrGroupLogLockAcc["MEMBER_NO"] = $rowLogLockAccount["MEMBER_NO"];
+			$arrGroupLogLockAcc["DEVICE_NAME"] = $rowLogLockAccount["DEVICE_NAME"];
+			$arrGroupLogLockAcc["UNIQUE_ID"] = $rowLogLockAccount["UNIQUE_ID"];
+			$arrGroupLogLockAcc["LOCK_DATE"] =  isset($rowLogLockAccount["LOCK_DATE"]) ? $lib->convertdate($rowLogLockAccount["LOCK_DATE"],'d m Y',true) : null;
 
 			$arrayGroup[] = $arrGroupLogLockAcc;
 		}

@@ -1,56 +1,48 @@
 <?php
 require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin',null)){
 		$arrayGroup = array();
 		
 
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conmysql->prepare("SELECT
-												DATE_FORMAT(login_date, '%m') AS MONTH,
-												DATE_FORMAT(login_date, '%Y') AS YEAR,
-												IFNULL((
+		$fetchUserlogin = $conoracle->prepare("SELECT
+												TO_CHAR(login_date, 'MM') AS  MONTH,
+												TO_CHAR(login_date, 'YYYY') AS YEAR,
+												NVL((
 													SELECT COUNT(member_no) as C_MEM_LOGIN 
 													FROM gcuserlogin 
 													WHERE
-														DATE_FORMAT(login_date, '%m') = MONTH 
-														and is_login = '1'  AND channel = 'web'
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGIN_WEB,
-												IFNULL((
+														TO_CHAR(login_date, 'MM') = TO_CHAR(sysdate, 'MM')  
+														and is_login = '1'  AND channel = 'web'),0) as C_MEM_LOGIN_WEB,
+												NVL((
 													SELECT COUNT(member_no) as C_MEM_LOGIN 
 													FROM gcuserlogin 
 													WHERE
-														DATE_FORMAT(login_date, '%m') = MONTH 
-														and is_login = '1'  AND channel = 'mobile_app'
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGIN_MOBILE,
-												IFNULL((
+														TO_CHAR(login_date, 'MM') = TO_CHAR(sysdate, 'MM')  
+														and is_login = '1'  AND channel = 'mobile_app'),0) as C_MEM_LOGIN_MOBILE,
+												NVL((
 													SELECT COUNT(member_no) as C_MEM_LOGIN 
 													FROM gcuserlogin 
 													WHERE
-														DATE_FORMAT(login_date, '%m') = MONTH 
-														and is_login = '1' 
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGIN,
-												IFNULL((
+														TO_CHAR(login_date, 'MM') = TO_CHAR(sysdate, 'MM')  
+														and is_login = '1' ),0) as C_MEM_LOGIN,
+												NVL((
 													SELECT COUNT(member_no) as C_MEM_LOGOUT FROM gcuserlogin 
 													WHERE
-														DATE_FORMAT(login_date, '%m') = MONTH and is_login <> '1' 
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT,
-												IFNULL((
+														TO_CHAR(login_date, 'MM') = TO_CHAR(sysdate, 'MM')  and is_login <> '1' ),0) as C_MEM_LOGOUT,
+												NVL((
 													SELECT COUNT(member_no) as C_MEM_LOGOUT FROM gcuserlogin 
 													WHERE
-														DATE_FORMAT(login_date, '%m') = MONTH and is_login <> '1'  AND channel = 'web'
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT_WEB,
-												IFNULL((
+														TO_CHAR(login_date, 'MM') = TO_CHAR(sysdate, 'MM')  and is_login <> '1'  AND channel = 'web'),0) as C_MEM_LOGOUT_WEB,
+												NVL((
 													SELECT COUNT(member_no) as C_MEM_LOGOUT FROM gcuserlogin 
 													WHERE
-														DATE_FORMAT(login_date, '%m') = MONTH and is_login <> '1'  AND channel = 'mobile_app'
-													GROUP BY DATE_FORMAT(login_date, '%m')),0) as C_MEM_LOGOUT_MOBILE
+														TO_CHAR(login_date, 'MM') = TO_CHAR(sysdate, 'MM')  and is_login <> '1'  AND channel = 'mobile_app'),0) as C_MEM_LOGOUT_MOBILE
 											FROM
 												gcuserlogin
 											WHERE
-												login_date <= DATE_SUB(login_date, INTERVAL -6 MONTH)
-											GROUP BY
-												DATE_FORMAT(login_date, '%m')
+												TO_CHAR(login_date,'YYYY-MM-DD')  BETWEEN TO_CHAR(ADD_MONTHS(sysdate, -6),'YYYY-MM-DD') and  TO_CHAR(sysdate,'YYYY-MM-DD')
+											GROUP BY login_date 
 											ORDER BY login_date ASC");
 		$fetchUserlogin->execute();
 		while($rowUserlogin = $fetchUserlogin->fetch(PDO::FETCH_ASSOC)){
@@ -69,11 +61,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult["USER_LOGIN_LOGOUT_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../include/exit_footer.php');
-	}else{
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../../include/exit_footer.php');
-	}
+
 }else{
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);

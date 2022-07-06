@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrTrackStatus["REQ_STATUS"] = $rowTrackStatus["REQ_STATUS"];
 			$arrTrackStatus["REQ_STATUS_DESC"] = $configError["REQ_WELFARE_STATUS"][0][$rowTrackStatus["REQ_STATUS"]][0][$lang_locale];
 			$arrTrackStatus["ASSISTTYPE_CODE"] = $rowTrackStatus["ASSISTTYPE_CODE"];
-			$getFormatForm = $conmysql->prepare("SELECT gw.label_text,gw.input_name,gw.input_format
+			$getFormatForm = $conoracle->prepare("SELECT gw.label_text,gw.input_name,gw.input_format
 												FROM gcformatreqwelfare gw LEFT JOIN gcconstantwelfare gf ON gw.id_const_welfare = gf.id_const_welfare
 												WHERE gf.welfare_type_code = :assisttype_code and (gf.member_cate_code = :cate_code OR gf.member_cate_code = 'AL') 
 												and gf.is_use = '1'");
@@ -31,11 +31,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if($getFormatForm->rowCount() > 0){
 				while($rowForm = $getFormatForm->fetch(PDO::FETCH_ASSOC)){
 					$arrayDetailAss = array();
-					$arrayDetailAss["LABEL"] = $rowForm["label_text"];
-					if(isset($rowForm["input_format"])){
-						$arrayDetailAss["VALUE"] = (json_decode($rowForm["input_format"],true))[$rowTrackStatus[strtoupper($rowForm["input_name"])]];
+					$arrayDetailAss["LABEL"] = $rowForm["LABEL_TEXT"];
+					if(isset($rowForm["INPUT_FORMAT"])){
+						$arrayDetailAss["VALUE"] = (json_decode($rowForm["INPUT_FORMAT"],true))[$rowTrackStatus[strtoupper($rowForm["INPUT_NAME"])]];
 					}else{
-						$arrayDetailAss["VALUE"] = $rowTrackStatus[strtoupper($rowForm["input_name"])];
+						$arrayDetailAss["VALUE"] = $rowTrackStatus[strtoupper($rowForm["INPUT_NAME"])];
 					}
 					$arrTrackStatus["DETAIL_ASSIST"][] = $arrayDetailAss;
 				}

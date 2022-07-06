@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$arrayResult = array();
+		
 		$arrGroupAccount = array();
 		$arrayGroupSTM = array();
 		$limit = $func->getConstant('limit_stmloan');
@@ -42,7 +42,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rownum = 999999;
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
 		}
-		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
+		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lsm.LOANITEMTYPE_CODE as TYPE_CODE,lit.LOANITEMTYPE_DESC AS TYPE_DESC,
+											lsm.slip_date as operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance,lsm.REF_SLIPNO as SLIP_NO
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
@@ -61,7 +62,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["SLIP_NO"] = $rowStm["SLIP_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["PRN_PAYMENT"] = number_format($rowStm["PRN_PAYMENT"],2);
-			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);
+			if($rowStm["TYPE_CODE"] != 'LRC'){
+				$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);
+			}
 			$arrSTM["SUM_PAYMENT"] = number_format($rowStm["INT_PAYMENT"] + $rowStm["PRN_PAYMENT"],2);
 			$arrSTM["LOAN_BALANCE"] = number_format($rowStm["LOAN_BALANCE"],2);
 			$arrayGroupSTM[] = $arrSTM;

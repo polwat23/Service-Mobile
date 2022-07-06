@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logerrorusage')){
+	if($func->check_permission_core($payload,'log','logerrorusage',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogError = $conmysql->prepare("SELECT error_menu,
+		$fetchLogError = $conoracle->prepare("SELECT error_menu,
 															error_code,
 															error_desc,
 															error_date,
@@ -13,11 +13,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchLogError->execute();
 		while($rowLogError = $fetchLogError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogError = array();
-			$arrLogError["ERROR_MENU"] = $rowLogError["error_menu"];
-			$arrLogError["ERROR_CODE"] = $rowLogError["error_code"];
-			$arrLogError["ERROR_DESC"] = $rowLogError["error_desc"];
-			$arrLogError["ERROR_DATE"] =  $lib->convertdate($rowLogError["error_date"],'d m Y',true); 
-			$arrLogError["ERROR_DEVICE"] = $rowLogError["error_device"];
+			$arrLogError["ERROR_MENU"] = $rowLogError["ERROR_MENU"];
+			$arrLogError["ERROR_CODE"] = $rowLogError["ERROR_CODE"];
+			$arrLogError["ERROR_DESC"] = $rowLogError["ERROR_DESC"];
+			$arrLogError["ERROR_DATE"] =  $lib->convertdate($rowLogError["ERROR_DATE"],'d m Y',true); 
+			$arrLogError["ERROR_DEVICE"] = $rowLogError["ERROR_DEVICE"];
 			
 			$arrayGroup[] = $arrLogError;
 		}

@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','managenews')){
-		$conmysql->beginTransaction();
+	if($func->check_permission_core($payload,'mobileadmin','managenews',$conoracle)){
+		$conoracle->beginTransaction();
 		$pathImg1 = null;
 		$pathImg2 = null;
 		$pathImg3 = null;
@@ -174,8 +174,16 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 								  </body>
 									</html>';
 		}
-
-		$update_news= $conmysql->prepare("UPDATE gcnews SET 
+		$file_pointer = __DIR__.'/../../../../resource/html/'.'news'.$dataComing["id_news"].'.html'; 
+  
+		if (!unlink($file_pointer)) { 
+			$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../../../include/exit_footer.php');
+		} 
+		
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'news'.$dataComing["id_news"].'.html', $detail_html . PHP_EOL, FILE_APPEND);
+		$update_news= $conoracle->prepare("UPDATE gcnews SET 
 												news_title = :news_title,
 												news_detail = :news_detail,
 												path_img_header=:path_img_header,
@@ -200,7 +208,7 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 				':path_img_4' => $pathImg4 ?? null,
 				':path_img_5' => $pathImg5 ?? null,
 				':create_by' => $payload["username"],
-				':news_html' => $detail_html ?? null,
+				':news_html' => '/resource/html/'.'news'.$dataComing["id_news"].'.html' ?? null
 			])){
 				$last_id = $dataComing["id_news"];
 				
@@ -220,26 +228,26 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 							$pathFile = $pathFile."?".$random_text;
 						}
 						//update file sql
-						$update_news= $conmysql->prepare("UPDATE gcnews SET 
+						$update_news= $conoracle->prepare("UPDATE gcnews SET 
 															file_upload = :path_file
 													  WHERE id_news = :id_news");
 						if($update_news->execute([
 							':id_news' =>  $last_id,
 							':path_file' => $pathFile ?? null
 						])){
-							$conmysql->commit();
+							$conoracle->commit();
 							$arrayResult["RESULT"] = TRUE;
 							require_once('../../../../include/exit_footer.php');
 							
 						}else{
-							$conmysql->rollback();
+							$conoracle->rollback();
 							$arrayResult['RESPONSE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../../../include/exit_footer.php');
 							
 						}
 			
-						$conmysql->rollback();
+						$conoracle->rollback();
 						$arrayResult['DATA'] = [
 							':id_news' =>  $last_id,
 							':path_file' => $pathFile ?? null
@@ -248,7 +256,7 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 						require_once('../../../../include/exit_footer.php');
 						
 					}else{
-						$conmysql->rollback();
+						$conoracle->rollback();
 						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
@@ -256,26 +264,26 @@ if($lib->checkCompleteArgument(['unique_id','id_news'],$dataComing)){
 					}
 				}else if($dataComing["is_delete_file"] == "1"){
 					//update file sql
-					$update_news= $conmysql->prepare("UPDATE gcnews SET 
+					$update_news= $conoracle->prepare("UPDATE gcnews SET 
 														file_upload = :path_file
 												  WHERE id_news = :id_news");
 					if($update_news->execute([
 						':id_news' =>  $last_id,
 						':path_file' => null
 					])){
-						$conmysql->commit();
+						$conoracle->commit();
 						$arrayResult["RESULT"] = TRUE;
 						require_once('../../../../include/exit_footer.php');
 						
 					}else{
-						$conmysql->rollback();
+						$conoracle->rollback();
 						$arrayResult['RESPONSE'] = "ไม่สามารถลบไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 						
 					}
 				}else{
-					$conmysql->commit();
+					$conoracle->commit();
 					$arrayResult["RESULT"] = TRUE;
 					require_once('../../../../include/exit_footer.php');
 					

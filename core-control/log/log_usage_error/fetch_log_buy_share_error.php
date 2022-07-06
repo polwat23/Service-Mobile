@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logbuyshareerror')){
+	if($func->check_permission_core($payload,'log','logbuyshareerror',$conoracle)){
 		$arrayGroup = array();
-		$fetchLogShare = $conmysql->prepare("SELECT
+		$fetchLogShare = $conoracle->prepare("SELECT
 														s.id_buyshare,
 														s.member_no,
 														s.transaction_date,
@@ -28,23 +28,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchLogShare->execute();
 		while($rowLogShare = $fetchLogShare->fetch(PDO::FETCH_ASSOC)){
 			$arrLogShare = array();
-			$arrLogShare["ID_BUYSHARE"] = $rowLogShare["id_buyshare"];
-			$arrLogShare["MEMBER_NO"] = $rowLogShare["member_no"];
-			$arrLogShare["CHANNEL"] = $rowLogShare["channel"];
-			$arrLogShare["TRANSACTION_DATE"] =  $lib->convertdate($rowLogShare["transaction_date"],'d m Y',true); 
-			$arrLogShare["DEVICE_NAME"] = $rowLogShare["device_name"];
-			$arrLogShare["AMT_TRANSFER"] = $rowLogShare["amt_transfer"];
+			$arrLogShare["ID_BUYSHARE"] = $rowLogShare["ID_BUYSHARE"];
+			$arrLogShare["MEMBER_NO"] = $rowLogShare["MEMBER_NO"];
+			$arrLogShare["CHANNEL"] = $rowLogShare["CHANNEL"];
+			$arrLogShare["TRANSACTION_DATE"] =  $lib->convertdate($rowLogShare["TRANSACTION_DATE"],'d m Y',true); 
+			$arrLogShare["DEVICE_NAME"] = $rowLogShare["DEVICE_NAME"];
+			$arrLogShare["AMT_TRANSFER"] = $rowLogShare["AMT_TRANSFER"];
 			
-			$arrLogShare["AMT_TRANSFER_FORMAT"] =number_format($rowLogShare["amt_transfer"],2);
-			$arrLogShare["PENALTY_AMT_FORMAT"] =number_format($rowLogShare["penalty_amt"],2);
-			$arrLogShare["RESPONSE_CODE"] = $rowLogShare["response_code"];
-			$arrLogShare["DEPTACCOUNT_NO"] = $rowLogShare["deptaccount_no"];
-			$arrLogShare["DESTINATION"] = $rowLogShare["destination"];
-			$arrLogShare["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowLogShare["deptaccount_no"],$func->getConstant('dep_format'));
-			$arrLogShare["DESTINATION_FORMAT"] = $lib->formataccount($rowLogShare["destination"],$func->getConstant('dep_format'));
-			$arrLogShare["RESPONSE_MESSAGE"] = $rowLogShare["response_message"];
-			$arrLogShare["UNIQE_ID"] = $rowLogShare["unique_id"];
-			$arrLogShare["STATUS_FLAG"] = $rowLogShare["status_flag"];
+			$arrLogShare["AMT_TRANSFER_FORMAT"] =number_format($rowLogShare["AMT_TRANSFER"],2);
+			$arrLogShare["PENALTY_AMT_FORMAT"] =number_format($rowLogShare["PENALTY_AMT"],2);
+			$arrLogShare["RESPONSE_CODE"] = $rowLogShare["RESPONSE_CODE"];
+			$arrLogShare["DEPTACCOUNT_NO"] = $rowLogShare["DEPTACCOUNT_NO"];
+			$arrLogShare["DESTINATION"] = $rowLogShare["DESTINATION"];
+			$arrLogShare["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowLogShare["DEPTACCOUNT_NO"],$func->getConstant('dep_format',$conoracle));
+			$arrLogShare["DESTINATION_FORMAT"] = $lib->formataccount($rowLogShare["DESTINATION"],$func->getConstant('dep_format',$conoracle));
+			$arrLogShare["RESPONSE_MESSAGE"] = $rowLogShare["RESPONSE_MESSAGE"];
+			$arrLogShare["UNIQE_ID"] = $rowLogShare["UNIQUE_ID"];
+			$arrLogShare["STATUS_FLAG"] = $rowLogShare["STATUS_FLAG"];
 
 			$arrayGroup[] = $arrLogShare;
 		}

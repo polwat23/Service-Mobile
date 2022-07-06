@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_granted'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','announce')){
+	if($func->check_permission_core($payload,'mobileadmin','announce',$conoracle)){
 		$pathImg = null;
 		if(isset($dataComing["announce_cover"]) && $dataComing["announce_cover"] != null){
 			$destination = __DIR__.'/../../../../resource/announce';
@@ -40,8 +40,10 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 							  </body>
 								</html>';
 		}
-		
-		$insert_announce = $conmysql->prepare("INSERT INTO gcannounce(
+		$id_announce  = $func->getMaxTable('id_announce' , 'gcannounce',$conoracle);
+		file_put_contents(__DIR__.'/../../../../resource/html/'.'announce'.$id_announce.'.html', $detail_html . PHP_EOL, FILE_APPEND);
+		$insert_announce = $conoracle->prepare("INSERT INTO gcannounce(
+																	id_announce,
 																	announce_cover,
 																	announce_title,
 																	announce_detail,
@@ -57,11 +59,12 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	is_show_between_due,
 																	announce_html)
 																VALUES(
+																	:id_announce,
 																	:announce_cover,
 																	:announce_title,
 																	:announce_detail,
-																	:effect_date,
-																	:due_date,
+																	TO_DATE(:effect_date,'yyyy/mm/dd hh24:mi:ss'),
+																	TO_DATE(:due_date,'yyyy/mm/dd hh24:mi:ss'),
 																	:priority,
 																	:flag_granted,
 																	:is_check,
@@ -72,6 +75,7 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 																	:is_show_between_due,
 																	:detail_html)");
 		if($insert_announce->execute([
+			':id_announce' =>  $id_announce,
 			':announce_title' =>  $dataComing["announce_title"],
 			':announce_detail' => $dataComing["announce_detail"],
 			':effect_date' =>  $dataComing["effect_date"],	
@@ -85,8 +89,7 @@ if($lib->checkCompleteArgument(['unique_id','effect_date','priority','flag_grant
 			':username' =>  $payload["username"],
 			':announce_cover' =>  $pathImg ?? null,
 			':is_show_between_due' => $dataComing["is_show_between_due"],
-			':detail_html' => $detail_html ?? null
-			
+			':detail_html' => '/resource/html/'.'announce'.$id_announce.'.html' ?? null
 		])){
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');

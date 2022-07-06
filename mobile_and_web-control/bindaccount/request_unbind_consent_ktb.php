@@ -6,19 +6,19 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$arrPayloadverify = array();
 		$arrPayloadverify['member_no'] = $payload["member_no"];
-		$check_account = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
+		$check_account = $conoracle->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
 											and bindaccount_status IN('0','1','7')");
 		$check_account->execute([
 			':sigma_key' => $dataComing["sigma_key"],
 			':id_bindaccount' => $dataComing["id_bindaccount"],
 			':member_no' => $payload["member_no"]
 		]);
-		if($check_account->rowCount() > 0){
-			$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
+		$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowAcc["CITIZEN_ID"])){	
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
 			$arrPayloadverify['member_no'] = $payload["member_no"];
 			$arrPayloadverify['exp'] = time() + 300;
-			$arrPayloadverify['citizen_id'] = $rowAcc["citizen_id"];
+			$arrPayloadverify['citizen_id'] = $rowAcc["CITIZEN_ID"];
 			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
 			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData = array();
@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$
 			$arrSendData["app_id"] = $config["APP_ID"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/ktb/revoke_register_account',$arrSendData);
 			if(!$responseAPI["RESULT"]){
-				$conmysql->rollback();
+				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = "WS0029";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],

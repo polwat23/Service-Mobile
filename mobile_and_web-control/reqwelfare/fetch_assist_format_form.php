@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare'],$dataComing
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'AssistRequest')){
 		$arrayGrpForm = array();
 		$year = date("Y");
-		$getFormatForm = $conmysql->prepare("SELECT input_type,input_length,input_name,label_text,placeholder,default_value,is_required,input_format
+		$getFormatForm = $conoracle->prepare("SELECT input_type,input_length,input_name,label_text,placeholder,default_value,is_required,input_format
 											FROM gcformatreqwelfare 
 											WHERE id_const_welfare = :id_const_welfare and is_use = '1'");
 		$getFormatForm->execute([
@@ -13,14 +13,14 @@ if($lib->checkCompleteArgument(['menu_component','id_const_welfare'],$dataComing
 		]);
 		while($rowForm = $getFormatForm->fetch(PDO::FETCH_ASSOC)){
 			$arrayForm = array();
-			$arrayForm["INPUT_TYPE"] = $rowForm["input_type"];
-			$arrayForm["INPUT_LENGTH"] = $rowForm["input_length"];
-			$arrayForm["INPUT_NAME"] = $rowForm["input_name"];
-			$arrayForm["LABEL_TEXT"] = $rowForm["label_text"];
-			$arrayForm["PLACEHOLDER"] = $rowForm["placeholder"];
-			$arrayForm["DEFAULT_VALUE"] = $rowForm["default_value"];
-			$arrayForm["INPUT_FORMAT"] = $rowForm["input_format"];
-			$arrayForm["IS_REQUIRED"] = $rowForm["is_required"];
+			$arrayForm["INPUT_TYPE"] = $rowForm["INPUT_TYPE"];
+			$arrayForm["INPUT_LENGTH"] = $rowForm["INPUT_LENGTH"];
+			$arrayForm["INPUT_NAME"] = $rowForm["INPUT_NAME"];
+			$arrayForm["LABEL_TEXT"] = $rowForm["LABEL_TEXT"];
+			$arrayForm["PLACEHOLDER"] = $rowForm["PLACEHOLDER"];
+			$arrayForm["DEFAULT_VALUE"] = $rowForm["DEFAULT_VALUE"];
+			$arrayForm["INPUT_FORMAT"] = $rowForm["INPUT_FORMAT"];
+			$arrayForm["IS_REQUIRED"] = $rowForm["IS_REQUIRED"];
 			$arrayGrpForm[] = $arrayForm;
 		}
 		$arrayResult['FORM_ASSIST'] = $arrayGrpForm;

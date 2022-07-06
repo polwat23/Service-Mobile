@@ -2,9 +2,9 @@
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'log','logdepttransbankerror')){
+	if($func->check_permission_core($payload,'log','logdepttransbankerror',$conoracle)){
 		$arrayGroup = array();
-		$fetchTranfertError = $conmysql->prepare("SELECT
+		$fetchTranfertError = $conoracle->prepare("SELECT
 													db.id_deptransbankerr,
 													db.member_no,
 													db.transaction_date,
@@ -21,16 +21,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchTranfertError->execute();
 		while($rowLogTranferError = $fetchTranfertError->fetch(PDO::FETCH_ASSOC)){
 			$arrLogTranfertError = array();
-			$arrLogTranfertError["ID_DEPTRANSBANKERR"] = $rowLogTranferError["id_deptransbankerr"];
-			$arrLogTranfertError["MEMBER_NO"] = $rowLogTranferError["member_no"];
-			$arrLogTranfertError["CHANNEL"] = $rowLogTranferError["channel"];
-			$arrLogTranfertError["TRANSACTION_DATE"] =  $lib->convertdate($rowLogTranferError["transaction_date"],'d m Y',true); 
-			$arrLogTranfertError["DEVICE_NAME"] = $rowLogTranferError["device_name"];
-			$arrLogTranfertError["AMT_TRANSFER"] = $rowLogTranferError["amt_transfer"];
-			$arrLogTranfertError["AMT_TRANSFER_FORMAT"] = number_format($rowLogTranferError["amt_transfer"],2);
-			$arrLogTranfertError["SIGMA_KEY"] = $rowLogTranferError["sigma_key"];
-			$arrLogTranfertError["RESPONSE_CODE"] = $rowLogTranferError["response_code"];
-			$arrLogTranfertError["RESPONSE_MESSAGE"] = $rowLogTranferError["response_message"];
+			$arrLogTranfertError["ID_DEPTRANSBANKERR"] = $rowLogTranferError["ID_DEPTRANSBANKERR"];
+			$arrLogTranfertError["MEMBER_NO"] = $rowLogTranferError["MEMBER_NO"];
+			$arrLogTranfertError["CHANNEL"] = $rowLogTranferError["CHANNEL"];
+			$arrLogTranfertError["TRANSACTION_DATE"] =  $lib->convertdate($rowLogTranferError["TRANSACTION_DATE"],'d m Y',true); 
+			$arrLogTranfertError["DEVICE_NAME"] = $rowLogTranferError["DEVICE_NAME"];
+			$arrLogTranfertError["AMT_TRANSFER"] = $rowLogTranferError["AMT_TRANSFER"];
+			$arrLogTranfertError["AMT_TRANSFER_FORMAT"] = number_format($rowLogTranferError["AMT_TRANSFER"],2);
+			$arrLogTranfertError["SIGMA_KEY"] = $rowLogTranferError["SIGMA_KEY"];
+			$arrLogTranfertError["RESPONSE_CODE"] = $rowLogTranferError["RESPONSE_CODE"];
+			$arrLogTranfertError["RESPONSE_MESSAGE"] = $rowLogTranferError["RESPONSE_MESSAGE"];
 			
 			$arrayGroup[] = $arrLogTranfertError;
 		}

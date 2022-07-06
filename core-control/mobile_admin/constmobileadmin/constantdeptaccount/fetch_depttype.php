@@ -2,10 +2,10 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
+	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount',$conoracle)){
 		$arrayGroup = array();
 		$arrDepttypeuse = array();
-		$fetchDepttypeUsed = $conmysql->prepare("SELECT DEPT_TYPE_CODE FROM gcconstantaccountdept");
+		$fetchDepttypeUsed = $conoracle->prepare("SELECT DEPT_TYPE_CODE FROM gcconstantaccountdept");
 		$fetchDepttypeUsed->execute();
 		while($rowDepttypeUse = $fetchDepttypeUsed->fetch(PDO::FETCH_ASSOC)){
 			$arrDepttypeuse[] = $rowDepttypeUse["DEPT_TYPE_CODE"];

@@ -20,12 +20,12 @@ use Connection\connection;
 
 $con = new connection();
 $basetest = json_decode(isset($headers["basetest"]) ? $headers["basetest"] : false);
-$conmysql = $con->connecttomysql($basetest);
+$conoracle = $con->connecttomysql($basetest);
 $conoracle = $con->connecttooracle($basetest);
 $conmongo = $con->connecttomongo($basetest);
 
 // Test MariaDB
-$testMariaDB = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = 'dev@mode'");
+$testMariaDB = $conoracle->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = 'dev@mode'");
 $testMariaDB->execute();
 if($testMariaDB->rowCount() > 0){
 	$arrResult["MYSQL"] = 'MYSQL is Connected 🟢';

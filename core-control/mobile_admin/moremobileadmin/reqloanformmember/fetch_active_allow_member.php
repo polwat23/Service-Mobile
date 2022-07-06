@@ -2,8 +2,8 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','loanrequestformmember')){
-		$fetchAllow = $conmysql->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
+	if($func->check_permission_core($payload,'mobileadmin','loanrequestformmember',$conoracle)){
+		$fetchAllow = $conoracle->prepare("SELECT member_no, create_date, update_date, update_username, is_allow
 											FROM gcallowmemberreqloan WHERE is_allow = '1'");
 		$fetchAllow->execute();
 		
@@ -11,12 +11,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 		while($rowAllow = $fetchAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();
-			$arrayGroup["CREATE_DATE"] = $rowAllow["create_date"] ?? null;
-			$arrayGroup["UPDATE_DATE"] = $rowAllow["update_date"] ?? null;
-			$arrayGroup["UPDATE_USERNAME"] = $rowAllow["update_username"] ?? null;
-			$arrayGroup["IS_ALLOW"] = $rowAllow["is_allow"] ?? 0;
+			$arrayGroup["CREATE_DATE"] = $rowAllow["CREATE_DATE"] ?? null;
+			$arrayGroup["UPDATE_DATE"] = $rowAllow["UPDATE_DATE"] ?? null;
+			$arrayGroup["UPDATE_USERNAME"] = $rowAllow["UPDATE_USERNAME"] ?? null;
+			$arrayGroup["IS_ALLOW"] = $rowAllow["IS_ALLOW"] ?? 0;
 			
-			$member_no = strtolower($lib->mb_str_pad($rowAllow["member_no"]));
+			$member_no = strtolower($lib->mb_str_pad($rowAllow["MEMBER_NO"]));
 			$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
 										mb.member_no
 										FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code

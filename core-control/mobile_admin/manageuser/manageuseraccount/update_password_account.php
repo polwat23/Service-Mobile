@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount')){
+	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount',$conoracle)){
 		$menuName = "manageuseraccount";
 		$list_name = "reset password";
 
@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		]);
 		$rowcitizenid = $fetchCitizenID->fetch(PDO::FETCH_ASSOC);
 		$new_password = $rowcitizenid["CARD_PERSON"];
-		$repassword = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :newpassword,account_status = '-9',counter_wrongpass = 0 WHERE member_no = :member_no");
+		$repassword = $conoracle->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,temppass = :newpassword,account_status = '-9',counter_wrongpass = 0 WHERE member_no = :member_no");
 		if($repassword->execute([
 				':newpassword' => password_hash($new_password,PASSWORD_DEFAULT),
 				':member_no' => $dataComing["member_no"]
@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 				':details' => $dataComing["member_no"]
 			];
 			
-			$log->writeLog('manageuser',$arrayStruc);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{

@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
+	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount',$conoracle)){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT
+		$fetchConstant = $conoracle->prepare("SELECT
 										bank.bank_code,
 										bank.bank_name,
 										bank.bank_short_name,
@@ -21,28 +21,28 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 										bank.fee_withdraw
 									FROM
 										csbankdisplay bank
-									INNER JOIN gcpalettecolor color ON
+									LEFT JOIN gcpalettecolor color ON
 										bank.id_palette = color.id_palette");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_PALETTE"] = $rowAccount["id_palette"];
-			$arrConstans["BANK_CODE"] = $rowAccount["bank_code"];
-			$arrConstans["BANK_NAME"] = $rowAccount["bank_name"];
-			$arrConstans["BANK_SHORT_NAME"] = $rowAccount["bank_short_name"];
-			$arrConstans["BANK_LOGO_PATH"] = $rowAccount["bank_logo_path"];
-			$arrConstans["BANK_FORMAT_ACCOUNT"] = $rowAccount["bank_format_account"];
-			$arrConstans["BANK_FORMAT_ACCOUNT_HIDE"] = $rowAccount["bank_format_account_hide"];
-			$arrConstans["TYPE_PALETTE"] = $rowAccount["type_palette"];
-			$arrConstans["COLOR_MAIN"] = $rowAccount["color_main"];
-			$arrConstans["COLOR_SECON"] = $rowAccount["color_secon"];
-			$arrConstans["COLOR_DEG"] = $rowAccount["color_deg"];
-			$arrConstans["COLOR_TEXT"] = $rowAccount["color_text"];
-			$arrConstans["FEE_DEPOSIT"] = $rowAccount["fee_deposit"];
-			$arrConstans["FEE_WITHDRAW"] = $rowAccount["fee_withdraw"];
+			$arrConstans["ID_PALETTE"] = $rowAccount["ID_PALETTE"];
+			$arrConstans["BANK_CODE"] = $rowAccount["BANK_CODE"];
+			$arrConstans["BANK_NAME"] = $rowAccount["BANK_NAME"];
+			$arrConstans["BANK_SHORT_NAME"] = $rowAccount["BANK_SHORT_NAME"];
+			$arrConstans["BANK_LOGO_PATH"] = $rowAccount["BANK_LOGO_PATH"];
+			$arrConstans["BANK_FORMAT_ACCOUNT"] = $rowAccount["BANK_FORMAT_ACCOUNT"];
+			$arrConstans["BANK_FORMAT_ACCOUNT_HIDE"] = $rowAccount["BANK_FORMAT_ACCOUNT_HIDE"];
+			$arrConstans["TYPE_PALETTE"] = $rowAccount["TYPE_PALETTE"];
+			$arrConstans["COLOR_MAIN"] = $rowAccount["COLOR_MAIN"];
+			$arrConstans["COLOR_SECON"] = $rowAccount["COLOR_SECON"];
+			$arrConstans["COLOR_DEG"] = $rowAccount["COLOR_DEG"];
+			$arrConstans["COLOR_TEXT"] = $rowAccount["COLOR_TEXT"];
+			$arrConstans["FEE_DEPOSIT"] = $rowAccount["FEE_DEPOSIT"];
+			$arrConstans["FEE_WITHDRAW"] = $rowAccount["FEE_WITHDRAW"];
 			
 			$arrConstans["BANK_CONSTANT"] = [];
-			$fetchBankMapping = $conmysql->prepare("SELECT bc.id_bankconstant,
+			$fetchBankMapping = $conoracle->prepare("SELECT bc.id_bankconstant,
 											bc.transaction_cycle,
 											bc.max_numof_deposit,
 											bc.max_numof_withdraw,
@@ -56,30 +56,31 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											LEFT JOIN gcbankconstantmapping bcp ON bc.id_bankconstant = bcp.id_bankconstant
 											WHERE bcp.bank_code = :bank_code AND bcp.is_use = '1'");
 			$fetchBankMapping->execute([
-				':bank_code' => $rowAccount["bank_code"]
+				':bank_code' => $rowAccount["BANK_CODE"]
 			]);
 			while($rowBankMapping = $fetchBankMapping->fetch(PDO::FETCH_ASSOC)){
 				$arrMapping = [];
 				$arrMapping["ID_BANKCONSTANT"] = $rowBankMapping["id_bankconstant"];
-				if($rowBankMapping["transaction_cycle"] == "day"){
+				if($rowBankMapping["TRANSACTION_CYCLE"] == "day"){
 					$arrMapping["TRANSACTION_CYCLE"] = "รายวัน";
-				}else if($rowBankMapping["transaction_cycle"] == "time"){
+				}else if($rowBankMapping["TRANSACTION_CYCLE"] == "time"){
 					$arrMapping["TRANSACTION_CYCLE"] = "รายครั้ง";
-				}else if($rowBankMapping["transaction_cycle"] == "month"){
+				}else if($rowBankMapping["TRANSACTION_CYCLE"] == "month"){
 					$arrMapping["TRANSACTION_CYCLE"] = "รายเดือน";
-				}else if($rowBankMapping["transaction_cycle"] == "year"){
+				}else if($rowBankMapping["TRANSACTION_CYCLE"] == "year"){
 					$arrMapping["TRANSACTION_CYCLE"] = "รายปี";
 				}else{
-					$arrMapping["TRANSACTION_CYCLE"] = $rowBankMapping["transaction_cycle"];
+					$arrMapping["TRANSACTION_CYCLE"] = $rowBankMapping["TRANSACTION_CYCLE"];
 				}
-				$arrMapping["MAX_NUMOF_DEPOSIT"] = $rowBankMapping["max_numof_deposit"] == "-1" ? "ไม่จำกัด" : number_format($rowBankMapping["max_numof_deposit"],0)." ครั้ง";
-				$arrMapping["MAX_NUMOF_WITHDRAW"] = $rowBankMapping["max_numof_withdraw"] == "-1" ? "ไม่จำกัด" : number_format($rowBankMapping["max_numof_withdraw"],0)." ครั้ง";
-				$arrMapping["MIN_DEPOSIT"] = $rowBankMapping["min_deposit"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["min_deposit"],2)." บาท";
-				$arrMapping["MAX_DEPOSIT"] = $rowBankMapping["max_deposit"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["max_deposit"],2)." บาท";
-				$arrMapping["MIN_WITHDRAW"] = $rowBankMapping["min_withdraw"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["min_withdraw"],2)." บาท";
-				$arrMapping["MAX_WITHDRAW"] = $rowBankMapping["max_withdraw"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["max_withdraw"],2)." บาท";
-				$arrMapping["EACH_BANK"] = $rowBankMapping["each_bank"];
-				$arrMapping["ID_BANKCONSTANTMAPPING"] = $rowBankMapping["id_bankconstantmapping"];
+				$arrMapping["TRANSACTION_NAME"] = $rowBankMapping["TRANSACTION_NAME"];
+				$arrMapping["MAX_NUMOF_DEPOSIT"] = $rowBankMapping["MAX_NUMOF_DEPOSIT"] == "-1" ? "ไม่จำกัด" : number_format($rowBankMapping["MAX_NUMOF_DEPOSIT"],0)." ครั้ง";
+				$arrMapping["MAX_NUMOF_WITHDRAW"] = $rowBankMapping["MAX_NUMOF_WITHDRAW"] == "-1" ? "ไม่จำกัด" : number_format($rowBankMapping["MAX_NUMOF_WITHDRAW"],0)." ครั้ง";
+				$arrMapping["MIN_DEPOSIT"] = $rowBankMapping["MIN_DEPOSIT"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["MIN_DEPOSIT"],2)." บาท";
+				$arrMapping["MAX_DEPOSIT"] = $rowBankMapping["MAX_DEPOSIT"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["MAX_DEPOSIT"],2)." บาท";
+				$arrMapping["MIN_WITHDRAW"] = $rowBankMapping["MIN_WITHDRAW"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["MIN_WITHDRAW"],2)." บาท";
+				$arrMapping["MAX_WITHDRAW"] = $rowBankMapping["MAX_WITHDRAW"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["MAX_WITHDRAW"],2)." บาท";
+				$arrMapping["EACH_BANK"] = $rowBankMapping["EACH_BANK"];
+				$arrMapping["ID_BANKCONSTANTMAPPING"] = $rowBankMapping["ID_BANKCONSTANTMAPPING"];
 				$arrConstans["BANK_CONSTANT"][] = $arrMapping;
 			}
 			

@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_announce'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','announce')){
+	if($func->check_permission_core($payload,'mobileadmin','announce',$conoracle)){
 
-		$update_announce = $conmysql->prepare("UPDATE gcannounce SET effect_date = :effect_date,due_date=:due_date
+		$update_announce = $conoracle->prepare("UPDATE gcannounce SET effect_date = :effect_date,due_date=:due_date
 																		WHERE id_announce = :id_announce");
 			if($update_announce->execute([
 				':id_announce' =>  $dataComing["id_announce"],

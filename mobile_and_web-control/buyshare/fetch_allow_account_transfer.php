@@ -6,15 +6,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccAllow = array();
 		$arrayAcc = array();
-		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
+		$fetchAccAllowTrans = $conoracle->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_buy_share = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
-		if($fetchAccAllowTrans->rowCount() > 0){
-			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
-				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
-			}
-			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.withdrawable_amt as prncbal,dpm.depttype_code
+		while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
+			$arrayAcc[] = "'".$rowAccAllow["DEPTACCOUNT_NO"]."'";
+		}
+		
+		if(sizeof($arrayAcc) > 0){
+			$getDataBalAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.prncbal as prncbal,dpm.depttype_code
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.acccont_type = '01' and dpm.deptclose_status = 0
 													ORDER BY dpm.deptaccount_no ASC");
@@ -77,8 +78,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESPONSE_CODE'] = "WS0023";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
+				require_once('../../include/exit_footer.php');			
 			}
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0023";

@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_welfare'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','manageassistance')){
+	if($func->check_permission_core($payload,'mobileadmin','manageassistance',$conoracle)){
 		$arrayWelfare = array();
-		$fetchWelfare = $conmysql->prepare("SELECT 
+		$fetchWelfare = $conoracle->prepare("SELECT 
 										gfr.id_format_req_welfare,
 										gfr.input_type,
 										gfr.input_length,
@@ -22,16 +22,16 @@ if($lib->checkCompleteArgument(['unique_id','id_welfare'],$dataComing)){
 		]);
 		while($dataWelfare = $fetchWelfare->fetch(PDO::FETCH_ASSOC)){
 			$welfare = array();
-			$welfare["INPUT_TYPE"] = $dataWelfare["input_type"];
-			$welfare["INPUT_LENGTH"] = $dataWelfare["input_length"];
-			$welfare["INPUT_NAME"] = $dataWelfare["input_name"];
-			$welfare["LABEL_TEXT"] = $dataWelfare["label_text"];
-			$welfare["PLACEHOLDER"] = $dataWelfare["placeholder"];
+			$welfare["INPUT_TYPE"] = $dataWelfare["INPUT_TYPE"];
+			$welfare["INPUT_LENGTH"] = $dataWelfare["INPUT_LENGTH"];
+			$welfare["INPUT_NAME"] = $dataWelfare["INPUT_NAME"];
+			$welfare["LABEL_TEXT"] = $dataWelfare["LABEL_TEXT"];
+			$welfare["PLACEHOLDER"] = $dataWelfare["PLACEHOLDER"];
 			$welfare["DEFAULT_VALUE"] = $dataWelfare["default_value"];
-			$welfare["INPUT_FORMATE"] = $dataWelfare["input_format"];
-			$welfare["IS_REQUIRED"] = $dataWelfare["is_required"];
-			$welfare["IS_USE"] = $dataWelfare["is_use"];
-			$welfare["ID_FORMAT_REQ_WELFARE"] = $dataWelfare["id_format_req_welfare"];
+			$welfare["INPUT_FORMATE"] = $dataWelfare["INPUT_FORMAT"];
+			$welfare["IS_REQUIRED"] = $dataWelfare["IS_REQUIRED"];
+			$welfare["IS_USE"] = $dataWelfare["IS_USE"];
+			$welfare["ID_FORMAT_REQ_WELFARE"] = $dataWelfare["ID_FORMAT_REQ_WELFARE"];
 			$arrayWelfare[] = $welfare;
 		}
 		$arrayResult['FORM_DATA'] = $arrayWelfare;

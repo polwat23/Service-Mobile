@@ -2,9 +2,9 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','id_constant','value_constant'],$dataComing)){
-	if($func->check_permission_core($payload,'mobileadmin','constantsystem')){
+	if($func->check_permission_core($payload,'mobileadmin','constantsystem',$conoracle)){
 		if(isset($dataComing["value_constant"]) || $dataComing["value_constant"] != ''){
-			$updateConstants = $conmysql->prepare("UPDATE gcconstant SET constant_value = :constant_value
+			$updateConstants = $conoracle->prepare("UPDATE gcconstant SET constant_value = :constant_value
 													WHERE id_constant = :id_constant");
 			if($updateConstants->execute([
 				':constant_value' => $dataComing["value_constant"],
