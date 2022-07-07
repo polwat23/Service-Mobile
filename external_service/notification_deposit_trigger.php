@@ -23,18 +23,6 @@ $fetchDataSTM = $conoracle->prepare("SELECT dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dm.DE
 									WHERE dsm.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and dsm.sync_notify_flag = '0' and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
-	$textExtend = "";
-	if($rowSTM["DEPTTYPE_CODE"] == '17'){
-		$getDataDueDate = $conoracle->prepare("SELECT to_char(PRNCDUE_DATE,'YYYYMMDD') AS PRNCDUE_DATE FROM dpdeptprncfixed WHERE deptaccount_no = :deptaccount_no and prnc_amt = :amount");
-		$getDataDueDate->execute([
-			':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
-			':amount' => $rowSTM["AMOUNT"]
-		]);
-		$rowDueDate = $getDataDueDate->fetch(PDO::FETCH_ASSOC);
-		if($rowDueDate["PRNCDUE_DATE"] == date('Ymd')){
-			$textExtend .= "บัญชีนี้ครบกำหนดแล้ว";
-		}
-	}
 	$arrToken = $func->getFCMToken('person',$rowSTM["MEMBER_NO"]);
 	foreach($arrToken["LIST_SEND"] as $dest){
 		if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
@@ -48,7 +36,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-			$arrMessage["BODY"] = $message_endpoint["BODY"].' '.$textExtend;
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
 			$arrMessage["PATH_IMAGE"] = null;
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
@@ -76,7 +64,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
 			$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
 			$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
-			$arrMessage["BODY"] = $message_endpoint["BODY"].' '.$textExtend;
+			$arrMessage["BODY"] = $message_endpoint["BODY"];
 			$arrMessage["PATH_IMAGE"] = null;
 			$arrPayloadNotify["PAYLOAD"] = $arrMessage;
 			$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";

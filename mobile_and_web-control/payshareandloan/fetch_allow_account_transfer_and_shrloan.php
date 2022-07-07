@@ -23,7 +23,7 @@ $conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'")
 $conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepPayLoan')){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PayShareLoan')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccAllow = array();
 		$arrGroupAccFav = array();
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$formatDeptHidden = $func->getConstant('hidden_dep');
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_pay_loan = '1'");
+													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_pay_loan = '1' and gad.allow_buyshare = '1'");
 		$fetchAccAllowTrans->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccAllowTrans->rowCount() > 0){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
@@ -83,23 +83,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;
 			}
-			$getAccFav = $conmysql->prepare("SELECT fav_refno,name_fav,from_account,destination FROM gcfavoritelist WHERE member_no = :member_no and flag_trans = 'LPM' and is_use = '1'");
-			$getAccFav->execute([':member_no' => $payload["member_no"]]);
-			while($rowAccFav = $getAccFav->fetch(PDO::FETCH_ASSOC)){
-				$arrFavMenu = array();
-				$arrFavMenu["NAME_FAV"] = $rowAccFav["name_fav"];
-				$arrFavMenu["FAV_REFNO"] = $rowAccFav["fav_refno"];
-				$arrFavMenu["DESTINATION"] = $rowAccFav["destination"];
-				$arrFavMenu["DESTINATION_FORMAT"] = $rowAccFav["destination"];
-				$arrFavMenu["DESTINATION_HIDDEN"] = $rowAccFav["destination"];
-				if(isset($rowAccFav["from_account"])) {
-					$arrFavMenu["FROM_ACCOUNT"] = $rowAccFav["from_account"];
-					$arrFavMenu["FROM_ACCOUNT_FORMAT"] = $lib->formataccount($rowAccFav["from_account"],$func->getConstant('dep_format'));
-					$arrFavMenu["FROM_ACCOUNT_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccFav["from_account"],$func->getConstant('hidden_dep'));
+			$arrayShare = array();
+			$getMembGroup = $conoracle->prepare("SELECT MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
+			$getMembGroup->execute([':member_no' => $member_no]);
+			$rowMembGrp = $getMembGroup->fetch(PDO::FETCH_ASSOC);
+			$grpAllow = substr($rowMembGrp["MEMBGROUP_CODE"],0,2);
+			if($grpAllow == "S2" || $grpAllow == "Y2"){
+				$getLastBuy = $conoracle->prepare("SELECT NVL(SUM(SHARE_AMOUNT) * 50,0) as AMOUNT_PAID FROM shsharestatement WHERE member_no = :member_no 
+													and TRUNC(to_char(slip_date,'YYYYMM')) = TRUNC(to_char(SYSDATE,'YYYYMM'))");
+				$getLastBuy->execute([':member_no' => $member_no]);
+				$rowLastBuy = $getLastBuy->fetch(PDO::FETCH_ASSOC);
+				$fetchShare = $conoracle->prepare("SELECT sharestk_amt,periodshare_amt FROM shsharemaster WHERE member_no = :member_no");
+				$fetchShare->execute([':member_no' => $member_no]);
+				$rowShare = $fetchShare->fetch(PDO::FETCH_ASSOC);
+				if($rowLastBuy["AMOUNT_PAID"] < $rowShare["PERIODSHARE_AMT"] * 50){
+					$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*50,2);
+					$arrayShare["MEMBER_NO"] = $member_no;
+					$arrayShare["MUST_BUYSHARE"] = number_format(($rowShare["PERIODSHARE_AMT"]*50) - $rowLastBuy["AMOUNT_PAID"],2);
+					$arrayShare["LIMIT_BUYSHARE"] = number_format(($rowShare["PERIODSHARE_AMT"]*50) - $rowLastBuy["AMOUNT_PAID"],2);
 				}
-				$arrGroupAccFav[] = $arrFavMenu;
 			}
-
 			$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,
 													csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
@@ -129,9 +132,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 
 			if(sizeof($arrGroupAccAllow) > 0){
+				$arrayResult['STEP_MOD_AMT'] = 50;
+				$arrayResult['SHARE'] = $arrayShare;
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
-				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
 				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
 				$arrayResult['LOAN'] = $arrLoanGrp;

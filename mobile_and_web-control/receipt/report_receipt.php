@@ -143,7 +143,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -214,7 +219,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="100"  /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold;color: red;">ยกเลิกใบเสร็จรับเงิน</p>';
@@ -223,7 +228,7 @@ function GenerateReport($dataReport,$header,$lib){
 	}
 	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์การทางพิเศษแห่งประเทศไทย จำกัด</p>
 			<p style="margin-top: -25px;font-size: 18px;">111 ถนนริมคลองบางกะปิ แขวงบางกะปิ เขตห้วยขวาง กรุงเทพฯ 10310</p>
-			<p style="margin-top: -23px;font-size: 18px;">โทรศัพท์ 02-558-9980 ต่อ 29000-29011 เบอร์มือถือ 093-562-8746 (สินเชื่อ) 092-647-4649 (การเงิน) <br /></p>
+			<p style="margin-top: -23px;font-size: 18px;">โทรศัพท์ 02-558-9800 ต่อ 29000-29011 เบอร์มือถือ 093-562-8746 (สินเชื่อ) 092-647-4649 (การเงิน) <br /></p>
 			<p style="margin-top: -25px;font-size: 18px;">FAX 02-558-9979  email : payment.coop@gmail.com</p>
 			</div>
 			</div>

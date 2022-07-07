@@ -14,8 +14,28 @@ class CalculateDep {
 	function __construct() {
 		$connection = new connection();
 		$this->lib = new library();
-		$this->con = $connection->connecttomysql();
-		$this->conora = $connection->connecttooracle();
+		//$this->con = $connection->connecttomysql();
+		$dbhost = "127.0.0.1";
+		$dbuser = "root";
+		$dbpass = "EXAT2022";
+		$dbname = "mobile_exat_test";
+
+		$this->con = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
+		$this->con->exec("set names utf8mb4");
+
+
+		$dbnameOra = "(DESCRIPTION =
+					(ADDRESS_LIST =
+					  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
+					)
+					(CONNECT_DATA =
+					  (SERVICE_NAME = iorcl)
+					)
+				  )";
+		$this->conora = new \PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
+		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+		//$this->conora = $connection->connecttooracle();
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
@@ -87,9 +107,22 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		
 		if($amt_transfer < $dataConst["MINDEPT_AMT"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
 			$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+		$getSumOfDeposit = $this->conora->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) as SUM_AMOUNT FROM dpdeptmaster dm 
+														LEFT JOIN dpdeptstatement ds ON dm.deptaccount_no = ds.deptaccount_no
+														WHERE dm.member_no = :member_no and dm.deptclose_status = '0' 
+														and ds.deptitemtype_code <> 'INT'
+														and TO_CHAR(ds.operate_date,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')");
+		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
+		if($rowSumOfDeposit["SUM_AMOUNT"] + $amt_transfer > '50000'){
+			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
@@ -344,6 +377,17 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		if($dataConst["DEPTTYPE_CODE"] == '01'){
+			$getAmountTXPerDay = $this->conora->prepare("SELECT COUNT(seq_no) as C_SEQ FROM dpdeptstatement 
+														WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
+			$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
+			$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
+			if($amountTx["C_SEQ"] > 99){
+				$arrayResult['RESPONSE_CODE'] = "WS0101";
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
 			$transfer_mode = "1";
@@ -351,7 +395,7 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
 			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$menucheckrights = "and gca.allow_buyshare = '1'";
 			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan'){
 			$menucheckrights = "and gca.allow_pay_loan = '1'";
