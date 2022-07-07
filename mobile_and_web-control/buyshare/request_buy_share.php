@@ -41,25 +41,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
-			if($dataComing["penalty_amt"] > 0){
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-			}else{
-				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			}
+			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$getlastseq_no = $cal_dep->getLastSeqNo($deptaccount_no);
-			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-			$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-			$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+			$deptslip_noFee = null;
+			if($dataComing["penalty_amt"] > 0){
+				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+				$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+			}
+			$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
 			$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
-			$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 			$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+			$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 			$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-			$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+			$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
+			$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
+			$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 			$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 			$getShareData = $cal_shr->getShareInfo($member_no);
 			$conoracle->beginTransaction();

@@ -26,5 +26,6 @@ $avai_shr = $rowMembData["SHARE_BALANCE"] * 0.9;
 $loanpermitArr = [];
 $loanpermitArr[] = $maxloan_amt;
 $loanpermitArr[] = $avai_shr;
+$loanpermitArr[] = $rowMembData["SALARY_AMOUNT"] * 5;
 $maxloan_amt = min($loanpermitArr);
 ?>

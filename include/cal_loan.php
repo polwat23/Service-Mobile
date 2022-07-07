@@ -64,7 +64,7 @@ class CalculateLoan {
 		$arrResponse = json_decode($interestResult);
 		if($arrResponse->RESULT){
 			return [
-				"INT_PERIOD" => $arrResponse->INT_PERIOD,
+				"INT_PERIOD" => $arrResponse->INT_PAYMENT,
 				"INT_RETURN" => $arrResponse->INT_RETURN
 			];
 		}else{

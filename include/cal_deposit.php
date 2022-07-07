@@ -114,7 +114,18 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		
+		$getSumOfDeposit = $this->conora->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) as SUM_AMOUNT FROM dpdeptmaster dm 
+														LEFT JOIN dpdeptstatement ds ON dm.deptaccount_no = ds.deptaccount_no
+														WHERE dm.member_no = :member_no and dm.deptclose_status = '0' 
+														and ds.deptitemtype_code <> 'INT'
+														and TO_CHAR(ds.operate_date,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')");
+		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
+		if($rowSumOfDeposit["SUM_AMOUNT"] + $amt_transfer > '50000'){
+			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
 			$transfer_mode = "1";
@@ -371,7 +382,7 @@ class CalculateDep {
 														WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
 			$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
 			$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
-			if($amountTx["C_SEQ"] > 0){
+			if($amountTx["C_SEQ"] > 99){
 				$arrayResult['RESPONSE_CODE'] = "WS0101";
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;

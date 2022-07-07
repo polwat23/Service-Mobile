@@ -25,13 +25,28 @@ $conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		
+		$getMembGroup = $conoracle->prepare("SELECT MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
+		$getMembGroup->execute([':member_no' => $member_no]);
+		$rowMembGrp = $getMembGroup->fetch(PDO::FETCH_ASSOC);
+		$grpAllow = substr($rowMembGrp["MEMBGROUP_CODE"],0,2);
+		if($grpAllow != "S2" && $grpAllow != "Y2"){
+			$arrayResult['RESPONSE_CODE'] = "WS0075";
+			if(isset($configError["BUY_SHARES_ERR"][0]["0004"][0][$lang_locale])){
+				$arrayResult['RESPONSE_MESSAGE'] = $configError["BUY_SHARES_ERR"][0]["0004"][0][$lang_locale];
+			}else{
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			}
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$getCurrShare = $conoracle->prepare("SELECT SHARESTK_AMT FROM shsharemaster WHERE member_no = :member_no");
 		$getCurrShare->execute([':member_no' => $member_no]);
 		$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
 		$sharereq_value = ($rowCurrShare["SHARESTK_AMT"] * 50) + $dataComing["amt_transfer"];
 		
-		/*$getConstantShare = $conoracle->prepare("SELECT MAXSHARE_HOLD,10 as SHAREROUND_FACTOR FROM SHSHARETYPE WHERE SHARETYPE_CODE = '01'");
+		$getConstantShare = $conoracle->prepare("SELECT MAXSHARE_HOLD,50 as SHAREROUND_FACTOR FROM SHSHARETYPE");
 		$getConstantShare->execute();
 		$rowContShare = $getConstantShare->fetch(PDO::FETCH_ASSOC);
 		if($sharereq_value > $rowContShare["MAXSHARE_HOLD"]){
@@ -44,8 +59,8 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
-		}*/
-		/*if($sharereq_value < $rowContShare["SHAREROUND_FACTOR"]){
+		}
+		if($sharereq_value < $rowContShare["SHAREROUND_FACTOR"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0075";
 			if(isset($configError["BUY_SHARES_ERR"][0]["0003"][0][$lang_locale])){
 				$arrayResult['RESPONSE_MESSAGE'] = str_replace('${SHAREROUND_FACTOR}',number_format($rowContShare["SHAREROUND_FACTOR"],2),$configError["BUY_SHARES_ERR"][0]["0003"][0][$lang_locale]);
@@ -55,7 +70,17 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 			
-		}*/
+		}
+		$getShareStmMonth = $conoracle->prepare("SELECT COUNT(SEQ_NO) as C_SHARE FROM shsharestatement 
+												WHERE member_no = :member_no and shritemtype_code = 'SPX' and TO_CHAR(operate_date,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')");
+		$getShareStmMonth->execute([':member_no' => $member_no]);
+		$rowShareStm = $getShareStmMonth->fetch(PDO::FETCH_ASSOC);
+		if($rowShareStm["C_SHARE"] > 0){
+			$arrayResult['RESPONSE_CODE'] = "WS0102";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
 		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WFS');
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
@@ -68,6 +93,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
 					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 				}
+			
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

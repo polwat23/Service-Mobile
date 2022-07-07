@@ -27,17 +27,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
 			$getMethpay = $conoracle->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
+													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
 													CM.BANK_DESC AS BANK,
 													YM.EXPENSE_AMT AS RECEIVE_AMT ,						
 													YM.EXPENSE_ACCID AS BANK_ACCOUNT,
-													YM.METHPAYTYPE_CODE
+													YM.METHPAYTYPE_CODE,
+													ycf.METHPAYTYPE_DESC
 												FROM 
 													YRDIVMETHPAY YM LEFT JOIN CMUCFMONEYTYPE CUCF ON
 													YM.MONEYTYPE_CODE = CUCF.MONEYTYPE_CODE
 													LEFT JOIN CMUCFBANK CM ON YM.EXPENSE_BANK = CM.BANK_CODE
+													LEFT JOIN yrucfmethpay ycf ON ym.METHPAYTYPE_CODE = ycf.METHPAYTYPE_CODE
 												WHERE
 													YM.MEMBER_NO = :member_no
-													AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP')
+													AND YM.METHPAYTYPE_CODE IN('CBT','CSH','DEP','SAL','CHQ','NXT')
 													AND YM.DIV_YEAR = :div_year");
 			$getMethpay->execute([
 				':member_no' => $member_no,
@@ -53,14 +56,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format'));
 					}
 				}
-				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
+				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["METHPAYTYPE_DESC"];
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
 			}
 			
 			$getPaydiv = $conoracle->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.expense_amt as pay_amt
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
-											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('CBT','CSH','DEP')");
+											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('CBT','CSH','DEP','SAL','CHQ','NXT')");
 			$getPaydiv->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]

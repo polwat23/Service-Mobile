@@ -92,7 +92,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -163,7 +169,7 @@ function GenerateReport($dataReport,$header,$lib){
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="100" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
 				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์การทางพิเศษแห่งประเทศไทย จำกัด</p>
@@ -192,12 +198,6 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
-			</tr>
-			<tr>
-			<td style="width: 50px;font-size: 18px;">ทุนเรือนหุ้น :</td>
-			<td style="width: 350px;">'.$header["sharestk_value"].'</td>
-			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
-			<td style="width: 101px;">'.$header["interest_accum"].'</td>
 			</tr>
 			</tbody>
 			</table>

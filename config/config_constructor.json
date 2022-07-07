@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "EXAT Saving",
 	"COOP_KEY" : "exat-test",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=exat",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=exat",
 	"COOP_KEY_PROD" : "exat",
 	"COOP_ID" : "022001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
