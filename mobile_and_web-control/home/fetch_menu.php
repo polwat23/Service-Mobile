@@ -89,7 +89,7 @@ if(!$anonymous){
 				}
 			}else {
 				$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
-													WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+													WHERE member_no = :member_no and PRINCIPAL_BALANCE > 0 and contract_status > 0 and contract_status <> 8");
 				$fetchMenuLoan->execute([
 					':member_no' => $member_no
 				]);
@@ -274,7 +274,7 @@ if(!$anonymous){
 								}
 							}else {
 								$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
-																	WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+																	WHERE member_no = :member_no and principal_balance > 0 and contract_status > 0 and contract_status <> 8");
 								$fetchMenuLoan->execute([
 									':member_no' => $member_no
 								]);
@@ -354,8 +354,8 @@ if(!$anonymous){
 								$arrMenuLoan["CONTRACT_NO"] = 'close';
 							}
 						}else {
-							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(PRINCIPAL_BALANCE) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
-																WHERE member_no = :member_no and contract_status > 0 and contract_status <> 8");
+							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(principal_balance) as BALANCE,COUNT(loancontract_no) as C_CONTRACT FROM lncontmaster 
+																WHERE member_no = :member_no and principal_balance > 0 and contract_status > 0 and contract_status <> 8");
 							$fetchMenuLoan->execute([
 								':member_no' => $member_no
 							]);
@@ -406,6 +406,11 @@ if(!$anonymous){
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
+				
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '330' || $dataComing["channel"] == 'web'){
+					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+				}
+
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -466,6 +471,11 @@ if(!$anonymous){
 		}
 		if(isset($arrayAllMenu)){
 			$arrayResult['MENU'] = $arrayAllMenu;
+			
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '330' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+			}
+				
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
