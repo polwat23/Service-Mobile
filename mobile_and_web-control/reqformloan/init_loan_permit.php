@@ -173,8 +173,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 						$arrConst["FILEMAPPING_ID"] = $rowConstUploadFile["filemapping_id"];
 						$arrConst["FILE_ID"] = $rowConstUploadFile["file_id"];
 						$arrConst["FILE_NAME"] = $rowConstUploadFile["file_name"];
+						if($rowConstUploadFile["file_id"] =='7'){
+							$arrConst["MAX"] = $rowCollReqgrt["USEMAN_AMT"];
+						}else{
+							$arrConst["MAX"] = $rowConstUploadFile["max"];
+						}
 						$arrConst["LOANGROUP_CODE"] = $rowConstUploadFile["loangroup_code"];
-						$arrConst["MAX"] = $rowConstUploadFile["max"];
 						$arrConst["IS_REQUIRE"] = $rowConstUploadFile["is_require"] == "1";
 						$arrConst["UPDATE_DATE"] = $rowConstUploadFile["update_date"];
 						$arrayUploadFileGroup[] = $arrConst;

@@ -11,7 +11,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrHistory = array();
 			$arrHistory["DOC_NAME"] = $rowHistory["doc_filename"];
 			$arrHistory["DOC_DATE"] = $lib->convertdate($rowHistory["create_date"],"D M Y");
-			$arrHistory["DOC_URL"] = $rowHistory["doc_address"];
+			if ($forceNewSecurity == true) {
+				$path_explode = $rowHistory["doc_address"] ? explode('/resource/', $rowHistory["doc_address"]) : "";
+				$parts = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+				$arrHistory['DOC_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $parts);
+				$arrHistory["DOC_URL_TOKEN"] = $lib->generate_token_access_resource($parts, $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrHistory["DOC_URL"] = $rowHistory["doc_address"];
+			}
+			
 			$arrGroupHis[] = $arrHistory;
 		}
 		$arrayResult['DOC'] = $arrGroupHis;

@@ -5,22 +5,38 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SendReceiveDocuments')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupHis = array();
-		
-		$file_doc = __DIR__.'/../../resource/member_document';	
-		$files = scandir($file_doc);
-		
-		foreach($files as $file_member){
+		$file_doc = glob(__DIR__.'/../../resource/member_document/*/*/'.$member_no.'/*.pdf');
+
+		foreach($file_doc as $file_member){
 			$arrFile = array();
-			$name_file = $file_member;
-			$file_member = substr($file_member,0,8);
-			$name = substr($name_file,8);
-			if($file_member == $member_no){
-				$arrFile["DOC_NAME"] = $name;
-				$arrFile["DOC_URL"] = $config["URL_SERVICE"]."resource/member_document/".$name_file;
-				$arrGroupHis[] = $arrFile;
+			
+			$base_url = str_replace("\\", "/", str_replace(realpath(__DIR__."/../../resource/member_document"), "", realpath($file_member)));
+			$path_explode = explode("/", $base_url);
+			
+			$arrFile["DOC_NAME"] = basename(end($path_explode), ".pdf");
+			$file_path = "/resource/member_document/".$base_url;
+			
+			$file_created_date = date("Y-m-d H:i:s", filectime(realpath($file_member)));
+			$arrFile["file_created_date"] = $file_created_date;
+			$arrFile["DOC_DATE"] = $lib->convertdate($file_created_date,"D M Y");
+			
+			if ($forceNewSecurity == true) {
+				$arrFile['DOC_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $file_path);
+				$arrFile["DOC_URL_TOKEN"] = $lib->generate_token_access_resource($file_path, $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrFile["DOC_URL"] = $config["URL_SERVICE"].$file_path;
 			}
+			$arrGroupHis[] = $arrFile;
 		}
+		
+		//sort by date
+		usort($arrGroupHis, function($a, $b) {
+			return strtotime($b['file_created_date']) - strtotime($a['file_created_date']);
+		});
+		
 		//$lib->sendLineNotify(json_encode($file_doc));
+		
+		/*
 		$getHistory = $conmysql->prepare("SELECT doc_no, doc_filename,create_date,doc_address  FROM gcdocuploadfile WHERE doc_status = '1'");
 		$getHistory->execute([':member_no' => $member_no]);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
@@ -30,6 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrHistory["DOC_URL"] = $rowHistory["doc_address"];
 			$arrGroupHis[] = $arrHistory;
 		}
+		*/
 		$arrayResult['DOC'] = $arrGroupHis;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

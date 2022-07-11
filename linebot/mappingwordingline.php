@@ -2,7 +2,7 @@
 $arrPostData = array();
 $arrPostData['replyToken'] = $reply_token;
 
-if($message == "จัดการบัญชี"){
+if($message == "จัดการบัญชี" || $message == "ผูกบัญชี"){
 	require_once('./service/bindaccount.php');
 }else if($message == "ยกเลิกผูกบัญชี"){
 	require_once('./service/unbindaccount.php');
@@ -40,8 +40,10 @@ if($message == "จัดการบัญชี"){
 	require_once('./service/report/report_problem.php');
 }else if($message == "กิจกรรมสหกรณ์"){
 	require_once('./service/event.php');
-}else if($message == "-แจ้งเตือน"){
-	require_once('./service/line_notkfy.php');
+}else if($message == "แจ้งเตือน"){
+	require_once('./service/notify/line_notify.php');
+}else if($message == " เปิดการแจ้งเตือน" || $message == " ปิดการแจ้งเตือน" ){
+	require_once('./service/notify/update_notify.php');
 }else if($message == "ติดตามใบคำขอกู้" || $message == "ติดตามใบคำขอกู้ออนไลน์" ){
 	require_once('./service/trackreqloan.php');
 }else{

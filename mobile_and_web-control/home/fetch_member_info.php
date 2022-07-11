@@ -84,6 +84,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["DATA_PROTECTION"] = 'ข้อมูลส่วนตัวของท่านได้รับความคุ้มครองตาม พรบ PDPA2562';
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
