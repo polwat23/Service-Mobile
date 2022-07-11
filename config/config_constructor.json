@@ -2,6 +2,7 @@
 	"NAME_APP" : "LPT Saving Connect",
 	"COOP_KEY" : "LPT",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=lpt",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=lpt",
 	"COOP_ID" : "027001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control",
 	"APP_ID" : "gensoft.coop.mobile.lpt",
