@@ -73,7 +73,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
 			if($arrayPDF["RESULT"]){
-				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				if ($forceNewSecurity == true) {
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+					$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+				}
 				$arrayResult['BALANCE_DATE'] = date('Y-m-d',strtotime($rowBalMaster["BALANCE_DATE"]));
 				$arrayResult['IS_CONFIRM'] = FALSE;
 				$arrayResult['DISABLED_CONFIRM'] = FALSE;

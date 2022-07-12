@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$dateRetry = new DateTime(date('d-m-Y',strtotime($rowMemberRetryDate["RETRY_DATE"])));
 			$dateNow = new DateTime(date('d-m-Y'));
 			$date_duration = $dateRetry->diff($dateNow);
-			if($date_duration->days <= 365 && $member_no != "00000218" && $member_no != "00000499"){
+			if($date_duration->days <= 365 && $member_no != "00000218" && $member_no != "00000499" && $member_no != "00000472"){
 				$arrayResult['RESPONSE_MESSAGE'] = $configError["RECEIVE_LOAN_RETRY_BEFORE"][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
