@@ -2,6 +2,7 @@
 	"NAME_APP" : "YST Saving Connect",
 	"COOP_KEY" : "yst",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=yst",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=yst",
 	"COOP_ID" : "070001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/",
 	"APP_ID" : "com.ystcoop.mobile",
