@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$interestPeriod = 0;
 		$withdrawStatus = FALSE;
 		$intarrear = $dataCont["INTEREST_ARREAR"];
-		$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+		$interest = $cal_loan->calculateIntAPI($dataComing["contract_no"],$dataComing["amt_transfer"]);
 		$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
@@ -96,7 +96,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					if($payslipdet["RESULT"]){
 						$repayloan = $cal_loan->repayLoan($conoracle,$dataComing["contract_no"],$dataComing["amt_transfer"],$dataComing["penalty_amt"],
 						$config,$payinslipdoc_no,$dateOperC,
-						$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$dataComing["app_version"],$interestFull,$int_returnSrc);
+						$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$dataComing["app_version"],$interestFull,$int_returnSrc,
+						$interest["INT_PERIOD"]);
 						if($repayloan["RESULT"]){
 							$conoracle->commit();
 							$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)

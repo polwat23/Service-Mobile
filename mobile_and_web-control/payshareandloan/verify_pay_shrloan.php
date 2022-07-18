@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','list_payment'],
 								$fetchShare = $conoracle->prepare("SELECT sharestk_amt,periodshare_amt FROM shsharemaster WHERE member_no = :member_no");
 								$fetchShare->execute([':member_no' => $member_no]);
 								$rowShare = $fetchShare->fetch(PDO::FETCH_ASSOC);
-								if($rowLastBuy["AMOUNT_PAID"] + $listPayment["amount"] > $rowShare["PERIODSHARE_AMT"] * 50){
+								if($rowLastBuy["AMOUNT_PAID"] + $listPayment["amt_transfer"] > $rowShare["PERIODSHARE_AMT"] * 50){
 									$arrayResult['RESPONSE_CODE'] = "BUY_SHARE_OVER_LIMIT";
 									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 									$arrayResult['RESULT'] = FALSE;
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','list_payment'],
 																	WHERE loancontract_no = :loancontract_no");
 							$fetchLoanRepay->execute([':loancontract_no' => $listPayment["destination"]]);
 							$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-							$interest = $cal_loan->calculateIntAPI($listPayment["destination"],$listPayment["amount"]);
+							$interest = $cal_loan->calculateIntAPI($listPayment["destination"],$listPayment["amt_transfer"]);
 							if($interest["INT_PERIOD"] > 0){
 								if($listPayment["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PERIOD"]){
 									$arrayResult['RESPONSE_CODE'] = "WS0098";
@@ -72,6 +72,21 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','list_payment'],
 									$arrayResult['RESULT'] = FALSE;
 									require_once('../../include/exit_footer.php');
 								}
+							}
+							if($interest["INT_PERIOD"] > 0){
+								$prinPay = 0;
+								if($dataComing["amt_transfer"] < $interest["INT_PERIOD"]){
+									$interest["INT_PERIOD"] = $listPayment["amt_transfer"];
+								}else{
+									$prinPay = $listPayment["amt_transfer"] - $interest["INT_PERIOD"];
+								}
+								if($prinPay < 0){
+									$prinPay = 0;
+								}
+								$listPayment["payment_int"] = $interest["INT_PERIOD"];
+								$listPayment["payment_prin"] = $prinPay;
+							}else{
+								$listPayment["payment_prin"] = $listPayment["amt_transfer"];
 							}
 							$listPayment["fee_amt"] = 0;
 							$sum_fee_amt += $listPayment["fee_amt"];
