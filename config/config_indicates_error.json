@@ -210,6 +210,7 @@
 		"ALLOW_TRANS_INSIDE_FLAG_ON" : [{"th" : "สำหรับทำธุรกรรมภายในเท่านั้น","en" : "Only transaction inside"}],
 		"ALLOW_TRANS_ALL_MENU" : [{"th" : "สามารถทำธุรกรรมได้ทั้งภายในและธนาคาร","en" : "Can transaction inside and transaction with bank"}],
 		"CAUTION_LOANREQUEST" : [{"th" : "ไม่สามารถขอกู้ได้ เนื่องจากหนี้เดิมของท่านมีมากกว่าสิทธิ์กู้ของท่าน ท่านต้องการทำรายการต่อไป ?","en" : "Cannot request loan because old debt is more than your loan rights. Do you want to continue ?"}],
+		"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
 		"BUTTON_TEXT" : [{
 			"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
 			"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]

@@ -75,7 +75,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	require_once('../../include/exit_footer.php');	
 }
 ?>

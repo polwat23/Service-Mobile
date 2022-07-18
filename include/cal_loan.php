@@ -195,12 +195,12 @@ class CalculateLoan {
 		return $constLoanContractCont;
 	}
 	public function repayLoan($conoracle,$contract_no,$amt_transfer,$penalty_amt,$config,$slipdocno,$operate_date,
-	$tofrom_accid,$slipwtd,$log,$lib,$payload,$from_account_no,$lnslip_no,$member_no,$ref_no,$app_version,$interest=0,$intReturn=0){
+	$tofrom_accid,$slipwtd,$log,$lib,$payload,$from_account_no,$lnslip_no,$member_no,$ref_no,$app_version,$interest=0,$intReturn=0,$intFull=0){
 		$dataCont = $this->getContstantLoanContract($contract_no);
 		$interest = $interest;
 		$intArr = 0;
 		$prinPay = 0;
-		if($amt_transfer < $interest){
+		if($amt_transfer <= $interest){
 			$interest = $amt_transfer;
 		}else{
 			$prinPay = $amt_transfer - $interest;
@@ -209,6 +209,9 @@ class CalculateLoan {
 			$prinPay = 0;
 		}
 		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		if(($intFull - $interestPeriod) > 0){
+			$intArr = $intFull - $interestPeriod;
+		}
 		if($interestPeriod < 0){
 			$intArr = $dataCont["INTEREST_ARREAR"] - $interest;
 			$interestPeriod = 0;
@@ -620,7 +623,7 @@ class CalculateLoan {
 				':status_flag' => '0',
 				':destination' => $payinslip_no,
 				':response_code' => "WS0066",
-				':response_message' => 'INSERT slslippayindet ไม่ได้'.$insertSLSlipDet->queryString."\n".json_encode($executeSlDet)
+				':response_message' => 'INSERT slslippayindet ไม่ได้'.$insertSLSlipDet->queryString."\n".json_encode($conoracle->errorInfo())
 			];
 			$log->writeLog('repayloan',$arrayStruc);
 			$arrayResult["RESPONSE_CODE"] = 'WS0066';

@@ -93,14 +93,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													and TRUNC(to_char(slip_date,'YYYYMM')) = TRUNC(to_char(SYSDATE,'YYYYMM'))");
 				$getLastBuy->execute([':member_no' => $member_no]);
 				$rowLastBuy = $getLastBuy->fetch(PDO::FETCH_ASSOC);
-				$fetchShare = $conoracle->prepare("SELECT sharestk_amt,periodshare_amt FROM shsharemaster WHERE member_no = :member_no");
+				$fetchShare = $conoracle->prepare("SELECT sharestk_amt,periodshare_amt FROM shsharemaster WHERE member_no = :member_no and payment_status = '1' ");
 				$fetchShare->execute([':member_no' => $member_no]);
 				$rowShare = $fetchShare->fetch(PDO::FETCH_ASSOC);
-				if($rowLastBuy["AMOUNT_PAID"] < $rowShare["PERIODSHARE_AMT"] * 50){
-					$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*50,2);
-					$arrayShare["MEMBER_NO"] = $member_no;
-					$arrayShare["MUST_BUYSHARE"] = number_format(($rowShare["PERIODSHARE_AMT"]*50) - $rowLastBuy["AMOUNT_PAID"],2);
-					$arrayShare["LIMIT_BUYSHARE"] = number_format(($rowShare["PERIODSHARE_AMT"]*50) - $rowLastBuy["AMOUNT_PAID"],2);
+				if(isset($rowShare["SHARESTK_AMT"])){
+					if($rowLastBuy["AMOUNT_PAID"] < $rowShare["PERIODSHARE_AMT"] * 50){
+						$arrayShare["SHARE_AMT"] = number_format($rowShare["SHARESTK_AMT"]*50,2);
+						$arrayShare["MEMBER_NO"] = $member_no;
+						$arrayShare["MUST_BUYSHARE"] = number_format(($rowShare["PERIODSHARE_AMT"]*50) - $rowLastBuy["AMOUNT_PAID"],2);
+						$arrayShare["LIMIT_BUYSHARE"] = number_format(($rowShare["PERIODSHARE_AMT"]*50) - $rowLastBuy["AMOUNT_PAID"],2);
+					}
 				}
 			}
 			$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,gba.bank_code,

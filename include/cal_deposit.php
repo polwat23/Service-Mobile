@@ -384,9 +384,26 @@ class CalculateDep {
 			$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
 			if($amountTx["C_SEQ"] > 99){
 				$arrayResult['RESPONSE_CODE'] = "WS0101";
+				
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
 			}
+			if($amt_transfer < 100 ){
+				$arrayResult['RESPONSE_CODE'] = "WS0056";
+				$arrayResult['MINWITD_AMT'] = 100;
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+		}
+		if($dataConst["DEPTTYPE_CODE"] == '02' || $dataConst["DEPTTYPE_CODE"] == '07'){
+			
+			if($amt_transfer < 1000 ){
+				$arrayResult['RESPONSE_CODE'] = "WS0056";
+				$arrayResult['MINWITD_AMT'] = 1000;
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+		
 		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
@@ -1138,7 +1155,7 @@ class CalculateDep {
 		}
 	}
 	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc){
+	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null){
 		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
@@ -1220,7 +1237,7 @@ class CalculateDep {
 			if($insertStatement->execute($arrExecuteStm)){
 				if($penalty_amt > 0){
 					$rowMapAccFee = $this->getVcMapID('00');
-					$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+					$deptslip_noPenalty = $penaltyslip;
 					$lastStmSrcNo += 1;
 					$arrExecutePenalty = [
 						':deptslip_no' => $deptslip_noPenalty,
@@ -1319,9 +1336,8 @@ class CalculateDep {
 		}
 	}
 	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null){
-		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
-		$deptslip_noPenalty = $lib->mb_str_pad($deptslip_no + 1,$arrSlipno["QUERY"]["DOCUMENT_LENGTH"],'0');
+	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null,$deptfeeslip_no){
+		$deptslip_noPenalty = $deptfeeslip_no;
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		$arrExecutePenalty = [
@@ -1388,19 +1404,19 @@ class CalculateDep {
 					return $arrayResult;
 				}else{
 					$arrayResult["RESPONSE_CODE"] = 'WS0037';
-					$arrayResult['ACTION'] = 'UPDATE DPDEPTMASTER ไม่ได้'.$updateDeptMaster->queryString."\n".json_encode($arrUpdateMaster);
+					$arrayResult['ACTION'] = 'UPDATE DPDEPTMASTER ไม่ได้'."\n".json_encode($conoracle->errorInfo());
 					$arrayResult['RESULT'] = FALSE;
 					return $arrayResult;
 				}
 			}else{
 				$arrayResult["RESPONSE_CODE"] = 'WS0037';
-				$arrayResult['ACTION'] = 'Insert DPDEPTSTATEMENT ค่าปรับ ไม่ได้'.$insertStatementPenalty->queryString."\n".json_encode($arrExecuteStmPenalty);
+				$arrayResult['ACTION'] = 'Insert DPDEPTSTATEMENT ค่าปรับ ไม่ได้'."\n".json_encode($conoracle->errorInfo());
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
 			}
 		}else{
 			$arrayResult["RESPONSE_CODE"] = 'WS0037';
-			$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecutePenalty);
+			$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'."\n".json_encode($conoracle->errorInfo());
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}

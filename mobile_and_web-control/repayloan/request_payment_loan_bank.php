@@ -47,24 +47,21 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
 		}
-		$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+		$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
-		if($dataComing["fee_amt"] > 0){
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
-		}else{
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		}
-		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
+		$getlastseq_no = $cal_dep->getLastSeqNo($from_account_no);
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-		$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-		$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+		$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+		$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 		$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 		$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 		$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+		$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 		$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-		$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
+		$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
 		$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 		$getBalanceAccFee = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 		$getBalanceAccFee->execute([':deptaccount_no' => $rowBankDisplay["account_payfee"]]);
@@ -83,26 +80,34 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 			require_once('../../include/exit_footer.php');
 
 		}
-		$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FEE',
-		$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,0);
-		if($penaltyWtd["RESULT"]){
-		}else{
-			$conoracle->rollback();
-			$conmysql->rollback();
-			$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
-			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-			$arrayStruc = [
-				':member_no' => $payload["member_no"],
-				':id_userlogin' => $payload["id_userlogin"],
-				':operate_date' => $dateOper,
-				':sigma_key' => $dataComing["sigma_key"],
-				':amt_transfer' => $amt_transfer,
-				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
-			];
-			$log->writeLog('deposittrans',$arrayStruc);
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
+		if($rowBankDisplay["fee_deposit"] > 0){
+			$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+			$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+
+			$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FEE',
+			$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,0,$deptslip_noFee);
+			if($penaltyWtd["RESULT"]){
+			}else{
+				$conoracle->rollback();
+				$conmysql->rollback();
+				$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
+					':sigma_key' => $dataComing["sigma_key"],
+					':amt_transfer' => $amt_transfer,
+					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
+				];
+				$log->writeLog('deposittrans',$arrayStruc);
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
 		}
 		$payslip = $cal_loan->paySlip($conoracle,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
 		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);

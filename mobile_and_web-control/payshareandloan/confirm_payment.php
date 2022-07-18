@@ -368,7 +368,8 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
                                 $ref_no,
                                 $dataComing["app_version"],
                                 $interestFull,
-                                $int_returnSrc
+                                $int_returnSrc,
+								$interest["INT_PERIOD"]
                             );
                             if (!$repayloan["RESULT"]) {
                                 $conoracle->rollback();
