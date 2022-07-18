@@ -450,15 +450,27 @@ class CalculateLoan {
 			}
 			if($insertSTMLoan->execute($executeLnSTM)){
 				$LoanDebt = $dataCont["PRINCIPAL_BALANCE"] - $prinPay;
-				if((($LoanDebt / 12) % 10) == 0){
-					$periodPay = ($LoanDebt / 12);
+				if($dataCont["LOANTYPE_CODE"] == '18'){
+					if((($LoanDebt / 150) % 10) == 0){
+						$periodPay = ($LoanDebt / 150);
+					}else{
+						$periodPay = ($LoanDebt / 150) + (10 - (($LoanDebt / 150) % 10));
+					}
+					if($periodPay < 100){
+						$periodPay = 100;
+					}
+					$periodPay = floor($periodPay);
 				}else{
-					$periodPay = ($LoanDebt / 12) + (10 - (($LoanDebt / 12) % 10));
+					if((($LoanDebt / 12) % 10) == 0){
+						$periodPay = ($LoanDebt / 12);
+					}else{
+						$periodPay = ($LoanDebt / 12) + (10 - (($LoanDebt / 12) % 10));
+					}
+					$periodPay = floor($periodPay);
 				}
-				$periodPay = floor($periodPay);
 				if($interestPeriod > 0){
 					if($dataCont["RKEEP_PRINCIPAL"] == 0 && $dataCont["PRINCIPAL_BALANCE"] - $prinPay == 0){
-						if($dataCont["LOANTYPE_CODE"] == '13'){
+						if($dataCont["LOANTYPE_CODE"] == '13' || $dataCont["LOANTYPE_CODE"] == '18'){
 							$executeLnMaster = [
 								$dataCont["PRINCIPAL_BALANCE"] - $prinPay,$lastperiod,$intArr,$interest_accum + $interest["INT_PAYMENT"],
 								$int_returnSrc,$prinPay,$interest["INT_PAYMENT"],$dataCont["LAST_STM_NO"] + 1,$dataCont["WITHDRAWABLE_AMT"] + $prinPay,$contract_no
@@ -486,7 +498,7 @@ class CalculateLoan {
 																		WHERE loancontract_no = ?");
 						}
 					}else{
-						if($dataCont["LOANTYPE_CODE"] == '13'){
+						if($dataCont["LOANTYPE_CODE"] == '13' || $dataCont["LOANTYPE_CODE"] == '18'){
 							$executeLnMaster = [
 								$dataCont["PRINCIPAL_BALANCE"] - $prinPay,$lastperiod,$intArr,$interest_accum + $interest["INT_PAYMENT"],
 								$int_returnSrc,$prinPay,$interest["INT_PAYMENT"],$dataCont["LAST_STM_NO"] + 1,$dataCont["WITHDRAWABLE_AMT"] + $prinPay,$periodPay,$contract_no
@@ -515,7 +527,7 @@ class CalculateLoan {
 					}
 				}else{
 					if($dataCont["RKEEP_PRINCIPAL"] == 0 && $dataCont["PRINCIPAL_BALANCE"] - $prinPay == 0){
-						if($dataCont["LOANTYPE_CODE"] == '13'){
+						if($dataCont["LOANTYPE_CODE"] == '13' || $dataCont["LOANTYPE_CODE"] == '18'){
 							$executeLnMaster = [
 								$dataCont["PRINCIPAL_BALANCE"] - $prinPay,$lastperiod,$intArr,$interest_accum + $interest["INT_PAYMENT"],
 								$int_returnSrc,$prinPay,$interest["INT_PAYMENT"],$dataCont["LAST_STM_NO"] + 1,$dataCont["WITHDRAWABLE_AMT"] + $prinPay,$periodPay,$contract_no
@@ -543,7 +555,7 @@ class CalculateLoan {
 																		WHERE loancontract_no = ?");
 						}
 					}else{
-						if($dataCont["LOANTYPE_CODE"] == '13'){
+						if($dataCont["LOANTYPE_CODE"] == '13' || $dataCont["LOANTYPE_CODE"] == '18'){
 							$executeLnMaster = [
 								$dataCont["PRINCIPAL_BALANCE"] - $prinPay,$lastperiod,$intArr,$interest_accum + $interest["INT_PAYMENT"],
 								$int_returnSrc,$prinPay,$interest["INT_PAYMENT"],$dataCont["LAST_STM_NO"] + 1,$dataCont["WITHDRAWABLE_AMT"] + $prinPay,$periodPay,$contract_no
@@ -965,10 +977,23 @@ class CalculateLoan {
 		}
 		if($insertSTMLoan->execute($executeLnSTM)){
 			$LoanDebt = $dataCont["PRINCIPAL_BALANCE"] + $prinPay;
-			if((($LoanDebt / 12) % 10) == 0){
-				$periodPayment = ($LoanDebt / 12);
+			if($dataCont["LOANTYPE_CODE"] == '18'){
+				if((($LoanDebt / 150) % 10) == 0){
+					$periodPay = ($LoanDebt / 150);
+				}else{
+					$periodPay = ($LoanDebt / 150) + (10 - (($LoanDebt / 150) % 10));
+				}
+				if($periodPay < 100){
+					$periodPay = 100;
+				}
+				$periodPay = floor($periodPay);
 			}else{
-				$periodPayment = ($LoanDebt / 12) + (10 - (($LoanDebt / 12) % 10));
+				if((($LoanDebt / 12) % 10) == 0){
+					$periodPayment = ($LoanDebt / 12);
+				}else{
+					$periodPayment = ($LoanDebt / 12) + (10 - (($LoanDebt / 12) % 10));
+				}
+				$periodPay = floor($periodPay);
 			}
 			$executeLnMaster = [
 				$dataCont["WITHDRAWABLE_AMT"] - $prinPay,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,$lastperiod,

@@ -2,6 +2,7 @@
 	"NAME_APP" : "MJU Saving",
 	"COOP_KEY" : "mju-test",	
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=mju",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=mju",
 	"COOP_KEY_PROD" : "mju",
 	"COOP_ID" : "061001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
