@@ -17,6 +17,7 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 		$arrayDetailNews["FILE_UPLOAD"] = $rowDetailNews["file_upload"];
 		$arrayDetailNews["CREATE_BY"] = $rowDetailNews["create_by"];
 		$arrayDetailNews["UPDATE_DATE"] = $lib->convertdate($rowDetailNews["update_date"],'D m Y',true);
+		$arrayDetailNews["ALLOW_TARGET"] = TRUE;
 		$path_img = array();
 		if(isset($rowDetailNews["img_gallery_1"])){
 			$path_img[] = $rowDetailNews["img_gallery_1"];
