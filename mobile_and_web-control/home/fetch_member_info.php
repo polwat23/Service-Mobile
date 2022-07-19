@@ -139,7 +139,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["FULL_ADDRESS_CURR"] = $addressCurr;
 			$arrayResult["MEMBER_NO"] = $member_no;
 			$arrayResult["RECEIVE_DIV"] = $rowRecvAcc["DIVPAYTYPE_CODE"] == 'TRN' ? 'บัญชีสหกรณ์ : '.$lib->formataccount($rowRecvAcc["BANK_ACCID"],$func->getConstant('dep_format'))
-			: $rowRecvAcc["DIVPAYTYPE_DESC"].' '.$rowRecvAcc["BANK_DESC"].' '.$rowRecvAcc["BRANCH_NAME"].' '.$rowRecvAcc["BANK_ACCID"];
+			: $rowRecvAcc["DIVPAYTYPE_DESC"].' '.$rowRecvAcc["BANK_DESC"].' '.$rowRecvAcc["BANK_ACCID"];
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
