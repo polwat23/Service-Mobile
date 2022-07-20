@@ -493,7 +493,7 @@ class CalculateLoan {
 																		PRINCIPAL_BALANCE = :prin_bal,LAST_PERIODPAY = :lastperiod_pay,
 																		LASTPAYMENT_DATE = TRUNC(SYSDATE),
 																		INTEREST_ARREAR = :int_arr,INTEREST_ACCUM = :int_accum,
-																		INTEREST_RETURN = :int_return,,
+																		INTEREST_RETURN = :int_return,
 																		LAST_STM_NO = :laststmno
 																		WHERE loancontract_no = :loancontract_no");
 						}
