@@ -380,7 +380,11 @@ class CalculateLoan {
 		$int_returnFull = 0;
 		$interest = $this->calculateIntAPI($contract_no,$amt_transfer);
 		$interestFull = $interest["INT_PAYMENT"];
-		$interestPeriod = $interest["INT_PERIOD"];
+		if($interest["INT_PERIOD"] > 0){
+			$interestPeriod = $interest["INT_PERIOD"];
+		}else{
+			$interestPeriod = $interest["INT_PAYMENT"];
+		}
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
