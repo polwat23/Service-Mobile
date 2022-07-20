@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "SPS Saving",
 	"COOP_KEY" : "sps-test",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=sps",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=sps",
 	"COOP_ID" : "073001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.sps.mobile",
