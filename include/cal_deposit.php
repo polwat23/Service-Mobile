@@ -1230,7 +1230,7 @@ class CalculateDep {
 		}
 	}
 	public function insertFeeTransaction($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$deptslip_noPenalty,$oneway_fee=false){
+	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$oneway_fee=false,$deptslip_noPenalty){
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
 		if($oneway_fee){
