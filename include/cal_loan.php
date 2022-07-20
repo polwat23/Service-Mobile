@@ -634,12 +634,12 @@ class CalculateLoan {
 		];
 		$insertPayinSlip = $conoracle->prepare("INSERT INTO slslippayin(COOP_ID,PAYINSLIP_NO,MEMCOOP_ID,MEMBER_NO,DOCUMENT_NO,SLIPTYPE_CODE,
 												SLIP_DATE,OPERATE_DATE,SHARESTKBF_VALUE,SHARESTK_VALUE,INTACCUM_AMT,REF_SYSTEM,REF_SLIPNO,SLIP_AMT,
-												MEMBGROUP_CODE,ENTRY_ID,ENTRY_DATE)
+												MEMBGROUP_CODE,ENTRY_ID,ENTRY_DATE,SLIP_STATUS,entry_bycoopid)
 												VALUES(:coop_id,:payinslip_no,:coop_id,:member_no,:document_no,:sliptype_code,
 												TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
 												TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
 												:sharevalue,:sharevalue,:intaccum_amt,'DEP',:slipdep,:slip_amt,:membgroup_code,
-												'MOBILE',SYSDATE)");
+												'MOBILE',SYSDATE,'1',:coop_id)");
 		if($insertPayinSlip->execute($arrExecuteSlSlip)){
 			$arrayResult['RESULT'] = TRUE;
 			return $arrayResult;
