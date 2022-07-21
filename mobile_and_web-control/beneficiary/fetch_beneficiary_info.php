@@ -46,7 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						}
 						$arrResponse = json_decode($responseAPI);
 						if($arrResponse->RESULT){
-							$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg?vd='.$rowBenefit["UPDATE_DATE"];
+							$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg?vd='.$rowBenefit["UPDATE_DATE"];
 						}else{
 							unlink($pathnameTmp);
 							$message_error = "ไม่สามารถ CONVERT ผู้รับผลได้ เพราะ ".json_encode($arrResponse->RESPONSE_MESSAGE);
@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						http_response_code(204);
 					}
 				}else{
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
+					$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg';
 				}
 			}else{
 				file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
@@ -88,7 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
-						$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$member_no.'.jpg';
+						$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg';
 					}else{
 						unlink($pathname);
 						$message_error = "ไม่สามารถ CONVERT ผู้รับผลได้ เพราะ ".json_encode($arrResponse->RESPONSE_MESSAGE);
@@ -121,12 +121,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
 						unlink($pathnameTmp);
-						$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
+						$DataURLBase64 = '/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
 					}else{
 						unlink($pathnameTmp);
 					}
 				}else{
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
+					$DataURLBase64 = '/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
 				}
 			}else{
 				file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
@@ -141,7 +141,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					unlink($pathnameTmp);
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
+					$DataURLBase64 = '/resource/beneficiary/'.$filename.'?v='.$rowBenefit["UPDATE_DATE"];
 				}else{
 					unlink($pathnameTmp);
 				}
@@ -149,7 +149,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		if(isset($DataURLBase64) && $DataURLBase64 != ''){
 			$arrayResult['DATA_TYPE'] = $rowBenefit["DATA_TYPE"] ?? 'pdf';
-			$arrayResult['BENEFICIARY'] = $DataURLBase64;
+			$arrayResult["BENEFICIARY"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256",$DataURLBase64);
+			$arrayResult["FILE_TOKEN"] = $lib->generate_token_access_resource($DataURLBase64, $jwt_token, $config["SECRET_KEY_JWT"]);
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

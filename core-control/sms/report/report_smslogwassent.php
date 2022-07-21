@@ -30,7 +30,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											".(isset($dataComing["send_by"]) && $dataComing["send_by"] != '' ? "and send_by = :send_by" : null)."
 											".(isset($dataComing["is_sendahead"]) && $dataComing["is_sendahead"] != '' ? "and is_sendahead = :is_sendahead" : null)."
 											".(isset($dataComing["start_date"]) && $dataComing["start_date"] != '' ? "and TO_CHAR(send_date,'YYYY-MM-DD') >= :start_date" : null)."
-											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and TO_CHAR(send_date,'YYYY-MM-DD') <= :end_date" : null)." ORDER BY send_date DESC");
+											".(isset($dataComing["end_date"]) && $dataComing["end_date"] != '' ? "and TO_CHAR(send_date,'YYYY-MM-DD') <= :end_date" : null)." ORDER BY id_logsent ASC");
 		$fetchReport->execute($arrayExecute);
 		while($rowReport = $fetchReport->fetch(PDO::FETCH_ASSOC)){
 			$arrayReport = array();

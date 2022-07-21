@@ -14,10 +14,11 @@ if($lib->checkCompleteArgument(['unique_id','rootmenu'],$dataComing)){
 		$arrGroupRootMenu["ROOT_MENU_NAME"] = $rowGrpMenu["MENU_NAME"];
 		$arrGroupRootMenu["ROOT_PATH"] = $rowGrpMenu["PAGE_NAME"];
 		$getSubMenu = $conoracle->prepare("SELECT ams.WIN_DESCRIPTION as MENU_NAME,ams.WIN_OBJECT as PAGE_NAME
-										FROM amsecwins ams
-										WHERE ams.application = 'user' and ams.used_flag = '1' and ams.GROUP_CODE = :grp_code ORDER BY ams.WIN_ORDER ASC");
+										FROM amsecwins ams LEFT JOIN  amsecpermiss amp ON ams.application = amp.application AND ams.window_id = amp.window_id
+										WHERE ams.application = 'user' and amp.check_flag = '1' AND user_name =: user_name and ams.GROUP_CODE = :grp_code ORDER BY ams.WIN_ORDER ASC");
 		$getSubMenu->execute([
-			':grp_code' => $rowGrpMenu["GROUP_CODE"]
+			':grp_code' => $rowGrpMenu["GROUP_CODE"],
+			':user_name' => $payload["username"]
 		]);
 		while($rowSubMenu = $getSubMenu->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroupSubMenu = array();

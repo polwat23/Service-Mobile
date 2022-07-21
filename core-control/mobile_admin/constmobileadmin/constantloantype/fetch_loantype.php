@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan',$conoracle)){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,LOANTYPE_ALIAS_NAME FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,LOANTYPE_ALIAS_NAME,IS_PAYMENT FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;
@@ -19,12 +19,14 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayLoantype["IS_CREDITLOAN"] = "0";
 				$arrayLoantype["IS_LOANREQUEST"] = "0";
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = "0";
-			$arrayLoantype["LOANTYPE_ALIAS_NAME"] = null;
+				$arrayLoantype["IS_PAYMENT"] = "0";
+				$arrayLoantype["LOANTYPE_ALIAS_NAME"] = null;
 			}else{
 				$arrayLoantype["IS_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_CREDITLOAN"];
 				$arrayLoantype["IS_LOANREQUEST"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_LOANREQUEST"];
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_ESTIMATE_CREDITLOAN"];
-			$arrayLoantype["LOANTYPE_ALIAS_NAME"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["LOANTYPE_ALIAS_NAME"];
+				$arrayLoantype["IS_PAYMENT"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_PAYMENT"];
+				$arrayLoantype["LOANTYPE_ALIAS_NAME"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["LOANTYPE_ALIAS_NAME"];
 			}
 			$arrayLoantype["LOANTYPE_CODE"] = $rowLoantype["LOANTYPE_CODE"];
 			$arrayLoantype["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_DESC"];

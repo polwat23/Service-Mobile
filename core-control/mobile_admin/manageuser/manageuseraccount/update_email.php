@@ -4,8 +4,8 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','member_no','new_email'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','manageuseraccount',$conoracle)){
 		$update_email = $conoracle->prepare("UPDATE gcmemberaccount 
-																SET email = :new_email
-																WHERE  member_no = :member_no;");
+											   SET email = :new_email
+											   WHERE  member_no = :member_no");
 		if($update_email->execute([
 			':new_email' => $dataComing["new_email"],
 			':member_no' => $dataComing["member_no"] 
@@ -23,7 +23,6 @@ if($lib->checkCompleteArgument(['unique_id','member_no','new_email'],$dataComing
 			$arrayResult['RESPONSE'] = "ไม่สามารถทำรายการได้ กรุณาติดต่อผู้พัฒนา";
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
-			
 		}
 		require_once('../../../../include/exit_footer.php');	
 	}else{

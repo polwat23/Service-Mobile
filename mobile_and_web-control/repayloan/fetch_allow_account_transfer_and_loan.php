@@ -64,15 +64,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrLoan["LOAN_TYPE_IMG"] = null;
 				}
-				$getLoanConstant = $conoracle->prepare("SELECT loantype_alias_name FROM gcconstanttypeloan WHERE loantype_code = :loantype_code");
+				$getLoanConstant = $conoracle->prepare("SELECT loantype_alias_name,loantype_code FROM gcconstanttypeloan WHERE loantype_code = :loantype_code and is_payment = '1'");
 				$getLoanConstant->execute([':loantype_code' => $rowLoan["LOANTYPE_CODE"]]);
 				$rowLoanCont = $getLoanConstant->fetch(PDO::FETCH_ASSOC);
-				$arrLoan["LOAN_TYPE"] = $rowLoanCont["LOANTYPE_ALIAS_NAME"] ?? $rowLoan["LOANTYPE_DESC"];
-				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
-				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
-				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
-				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
-				$arrLoanGrp[] = $arrLoan;
+				if(isset($rowLoanCont["LOANTYPE_CODE"]) && $rowLoanCont["LOANTYPE_CODE"] != ""){
+					$arrLoan["LOAN_TYPE"] = $rowLoanCont["LOANTYPE_ALIAS_NAME"] ?? $rowLoan["LOANTYPE_DESC"];
+					$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
+					$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
+					$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
+					$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
+					$arrLoanGrp[] = $arrLoan;
+				}
 			}
 			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccFav) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;

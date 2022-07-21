@@ -189,7 +189,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 			])){
 				$last_id = $conoracle->lastInsertId();
-				
 				// start เพิ่มไฟล์เเนบ
 				if(isset($dataComing["file_upload"]) && $dataComing["file_upload"] != null){
 					$destination = __DIR__.'/../../../../resource/news';
@@ -224,7 +223,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							require_once('../../../../include/exit_footer.php');
 							
 						}
-			
 						$conoracle->rollback();
 						$arrayResult['DATA'] = [
 							':id_news' =>  $last_id,
@@ -238,23 +236,18 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถอัพโหลดไฟล์แนบได้ กรุณาติดต่อผู้พัฒนา";
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
-						
 					}
 				}else{
 					$conoracle->commit();
 					$arrayResult["RESULT"] = TRUE;
 					require_once('../../../../include/exit_footer.php');
-					
 				}
 				//end เพิ่มไฟล์เเนบ
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถเพิ่มข่าวสารได้ กรุณาติดต่อผู้พัฒนา ";
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../../../include/exit_footer.php');
-				
 			}
-			
-	
 	}else{
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);

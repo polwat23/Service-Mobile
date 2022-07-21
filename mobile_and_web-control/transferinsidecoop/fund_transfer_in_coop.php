@@ -13,14 +13,17 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			}else{
 				$recv_amt = $dataComing["amt_transfer"];
 			}
-			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
+			
 			$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
 			$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
+			$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
+			$constToAcc = $cal_dep->getConstantAcc($to_account_no);
+			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 			$dateOperC = date('c');
 			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 			$ref_no = time().$lib->randomText('all',3);
 			$arrayGroup = array();
-			$arrayGroup["account_id"] = $func->getConstant("operative_account");
+			$arrayGroup["account_id"] = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
 			$arrayGroup["action_status"] = "1";
 			$arrayGroup["atm_no"] = "mobile";
 			$arrayGroup["atm_seqno"] = null;
@@ -33,8 +36,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["deptaccount_no"] = $from_account_no;
 			$arrayGroup["depttype_code"] = null;
 			$arrayGroup["dest_deptaccount_no"] = $to_account_no;
-			$arrayGroup["dest_slipitemtype_code"] = "DTX";
-			$arrayGroup["dest_stmitemtype_code"] = "DTX";
+			$arrayGroup["dest_slipitemtype_code"] = "DIM";
+			$arrayGroup["dest_stmitemtype_code"] = "DIM";
 			$arrayGroup["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 			$arrayGroup["fee_amt"] = $dataComing["fee_amt"];
 			$arrayGroup["feeinclude_status"] = $penalty_include;
@@ -49,8 +52,8 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["principal_amt"] = null;
 			$arrayGroup["ref_app"] = "mobile";
 			$arrayGroup["ref_slipno"] = null;
-			$arrayGroup["slipitemtype_code"] = "WTX";
-			$arrayGroup["stmtitemtype_code"] = "WTX";
+			$arrayGroup["slipitemtype_code"] = "WIM";
+			$arrayGroup["stmtitemtype_code"] = "WIM";
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			try {
@@ -64,15 +67,18 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 					$fetchSeqno = $conoracle->prepare("SELECT SEQ_NO FROM dpdeptstatement WHERE deptslip_no = :deptslip_no");
 					$fetchSeqno->execute([':deptslip_no' => $responseSoap->ref_slipno]);
 					$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-					$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
-					$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo ,memo_text,deptaccount_no,seq_no)
-														VALUES(:id_memo,:remark,:deptaccount_no,:seq_no)");
-					$insertRemark->execute([
-						':id_memo' => $id_memo,
-						':remark' => $dataComing["remark"],
-						':deptaccount_no' => $from_account_no,
-						':seq_no' => $rowSeqno["SEQ_NO"]
-					]);
+					if(isset($dataComing["remark"])){
+						$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+						$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo ,memo_text,deptaccount_no,seq_no)
+															VALUES(:id_memo,:remark,:deptaccount_no,:seq_no)");
+						$insertRemark->execute([
+							':id_memo' => $id_memo,
+							':remark' => $dataComing["remark"],
+							':deptaccount_no' => $from_account_no,
+							':seq_no' => $rowSeqno["SEQ_NO"]
+						]);
+					}
+					
 					$arrayResult['TRANSACTION_NO'] = $ref_no;
 					$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
@@ -92,7 +98,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':ref_no_source' => $responseSoap->ref_slipno
 					]);
 					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
-					$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
+					$templateMessage = $func->getTemplateSystem('TransferDepInsideCoop',1);
 					$dataMerge = array();
 					$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
 					$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
@@ -134,8 +140,69 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							}
 						}
 					}
+					if($payload["member_no"] != $constToAcc["MEMBER_NO"]){
+						$arrTokenDest = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
+						$templateMessageDest = $func->getTemplateSystem('DestinationReceive',1);
+						$dataMergeDest = array();
+						$dataMergeDest["DEPTACCOUNT"] = $lib->formataccount_hidden($to_account_no,$func->getConstant('hidden_dep'));
+						$dataMergeDest["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+						$dataMergeDest["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+						$message_endpointDest = $lib->mergeTemplate($templateMessageDest["SUBJECT"],$templateMessageDest["BODY"],$dataMergeDest);
+						foreach($arrTokenDest["LIST_SEND"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$arrPayloadNotifyDest["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotifyDest["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessageDest["SUBJECT"] = $message_endpointDest["SUBJECT"];
+								$arrMessageDest["BODY"] = $message_endpointDest["BODY"];
+								$arrMessageDest["PATH_IMAGE"] = null;
+								$arrPayloadNotifyDest["PAYLOAD"] = $arrMessageDest;
+								$arrPayloadNotifyDest["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotifyDest["SEND_BY"] = 'system';
+								if($func->insertHistory($arrPayloadNotifyDest,'2')){
+									$lib->sendNotify($arrPayloadNotifyDest,"person");
+								}
+							}
+						}
+						foreach($arrTokenDest["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$arrPayloadNotifyDest["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotifyDest["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessageDest["SUBJECT"] = $message_endpointDest["SUBJECT"];
+								$arrMessageDest["BODY"] = $message_endpointDest["BODY"];
+								$arrMessageDest["PATH_IMAGE"] = null;
+								$arrPayloadNotifyDest["PAYLOAD"] = $arrMessageDest;
+								$arrPayloadNotifyDest["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotifyDest["SEND_BY"] = 'system';
+								if($func->insertHistory($arrPayloadNotifyDest,'2')){
+									$lib->sendNotifyHW($arrPayloadNotifyDest,"person");
+								}
+							}
+						}
+						$arrayTelDest = $func->getSMSPerson('person',array($constToAcc["MEMBER_NO"]));
+						foreach($arrayTelDest as $dest){
+							$id_smsnotsent  = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent');
+							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
+								$message_body = $message_endpointDest["BODY"];
+								$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+								$arraySendSMS = $lib->sendSMS($arrayDest);
+								if($arraySendSMS["RESULT"]){
+									$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
+									$func->logSMSWasSent(null,$arrGRPAll,$arrayTelDest,'system',true);
+								}else{
+									$bulkInsert[] = "('".$id_smsnotsent."',null,'".$message_body."','".$payload["member_no"]."',
+											'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
+									$func->logSMSWasNotSent($bulkInsert);
+								}
+							}else{
+								$bulkInsert[] = "('".$id_smsnotsent."',null,'".$message_endpointDest["BODY"]."','".$payload["member_no"]."',
+										'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
+								$func->logSMSWasNotSent($bulkInsert);
+							}
+						}
+					}
 					$arrayTel = $func->getSMSPerson('person',array($payload["member_no"]));
 					foreach($arrayTel as $dest){
+						$id_smsnotsent  = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent');
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 							$message_body = $message_endpoint["BODY"];
 							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
@@ -144,16 +211,17 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 								$arrGRPAll[$dest["MEMBER_NO"]] = $message_body;
 								$func->logSMSWasSent(null,$arrGRPAll,$arrayTel,'system',true);
 							}else{
-								$bulkInsert[] = "(null,'".$message_body."','".$payload["member_no"]."',
+								$bulkInsert[] = "('".$id_smsnotsent."',null,'".$message_body."','".$payload["member_no"]."',
 										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','system',null)";
 								$func->logSMSWasNotSent($bulkInsert);
 							}
 						}else{
-							$bulkInsert[] = "(null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
+							$bulkInsert[] = "('".$id_smsnotsent."',null,'".$message_endpoint["BODY"]."','".$payload["member_no"]."',
 									'sms','-',null,'ไม่พบเบอร์โทรศัพท์ในระบบ','system',null)";
 							$func->logSMSWasNotSent($bulkInsert);
 						}
 					}
+					
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{

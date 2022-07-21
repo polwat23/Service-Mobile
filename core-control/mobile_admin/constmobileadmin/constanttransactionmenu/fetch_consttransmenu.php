@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttransactionmenu',$conoracle)){
 		$arrayGroup = array();
 		$fetchConstant = $conoracle->prepare("SELECT id_menu,menu_name,menu_icon_path FROM gcmenu mc
-										WHERE id_menu in (56) AND menu_status<> -9");
+										WHERE id_menu in (56) AND menu_status <> -9");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrConstans["TRANSMENU"] = [];
 			
 			$fetchMenuTransaction = $conoracle->prepare("SELECT id_menu,menu_name,menu_icon_path,menu_component FROM gcmenu mc
-										WHERE menu_parent = :id_parent AND menu_status<> -9");
+										WHERE menu_parent = :id_parent AND menu_status <> -9");
 			$fetchMenuTransaction->execute([
 				':id_parent' => $rowAccount["ID_MENU"]
 			]);
@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 												bc.max_withdraw,
 												bcp.id_constantmapping 
 												FROM gcbankconstant bc
-												LEFT JOIN gcmenuconstantmapping bcp ON bc.id_bankconstant = bcp.id_bankconstant
+												INNER JOIN gcmenuconstantmapping bcp ON bc.id_bankconstant = bcp.id_bankconstant
 												WHERE bcp.menu_component = :menu_component AND bcp.is_use = '1'");
 				$fetchBankMapping->execute([
 					':menu_component' => $rowMenu["MENU_COMPONENT"]

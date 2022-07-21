@@ -6,7 +6,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		|| $func->check_permission_core($payload,'sms','reportsmssuccess',$conoracle)){
 		$arrTemplateGroup = array();
 		if(isset($dataComing["id_smstemplate"])){
-			$fetchTemplate = $conoracle->prepare("SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,sq.set_column,st.spec_person,
+			/*SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,sq.set_column,st.spec_person,
+												sq.column_selected,sq.target_field,sq.is_bind_param,sq.condition_target,sq.is_stampflag,sq.stamp_table,sq.where_stamp
+												FROM smstemplate st LEFT JOIN smsquery sq ON st.id_smsquery = sq.id_smsquery
+												WHERE st.is_use = '1' and st.id_smstemplate = :id_smstemplate 
+			st.spec_person หาย*/
+			$fetchTemplate = $conoracle->prepare("SELECT st.id_smstemplate,st.smstemplate_name,st.smstemplate_body,sq.id_smsquery,sq.sms_query,sq.set_column,
 												sq.column_selected,sq.target_field,sq.is_bind_param,sq.condition_target,sq.is_stampflag,sq.stamp_table,sq.where_stamp
 												FROM smstemplate st LEFT JOIN smsquery sq ON st.id_smsquery = sq.id_smsquery
 												WHERE st.is_use = '1' and st.id_smstemplate = :id_smstemplate");

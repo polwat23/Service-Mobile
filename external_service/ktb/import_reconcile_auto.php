@@ -13,7 +13,6 @@ if($lib->checkCompleteArgument(['list_reconcile'],$dataComing)){
 							,'".$list_reconcile['CHANNEL_ID']."','".$list_reconcile['FILLER']."')");
 		if($insertImpReconcile->execute()){
 			echo "insert complete";
-			file_put_contents('MarrImp.txt', json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 		}else{
 			echo "not insert";
 		}

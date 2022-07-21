@@ -129,7 +129,7 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 															VALUES(:id_sendahead, :send_topic,:send_message,:destination,:destination_revoke,TO_DATE(:send_date,'yyyy/mm/dd hh24:mi'),:username,:id_template,:send_platform,:send_image)");
 					if($insertSendAhead->execute([
 						':id_sendahead' => $id_sendahead,
-						':send_topic' => $dataComing["send_topic_emoji_"],
+						':send_topic' => $dataComing["send_topic_emoji_"] ?? null,
 						':send_message' => $dataComing["send_message_emoji_"],
 						':destination' => isset($dataComing["destination"]) ? implode(',',$dataComing["destination"]) : 'all',
 						':destination_revoke' => isset($dataComing["destination_revoke"]) ? implode(',',$dataComing["destination_revoke"]) : null,
@@ -143,6 +143,7 @@ if($lib->checkCompleteArgument(['unique_id','send_date'],$dataComing)){
 						require_once('../../../../include/exit_footer.php');
 					}else{
 						$arrayResult['RESPONSE'] = "ไม่สามารถตั้งเวลาการส่งข้อความล่วงหน้าได้ กรุณาติดต่อผู้พัฒนา";
+						$arrayResult['DEBUG'] = json_encode($conoracle->errorInfo());
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../../../include/exit_footer.php');
 						

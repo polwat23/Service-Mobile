@@ -5,6 +5,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$showSplitSlip = $func->getConstant('show_split_slip_report');
+		$recv_year = substr(trim($dataComing["recv_period"]),0,4) - 543;
+		$revc_period_raw = $recv_year.substr(trim($dataComing["recv_period"]),-2,2);
 		$arrGroupDetail = array();
 		$getDetailKP = $conoracle->prepare("SELECT 
 													CASE kut.system_code 
@@ -57,9 +59,24 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
 				}
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
+				if(rowDetail["ITEM_BALANCE"] == 0){
+					$getAccDetail = $conoracle->prepare("SELECT * FROM (SELECT PRNCBAL,SEQ_NO FROM dpdeptstatement 
+													WHERE deptaccount_no = :deptaccount_no and 
+													deptitemtype_code = 'DTR' and TO_CHAR(operate_date,'YYYYMM') = :operate_date 
+													ORDER BY SEQ_NO DESC) WHERE rownum <= 1");
+					$getAccDetail->execute([
+						':deptaccount_no' => preg_replace("/[^0-9]/", "", $rowDetail["PAY_ACCOUNT"]),
+						':operate_date' => $revc_period_raw
+					]);
+					$rowAccDetail = $getAccDetail->fetch(PDO::FETCH_ASSOC);
+					$rowDetail["ITEM_BALANCE"] = $rowAccDetail["PRNCBAL"];
+				}
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount(preg_replace("/[^0-9]/", "", $rowDetail["PAY_ACCOUNT"]),$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+				if(isset($rowDetail["SEQ_NO"]) && $rowDetail["SEQ_NO"] != "" && $rowDetail["SEQ_NO"] > 0){
+					$arrDetail["PERIOD"] = $rowDetail["SEQ_NO"];
+				}
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}

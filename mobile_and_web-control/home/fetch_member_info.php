@@ -62,7 +62,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 									}
 									$arrResponse = json_decode($responseAPI);
 									if($arrResponse->RESULT){
-										$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg?vd='.$rowAvatar["UPDATE_DATE"];
+										$DataURLBase64 = '/resource/defaultAvatar/'.$member_no.'.jpg?vd='.$rowAvatar["UPDATE_DATE"];
 									}else{
 										unlink($pathnameTmp);
 									}
@@ -70,7 +70,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 									unlink($pathnameTmp);
 								}
 							}else{
-								$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg';
+								$DataURLBase64 = '/resource/defaultAvatar/'.$member_no.'.jpg';
 							}
 						}else{
 							file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
@@ -94,7 +94,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 								}
 								$arrResponse = json_decode($responseAPI);
 								if($arrResponse->RESULT){
-									$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$member_no.'.jpg';
+									$DataURLBase64 = '/resource/defaultAvatar/'.$member_no.'.jpg';
 								}else{
 									unlink($pathname);
 								}
@@ -122,12 +122,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 								$arrResponse = json_decode($responseAPI);
 								if($arrResponse->RESULT){
 									unlink($pathnameTmp);
-									$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
+									$DataURLBase64 = '/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
 								}else{
 									unlink($pathnameTmp);
 								}
 							}else{
-								$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
+								$DataURLBase64 = '/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
 							}
 						}else{
 							file_put_contents($pathnameTmp,stream_get_contents($rowAvatar["BASE64_IMG"]));
@@ -142,14 +142,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrResponse = json_decode($responseAPI);
 							if($arrResponse->RESULT){
 								unlink($pathnameTmp);
-								$DataURLBase64 = $config["URL_SERVICE"].'/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
+								$DataURLBase64 = '/resource/defaultAvatar/'.$filename.'?v='.$rowAvatar["UPDATE_DATE"];
 							}else{
 								unlink($pathnameTmp);
 							}
 						}
 					}
 					
-					$arrayResult["AVATAR_PATH"] = $DataURLBase64;
+					$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256",$DataURLBase64);
+					$arrayResult["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($DataURLBase64, $jwt_token, $config["SECRET_KEY_JWT"]);
 					$arrayResult["AVATAR_PATH_WEBP"] = null;
 				}else{
 					$arrayResult["AVATAR_PATH"] = null;
@@ -252,6 +253,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$filename = $member_no.$rowSignature["DATA_TYPE"];
 			$pathnameTmp = __DIR__.'/../../resource/signature/temp_'.$filename;
 			$pathname = __DIR__.'/../../resource/signature/'.$filename;
+			$DataURLBase64Signature = "";
 			if(file_exists($pathname)){
 				$fileModify = date("YmdHi", filemtime($pathname));
 				if($rowSignature["UPDATE_DATE"] >= $fileModify){
@@ -268,12 +270,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
 						unlink($pathnameTmp);
-						$DataURLBase64 = $config["URL_SERVICE"].'/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
+						$DataURLBase64Signature = '/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
 					}else{
 						unlink($pathnameTmp);
 					}
 				}else{
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
+					$DataURLBase64Signature = '/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
 				}
 			}else{
 				file_put_contents($pathnameTmp,stream_get_contents($rowSignature["BASE64_IMG"]));
@@ -288,12 +290,14 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					unlink($pathnameTmp);
-					$DataURLBase64 = $config["URL_SERVICE"].'/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
+					$DataURLBase64Signature = '/resource/signature/'.$filename.'?v='.$rowSignature["UPDATE_DATE"];
 				}else{
 					unlink($pathnameTmp);
 				}
 			}
-			$arrayResult["SIGNATURE"] = $DataURLBase64 ?? "";
+			$arrayResult["SIGNATURE"] = $config["URL_SERVICE"].$DataURLBase64Signature;
+			//$arrayResult["SIGNATURE"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256",$DataURLBase64Signature);
+			//$arrayResult["SIGNATURE_TOKEN"] = $lib->generate_token_access_resource($DataURLBase64Signature, $jwt_token, $config["SECRET_KEY_JWT"]);
 			$arrayResult["PHONE"] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];

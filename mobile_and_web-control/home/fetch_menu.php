@@ -76,14 +76,14 @@ if(!$anonymous){
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
-												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
+												and (gm.menu_channel = :channel OR 1=1) ORDER BY TO_NUMBER(gm.menu_order) ASC");
 			}else{
 				$fetch_menu = $conoracle->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") and gm.menu_parent = :menu_parent 
 												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
-												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
+												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY TO_NUMBER(gm.menu_order) ASC");
 			}
 			$fetch_menu->execute([
 				':menu_parent' => $dataComing["menu_parent"],
@@ -151,14 +151,14 @@ if(!$anonymous){
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).")
 												and gm.menu_status IN('0','1') and (gm2.menu_status IN('0','1') OR gm.menu_parent = '0')
-												and (gm.menu_channel = :channel OR 1=1) ORDER BY gm.menu_order ASC");
+												and (gm.menu_channel = :channel OR 1=1) ORDER BY TO_NUMBER(gm.menu_order) ASC");
 			}else{
 				$fetch_menu = $conoracle->prepare("SELECT gm.id_menu,gm.menu_name,gm.menu_name_en,gm.menu_icon_path,gm.menu_component,
 												gm.menu_parent,gm.menu_status,gm.menu_version 
 												FROM gcmenu gm LEFT JOIN gcmenu gm2 ON gm.menu_parent = gm2.id_menu
 												WHERE gm.menu_permission IN (".implode(',',$permission).") 
 												and gm.menu_status = '1' and (gm2.menu_status = '1' OR gm.menu_parent = '0')
-												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY gm.menu_order ASC");
+												and (gm.menu_channel = :channel OR gm.menu_channel = 'both') ORDER BY TO_NUMBER(gm.menu_order) ASC");
 			}
 			$fetch_menu->execute([
 				':channel' => $dataComing["channel"]
@@ -225,7 +225,15 @@ if(!$anonymous){
 					if($rowMenu["MENU_PARENT"] == '0'){
 						$arrayAllMenu[] = $arrMenu;
 					}else if($rowMenu["MENU_PARENT"] == '24'){
-						$arrayMenuSetting[] = $arrMenu;
+						if (
+								($rowMenu["menu_component"] == "SettingAccountDeletion") &&
+								(!in_array($payload["member_no"], array("etnmode1","etnmode2","etnmode3","etnmode4")))
+							) {
+								//ปิดการแสดงเมนูลบบัญชี ให้แสดงเฉพาะ etnmode
+							} else {
+								$arrayMenuSetting[] = $arrMenu;
+							}
+
 					}else if($rowMenu["MENU_PARENT"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}else if($rowMenu["MENU_PARENT"] == '56'){
@@ -302,7 +310,7 @@ if(!$anonymous){
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["LIMIT_AMOUNT_TRANSACTION"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= '100' || $dataComing["channel"] == 'web'){
-					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] = $config["URL_POLICY"];
 				}
 
 				$arrayResult['RESULT'] = TRUE;
@@ -364,6 +372,9 @@ if(!$anonymous){
 			}
 		}
 		if(isset($arrayAllMenu)){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '100' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] = $config["URL_POLICY"];
+			}
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

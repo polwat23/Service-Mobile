@@ -5,6 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) 
 		|| $func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
+		$member_destination = array();
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';

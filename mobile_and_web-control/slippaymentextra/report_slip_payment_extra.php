@@ -26,7 +26,7 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["full_name"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
-		$sqlGetMembGrp = $conoracle->prepare("SELECT (B.MEMBGROUP_DESC || ' / ' || A.MEMBGROUP_DESC ) AS MEMBGROUP_CODE_STR 
+		$sqlGetMembGrp = $conoracle->prepare("SELECT (A.MEMBGROUP_CODE || ' ' || A.MEMBGROUP_DESC ) AS MEMBGROUP_CODE_STR 
 												FROM MBUCFMEMBGROUP A LEFT JOIN MBUCFMEMBGROUP B ON A.MEMBGROUP_CONTROL = B.MEMBGROUP_CODE 
 												WHERE A.MEMBGROUP_CODE = :MEMBGRP");
 		$sqlGetMembGrp->execute([':MEMBGRP' => $rowName["MEMBGROUP_CODE"]]);
@@ -281,10 +281,10 @@ $html .= '
 			<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
 			<div style="width:100px;margin-left: 570px;display:flex;">
 			<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
-			<div style="font-size: 18px;margin-left: 40px;margin-top:60px; white-space: nowrap;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 0px;margin-top:60px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 570px;margin-top:-25px;">(นางวรีย์พรรณ โหมดเทศ)</div>
+			<div style="font-size: 18px;margin-left: 610px;margin-top:-25px;">ผู้จัดการ</div>
 			';
 			
 	

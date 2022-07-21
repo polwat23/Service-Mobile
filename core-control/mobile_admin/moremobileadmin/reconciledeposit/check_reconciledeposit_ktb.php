@@ -8,10 +8,9 @@ if($lib->checkCompleteArgument(['unique_id','reconcile_data','operate_date'],$da
 		$arrayMember = array();
 		$fetchTrans = $conoracle->prepare("SELECT ref_no,from_account,destination,amount,fee_amt,penalty_amt,amount_receive,operate_date,member_no
 											FROM gctransaction 
-											WHERE operate_date = TO_DATE(:operate_date,'yyyy/mm/dd') AND result_transaction = '1' AND trans_flag = '1' AND transfer_mode = '9'");
-		$fetchTrans->execute([
-			':operate_date' => $dataComing['operate_date']
-		]);
+											WHERE TO_CHAR(operate_date,'YYYY-MM-DD') = '".$dataComing['operate_date']."' 
+											AND result_transaction = '1' AND trans_flag = '1' AND transfer_mode = '9'");
+		$fetchTrans->execute();
 		$arrayGroup["COOP_RECONCILE"] = array();
 		$arrayGroup["BANK_RECONCILE"] = array();
 		while($rowTrans = $fetchTrans->fetch()){

@@ -60,7 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$getAccBankAllow = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
 															FROM atmregistermobile atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
 															WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1' 
-															and atr.connect_status = '1'");
+															and atr.connect_status = '1' and atr.cancel_id IS NULL");
 					$getAccBankAllow->execute([':member_no' => $member_no]);
 					$rowAccBank = $getAccBankAllow->fetch(PDO::FETCH_ASSOC);
 					if(isset($rowAccBank["ACCOUNT_CODE"]) && $rowAccBank["ACCOUNT_CODE"] != ""){
@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}else{
 						$getAccBankAllowATM = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
 																FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
-																WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1'");
+																WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1' and atr.cancel_id IS NULL");
 						$getAccBankAllowATM->execute([':member_no' => $member_no]);
 						$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
 						if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] != ""){

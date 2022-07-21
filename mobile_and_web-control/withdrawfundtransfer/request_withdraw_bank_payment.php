@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':response_message' => $responseSoap->msg_output
 					];
 					$log->writeLog('withdrawtrans',$arrayStruc);
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output;//$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 					
@@ -152,10 +152,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			// -----------------------------------------------
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["LINK_WITHDRAW_COOPDIRECT"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
-				$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+				$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',SYSDATE,:member_no
+															VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'-9',SYSDATE,:member_no
 															,:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
@@ -212,13 +212,18 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':deptaccount_no' => $coop_account_no
 				]);
 				$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-				$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
-													VALUES(:remark,:deptaccount_no,:seq_no)");
-				$insertRemark->execute([
-					':remark' => $dataComing["remark"],
-					':deptaccount_no' => $coop_account_no,
-					':seq_no' => $rowSeqno["SEQ_NO"]
-				]);
+				if(isset($dataComing["remark"])){
+					$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+					$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo,memo_text,deptaccount_no,seq_no)
+														VALUES(:id_memo,:remark,:deptaccount_no,:seq_no)");
+					$insertRemark->execute([
+						':id_memo' =>  $id_memo,
+						':remark' => $dataComing["remark"],
+						':deptaccount_no' => $coop_account_no,
+						':seq_no' => $rowSeqno["SEQ_NO"]
+					]);
+				}
+				
 				$arrExecute = [
 					':ref_no' => $ref_no,
 					':itemtype' => $rowDataWithdraw["ITEMTYPE_WTD"],
@@ -228,7 +233,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':amount_receive' => $amt_transfer,
-					':oper_date' => $dateOper,
+					':operate_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,
@@ -237,10 +242,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':ref_no_source' => $refbank_no,
 					':bank_code' => $rowDataWithdraw["BANK_CODE"] ?? '004'
 				];
-				$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+				$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'1',:member_no,:ref_no1,
+															VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'1',:member_no,:ref_no1,
 															:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
 				if($insertTransactionLog->execute($arrExecute)){
 				}else{
@@ -311,10 +316,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
-				$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+				$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 															,amount,fee_amt,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,
 															ref_no_1,coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
-															VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',:oper_date,'-9',SYSDATE,:member_no
+															VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:penalty_amt,:amount_receive,'-1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'-9',SYSDATE,:member_no
 															,:ref_no1,:slip_no,:etn_ref,:id_userlogin,:ref_no_source,:bank_code)");
 				$insertTransactionLog->execute([
 					':ref_no' => $ref_no,
@@ -325,7 +330,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					':fee_amt' => $dataComing["fee_amt"],
 					':penalty_amt' => $dataComing["penalty_amt"],
 					':amount_receive' => $amt_transfer,
-					':oper_date' => $dateOper,
+					':operate_date' => $dateOper,
 					':member_no' => $payload["member_no"],
 					':ref_no1' => $coop_account_no,
 					':slip_no' => $ref_slipno,

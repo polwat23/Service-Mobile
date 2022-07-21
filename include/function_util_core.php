@@ -74,94 +74,41 @@ class functions {
 			}
 		}
 		public function insertHistory($payload,$type_history='1',$is_sendahead = '0',$conora) {
-			$conora->beginTransaction();
 			$id_history = $this->getMaxTable('id_history' , 'gchistory',$conora);
 			if($payload["TYPE_SEND_HISTORY"] == "onemessage"){
 				if($is_sendahead == '1'){
-					$bulkInsert = array();
 					foreach($payload["MEMBER_NO"] as $member_no){
-						$bulkInsert[] = "(".$id_history.",'".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").",'".$is_sendahead."')";
-						if(sizeof($bulkInsert) == 1000){
-							$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
-													VALUES".implode(',',$bulkInsert));
-							if($insertHis->execute()){
-								unset($bulkInsert);
-								$bulkInsert = array();
-							}else{
-								$conora->rollback();
-								return false;
-							}
-						}
-						$id_history++;
-					}
-					if(sizeof($bulkInsert) > 0){
+						$bulkInsert = "(".$id_history.",'".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").",'".$is_sendahead."')";
 						$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
-													VALUES".implode(',',$bulkInsert));
-						if($insertHis->execute()){
-							$conora->commit();
-							return true;
-						}else{
-							$conora->rollback();
-							return false;
-						}
-					}else{
-						$conora->commit();
-						return true;
-					}
-				}else{
-					$bulkInsert = array();
-					foreach($payload["MEMBER_NO"] as $member_no){
-						$bulkInsert[] = "(".$id_history.",'".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").")";
-						if(sizeof($bulkInsert) == 1000){
-							$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
-													VALUES".implode(',',$bulkInsert));
-							if($insertHis->execute()){
-								unset($bulkInsert);
-								$bulkInsert = array();
-							}else{
-								$conora->rollback();
-								return false;
-							}
-						}
+												VALUES".$bulkInsert);
+						$insertHis->execute();
 						$id_history++;
 					}
-					if(sizeof($bulkInsert) > 0){
+					return true;
+				}else{
+					foreach($payload["MEMBER_NO"] as $member_no){
+						$bulkInsert = "(".$id_history.",'".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").")";
 						$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
-													VALUES".implode(',',$bulkInsert));
-						if($insertHis->execute()){
-							$conora->commit();
-							return true;
-						}else{
-							$conora->rollback();
-							return false;
-						}
-					}else{
-						$conora->commit();
-						return true;
+													VALUES".$bulkInsert);
+						$id_history++;
 					}
+					return true;
 
 				}
 			}else if($payload["TYPE_SEND_HISTORY"] == "manymessage"){
 				if($is_sendahead == '1'){
-					$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
-													VALUES".implode(',',$payload["bulkInsert"]));
-					if($insertHis->execute()){
-						$conora->commit();
-						return true;
-					}else{
-						$conora->rollback();
-						return false;
+					foreach($payload["bulkInsert"] as $value){
+						$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
+														VALUES".$value);
+						$insertHis->execute();
 					}
+					return true;
 				}else{
-					$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
-													VALUES".implode(',',$payload["bulkInsert"]));
-					if($insertHis->execute()){
-						$conora->commit();
-						return true;
-					}else{
-						$conora->rollback();
-						return false;
+					foreach($payload["bulkInsert"] as $value){
+						$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
+													VALUES".$value);
 					}
+					return true;
 				}
 			}else{
 				return true;
@@ -279,24 +226,31 @@ class functions {
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 					}
 					if(sizeof($arrayMemberTemp) > 0){
-						$fetchDataOra = $conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
-																resign_status = 0 and MEM_TELMOBILE IS NOT NULL");
+						$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																 WHERE mb.member_no IN(".implode(',',$arrayMemberTemp).") and
+																 mb.resign_status = 0 and mb.MEM_TELMOBILE IS NOT NULL");
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}
 					}
 				}else{
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchDataOra = $conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																WHERE mb.member_no IN('".implode("','",$member_no)."')");
 						$fetchDataOra->execute();
 					}else{
-						$fetchDataOra = $conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																WHERE  mb.member_no = :member_no");
 						$fetchDataOra->execute([':member_no' => $member_no]);
 					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
@@ -305,18 +259,22 @@ class functions {
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}else{
 							$arrayMT = array();
 							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 							$arrayMemberGRP[] = $arrayMT;
 						}
 					}
 				}
 			}else{
-				$fetchDataOra = $conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE resign_status = '0'");
+				$fetchDataOra = $conora->prepare("SELECT  mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as fullname 
+												FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+												WHERE mb.resign_status = '0'");
 				$fetchDataOra->execute();
 				while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						$arrayMT = array();
@@ -346,271 +304,115 @@ class functions {
 		}
 		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$conora,
 		$multi_message=false,$trans_flag=false,$is_sendahead = '0') {
-			$conora->beginTransaction();
 			$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
-			$textcombine = array();
-			$textcombinenotsent = array();
 			if($is_sendahead){
 				if($trans_flag){
 				}else{
 					if($multi_message){
 						foreach($destination as $dest){
-							$textcombine[] = "('".$id_logsent."','".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
-							if(sizeof($textcombine) == 1000){
-								$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
-																	VALUES".implode(',',$textcombine));
-								if($insertToLogSMS->execute()){
-									unset($textcombine);
-									$textcombine = array();
-								}else{
-									$conora->rollback();
-									break;
-								}
-							}
+							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
+																VALUES('".$id_logsent."','".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')");
+							$insertToLogSMS->execute();
 							$id_logsent++;
 						}
-						if(sizeof($textcombine) > 0){
-							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
-																	VALUES".implode(',',$textcombine));
-							if($insertToLogSMS->execute()){
-								$conora->commit();
-								return true;
-							}else{
-								$conora->rollback();
-								return false;
-							}
-						}else{
-							$conora->commit();
-							return true;
-						}
+						return true;
 					}else{
 						foreach($destination as $dest){
 							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-								$textcombine[] = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
-							}else{
-								$textcombinenotsent[] = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
-							}
-							if(sizeof($textcombine) == 1000){
+								$textcombine = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
 								$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
-																	VALUES".implode(',',$textcombine));
-								if($insertToLogSMS->execute()){
-									unset($textcombine);
-									$textcombine = array();
-								}else{
-									$conora->rollback();
-									return false;
-								}
-							}
-							if(sizeof($textcombinenotsent) == 1000){
+																	VALUES".$textcombine);
+								$insertToLogSMS->execute();
+							}else{
+								$textcombinenotsent = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
 								$insertToLogNotSentSMS = $conora->prepare("INSERT INTO smswasnotsent(id_logsent,message,member_no,send_platform,cause_notsent,send_by,id_smstemplate,is_sendahead)
-																		VALUES".implode(',',$textcombinenotsent));
-								if($insertToLogNotSentSMS->execute()){
-									unset($textcombinenotsent);
-									$textcombinenotsent = array();
-								}else{
-									$conora->rollback();
-									return false;
-								}
+																		VALUES".$textcombinenotsent);
+								$insertToLogNotSentSMS->execute();
 							}
 							$id_logsent++;
 						}
-						if(sizeof($textcombine) > 0){
-							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
-																	VALUES".implode(',',$textcombine));
-							if($insertToLogSMS->execute()){
-								if(sizeof($textcombinenotsent) > 0){
-									$insertToLogNotSentSMS = $conora->prepare("INSERT INTO smswasnotsent(id_logsent,message,member_no,send_platform,cause_notsent,send_by,id_smstemplate,is_sendahead)
-																			VALUES".implode(',',$textcombinenotsent));
-									if($insertToLogNotSentSMS->execute()){
-										$conora->commit();
-										return true;
-									}else{
-										$conora->rollback();
-										return false;
-									}
-								}else{
-									$conora->commit();
-									return true;
-								}
-							}else{
-								$conora->rollback();
-								return false;
-							}
-						}else{
-							if(sizeof($textcombinenotsent) > 0){
-								$insertToLogNotSentSMS = $conora->prepare("INSERT INTO smswasnotsent(id_logsent,message,member_no,send_platform,cause_notsent,send_by,id_smstemplate,is_sendahead)
-																			VALUES".implode(',',$textcombinenotsent));
-								if($insertToLogNotSentSMS->execute()){
-									$conora->commit();
-										return true;
-								}else{
-									$conora->rollback();
-									return false;
-								}
-							}else{
-								$conora->commit();
-								return true;
-							}
-						}
+						return true;
 					}
 				}
 			}else{
 				if($trans_flag){
-					
 				}else{
 					if($multi_message){
 						foreach($destination as $dest){
-							$textcombine[] = "('".$id_logsent."','".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
-							if(sizeof($textcombine) == 1000){
-								$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																	VALUES".implode(',',$textcombine));
-								if($insertToLogSMS->execute()){
-									unset($textcombine);
-									$textcombine = array();
-								}else{
-									$conora->rollback();
-									break;
-								}
-							}
+							$textcombine = "('".$id_logsent."','".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+																VALUES".$textcombine);
+							$insertToLogSMS->execute();
 							$id_logsent++;
 						}
-						if(sizeof($textcombine) > 0){
-							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																	VALUES".implode(',',$textcombine));
-							if($insertToLogSMS->execute()){
-								$conora->commit();
-								return true;
-							}else{
-								$conora->rollback();
-								return false;
-							}
-						}else{
-							$conora->commit();
-							return true;
-						}
+						return true;
 					}else{
 						foreach($destination as $dest){
 							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
-								$textcombine[] = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
-							}else{
-								$textcombinenotsent[] = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
-							}
-							if(sizeof($textcombine) == 1000){
+								$textcombine = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 								$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																	VALUES".implode(',',$textcombine));
-								if($insertToLogSMS->execute()){
-									unset($textcombine);
-									$textcombine = array();
-								}else{
-									$conora->rollback();
-									return false;
-								}
-							}
-							if(sizeof($textcombinenotsent) == 1000){
+																	VALUES".$textcombine);
+								$insertToLogSMS->execute();
+							}else{
+								$textcombinenotsent = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','sms','ไม่พบเบอร์โทรศัพท์','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 								$insertToLogNotSentSMS = $conora->prepare("INSERT INTO smswasnotsent(id_logsent,message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
-																		VALUES".implode(',',$textcombinenotsent));
-								if($insertToLogNotSentSMS->execute()){
-									unset($textcombinenotsent);
-									$textcombinenotsent = array();
-								}else{
-									$conora->rollback();
-									return false;
-								}
+																		VALUES".$textcombinenotsent);
+								$insertToLogNotSentSMS->execute();
 							}
 							$id_logsent++;
 						}
-						if(sizeof($textcombine) > 0){
-							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
-																	VALUES".implode(',',$textcombine));
-							if($insertToLogSMS->execute()){
-								if(sizeof($textcombinenotsent) > 0){
-									$insertToLogNotSentSMS = $conora->prepare("INSERT INTO smswasnotsent(id_logsent,message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
-																			VALUES".implode(',',$textcombinenotsent));
-									if($insertToLogNotSentSMS->execute()){
-										$conora->commit();
-										return true;
-									}else{
-										$conora->rollback();
-										return false;
-									}
-								}else{
-									$conora->commit();
-									return true;
-								}
-							}else{
-								$conora->rollback();
-								return false;
-							}
-						}else{
-							if(sizeof($textcombinenotsent) > 0){
-								$insertToLogNotSentSMS = $conora->prepare("INSERT INTO smswasnotsent(id_logsent,message,member_no,send_platform,cause_notsent,send_by,id_smstemplate)
-																			VALUES".implode(',',$textcombinenotsent));
-								if($insertToLogNotSentSMS->execute()){
-									$conora->commit();
-										return true;
-								}else{
-									$conora->rollback();
-									return false;
-								}
-							}else{
-								$conora->commit();
-								return true;
-							}
-						}
+						return true;
 					}
 				}
 			}
 		}
 		public function logSMSWasNotSent($bulkInsert,$conora,$multi_message=false,$is_sendahead = '0',$his_img=false) {
-			$conora->beginTransaction();
 			if($is_sendahead == '1'){
 				if($multi_message){
 					return true;
 				}else{
 					if($his_img){
-						$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead,his_path_image)
-															VALUES".implode(',',$bulkInsert));
+						foreach($bulkInsert as $value) {
+							$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead,his_path_image)
+															VALUES".$value);
+							$insertToLogSMS->execute();
+						}
 					}else{
-						$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead)
-															VALUES".implode(',',$bulkInsert));
+						foreach($bulkInsert as $value) {
+							$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,is_sendahead)
+															VALUES".$value);
+							$insertToLogSMS->execute();
+						}
 					}
-					if($insertToLogSMS->execute()){
-						$conora->commit();
-						return true;
-					}else{
-						$conora->rollback();
-						return false;
-					}
+					return true;
 				}
 			}else{
 				if($multi_message){
 					return true;
 				}else{
 					if($his_img){
-						$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,his_path_image)
-																VALUES".implode(',',$bulkInsert));
+						foreach($bulkInsert as $value) {
+							$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate,his_path_image)
+																VALUES".$value);
+							$insertToLogSMS->execute();
+						}
+						
 					}else{
 						$insertToLogSMS = $conora->prepare("INSERT INTO smswasnotsent(id_smsnotsent,topic,message,member_no,send_platform,tel_mobile,fcm_token,cause_notsent,send_by,id_smstemplate)
-																VALUES".implode(',',$bulkInsert));
+																VALUES".$value);
+						$insertToLogSMS->execute();
 					}
-					if($insertToLogSMS->execute()){
-						$conora->commit();
-						return true;
-					}else{
-						$conora->rollback();
-						return false;
-					}
+					return true;
 				}
 			}
 		}
 		public function logSendMail($blukInsert,$conora){
-			$insertMail = $conora->prepare("INSERT INTO smslogmailsend(id_mailsend,mail_title, mail_text,mail_address,send_status,send_by,id_smstemplate,is_sendahead,error_message,member_no)
-												VALUES".implode(",",$blukInsert));
-			if($insertMail->execute()){
-				return true;
-			}else{
-				return false;
+			foreach($blukInsert as $value){
+				$insertMail = $conora->prepare("INSERT INTO smslogmailsend(id_mailsend,mail_title, mail_text,mail_address,send_status,send_by,id_smstemplate,is_sendahead,error_message,member_no)
+												VALUES".$value);
+				$insertMail->execute();
 			}
+			return true;
 		}
 		
 		public function getMaxTable($column , $table,$conora){

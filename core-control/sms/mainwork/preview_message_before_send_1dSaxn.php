@@ -3,6 +3,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channel_send'],$dataComing)){
 	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) || 
 	$func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
+		
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
@@ -34,6 +35,12 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
 				$arrTarget = array();
+				
+				$getName = $conoracle->prepare("SELECT MP.PRENAME_DESC || MB.MEMB_NAME ||' '|| MB.MEMB_SURNAME AS FULLNAME 
+												FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+												WHERE MB.MEMBER_NO = :member_no");
+				$getName->execute([':member_no' => $rowTarget["MEMBER_NO"]]);
+				$rowTetName = $getName->fetch(PDO::FETCH_ASSOC);
 				$arrTarget["NENOUGH_AMT"] = $rowTarget["NENOUGH_AMT"];
 				$arrTarget["EXPENSE_ACCID"] = $rowTarget["EXPENSE_ACCID"];
 				$arrTarget["RECV_PERIOD"] = $rowTarget["RECV_PERIOD"];
@@ -43,11 +50,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if($arrToken["LIST_SEND"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
 						$arrGroupSuccess["DESTINATION"] = $arrToken["LIST_SEND"][0]["MEMBER_NO"];
 						$arrGroupSuccess["REF"] = $rowTarget["MEMBER_NO"];
+						$arrGroupSuccess["FULLNAME"] = $rowTetName["FULLNAME"];
 						$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"].'^'.$arrMessage["SUBJECT"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $rowTarget["MEMBER_NO"];
 						$arrGroupCheckSend["REF"] = $rowTarget["MEMBER_NO"];
+						$arrGroupCheckSend["FULLNAME"] = $rowTetName["FULLNAME"];
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
@@ -56,17 +65,20 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
 							$arrGroupSuccess["DESTINATION"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
 							$arrGroupSuccess["REF"] = $rowTarget["MEMBER_NO"];
+							$arrGroupSuccess["FULLNAME"] = $rowTetName["FULLNAME"];
 							$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"].'^'.$arrMessage["SUBJECT"];
 							$arrGroupAllSuccess[] = $arrGroupSuccess;
 						}else{
 							$arrGroupCheckSend["DESTINATION"] = $rowTarget["MEMBER_NO"];
 							$arrGroupCheckSend["REF"] = $rowTarget["MEMBER_NO"];
+							$arrGroupCheckSend["FULLNAME"] = $rowTetName["FULLNAME"];
 							$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
 							$arrGroupAllFailed[] = $arrGroupCheckSend;
 						}
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $rowTarget["MEMBER_NO"];
 						$arrGroupCheckSend["REF"] = $rowTarget["MEMBER_NO"];
+						$arrGroupCheckSend["FULLNAME"] = $rowTetName["FULLNAME"];
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
@@ -95,12 +107,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["REF"] = $dest["MEMBER_NO"];
+						$arrGroupSuccess["FULLNAME"] = $dest["FULLNAME"];
 						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
 						$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
 						$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
+						$arrGroupCheckSend["FULLNAME"] = $dest["FULLNAME"];
 						$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"];
 						$arrGroupAllFailed[] = $arrGroupCheckSend;

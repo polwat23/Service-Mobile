@@ -8,13 +8,12 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 		$arrayMember = array();
 		$fetchTrans = $conoracle->prepare("SELECT ref_no,from_account,destination,amount,fee_amt,penalty_amt,amount_receive,operate_date,member_no
 											FROM gctransaction 
-											WHERE operate_date = TO_DATE(:operate_date,'yyyy/mm/dd') AND result_transaction = '1' AND trans_flag = '-1' AND transfer_mode = '9'");
-		$fetchTrans->execute([
-			':operate_date' => $dataComing['operate_date']
-		]);
+											WHERE TO_CHAR(operate_date,'YYYY-MM-DD') = '".$dataComing['operate_date']."' 
+											AND result_transaction = '1' AND trans_flag = '-1' AND transfer_mode = '9'");
+		$fetchTrans->execute();
 		$arrayGroup["COOP_RECONCILE"] = array();
 		$arrayGroup["BANK_RECONCILE"] = array();
-		while($rowTrans = $fetchTrans->fetch()){
+		while($rowTrans = $fetchTrans->fetch(PDO::FETCH_ASSOC)){
 			$arrTrans = array();
 			$arrTrans["REF_NO"] = $rowTrans["REF_NO"];
 			$arrTrans["FROM_ACCOUNT"] = $rowTrans["FROM_ACCOUNT"];
@@ -55,12 +54,10 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 										credit_amount, fee_amount, net_amount, payer_account_no, payee_account_no, payee_account_bank_code, 
 										reference1, reference2, effective_date, response_code, response_desc, transref_no, sys_ref_no, channel_id, filler 
 										FROM reconcilewithdrawktb 
-										WHERE effective_date = :effective_date");
-		$fetchReconcile->execute([
-			':effective_date' => str_replace('-','',$dataComing['operate_date'])
-		]);
+										WHERE effective_date = '".preg_replace('/-/','',$dataComing["operate_date"])."'");
+		$fetchReconcile->execute();
 		
-		while($rowReconcile = $fetchReconcile->fetch()){
+		while($rowReconcile = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrTrans = array();
 			$arrTrans["ID_WTDRECONCILE"] = $rowReconcile["ID_WTDRECONCILE"];
 			$arrTrans["IMPORT_DATE"] = $rowReconcile["IMPORT_DATE"];
@@ -84,7 +81,6 @@ if($lib->checkCompleteArgument(['unique_id','operate_date'],$dataComing)){
 			$arrTrans["FILLER"] = $rowReconcile["FILLER"];
 			$arrayGroup["BANK_RECONCILE"][] = $arrTrans;
 		}
-		
 		$arrayResult['BANK_RECONCILE'] = $arrayGroup["BANK_RECONCILE"];
 		$arrayResult['COOP_RECONCILE'] = $arrayGroup["COOP_RECONCILE"];
 		$arrayResult['RESULT'] = TRUE;

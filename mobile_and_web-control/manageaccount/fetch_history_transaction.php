@@ -11,11 +11,11 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 		}else{
 			$old_ref_no = isset($dataComing["ref_no"]) ? "and ref_no < ".$dataComing["ref_no"] : "and ref_no < 99999999999999999";
 		}
-		$fetchTransList = $conoracle->prepare("SELECT REF_NO,TRANSFER_MODE,DESTINATION,DESTINATION_TYPE,AMOUNT_RECEIVE,OPERATE_DATE,FEE_AMT,PENALTY_AMT,TRANS_FLAG
-															FROM gctransaction WHERE member_no = :member_no and from_account = :deptaccount_no and result_transaction <> '-9' ".$old_ref_no."
-															ORDER BY ref_no DESC LIMIT ".$rownum);
+		$fetchTransList = $conoracle->prepare("SELECT * FROM (SELECT REF_NO,TRANSFER_MODE,DESTINATION,DESTINATION_TYPE,AMOUNT_RECEIVE,OPERATE_DATE,FEE_AMT,PENALTY_AMT,TRANS_FLAG
+															FROM gctransaction WHERE member_no = :member_no and from_account = :deptaccount_no and result_transaction <> '-9'
+															ORDER BY ref_no DESC) WHERE rownum <= ".$rownum);
 		$fetchTransList->execute([
-			':member_no' => $payload["member_no"],
+			':member_no' => $member_no,
 			':deptaccount_no' => preg_replace('/-/','',$dataComing["deptaccount_no"])
 		]);
 		if($dataComing["source_type"] == "coop"){
@@ -94,6 +94,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 			}
 			$arrayTransaction[] = $arrayTrans;
 		}
+		
 		$arrayResult['TRANSACTION_LIST'] = $arrayTransaction;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

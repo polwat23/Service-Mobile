@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			
 			$arrConstans["BANK_CONSTANT"] = [];
 			$fetchBankMapping = $conoracle->prepare("SELECT bc.id_bankconstant,
-											bc.transaction_cycle,
+											TRIM(bc.transaction_cycle) as transaction_cycle,
 											bc.max_numof_deposit,
 											bc.max_numof_withdraw,
 											bc.min_deposit,
@@ -51,6 +51,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 											bc.min_withdraw,
 											bc.max_withdraw,
 											bc.each_bank,
+											bc.TRANSACTION_NAME,
 											bcp.id_bankconstantmapping 
 											FROM gcbankconstant bc
 											LEFT JOIN gcbankconstantmapping bcp ON bc.id_bankconstant = bcp.id_bankconstant

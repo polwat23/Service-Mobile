@@ -4,14 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ConsentAgreement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getAccept = $conoracle->prepare("SELECT ID_ACCEPT FROM gcacceptpolicy WHERE member_no = :member_no and policy_id = 'v2'");
+		$getAccept = $conoracle->prepare("SELECT ID_ACCEPT FROM gcacceptpolicy WHERE member_no = :member_no and policy_id = 'v4'");
 		$getAccept->execute([':member_no' => $payload["member_no"]]);
 		$rowAccept = $getAccept->fetch(PDO::FETCH_ASSOC);
 		if(empty($rowAccept["ID_ACCEPT"]) || $rowAccept["ID_ACCEPT"] == ""){
 			$arrConsentForm = array();
 			if(preg_replace('/\./','',$dataComing["app_version"]) >= '100'){
 				$arrayResult['TERMS']["TERMS_URL"] = $config["URL_POLICY"];
-				$arrayResult['TERMS']["TERMS_ID"] = 'v2';
+				$arrayResult['TERMS']["TERMS_ID"] = 'v4';
 			}
 		}
 		$arrayResult['RESULT'] = TRUE;

@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$getTemplateUnMatch = $conoracle->prepare("SELECT id_smstemplate,smstemplate_name,smstemplate_body
 													FROM smstemplate 
 													WHERE is_use = '1' and id_smstemplate NOT IN(SELECT id_smstemplate FROM smstopicmatchtemplate WHERE is_use <> '-9')
-													and id_smsquery IS NULL");
+													and id_smsquery IS NULL order by  smstemplate_name ASC");
 		$getTemplateUnMatch->execute();
 		while($rowTemplate = $getTemplateUnMatch->fetch(PDO::FETCH_ASSOC)){
 			$arrTemplate = array();

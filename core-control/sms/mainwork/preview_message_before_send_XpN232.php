@@ -31,7 +31,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			foreach($dataComing["destination"] as $member_no) {
 				$grpMember[] = "'".$lib->mb_str_pad($member_no)."'";
 			}
-			$getCoopPhone = $conoracle->prepare("SELECT IVR_PASSWORD,MEMBER_NO FROM MBMEMBMASTER WHERE member_no IN(".implode(',',$grpMember).")");
+			$getCoopPhone = $conoracle->prepare("SELECT mb.IVR_PASSWORD,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+												 FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+												 WHERE mb.member_no IN(".implode(',',$grpMember).")");
 			$getCoopPhone->execute();
 			while($rowTarget = $getCoopPhone->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
@@ -47,6 +49,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $rowTarget["MEMBER_NO"];
 						$arrGroupCheckSend["REF"] = $rowTarget["MEMBER_NO"];
+						$arrGroupCheckSend["FULLNAME"] = $rowTarget["FULLNAME"];
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
@@ -55,17 +58,20 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						if($arrToken["LIST_SEND_HW"][0]["RECEIVE_NOTIFY_NEWS"] == "1"){
 							$arrGroupSuccess["DESTINATION"] = $arrToken["LIST_SEND_HW"][0]["MEMBER_NO"];
 							$arrGroupSuccess["REF"] = $rowTarget["MEMBER_NO"];
+							$arrGroupSuccess["FULLNAME"] = $rowTarget["FULLNAME"];
 							$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"].'^'.$arrMessage["SUBJECT"];
 							$arrGroupAllSuccess[] = $arrGroupSuccess;
 						}else{
 							$arrGroupCheckSend["DESTINATION"] = $rowTarget["MEMBER_NO"];
 							$arrGroupCheckSend["REF"] = $rowTarget["MEMBER_NO"];
+							$arrGroupCheckSend["FULLNAME"] = $rowTarget["FULLNAME"];
 							$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^บัญชีนี้ไม่ประสงค์รับการแจ้งเตือนข่าวสาร';
 							$arrGroupAllFailed[] = $arrGroupCheckSend;
 						}
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $rowTarget["MEMBER_NO"];
 						$arrGroupCheckSend["REF"] = $rowTarget["MEMBER_NO"];
+						$arrGroupCheckSend["FULLNAME"] = $rowTarget["FULLNAME"];
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"].'^ไม่สามารถระบุเครื่องในการรับแจ้งเตือนได้';
 						$arrGroupAllFailed[] = $arrGroupCheckSend;
 					}
@@ -101,12 +107,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				foreach($arrayTel as $dest){
 					if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 						$arrGroupSuccess["DESTINATION"] = $dest["MEMBER_NO"];
+						$arrGroupSuccess["FULLNAME"] = $dest["FULLNAME"];
 						$arrGroupSuccess["REF"] = $dest["MEMBER_NO"];
 						$arrGroupSuccess["TEL"] = $lib->formatphone($dest["TEL"],'-');
 						$arrGroupSuccess["MESSAGE"] = $arrMessage["BODY"];
 						$arrGroupAllSuccess[] = $arrGroupSuccess;
 					}else{
 						$arrGroupCheckSend["DESTINATION"] = $dest["MEMBER_NO"];
+						$arrGroupCheckSend["FULLNAME"] = $dest["FULLNAME"];
 						$arrGroupCheckSend["REF"] = $dest["MEMBER_NO"];
 						$arrGroupCheckSend["TEL"] = "ไม่พบเบอร์โทรศัพท์";
 						$arrGroupCheckSend["MESSAGE"] = $arrMessage["BODY"];

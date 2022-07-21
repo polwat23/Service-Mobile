@@ -39,6 +39,18 @@ class CalculateDep {
 		$arrayResult['RESULT'] = TRUE;
 		return $arrayResult;
 	}
+	
+	public function getVcMapID($depttype_code,$sys_code='DEP'){
+		$getvc = $this->conora->prepare("SELECT ACCOUNT_ID FROM VCMAPACCID WHERE SYSTEM_CODE = :sys_code 
+										AND SLIPITEMTYPE_CODE = :sys_code AND SHRLONTYPE_CODE = :depttype_code");
+		$getvc->execute([
+			':depttype_code' => $depttype_code,
+			':sys_code' => $sys_code
+		]);
+		$rowvc = $getvc->fetch(\PDO::FETCH_ASSOC);
+		return $rowvc;
+	}
+
 	public function getWithdrawable($deptaccount_no){
 		$DataAcc = $this->getConstantAcc($deptaccount_no);
 		return $DataAcc["PRNCBAL"] - $DataAcc["MINPRNCBAL"] - $DataAcc["CHECKPEND_AMT"];
@@ -59,6 +71,7 @@ class CalculateDep {
 					"adc_amt" => 0.00
 				];
 				$resultWS = $clientWS->__call("of_check_sequest_online", array($argumentWS));
+				file_put_contents('text.txt',json_encode($argumentWS));
 				if($resultWS->ai_status == '0'){
 					$arrayResult["CAN_DEPOSIT"] = TRUE;
 					$arrayResult["CAN_WITHDRAW"] = TRUE;
@@ -119,7 +132,7 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
+		/*$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
 		$getLimitAllDay->execute();
 		$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
 		if($rowLimitAllDay["FIXED_UNIT"] == '1'){
@@ -143,7 +156,7 @@ class CalculateDep {
 			$arrayResult["RESPONSE_CODE"] = 'WS0043';
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
-		}
+		}*/
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
 			$transfer_mode = "1";
@@ -169,7 +182,7 @@ class CalculateDep {
 				return $arrayResult;
 			}
 			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
+				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
 														FROM gcbankconstantmapping gbm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gbm.id_bankconstant = gbc.id_bankconstant
@@ -182,6 +195,7 @@ class CalculateDep {
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
+						
 						if($rowConstMapMenu["MIN_DEPOSIT"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_DEPOSIT"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0056";
 							$arrayResult['MINDEPT_AMT'] = $rowConstMapMenu["MIN_DEPOSIT"];
@@ -191,7 +205,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
 						if($rowConstMapMenu["EACH_BANK"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
@@ -200,7 +214,7 @@ class CalculateDep {
 							]);
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
@@ -215,7 +229,7 @@ class CalculateDep {
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["MAX_DEPOSIT"]){
+						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -223,7 +237,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
 						if($rowConstMapMenu["EACH_BANK"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
@@ -232,7 +246,7 @@ class CalculateDep {
 							]);
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
@@ -255,7 +269,7 @@ class CalculateDep {
 					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
 						if($rowConstMapMenu["EACH_BANK"] == '0'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
@@ -264,7 +278,7 @@ class CalculateDep {
 							]);
 						}else{
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY') and bank_code = :bank_code
                                                                     and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
@@ -287,7 +301,7 @@ class CalculateDep {
 					}
 				}
 			}else{
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
+				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
 														FROM gcmenuconstantmapping gmm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gmm.id_bankconstant = gbc.id_bankconstant
@@ -308,7 +322,7 @@ class CalculateDep {
 						}
 					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
@@ -328,7 +342,7 @@ class CalculateDep {
 						}
 					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
@@ -348,7 +362,7 @@ class CalculateDep {
 						}
 					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
 						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '1'
+																FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
 																and result_transaction = '1' and transfer_mode = :transfer_mode");
 						$getTransaction->execute([
@@ -403,14 +417,14 @@ class CalculateDep {
 												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
 												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
 												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
-												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+												and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
 			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		}else{
 			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
 												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
 												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
 												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
-												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+												and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
 			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		}
 		$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
@@ -445,7 +459,7 @@ class CalculateDep {
 				return $arrayResult;
 			}
 			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw,gbc.each_bank
+				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw,gbc.each_bank
 														FROM gcbankconstantmapping gbm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gbm.id_bankconstant = gbc.id_bankconstant
@@ -491,7 +505,7 @@ class CalculateDep {
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["MAX_WITHDRAW"]){
+						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -563,7 +577,7 @@ class CalculateDep {
 					}
 				}
 			}else{
-				$getConstantMapMenu = $this->con->prepare("SELECT gbc.transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw 
+				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw 
 														FROM gcmenuconstantmapping gmm 
 														LEFT JOIN gcbankconstant gbc 
 														ON gmm.id_bankconstant = gbc.id_bankconstant
@@ -660,7 +674,7 @@ class CalculateDep {
 		$rowSeqAmt = $getSequestAmt->fetch(\PDO::FETCH_ASSOC);
 		return $rowSeqAmt;
 	}
-	private function getConstantAcc($deptaccount_no){
+	public function getConstantAcc($deptaccount_no){
 		$getConst = $this->conora->prepare("SELECT dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
 											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,NVL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
 											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG,dpm.CHECKPEND_AMT,dpm.MEMBER_NO

@@ -1,8 +1,7 @@
 {
 	"NAME_APP" : "RFSC Connect",
 	"COOP_KEY" : "rfsc",
-	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=rfsc",
-	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=rfsc",
+	"URL_POLICY" : "https://policy.thaicoop.co/rfsc/policy_v3.html?coop=rfsc",
 	"COOP_ID" : "050001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control/",
 	"APP_ID" : "com.forestcoop.mobile",
@@ -33,7 +32,7 @@
 	"PASS_MAIL" : "h>-^yM3cPd3&",
 	"SUBSCRIPT_ROOM_NOTIFY" : "/topics/member",
 	"CMD_SMS" : "SENDMSG",
-	"FROM_SERVICES_SMS" : "Forest_UAT",
+	"FROM_SERVICES_SMS" : "Forest_COOP",
 	"CHARGE_SMS" : "66614103343",
 	"CODE_SMS" : "45140200001"
 }

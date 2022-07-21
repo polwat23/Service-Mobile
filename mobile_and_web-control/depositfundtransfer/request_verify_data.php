@@ -33,7 +33,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 												WHERE gc.sigma_key = :sigma_key and gc.bindaccount_status = '1'");
 		$getBankDisplay->execute([':sigma_key' => $dataComing["sigma_key"]]);
 		$rowBankDisplay = $getBankDisplay->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowBankDisplay["LINK_INQUIRYDEP_COOPDIRECT"])){
+		if(isset($rowBankDisplay["BANK_CODE"])){
 			
 			$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowBankDisplay["BANK_CODE"]);
 			if($arrRightDep["RESULT"]){

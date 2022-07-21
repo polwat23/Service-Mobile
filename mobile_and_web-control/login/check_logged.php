@@ -9,8 +9,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		':member_no' => $payload["member_no"],
 		':unique_id' => $dataComing["unique_id"]
 	]);
-	if($checkUserlogin->rowCount() > 0){
-		$rowLog = $checkUserlogin->fetch();
+	$rowLog = $checkUserlogin->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowLog["ID_USERLOGIN"]) && $rowLog["ID_USERLOGIN"] != ""){
 		if($rowLog["IS_LOGIN"] == '1'){
 			$lib->addLogtoTxt([
 				"access_date" => date('Y-m-d H:i:s'), 

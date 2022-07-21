@@ -33,7 +33,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												asp.member_no,ast.assisttype_desc from assslippayout asp LEFT JOIN 
 												assucfassisttype ast ON  asp.assisttype_code = ast.assisttype_code 
 												where ast.assisttype_group = '01' and
-												TRUNC(TO_CHAR(asp.SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."' and asp.sync_notify_flag = 0");
+												TRUNC(TO_CHAR(asp.SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and asp.sync_notify_flag = 0");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupMessage = array();
@@ -163,7 +165,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												asp.member_no,ast.assisttype_desc from assslippayout asp LEFT JOIN 
 												assucfassisttype ast ON  asp.assisttype_code = ast.assisttype_code 
 												where ast.assisttype_group = '01' and
-												TRUNC(TO_CHAR(asp.SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."' and asp.sync_notify_flag = 0");
+												TRUNC(TO_CHAR(asp.SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and asp.sync_notify_flag = 0");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();

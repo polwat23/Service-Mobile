@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								" min_withdraw => ".$dataComing["min_withdraw"].
 								" max_withdraw => ".$dataComing["max_withdraw"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc, false, $conoracle);
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

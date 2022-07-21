@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 								" each_bank => ".$dataComing["each_bank"].
 								" id_bankconstant => ".$dataComing["id_bankconstant"]
 			];
-			$log->writeLog('manageuser',$arrayStruc);
+			$log->writeLog('manageuser',$arrayStruc, false, $conoracle);
 			$arrayResult["RESULT"] = TRUE;
 			echo json_encode($arrayResult);
 		}else{

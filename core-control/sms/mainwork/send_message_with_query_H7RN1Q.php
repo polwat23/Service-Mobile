@@ -5,6 +5,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) 
 		|| $func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
+		$member_destination = array();
+		if($dataComing["type_send"] == "person"){
+			if(isset($dataComing["destination"]) && $dataComing["destination"] != null){
+				foreach($dataComing["destination"] as $desMemberNo){
+					$member_destination[] = strtolower($lib->mb_str_pad($desMemberNo));
+				}
+			}
+		}
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
@@ -30,18 +38,17 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
 			$getNormCont = $conoracle->prepare("SELECT slo.PAYOUTSLIP_NO,NVL(TRIM(TO_CHAR(slo.payoutnet_amt, '999,999,999,999.99')),0) as payoutnet_amt ,
-												slo.member_no,NVL(TRIM(TO_CHAR(slo.payout_amt, '999,999,999,999.99')),0) as payout_amt ,
-												NVL(TRIM(TO_CHAR(slid.item_payamt, '999,999,999,999.99')),0) as item_payamt_share,
-												NVL(TRIM(TO_CHAR(slid_l.item_payamt, '999,999,999,999.99')),0) as item_payamt_loan,
-												(SELECT NVL(TRIM(TO_CHAR(SUM(item_payamt), '999,999,999,999.99')),0) FROM slslippayindet 
-												WHERE PAYINSLIP_NO = sli.PAYINSLIP_NO and SLIPITEMTYPE_CODE 
-												IN('INS','INN','ISF','INM','PRN','PRB','IPM','INP')) as item_payamt_ins FROM slslippayout slo 
-												LEFT JOIN slslippayin sli ON slo.SLIPCLEAR_NO = sli.PAYINSLIP_NO LEFT JOIN slslippayindet slid 
-												ON sli.PAYINSLIP_NO = slid.PAYINSLIP_NO  and slid.SLIPITEMTYPE_CODE = 'SHR' LEFT JOIN 
-												slslippayindet slid_l ON sli.PAYINSLIP_NO = slid_l.PAYINSLIP_NO  and slid.SLIPITEMTYPE_CODE = 'LON' 
-												LEFT JOIN lnloantype ln ON slo.shrlontype_code = ln.loantype_code where slo.sliptype_code = 'LWD' and 
-												TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."' and slo.sync_notify_flag = '0' and 
-												ln.monitfetter_grop = 'NORM' ");
+											slo.member_no,NVL(TRIM(TO_CHAR(slo.payout_amt, '999,999,999,999.99')),0) as payout_amt ,
+											to_char( nvl( ( select  sum(sld.item_payamt) from slslippayindet sld where  slo.SLIPCLEAR_NO = sld.PAYINSLIP_NO and sld.slipitemtype_code = 'SHR' ),0) ,'999,999,999.99' ) as item_payamt_share ,
+											to_char( nvl( ( select  sum(sld.item_payamt)  from slslippayindet sld where  slo.SLIPCLEAR_NO = sld.PAYINSLIP_NO and sld.slipitemtype_code = 'LON' ),0) ,'999,999,999.99' ) as item_payamt_loan ,
+											to_char( nvl( ( select  sum(sld.item_payamt)  from slslippayindet sld where  slo.SLIPCLEAR_NO = sld.PAYINSLIP_NO and sld.slipitemtype_code like 'I%' ),0)  ,'999,999,999.99' ) as item_payamt_ins ,
+											slo.LOANCONTRACT_NO
+											FROM slslippayout slo  
+											LEFT JOIN lnloantype ln ON slo.shrlontype_code = ln.loantype_code where slo.sliptype_code = 'LWD' and slo.sync_notify_flag = '0' and 
+											slo.slip_status = 1 and   ln.monitfetter_grop = 'NORM' and ln.loantype_code not like '01%' and ln.loantype_code <> '02023' 
+											and TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+											(($dataComing["type_send"] == "person") ? (" and slo.MEMBER_NO in('".implode("','",$member_destination)."')") : "")."
+											ORDER BY slo.LOANCONTRACT_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupMessage = array();
@@ -171,18 +178,17 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$bulkInsert = array();
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			$getNormCont = $conoracle->prepare("SELECT slo.PAYOUTSLIP_NO,NVL(TRIM(TO_CHAR(slo.payoutnet_amt, '999,999,999,999.99')),0) as payoutnet_amt ,
-												slo.member_no,NVL(TRIM(TO_CHAR(slo.payout_amt, '999,999,999,999.99')),0) as payout_amt ,
-												NVL(TRIM(TO_CHAR(slid.item_payamt, '999,999,999,999.99')),0) as item_payamt_share,
-												NVL(TRIM(TO_CHAR(slid_l.item_payamt, '999,999,999,999.99')),0) as item_payamt_loan,
-												(SELECT NVL(TRIM(TO_CHAR(SUM(item_payamt), '999,999,999,999.99')),0) FROM slslippayindet 
-												WHERE PAYINSLIP_NO = sli.PAYINSLIP_NO and SLIPITEMTYPE_CODE 
-												IN('INS','INN','ISF','INM','PRN','PRB','IPM','INP')) as item_payamt_ins FROM slslippayout slo 
-												LEFT JOIN slslippayin sli ON slo.SLIPCLEAR_NO = sli.PAYINSLIP_NO LEFT JOIN slslippayindet slid 
-												ON sli.PAYINSLIP_NO = slid.PAYINSLIP_NO  and slid.SLIPITEMTYPE_CODE = 'SHR' LEFT JOIN 
-												slslippayindet slid_l ON sli.PAYINSLIP_NO = slid_l.PAYINSLIP_NO  and slid.SLIPITEMTYPE_CODE = 'LON' 
-												LEFT JOIN lnloantype ln ON slo.shrlontype_code = ln.loantype_code where slo.sliptype_code = 'LWD' and 
-												TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."' and slo.sync_notify_flag = '0' and 
-												ln.monitfetter_grop = 'NORM' ");
+											slo.member_no,NVL(TRIM(TO_CHAR(slo.payout_amt, '999,999,999,999.99')),0) as payout_amt ,
+											to_char( nvl( ( select  sum(sld.item_payamt) from slslippayindet sld where  slo.SLIPCLEAR_NO = sld.PAYINSLIP_NO and sld.slipitemtype_code = 'SHR' ),0) ,'999,999,999.99' ) as item_payamt_share ,
+											to_char( nvl( ( select  sum(sld.item_payamt)  from slslippayindet sld where  slo.SLIPCLEAR_NO = sld.PAYINSLIP_NO and sld.slipitemtype_code = 'LON' ),0) ,'999,999,999.99' ) as item_payamt_loan ,
+											to_char( nvl( ( select  sum(sld.item_payamt)  from slslippayindet sld where  slo.SLIPCLEAR_NO = sld.PAYINSLIP_NO and sld.slipitemtype_code like 'I%' ),0)  ,'999,999,999.99' ) as item_payamt_ins ,
+											slo.LOANCONTRACT_NO
+											FROM slslippayout slo  
+											LEFT JOIN lnloantype ln ON slo.shrlontype_code = ln.loantype_code where slo.sliptype_code = 'LWD' and slo.sync_notify_flag = '0' and 
+											slo.slip_status = 1 and   ln.monitfetter_grop = 'NORM' and ln.loantype_code not like '01%' and ln.loantype_code <> '02023' 
+											and TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+											(($dataComing["type_send"] == "person") ? (" and slo.MEMBER_NO in('".implode("','",$member_destination)."')") : "")."
+											ORDER BY slo.LOANCONTRACT_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();

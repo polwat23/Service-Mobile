@@ -48,7 +48,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayLoan["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_ALIAS_NAME"] ?? $rowLoanData["LOANTYPE_DESC"];
 					$arrayLoan["MAX_PERIOD"] = $rowLoanData["MAX_PERIOD"];
 					$arrayLoan["INT_RATE"] = $rowLoanData["INTEREST_RATE"] ?? 0;
-					$arrayLoan['TERMS_URL']  = "";
+					//$arrayLoan['TERMS_URL']  = "";
 					if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoantype["LOANTYPE_CODE"].'.png')){
 						$arrayLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoantype["LOANTYPE_CODE"].'.png?v='.date('Ym');
 					}else{

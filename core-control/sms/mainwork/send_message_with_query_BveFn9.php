@@ -5,6 +5,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) 
 		|| $func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
+		$member_destination = array();
+		if($dataComing["type_send"] == "person"){
+			if(isset($dataComing["destination"]) && $dataComing["destination"] != null){
+				foreach($dataComing["destination"] as $desMemberNo){
+					$member_destination[] = strtolower($lib->mb_str_pad($desMemberNo));
+				}
+			}
+		}
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
@@ -31,7 +39,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
 			$getNormCont = $conoracle->prepare("SELECT sld.ITEM_PAYAMT,sl.MEMBER_NO,sld.SLIPITEM_DESC,TO_CHAR(sl.entry_date,'YYYY-MM-DD HH24:MI') as ENTRY_DATE,NVL(sld.LOANCONTRACT_NO,sl.MEMBER_NO) as LOANCONTRACT_NO
 												FROM slslippayin sl LEFT JOIN slslippayindet sld ON sl.payinslip_no = sld.payinslip_no
-												where TRUNC(TO_CHAR(sl.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."' and sl.ref_system = 'BIL' and sl.slip_status = '1'");
+												where TRUNC(TO_CHAR(sl.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and sl.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and sl.ref_system = 'BIL' and sl.slip_status = '1'");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupMessage = array();
@@ -161,7 +171,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			$getNormCont = $conoracle->prepare("SELECT sld.ITEM_PAYAMT,sl.MEMBER_NO,sld.SLIPITEM_DESC,TO_CHAR(sl.entry_date,'YYYY-MM-DD HH24:MI') as ENTRY_DATE,NVL(sld.LOANCONTRACT_NO,sl.MEMBER_NO) as LOANCONTRACT_NO
 												FROM slslippayin sl LEFT JOIN slslippayindet sld ON sl.payinslip_no = sld.payinslip_no
-												where TRUNC(TO_CHAR(sl.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."' and sl.ref_system = 'BIL' and sl.slip_status = '1'");
+												where TRUNC(TO_CHAR(sl.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and sl.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and sl.ref_system = 'BIL' and sl.slip_status = '1'");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();

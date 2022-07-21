@@ -1,7 +1,7 @@
 <?php
 require_once('../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
-require_once(__DIR__.'/../include/function_util.php');
+require_once(__DIR__.'/../include/function_util_core.php');
 
 use Utility\Library;
 use Component\functions;
@@ -16,7 +16,7 @@ $dateNow = date("YmdHi");
 
 $getNotifyWaitforSend = $conoracle->prepare("SELECT is_import,create_by,id_sendahead,send_topic,send_message,destination,CASE destination_revoke WHEN '' THEN NULL ELSE destination_revoke END as destination_revoke
 										,id_smsquery,id_smstemplate,send_platform,send_image
-										FROM smssendahead WHERE is_use = '1' and :datenow >= DATE_FORMAT(send_date,'%Y%m%d%H%i')");
+										FROM smssendahead WHERE is_use = '1' and :datenow >= TO_CHAR(send_date,'YYYYMMDDHH24MI')");
 $getNotifyWaitforSend->execute([':datenow' => $dateNow]);
 while($rowNoti = $getNotifyWaitforSend->fetch(PDO::FETCH_ASSOC)){
 	$pathImg = isset($rowNoti["send_image"]) && $rowNoti["send_image"] != "" ? $config["URL_SERVICE"].$rowNoti["send_image"] : null;

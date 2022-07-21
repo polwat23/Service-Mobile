@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','int_rate'],$da
 					$arrayResult['ACCOUNT_RECEIVE_HIDDEN'] = $lib->formataccount_hidden($arrayResult['ACCOUNT_RECEIVE'],$func->getConstant('hidden_dep'));
 					$arrayResult['CONTRACT_CLR'] = $responseSoap->contclr_no;
 					$arrayResult['DIFF_OLD_CONTRACT'] = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
-					$arrayResult['LOANPERMIT_AMT'] = $responseSoap->loanpermiss_amt;
+					$arrayResult['LOANPERMIT_AMT'] = $responseSoap->loancredit_amt;
 					$arrayResult['REQUEST_AMT'] = $responseSoap->maxloanrequest_amt;
 					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
 					$arrayResult['PERIOD'] = $responseSoap->period_payamt;

@@ -468,24 +468,31 @@ class functions {
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 					}
 					if(sizeof($arrayMemberTemp) > 0){
-						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
-																resign_status = 0 and MEM_TELMOBILE IS NOT NULL");
+						$fetchDataOra = $this->conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																 WHERE mb.member_no IN(".implode(',',$arrayMemberTemp).") and
+																 mb.resign_status = 0 and mb.MEM_TELMOBILE IS NOT NULL");
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 							if(isset($rowDataOra["MEM_TELMOBILE"])){
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}
 					}
 				}else{
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra = $this->conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																WHERE mb.member_no IN('".implode("','",$member_no)."')");
 						$fetchDataOra->execute();
 					}else{
-						$fetchDataOra = $this->conora->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra = $this->conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																WHERE  mb.member_no = :member_no");
 						$fetchDataOra->execute([':member_no' => $member_no]);
 					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
@@ -494,12 +501,14 @@ class functions {
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}else{
 							$arrayMT = array();
 							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 							$arrayMemberGRP[] = $arrayMT;
 						}
 					}
@@ -801,13 +810,13 @@ class functions {
 			}
 		}
 		public function MaintenanceMenu($menu_component) {
-			if($menu_component == 'System'){
+			/*if($menu_component == 'System'){
 				$mainTenance = $this->conora->prepare("UPDATE gcmenu SET menu_status = '0',menu_permission = '3' WHERE menu_component = :menu_component");
 				$mainTenance->execute([':menu_component' => $menu_component]);
 			}else{
 				$mainTenance = $this->conora->prepare("UPDATE gcmenu SET menu_status = '0' WHERE menu_component = :menu_component");
 				$mainTenance->execute([':menu_component' => $menu_component]);
-			}
+			}*/
 		}
 		public function PrefixGenerate($prefix){
 			$arrPrefix = explode(",",$prefix);

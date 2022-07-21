@@ -20,24 +20,6 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		
 	}
 	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
-	if($member_no != "00004034" && $member_no != "00004184" && $member_no != "00006966" && $member_no != "00008579" && $member_no != "00008580"
-	&& $member_no != "00010227" && $member_no != "00012327" && $member_no != "00012329" && $member_no != "00012330"
-	&& $member_no != "00016111" && $member_no != "00016128" && $member_no != "00016247" && $member_no != "00016633"
-	&& $member_no != "00016667" && $member_no != "00016939" && $member_no != "00016973" && $member_no != "00017581"
-	&& $member_no != "00017583" && $member_no != "00017770" && $member_no != "00017771" && $member_no != "00017774"
-	&& $member_no != "00017775" && $member_no != "00018237" && $member_no != "00018238" && $member_no != "00018744"
-	&& $member_no != "00018762" && $member_no != "00018790" && $member_no != "00018978" && $member_no != "00019107" && $member_no != "00019290"
-	&& $member_no != "00019850" && $member_no != "00019986" && $member_no != "00019987" && $member_no != "00019988"
-	&& $member_no != "00019989" && $member_no != "00020154" && $member_no != "00020244" && $member_no != "00020691"
-	&& $member_no != "00021007" && $member_no != "00021098" && $member_no != "00021357" && $member_no != "00021389"
-	&& $member_no != "00021390" && $member_no != "00005449" && $member_no != "etnmode1" && $member_no != "etnmode2" 
-	&& $member_no != "etnmode3" && $member_no != "etnmode4" && $member_no != "etnmode5" && $member_no != "00500002"){
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-	}
 	if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
 		$checkBlackList = $conoracle->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1'");
 		$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);

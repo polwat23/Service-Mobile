@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constanttypeloan',$conoracle)){
 		$arrayGroup = array();
 		$arrayLoanCheckGrp = array();
-		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN FROM gcconstanttypeloan");
+		$fetchLoanTypeCheck = $conoracle->prepare("SELECT LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,IS_PAYMENT FROM gcconstanttypeloan");
 		$fetchLoanTypeCheck->execute();
 		while($rowLoantypeCheck = $fetchLoanTypeCheck->fetch(PDO::FETCH_ASSOC)){
 			$arrayLoanCheck = $rowLoantypeCheck;
@@ -19,11 +19,13 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 				$arrayLoantype["IS_CREDITLOAN"] = "0";
 				$arrayLoantype["IS_LOANREQUEST"] = "0";
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = "0";
+				$arrayLoantype["IS_PAYMENT"] = "0";
 				
 			}else{
 				$arrayLoantype["IS_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_CREDITLOAN"];
 				$arrayLoantype["IS_LOANREQUEST"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_LOANREQUEST"];
 				$arrayLoantype["IS_ESTIMATE_CREDITLOAN"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_ESTIMATE_CREDITLOAN"];
+				$arrayLoantype["IS_PAYMENT"] = $arrayLoanCheckGrp[array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE'))]["IS_PAYMENT"];
 			}
 			$arrayLoantype["LOANTYPE_CODE"] = $rowLoantype["LOANTYPE_CODE"];
 			$arrayLoantype["LOANTYPE_DESC"] = $rowLoantype["LOANTYPE_DESC"];
@@ -39,20 +41,21 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 			});
 			foreach($resultUDiff as $value_diff){
 				if(array_search($value_diff["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE')) === False){
-					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_ESTIMATE_CREDITLOAN"]."')";
-					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN ='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
+					$insertBulkCont[] = "('".$value_diff["LOANTYPE_CODE"]."','".$value_diff["IS_CREDITLOAN"]."','".$value_diff["IS_LOANREQUEST"]."','".$value_diff["IS_ESTIMATE_CREDITLOAN"]."','".$value_diff["IS_PAYMENT"]."')";
+					$insertBulkContLog[]='LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST ='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN ='.$value_diff["IS_ESTIMATE_CREDITLOAN"].' IS_PAYMENT ='.$value_diff["IS_PAYMENT"];
 				}else{
-					$updateConst = $conoracle->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST, IS_ESTIMATE_CREDITLOAN = :IS_ESTIMATE_CREDITLOAN WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
+					$updateConst = $conoracle->prepare("UPDATE gcconstanttypeloan SET IS_CREDITLOAN = :IS_CREDITLOAN,IS_LOANREQUEST = :IS_LOANREQUEST, IS_ESTIMATE_CREDITLOAN = :IS_ESTIMATE_CREDITLOAN,IS_PAYMENT = :IS_PAYMENT WHERE LOANTYPE_CODE = :LOANTYPE_CODE");
 					$updateConst->execute([
 						':IS_CREDITLOAN' => $value_diff["IS_CREDITLOAN"],
 						':IS_LOANREQUEST' => $value_diff["IS_LOANREQUEST"],
 						':IS_ESTIMATE_CREDITLOAN' => $value_diff["IS_ESTIMATE_CREDITLOAN"],
+						':IS_PAYMENT' => $value_diff["IS_PAYMENT"],
 						':LOANTYPE_CODE' => $value_diff["LOANTYPE_CODE"]
 					]);
-					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN='.$value_diff["IS_ESTIMATE_CREDITLOAN"];
+					$updateConstLog = 'LOANTYPE_CODE=> '.$value_diff["LOANTYPE_CODE"].' IS_CREDITLOAN ='.$value_diff["IS_CREDITLOAN"].' IS_LOANREQUEST='.$value_diff["IS_LOANREQUEST"].' IS_ESTIMATE_CREDITLOAN='.$value_diff["IS_ESTIMATE_CREDITLOAN"].' IS_PAYMENT='.$value_diff["IS_PAYMENT"];
 				}
 			}
-			$insertConst = $conoracle->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN)
+			$insertConst = $conoracle->prepare("INSERT gcconstanttypeloan(LOANTYPE_CODE,IS_CREDITLOAN,IS_LOANREQUEST,IS_ESTIMATE_CREDITLOAN,IS_PAYMENT)
 															VALUES".implode(',',$insertBulkCont));
 			$insertConst->execute();
 			$arrayStruc = [
@@ -62,7 +65,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 				':details' => implode(',',$insertBulkContLog).' '.$updateConstLog
 			];
 			$arrayResult['dataOld'] = $arrayGroup;
-			$log->writeLog('manageuser',$arrayStruc,$conoracle);	
+			$log->writeLog('manageuser',$arrayStruc,false,$conoracle);	
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../../include/exit_footer.php');
 		}else{

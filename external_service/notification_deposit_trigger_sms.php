@@ -1,7 +1,7 @@
 <?php
 require_once('../autoloadConnection.php');
 require_once(__DIR__.'/../include/lib_util.php');
-require_once(__DIR__.'/../include/function_util.php');
+require_once(__DIR__.'/../include/function_util_core.php');
 
 use Utility\Library;
 use Component\functions;
@@ -32,7 +32,7 @@ if(isset($templateMessage)){
 										FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
 										LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no and dsm.coop_id = dm.coop_id
 										LEFT JOIN mbmembmaster mb ON dm.member_no = mb.member_no
-										WHERE dsm.operate_date BETWEEN (SYSDATE - 2) and SYSDATE and dsm.sync_notify_flag = '0' and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
+										WHERE dsm.operate_date BETWEEN (SYSDATE - 1) and SYSDATE and dsm.sync_notify_sms_flag = '0' and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 	$fetchDataSTM->execute();
 	while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$getOperDateLastSeqNo = $conoracle->prepare("SELECT OPERATE_DATE FROM DPDEPTSTATEMENT WHERE DEPTACCOUNT_NO = :deptaccount_no and SEQ_NO = :seq_no");
@@ -47,7 +47,7 @@ if(isset($templateMessage)){
 			$durationIdle = 0;
 		}
 		if($rowSTM["SIGN_FLAG"] == '1'){
-			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_dept_send_free"] || $durationIdle >= '90'){
+			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_dept_send_free"] || $durationIdle >= $arrSMSCont["limit_period_idle"]){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$formatDept);
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
@@ -60,7 +60,7 @@ if(isset($templateMessage)){
 					$arrayComing["MEMBER_NO"] = $rowSTM["MEMBER_NO"];
 					$arrayTel[] = $arrayComing;
 					$func->logSMSWasSent(null,$message_endpoint["BODY"],$arrayTel,'system');
-					$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+					$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 					$updateFlagDP->execute([
 						':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 						':seq_no' => $rowSTM["SEQ_NO"]
@@ -103,7 +103,7 @@ if(isset($templateMessage)){
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
 											]);
-											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 											$updateFlagDP->execute([
 												':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 												':seq_no' => $rowSTM["SEQ_NO"]
@@ -138,7 +138,7 @@ if(isset($templateMessage)){
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
 											]);
-											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 											$updateFlagDP->execute([
 												':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 												':seq_no' => $rowSTM["SEQ_NO"]
@@ -174,7 +174,7 @@ if(isset($templateMessage)){
 											':smid' => $arraySendSMS["SMID"],
 											':lastId' => $lastId
 										]);
-										$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+										$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 										$updateFlagDP->execute([
 											':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 											':seq_no' => $rowSTM["SEQ_NO"]
@@ -190,7 +190,7 @@ if(isset($templateMessage)){
 				}
 			}
 		}else{
-			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_withdraw_send_free"] || $durationIdle >= '180'){
+			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_withdraw_send_free"] || $durationIdle >= $arrSMSCont["limit_period_idle"]){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
 				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
@@ -203,7 +203,7 @@ if(isset($templateMessage)){
 					$arrayComing["MEMBER_NO"] = $rowSTM["MEMBER_NO"];
 					$arrayTel[] = $arrayComing;
 					$func->logSMSWasSent(null,$message_endpoint["BODY"],$arrayTel,'system');
-					$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+					$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 					$updateFlagDP->execute([
 						':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 						':seq_no' => $rowSTM["SEQ_NO"]
@@ -246,7 +246,7 @@ if(isset($templateMessage)){
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
 											]);
-											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 											$updateFlagDP->execute([
 												':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 												':seq_no' => $rowSTM["SEQ_NO"]
@@ -281,7 +281,7 @@ if(isset($templateMessage)){
 												':smid' => $arraySendSMS["SMID"],
 												':lastId' => $lastId
 											]);
-											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+											$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 											$updateFlagDP->execute([
 												':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 												':seq_no' => $rowSTM["SEQ_NO"]
@@ -317,7 +317,7 @@ if(isset($templateMessage)){
 											':smid' => $arraySendSMS["SMID"],
 											':lastId' => $lastId
 										]);
-										$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
+										$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 										$updateFlagDP->execute([
 											':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
 											':seq_no' => $rowSTM["SEQ_NO"]

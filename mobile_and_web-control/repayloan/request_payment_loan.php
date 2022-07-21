@@ -65,27 +65,29 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					if($resultWSLN->of_saveslip_payin_mobileResult->msg_output == '0000'){
 						
 						$fetchSeqno = $conoracle->prepare("SELECT MAX(SEQ_NO) as SEQ_NO FROM dpdeptstatement 
-														WHERE   = :deptaccount_no and deptitem_amt = :slip_amt
+														WHERE  deptaccount_no = :deptaccount_no and deptitem_amt = :slip_amt
 														and TO_DATE(operate_date,'YYYY-MM-DD') = :slip_date");
 						$fetchSeqno->execute([
-							':deptaccount_no' => $responseSaveLN->deptaccount_no,
-							':slip_amt' => $responseSaveLN->slip_amt,
-							':slip_date' => $lib->convertdate($responseSaveLN->slip_date,'y-n-d')
+							':deptaccount_no' => $resultWSLN->of_saveslip_payin_mobileResult->deptaccount_no,
+							':slip_amt' => $resultWSLN->of_saveslip_payin_mobileResult->slip_amt,
+							':slip_date' => $lib->convertdate($resultWSLN->of_saveslip_payin_mobileResult->slip_date,'y-n-d')
 						]);
 						$rowSeqno = $fetchSeqno->fetch(PDO::FETCH_ASSOC);
-						$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
-						$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo ,memo_text,deptaccount_no,seq_no)
-															VALUES(:id_memo ,:remark,:deptaccount_no,:seq_no)");
-						$insertRemark->execute([
-							':id_memo' =>  $id_memo,
-							':remark' => $dataComing["remark"],
-							':deptaccount_no' => $from_account_no,
-							':seq_no' => $rowSeqno["SEQ_NO"]
-						]);
-						$arrayResult['INTEREST_PAYMENT'] = $responseSaveLN->interest_payment;
-						$arrayResult['PRIN_PAYMENT'] = $responseSaveLN->principal_payment;
-						$arrayResult['INTEREST_PAYMENT_FORMAT'] = number_format($responseSaveLN->interest_payment,2);
-						$arrayResult['PRIN_PAYMENT_FORMAT'] = number_format($responseSaveLN->principal_payment,2);
+						if(isset($dataComing["remark"])){
+							$id_memo  = $func->getMaxTable('id_memo' , 'gcmemodept');
+							$insertRemark = $conoracle->prepare("INSERT INTO gcmemodept(id_memo ,memo_text,deptaccount_no,seq_no)
+																VALUES(:id_memo ,:remark,:deptaccount_no,:seq_no)");
+							$insertRemark->execute([
+								':id_memo' =>  $id_memo,
+								':remark' => $dataComing["remark"],
+								':deptaccount_no' => $from_account_no,
+								':seq_no' => $rowSeqno["SEQ_NO"]
+							]);
+						}
+						$arrayResult['INTEREST_PAYMENT'] = $resultWSLN->of_saveslip_payin_mobileResult->interest_payment;
+						$arrayResult['PRIN_PAYMENT'] = $resultWSLN->of_saveslip_payin_mobileResult->principal_payment;
+						$arrayResult['INTEREST_PAYMENT_FORMAT'] = number_format($resultWSLN->of_saveslip_payin_mobileResult->interest_payment,2);
+						$arrayResult['PRIN_PAYMENT_FORMAT'] = number_format($resultWSLN->of_saveslip_payin_mobileResult->principal_payment,2);
 						$arrayResult['TRANSACTION_NO'] = $ref_no;
 						$arrayResult["TRANSACTION_DATE"] = $lib->convertdate($dateOper,'D m Y',true);
 						$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
@@ -102,7 +104,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							':member_no' => $payload["member_no"],
 							':ref_no1' => $from_account_no,
 							':id_userlogin' => $payload["id_userlogin"],
-							':ref_no_source' => $responseSaveLN->payinslip_no
+							':ref_no_source' => $resultWSLN->of_saveslip_payin_mobileResult->payinslip_no
 						]);
 						$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 						$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
@@ -128,11 +130,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 									$func->insertHistory($arrPayloadNotify,'2');
 									$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 									$updateSyncNoti->execute([
-										':deptaccount_no' => $responseSaveLN->deptaccount_no,
+										':deptaccount_no' => $resultWSLN->of_saveslip_payin_mobileResult->deptaccount_no,
 										':seq_no' => $rowSeqno["SEQ_NO"]
 									]);
 									$updateSyncNoti = $conoracle->prepare("UPDATE lncontstatement SET sync_notify_flag = '1' WHERE ref_slipno = :ref_slipno");
-									$updateSyncNoti->execute([':ref_slipno' => $responseSaveLN->payinslip_no]);
+									$updateSyncNoti->execute([':ref_slipno' => $resultWSLN->of_saveslip_payin_mobileResult->payinslip_no]);
 								}
 							}
 						}
@@ -228,6 +230,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					':response_code' => "WS0066",
 					':response_message' => $e->getMessage()
 				];
+				//file_put_contents(__DIR__.'/Msgresponse.txt', json_encode($e,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 				$log->writeLog('repayloan',$arrayStruc);
 				$arrayResult["RESPONSE_CODE"] = 'WS0066';
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

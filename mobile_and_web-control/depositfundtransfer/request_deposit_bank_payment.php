@@ -233,9 +233,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						require_once('../../include/exit_footer.php');
 						
 					}else{
-						$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+						$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 																	,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-																	VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'-9',SYSDATE,:member_no,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
+																	VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'-9',SYSDATE,:member_no,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
 						$insertTransactionLog->execute([
 							':ref_no' => $ref_no,
 							':itemtype' => $rowDataDeposit["ITEMTYPE_DEP"],
@@ -335,9 +335,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						
 					}
 				}catch(SoapFault $e){
-					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+					$insertTransactionLog = $conoracle->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination_type,destination,transfer_mode
 																,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,coop_slip_no,id_userlogin,ref_no_source,bank_code)
-																VALUES(:ref_no,:itemtype,:from_account,:destination,'9',:amount,:fee_amt,:amount_receive,'1',:operate_date,'-9',SYSDATE,:member_no,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
+																VALUES(:ref_no,:itemtype,:from_account,'1',:destination,'9',:amount,:fee_amt,:amount_receive,'1',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'-9',SYSDATE,:member_no,:ref_no1,:slip_no,:id_userlogin,:ref_no_source,:bank_code)");
 					$insertTransactionLog->execute([
 						':ref_no' => $ref_no,
 						':itemtype' => $rowDataDeposit["ITEMTYPE_DEP"],

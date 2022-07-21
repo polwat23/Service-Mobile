@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	
 	$jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 	$config = json_decode($jsonConfig,true);
+	file_put_contents('test.txt',json_encode($dataComing));
 	if(isset($dataComing)){
 		if(isset($dataComing["verify_token"])){
 			$jwt = new Jwt($dataComing["verify_token"], $config["VERIFY_KEY_EXTERNAL"]);

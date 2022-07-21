@@ -5,6 +5,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 	if($func->check_permission_core($payload,'sms','sendmessageall',$conoracle) 
 		|| $func->check_permission_core($payload,'sms','sendmessageperson',$conoracle)){
 		$id_template = isset($dataComing["id_smstemplate"]) && $dataComing["id_smstemplate"] != "" ? $dataComing["id_smstemplate"] : null;
+		$member_destination = array();
+		if($dataComing["type_send"] == "person"){
+			if(isset($dataComing["destination"]) && $dataComing["destination"] != null){
+				foreach($dataComing["destination"] as $desMemberNo){
+					$member_destination[] = strtolower($lib->mb_str_pad($desMemberNo));
+				}
+			}
+		}
 		if($dataComing["channel_send"] == "mobile_app"){
 			if(isset($dataComing["send_image"]) && $dataComing["send_image"] != null){
 				$destination = __DIR__.'/../../../resource/image_wait_to_be_sent';
@@ -33,7 +41,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												slu.assisttype_desc,TO_CHAR(slo.slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date 
 												from assslippayout slo LEFT JOIN assucfassisttype slu 
 												ON slo.assisttype_code = slu.assisttype_code 
-												WHERE TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."' and slo.sync_notify_flag = 0");
+												WHERE TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and slo.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and slo.sync_notify_flag = 0");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupMessage = array();
@@ -164,7 +174,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												slu.assisttype_desc,TO_CHAR(slo.slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date 
 												from assslippayout slo LEFT JOIN assucfassisttype slu 
 												ON slo.assisttype_code = slu.assisttype_code 
-												WHERE TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."' and slo.sync_notify_flag = 0");
+												WHERE TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and slo.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and slo.sync_notify_flag = 0");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
