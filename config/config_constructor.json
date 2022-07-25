@@ -2,6 +2,7 @@
 	"NAME_APP" : "PHY Saving",
 	"COOP_KEY" : "phy-test",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=phy",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=phy",
 	"COOP_ID" : "041001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control",
 	"APP_ID" : "com.phy.mobile",
