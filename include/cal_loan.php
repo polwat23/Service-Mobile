@@ -460,8 +460,10 @@ class CalculateLoan {
 					}else{
 						$periodPay = ($LoanDebt / 150) + (10 - (($LoanDebt / 150) % 10));
 					}
-					if($periodPay < 100){
+					if($periodPay < 100 && $periodPay > 0){
 						$periodPay = 100;
+					}else if($periodPay < 0){
+						$periodPay = 0;
 					}
 					$periodPay = floor($periodPay);
 				}else{

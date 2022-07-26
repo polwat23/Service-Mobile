@@ -16,6 +16,8 @@ $fetchDataSTM->execute();
 while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 	if($rowSTM["LOANTYPE_CODE"] == '13'){
 		$templateMessage = $func->getTemplateSystem('ApproveLoan',1);
+	}else if($rowSTM["LOANTYPE_CODE"] == '18'){
+		$templateMessage = $func->getTemplateSystem('ApproveLoan',3);
 	}else{
 		$templateMessage = $func->getTemplateSystem('ApproveLoan',2);
 	}
