@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManageAtm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$getATMCard = $conoracle->prepare("SELECT atmcard_id,atmclose,firstname,surname FROM atmmember WHERE member_no = :member_no");
+		$getATMCard = $conoracle->prepare("SELECT atmcard_id,atmclose,atmhold,firstname,surname FROM atmmember WHERE member_no = :member_no and atmclose = '0'");
 		$getATMCard->execute([':member_no' => $member_no]);
 		$arrCard = array();
 		while($rowCard = $getATMCard->fetch(PDO::FETCH_ASSOC)){
@@ -16,7 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$listCard["ATM_CARD_ID_FORMAT_HIDE"] = $lib->formataccount_hidden_atm($card_number,'xxxx-hhhh-hhhh-xxxx');
 			$listCard["ATM_HOLDER"] = $rowCard["FIRSTNAME"].' '.$rowCard["SURNAME"];
 			$listCard["ATM_IMG"] = $config["URL_SERVICE"]."resource/utility_icon/atm/atm_card.webp";
-			$listCard["IS_SUSPENDED"] = $rowCard["ATMCLOSE"] == '1' ? TRUE : FALSE;
+			$listCard["IS_SUSPENDED"] = $rowCard["ATMHOLD"] == '1' ? TRUE : FALSE;
 			//$listCard["BALANCE_AMT"] = "10,000.00";
 			$arrCard[] = $listCard;
 		}

@@ -11,6 +11,19 @@ if($lib->checkCompleteArgument(['menu_component','terms_id'],$dataComing)){
 			':url_policy' => $config["URL_POLICY"],
 			':policy_id' => $dataComing["terms_id"]
 		]);
+		
+		$getStatusAccept = $conoracle->prepare("SELECT PRIVACY_POLICY FROM mbmembmaster WHERE member_no = :member_no");
+		$getStatusAccept->execute([':member_no' => $member_no]);
+		$rowStatus = $getStatusAccept->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowStatus["PRIVACY_POLICY"]) && $rowStatus["PRIVACY_POLICY"] != '0' && $rowStatus["PRIVACY_POLICY"] != '9'){
+			if($rowStatus["PRIVACY_POLICY"] == '1'){
+				$updatePrivacy = $conoracle->prepare("UPDATE mbmembmaster SET privacy_policy = '3' WHERE member_no = :member_no");
+				$updatePrivacy->execute([':member_no' => $member_no]);
+			}
+		}else{
+			$updatePrivacy = $conoracle->prepare("UPDATE mbmembmaster SET privacy_policy = '2' WHERE member_no = :member_no");
+			$updatePrivacy->execute([':member_no' => $member_no]);
+		}
 		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

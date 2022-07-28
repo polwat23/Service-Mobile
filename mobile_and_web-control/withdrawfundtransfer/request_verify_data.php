@@ -214,6 +214,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						$arrayResult['CITIZEN_ID_ENC'] = $arrResponse->CITIZEN_ID_ENC;
 						$arrayResult['BANK_ACCOUNT_ENC'] = $arrResponse->BANK_ACCOUNT_ENC;
 						$arrayResult['TRAN_ID'] = $arrResponse->TRAN_ID;
+						$arrayResult['ACCOUNT_NAME'] = $arrResponse->ACCOUNT_NAME;
 					}else{
 						$arrayResult['RESPONSE_CODE'] = "WS0042";
 						$arrayStruc = [
