@@ -49,11 +49,11 @@ $config = json_decode($json,true);
 					<div class="login100-form-avatar">
 						<img src="https://cdn.thaicoop.co/coop/<?=$config["COOP_KEY"]?>.jpg" id="avatar" alt="logo">
 					</div>
-					<span class="login100-form-title p-t-20">
+					<span class="login100-form-title p-t-20" style="font-size:20px; font-weight:bold">
 						สมัครใช้บริการ <?=$config["LINEBOT_NAME"]?>
 					</span>
 					<span class="login100-form-title p-t-20 p-b-45" >
-						สวัสดี <span id="nameline"></span> <?php echo $_GET["id"]??null  ?> 
+						สวัสดี <span id="nameline"></span>  
 					</span>
 					<div class="container-login100-form-btn p-t-10" id="showwhenload" style="display:none;">
 					<a href="#" class="login100-form-btn" id="deeplink">

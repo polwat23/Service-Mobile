@@ -8,7 +8,7 @@ $member_no = $lineLib->getMemberNo($user_id);
 		':line_token' => $user_id,
 		':detail' => json_encode($dataComing["events"][0],JSON_UNESCAPED_UNICODE )
 	])){
-		
+		/*
 		$insertTextIncome = $conmysql->prepare("INSERT INTO lbmessagedata (text,line_token,detail,sender) VALUES (:text,:line_token,:detail,:member_no)");
 		if($insertTextIncome->execute([
 			':text' => $message, 
@@ -35,6 +35,8 @@ $member_no = $lineLib->getMemberNo($user_id);
 			$lib->sendLineNotify($message_error);
 		}
 		//none
+		
+		*/
 	}else{
 		$data = [
 			':text' => $message, 

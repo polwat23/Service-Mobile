@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 			}
 		}
 		$rowPassword = $checkLogin->fetch(PDO::FETCH_ASSOC);
-		$checkResign = $conoracle->prepare("SELECT resign_status FROM mbmembmaster WHERE member_no = :member_no");
+		$checkResign = $conoracle->prepare("SELECT resign_status ,ADDR_MOBILEPHONE as MEM_TELMOBILE FROM mbmembmaster WHERE member_no = :member_no");
 		$checkResign->execute([':member_no' => $member_no]);
 		$rowResign = $checkResign->fetch(PDO::FETCH_ASSOC);
 		if($rowResign["RESIGN_STATUS"] == '1'){
@@ -170,6 +170,23 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 							$updateWrongPassCount->execute([
 								':member_no' => $member_no
 							]);
+							
+							$getMemberLogin = $conmysql->prepare("SELECT unique_id FROM gcuserlogin WHERE member_no = :member_no and channel = :channel  ORDER BY id_userlogin ASC");
+							$getMemberLogin->execute([
+								':member_no' => $member_no,
+								':channel' => $arrPayload["PAYLOAD"]["channel"]
+							]);
+							$rowMemberLogin = $getMemberLogin->fetch(PDO::FETCH_ASSOC);
+
+							if($dataComing["unique_id"] != $rowMemberLogin["unique_id"]){
+								if($dataComing["member_no"] == 'etnmode1' || $dataComing["member_no"] == 'etnmode2' || $dataComing["member_no"] == 'etnmode3' || $dataComing["member_no"] == 'etnmode4'){
+									$arrayResult['IS_OTP'] = FALSE;
+								}else{
+									$arrayResult['IS_OTP'] = TRUE;
+								}
+								$arrayResult['TEL'] = $rowResign["MEM_TELMOBILE"];
+								
+							}
 							$arrayResult['RESULT'] = TRUE;
 							
 							if ($forceNewSecurity == true) {
@@ -178,8 +195,23 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								$arrayResult = array();
 								$arrayResult = $newArrayResult;
 							}
-
+							$line_token = $lineLib->getLineToken($member_no);
+							if($line_token){
+								$device_name = $arrPayload["PAYLOAD"]["device_name"];
+								$ip_address = $arrPayload["PAYLOAD"]["ip_address"];
+								$arrPostData["messages"][0] = $lineLib->notifyLineLogin($device_name,$ip_address);//$dataPrepare;
+								$arrPostData["to"] = $line_token;
+								$dataSendLineBot = $lineLib->sendPushLineBot($arrPostData);
+								if($dataSendLineBot["RESULT"] == false){
+									$filename = basename(__FILE__, '.php');
+									$message = "Line Bot| Can not push message |".$filename." |".json_encode($dataSendLineBot,JSON_UNESCAPED_UNICODE);
+									$lib->sendLineNotify($message);
+								}	
+							}
+							
 							require_once('../../include/exit_footer.php');
+						
+						
 						}else{
 							$conmysql->rollback();
 							$filename = basename(__FILE__, '.php');

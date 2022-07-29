@@ -148,6 +148,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 												':request_amt' => $request_amt]);
 					$rowCollReqgrt =  $fetchCollReqgrt->fetch(PDO::FETCH_ASSOC);				
 					$arrayResult["IS_GUARANTEE"] = TRUE;
+					$arrayResult["IS_GUARANTEE_NAME"] = true;
+					$arrayResult["IS_GUARANTEE"] = true;
 					$iscountcoll = $rowCollReqgrt["USEMAN_AMT"];
 					$arrayResult["GUARANTOR"] = $rowCollReqgrt["USEMAN_AMT"];
 				}
@@ -173,8 +175,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 						$arrConst["FILEMAPPING_ID"] = $rowConstUploadFile["filemapping_id"];
 						$arrConst["FILE_ID"] = $rowConstUploadFile["file_id"];
 						$arrConst["FILE_NAME"] = $rowConstUploadFile["file_name"];
+						if($rowConstUploadFile["file_id"] =='7'){
+							$arrConst["MAX"] = $rowCollReqgrt["USEMAN_AMT"];
+						}else{
+							$arrConst["MAX"] = $rowConstUploadFile["max"];
+						}
 						$arrConst["LOANGROUP_CODE"] = $rowConstUploadFile["loangroup_code"];
-						$arrConst["MAX"] = $rowConstUploadFile["max"];
 						$arrConst["IS_REQUIRE"] = $rowConstUploadFile["is_require"] == "1";
 						$arrConst["UPDATE_DATE"] = $rowConstUploadFile["update_date"];
 						$arrayUploadFileGroup[] = $arrConst;
@@ -198,11 +204,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult["SALARY"] = $dataComing["salary"];
 				$arrayResult["REMARK"] = $dataComing["remark"];
-				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
+				
 				$arrayResult["IS_INPUT_REMARK"] = TRUE;
 				$arrayResult["IS_INPUT_SALARY"] = TRUE;
 				$arrayResult["REQ_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = TRUE;
+				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;		
 				$arrayResult["HIDE_PERIOD_INFO"] = TRUE;

@@ -211,7 +211,14 @@ if(!$anonymous){
 							$arrayGroupMenu["ID_PARENT"] = $rowMenu["menu_parent"];
 							$arrayGroupMenu["MENU"][] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '24'){
-							$arrayMenuSetting[] = $arrMenu;
+							if (
+								($rowMenu["menu_component"] == "SettingAccountDeletion") &&
+								(!in_array($payload["member_no"], array("etnmode1","etnmode2","etnmode3","etnmode4")))
+							) {
+								//ปิดการแสดงเมนูลบบัญชี ให้แสดงเฉพาะ etnmode
+							} else {
+								$arrayMenuSetting[] = $arrMenu;
+							}
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
 							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
@@ -409,6 +416,7 @@ if(!$anonymous){
 				
 				if(preg_replace('/\./','',$dataComing["app_version"]) >= '131' || $dataComing["channel"] == 'web'){
 					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+					$arrayResult["APP_CONFIG"]["LINE_BOT_URL"] =  $config["URL_LINEBOT"];
 				}
 
 				$arrayResult['RESULT'] = TRUE;
@@ -472,6 +480,7 @@ if(!$anonymous){
 			
 			if(preg_replace('/\./','',$dataComing["app_version"]) >= '131' || $dataComing["channel"] == 'web'){
 				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+				$arrayResult["APP_CONFIG"]["LINE_BOT_URL"] =  $config["URL_LINEBOT"];
 			}
 				
 			$arrayResult['RESULT'] = TRUE;

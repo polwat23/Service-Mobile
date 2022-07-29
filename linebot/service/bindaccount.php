@@ -77,7 +77,7 @@ if($checkBeenBind->rowCount() > 0){
 	$dataContent["contents"][0]["body"]["type"] = "box";
 	$dataContent["contents"][0]["body"]["layout"] = "vertical";
 	$dataContent["contents"][0]["body"]["contents"][0]["type"] = "text";
-	$dataContent["contents"][0]["body"]["contents"][0]["text"] = "หากใช้งาน Line บนคอมพิวเตอร์ให้ใช้ แอปพลิเคชัน RYT Saving เข้าเมนูสแกน QR Code แล้วสแกน";
+	$dataContent["contents"][0]["body"]["contents"][0]["text"] = "หากใช้งาน Line บนคอมพิวเตอร์ให้ใช้ แอปพลิเคชัน สอ.กฟผ. เข้าเมนูสแกน QR Code แล้วสแกน";
 	$dataContent["contents"][0]["body"]["contents"][0]["size"] = "sm";
 	$dataContent["contents"][0]["body"]["contents"][0]["color"] = "#000000FF";
 	$dataContent["contents"][0]["body"]["contents"][0]["wrap"] = true;

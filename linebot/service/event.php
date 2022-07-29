@@ -139,8 +139,9 @@ if(sizeof($arrayGroupNews) >0 ){
 	$arrPostData["messages"][0] = $eventData;
 	$arrPostData["replyToken"] = $reply_token; 
 }else{
-	$messageResponse = "ไม่พบกิจกรรมของสหกรณ์";
-	$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+	$altText = "ท่านยังไม่ได้ผูกบัญชี";
+	$dataMs = $lineLib->notBindAccount();
+	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataMs);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
 }

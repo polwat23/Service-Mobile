@@ -7,9 +7,10 @@ if($message == " เปิดการแจ้งเตือน"){
 	$is_notify = 0;
 }
 
-$insertNotify =  $conmysql->prepare("UPDATE lbnotify SET is_notify = :is_notify ");
+$insertNotify =  $conmysql->prepare("UPDATE lbnotify SET is_notify = :is_notify WHERE line_token = :line_token ");
 	if($insertNotify->execute([
-		':is_notify' => $is_notify
+		':is_notify' => $is_notify,
+		':line_token' => $user_id
 	])){
 		$messageResponse = $message." สำเร็จ";
 		$dataPrepare = $lineLib->prepareMessageText($messageResponse);
