@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component', 'cremation_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DeceasedInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		
@@ -12,15 +12,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayDataWcAcc = array();
 		$arrayNameGrp = array();
 
-		$getDataWc = $conmysql->prepare("SELECT full_name, cremation_amt, data_date FROM gccremationlist WHERE is_use = '1' AND data_date BETWEEN :datebefore AND :datenow  ORDER BY data_date DESC");
+		$getDataWc = $conmysql->prepare("SELECT full_name, cremation_amt, data_date FROM gccremationlist WHERE is_use = '1' AND data_date BETWEEN :datebefore AND :datenow AND cremation_coop = :cremation_coop  ORDER BY data_date DESC");
 		$getDataWc->execute([
 			':datebefore' => $date_before,
-			':datenow' => $date_now
+			':datenow' => $date_now,
+			':cremation_coop' => $dataComing["cremation_code"]
 		]);
 		
 		while($rowDataWc = $getDataWc->fetch(PDO::FETCH_ASSOC)){
 			$arrayName = array();
 			$arrayName["FULL_NAME"] = $rowDataWc["full_name"];
+			$arrayName["CREMATION_AMT_NO_FORMAT"] = $rowDataWc["cremation_amt"];
 			$arrayName["CREMATION_AMT"] = number_format($rowDataWc["cremation_amt"],2);
 			$arrayNameGrp[$rowDataWc["data_date"]][] = $arrayName;
 		}
@@ -30,6 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayDataWc = array();
 				$arrayDataWc["LIST"] = $arrayNameGrp[$key];
 				$arrayDataWc["MONTH"] = $lib->convertperiodkp(date("Ym", strtotime($key)), true);
+				$arrayDataWc["TOTAL_AMT"] = number_format(array_sum(array_column($arrayNameGrp[$key], 'CREMATION_AMT_NO_FORMAT') ?? 0),2);
 				$arrayDataWcGrp[] = $arrayDataWc;
 				$arrayDataWcAcc[] = $key;
 			}

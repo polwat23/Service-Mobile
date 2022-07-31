@@ -2,34 +2,24 @@
 set_time_limit(150);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coop_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','citizen_id'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		try {
-			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
-			$mobile_no = preg_replace('/-/','',$dataComing["k_mobile_no"]);
+			$coop_account_no = $payload["member_no"];
 			$arrPayloadverify = array();
 			$arrPayloadverify['member_no'] = $payload["member_no"];
-			$arrPayloadverify['coop_account_no'] = time().$lib->randomText('all',2);
-			$arrPayloadverify['user_mobile_no'] = $mobile_no;
+			$arrPayloadverify['coop_account_no'] = $coop_account_no;
 			$arrPayloadverify['citizen_id'] = $dataComing["citizen_id"];
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
-			$arrPayloadverify['exp'] = time() + 60;
+			$arrPayloadverify['exp'] = time() + 300;
 			$sigma_key = $lib->generate_token();
 			$arrPayloadverify['sigma_key'] = $sigma_key;
 			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$checkAccBankBeenbind = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
-			$checkAccBankBeenbind->execute([':member_no' => $payload["member_no"]]);
-			if($checkAccBankBeenbind->rowCount() > 0){
-				$arrayResult['RESPONSE_CODE'] = "WS0036";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status = '8'");
+			$checkBeenBindForPending = $conmysql->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no 
+														and bindaccount_status = '8' and bank_code = '006'");
 			$checkBeenBindForPending->execute([
 				':member_no' => $payload["member_no"]
 			]);
@@ -52,19 +42,19 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 			$account_name_th = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
 			//$account_name_en = $arrResponseVerify->ACCOUNT_NAME_EN;
 			$conmysql->beginTransaction();
-			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,mobile_no,bank_account_name,bank_account_name_en,bank_code,id_token) 
-															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:mobile_no,:bank_account_name,:bank_account_name_en,'004',:id_token)");
+			$insertPendingBindAccount = $conmysql->prepare("INSERT INTO gcbindaccount(sigma_key,member_no,deptaccount_no_coop,citizen_id,bank_account_name,bank_account_name_en,bank_code,id_token,account_payfee) 
+															VALUES(:sigma_key,:member_no,:coop_account_no,:citizen_id,:bank_account_name,:bank_account_name_en,'006',:id_token,:acc_payfee)");
 			if($insertPendingBindAccount->execute([
 				':sigma_key' => $sigma_key,
 				':member_no' => $payload["member_no"],
 				':coop_account_no' => $coop_account_no,
 				':citizen_id' => $dataComing["citizen_id"],
-				':mobile_no' => $mobile_no,
 				':bank_account_name' => $account_name_th,
 				':bank_account_name_en' => $account_name_th,
-				':id_token' => $payload["id_token"]
+				':id_token' => $payload["id_token"],
+				':acc_payfee' => preg_replace('/-/','',$dataComing["account_payfee"])
 			])){
-				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/request_reg_id_for_consent',$arrSendData);
+				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/ktb/request_reg_id_for_consent',$arrSendData);
 				if(!$responseAPI["RESULT"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0022";
 					$arrayStruc = [
@@ -77,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':query_flag' => '1'
 					];
 					$log->writeLog('bindaccount',$arrayStruc);
-					$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+					$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/ktb/request_reg_id_for_consent ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 					$lib->sendLineNotify($message_error);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -132,10 +122,10 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 						':member_no' => $payload["member_no"],
 						':coop_account_no' => $coop_account_no,
 						':citizen_id' => $dataComing["citizen_id"],
-						':mobile_no' => $mobile_no,
 						':bank_account_name' => $account_name_th,
 						':bank_account_name_en' => $account_name_th,
-						':id_token' => $payload["id_token"]
+						':id_token' => $payload["id_token"],
+						':acc_payfee' => preg_replace('/-/','',$dataComing["account_payfee"])
 					]),
 					':query_error' => $insertPendingBindAccount->queryString,
 					':query_flag' => '-9'
@@ -146,10 +136,10 @@ if($lib->checkCompleteArgument(['menu_component','k_mobile_no','citizen_id','coo
 					':member_no' => $payload["member_no"],
 					':coop_account_no' => $coop_account_no,
 					':citizen_id' => $dataComing["citizen_id"],
-					':mobile_no' => $mobile_no,
 					':bank_account_name' => $account_name_th,
 					':bank_account_name_en' => $account_name_th,
-					':id_token' => $payload["id_token"]
+					':id_token' => $payload["id_token"],
+					':acc_payfee' => preg_replace('/-/','',$dataComing["account_payfee"])
 				]);
 				$lib->sendLineNotify($message_error);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
