@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getAccept->execute([':member_no' => $payload["member_no"]]);
 		if($getAccept->rowCount() == 0){
 			$arrConsentForm = array();
-			if(preg_replace('/\./','',$dataComing["app_version"]) >= '150' && $payload["member_no"] == '000'){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '150'){
 				$arrayResult['TERMS']["TERMS_URL"] = $config["URL_POLICY"];
 				$arrayResult['TERMS']["TERMS_ID"] = 'v1';
 			}
