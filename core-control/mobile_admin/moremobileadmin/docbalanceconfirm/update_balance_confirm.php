@@ -285,7 +285,7 @@ $html.='
 	<div style="font-weight:bold;" class="text-center">หนังสือตอบตอบยืนยันยอด</div>
 	<div>
 		<div style="margin-left:30px; display:inline;">เรียน</div>
-		<div style="margin-left:30px; display:inline;">นางวราพร แพสถิตถาวร</div>
+		<div style="margin-left:30px; display:inline;">นางสาวสุภางค์   เวสารัชอารีย์กุล</div>
 		<div style="margin-left:30px; display:inline;">ผู้ตรวจสอบบัญชี สหกรณ์ออมทรัพย์ไทยน้ำทิพย์ จำกัด</div>
 	</div>
 	<div>ข้าพเจ้าขอยืนยันยอดทุนเรือนหุ้น เงินกู้ค้างชำระ และเงินฝาก ตามรายการที่ทางสหกรณ์ออมทรัพย์ แจ้งให้ข้าพเจ้าทราบนั้น</div>
