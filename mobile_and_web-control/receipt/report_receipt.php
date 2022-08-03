@@ -132,8 +132,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																kpd.RECEIPT_NO,
 																kpd.OPERATE_DATE,
 																kpd.SHARESTK_VALUE,
-																kpd.KEEPING_STATUS
+																kpd.KEEPING_STATUS,
+																KL.LOANCREDIT_AMT,KL.CONCOLL_BLANCE
 																FROM kpmastreceive kpd
+																LEFT JOIN KPTEMPLOANCREDIT KL ON kpd.MEMBER_NO = KL.MEMBER_NO
 																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
@@ -145,6 +147,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
 		$header["membgroup_code"] = $rowName["MEMBGROUP_CODE"];
+		$header["loancredit_amt"] = number_format($rowKPHeader["LOANCREDIT_AMT"],2);
+		$header["loancoll_amt"] = number_format($rowKPHeader["CONCOLL_BLANCE"],2);
 		$header["buyshare_more"] = "";
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D/n/Y');
@@ -326,8 +330,8 @@ $html .= '
                   </tr>
                   <tr>
                     <td style="border:none;"></td>
-                    <td>'.($header["วงเงินกู้ไม่เกิน"]??null).'</td>
-                    <td>'.($header["สิทธิ์ค้ำคงเหลือ"]??null).'</td>
+                    <td>'.($header["loancredit_amt"]??null).'</td>
+                    <td>'.($header["loancoll_amt"]??null).'</td>
                   </tr>
               </table>
           </div>
