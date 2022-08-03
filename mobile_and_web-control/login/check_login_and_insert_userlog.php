@@ -147,8 +147,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				if(sizeof($bulkInsert) > 0){
 					
 					$insertBacklist = $conoracle->prepare("INSERT ALL ".implode(' ',$bulkInsert)." SELECT * FROM dual");
-					$insertBacklist->execute();
-					/*if($insertBacklist->execute()){
+					if($insertBacklist->execute()){
 					}else{
 						
 						
@@ -158,7 +157,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 						
-					}*/
+					}
 				}
 				if(sizeof($arrayIdToken) > 0){
 					$updateLoggedOneDevice = $conoracle->prepare("UPDATE gctoken gt,gcuserlogin gu SET gt.rt_is_revoke = '-6',

@@ -22,6 +22,18 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
+		
+		
+		$getSharemasterinfo = $conoracle->prepare("SELECT (sharestk_amt * 10) as SHARE_AMT,(periodshare_amt * 10) as PERIOD_SHARE_AMT,sharebegin_amt
+													FROM shsharemaster WHERE member_no = :member_no");
+		$getSharemasterinfo->execute([':member_no' => $member_no]);
+		$rowMastershare = $getSharemasterinfo->fetch(PDO::FETCH_ASSOC);
+		if($rowMastershare){
+			$header['BRING_FORWARD'] = number_format($rowMastershare["SHAREBEGIN_AMT"] * 10,2);
+			$header['SHARE_AMT'] = number_format($rowMastershare["SHARE_AMT"],2);
+		}
+		
+		
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
 			$getPaymentDetail = $conoracle->prepare("SELECT 
 																		CASE kut.system_code 
@@ -166,7 +178,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["member_no"] = $payload["member_no"];
 		$header["sum_amount"] = $sumAmount;
 		$header["receipt_no"] = trim($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D/n/Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			if ($forceNewSecurity == true) {
@@ -293,22 +305,20 @@ function GenerateReport($dataReport,$header,$lib){
 				<table style="width: 100%;">
 					<tbody>
 						<tr>
-							<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
-							<td style="width: 350px;">'.$header["member_no"].'</td>
+							<td style="width: 50px;font-size: 18px;">สังกัด/งบงาน :</td>
+							<td style="width: 101px;">'.$header["member_group"].'</td>
 							<td style="width: 50px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
 							<td style="width: 101px;">'.$header["receipt_no"].'</td>
 						</tr>
 						<tr>
-							<td style="width: 50px;font-size: 18px;"></td>
-							<td style="width: 350px;"></td>
+							<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
+							<td style="width: 350px;">'.$header["member_no"].'</td>
 							<td style="width: 50px;font-size: 18px;">วันที่ :</td>
 							<td style="width: 101px;">'.$header["operate_date"].'</td>
 						</tr>
 						<tr>
 							<td style="width: 50px;font-size: 18px;">ชื่อ - สกุล :</td>
 							<td style="width: 350px;">'.$header["fullname"].'</td>
-							<td style="width: 50px;font-size: 18px;">สังกัด :</td>
-							<td style="width: 101px;">'.$header["member_group"].'</td>
 						</tr>
 					</tbody>
 				</table>
@@ -316,12 +326,17 @@ function GenerateReport($dataReport,$header,$lib){
 			<div>
 				<table style=" border-collapse: collapse; width:100%">
 					<tr>
-						<th class="center" style="width:350px">รายการชำระ</th>
+						<th class="center" style="width:350px; text-align:left">หุนเรือนหุ้นยกมาต้นปี  &nbsp;&nbsp; '.$header["BRING_FORWARD"].'</th>
+						<th class="center" style="width:80px" colspan="3"></th>
+						<th class="center" colspan="2">ทุนเรือนหุ้น &nbsp;&nbsp;'.$header["SHARE_AMT"].'</th>
+					</tr>
+					<tr>
+						<th class="center" style="width:350px">รายละเอียดรายการ</th>
 						<th class="center" style="width:80px">งวดที่</th>
 						<th class="center">เงินต้น</th>
 						<th class="center">ดอกเบี้ย</th>
 						<th class="center">รวมเป็นเงิน</th>
-						<th class="center">ยอดเงินคงเหลือ</th>
+						<th class="center" style="width:148.5px">ยอดคงเหลือ</th>
 					</tr>
 				</table>
 
@@ -338,17 +353,17 @@ function GenerateReport($dataReport,$header,$lib){
 				$html .= '<table style=" border-collapse: collapse; width:100%">';
 				// Detail
 	
-	$i = 0;
-	$bordRight = sizeof($dataReport) > 12 ? 'border-right:1px solid;' : '';
-	$endRow = -1;
-	$startRow = -1;
-	if (sizeof($dataReport) == 19 || sizeof($dataReport) == 20) {
-		$endRow = 18;
-		$startRow = 19;
-	}  else if (sizeof($dataReport) >= 21) {
-		$endRow = 19;
-		$startRow = 20;
-	}
+				$i = 0;
+				$bordRight = sizeof($dataReport) > 12 ? 'border-right:1px solid;' : '';
+				$endRow = -1;
+				$startRow = -1;
+				if (sizeof($dataReport) == 19 || sizeof($dataReport) == 20) {
+					$endRow = 18;
+					$startRow = 19;
+				}  else if (sizeof($dataReport) >= 21) {
+					$endRow = 19;
+					$startRow = 20;
+				}
 
 	foreach($dataReport as $data){
 		$html .='
@@ -371,8 +386,8 @@ function GenerateReport($dataReport,$header,$lib){
 				</div>
 				<table style=" border-collapse: collapse; width:100%">
 					<tr>
-						<td class="center border" style="width:557px;">'.$lib->baht_text($header["sum_amount"]).'</td>
-						<td class="border center" style="width:114.5px">รวมเงิน</td>
+						<td class="center border" style="width:557px;">('.$lib->baht_text($header["sum_amount"]).')</td>
+						<td class="border center" style="width:114.5px">รวมเป็นเงิน</td>
 						<td class="border right" style="width:128px; padding-right:5px;">'.number_format($header["sum_amount"],2).'</td>
 						<td class="border right" style="padding-right:5px;"></td>
 					</tr>				
@@ -383,14 +398,16 @@ function GenerateReport($dataReport,$header,$lib){
 		}
 			// หมายเหตุ - ลายเซ็น
 	$html .= '
-			<div style="display:flex;">
-			<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
-			<div style="width:100px;margin-left: 570px;display:flex;">
-			<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
-			<div style="font-size: 18px;margin-left: 0px;margin-top:60px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
+			<div style="display:flex; position:relative">
+				<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
+				<div style="width:100px;margin-left: 570px;display:flex;">
+					<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
+				
+					<div style="font-size: 18px;margin-left: 0px;margin-top:60px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
+				</div>
+				<div style="position:absolute; font-size: 18px;margin-left: 750px;top:20px;">ผู้จัดการ</div>
 			</div>
-			</div>
-			<div style="font-size: 18px;margin-left: 610px;margin-top:-25px;">ผู้จัดการ</div>
+		
 			';
 
 	$dompdf = new Dompdf([

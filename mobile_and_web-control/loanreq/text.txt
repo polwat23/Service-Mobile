@@ -1,1 +1,1 @@
-{"as_wspass":"Data Source=192.168.10.232\/gcoop;Persist Security Info=True;User ID=iscorfsc;Password=iscorfsc;Unicode=True;coop_id=050001;coop_control=050001;","as_deptaccount_no":"0101158249","as_deptitemtype_code":"DTX","adc_deptitem_amt":0,"ai_status":0,"as_msglog":null,"adc_amt":0}
+{"as_wspass":"Data Source=192.168.10.232\/gcoop;Persist Security Info=True;User ID=iscorfsc;Password=iscorfsc;Unicode=True;coop_id=050001;coop_control=050001;","as_deptaccount_no":"5101251029","as_deptitemtype_code":"DTX","adc_deptitem_amt":0,"ai_status":0,"as_msglog":null,"adc_amt":0}

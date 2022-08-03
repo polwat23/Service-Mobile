@@ -27,16 +27,15 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			}
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
-			$getNormCont = $conoracle->prepare("select TRIM(TO_CHAR(nenough_amt, '999,999,999,999.99')) as nenough_amt,recv_period,
-												EXPENSE_ACCID,member_no from  kpkepnotenoughmoneytosms 
-												where post_status = '8' and expense_code IS NULL");
+			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
 				$arrTarget = array();
-				$arrTarget["NENOUGH_AMT"] = $rowTarget["NENOUGH_AMT"];
-				$arrTarget["EXPENSE_ACCID"] = $rowTarget["EXPENSE_ACCID"];
-				$arrTarget["RECV_PERIOD"] = $rowTarget["RECV_PERIOD"];
+				$arrTarget["RECV_MONTH"] = $lib->convertperiodkp(trim($rowTarget["RECV_PERIOD"]));
+				$arrTarget["KEPT_AMT"] = number_format($rowTarget["KEPITEM_AMT"],2);
+				$arrTarget["DEPTBAL_AMT"] = number_format($rowTarget["DEPTBAL_AMT"],2);
 				$arrToken = $func->getFCMToken('person',$rowTarget["MEMBER_NO"],$conoracle);
 				$arrMessage = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 				$getName = $conoracle->prepare("SELECT MP.PRENAME_DESC || MB.MEMB_NAME ||' '|| MB.MEMB_SURNAME AS FULLNAME 
@@ -89,16 +88,15 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 		}else{
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
-			$getNormCont = $conoracle->prepare("select TRIM(TO_CHAR(nenough_amt, '999,999,999,999.99')) as nenough_amt,recv_period,
-												EXPENSE_ACCID,member_no from  kpkepnotenoughmoneytosms 
-												where post_status = '8' and expense_code IS NULL");
+			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
 				$arrTarget = array();
-				$arrTarget["NENOUGH_AMT"] = $rowTarget["NENOUGH_AMT"];
-				$arrTarget["EXPENSE_ACCID"] = $rowTarget["EXPENSE_ACCID"];
-				$arrTarget["RECV_PERIOD"] = $rowTarget["RECV_PERIOD"];
+				$arrTarget["RECV_MONTH"] = $lib->convertperiodkp(trim($rowTarget["RECV_PERIOD"]));
+				$arrTarget["KEPT_AMT"] = number_format($rowTarget["KEPITEM_AMT"],2);
+				$arrTarget["DEPTBAL_AMT"] = number_format($rowTarget["DEPTBAL_AMT"],2);
 				$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
 				$arrayTel = $func->getSMSPerson('person',$rowTarget["MEMBER_NO"],$conoracle);
 				foreach($arrayTel as $dest){

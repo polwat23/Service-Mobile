@@ -29,17 +29,16 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			}
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
-			$getNormCont = $conoracle->prepare("select TRIM(TO_CHAR(nenough_amt, '999,999,999,999.99')) as nenough_amt,recv_period,
-												EXPENSE_ACCID,member_no from  kpkepnotenoughmoneytosms 
-												where post_status = '8' and expense_code IS NULL");
+			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO,SEQ_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupMessage = array();
 				$arrMemberNoDestination = array();
 				$arrTarget = array();
-				$arrTarget["NENOUGH_AMT"] = $rowTarget["NENOUGH_AMT"];
-				$arrTarget["EXPENSE_ACCID"] = $rowTarget["EXPENSE_ACCID"];
-				$arrTarget["RECV_PERIOD"] = $rowTarget["RECV_PERIOD"];
+				$arrTarget["RECV_MONTH"] = $lib->convertperiodkp(trim($rowTarget["RECV_PERIOD"]));
+				$arrTarget["KEPT_AMT"] = number_format($rowTarget["KEPITEM_AMT"],2);
+				$arrTarget["DEPTBAL_AMT"] = number_format($rowTarget["DEPTBAL_AMT"],2);
 				$arrMessageMerge = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 				if(!in_array($rowTarget["MEMBER_NO"].'_'.$arrMessageMerge["BODY"],$dataComing["destination_revoke"])){
 					$arrToken = $func->getFCMToken('person',$rowTarget["MEMBER_NO"],$conoracle);
@@ -56,6 +55,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 								$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
 								$arrPayloadNotify["TYPE_NOTIFY"] = "2";										
 								if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+									$updateData = $conoracle->prepare("UPDATE KPKEPNOTENOUGHMONEYTOSMS SET POST_STATUS = '1' 
+																		WHERE RECV_PERIOD = :recv_period and MEMBER_NO = :member_no and SEQ_NO = :seq_no");
+									$updateData->execute([
+										':recv_period' => $rowTarget["RECV_PERIOD"],
+										':member_no' => $rowTarget["MEMBER_NO"],
+										':seq_no' => $rowTarget["SEQ_NO"]
+									]);
 									$blukInsert[] = "('".$id_history."','1','".$arrMessageMerge["SUBJECT"]."','".$arrMessageMerge["BODY"]."','".($pathImg ?? null)."','".$arrToken["LIST_SEND"][0]["MEMBER_NO"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
 									if(sizeof($blukInsert) == 1000){
 										$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
@@ -158,17 +164,16 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$arrayMerge = array();
 			$bulkInsert = array();
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
-			$getNormCont = $conoracle->prepare("select TRIM(TO_CHAR(nenough_amt, '999,999,999,999.99')) as nenough_amt,recv_period,
-												EXPENSE_ACCID,member_no from  kpkepnotenoughmoneytosms 
-												where post_status = '8' and expense_code IS NULL");
+			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO,SEQ_NO FROM KPKEPNOTENOUGHMONEYTOSMS 
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
 				$arrGroupMessage = array();
 				$arrTarget = array();
-				$arrTarget["NENOUGH_AMT"] = $rowTarget["NENOUGH_AMT"];
-				$arrTarget["EXPENSE_ACCID"] = $rowTarget["EXPENSE_ACCID"];
-				$arrTarget["RECV_PERIOD"] = $rowTarget["RECV_PERIOD"];
+				$arrTarget["RECV_MONTH"] = $lib->convertperiodkp(trim($rowTarget["RECV_PERIOD"]));
+				$arrTarget["KEPT_AMT"] = number_format($rowTarget["KEPITEM_AMT"],2);
+				$arrTarget["DEPTBAL_AMT"] = number_format($rowTarget["DEPTBAL_AMT"],2);
 				$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
 				if(!in_array($rowTarget["MEMBER_NO"].'_'.$arrMessage["BODY"],$dataComing["destination_revoke"])){
 					$arrayTel = $func->getSMSPerson('person',$rowTarget["MEMBER_NO"],$conoracle);
@@ -176,6 +181,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 						$arraySendSMS = $lib->sendSMS($arrayDest);
 						if($arraySendSMS["RESULT"]){
+							$updateData = $conoracle->prepare("UPDATE KPKEPNOTENOUGHMONEYTOSMS SET POST_STATUS = '1' 
+																WHERE RECV_PERIOD = :recv_period and MEMBER_NO = :member_no and SEQ_NO = :seq_no");
+							$updateData->execute([
+								':recv_period' => $rowTarget["RECV_PERIOD"],
+								':member_no' => $rowTarget["MEMBER_NO"],
+								':seq_no' => $rowTarget["SEQ_NO"]
+							]);
 							$arrayMerge[] = $arrayTel[0];
 							$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
 						}else{

@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['unique_id','reconcile_data','operate_date'],$da
 			$arrTrans["OPERATE_DATE"] = $lib->convertdate($rowTrans["OPERATE_DATE"],'d m Y',true);
 			$arrTrans["MEMBER_NO"] = $rowTrans["MEMBER_NO"];
 			$arrTrans["NET_AMOUNT"] = number_format($rowTrans["AMOUNT"]+$rowTrans["FEE_AMT"],2);
-			$arrTrans["SIMULATE_KEY"] = $rowTrans["DESTINATION"].str_replace(".","",$rowTrans["AMOUNT"]);
+			$arrTrans["SIMULATE_KEY"] = $rowTrans["DESTINATION"].str_replace(".","",number_format($rowTrans["AMOUNT"],2,".",""));
 			$arrTrans["SIMULATE_TIME"] = date_format(date_create($rowTrans["OPERATE_DATE"]),"YmdHi.s");
 			
 			//get member name

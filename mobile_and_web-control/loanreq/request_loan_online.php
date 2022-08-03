@@ -35,6 +35,12 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 						$arrayResult['RESULT'] = FALSE;
 						require_once('../../include/exit_footer.php');
 					}
+					if($dataComing["request_amt"] > $responseSoap->loanpermiss_amt){
+						$arrayResult['RESPONSE_CODE'] = "WS0074";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+					}
 					$diff_old_contract = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
 					$structureReqLoanPayment = array();
 					$structureReqLoanPayment["coop_id"] = $config["COOP_ID"];
@@ -44,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component','request_amt','loantype_code','
 					$structureReqLoanPayment["operate_date"] = date("c");
 					$structureReqLoanPayment["contcredit_flag"] = '1';
 					$structureReqLoanPayment["loancontract_no"] = 'AUTO';
-					$structureReqLoanPayment["entry_id"] = 'mobile';
+					$structureReqLoanPayment["entry_id"] = $dataComing["channel"] == 'mobile_app' ? "MCOOP" : "ICOOP";
 					$structureReqLoanPayment["loanpermiss_amt"] = $responseSoap->loanpermiss_amt;
 					$structureReqLoanPayment["period_payamt"] = $dataComing["period"];
 					$structureReqLoanPayment["loanrequest_amt"] = $dataComing["request_amt"];

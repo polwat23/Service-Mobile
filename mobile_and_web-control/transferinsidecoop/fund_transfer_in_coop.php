@@ -4,26 +4,27 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_deptaccount_no','amt_transfer','fee_amt'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepInsideCoop') ||
 	$func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferSelfDepInsideCoop')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		
+		$penalty_include = $func->getConstant("include_penalty");
+		if($penalty_include == '0'){
+			$recv_amt = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
+		}else{
+			$recv_amt = $dataComing["amt_transfer"];
+		}
+		
+		$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
+		$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
+		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
+		$constToAcc = $cal_dep->getConstantAcc($to_account_no);
 		try {
-			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-			
-			$penalty_include = $func->getConstant("include_penalty");
-			if($penalty_include == '0'){
-				$recv_amt = $dataComing["amt_transfer"] - $dataComing["fee_amt"];
-			}else{
-				$recv_amt = $dataComing["amt_transfer"];
-			}
-			
-			$from_account_no = preg_replace('/-/','',$dataComing["from_deptaccount_no"]);
-			$to_account_no = preg_replace('/-/','',$dataComing["to_deptaccount_no"]);
-			$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
-			$constToAcc = $cal_dep->getConstantAcc($to_account_no);
 			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 			$dateOperC = date('c');
 			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 			$ref_no = time().$lib->randomText('all',3);
+			$srcAccID = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
 			$arrayGroup = array();
-			$arrayGroup["account_id"] = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
+			$arrayGroup["account_id"] = $srcAccID["ACCOUNT_ID"];
 			$arrayGroup["action_status"] = "1";
 			$arrayGroup["atm_no"] = "mobile";
 			$arrayGroup["atm_seqno"] = null;
@@ -254,9 +255,10 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							':response_message' => $responseSoap->msg_output
 						];
 					}
+					
 					$log->writeLog('transferinside',$arrayStruc);
 					$arrayResult["RESPONSE_CODE"] = 'WS0064';
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output;
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 					

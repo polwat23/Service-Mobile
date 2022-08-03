@@ -8,7 +8,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($dataComing["contract_no"])){
 			$arrayGroupLoan = array();
 			$contract_no = preg_replace('/\//','',$dataComing["contract_no"]);
-			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,lt.LOANTYPE_DESC as TYPE_DESC
+			$getWhocollu = $conoracle->prepare("SELECT lnm.principal_balance as PRNBAL,lnm.loancontract_no,NVL(lnm.loanapprove_amt,0) as APPROVE_AMT,
+												lt.LOANTYPE_DESC as TYPE_DESC
 												FROM lncontmaster lnm LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE WHERE lnm.loancontract_no = :contract_no
 												and lnm.contract_status > 0 and lnm.contract_status <> 8");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
@@ -18,9 +19,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayGroupLoan["CONTRACT_NO"] = $contract_no;
 			$arrGrpAllLoan = array();
 			$getCollDetail = $conoracle->prepare("SELECT DISTINCT lnc.LOANCOLLTYPE_CODE,llc.LOANCOLLTYPE_DESC,lnc.REF_COLLNO,lnc.COLL_PERCENT,
-																lnc.DESCRIPTION
-																FROM lncontcoll lnc LEFT JOIN lnucfloancolltype llc ON lnc.LOANCOLLTYPE_CODE = llc.LOANCOLLTYPE_CODE
-																WHERE lnc.coll_status = '1' and lnc.loancontract_no = :contract_no ORDER BY lnc.LOANCOLLTYPE_CODE ASC");
+												lnc.COLLACTIVE_PERCENT,
+												lnc.COLLBASE_PERCENT,
+												lnc.DESCRIPTION
+												FROM lncontcoll lnc LEFT JOIN lnucfloancolltype llc ON lnc.LOANCOLLTYPE_CODE = llc.LOANCOLLTYPE_CODE
+												WHERE lnc.coll_status = '1' and lnc.loancontract_no = :contract_no ORDER BY lnc.LOANCOLLTYPE_CODE ASC");
 			$getCollDetail->execute([':contract_no' => $contract_no]);
 			while($rowColl = $getCollDetail->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupAll = array();
@@ -54,7 +57,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														WHERE MMB.member_no = :member_no");
 					$whocolluMember->execute([':member_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollMember = $whocolluMember->fetch(PDO::FETCH_ASSOC);
-					$arrGroupAllMember["SHARE_COLL_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+					$arrGroupAllMember["SHARE_COLL_AMT"] = number_format(($rowWhocollu["PRNBAL"] * $rowColl["COLLACTIVE_PERCENT"]) / $rowColl["COLLBASE_PERCENT"],2);
 					$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
@@ -64,7 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$rowCollDept = $whocolluDept->fetch(PDO::FETCH_ASSOC);
 					$arrGroupAllMember["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
 					$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
-					$arrGroupAllMember["DEPT_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
+					$arrGroupAllMember["DEPT_AMT"] = number_format(($rowWhocollu["PRNBAL"] * $rowColl["COLLACTIVE_PERCENT"]) / $rowColl["COLLBASE_PERCENT"],2);
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
 					$whocolluAsset = $conoracle->prepare("SELECT lcm.COLLMAST_REFNO,lcd.LAND_LANDNO,lcd.POS_TUMBOL,MBD.DISTRICT_DESC,MBP.PROVINCE_DESC,lcm.COLLMAST_NO
 																		FROM lncollmaster lcm LEFT JOIN lncolldetail lcd ON lcm.COLLMAST_NO = lcd.COLLMAST_NO 

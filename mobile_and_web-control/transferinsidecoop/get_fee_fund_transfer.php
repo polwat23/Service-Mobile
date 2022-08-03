@@ -10,6 +10,13 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		if($arrInitDep["RESULT"]){
 			$checkSeqAmtSrc = $cal_dep->getSequestAmount($deptaccount_no,'WTX');
 			if($checkSeqAmtSrc["RESULT"]){
+				if($checkSeqAmtSrc["CAN_WITHDRAW"]){
+				}else{
+					$arrayResult['RESPONSE_CODE'] = "WS0104";
+					$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmtSrc["SEQUEST_DESC"];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
 				$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 				if($arrRightDep["RESULT"]){
 					$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
