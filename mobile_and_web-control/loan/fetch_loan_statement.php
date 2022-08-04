@@ -21,29 +21,38 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO > 0";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.LPD_NUM_INST > ".$dataComing["old_seq_no"] : "and lsm.LPD_NUM_INST > 0";
 			}else{
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.LPD_NUM_INST < ".$dataComing["old_seq_no"] : "and lsm.LPD_NUM_INST < 999999";
 			}
 		}else{
 			$rownum = 999999;
-			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.LPD_NUM_INST < ".$dataComing["old_seq_no"] : "and lsm.LPD_NUM_INST < 999999";
 		}
-		$getAccount = $conoracle->prepare("SELECT principal_balance as LOAN_BALANCE FROM lncontmaster
-											WHERE contract_status = 1 and loancontract_no = :contract_no");
+		$getAccount = $conoracle->prepare("SELECT LCONT_AMOUNT_SAL as LOAN_BALANCE FROM LOAN_M_CONTACT
+											WHERE LCONT_STATUS_CONT IN('H','A') and LCONT_ID = :contract_no");
 		$getAccount->execute([
 			':contract_no' => $contract_no
 		]);
 		$rowContract = $getAccount->fetch(PDO::FETCH_ASSOC);
+		
+		$getAmtPass = $conoracle->prepare("SELECT CASE WHEN (AMOUNTPAST2 < 0) THEN '0' ELSE TO_CHAR(AMOUNTPAST2) END AS AMOUNTPAST 
+									FROM VIEW_DAY_PASS WHERE LCONT_ID=:contract_no");
+		$getAmtPass->execute([
+			':contract_no' => $contract_no
+		]);
+		$rowAmtPass = $getAmtPass->fetch(PDO::FETCH_ASSOC);
+		
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
+		$arrayHeaderAcc["OVERDUE_BALANCE"] = number_format($rowAmtPass["AMOUNTPAST"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
-		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
-											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
-											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
-											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
+		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lsm.REMARK AS TYPE_DESC,lsm.LPD_DATE as operate_date,
+											lsm.LPD_SAL as PRN_PAYMENT,lsm.LPD_NUM_INST as SEQ_NO,lsm.LPD_NO as SLIP_NO,
+											lsm.LPD_INTE as INT_PAYMENT,lsm.LCONT_BAL_AMOUNT as loan_balance
+											FROM LOAN_M_PAYDEPT lsm 
+											WHERE lsm.LCONT_ID = :contract_no and lsm.LPD_DATE
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+											ORDER BY lsm.LPD_DATE DESC ) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,
@@ -53,6 +62,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
+			$arrSTM["SLIP_NO"] = $rowStm["SLIP_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 			$arrSTM["PRN_PAYMENT"] = number_format($rowStm["PRN_PAYMENT"],2);
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);

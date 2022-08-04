@@ -4,8 +4,8 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$fetchAccountBeenBind = $conmysql->prepare("SELECT gba.deptaccount_no_bank,gpl.type_palette,gpl.color_deg,gpl.color_text,gpl.color_main,gba.id_bindaccount,gba.deptaccount_no_coop,gba.sigma_key,
-													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,
-													gba.bank_account_name,gba.bank_account_name_en,gba.bank_code,gba.citizen_id
+													gpl.color_secon,csb.bank_short_name,csb.bank_logo_path,csb.bank_format_account,csb.bank_format_account_hide,gba.bindaccount_status,gba.citizen_id,
+													gba.bank_account_name,gba.bank_account_name_en,csb.bank_short_ename,csb.bank_code,gba.account_payfee
 													FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 													LEFT JOIN gcpalettecolor gpl ON csb.id_palette = gpl.id_palette and gpl.is_use = '1'
 													WHERE gba.member_no = :member_no and gba.bindaccount_status NOT IN('8','-9')");
@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrBindAccount = array();
 		while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 			if($rowAccountBind["bank_code"] != "999"){
-				$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
+				/*$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccountBind["deptaccount_no_coop"]]);
 				$getDetailAcc = $conoracle->prepare("SELECT deptaccount_name FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccountBind["deptaccount_no_coop"]]);
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);
 				$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
-				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
+				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));*/
 			}else{
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formatcitizen($rowAccountBind["citizen_id"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formatcitizen($rowAccountBind["citizen_id"]);
@@ -44,7 +44,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$explodePathBankLOGO = explode('.',$rowAccountBind["bank_logo_path"]);
 			$arrAccount["ICON_BANK_WEBP"] = $config['URL_SERVICE'].$explodePathBankLOGO[0].'.webp';
 			$arrAccount["BANK_NAME"] = $rowAccountBind["bank_short_name"];
+			$arrAccount["BANK_CODE"] = $rowAccountBind["bank_code"];
 			$arrAccount["ID_BINDACCOUNT"] = $rowAccountBind["id_bindaccount"];
+			$arrAccount["BANK_SHORT_NAME"] = $rowAccountBind["bank_short_ename"];
+			if(isset($rowAccountBind["account_payfee"])){
+				$arrAccount["DEPTACCOUNT_NO_PAYFEE"] = $lib->formataccount($rowAccountBind["account_payfee"],$func->getConstant('dep_format'));
+			}
 			$arrAccount["SIGMA_KEY"] = $rowAccountBind["sigma_key"];
 			$arrAccount["BIND_STATUS"] = $rowAccountBind["bindaccount_status"];
 			$arrAccount["ACCOUNT_COOP_NAME"] = $lang_locale == 'th' ? $rowAccountBind["bank_account_name"] : $rowAccountBind["bank_account_name_en"];

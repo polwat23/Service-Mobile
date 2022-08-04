@@ -19,12 +19,14 @@ if($lib->checkCompleteArgument(['otp','ref_no'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
+
 	$callfile_now = strtotime(date('Y-m-d H:i:s'));
 	$checkOTP = $conmysql->prepare("SELECT otp_status,expire_date FROM gcotp WHERE otp_password = :otp_pass and refno_otp = :ref_no");
 	$checkOTP->execute([
 		':otp_pass' => $dataComing["otp"],
 		':ref_no' => $dataComing["ref_no"]
 	]);
+	
 	if($checkOTP->rowCount() > 0){
 		$rowOTP = $checkOTP->fetch(PDO::FETCH_ASSOC);
 		$expire = strtotime($rowOTP["expire_date"]);

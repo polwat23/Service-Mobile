@@ -11,16 +11,17 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowMail = $fetchMail->fetch(PDO::FETCH_ASSOC);
 		$arrayAttach = array();
 		$account_no = preg_replace('/-/','',$dataComing["account_no"]);
-		$getCardPerson = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$getCardPerson = $conoracle->prepare("SELECT id_card as CARD_PERSON FROM MEM_H_MEMBER WHERE account_id = :member_no");
 		$getCardPerson->execute([':member_no' => $member_no]);
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conoracle->prepare("SELECT dpt.DEPTITEMTYPE_DESC AS TYPE_TRAN,dpt.SIGN_FLAG,dps.DEPTSLIP_NO,
-																		dps.operate_date as OPERATE_DATE,dps.DEPTITEM_AMT as TRAN_AMOUNT,dps.PRNCBAL 
-																		FROM dpdeptstatement dps LEFT JOIN DPUCFDEPTITEMTYPE dpt ON dps.DEPTITEMTYPE_CODE = dpt.DEPTITEMTYPE_CODE
-																		WHERE dps.deptaccount_no = :account_no and dps.operate_date BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
-																		ORDER BY dps.SEQ_NO DESC");
+			$fetchDataSTM = $conoracle->prepare("SELECT dpt.TRANS_DESC AS TYPE_TRAN,dps.T_TRNS_TYPE as SIGN_FLAG,
+												dps.CURR_DATE as OPERATE_DATE,(dps.DEP_CASH + dps.WDL_CASH) as TRAN_AMOUNT,dps.N_BALANCE as PRNCBAL 
+												FROM BK_T_NOBOOK dps LEFT JOIN BK_M_TRANSCODE dpt ON dps.TRANS_CODE = dpt.TRANS_CODE
+												WHERE dps.account_no = :account_no and TRUNC(dps.CURR_DATE) 
+												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
+												ORDER BY dps.PAGE_NO DESC,dps.LINE_NO DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
 				':datebefore' => $date_between[0],
@@ -30,8 +31,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 				$arraySTM = array();
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
-				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];
-				$arraySTM["DEPTSLIP_NO"] = $rowDataSTM["DEPTSLIP_NO"];
+				if($rowStm["SIGN_FLAG"] == 'R'){
+					$arrSTM["SIGN_FLAG"] = '1';
+				}else{
+					$arrSTM["SIGN_FLAG"] = '-1';
+				}
 				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
 				$arraySTM["TRAN_AMOUNT"] = $rowDataSTM["TRAN_AMOUNT"];
 				$arraySTM["PRNCBAL"] = $rowDataSTM["PRNCBAL"];
@@ -187,12 +191,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	 <div style="text-align: center;margin-bottom: 0px;" padding:0px; margin-bottom:20px; width:100%;></div>
 	<header>
 	<div style="position:fixed;">
-			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
+			   <div style="padding:0px;"><img src="../../resource/logo/logo.png" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์สาธารณสุขเชียงราย จำกัด
+					สหกรณ์อิสลามอิบนูอัฟฟาน จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Chiangrai Public Health Saving And Credit Co-operative Limited
+					IBNU AFFAN
 			   </div>
 			   </div>
 				<div class="frame-info-user">

@@ -4,26 +4,31 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GuaranteeInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		
+		$getDataMember = $conoracle->prepare("SELECT ID_CARD,BR_NO FROM MEM_H_MEMBER WHERE account_id = :member_no");
+		$getDataMember->execute([':member_no' => $member_no]);
+		$rowDataMember = $getDataMember->fetch(PDO::FETCH_ASSOC);
 		$arrayGroupLoan = array();
 		$getUcollwho = $conoracle->prepare("SELECT
-											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
-											LNTYPE.loantype_desc as TYPE_DESC,
-											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
-											LCM.MEMBER_NO AS MEMBER_NO,
-											NVL(LCM.principal_balance,0) as LOAN_BALANCE,
-											LCM.LAST_PERIODPAY as LAST_PERIOD,
-											LCM.period_payamt as PERIOD
+											LCC.LCONT_ID as LOANCONTRACT_NO,
+											LNTYPE.L_TYPE_NAME as TYPE_DESC,
+											PRE.PTITLE_NAME as PRENAME_DESC,MEMB.FNAME as MEMB_NAME,MEMB.LNAME as MEMB_SURNAME,
+											LCM.ACCOUNT_ID AS MEMBER_NO,
+											NVL(LCM.LCONT_AMOUNT_SAL,0) as LOAN_BALANCE,
+											LCM.LCONT_MAX_INSTALL - LCM.LCONT_NUM_INST as LAST_PERIOD,
+											LCM.LCONT_MAX_INSTALL as PERIOD
 											FROM
-											LNCONTCOLL LCC LEFT JOIN LNCONTMASTER LCM ON  LCC.LOANCONTRACT_NO = LCM.LOANCONTRACT_NO
-											LEFT JOIN MBMEMBMASTER MEMB ON LCM.MEMBER_NO = MEMB.MEMBER_NO
-											LEFT JOIN MBUCFPRENAME PRE ON MEMB.PRENAME_CODE = PRE.PRENAME_CODE
-											LEFT JOIN lnloantype LNTYPE  ON LCM.loantype_code = LNTYPE.loantype_code
+											LOAN_T_GUAR LCC LEFT JOIN LOAN_M_CONTACT LCM ON  LCC.LCONT_ID = LCM.LCONT_ID
+											LEFT JOIN MEM_H_MEMBER MEMB ON LCM.ACCOUNT_ID = MEMB.ACCOUNT_ID
+											LEFT JOIN MEM_M_PTITLE PRE ON MEMB.ptitle_id = PRE.ptitle_id
+											LEFT JOIN LOAN_M_TYPE_NAME LNTYPE  ON LCM.L_TYPE_CODE = LNTYPE.L_TYPE_CODE
 											WHERE
-											LCM.CONTRACT_STATUS > 0 AND LCM.CONTRACT_STATUS <> 8
-											AND LCC.LOANCOLLTYPE_CODE = '01'
-											AND LCC.REF_COLLNO = :member_no");
-		$getUcollwho->execute([':member_no' => $member_no]);
+											LCM.LCONT_STATUS_CONT IN('H','A')
+											AND LCC.LG_SAL > 0
+											AND LCC.MEM_ID = :id_card and LCC.BR_NO_OTHER = :br_no");
+		$getUcollwho->execute([
+			':id_card' => $rowDataMember["ID_CARD"],
+			':br_no' => $rowDataMember["BR_NO"]
+		]);
 		while($rowUcollwho = $getUcollwho->fetch(PDO::FETCH_ASSOC)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];

@@ -13,7 +13,7 @@
 	font-family: 'Prompt', sans-serif;
 }
 body {
-	background-color: #E9EDFB;
+	background-color: #0095DA;
 	margin: 2px;
 }
 table {
@@ -43,15 +43,52 @@ table thead th {
 <body>
 <table>
 <thead>
-<tr>
-<th>งวด</th>
-<th>วันที่ชำระ</th>
-<th>จำนวนวัน</th>
-<th>เงินต้น</th>
-<th>ดอกเบี้ย</th>
-<th>ยอดชำระ</th>
-<th>หนี้คงเหลือ</th>
-</tr>
+	<tr>
+		<th colspan="3"  style="font-weight: bold;border-right: solid 1px grey;">งวด</th>
+		<th colspan="4">ชำระต่องวด</th>
+	</tr>
+</thead>
+<tbody class="body-card-table">
+	<tr>
+		<td colspan="3" style="font-weight: bold;border-right: solid 1px grey;">
+			1 - <?php echo $period - 1;?>
+		</td>
+		<td colspan="4" style="font-weight: bold;">
+			<?php echo $arrPayment[0]["PAYMENT_PER_PERIOD"] ?? 0;?>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3" style="font-weight: bold;border-right: solid 1px grey;">
+			<?php echo $period;?>
+		</td>
+		<td colspan="4" style="font-weight: bold;">
+			<?php echo $arrPayment[$period-1]["PAYMENT_PER_PERIOD"] ?? 0;?>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3" style="font-weight: bold;border-right: solid 1px grey;">
+			รวมยอด
+		</td>
+		<td colspan="4" style="font-weight: bold;">
+			<?php echo number_format($sumPayment,2) ?>
+		</td>
+	</tr>
+	<tr style="background-color: black;">
+		<td colspan="7" style="font-weight: bold;">
+		
+		</td>
+	</tr>
+</tbody>
+<thead>
+	<tr>
+		<th>งวด</th>
+		<th>วันที่ชำระ</th>
+		<th>จำนวนวัน</th>
+		<th>เงินต้น</th>
+		<th>ดอกเบี้ย</th>
+		<th>ยอดชำระ</th>
+		<th>หนี้คงเหลือ</th>
+	</tr>
 </thead>
 <tbody class="body-card-table">
 <?php

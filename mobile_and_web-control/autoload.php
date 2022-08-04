@@ -3,7 +3,7 @@ ini_set('display_errors', false);
 ini_set('error_log', __DIR__.'/../log/error.log');
 error_reporting(E_ERROR);
 
-header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale");
+header("Access-Control-Allow-Headers: Origin, Content-Type ,X-Requested-With, Accept, Authorization,Lang_locale,Request_token");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
@@ -25,6 +25,8 @@ foreach ($_SERVER as $header_key => $header_value){
 		$headers["Authorization"] = $header_value;
 	}else if($header_key == "HTTP_LANG_LOCALE") {
 		$headers["Lang_locale"] = $header_value;
+	} else if ($header_key == "HTTP_REQUEST_TOKEN") {
+		$headers["Request_token"] = $header_value;
 	}
 }
 if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
@@ -42,6 +44,7 @@ require_once(__DIR__.'/../include/function_util.php');
 require_once(__DIR__.'/../include/control_log.php');
 require_once(__DIR__.'/../include/cal_deposit.php');
 require_once(__DIR__.'/../include/cal_loan.php');
+require_once(__DIR__.'/../include/cal_share.php');
 require_once(__DIR__.'/../include/authorized.php');
 
 // Call functions
@@ -50,6 +53,7 @@ use Authorized\Authorization;
 use Component\functions;
 use ControlLog\insertLog;
 use CalculateDeposit\CalculateDep;
+use CalculateShare\CalculateShare;
 use CalculateLoan\CalculateLoan;
 use PHPMailer\PHPMailer\{PHPMailer,Exception};
 use ReallySimpleJWT\{Token,Parse,Jwt,Validate,Encode};
@@ -66,6 +70,7 @@ $func = new functions();
 $log = new insertLog();
 $cal_dep = new CalculateDep();
 $cal_loan = new CalculateLoan();
+$cal_shr = new CalculateShare();
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 $jsonConfigError = file_get_contents(__DIR__.'/../config/config_indicates_error.json');
@@ -87,6 +92,15 @@ if(is_array($conoracle) && $conoracle["RESULT"] == FALSE && $conoracle["IS_OPEN"
 	http_response_code(500);
 	
 }
+
+if ($forceNewSecurity == true && $isValidateRequestToken == false) {
+	$arrayResult['RESPONSE_CODE'] = "WS4004";
+	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+	$arrayResult['RESULT'] = FALSE;
+	http_response_code(400);
+	require_once(__DIR__.'/../include/exit_footer.php');
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 	$payload = array();
@@ -157,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 						$arrayResult['RESPONSE_CODE'] = "WS0034";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						http_response_code(401);
+						http_response_code(500);
 						require_once(__DIR__.'/../include/exit_footer.php');
 						
 					}else if($errorCode === 4){

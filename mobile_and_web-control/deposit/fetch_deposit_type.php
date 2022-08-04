@@ -5,16 +5,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrAllAccount = array();
-		$getSumAllAccount = $conoracle->prepare("SELECT SUM(prncbal) as SUM_BALANCE FROM dpdeptmaster WHERE member_no = :member_no and deptclose_status <> 1");
+		$getSumAllAccount = $conoracle->prepare("SELECT SUM(BALANCE) as SUM_BALANCE FROM BK_H_SAVINGACCOUNT 
+												WHERE account_id = :member_no and ACC_STATUS = 'O'");
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
-											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
-											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+		$getAccount = $conoracle->prepare("SELECT dp.ACC_TYPE as depttype_code,dt.ACC_DESC as depttype_desc,dp.account_no as deptaccount_no,
+											dp.account_name as deptaccount_name,dp.BALANCE as BALANCE,
+											dp.LAST_DATE as LAST_OPERATE_DATE
+											FROM BK_H_SAVINGACCOUNT dp LEFT JOIN BK_M_ACC_TYPE dt ON dp.ACC_TYPE = dt.ACC_TYPE
+											WHERE dp.account_id = :member_no and dp.ACC_STATUS = 'O' ORDER BY dp.account_no ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
@@ -26,6 +28,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAccount["COVER_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
 				}else{
 					$arrGroupAccount["COVER_IMG"] = null;
+				}
+			}else{
+				if(file_exists(__DIR__.'/../../resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg')){
+					$arrGroupAccount["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/cover-dept/'.$rowAccount["DEPTTYPE_CODE"].'.jpg?v='.date('Ym');
+				}else{
+					$arrGroupAccount["DEPT_TYPE_IMG"] = null;
 				}
 			}
 			$fetchAlias = $conmysql->prepare("SELECT alias_name,path_alias_img,date_format(update_date,'%Y%m%d%H%i%s') as update_date FROM gcdeptalias WHERE deptaccount_no = :account_no");
@@ -42,6 +50,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["ALIAS_PATH_IMG"] = null;
 				$arrAccount["ALIAS_PATH_IMG_WEBP"]  = null;
 			}
+			$arrAccount["DEPTTYPE_CODE"] = $rowAccount["DEPTTYPE_CODE"];
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$formatDeptHidden);
 			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',TRIM($rowAccount["DEPTACCOUNT_NAME"]));

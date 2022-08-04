@@ -9,13 +9,30 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowCreditAllow = $getLoanCredit->fetch(PDO::FETCH_ASSOC)){
 			$arrLoanAllow[] = "'".$rowCreditAllow["loantype_code"]."'";
 		}
-		$fetchIntrate = $conoracle->prepare("select (lir.interest_rate ) as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
+		/*$fetchIntrate = $conoracle->prepare("select (lir.interest_rate ) as interest_rate,lp.loantype_desc,lp.loantype_code from lnloantype lp LEFT JOIN lncfloanintratedet lir
 												ON lp.inttabrate_code = lir.loanintrate_code where lp.loantype_code IN(".implode(',',$arrLoanAllow).") and
 												to_char(sysdate,'YYYY-MM-DD') BETWEEN 
 												to_char(lir.effective_date,'YYYY-MM-DD') and to_char(lir.expire_date,'YYYY-MM-DD')");
-		$fetchIntrate->execute();
+		$fetchIntrate->execute();*/
+		$ArrRowIntrate = array();
+		$intrate = array();
+		$intrate["INTEREST_RATE"] = "1";
+		$intrate["LOANTYPE_CODE"] = "0";
+		$intrate["LOANTYPE_DESC"] = "สินเชื่อสามัญปกติ";
+		$ArrRowIntrate[] = $intrate;
+		$intrate = array();
+		$intrate["INTEREST_RATE"] = "1";
+		$intrate["LOANTYPE_CODE"] = "1";
+		$intrate["LOANTYPE_DESC"] = "สินเชื่อคุณภาพ";
+		$ArrRowIntrate[] = $intrate;
+		$intrate = array();
+		$intrate["INTEREST_RATE"] = "1";
+		$intrate["LOANTYPE_CODE"] = "2";
+		$intrate["LOANTYPE_DESC"] = "สินเชื่อคุณภาพแบบขั้นบันได";
+		$ArrRowIntrate[] = $intrate;
+		
 		$arrIntGroup = array();
-		while($rowIntrate = $fetchIntrate->fetch(PDO::FETCH_ASSOC)){
+		foreach ($ArrRowIntrate as &$rowIntrate) {
 			$arrIntrate = array();
 			$arrIntrate["INT_RATE"] = $rowIntrate["INTEREST_RATE"];
 			$arrIntrate["LOANTYPE_CODE"] = $rowIntrate["LOANTYPE_CODE"];

@@ -4,7 +4,7 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$fetchDataMember = $conoracle->prepare("SELECT card_person FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember = $conoracle->prepare("SELECT id_card as CARD_PERSON FROM MEM_H_MEMBER WHERE account_id = :member_no");
 		$fetchDataMember->execute([
 			':member_no' => $member_no
 		]);
@@ -42,10 +42,11 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 					':member_no' => $member_no
 				]);
 				$arrayGroupAccount = array();
+				$formatDept = $func->getConstant('dep_format');
 				while($rowDataAccount = $fetchDataAccount->fetch(PDO::FETCH_ASSOC)){
 					$arrayAccount = array();
 					$arrayAccount["DEPTTYPE_DESC"] = $rowDataAccount["DEPTTYPE_DESC"];
-					$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
+					$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$formatDept);
 					$arrayAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAccount["DEPTACCOUNT_NAME"]));
 					$arrayGroupAccount[] = $arrayAccount;
 				}

@@ -47,10 +47,18 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
-			$arrayDest["member_no"] = $member_no;
-			$arrayDest["tel"] = $arrayTel[0]["TEL"];
-			$arrayDest["message"] = $arrMessage["BODY"];
-			$arraySendSMS = $lib->sendSMS($arrayDest);
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['action'] = "sendmsg";
+			$arrVerifyToken["mode"] = "eachmsg";
+			$arrVerifyToken['typeMsg'] = 'OTP';
+			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
+			$arrMsg[0]["msg"] = $arrMessage["BODY"];
+			$arrMsg[0]["to"] = $arrayTel[0]["TEL"];
+			$arrSendData["dataMsg"] = $arrMsg;
+			$arrSendData["custId"] = 'ryt';
+			$arrHeader[] = "version: v1";
+			$arrHeader[] = "OAuth: Bearer ".$verify_token;
+			$arraySendSMS = $lib->posting_data($config["URL_SMS"].'/navigator',$arrSendData,$arrHeader);
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
 				$conmysql->commit();

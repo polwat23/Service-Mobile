@@ -1,0 +1,1 @@
+{":loancontract_no":"สนญ-สม-2560-000017",":lreg_recno":null,":br_no":null,":code":null,":lpd_no":"65PAL29765",":lpd_num_inst":1,":lpd_flag":null,":lpd_sal":"400",":lpd_inte":false,":remark":"รับชำระเงินยืม",":lpd_username":"APP01",":flag_tpay":"1",":sum_sal":"400",":lcont_bal_amount":-400,":line":1,":page":null,":cardline":1,":cardpage":null,":lcont_bal_profit":0}

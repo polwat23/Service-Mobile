@@ -19,7 +19,7 @@ class library {
 		$data[8] = chr( ord( $data[8] ) & 0x3f | 0x80 );
 		return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
 	}
-	public function convertdate($date,$format="D m Y",$is_time=false,$not_space=false){
+	public function convertdate($date,$format="D m Y",$is_time=false){
 		if(isset($date)){
 			$date = preg_replace('|/|','-',$date);
 			$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
@@ -52,41 +52,21 @@ class library {
 							break;				
 					}
 				}else{
-					if($not_space){
-						switch($value_format){
-							case "D" :
-							case "d" : $dateConverted .= $datearray[2];
-								break;
-							case "M" : $dateConverted .= $thaimonth[$datearray[1]*1];
-								break;
-							case "m" : $dateConverted .= $thaishort[$datearray[1]*1];
-								break;
-							case "N" :
-							case "n" : $dateConverted .= $datearray[1];
-								break;
-							case "Y" : $dateConverted .= ($datearray[0]+543);
-								break;
-							case "y" : $dateConverted .= ($datearray[0]);
-								break;
-						}
-
-					}else{
-						switch($value_format){
-							case "D" :
-							case "d" : $dateConverted .= $separate.$datearray[2];
-								break;
-							case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
-								break;
-							case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
-								break;
-							case "N" :
-							case "n" : $dateConverted .= $separate.$datearray[1];
-								break;
-							case "Y" : $dateConverted .= $separate.($datearray[0]+543);
-								break;
-							case "y" : $dateConverted .= $separate.($datearray[0]);
-								break;
-						}
+					switch($value_format){
+						case "D" :
+						case "d" : $dateConverted .= $separate.$datearray[2];
+							break;
+						case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
+							break;
+						case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
+							break;
+						case "N" :
+						case "n" : $dateConverted .= $separate.$datearray[1];
+							break;
+						case "Y" : $dateConverted .= $separate.($datearray[0]+543);
+							break;
+						case "y" : $dateConverted .= $separate.($datearray[0]);
+							break;
 					}
 				}
 			}
@@ -98,7 +78,6 @@ class library {
 			return '-';
 		}
 	}
-
 	public function count_duration($date,$format="ym"){
 		$date = preg_replace('|/|','-',$date);
 		$dateconverted = new \DateTime($date);
@@ -314,7 +293,7 @@ class library {
 				$dataImg = base64_decode($data_Img[1]);
 				$info_img = explode('/',$data_Img[0]);
 				$ext_img = str_replace('base64','',$info_img[1]);
-				$im_string = imageCreateFromString($dataImg);
+				$im_string = \imageCreateFromString($dataImg);
 				if (!$im_string) {
 					return false;
 				}else{
@@ -723,7 +702,7 @@ class library {
 
 		return $text;
 	}
-	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
+	public function mb_str_pad($input,$pad_length="5",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 	public function sendLineNotify($message){
@@ -851,6 +830,58 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	public function generateQrCodeImg($qrData){
+		$data = [
+			"theme" => "default",
+			"QR_TYPE_DESC" => $qrData["QR_TYPE_DESC"],
+			"ACC_NAME" => $qrData["ACC_NAME"],
+			"ACC_NO" => $qrData["ACC_NO"],
+			"AMT_TRANSFER" => $qrData["AMT_TRANSFER"],
+			"datainQR" => $qrData["datainQR"],
+			"FEE" => $qrData["FEE"],
+			"OPERATE_DATE" => $qrData["OPERATE_DATE"],
+		];     
+		$ch = curl_init();  
+		$headers = [
+			 'Content-Type: application/json'
+		];  
+		
+		curl_setopt( $ch,CURLOPT_URL, 'https://api-node.thaicoop.co/genSlip/genslipqr/ibnu' );                                                                  
+		curl_setopt( $ch,CURLOPT_POST, true );  
+		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode($data));                                                                  
+																												 
+		$result = curl_exec($ch);
+		
+		if(isset($result) && $result !== FALSE){
+			$resultQr = json_decode($result);
+			curl_close ($ch);
+			if(isset($resultQr)){
+				return $resultQr;
+			}else{
+				return false;
+			}
+		}else{
+			curl_close ($ch);
+			return false;
+		}
+	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
 	}
 }
 ?>

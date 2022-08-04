@@ -16,11 +16,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayDept[] = $rowAccAllow["deptaccount_no"];
 			}
-			$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
-											dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal,dpm.CHECKPEND_AMT
-											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no
-											ORDER BY dpm.deptaccount_no");
+			$getAllAcc = $conoracle->prepare("SELECT dpm.account_no as deptaccount_no,dpm.account_name as deptaccount_name,dpt.ACC_DESC as depttype_desc,
+											dpm.ACC_TYPE as depttype_code,dpm.BALANCE as PRNCBAL
+											FROM BK_H_SAVINGACCOUNT dpm LEFT JOIN BK_M_ACC_TYPE dpt ON dpm.ACC_TYPE = dpt.ACC_TYPE
+											WHERE dpm.ACC_STATUS = 'O' and dpm.account_id = :member_no
+											ORDER BY dpm.account_no");
 			$getAllAcc->execute([':member_no' => $member_no]);
 			while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){
 				$fetchConstantAllowDept = $conmysql->prepare("SELECT allow_deposit_inside,allow_withdraw_inside FROM gcconstantaccountdept 
@@ -41,18 +41,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
 					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
-					$checkDep = $cal_dep->getSequestAmt($rowDataAccAll["DEPTACCOUNT_NO"]);
-					if($checkDep["CAN_DEPOSIT"]){
-						$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["allow_deposit_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_DEPOSIT"] = '0';
-					}
-					if($checkDep["CAN_WITHDRAW"]){
-						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
-					}else{
-						$arrAccAllow["CAN_WITHDRAW"] = '0';
-					}
-					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]) - $checkDep["SEQUEST_AMOUNT"];
+					$arrAccAllow["CAN_DEPOSIT"] = '1';
+					$arrAccAllow["CAN_WITHDRAW"] = '1';
+					$arrAccAllow["BALANCE"] = $cal_dep->getWithdrawable($rowDataAccAll["DEPTACCOUNT_NO"]);
 					$arrAccAllow["BALANCE_DEST"] = number_format($rowDataAccAll["PRNCBAL"],2);
 					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 					$arrGroupAccAllow[] = $arrAccAllow;

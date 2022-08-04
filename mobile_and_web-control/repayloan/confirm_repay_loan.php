@@ -16,37 +16,23 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
 					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 				}
-				$fetchLoanRepay = $conoracle->prepare("SELECT principal_balance,INTEREST_RETURN,RKEEP_PRINCIPAL
-														FROM lncontmaster
-														WHERE loancontract_no = :loancontract_no");
+				
+				$fetchLoanRepay = $conoracle->prepare("SELECT lnm.LCONT_AMOUNT_SAL as principal_balance, lnm.LCONT_PROFIT as int_balance
+													FROM LOAN_M_CONTACT lnm LEFT JOIN LOAN_M_TYPE_NAME lnt ON lnm.L_TYPE_CODE = lnt.L_TYPE_CODE  
+													WHERE lnm.LCONT_ID = :loancontract_no
+													and lnm.LCONT_STATUS_CONT IN('H','A')");
 				$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 				$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-				$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-				if($interest > 0){
-					$int_return = $rowLoan["INTEREST_RETURN"];
-					if($int_return >= $interest){
-						$int_return = $int_return - $interest;
-						$interest = 0;
-					}else{
-						$interest = $interest - $int_return;
-						$int_return = 0;
-					}
-					if($dataComing["amt_transfer"] < $interest){
-						$interest = $dataComing["amt_transfer"];
-					}else{
-						$prinPay = $dataComing["amt_transfer"] - $interest;
-					}
-					if($prinPay < 0){
-						$prinPay = 0;
-					}
-					if($interest > 0){
-						$arrayResult["PAYMENT_INT"] = $interest;
-					}
-					$arrayResult["PAYMENT_PRIN"] = $prinPay;
-				}else{
-					$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
-				}
-				if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+				$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+				$prinPay = $interest["PRIN_PAYMENT"];
+				$arrayResult["OTHER_INFO"][0]["LABEL"] = "เงินต้น";
+				$arrayResult["OTHER_INFO"][0]["VALUE"] = number_format($prinPay,2)." บาท";
+				$arrayResult["OTHER_INFO"][1]["LABEL"] = "ค่าบริการ";
+				$arrayResult["OTHER_INFO"][1]["VALUE"] = number_format($interest["INT_PAYMENT"],2)." บาท";
+				//$arrayResult["PAYMENT_INT"] = $interest["INT_PAYMENT"];
+				//$arrayResult["PAYMENT_PRIN"] = $prinPay;
+				//if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+				if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"]) + $rowLoan["INT_BALANCE"]){
 					$arrayResult['RESPONSE_CODE'] = "WS0098";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
