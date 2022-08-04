@@ -1258,6 +1258,7 @@ class CalculateDep {
 				$operate_date,$lastStmSrcNo,$itemtype_wtd,date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),$tofrom_accid,
 				$deptslip_no,$penalty_amt,$operate_date
 			];
+			
 			$insertDpSlipPenalty = $conmssql->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
 														deptcoop_id,DEPTGROUP_CODE,MEMBCAT_CODE,DEPTSLIP_DATE,RECPPAYTYPE_CODE,DEPTSLIP_AMT,CASH_TYPE,
 														PRNCBAL,WITHDRAWABLE_AMT,CHECKPEND_AMT,ENTRY_ID,ENTRY_DATE, 
@@ -1290,6 +1291,9 @@ class CalculateDep {
 														lastaccess_date = CONVERT(VARCHAR(19),?,20),laststmseq_no = ?
 														WHERE deptaccount_no = ?");
 				if($updateDeptMaster->execute($arrUpdateMaster)){
+					$constFromAcc["WITHDRAWABLE_AMT"] -= $penalty_amt;
+					$constFromAcc["PRNCBAL"] -= $penalty_amt;
+					$arrayResult["DATA_CONT"] = $constFromAcc;
 					$arrayResult['RESULT'] = TRUE;
 					return $arrayResult;
 				}else{

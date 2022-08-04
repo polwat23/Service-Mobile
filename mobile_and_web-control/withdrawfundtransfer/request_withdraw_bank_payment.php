@@ -75,8 +75,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}
 		if($dataComing["penalty_amt"] > 0){
 			$arrSlipDPnoPenalty = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-			$deptslip_noPenalty = $arrSlipDPnoFee["SLIP_NO"];
-			$lastdocument_noPenalty = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$deptslip_noPenalty = $arrSlipDPnoPenalty["SLIP_NO"];
+			$lastdocument_noPenalty = $arrSlipDPnoPenalty["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$updateDocuControlPenalty = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
 			$updateDocuControlPenalty->execute([':lastdocument_no' => $lastdocument_noPenalty]);
 		}
@@ -95,7 +95,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$dataAccFee,false,$deptslip_noFee);
 			if($feeWtd["RESULT"]){
 				if($dataComing["penalty_amt"] > 0){
-					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$coop_account_no,$vccamtPenalty,'FEM',
+					$dataAccFee = $feeWtd["DATA_CONT"];
+					$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$coop_account_no,$vccamtPenalty,'FEE',
 					$dataComing["amt_transfer"],$dataComing["penalty_amt"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"] + 1,$dataAccFee,false,$deptslip_noPenalty);
 					if($penaltyWtd["RESULT"]){
 					}else{
