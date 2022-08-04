@@ -46,6 +46,10 @@ if($message == "จัดการบัญชี" || $message == "ผูกบ�
 	require_once('./service/notify/update_notify.php');
 }else if($message == "ติดตามใบคำขอกู้" || $message == "ติดตามใบคำขอกู้ออนไลน์" ){
 	require_once('./service/trackreqloan.php');
+}else if($message == "#ล็อคบัญชี"){
+	require_once('./service/lockaccount/lockaccount.php');
+}else if($message == "#ยืนยันการล็อคบัญชี"){
+	require_once('./service/lockaccount/confirm_lockaccount.php');
 }else{
 	$pattern = "/[\s:\;\/]/"; 
 	$arrMessage = preg_split($pattern, $message,-1,PREG_SPLIT_NO_EMPTY);

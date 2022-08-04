@@ -240,7 +240,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayRecon["TRANSFER_TYPE"] = 'ธุรกรรมภายนอก';
 			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '-1' && $rowRecon["transaction_type_code"] == 'WIM')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ถอน';
-			} else if($rowRecon["transfer_mode"] == '5' && ($rowRecon["trans_flag"] == '-1' && $rowRecon["transaction_type_code"] == 'DTX')){
+			} else if($rowRecon["transfer_mode"] == '5' && ($rowRecon["transaction_type_code"] == 'DTX')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ธุรกรรมผ่าน QR';
 			}else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '1' && $rowRecon["transaction_type_code"] == 'DIM')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ฝาก';

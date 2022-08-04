@@ -405,56 +405,63 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["period_payment"] = $dataComing["period_payment"];
 					$arrData["period"] = $dataComing["period"];					
 					$arrData["recv_account"] = $deptaccount_no_bank;
-					
+					//$lib->sendLineNotify(json_encode($dataComing));
 					//ดึงชื่อคนค้ำ
 					$contcollArr = array();
 					$arrDataMember = array();
 					$arrMember = array();
-					foreach($dataComing["guarantor"] as $guarantor){
-						$memberno = strtolower($lib->mb_str_pad($guarantor));
-						$getContcoll = $conoracle->prepare("SELECT mp.prename_desc, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME ,mg.MEMBGROUP_DESC,
-															mbp.POSITION_DESC,MB.SALARY_AMOUNT,MB.ADDR_MOBILEPHONE
-															FROM mbmembmaster mb  LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-															LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
-															LEFT JOIN mbucfposition mbp ON mb.position_code = mbp.position_code
-															WHERE mb.member_no  = :member_no");
-						$getContcoll->execute([':member_no' => $memberno]);
-						$rowContcoll = $getContcoll->fetch(PDO::FETCH_ASSOC);	
-						
 					
-						if(strlen($memberno) <= 8 ){
-							$insertDocList = $conmysql->prepare("INSERT INTO gccontcoll(loancontract_no,member_no,refcoll_no)
-																VALUES(:doc_no,:member_no,:refcoll_no)");
-							$insertDocList->execute([
-								':doc_no' => $reqloan_doc,
-								':member_no' => $payload["member_no"],
-								':refcoll_no' => $rowContcoll["MEMBER_NO"]
-							]);
-						}else{
-							$arrayResult['RESPONSE_CODE'] = "WS4005";
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-							$arrayResult['RESULT'] = FALSE;
-							require_once('../../include/exit_footer.php');
+					if($dataComing["guarantor_type"] == "MEMBER_NO"){
+						foreach($dataComing["guarantor"] as $guarantor){
+							$memberno = strtolower($lib->mb_str_pad($guarantor));
+							$getContcoll = $conoracle->prepare("SELECT mp.prename_desc, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME ,mg.MEMBGROUP_DESC,
+																mbp.POSITION_DESC,MB.SALARY_AMOUNT,MB.ADDR_MOBILEPHONE
+																FROM mbmembmaster mb  LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+																LEFT JOIN mbucfmembgroup mg ON mb.membgroup_code = mg.membgroup_code
+																LEFT JOIN mbucfposition mbp ON mb.position_code = mbp.position_code
+																WHERE mb.member_no  = :member_no");
+							$getContcoll->execute([':member_no' => $memberno]);
+							$rowContcoll = $getContcoll->fetch(PDO::FETCH_ASSOC);	
+							
+						
+							if(strlen($memberno) <= 8 ){
+								$insertDocList = $conmysql->prepare("INSERT INTO gccontcoll(loancontract_no,member_no,refcoll_no)
+																	VALUES(:doc_no,:member_no,:refcoll_no)");
+								$insertDocList->execute([
+									':doc_no' => $reqloan_doc,
+									':member_no' => $payload["member_no"],
+									':refcoll_no' => $rowContcoll["MEMBER_NO"]
+								]);
+							}else{
+								$arrayResult['RESPONSE_CODE'] = "WS4005";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								require_once('../../include/exit_footer.php');
+							}
+							
+							if(isset($rowContcoll["MEMBER_NO"])){
+								$contcollArr["MEMBER_NO"] = $rowContcoll["MEMBER_NO"];
+							}else{
+								$arrDataMember[] = $memberno;
+							}				
+							$contcollArr["FULLNAME"] = $rowContcoll["PRENAME_DESC"].$rowContcoll["MEMB_NAME"].' '.$rowContcoll["MEMB_SURNAME"];
+							$contcollArr["ADDR_MOBILEPHONE"] = $rowContcoll["ADDR_MOBILEPHONE"];
+							$contcollArr["MEMBGROUP_DESC"] = $rowContcoll["MEMBGROUP_DESC"];	
+							$contcollArr["POSITION_DESC"] = $rowContcoll["POSITION_DESC"];
+							$contcollArr["SALARY_AMOUNT"] = number_format($rowContcoll["SALARY_AMOUNT"],2);							
+							$arrData["guarantor"][] = $contcollArr;
 						}
-						
-						if(isset($rowContcoll["MEMBER_NO"])){
-							$contcollArr["MEMBER_NO"] = $rowContcoll["MEMBER_NO"];
-						}else{
-							$arrDataMember[] = $memberno;
-						}				
-						$contcollArr["FULLNAME"] = $rowContcoll["PRENAME_DESC"].$rowContcoll["MEMB_NAME"].' '.$rowContcoll["MEMB_SURNAME"];
-						$contcollArr["ADDR_MOBILEPHONE"] = $rowContcoll["ADDR_MOBILEPHONE"];
-						$contcollArr["MEMBGROUP_DESC"] = $rowContcoll["MEMBGROUP_DESC"];	
-						$contcollArr["POSITION_DESC"] = $rowContcoll["POSITION_DESC"];
-						$contcollArr["SALARY_AMOUNT"] = number_format($rowContcoll["SALARY_AMOUNT"],2);							
-						$arrData["guarantor"][] = $contcollArr;
-					}
-					if(sizeof($arrDataMember) > 0){
-						$massageerror = implode(" , ",$arrDataMember);
-						$arrayResult['RESPONSE_MESSAGE'] = "กรอกเลขสมาชิกคนค้ำไม่ถูกต้อง  ".$massageerror." กรุณาทำรายการใหม่ ";
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-						
+						if(sizeof($arrDataMember) > 0){
+							$massageerror = implode(" , ",$arrDataMember);
+							$arrayResult['RESPONSE_MESSAGE'] = "กรอกเลขสมาชิกคนค้ำไม่ถูกต้อง  ".$massageerror." กรุณาทำรายการใหม่ ";
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');	
+						}
+					}else{
+						foreach($dataComing["guarantor"] as $guarantor){
+							$contcollArr["FULLNAME"] = $guarantor;					
+							$arrData["guarantor"][] = $contcollArr;
+						}
 					}
 					if(file_exists('form_request_loan.php')){
 						include('form_request_loan.php');

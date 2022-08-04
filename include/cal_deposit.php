@@ -1156,7 +1156,7 @@ class CalculateDep {
 						':deptaccount_no' => $deptaccount_no,
 						':depttype_code' => $constFromAcc["DEPTTYPE_CODE"],
 						':deptgrp_code' => $constFromAcc["DEPTGROUP_CODE"],
-						':itemtype_code' => 'FEE',
+						':itemtype_code' => 'FEM',
 						':slip_amt' => $penalty_amt,
 						':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
 						':prncbal' => $constFromAcc["PRNCBAL"],
@@ -1165,7 +1165,7 @@ class CalculateDep {
 						':entry_date' => $operate_date,
 						':laststmno' => $lastStmSrcNo,
 						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-						':acc_id' => $rowMapAccFee["ACCOUNT_ID"],
+						':acc_id' => '111302',
 						':refer_deptslip_no' => $deptslip_no
 					];
 					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
@@ -1184,7 +1184,7 @@ class CalculateDep {
 							':coop_id' => $config["COOP_ID"],
 							':from_account_no' => $deptaccount_no,
 							':seq_no' => $lastStmSrcNo,
-							':itemtype_code' => 'FEE',
+							':itemtype_code' => 'FEM',
 							':slip_amt' => $penalty_amt,
 							':balance_forward' => $constFromAcc["PRNCBAL"] - $amt_transfer,
 							':after_trans_amt' => $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,

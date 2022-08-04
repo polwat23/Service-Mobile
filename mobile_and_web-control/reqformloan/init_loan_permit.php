@@ -148,6 +148,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 												':request_amt' => $request_amt]);
 					$rowCollReqgrt =  $fetchCollReqgrt->fetch(PDO::FETCH_ASSOC);				
 					$arrayResult["IS_GUARANTEE"] = TRUE;
+					$arrayResult["IS_GUARANTEE_NAME"] = true;
+					$arrayResult["IS_GUARANTEE"] = true;
 					$iscountcoll = $rowCollReqgrt["USEMAN_AMT"];
 					$arrayResult["GUARANTOR"] = $rowCollReqgrt["USEMAN_AMT"];
 				}
@@ -202,11 +204,12 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}
 				$arrayResult["SALARY"] = $dataComing["salary"];
 				$arrayResult["REMARK"] = $dataComing["remark"];
-				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
+				
 				$arrayResult["IS_INPUT_REMARK"] = TRUE;
 				$arrayResult["IS_INPUT_SALARY"] = TRUE;
 				$arrayResult["REQ_SALARY"] = TRUE;
 				$arrayResult["REQ_CITIZEN"] = TRUE;
+				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
 				$arrayResult["IS_UPLOAD_CITIZEN"] = FALSE;
 				$arrayResult["IS_UPLOAD_SALARY"] = FALSE;		
 				$arrayResult["HIDE_PERIOD_INFO"] = TRUE;

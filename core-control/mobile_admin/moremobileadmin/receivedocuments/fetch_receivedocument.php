@@ -4,7 +4,7 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','uploaddocuments')){
 		$arrayDocFile= array();
-		$fetchDocFile = $conmysql->prepare("SELECT doc_no, doc_filename, doc_address, member_no, create_date, doc_status ,open_status FROM doclistmaster WHERE doc_status ='1'");
+		$fetchDocFile = $conmysql->prepare("SELECT doc_no, doc_filename, doc_address, member_no, create_date, doc_status ,open_status FROM doclistmaster WHERE doc_status ='1' ORDER BY create_date DESC");
 		$fetchDocFile->execute();	
 		while($rowDocFile = $fetchDocFile->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();

@@ -111,9 +111,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayRecon["TRANSFER_TYPE"] = 'ธุรกรรมภายนอก';
 			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '-1' && $rowRecon["transaction_type_code"] == 'WIM')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ถอน';
-			} else if($rowRecon["transfer_mode"] == '5' && ($rowRecon["trans_flag"] == '-1' && $rowRecon["transaction_type_code"] == 'DTX')){
+			} else if($rowRecon["transfer_mode"] == '5'  && ($rowRecon["transaction_type_code"] == 'DTX')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ธุรกรรมผ่าน QR';
-			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '1' && $rowRecon["transaction_type_code"] == 'DIM')){
+			} else if($rowRecon["transfer_mode"] == '9' && ($rowRecon["trans_flag"] == '1' && $rowRecon["transaction_type_code"] == 'DTX')){
 				$arrayRecon["TRANSFER_TYPE"] = 'ฝาก';
 			}
 			
@@ -124,7 +124,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
 						$deposit_external_10 += $rowRecon["amount"];
 						$dept_count10++;
 					}else if($rowDepttype["DEPTTYPE_CODE"] =='11'){
@@ -137,7 +137,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
 						$withdraw_external_10 += $rowRecon["amount"];
 						$withdraw10++;
 					}else if($rowDepttype["DEPTTYPE_CODE"] =='11'){
@@ -183,7 +183,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
 						$deposit_inside_10 += $rowRecon["amount"];
 						$inside_dept10 ++;
 					}else if($rowDepttype["DEPTTYPE_CODE"] =='11'){
@@ -191,13 +191,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$inside_dept20++;					
 					}
 				}
-				if($rowRecon["transaction_type_code"] == 'WTX'){ //ถอนภายใน
+				if($rowRecon["transaction_type_code"] == 'WIM'){ //ถอนภายใน
 					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :from_account");
 					$getDepttype->execute([
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='10'){
 						$withdraw_inside_10 += $rowRecon["amount"];
 						$inside_withdraw10++;
 					}else if($rowDepttype["DEPTTYPE_CODE"] =='11'){
@@ -227,7 +227,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowWithdraw= $getWithdraw->fetch(PDO::FETCH_ASSOC);
-					if($rowWithdraw["DEPTTYPE_CODE"] =='01'){ 
+					if($rowWithdraw["DEPTTYPE_CODE"] =='10'){ 
 						$payment10 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
 						$inside_withdraw10++;
 						//$inside_dept10 ++;
@@ -252,7 +252,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							':destination' => $rowRecon["destination"]
 						]);
 						$rowDept= $getDept->fetch(PDO::FETCH_ASSOC);
-						if($rowDept["DEPTTYPE_CODE"] =='01'){ 
+						if($rowDept["DEPTTYPE_CODE"] =='10'){ 
 							$depositinside_10 = ($getloan_inside_01 ?? 0);
 							$inside_dept10++;
 						}else if($rowDept["DEPTTYPE_CODE"] =='11'){

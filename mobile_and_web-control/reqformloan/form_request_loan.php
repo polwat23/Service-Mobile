@@ -236,6 +236,9 @@ $html = '
 				font-size:11pt;
 				line-height:17px;
 			}
+			.tableData{
+				font-size:11pt;
+			}
 			</style>';
 //ขนาด
 $html .= '<div style="margin:-25px -20px -20px -20px;" >';
@@ -626,29 +629,29 @@ $html .= '
 					</div>
 				</div>
 				<div style="margin-top:10px;">
-					<table style="border-collapse: collapse; width:100%  ">
+					<table style="border-collapse: collapse; width:95%  ">
 						<tr>
-							<td class="center" style="width:20px">ที่</td>
-							<td class="center" style="width:145px">ชื่อ - สกุล</td>
-							<td class="center">เลขทะเบียน</td>
-							<td class="center">ตำแหน่ง</td>
-							<td class="center" style="width:130px">โรงเรียน / หน่วยงาน</td>
-							<td class="center">เงินเดือน</td>
-							<td class="center">เบอร์โทร</td>
-							<td class="center">ลายมือชื่อ</td>
+							<td class="center tableData">ที่</td>
+							<td class="center tableData">ชื่อ - สกุล</td>
+							<td class="center tableData">เลขทะเบียน</td>
+							<td class="center tableData">ตำแหน่ง</td>
+							<td class="center tableData" style="width:130px">โรงเรียน / หน่วยงาน</td>
+							<td class="center tableData">เงินเดือน</td>
+							<td class="center tableData">เบอร์โทร</td>
+							<td class="center tableData">ลายมือชื่อ</td>
 						</tr>';
 
 			for($i=0; $i < 9; $i++){
 				
 					$html .='
 						<tr>
-							<td class="center" style="height:32px;">'.($i+1).'</td>
-							<td>'.($data["guarantor"][$i]["FULLNAME"]??null).'</td>
-							<td class="center">'.($data["guarantor"][$i]["MEMBER_NO"]??null).'</td>
-							<td class="center">'.($data["guarantor"][$i]["POSITION_DESC"]??null).'</td>
-							<td>'.($data["guarantor"][$i]["MEMBGROUP_DESC"]??null).'</td>
-							<td class="right">'.($data["guarantor"][$i]["SALARY_AMOUNT"]??null).'</td>
-							<td class="center">'.($data["guarantor"][$i]["ADDR_MOBILEPHONE"]??null).'</td>
+							<td class="center tableData">'.($i+1).'</td>
+							<td class="tableData">'.($data["guarantor"][$i]["FULLNAME"]??null).'</td>
+							<td class="center tableData">'.($data["guarantor"][$i]["MEMBER_NO"]??null).'</td>
+							<td class="center tableData">'.($data["guarantor"][$i]["POSITION_DESC"]??null).'</td>
+							<td class="tableData">'.($data["guarantor"][$i]["MEMBGROUP_DESC"]??null).'</td>
+							<td class="right tableData">'.($data["guarantor"][$i]["SALARY_AMOUNT"]??null).'</td>
+							<td class="center tableData">'.($data["guarantor"][$i]["ADDR_MOBILEPHONE"]??null).'</td>
 							<td></td>
 						</tr>
 					';
@@ -754,9 +757,7 @@ $html .= '<div class="wrapper-page " >
 				<div class="absolute" style="margin-left:110px; width:268px; "><div class="data nowrap left ">'.($data[""]??null).'</div></div>
 				<b>เลขบัญชีธนาคารกรุงไทย</b>....................................................................................................................................................................................
 			</div>
-			<div class="list" style="margin-top:10px;">
-				<b >โปรดระบุกรรมเป็นพยานในสัญญาเงินกู้</b>............................................................................................................................................................
-			</div>
+			
 			<div class="border" style="margin-top:20px; padding-bottom:20px; ">
 				<div class="center bold" style="border-bottom:1px solid; padding-bottom:5px;">บันทึกการพิจารณาให้ความเห็นของผู้บังคับบัญชา</div>
 				<div style="padding-top:5px;">

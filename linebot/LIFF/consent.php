@@ -5,9 +5,11 @@ use Connection\connection;
 
 $con = new connection();
 $conmysql = $con->connecttomysql();
-$user_id = $_GET["id"]??null;
-$checkUser = $conmysql->prepare("SELECT *FROM gcmemberaccount WHERE line_token = 'U0e9f26a43992b856ed5561ffb75d049f'");
-$checkUser->execute();
+$line_token = $_GET["id"]??null;
+$checkUser = $conmysql->prepare("SELECT *FROM gcmemberaccount WHERE line_token = :line_token");
+$checkUser->execute([
+	':line_token'=> $line_token
+]);
 $rowUser = $checkUser->fetch(PDO::FETCH_ASSOC);
 $user = 0;
 
@@ -121,13 +123,12 @@ $config = json_decode($json,true);
 					
 				</div>
 			</div>
-	
 	<?php }
 	else{ ?>
 <div class="container">
 	<div class="box-consent">
 		<div class="row" >
-			<iframe src="https://policy.thaicoop.co/privacy.html?coop=ryt" style="height:560px; width:100%;" title="consent"></iframe>
+			<iframe src="https://policy.thaicoop.co/privacy.html?coop=ryt" style="height:70vh; width:100%;" title="consent"></iframe>
 		
 			<div style="margin-top:10px;">
 				<div class = "accept-all">

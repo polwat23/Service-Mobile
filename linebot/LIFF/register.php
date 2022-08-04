@@ -53,7 +53,7 @@ $config = json_decode($json,true);
 						สมัครใช้บริการ <?=$config["LINEBOT_NAME"]?>
 					</span>
 					<span class="login100-form-title p-t-20 p-b-45" >
-						สวัสดี <span id="nameline"></span> <?php echo $_GET["id"]??null  ?> 
+						สวัสดี <span id="nameline"></span>  
 					</span>
 					<div class="container-login100-form-btn p-t-10" id="showwhenload" style="display:none;">
 					<a href="#" class="login100-form-btn" id="deeplink">

@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			':member_no' => $member_no
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMember["MEMB_NAME"])){
+		if(isset($rowMember["MEMB_NAME"]) && $rowMember["MEMB_NAME"]  !=''){
 			if($rowMember["RESIGN_STATUS"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				
 			}
 			if(empty($rowMember["MEM_TELMOBILE"]) || $rowMember["MEM_TELMOBILE"] == ""){
-				$arrayResult['RESPONSE_CODE'] = "WS0128";
+				$arrayResult['RESPONSE_CODE'] = "WS0059";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');

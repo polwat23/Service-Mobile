@@ -2,6 +2,7 @@
 $filename = basename(__FILE__, '.php');
 $member_no = $lineLib->getMemberNo($user_id);
 
+if(isset($message)){
 	$insertTextIncome = $conmysql->prepare("INSERT INTO lbincometext (text,line_token,detail) VALUES (:text,:line_token,:detail)");
 	if($insertTextIncome->execute([
 		':text' => $message, 
@@ -53,5 +54,14 @@ $member_no = $lineLib->getMemberNo($user_id);
 		$message_error = "Line Bot insert ลง  lbincometext  ไม่ได้".$filename."\n".'DATA => '.json_encode($data);
 		$lib->sendLineNotify($message_error);
 	}
+}else{
+	$data = [
+			':date' => date('Y-m-d H:i:s'), 
+			':text' => $message, 
+			':line_token' => $user_id,
+			':detail' => json_encode($dataComing["events"][0],JSON_UNESCAPED_UNICODE )
+		];
+	file_put_contents('../log/notincometext.txt', json_encode($data,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);	
+}
 
 ?>

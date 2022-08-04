@@ -8,8 +8,7 @@ class libraryLine {
 	private $conmssql;
 	function __construct() {
 		$connection = new connection();
-		$this->con = $connection->connecttomysql();
-		
+		$this->con = $connection->connecttomysql();	
 	}
 	public function checkBindAccount($line_token){
 		$fetchBindAccount = $this->con->prepare("SELECT member_no FROM gcmemberaccount WHERE line_token = :line_token");
@@ -52,6 +51,18 @@ class libraryLine {
 			return false;
 		}
 	}
+	public function getLineToken($member_no=null){
+		$getData = $this->con->prepare("SELECT line_token FROM gcmemberaccount WHERE member_no = :member_no");
+		
+		$getData->execute([':member_no' => $member_no]);
+		if($getData->rowCount() > 0){
+			$rowLimit = $getData->fetch(\PDO::FETCH_ASSOC);
+			return $rowLimit["line_token"];
+		}else{
+			return false;
+		}
+		
+	}
 	
 	public function checkNotify($member_no=null,$detail=null,$ref=null) {
 		$chkNotify = $this->con->prepare("SELECT * FROM lbhistory WHERE his_detail = :detail AND member_no = :member_no AND ref = :ref");
@@ -73,7 +84,7 @@ class libraryLine {
 		$dataContent["body"]["layout"] = "vertical";
 		$dataContent["body"]["contents"][0]["type"] = "text";
 		$dataContent["body"]["contents"][0]["text"] = "ท่านยังไม่ได้ผูกบัญชี";
-		$dataContent["body"]["contents"][0]["color"] = "#0EA7CA";
+		$dataContent["body"]["contents"][0]["color"] = "#f9b715";
 		$dataContent["body"]["contents"][1]["type"] = "text";
 		$dataContent["body"]["contents"][1]["text"] = " กรุณาผูกบัญชีเพื่อดูข้อมูล";
 		$dataContent["body"]["contents"][1]["size"] = "sm";
@@ -86,8 +97,56 @@ class libraryLine {
 		$dataContent["body"]["contents"][2]["height"] = "sm";
 		$dataContent["body"]["contents"][2]["style"] = "primary";
 		$dataContent["body"]["contents"][2]["margin"] = "xl";
-		$dataContent["body"]["contents"][2]["color"] = "#E3519D";
+		$dataContent["body"]["contents"][2]["color"] = "#f9b715";
 		return $dataContent;
+	}
+	
+	public function notifyLineLogin($device,$ipAddress){
+		$json = file_get_contents(__DIR__.'/../config/config_linebot.json');
+		$json_data = json_decode($json,true);
+		$dataContent = [];
+		$dataContent["type"] = "flex";
+		$dataContent["altText"] = "มีการเข้าสู่ระบบ ".$json_data["LINEBOT_NAME"];
+		$dataContent["contents"]["type"] = "bubble";
+		$dataContent["contents"]["direction"] = "ltr";
+		$dataContent["contents"]["body"]["type"] = "box";
+		$dataContent["contents"]["body"]["layout"] = "vertical";
+		$dataContent["contents"]["body"]["contents"][0]["type"] = "text";
+		$dataContent["contents"]["body"]["contents"][0]["text"] = "มีการเข้าสู่ระบบ ".$json_data["LINEBOT_NAME"]." บน ";
+		$dataContent["contents"]["body"]["contents"][0]["align"] = "start";
+		$dataContent["contents"]["body"]["contents"][0]["wrap"] = true;
+		$dataContent["contents"]["body"]["contents"][1]["type"] = "text";
+		$dataContent["contents"]["body"]["contents"][1]["text"] = $device??'-';
+		$dataContent["contents"]["body"]["contents"][1]["weight"] = "bold";
+		$dataContent["contents"]["body"]["contents"][1]["color"] = "#144FF0FF";
+		$dataContent["contents"]["body"]["contents"][1]["align"] = "center";
+		
+		$dataContent["contents"]["body"]["contents"][2]["type"] = "text";
+		$dataContent["contents"]["body"]["contents"][2]["text"] = "ip address ".($ipAddress);
+		$dataContent["contents"]["body"]["contents"][2]["weight"] = "bold";
+		$dataContent["contents"]["body"]["contents"][2]["color"] = "#000000";
+		$dataContent["contents"]["body"]["contents"][2]["align"] = "center";
+		
+		$dataContent["contents"]["body"]["contents"][3]["type"] = "text";
+		$dataContent["contents"]["body"]["contents"][3]["text"] = "หากคุณไม่ได้พยายามเข้าสู่ระบบ  แนะนำให้เข้าสู่ระบบเพื่อเปลี่ยนรหัสผ่านของคุณ หรือ ล็อคบัญชี ";
+		$dataContent["contents"]["body"]["contents"][3]["wrap"] = true;
+		$dataContent["contents"]["body"]["contents"][4]["type"] = "box";
+		$dataContent["contents"]["body"]["contents"][4]["layout"] = "horizontal";
+		$dataContent["contents"]["body"]["contents"][4]["offsetTop"] = "10px";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][0]["type"] = "text";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][0]["text"] = "เปลี่ยนรหัสผ่าน";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][0]["weight"] = "bold";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][0]["action"]["type"] = "uri";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][0]["action"]["label"] = "คู่มือการใช้งาน";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][0]["action"]["uri"] = "https://manual.gensoft.co.th/mobile/".(strtoupper($json_data["COOP_KEY"]))."/question/management/changepass";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["type"] = "text";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["text"] = "ล็อคบัญชี";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["weight"] = "bold";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["color"] = "#FF0000";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["action"]["type"] = "message";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["action"]["label"] = "#ล็อคบัญชี";
+		$dataContent["contents"]["body"]["contents"][4]["contents"][1]["action"]["text"] = "#ล็อคบัญชี";
+		return($dataContent);
 	}
 
 	public function prepareMessageText($message){
