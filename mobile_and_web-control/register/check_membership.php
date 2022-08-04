@@ -19,7 +19,25 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}
+	$handle = fopen("member.txt", "r");
 	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
+	
+	$found = false;
+	if ($handle) {
+		while (($line = fgets($handle)) !== false) {
+			if($member_no == trim($line)){
+				$found = true;
+			}
+		}
+		fclose($handle);
+	}
+	if(!$found){
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+	}
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
@@ -29,7 +47,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conoracle->prepare("SELECT MB.ID_CARD as CARD_PERSON,MB.TRIED_FLG as RESIGN_STATUS,
+		$checkValid = $conoracle->prepare("SELECT MB.ID_CARD as CARD_PERSON,MB.TRIED_FLG as RESIGN_STATUS,MB.APP_TEL,
 										MB.FNAME as MEMB_NAME,MB.LNAME as MEMB_SURNAME,mp.PTITLE_NAME as PRENAME_DESC
 										FROM MEM_H_MEMBER MB LEFT JOIN MEM_M_PTITLE MP ON mb.ptitle_id = mp.ptitle_id
 										WHERE MB.account_id = :member_no");
@@ -51,6 +69,20 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
+			}
+			$rowMember["APP_TEL"] = preg_replace('/-/','',TRIM($rowMember["APP_TEL"]));
+			if(isset($dataComing["phone"]) && $dataComing["phone"] != "" && isset($rowMember["APP_TEL"]) && $rowMember["APP_TEL"] != ""){
+				if($dataComing["phone"] != $rowMember["APP_TEL"]){
+					$arrayResult['RESPONSE_CODE'] = "WS0059";
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
+			}else{
+				$arrayResult['RESPONSE_CODE'] = "WS0059";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
 			}
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];

@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_MENU'][0][$lang_locale];
 						}else{
 							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
-							$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_OUTSIDE_FLAG_OFF'][0][$lang_locale];
+							//$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_OUTSIDE_FLAG_OFF'][0][$lang_locale];
 						}
 					}else{
 						if(($rowDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowDeptTypeAllow["allow_deposit_outside"] == '0') && 

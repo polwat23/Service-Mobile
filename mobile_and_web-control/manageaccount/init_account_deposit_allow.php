@@ -24,12 +24,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														FROM BK_H_SAVINGACCOUNT dpm LEFT JOIN BK_M_ACC_TYPE dpt ON dpm.ACC_TYPE = dpt.ACC_TYPE
 														WHERE dpm.ACC_TYPE IN(".implode(',',$arrDeptAllowed).")
 														and dpm.account_no NOT IN(".implode(',',$arrAccAllowed).")
-														and dpm.account_id = :member_no and dpm.ACC_STATUS = 'O' ORDER BY dpm.account_no");
+														and dpm.account_id = :member_no and dpm.ACC_STATUS = 'O' and dpm.JOIN_FLAG='N' ORDER BY dpm.account_no");
 		}else{
 			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.account_no as deptaccount_no,TRIM(dpm.account_name) as deptaccount_name,dpt.ACC_DESC as depttype_desc,dpm.ACC_TYPE as depttype_code
 														FROM BK_H_SAVINGACCOUNT dpm LEFT JOIN BK_M_ACC_TYPE dpt ON dpm.ACC_TYPE = dpt.ACC_TYPE
 														WHERE dpm.ACC_TYPE IN(".implode(',',$arrDeptAllowed).")
-														and dpm.account_id = :member_no and dpm.ACC_STATUS = 'O' ORDER BY dpm.account_no");
+														and dpm.account_id = :member_no and dpm.ACC_STATUS = 'O' and dpm.JOIN_FLAG='N' ORDER BY dpm.account_no");
 
 		}
 		$getAccountAllinCoop->execute([':member_no' => $member_no]);

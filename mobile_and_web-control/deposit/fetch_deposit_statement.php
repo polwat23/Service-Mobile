@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
-			if(substr($rowStm["TRANS_CODE"],0,1) == 'D' || substr($rowStm["TRANS_CODE"],0,1) == 'O' || substr($rowStm["TRANS_CODE"],0,1) == 'T'){
+			if(substr($rowStm["TRANS_CODE"],0,1) == 'D' || substr($rowStm["TRANS_CODE"],0,1) == 'O' || substr($rowStm["TRANS_CODE"],0,1) == 'T' || substr($rowStm["TRANS_CODE"],0,1) == 'P'){
 				$arrSTM["SIGN_FLAG"] = '1';
 			}else{
 				$arrSTM["SIGN_FLAG"] = '-1';

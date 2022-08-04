@@ -74,7 +74,7 @@
 	"WS0056" : [{"th" : "ท่านทำรายการต่ำกว่ายอดที่กำหนด ยอดทำรายการขั้นต่ำ ${min_amount_deposit} บาท กรุณาลองใหม่อีกครั้ง","en" : "Money transactions amount lower than define, minimum money transactions amount is ${min_amount_deposit} Baht please try again"}],
 	"WS0057" : [{"th" : "ตั้ง PIN ล้มเหลว เพื่อความปลอดภัยของท่าน กรุณาตั้ง PIN โดยหลีกเลี่ยงเลขสมาชิก เลขที่เรียงกันและเลขซ้ำติดกัน 3 หลัก","en" : "Set PIN failed for secure of yourself please avoid member no, numbers in sequence and triple adjacent numbers"}],
 	"WS0058" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถคำนวณสิทธิ์กู้ได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot calculate maximum in this moment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
-	"WS0059" : [{"th" : "หมายเลขเบอร์โทรศัพท์ของท่านไม่ตรงกับในฐานข้อมูลของสหกรณ์ กรุณาตรวจสอบอีกครั้ง หากตรวจสอบแล้วยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Your phone number is not match in database please check your phone number again, if not yet please contact cooperative"}],
+	"WS0059" : [{"th" : "เบอร์โทรไม่ได้ผูกกับสหกรณ์ กรุณาติดต่อสหกรณ์","en" : "Please verify your phone number with cooperative"}],
 	"WS0060" : [{"th" : "หมายเลขประจำตัวประชาชนของท่านไม่ตรงกับในฐานข้อมูลของสหกรณ์ กรุณาตรวจสอบอีกครั้ง หากตรวจสอบแล้วยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Your citizen id is not match in database please check your citizen id again, if not yet please contact cooperative"}],
 	"WS0061" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถแสดงสิทธิ์ค้ำประกันได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot calculate guarantee limit. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
 	"WS0062" : [{"th" : "เกิดเหตุขัดข้องทำให้ไม่สามารถคำนวณชำระต่องวดได้ ทางสหกรณ์ขอปิดปรับปรุงระบบ ท่านสามารถทำรายการอีกครั้งในอีก 3 ชม.","en" : "Something was wronged that cannot calculate period payment. Cooperative wishes to close for the system maintenance please try again in 3 Hrs"}],
@@ -113,6 +113,12 @@
 	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
 	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
 	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
+	"WS0107" : [{"th" : "ไม่พบรหัสรายการ QR ดังกล่าว กรุณาลองอีกครั้ง","en" : "Not found this transaction id please try again"}],
+	"WS0108" : [{"th" : "รายการนี้เสร็จสิ้นแล้ว ไม่สามารถทำรายการซ้ำได้","en" : "This transaction was completed cannot repeat transaction"}],
+	"WS0109" : [{"th" : "รายการหมดอายุ กรุณาสร้างรายการใหม่ที่แอปฯ สหกรณ์","en" : "Transaction has expired please create qr on cooperatives application"}],
+	"WS0110" : [{"th" : "ประเภทสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member type is not allowed to payment monthly special"}],
+	"WS0111" : [{"th" : "กลุ่มสมาชิกของท่านไม่อนุญาตให้ทำชำระพิเศษรายเดือนได้","en" : "Your member group is not allowed to payment monthly special"}],
+	"WS0113" : [{"th" : "รายการไม่ถูกต้อง หากมีข้อสงสัยกรุณาติดต่อสหกรณ์","en" : "Invalid transaction if you have doubt please contract cooperative"}],
 	"WS1001" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1001","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1001"}],
 	"WS1002" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาติดต่อสหกรณ์#WS1002","en" : "Something was wronged that cannot login this moment please contact cooperative #WS1002"}],
 	"WS1003" : [{"th" : "เกิดข้อผิดพลาดบางประการทำให้ไม่สามารถแก้ไขเบอร์โทรได้ กรุณาติดต่อสหกรณ์ #WS1003","en" : "Something was wronged that cannot change phone number please contact cooperative #WS1003"}],
@@ -234,7 +240,8 @@
 		"BUY_SHARES_ERR" : [{
 			"0001" : [{"th" : "ไม่สามารถถือหุ้นเกิน ${MAXHOLD_AMT} ได้","en" : "Cannot hold shares over ${MAXHOLD_AMT}"}],
 			"0002" : [{"th" : "ไม่สามารถซื้อหุ้นต่อครั้งเกิน ${MAXSHAREPX_AMT} ได้","en" : "Cannot buy shares per times over ${MAXSHAREPX_AMT}"}],
-			"0003" : [{"th" : "ขั้นต่ำที่สามารถซื้อได้คือ ${SHAREROUND_FACTOR} บาท","en" : "Minimum can buy is ${SHAREROUND_FACTOR} baht"}]
+			"0003" : [{"th" : "ขั้นต่ำที่สามารถซื้อได้คือ ${SHAREROUND_FACTOR} บาท","en" : "Minimum can buy is ${SHAREROUND_FACTOR} baht"}],
+			"0004" : [{"th" : "บังคับซื้อหุ้นทีละหลัก ${SHAREROUND_FACTOR} บาท","en" : "Buy shares at ${SHAREROUND_FACTOR} baht per digit"}]
 		}],
 		"REQ_HAVE_OLD_CONTRACT" : [{"th" : "ท่านมีสัญญาเงินกู้ประเภทนี้อยู่แล้วไม่สามารถกู้ซ้ำได้","en" : "Your have contract already exist cannot request repeat"}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],

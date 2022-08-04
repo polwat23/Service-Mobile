@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrBindAccount = array();
 		while($rowAccountBind = $fetchAccountBeenBind->fetch(PDO::FETCH_ASSOC)){
 			if($rowAccountBind["bank_code"] != "999"){
-				$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
+				/*$fetchAccountBeenAllow = $conmysql->prepare("SELECT deptaccount_no FROM gcuserallowacctransaction WHERE deptaccount_no = :deptaccount_no and is_use <> '-9'");
 				$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccountBind["deptaccount_no_coop"]]);
 				$getDetailAcc = $conoracle->prepare("SELECT deptaccount_name FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no and deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccountBind["deptaccount_no_coop"]]);
@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formataccount($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_bank"],$rowAccountBind["bank_format_account_hide"]);
 				$arrAccount["DEPTACCOUNT_NO_COOP"] = $lib->formataccount($rowAccountBind["deptaccount_no_coop"],$func->getConstant('dep_format'));
-				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));
+				$arrAccount["DEPTACCOUNT_NO_COOP_HIDE"] = $lib->formataccount_hidden($rowAccountBind["deptaccount_no_coop"],$func->getConstant('hidden_dep'));*/
 			}else{
 				$arrAccount["DEPTACCOUNT_NO_BANK"] = $lib->formatcitizen($rowAccountBind["citizen_id"]);
 				$arrAccount["DEPTACCOUNT_NO_BANK_HIDE"] = $lib->formatcitizen($rowAccountBind["citizen_id"]);

@@ -93,7 +93,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						':deptaccount_no' => $deptaccount_no,
 						':amt_transfer' => $amt_transfer,
 						':response_code' => $arrResponse->RESPONSE_CODE,
-						':response_message' => json_encode($arrResponse->RETRUN_RAW)
+						':response_message' => json_encode($arrResponse)
 					];
 					$log->writeLog('withdrawtrans',$arrayStruc);
 					if(isset($configError[$rowDataDeposit["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){

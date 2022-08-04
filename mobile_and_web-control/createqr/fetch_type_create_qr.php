@@ -11,6 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getTypeTransQR->execute();
 		while($rowTypeQR = $getTypeTransQR->fetch(PDO::FETCH_ASSOC)){
 			$arrTypeQR = array();
+			$arrTypeQR["ALLOW_SELECT_TRANS_MODE"] = TRUE;
 			$arrTypeQR["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 			$arrTypeQR["TRANS_DESC"] = $rowTypeQR["trans_desc_qr"];
 			$arrTypeQR["OPERATE_DESC"] = $rowTypeQR["operation_desc_".$lang_locale];
@@ -57,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 					$arrContract = array();
 					$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
-					$interest = $cal_loan->calculateInterest($contract_no);
+					$interest = $cal_loan->calculateIntAPI($contract_no);
 					$arrContract["ACCOUNT_NO"] = $contract_no;
 					$arrContract["ACCOUNT_NO_HIDE"] = $contract_no;
 					$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);

@@ -76,10 +76,10 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_deposit_outside = '1'";
 			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$menucheckrights = "and gca.allow_buyshare = '1'";
 			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan'){
-			$menucheckrights = "and gca.allow_pay_loan = '1'";
+			$menucheckrights = "and gca.allow_payloan = '1'";
 			$transfer_mode = "2";
 		}
 		if($check_allow_acc){
@@ -329,10 +329,10 @@ class CalculateDep {
 			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
 			$transfer_mode = "9";
 		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
+			$menucheckrights = "and gca.allow_buyshare = '1'";
 			$transfer_mode = "3";
 		}else if($menu_component == 'TransferDepPayLoan'){
-			$menucheckrights = "and gca.allow_pay_loan = '1'";
+			$menucheckrights = "and gca.allow_payloan = '1'";
 			$transfer_mode = "2";
 		}
 		$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
@@ -555,7 +555,14 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	
+	public function getSequestAmt($deptaccount_no){
+		$arrSequest = array();
+		$arrSequest["CAN_WITHDRAW"] = TRUE;
+		$arrSequest["CAN_DEPOSIT"] = TRUE;
+		$arrSequest["SEQUEST_AMOUNT"] = 0;
+		return $arrSequest;
+	}
+
 	public function getConstantAcc($deptaccount_no){
 		$getConst = $this->conora->prepare("SELECT dpm.account_id as MEMBER_NO,dpm.ACC_STATUS,dpm.ACC_TYPE as DEPTTYPE_CODE,dpm.account_name as DEPTACCOUNT_NAME,
 											dpm.BALANCE as PRNCBAL,dpt.min_bal as MINPRNCBAL,dpm.LAST_PAGE,dpm.LAST_LINE,dpm.LINE_CARD,dpm.PAGE_CARD,
@@ -567,7 +574,28 @@ class CalculateDep {
 		return $rowConst;
 	}
 	
-	public function DepositMoneyInside($conoracle,$deptaccount_no,$tran_code,$amt_transfer,$from_account_no,$payload,$menu_component,$log){
+	public function getLastSeqNo($deptaccount_no){
+		$getLastSEQ = $this->conora->prepare("SELECT MAX(BOOK_ID) as MAX_SEQ_NO FROM BK_T_NOBOOK WHERE account_no = :deptaccount_no");
+		$getLastSEQ->execute([':deptaccount_no' => $deptaccount_no]);
+		$rowLastSEQ = $getLastSEQ->fetch(\PDO::FETCH_ASSOC);
+		return $rowLastSEQ;
+	}
+	
+	public function generateDocNo($bill_id,$lib){
+		$getLastDpSlipNo = $this->conora->prepare("select bill_type,bill_running,bill_year from sys_bill where bill_id = :bill_id");
+		$getLastDpSlipNo->execute([':bill_id' => $bill_id]);
+		$rowLastSlip = $getLastDpSlipNo->fetch(\PDO::FETCH_ASSOC);
+		$bill_running = $lib->mb_str_pad(($rowLastSlip["BILL_RUNNING"]+1), 6);
+		$deptslip_no = '';
+		$deptslip_no = $rowLastSlip["BILL_YEAR"].$rowLastSlip["BILL_TYPE"].($bill_running);
+		$arrayResult["SLIP_NO"] = $deptslip_no;
+		$arrayResult["BILL_RUNNING"] = $rowLastSlip["BILL_RUNNING"]+1;
+		$arrayResult["QUERY"] = $rowLastSlip;
+		return $arrayResult;
+	}
+
+	
+	public function DepositMoneyInside($conoracle,$deptaccount_no,$tran_code,$amt_transfer,$from_account_no,$payload,$menu_component,$log,$ref_no,$is_bill=false){
 		$constToAcc = $this->getConstantAcc($deptaccount_no);
 		$operate_date = date('Y-m-d H:i:s');
 		$page_no =  $constToAcc["LAST_LINE"] <= 24 ? $constToAcc["LAST_PAGE"] : $constToAcc["LAST_PAGE"] + 1;
@@ -583,13 +611,15 @@ class CalculateDep {
 			':amt_transfer' => $amt_transfer,
 			':balance' => $constToAcc["PRNCBAL"] + $amt_transfer,
 			':line_card' => $line_card,
-			':page_card' => $page_card
+			':page_card' => $page_card,
+			':br_no' => SUBSTR($deptaccount_no,0,3),
+			':ref_no' => $ref_no
 		];
 		$insertStatementSQL = "INSERT INTO BK_T_NOBOOK(CURR_DATE,ACCOUNT_NO,NOBOOK_SEQ,TRANS_CODE,USER_ID,DEP_CASH,DEP_CHQ,FLG_PRN,LINE_NO,
 							PAGE_NO,T_TRNS_TYPE,NOBOOK_CAUSE,BACK_DATE,WDL_CASH,WDL_CHQ,NOBOOK_DOC,N_BALANCE,
-							NO_FIX_NO,LINE_CARD,PAGE_CARD,FLG_CARD,BR_NO_REC) 
+							NO_FIX_NO,LINE_CARD,PAGE_CARD,FLG_CARD,BR_NO_REC,REF_NUM) 
 							VALUES(SYSDATE,:account_no,1,:tran_code,'APP01',:amt_transfer,0,'N',:line_no,:page_no,'R','',SYSDATE,0,0,'',
-							:balance,'0',:line_card,:page_card,'N','121')";
+							:balance,'0',:line_card,:page_card,'N',:br_no,:ref_no)";
 		$insertStatement = $conoracle->prepare($insertStatementSQL);
 		if($insertStatement->execute($arrExecute)){
 			$arrExecuteMaster = [
@@ -619,24 +649,26 @@ class CalculateDep {
 									:account_no,:tran_code,'R',:amt_transfer,0,'N',0,:balance,'121')";
 				$insertFinance = $conoracle->prepare($insertFinanceSQL);
 				if($insertFinance->execute($arrExecuteFinance)){
-					$insertTransactionLog = $this->con->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-																coop_slip_no,id_userlogin,ref_no_source)
-																VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
-																:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
-					$insertTransactionLog->execute([
-						':ref_no' => $ref_no,
-						':slip_type' => $tran_code,
-						':from_account' => $from_account_no,
-						':destination' => $deptaccount_no,
-						':amount' => $amt_transfer,
-						':penalty_amt' => $penalty_amt,
-						':amount_receive' => $amt_transfer - $penalty_amt,
-						':operate_date' => $operate_date,
-						':member_no' => $payload["member_no"],
-						':slip_no' => null,
-						':id_userlogin' => $payload["id_userlogin"]
-					]);
+					if(!$is_bill){
+						$insertTransactionLog = $this->con->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
+																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																	coop_slip_no,id_userlogin,ref_no_source)
+																	VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
+																	:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
+						$insertTransactionLog->execute([
+							':ref_no' => $ref_no,
+							':slip_type' => $tran_code,
+							':from_account' => $from_account_no,
+							':destination' => $deptaccount_no,
+							':amount' => $amt_transfer,
+							':penalty_amt' => $penalty_amt,
+							':amount_receive' => $amt_transfer - $penalty_amt,
+							':operate_date' => $operate_date,
+							':member_no' => $payload["member_no"],
+							':slip_no' => null,
+							':id_userlogin' => $payload["id_userlogin"]
+						]);
+					}
 					$arrayResult['RESULT'] = TRUE;
 					return $arrayResult;
 				}else{
@@ -746,7 +778,7 @@ class CalculateDep {
 		}
 	}
 	
-	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tran_code,$amt_transfer,$prevData=null){
+	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tran_code,$amt_transfer,$prevData=null,$ref_no){
 		$constAccount = $this->getConstantAcc($deptaccount_no);
 		$page_no =  $constAccount["LAST_LINE"] <= 24 ? $constAccount["LAST_PAGE"] : $constAccount["LAST_PAGE"] + 1;
 		$line_no = $constAccount["LAST_LINE"] < 24 ? $constAccount["LAST_LINE"] + 1 : 1;
@@ -767,13 +799,15 @@ class CalculateDep {
 			':amt_transfer' => $amt_transfer,
 			':balance' => $constAccount["PRNCBAL"] - $amt_transfer,
 			':line_card' => $line_card,
-			':page_card' => $page_card
+			':page_card' => $page_card,
+			':br_no' => SUBSTR($deptaccount_no,0,3),
+			':ref_no' => $ref_no
 		];
 		$insertStatementSQL = "INSERT INTO BK_T_NOBOOK(CURR_DATE,ACCOUNT_NO,NOBOOK_SEQ,TRANS_CODE,USER_ID,DEP_CASH,DEP_CHQ,FLG_PRN,LINE_NO,
 							PAGE_NO,T_TRNS_TYPE,NOBOOK_CAUSE,BACK_DATE,WDL_CASH,WDL_CHQ,NOBOOK_DOC,N_BALANCE,
-							NO_FIX_NO,LINE_CARD,PAGE_CARD,FLG_CARD,BR_NO_REC) 
+							NO_FIX_NO,LINE_CARD,PAGE_CARD,FLG_CARD,BR_NO_REC,REF_NUM) 
 							VALUES(SYSDATE,:account_no,1,:tran_code,'APP01',0,0,'N',:line_no,:page_no,'R','',SYSDATE,:amt_transfer,0,'',
-							:balance,'0',:line_card,:page_card,'N','121')";
+							:balance,'0',:line_card,:page_card,'N',:br_no,:ref_no)";
 		$insertStatement = $conoracle->prepare($insertStatementSQL);
 		if($insertStatement->execute($arrExecute)){
 			$arrExecuteMaster = [

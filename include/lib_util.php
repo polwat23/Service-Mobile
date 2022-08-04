@@ -293,7 +293,7 @@ class library {
 				$dataImg = base64_decode($data_Img[1]);
 				$info_img = explode('/',$data_Img[0]);
 				$ext_img = str_replace('base64','',$info_img[1]);
-				$im_string = imageCreateFromString($dataImg);
+				$im_string = \imageCreateFromString($dataImg);
 				if (!$im_string) {
 					return false;
 				}else{

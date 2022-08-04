@@ -6,23 +6,15 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount'],$d
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if($dataComing["trans_code"] == '01'){
 			$deptaccount_no = preg_replace('/-/','',$dataComing["destination"]);
-			$checkSeqAmt = $cal_dep->getSequestAmt($deptaccount_no,'DTE');
-			if($checkSeqAmt["CAN_DEPOSIT"]){
-				$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["trans_amount"],"TransactionDeposit","999",false);
-				if($arrRightDep["RESULT"]){
-				}else{
-					$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
-					if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
-						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
-					}else{
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					}
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-				}
+			$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["trans_amount"],"TransactionDeposit","999",false);
+			if($arrRightDep["RESULT"]){
 			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0104";
-				$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
+				$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
+				if($arrRightDep["RESPONSE_CODE"] == 'WS0056'){
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format($arrRightDep["MINDEPT_AMT"],2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
@@ -32,15 +24,42 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount'],$d
 													WHERE LCONT_ID = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["destination"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			$interest = $cal_loan->calculateInterest($dataComing["destination"],$dataComing["trans_amount"]);
-			$amt_prin = $dataComing["trans_amount"] - $interest;
-			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"]) + $interest){
+			$interest = $cal_loan->calculateIntAPI($dataComing["destination"],$dataComing["trans_amount"]);
+			$amt_prin = $dataComing["trans_amount"] - $interest["INT_PAYMENT"];
+			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"]) + $interest["INT_PAYMENT"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['dataConst'] = $rowLoan;
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
+		}else if($dataComing["trans_code"] == '03'){
+			$getCurrShare = $conoracle->prepare("SELECT SHR_SUM_BTH FROM SHR_MEM WHERE account_id = :member_no");
+			$getCurrShare->execute([':member_no' => $dataComing["destination"]]);
+			$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
+			$sharereq_value = $rowCurrShare["SHARESTK_AMT"] + $dataComing["trans_amount"];
+			$shareround_factor = 10;
+			if($sharereq_value < $shareround_factor){
+				$arrayResult['RESPONSE_CODE'] = "WS0075";
+				if(isset($configError["BUY_SHARES_ERR"][0]["0003"][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${SHAREROUND_FACTOR}',number_format($shareround_factor,2),$configError["BUY_SHARES_ERR"][0]["0003"][0][$lang_locale]);
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+				
+			}
+			if($dataComing["trans_amount"] % $shareround_factor > 0){
+				if(isset($configError["BUY_SHARES_ERR"][0]["0004"][0][$lang_locale])){
+					$arrayResult['RESPONSE_MESSAGE'] = str_replace('${SHAREROUND_FACTOR}',number_format($shareround_factor,2),$configError["BUY_SHARES_ERR"][0]["0004"][0][$lang_locale]);
+				}else{
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				}
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+			
 		}
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');

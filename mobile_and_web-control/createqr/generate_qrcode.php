@@ -32,8 +32,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			':app_version' => $dataComing["app_version"]
 		])){
 			//insert success
+			$dataLinkTrancode = '';
 			foreach ($dataComing["transList"] as $transValue) {
-				$account_no = preg_replace('/-/','',$transValue["account_no"]);
+				if($transValue["trans_code"] !== '02'){
+					$account_no = preg_replace('/-/','',$transValue["account_no"] ?? $member_no);
+				}else{
+					$account_no = $transValue["account_no"];
+				}
 				$insertQrDetail = $conmysql->prepare("INSERT INTO gcqrcodegendetail(qrgenerate, trans_code_qr, ref_account, qrtransferdt_amt, qrtransferdt_fee) 
 													VALUES (:qrgenerate, :trans_code_qr, :ref_account, :qrtransferdt_amt, :qrtransferdt_fee)");
 				if($insertQrDetail->execute([
@@ -43,8 +48,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':qrtransferdt_amt' => $transValue["amt_transfer"],
 					':qrtransferdt_fee' => 0,
 				])){
-					$qrTransferAmt += $transValue["amt_transfer"];
-					$qrTransferFee += 0;
+					if($dataComing["trans_mode"] === 'coop'){
+						if($transValue["trans_code"] === '01'){
+							$dataLinkTrancode = "ibafcoop://app/transferdepinsidecoop?destination=".$account_no."&amount=".$transValue["amt_transfer"];
+						}else if($transValue["trans_code"] === '02'){
+							$dataLinkTrancode = "ibafcoop://app/transferdeppayloan?destination=".$transValue["account_no"]."&amount=".$transValue["amt_transfer"];
+						}else if($transValue["trans_code"] === '03'){
+							$dataLinkTrancode = "ibafcoop://app/transferdepbuyshare?destination=".$member_no."&amount=".$transValue["amt_transfer"];
+						}
+					}else{
+						$qrTransferAmt += $transValue["amt_transfer"];
+						$qrTransferFee += 0;
+					}
 				}else{
 					$conmysql->rollback();
 					$arrayResult['RESPONSE_CODE'] = "WS1013";
@@ -66,14 +81,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					ob_flush();
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
 				}
 			}
 			$qrTransferAmtFormat = number_format($qrTransferAmt, 2, '', '');
 			$qrTransferFeeFormat = number_format($qrTransferFee, 2, '', '');
-			$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".$qrTransferAmtFormat;
+			if($dataComing["trans_mode"] == 'coop'){
+				$stringQRGenerate = $dataLinkTrancode;
+			}else{
+				$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".$qrTransferAmtFormat;
+			}
 			/*$qrCode = new QrCode($stringQRGenerate);
 			header('Content-Type: '.$qrCode->getContentType());
 			$qrCode->writeString();
@@ -144,9 +161,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$lib->sendLineNotify($message_error);
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					ob_flush();
-					echo json_encode($arrayResult);
-					exit();
+					require_once('../../include/exit_footer.php');
 				}
 			}else{
 				$conmysql->rollback();
@@ -168,9 +183,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$lib->sendLineNotify($message_error);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				ob_flush();
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
 			}
 		}else{
 			$conmysql->rollback();
@@ -194,9 +207,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			ob_flush();
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

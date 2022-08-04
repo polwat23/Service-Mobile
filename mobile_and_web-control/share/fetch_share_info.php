@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														stm.SHR_SUM_BTH as SUM_SHARE_AMT,stm.TYPE_SH_ID as shritemtype_desc,
 														stm.TMP_YEAR || stm.TMP_MONTH as period,stm.SLIP_NO as ref_slipno
 														FROM SHR_T_SHARE stm
-														WHERE stm.account_id = :member_no and stm.TYPE_SH_ID <> 'E' and stm.TMP_DATE_REC
+														WHERE stm.account_id = :member_no and stm.TYPE_SH_ID <> 'E' and TRUNC(stm.TMP_DATE_REC)
 														BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ORDER BY stm.SHR_SEN DESC");
 			$getShareStatement->execute([
 				':member_no' => $member_no,

@@ -416,6 +416,7 @@ if(!$anonymous){
 				$fetchLimitTrans = $conmysql->prepare("SELECT limit_amount_transaction FROM gcmemberaccount WHERE member_no = :member_no");
 				$fetchLimitTrans->execute([':member_no' => $member_no]);
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
+				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
 				$arrayResult['RESULT'] = TRUE;
@@ -478,6 +479,7 @@ if(!$anonymous){
 		}
 		if(isset($arrayAllMenu)){
 			$arrayResult['LOGIN_BANNER'] = $config["URL_SERVICE"].'/resource/logo/login_banner.webp?v=2';
+			$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

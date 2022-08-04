@@ -5,10 +5,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransferDepBuyShare')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);;
-		$getCurrShare = $conoracle->prepare("SELECT SHARESTK_AMT FROM shsharemaster WHERE member_no = :member_no");
+		$getCurrShare = $conoracle->prepare("SELECT SHR_SUM_BTH FROM SHR_MEM WHERE account_id = :member_no");
 		$getCurrShare->execute([':member_no' => $member_no]);
 		$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
-		$sharereq_value = ($rowCurrShare["SHARESTK_AMT"] * 10) + $dataComing["amt_transfer"];
+		$sharereq_value = $rowCurrShare["SHARESTK_AMT"] + $dataComing["amt_transfer"];
 		
 		/*if($sharereq_value > $rowContShare["MAXSHARE_HOLD"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0075";
@@ -33,18 +33,11 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'WFS');
+		$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],'W31');
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($arrRightDep["RESULT"]){
-				if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
-					$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
-					$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
-					$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
-					$arrayResult['CAUTION'] = $arrayCaution;
-					$arrayResult['FEE_AMT'] = $arrInitDep["PENALTY_AMT"];
-					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
-				}
+				
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

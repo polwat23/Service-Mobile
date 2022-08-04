@@ -40,12 +40,12 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrSendData["client_trans_no"] = $dataComing["CLIENT_TRANS_NO"];
 		}
 		$conoracle->beginTransaction();
-		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$rowDataWithdraw["itemtype_wtd"],$amt_transfer);
+		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$rowDataWithdraw["itemtype_wtd"],$amt_transfer,null,$ref_no);
 		if($wtdResult["RESULT"]){
 			if($coop_account_no == $rowDataWithdraw["account_payfee"]){
-				$wtdResultFee = $cal_dep->WithdrawMoneyInside($conoracle,$rowDataWithdraw["account_payfee"],"W16",$fee_amt,$wtdResult);
+				$wtdResultFee = $cal_dep->WithdrawMoneyInside($conoracle,$rowDataWithdraw["account_payfee"],"W16",$fee_amt,$wtdResult,$ref_no);
 			}else{
-				$wtdResultFee = $cal_dep->WithdrawMoneyInside($conoracle,$rowDataWithdraw["account_payfee"],"W16",$fee_amt);
+				$wtdResultFee = $cal_dep->WithdrawMoneyInside($conoracle,$rowDataWithdraw["account_payfee"],"W16",$fee_amt,null,$ref_no);
 			}
 			if($wtdResultFee["RESULT"]){
 				$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);
@@ -75,10 +75,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$arrResponse = json_decode($responseAPI);
 				if($arrResponse->RESULT){
 					$conoracle->commit();
-					$getLastBookID = $conoracle->prepare("SELECT MAX(BOOK_ID) MAX_BOOK FROM BK_T_NOBOOK WHERE account_no = :account_no and trans_code = :trans_code");
+					$getLastBookID = $conoracle->prepare("SELECT MAX(BOOK_ID) MAX_BOOK FROM BK_T_NOBOOK WHERE account_no = :account_no");
 					$getLastBookID->execute([
-						':account_no' => $coop_account_no,
-						':trans_code' => $rowDataWithdraw["itemtype_wtd"]
+						':account_no' => $coop_account_no
 					]);
 					$rowBookID = $getLastBookID->fetch(PDO::FETCH_ASSOC);
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,seq_no)
@@ -171,7 +170,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 						':fee_amt' => $dataComing["fee_amt"],
 						':deptaccount_no' => $coop_account_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => json_encode($arrResponse->RETRUN_RAW)
+						':response_message' => json_encode($arrResponse)
 					];
 					$log->writeLog('withdrawtrans',$arrayStruc);
 					if(isset($configError[$rowDataWithdraw["bank_short_ename"]."_ERR"][0][$arrResponse->RESPONSE_CODE][0][$lang_locale])){

@@ -196,7 +196,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 					สหกรณ์อิสลามอิบนูอัฟฟาน จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:20px">
-					Chiangrai Public Health Saving And Credit Co-operative Limited
+					IBNU AFFAN
 			   </div>
 			   </div>
 				<div class="frame-info-user">

@@ -21,10 +21,10 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			require_once('../../include/exit_footer.php');
 		}
 		$conoracle->beginTransaction();
-		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$from_account_no,$itemtypeWithdraw,$dataComing["amt_transfer"]);
+		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$from_account_no,$itemtypeWithdraw,$dataComing["amt_transfer"],null,$ref_no);
 		if($wtdResult["RESULT"]){
 			$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$to_account_no,$itemtypeDepositDest,$dataComing["amt_transfer"],
-			$from_account_no,$payload,$dataComing["menu_component"],$log);
+			$from_account_no,$payload,$dataComing["menu_component"],$log,$ref_no);
 			if($depositMoney["RESULT"]){
 				
 				$arrToken = $func->getFCMToken('person',$payload["member_no"]);
