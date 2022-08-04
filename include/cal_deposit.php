@@ -901,7 +901,7 @@ class CalculateDep {
 											VALUES(:deptslip_no,:coop_id,:deptaccount_no,:depttype_code,:coop_id,:deptgrp_code,TRUNC(sysdate),:itemtype_code,
 											:slip_amt,:cash_type,:prncbal,:withdrawable_amt,:checkpend_amt,'MOBILE',TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),:laststmno,:itemtype_code,
 											TRUNC(TO_DATE(:lastcalint_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(sysdate),1,0,0,:acc_id,1,:refer_deptslip_no,0,0,
-											:slip_amt,1,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
+											:slip_amt,0,0,0,1,1,0,1,1,TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'))");
 		if($insertDpSlipDest->execute($arrExecuteDest)){
 			$arrExecuteStmDest = [
 				':coop_id' => $config["COOP_ID"],

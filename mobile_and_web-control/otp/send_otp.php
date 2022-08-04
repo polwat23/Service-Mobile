@@ -20,7 +20,6 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$lib->sendLineNotify(json_encode($dataComing));
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 	$getTel = $conoracle->prepare("SELECT  ADDR_MOBILEPHONE as MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
