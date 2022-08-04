@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['unique_id','member_no'],$dataComing)){
 		if(isset($dataComing["member_no"]) && $dataComing["member_no"] != ''){
 			$arrayExecute[':member_no'] = strtolower($lib->mb_str_pad($dataComing["member_no"]));
 		}
-		$fetchContract = $conmssql->prepare("SELECT LOANCONTRACT_NO,MEMBER_NO FROM lncontmaster where member_no = :member_no and loantype_code = '13' and contract_status > 0 and contract_status <> 8");
+		$fetchContract = $conmssql->prepare("SELECT LOANCONTRACT_NO,MEMBER_NO FROM lncontmaster where member_no = :member_no and loantype_code IN('13','18') and contract_status > 0 and contract_status <> 8");
 		$fetchContract->execute($arrayExecute);
 		while($rowContract = $fetchContract->fetch(PDO::FETCH_ASSOC)){
 			$arrayGroup = array();

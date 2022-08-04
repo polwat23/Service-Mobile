@@ -9,19 +9,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccBind = array();
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		$getMemberRetryDate = $conmssql->prepare("SELECT RETRY_DATE FROM mbmembmaster WHERE member_no = :member_no");
-		$getMemberRetryDate->execute([':member_no' => $member_no]);
-		$rowMemberRetryDate = $getMemberRetryDate->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMemberRetryDate["RETRY_DATE"]) && $rowMemberRetryDate["RETRY_DATE"] != ""){
-			$dateRetry = new DateTime(date('d-m-Y',strtotime($rowMemberRetryDate["RETRY_DATE"])));
-			$dateNow = new DateTime(date('d-m-Y'));
-			$date_duration = $dateRetry->diff($dateNow);
-			if($date_duration->days <= 365 && $member_no != "00000218" && $member_no != "00000499" && $member_no != "00000472"){
-				$arrayResult['RESPONSE_MESSAGE'] = $configError["RECEIVE_LOAN_RETRY_BEFORE"][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
-		}
+		
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_receive_loan = '1'");
@@ -60,6 +48,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE ln.loantype_code IN(".implode(',',$arrGrpLoan).") and ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
+				if($rowLoan["LOANTYPE_CODE"] != '18'){
+					$getMemberRetryDate = $conmssql->prepare("SELECT RETRY_DATE FROM mbmembmaster WHERE member_no = :member_no");
+					$getMemberRetryDate->execute([':member_no' => $member_no]);
+					$rowMemberRetryDate = $getMemberRetryDate->fetch(PDO::FETCH_ASSOC);
+					if(isset($rowMemberRetryDate["RETRY_DATE"]) && $rowMemberRetryDate["RETRY_DATE"] != ""){
+						$dateRetry = new DateTime(date('d-m-Y',strtotime($rowMemberRetryDate["RETRY_DATE"])));
+						$dateNow = new DateTime(date('d-m-Y'));
+						$date_duration = $dateRetry->diff($dateNow);
+						if($date_duration->days <= 365 && $member_no != "00000218" && $member_no != "00000499" && $member_no != "00000472"){
+							$arrayResult['RESPONSE_MESSAGE'] = $configError["RECEIVE_LOAN_RETRY_BEFORE"][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+					}
+				}
 				$arrLoan = array();
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
