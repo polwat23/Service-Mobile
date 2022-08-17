@@ -7,7 +7,7 @@ $loantype_code = $rowCanCal["loantype_code"] ?? $dataComing["loantype_code"];
 $maxloan_amt = 0;
 $oldBal = 0;
 $receive_net = 0;
-$getShareBF = $conoracle->prepare("SELECT (sh.SHAREBEGIN_AMT * 10) AS SHAREBEGIN_AMT,mb.SALARY_AMOUNT 
+$getShareBF = $conoracle->prepare("SELECT (sh.SHARESTK_AMT * 10) AS SHARESTK_AMT,mb.SALARY_AMOUNT 
 												FROM mbmembmaster mb LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
 												WHERE mb.member_no = :member_no");
 $getShareBF->execute([':member_no' => $member_no]);
@@ -35,7 +35,7 @@ $getLoanCerdit->execute([
 ]);
 $rowLoanCredit = $getLoanCerdit->fetch(PDO::FETCH_ASSOC);
 $arrMin = array();
-$arrMin[] = $rowShareBF["SHAREBEGIN_AMT"] * $rowLoanCredit["PERCENT_SHARE"];
+$arrMin[] = $rowShareBF["SHARESTK_AMT"] * $rowLoanCredit["PERCENT_SHARE"];
 $arrMin[] = $rowShareBF["SALARY_AMOUNT"] * $rowLoanCredit["PERCENT_SALARY"];
 $maxloan_amt = MIN($arrMin);
 if($maxloan_amt > $rowLoanCredit["MAXLOAN_AMT"]){
