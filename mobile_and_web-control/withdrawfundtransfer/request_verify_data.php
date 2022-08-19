@@ -10,16 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 		$fetchDataDeposit->execute([':sigma_key' => $dataComing["sigma_key"]]);
 		$rowDataDeposit = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
-		$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
-													transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
-		$getTransactionForFee->execute([
-			':member_no' => $payload["member_no"]
-		]);
-		$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
-		$fee_amt = 0;
-		if($rowCountFee["C_TRANS"] + 1 > 2){
-			$fee_amt = $rowDataDeposit["fee_withdraw"];
-		}
+		$fee_amt = $rowDataDeposit["fee_withdraw"];
 		if($deptaccount_no == $rowDataDeposit["account_payfee"]){
 			$arrInitDep = $cal_dep->initDept($deptaccount_no,$dataComing["amt_transfer"],$rowDataDeposit["itemtype_wtd"],$fee_amt);
 		}else{

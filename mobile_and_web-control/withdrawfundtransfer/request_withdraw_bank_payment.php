@@ -27,11 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			':member_no' => $payload["member_no"]
 		]);
 		$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
-		if($rowCountFee["C_TRANS"] + 1 > 2){
-			$dataComing["fee_amt"] = $dataComing["fee_amt"];
-		}else{
-			$dataComing["fee_amt"] = 0;
-		}
+		$dataComing["fee_amt"] = $dataComing["fee_amt"];
 		if($rowDataWithdraw["bank_code"] == '025'){
 			$fee_amt = $dataComing["penalty_amt"];
 		}else{
@@ -96,68 +92,34 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			}else{
 				$wtdResult["MAX_SEQNO"] = $getlastseqFeeAcc["MAX_SEQ_NO"];
 			}
-			if($fee_amt > 0){
-				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-				$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
-				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
-				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+			$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+			$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+			$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 
-				$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
-				$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
-				if($penaltyWtd["RESULT"]){
-					
-				}else{
-					$conmssql->rollback();
-					$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayStruc = [
-						':member_no' => $payload["member_no"],
-						':id_userlogin' => $payload["id_userlogin"],
-						':operate_date' => $dateOper,
-						':amt_transfer' => $dataComing["amt_transfer"],
-						':penalty_amt' => $dataComing["penalty_amt"],
-						':fee_amt' => $fee_amt,
-						':deptaccount_no' => $coop_account_no,
-						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
-					];
-					$log->writeLog('withdrawtrans',$arrayStruc);
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-				}
+			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
+			$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
+			if($penaltyWtd["RESULT"]){
+				
 			}else{
-				if($rowCountFee["C_TRANS"] + 1 > 2){
-				}else{
-					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
-					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
-					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
-					$penaltyWtdPromo = $cal_dep->insertFeePromotion($conmssql,$from_account_no,$vccamtPenaltyPromo,'FWM',
-					$dataComing["amt_transfer"],$rowDataWithdraw["fee_withdraw"],$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
-					if($penaltyWtdPromo["RESULT"]){
-						
-					}else{
-						$conmssql->rollback();
-						$arrayResult['RESPONSE_CODE'] = $penaltyWtdPromo["RESPONSE_CODE"];
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayStruc = [
-							':member_no' => $payload["member_no"],
-							':id_userlogin' => $payload["id_userlogin"],
-							':operate_date' => $dateOper,
-							':amt_transfer' => $dataComing["amt_transfer"],
-							':penalty_amt' => $dataComing["penalty_amt"],
-							':fee_amt' => $fee_amt,
-							':deptaccount_no' => $coop_account_no,
-							':response_code' => $arrayResult['RESPONSE_CODE'],
-							':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtdPromo["ACTION"]
-						];
-						$log->writeLog('withdrawtrans',$arrayStruc);
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
-				}
+				$conmssql->rollback();
+				$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayStruc = [
+					':member_no' => $payload["member_no"],
+					':id_userlogin' => $payload["id_userlogin"],
+					':operate_date' => $dateOper,
+					':amt_transfer' => $dataComing["amt_transfer"],
+					':penalty_amt' => $dataComing["penalty_amt"],
+					':fee_amt' => $fee_amt,
+					':deptaccount_no' => $coop_account_no,
+					':response_code' => $arrayResult['RESPONSE_CODE'],
+					':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
+				];
+				$log->writeLog('withdrawtrans',$arrayStruc);
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
 			}
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);
 			if(!$responseAPI["RESULT"]){
