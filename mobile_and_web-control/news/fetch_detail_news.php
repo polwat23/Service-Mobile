@@ -34,6 +34,7 @@ if($lib->checkCompleteArgument(['id_news'],$dataComing)){
 			$path_img[] = $rowDetailNews["img_gallery_5"];
 		}
 		$arrayDetailNews["IMG"] = $path_img;
+		$arrayDetailNews['ALLOW_TARGET'] = TRUE;
 		$arrayResult['DETAIL_NEWS'] = $arrayDetailNews;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

@@ -9,16 +9,42 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 														WHERE gat.member_no = :member_no and gat.is_use <> '-9'");
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		if($fetchAccountBeenAllow->rowCount() > 0){
+			$checkBindAccount = $conmysql->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('1','0')");
+			$checkBindAccount->execute([':member_no' => $payload["member_no"]]);
+			$rowBindAcc = $checkBindAccount->fetch(PDO::FETCH_ASSOC);
 			while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 				$arrAccBeenAllow = array();
-				$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code,dpm.transonline_flag
+				$getDetailAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 				$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["deptaccount_no"]]);
 				$rowDetailAcc = $getDetailAcc->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowDetailAcc["DEPTACCOUNT_NAME"])){
-					if($rowDetailAcc["TRANSONLINE_FLAG"] == '0'){
-						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_FLAG_OFF'][0][$lang_locale];
+					$getDeptTypeAllow = $conmysql->prepare("SELECT allow_withdraw_outside,allow_withdraw_inside,allow_deposit_outside
+																			FROM gcconstantaccountdept
+																			WHERE dept_type_code = :depttype_code");
+					$getDeptTypeAllow->execute([
+						':depttype_code' => $rowDetailAcc["DEPTTYPE_CODE"]
+					]);
+					$rowDeptTypeAllow = $getDeptTypeAllow->fetch(PDO::FETCH_ASSOC);
+					if(isset($rowBindAcc["deptaccount_no_coop"]) && $rowBindAcc["deptaccount_no_coop"] != ""){
+						if($rowBindAcc["deptaccount_no_coop"] == $rowAccBeenAllow["deptaccount_no"]){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_MENU'][0][$lang_locale];
+						}else{
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+						}
+					}else{
+						if(($rowDeptTypeAllow["allow_withdraw_outside"] == '0' && $rowDeptTypeAllow["allow_deposit_outside"] == '0') && 
+						$rowDeptTypeAllow["allow_withdraw_inside"] == '1'){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_INSIDE_FLAG_ON'][0][$lang_locale];
+						}else if($rowDeptTypeAllow["allow_withdraw_outside"] == '1' || $rowDeptTypeAllow["allow_deposit_outside"] == '1'){
+							$arrAccBeenAllow["ALLOW_DESC"] = $configError['ALLOW_TRANS_ALL_MENU'][0][$lang_locale];
+						}else{
+							$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
+						}
+					}
+					if($rowDeptTypeAllow["allow_withdraw_inside"] == '0'){
+						$arrAccBeenAllow["FLAG_NAME"] = $configError['ACC_TRANS_FLAG_OFF'][0][$lang_locale];
 					}
 					$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDetailAcc["DEPTACCOUNT_NAME"]));
 					$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
@@ -26,6 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
 					$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
+
 					$arrGroupAccAllow[] = $arrAccBeenAllow;
 				}
 			}
