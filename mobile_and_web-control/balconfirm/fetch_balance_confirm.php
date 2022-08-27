@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				($arrGrpLoanAll[array_search($rowSumAllLoan["LOAN_TYPE"],array_column($arrGrpLoanAll,'TYPE_ACCOUNT'))])["SUM_BAL_IN_TYPE"] += $rowSumAllLoan["BALANCE"];
 			}
 		}
-		$getSumAllLoanShare = $conoracle->prepare("SELECT (sharestk_amt * 10) as SUM_SHARE FROM shsharemaster WHERE member_no = :member_no");
+		$getSumAllLoanShare = $conoracle->prepare("SELECT (sharestk_amt * 50) as SUM_SHARE FROM shsharemaster WHERE member_no = :member_no");
 		$getSumAllLoanShare->execute([':member_no' => $member_no]);
 		$rowSumAllShareBal = $getSumAllLoanShare->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SHARE_BALANCE'] = $rowSumAllShareBal["SUM_SHARE"];

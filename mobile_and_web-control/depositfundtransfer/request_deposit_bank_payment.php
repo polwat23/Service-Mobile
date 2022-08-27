@@ -51,14 +51,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 				$dataAccFee = $cal_dep->getConstantAcc($rowDataDeposit["account_payfee"]);
 				$depositMoney["MAX_SEQNO"] = $getlastseqFeeAcc["MAX_SEQ_NO"];
 			}
-			if($rowBalFee["PRNCBAL"] - $rowDataDeposit["fee_deposit"] < $dataAccFee["MINPRNCBAL"]){
-				$conoracle->rollback();
-				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0100";
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
 			$vccamtPenalty = $func->getConstant("map_account_id_ktb");
 			$from_account_no = $rowDataDeposit["account_payfee"];
 			$arrSendData = array();

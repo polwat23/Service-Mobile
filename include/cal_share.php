@@ -14,28 +14,8 @@ class CalculateShare {
 	function __construct() {
 		$connection = new connection();
 		$this->lib = new library();
-		//$this->con = $connection->connecttomysql();
-		$dbhost = "127.0.0.1";
-		$dbuser = "root";
-		$dbpass = "EXAT2022";
-		$dbname = "mobile_exat_test";
-
-		$this->con = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
-		$this->con->exec("set names utf8mb4");
-
-
-		$dbnameOra = "(DESCRIPTION =
-					(ADDRESS_LIST =
-					  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
-					)
-					(CONNECT_DATA =
-					  (SERVICE_NAME = iorcl)
-					)
-				  )";
-		$this->conora = new \PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
-		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
-		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
-		//$this->conora = $connection->connecttooracle();
+		$this->con = $connection->connecttomysql();
+		$this->conora = $connection->connecttooracle();
 	}
 	private function getConstShare(){
 		$getConstantShare = $this->conora->prepare("SELECT MAXSHARE_HOLD FROM SHSHARETYPE WHERE SHARETYPE_CODE = '01'");

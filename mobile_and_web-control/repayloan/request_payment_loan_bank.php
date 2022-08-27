@@ -28,18 +28,18 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$interestPeriod = 0;
 		$withdrawStatus = FALSE;
 		$intarrear = $dataCont["INTEREST_ARREAR"];
-		$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-		$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
+		$interest = $cal_loan->calculateIntAPI($dataComing["contract_no"],$dataComing["amt_transfer"]);
+		$intarrear = $interest["INT_ARREAR"];
+		$int_returnFull = $interest["INT_RETURN"];
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		$int_returnSrc = $interest["INT_RETURN"];
-		$interestFull = $interest["INT_PERIOD"];
-		if($interestFull > 0){
-			if($dataComing["amt_transfer"] < $interestFull){
-				$interestFull = $dataComing["amt_transfer"];
+		if($interest["INT_PAYMENT"] > 0){
+			if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $dataComing["amt_transfer"] - $interestFull;
+				$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
@@ -47,6 +47,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
 		}
+		$int_return = $dataCont["INTEREST_RETURN"];
+		
 		$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
@@ -86,9 +88,10 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
 			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
-
+			file_put_contents(__DIR__.'Msgresponse.txt', json_encode($deptslip_noFee,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+		
 			$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FEE',
-			$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,0,$deptslip_noFee);
+			$dataComing["amt_transfer"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,$deptslip_noFee);
 			if($penaltyWtd["RESULT"]){
 			}else{
 				$conoracle->rollback();
@@ -109,12 +112,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 				require_once('../../include/exit_footer.php');
 			}
 		}
+		
 		$payslip = $cal_loan->paySlip($conoracle,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
 		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
 		if($payslip["RESULT"]){
 			$payslipdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
-			$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
-			$intarrear,$int_returnSrc,$interestPeriod,'1',$penaltyWtd["DEPTSLIP_NO"]);
+			$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interestFull,
+			0,$int_returnSrc,$interestPeriod,'1',$penaltyWtd["DEPTSLIP_NO"]);
 			if($payslipdet["RESULT"]){
 				$repayloan = $cal_loan->repayLoan($conoracle,$dataComing["contract_no"],$dataComing["amt_transfer"],0,
 				$config,$payinslipdoc_no,$dateOperC,

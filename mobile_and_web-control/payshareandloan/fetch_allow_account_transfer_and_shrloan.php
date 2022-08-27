@@ -1,27 +1,6 @@
 <?php
 require_once('../autoload.php');
 
-$dbhost = "127.0.0.1";
-$dbuser = "root";
-$dbpass = "EXAT2022";
-$dbname = "mobile_exat_test";
-
-$conmysql = new PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
-$conmysql->exec("set names utf8mb4");
-
-
-$dbnameOra = "(DESCRIPTION =
-			(ADDRESS_LIST =
-			  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
-			)
-			(CONNECT_DATA =
-			  (SERVICE_NAME = iorcl)
-			)
-		  )";
-$conoracle = new PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
-$conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
-$conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
-
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PayShareLoan')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -67,8 +46,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$interest = 0;
 				$arrLoan = array();
 				$interest = $cal_loan->calculateIntAPI($rowLoan["LOANCONTRACT_NO"]);
-				if($interest["INT_PERIOD"] > 0){
-					$arrLoan["INT_BALANCE"] = $interest["INT_PERIOD"];
+				if($interest["INT_PAYMENT"] > 0){
+					$arrLoan["INT_BALANCE"] = $interest["INT_PAYMENT"];
 				}
 				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
 					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
@@ -78,7 +57,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"],2);
-				$arrLoan["SUM_BALANCE"] = number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PERIOD"],2);
+				$arrLoan["SUM_BALANCE"] = number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;
