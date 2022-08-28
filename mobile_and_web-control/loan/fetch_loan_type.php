@@ -11,11 +11,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$rowSumloanbalance = $getSumAllContract->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_LOANBALANCE'] = number_format($rowSumloanbalance["SUM_LOANBALANCE"],2);
 		$getContract = $conmssql->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,RTRIM(ln.LOANCONTRACT_NO) as LOANCONTRACT_NO,ln.principal_balance as LOAN_BALANCE,
-											ln.loanapprove_amt as APPROVE_AMT,ln.STARTCONT_DATE,ln.PERIOD_PAYMENT,ln.period_payamt as PERIOD,
+											ln.loanapprove_amt as APPROVE_AMT,ln.STARTCONT_DATE,ln.PERIOD_PAYMENT,ln.period_payamt as PERIOD, ln.LOANPAYMENT_TYPE,
 											ln.LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
+											WHERE ln.member_no = :member_no and ((ln.contract_status > 0 and ln.contract_status <> 8) OR
+											(ln.contract_status = -1 and DATEDIFF(month,ln.LASTPAYMENT_DATE,GETDATE()) < 13))");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();
@@ -29,6 +30,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrContract["STARTCONT_DATE"] = $lib->convertdate($rowContract["STARTCONT_DATE"],'D m Y');
 			$arrContract["PERIOD_PAYMENT"] = number_format($rowContract["PERIOD_PAYMENT"],2);
 			$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
+			$arrContract["PERIOD_BALANCE"] = $rowContract["PERIOD"] - $rowContract["LAST_PERIOD"];
+			if($rowContract["LOANPAYMENT_TYPE"] == '1'){
+				$arrContract["PAY_TYPE"]  ="คงต้น";
+			}else{
+				$arrContract["PAY_TYPE"]  ="คงยอด";
+			}
 			$arrGroupContract['TYPE_LOAN'] = $rowContract["LOAN_TYPE"];
 			if(array_search($rowContract["LOAN_TYPE"],array_column($arrAllLoan,'TYPE_LOAN')) === False){
 				($arrGroupContract['CONTRACT'])[] = $arrContract;

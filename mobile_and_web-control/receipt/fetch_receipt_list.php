@@ -5,16 +5,25 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$limit_period = $func->getConstant('limit_kpmonth');
-		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE,MEMBER_REF
+		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE
 												FROM MBMEMBMASTER 
 												WHERE member_no = :member_no");
 		$fetchName->execute([
 			':member_no' => $member_no
 		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		//สมาชิกอ้างอิง
+		$fetchRefmemno = $conmssql->prepare("select member_no as  member_ref  
+																	from mbmembmaster
+																	where  member_ref = :member_no ");
+		$fetchRefmemno->execute([
+			':member_no' => $member_no
+		]);
 		$arrMemberNoRef = array();
-		while($rowName = $fetchName->fetch(PDO::FETCH_ASSOC)){
-			$arrMemberNoRef[] = "'".$rowName["MEMBER_REF"]."'";
+		while($rowRefmemno = $fetchRefmemno->fetch(PDO::FETCH_ASSOC)){
+			$arrMemberNoRef[] = "'".$rowRefmemno["member_ref"]."'";
 		}
+		
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conmssql->prepare("SELECT TOP ". $limit_period." RECV_PERIOD,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT,KEEPING_STATUS 
 															from kpmastreceive where member_no = :member_no ORDER BY recv_period DESC");
@@ -54,6 +63,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAsslnvit = array();
 				$arrAsslnvit["REF_MEMBER_NO"] = $rowRefAssoInvite["MEMBER_NO"];
 				$arrAsslnvit["REF_AMOUNT"] = $rowRefAssoInvite["RECEIVE_AMT"];
+				$arrAsslnvit["SHOW_SLIP_REPORT"] = TRUE;
 				$asslnvitData[] =$arrAsslnvit;
 			}
 			if(sizeof($asslnvitData) > 0){

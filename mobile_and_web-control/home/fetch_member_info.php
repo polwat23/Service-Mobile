@@ -11,9 +11,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
 			if(isset($rowInfoMobile["path_avatar"])){
-				$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
-				$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
-				$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				if ($forceNewSecurity == true) {
+					$arrayResult['AVATAR_PATH'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_TOKEN"] = $lib->generate_token_access_resource($rowInfoMobile["path_avatar"], $jwt_token, $config["SECRET_KEY_JWT"]);
+					
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $explodePathAvatar[0].'.webp');
+					$arrayResult["AVATAR_PATH_WEBP_TOKEN"] = $lib->generate_token_access_resource($explodePathAvatar[0].'.webp', $jwt_token, $config["SECRET_KEY_JWT"]);
+				} else {
+					$arrayResult["AVATAR_PATH"] = $config["URL_SERVICE"].$rowInfoMobile["path_avatar"];
+					$explodePathAvatar = explode('.',$rowInfoMobile["path_avatar"]);
+					$arrayResult["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
+				}
 			}else{
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
@@ -61,18 +70,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) && $rowMember["PROVINCE_DESC"] != "" ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) && $rowMember["ADDR_POSTCODE"] != "" ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
-			$refAssoInvite = $conmssql->prepare("SELECT mp.PRENAME_SHORT, mb.MEMBER_NO,mb.MEMB_NAME,mb.MEMB_SURNAME
-																				FROM  mbmembmaster mb
-																				LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-																				WHERE mb.member_no = :member_no");
-			$refAssoInvite->execute([':member_no' => $rowMember["MEMBER_REF"]]);
-			$asslnvitData = array();
+			
+			if($rowMember["MEMBER_REF"] !="" && isset($rowMember["MEMBER_REF"]) ){
+				$refAssoInvite = $conmssql->prepare("select member_ref as  MEMBER_NO , 
+																				dbo.ft_getmbname(mbmembmaster.coop_id , mbmembmaster.member_ref ) as REF_FULLNAME
+																				from mbmembmaster
+																				where  member_no = :member_no and ( member_ref is not null and rtrim(member_ref) <> '')");
+				$refAssoInvite->execute([':member_no' => $member_no]);
+			}else{
+				$refAssoInvite = $conmssql->prepare("select member_no as  MEMBER_NO , 
+																				dbo.ft_getmbname(mbmembmaster.coop_id , mbmembmaster.member_no ) as REF_FULLNAME
+																				from mbmembmaster
+																				where  member_ref = :member_no");
+				$refAssoInvite->execute([':member_no' => $member_no]);
+			}
+  		   $asslnvitData = array();
 			while($rowRefAssoInvite = $refAssoInvite->fetch(PDO::FETCH_ASSOC)){
 				$arrAsslnvit = array();
 				$arrAsslnvit["REF_MEMBER_NO"] = $rowRefAssoInvite["MEMBER_NO"];
-				$arrAsslnvit["REF_MEMBER_NAME"] = $rowRefAssoInvite["PRENAME_SHORT"].$rowRefAssoInvite["MEMB_NAME"]." ".$rowRefAssoInvite["MEMB_SURNAME"];
+				$arrAsslnvit["REF_MEMBER_NAME"] = $rowRefAssoInvite["REF_FULLNAME"];
 				$asslnvitData[] =$arrAsslnvit;
 			}
+			
+
 			$arrayResult["PHONE"] = $lib->formatphone($rowMember["MEM_TELMOBILE"]);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];

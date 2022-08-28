@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "SMSK Saving",
 	"COOP_KEY" : "smsk-test",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=smsk",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=smsk",
 	"COOP_ID" : "074001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.smsk.mobile",
