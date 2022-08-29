@@ -14,28 +14,8 @@ class CalculateDep {
 	function __construct() {
 		$connection = new connection();
 		$this->lib = new library();
-		//$this->con = $connection->connecttomysql();
-		$dbhost = "127.0.0.1";
-		$dbuser = "root";
-		$dbpass = "EXAT2022";
-		$dbname = "mobile_exat_test";
-
-		$this->con = new \PDO("mysql:dbname={$dbname};host={$dbhost}", $dbuser, $dbpass);
-		$this->con->exec("set names utf8mb4");
-
-
-		$dbnameOra = "(DESCRIPTION =
-					(ADDRESS_LIST =
-					  (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.1.201)(PORT = 1521))
-					)
-					(CONNECT_DATA =
-					  (SERVICE_NAME = iorcl)
-					)
-				  )";
-		$this->conora = new \PDO("oci:dbname=".$dbnameOra.";charset=utf8", "iscotest", "iscotest");
-		$this->conora->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
-		$this->conora->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
-		//$this->conora = $connection->connecttooracle();
+		$this->con = $connection->connecttomysql();
+		$this->conora = $connection->connecttooracle();
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
@@ -107,6 +87,16 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		if($dataConst["DEPTTYPE_CODE"] == '02'){
+			
+			if($amt_transfer < 1000 ){
+				$arrayResult['RESPONSE_CODE'] = "WS0056";
+				$arrayResult['MINWITD_AMT'] = 1000;
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+		
+		}
 		
 		if($amt_transfer < $dataConst["MINDEPT_AMT"]){
 			$arrayResult['RESPONSE_CODE'] = "WS0056";
@@ -114,14 +104,16 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		
 		$getSumOfDeposit = $this->conora->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) as SUM_AMOUNT FROM dpdeptmaster dm 
 														LEFT JOIN dpdeptstatement ds ON dm.deptaccount_no = ds.deptaccount_no
 														WHERE dm.member_no = :member_no and dm.deptclose_status = '0' 
-														and ds.deptitemtype_code <> 'INT'
+														and ds.deptitemtype_code <> 'INT' AND SUBSTR(ds.deptitemtype_code,0,1) = 'D'
 														and TO_CHAR(ds.operate_date,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')");
 		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
-		if($rowSumOfDeposit["SUM_AMOUNT"] + $amt_transfer > '50000'){
+		$amout_dept = $rowSumOfDeposit["SUM_AMOUNT"] + $amt_transfer;		
+		if( $amout_dept > 50000){
 			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
@@ -192,12 +184,12 @@ class CalculateDep {
 							]);
 						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -224,12 +216,12 @@ class CalculateDep {
 							]);
 						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0102";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -256,12 +248,12 @@ class CalculateDep {
 							]);
 						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0103";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -298,12 +290,12 @@ class CalculateDep {
 							':transfer_mode' => $transfer_mode
 						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -318,12 +310,12 @@ class CalculateDep {
 							':transfer_mode' => $transfer_mode
 						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0102";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -338,12 +330,12 @@ class CalculateDep {
 							':transfer_mode' => $transfer_mode
 						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_deposit"]){
+						if($rowConstMapMenu["max_numof_deposit"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0103";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_deposit"]){
+						if($rowConstMapMenu["max_deposit"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_deposit"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -382,7 +374,7 @@ class CalculateDep {
 														WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
 			$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
 			$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
-			if($amountTx["C_SEQ"] > 99){
+			if($amountTx["C_SEQ"] > 1){
 				$arrayResult['RESPONSE_CODE'] = "WS0101";
 				
 				$arrayResult['RESULT'] = FALSE;
@@ -471,12 +463,12 @@ class CalculateDep {
 							]);
 						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
+						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_withdraw"]){
+						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -503,12 +495,12 @@ class CalculateDep {
 							]);
 						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
+						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0102";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_withdraw"]){
+						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -535,12 +527,12 @@ class CalculateDep {
 							]);
 						}
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
+						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0103";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_withdraw"]){
+						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -577,12 +569,12 @@ class CalculateDep {
 							':transfer_mode' => $transfer_mode
 						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
+						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0101";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_withdraw"]){
+						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -597,12 +589,12 @@ class CalculateDep {
 							':transfer_mode' => $transfer_mode
 						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
+						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0102";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_withdraw"]){
+						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -617,12 +609,12 @@ class CalculateDep {
 							':transfer_mode' => $transfer_mode
 						]);
 						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] >= $rowConstMapMenu["max_numof_withdraw"]){
+						if($rowConstMapMenu["max_numof_withdraw"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["max_numof_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0103";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
 						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer >= $rowConstMapMenu["max_withdraw"]){
+						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0093";
 							$arrayResult['RESULT'] = FALSE;
 							return $arrayResult;
@@ -948,7 +940,7 @@ class CalculateDep {
 				':entry_date' => $operate_date,
 				':laststmno' => $lastStmDestNo,
 				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
-				':fee_amt' => $penalty_amt,
+				':fee_amt' => 0,
 				':acc_id' => $tofrom_accid,
 				':posttovc_flag' => '0',
 				':refer_deptslip_no' => $slipWithdraw ?? null
@@ -969,7 +961,7 @@ class CalculateDep {
 				':entry_date' => $operate_date,
 				':laststmno' => $lastStmDestNo,
 				':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constToAcc["LASTCALINT_DATE"])),
-				':fee_amt' => $penalty_amt,
+				':fee_amt' => 0,
 				':acc_id' => $tofrom_accid,
 				':posttovc_flag' => '1',
 				':refer_deptslip_no' => $slipWithdraw ?? null
@@ -1245,7 +1237,7 @@ class CalculateDep {
 						':deptaccount_no' => $deptaccount_no,
 						':depttype_code' => $constFromAcc["DEPTTYPE_CODE"],
 						':deptgrp_code' => $constFromAcc["DEPTGROUP_CODE"],
-						':itemtype_code' => 'FEE',
+						':itemtype_code' => 'FEM',
 						':slip_amt' => $penalty_amt,
 						':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
 						':prncbal' => $constFromAcc["PRNCBAL"],
@@ -1273,7 +1265,7 @@ class CalculateDep {
 							':coop_id' => $config["COOP_ID"],
 							':from_account_no' => $deptaccount_no,
 							':seq_no' => $lastStmSrcNo,
-							':itemtype_code' => 'FEE',
+							':itemtype_code' => 'FEM',
 							':slip_amt' => $penalty_amt,
 							':balance_forward' => $constFromAcc["PRNCBAL"] - $amt_transfer,
 							':after_trans_amt' => $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,
@@ -1335,7 +1327,7 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
+	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEM',$amt_transfer,$penalty_amt,
 	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null,$deptfeeslip_no){
 		$deptslip_noPenalty = $deptfeeslip_no;
 		$lastStmSrcNo = $max_seqno + 1;
@@ -1373,7 +1365,7 @@ class CalculateDep {
 				':coop_id' => $config["COOP_ID"],
 				':from_account_no' => $deptaccount_no,
 				':seq_no' => $lastStmSrcNo,
-				':itemtype_code' => 'FEE',
+				':itemtype_code' => 'FEM',
 				':slip_amt' => $penalty_amt,
 				':balance_forward' => $constFromAcc["PRNCBAL"],
 				':after_trans_amt' => $constFromAcc["PRNCBAL"] - $penalty_amt,

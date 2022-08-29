@@ -47,12 +47,24 @@ class functions {
 		}
 		public function logout($id_token,$type_login) {
 			$logout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() WHERE id_token = :id_token");
+			$getMemberNo = $this->con->prepare("SELECT member_no FROM gcuserlogin WHERE  id_token = :id_token");
+			$getMemberNo->execute([':id_token' => $id_token]);
+			$arrMemberNo = $getMemberNo->fetch(\PDO::FETCH_ASSOC);
+			$member_no = $arrMemberNo["member_no"];
+			
 			if($logout->execute([
 				':type_login' => $type_login,
 				':id_token' => $id_token
 			])){
-				$this->revoke_alltoken($id_token,'-9',true);
-				return true;
+				$logout = $this->con->prepare("UPDATE gcmemberaccount SET fcm_token = null WHERE member_no = :member_no");
+				if($logout->execute([
+				':member_no' => $member_no
+				])){
+					$this->revoke_alltoken($id_token,'-9',true);
+					return true;
+				}else{
+					return false;
+				}
 			}else{
 				return false;
 			}

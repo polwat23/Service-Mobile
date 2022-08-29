@@ -67,8 +67,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$interest = 0;
 				$arrLoan = array();
 				$interest = $cal_loan->calculateIntAPI($rowLoan["LOANCONTRACT_NO"]);
-				if($interest["INT_PERIOD"] > 0){
-					$arrLoan["INT_BALANCE"] = $interest["INT_PERIOD"];
+				if($interest["INT_PAYMENT"] > 0){
+					$arrLoan["INT_BALANCE"] = $interest["INT_PAYMENT"];
 				}
 				if(file_exists(__DIR__.'/../../resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png')){
 					$arrLoan["LOAN_TYPE_IMG"] = $config["URL_SERVICE"].'resource/loan-type/'.$rowLoan["LOANTYPE_CODE"].'.png?v='.date('Ym');
@@ -78,7 +78,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["BALANCE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"],2);
-				$arrLoan["SUM_BALANCE"] = number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PERIOD"],2);
+				$arrLoan["SUM_BALANCE"] = number_format(($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"],2);
 				$arrLoan["PERIOD_ALL"] = number_format($rowLoan["PERIOD_PAYAMT"],0);
 				$arrLoan["PERIOD_BALANCE"] = number_format($rowLoan["LAST_PERIODPAY"],0);
 				$arrLoanGrp[] = $arrLoan;

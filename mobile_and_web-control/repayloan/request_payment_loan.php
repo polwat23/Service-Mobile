@@ -38,17 +38,17 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		$withdrawStatus = FALSE;
 		$intarrear = $dataCont["INTEREST_ARREAR"];
 		$interest = $cal_loan->calculateIntAPI($dataComing["contract_no"],$dataComing["amt_transfer"]);
-		$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
+		$intarrear = $interest["INT_ARREAR"];
+		$int_returnFull = $interest["INT_RETURN"];
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		$int_returnSrc = $interest["INT_RETURN"];
-		$interestFull = $interest["INT_PERIOD"];
-		if($interestFull > 0){
-			if($dataComing["amt_transfer"] < $interestFull){
-				$interestFull = $dataComing["amt_transfer"];
+		if($interest["INT_PAYMENT"] > 0){
+			if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $dataComing["amt_transfer"] - $interestFull;
+				$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
@@ -56,6 +56,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
 		}
+
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
 		$destvcid = $cal_dep->getVcMapID($dataCont["LOANTYPE_CODE"],'LON');
@@ -67,8 +68,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
-			$deptslip_no = $arrSlipDPno["SLIP_NO"];
+			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);	
+			$deptslip_no = $arrSlipDPno["SLIP_NO"];	
 			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$getlastseq_no = $cal_dep->getLastSeqNo($from_account_no);
 			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
@@ -244,7 +245,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+	require_once('../../include/exit_footer.php');	
 }
 ?>
