@@ -98,7 +98,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
 			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 
-			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FWM',
+			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FEM',
 			$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 			if($penaltyWtd["RESULT"]){
 				

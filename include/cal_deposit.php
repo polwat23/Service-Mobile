@@ -1234,7 +1234,7 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	public function insertFeeTransaction($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEE',$amt_transfer,$penalty_amt,
+	public function insertFeeTransaction($conmssql,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEM',$amt_transfer,$penalty_amt,
 	$operate_date,$config,$deptslip_no=null,$lib,$max_seqno,$constFromAcc,$oneway_fee=false,$slslip=null,$count_wtd=null,$penaltyslip=null){
 		$deptslip_noPenalty = $penaltyslip;
 		$lastStmSrcNo = $max_seqno + 1;
