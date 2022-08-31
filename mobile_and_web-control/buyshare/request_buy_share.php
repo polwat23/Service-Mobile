@@ -20,34 +20,30 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
+			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
-			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-			$deptslip_noFee = null;
 			if($dataComing["penalty_amt"] > 0){
-				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-				$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
-				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
-				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
+			}else{
+				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			}
 			$getlastseq_no = $cal_dep->getLastSeqNo($deptaccount_no);
-			$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
+			$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
+			$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
 			$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
-			$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
-			$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-			$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 			$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
+			$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
+			$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+			$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
+			$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
 			$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 			$getShareData = $cal_shr->getShareInfo($member_no);
 			$conoracle->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$deptaccount_no,null,$itemtypeWithdraw,$dataComing["amt_transfer"],
-			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noFee);
+			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 			if($wtdResult["RESULT"]){
 				$paykeeping = $cal_loan->paySlip($conoracle,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
 				$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$deptaccount_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
@@ -68,10 +64,9 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 							$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 							$templateMessage = $func->getTemplateSystem($dataComing["menu_component"],1);
 							$dataMerge = array();
-							$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($deptaccount_no,$func->getConstant('hidden_dep'));
-							$dataMerge["AMT_TRANSFER"] = number_format(($dataComing["amt_transfer"]/10),2);
-							$dataMerge["AMT_TRANSFER_BAHT"] = number_format($dataComing["amt_transfer"],2);
-							$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+							$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($deptaccount_no,$func->getConstant('hidden_dep'));
+							$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+							$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 							$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 							foreach($arrToken["LIST_SEND"] as $dest){
 								if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
@@ -108,9 +103,24 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 							$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																		,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
 																		coop_slip_no,id_userlogin,ref_no_source)
-																		VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
+																		VALUES(:ref_no,:slip_type,:from_account,:destination,'3',:amount,:penalty_amt,
 																		:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
-							$insertTransactionLog->execute([
+							if($insertTransactionLog->execute([
+								':ref_no' => $ref_no,
+								':slip_type' => $itemtypeWithdraw,
+								':from_account' => $dataComing["deptaccount_no"],
+								':destination' => $payload["member_no"],
+								':amount' => $dataComing["amt_transfer"],
+								':penalty_amt' => $dataComing["penalty_amt"],
+								':amount_receive' => $dataComing["amt_transfer"] - $dataComing["penalty_amt"],
+								':operate_date' => $dateOperC,
+								':member_no' => $payload["member_no"],
+								':slip_no' => $deptslip_no,
+								':id_userlogin' => $payload["id_userlogin"]
+							])){
+								
+							}else{
+								$lib->sendLineNotify(json_encode([
 								':ref_no' => $ref_no,
 								':slip_type' => $itemtypeWithdraw,
 								':from_account' => $from_account_no,
@@ -122,15 +132,16 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 								':member_no' => $payload["member_no"],
 								':slip_no' => $deptslip_no,
 								':id_userlogin' => $payload["id_userlogin"]
-							]);
+							]));
+							}
+							
 							if($payload["member_no"] != $constToAcc["MEMBER_NO"]){
 								$arrToken = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
-								$templateMessage = $func->getTemplateSystem('TransferDepBuyShare',1);
+								$templateMessage = $func->getTemplateSystem('DestinationReceive',1);
 								$dataMerge = array();
-								$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
-								$dataMerge["AMT_TRANSFER"] = number_format(($dataComing["amt_transfer"]/10),2);
-								$dataMerge["AMT_TRANSFER_BAHT"] = number_format($dataComing["amt_transfer"],2);
-								$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+								$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($to_account_no,$func->getConstant('hidden_dep'));
+								$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+								$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
 								foreach($arrToken["LIST_SEND"] as $dest){
 									if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){

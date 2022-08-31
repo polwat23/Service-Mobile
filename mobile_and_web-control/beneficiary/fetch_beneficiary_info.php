@@ -5,18 +5,36 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BeneficiaryInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupBNF = array();
-		$getBeneficiary = $conoracle->prepare("SELECT mg.gain_name,mg.gain_surname,mg.gain_addr,mg.gain_relation as gain_concern,mg.remark
-												FROM mbgainmaster mg LEFT JOIN mbucfgainconcern mc ON mg.gain_relation = mc.concern_code
-												WHERE mg.member_no = :member_no");
+		$getBeneficiary = $conoracle->prepare("SELECT 
+											W.NAME AS FULLNAME,
+											W.CODEPT_ADDRE AS ADDR,
+											NVL(W.CODEPT_TEL,'-') AS TEL,
+											NVL(wc.GAIN_CONCERN,NVL(w.CODEPT_RELATION,'-')) AS GAIN_CONCERN,
+											trim(W.CODEPT_ID) AS CARD_PERSON
+										FROM 
+											wccodeposit  W,
+											wcucfgainconcern wc
+										WHERE
+											(w.CODEPT_RELATION = wc.CONCERN_CODE (+))
+											 AND trim(W.DEPTACCOUNT_NO) = :member_no
+											 GROUP BY W.CODEPT_ID,W.CODEPT_TEL,wc.GAIN_CONCERN,
+											 W.CODEPT_ADDRE,W.NAME,w.CODEPT_RELATION");
 		$getBeneficiary->execute([':member_no' => $member_no]);
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
-			$arrBenefit["FULL_NAME"] = $rowBenefit["PRENAME_SHORT"].$rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
+			$arrBenefit["FULL_NAME"] = $rowBenefit["FULLNAME"];
+			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["ADDR"]);
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
+			/*
 			$arrBenefit["TYPE_PERCENT"] = 'text';
 			$arrBenefit["PERCENT_TEXT"] = isset($rowBenefit["REMARK"]) && $rowBenefit["REMARK"] != "" ? $rowBenefit["REMARK"] : "แบ่งให้เท่า ๆ กัน";
 			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);
+			*/
+			$other_info = array();
+			$other_info[] = array("LABEL" => "เลขบัตรประชาชน", "VALUE" => $lib->formatcitizen($rowBenefit["CARD_PERSON"]));
+
+			$arrBenefit["OTHER_INFO"] = $other_info;
+			
 			$arrGroupBNF[] = $arrBenefit;
 		}
 		$arrayResult['BENEFICIARY'] = $arrGroupBNF;

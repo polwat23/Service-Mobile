@@ -4,46 +4,64 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SlipInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		$limit_period = $func->getConstant('limit_kpmonth');
+		// $limit_period = $func->getConstant('limit_kpmonth');
 		$arrayGroupPeriod = array();
-		$getPeriodKP = $conoracle->prepare("SELECT * from ((
-															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
-															from kpmastreceive where member_no = :member_no
-														) ORDER BY recv_period DESC) where rownum <= :limit_period");
+		$getPeriodKP = $conoracle->prepare("
+			SELECT
+				TRIM(TO_CHAR(TO_NUMBER(SUBSTR(RECV.RECV_PERIOD,1,4))+1)) AS KEEP_YEAR, 
+				SL.DEPTSLIP_NO,
+				SL.DEPTSLIP_DATE, 
+				SL.DEPTSLIP_AMT, 
+				SL.COOP_ID
+			FROM WCRECIEVEMONTH RECV
+				JOIN WCDEPTSLIP SL ON (SL.DEPTACCOUNT_NO = RECV.WFMEMBER_NO AND SL.DEPTITEMTYPE_CODE = 'WPF' AND SL.RECV_PERIOD = RECV.RECV_PERIOD AND SL.ITEM_STATUS = 1)
+			WHERE RECV.WCITEMTYPE_CODE = 'FEE'
+				AND TRIM(RECV.WFMEMBER_NO) = :member_no
+				AND RECV.STATUS_POST IN (1,2)
+				ORDER BY RECV.RECV_PERIOD DESC");
 		$getPeriodKP->execute([
-				':member_no' => $member_no,
-				':limit_period' => $limit_period
+				':member_no' => $member_no
 		]);
 		while($rowPeriod = $getPeriodKP->fetch(PDO::FETCH_ASSOC)){
 			$arrKpmonth = array();
-			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
-			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
-			$getKPDetail = $conoracle->prepare("SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
-													FROM kpmastreceivedet kpd
-													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
-													kpd.keepitemtype_code = kut.keepitemtype_code
-													where kpd.member_no = :member_no and kpd.kpslip_no = :kpslip_no");
-			$getKPDetail->execute([
-				':member_no' => $member_no,
-				':kpslip_no' => $rowPeriod["KPSLIP_NO"]
-			]);
-			$rowKPDetali = $getKPDetail->fetch(PDO::FETCH_ASSOC);
-			$arrKpmonth["SLIP_NO"] = $rowPeriod["RECEIPT_NO"];
-			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["RECEIPT_DATE"],'d m Y');
-			if(isset($rowPeriod["RECEIVE_AMT"]) && $rowPeriod["RECEIVE_AMT"] != ""){
-				$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["RECEIVE_AMT"],2);
-			}else{
-				$arrKpmonth["RECEIVE_AMT"] = number_format($rowKPDetali["ITEM_PAYMENT"],2);
-			}
-			if($rowPeriod["KEEPING_STATUS"] == '-99' || $rowPeriod["KEEPING_STATUS"] == '-9'){
-				$arrKpmonth["IS_CANCEL"] = TRUE;
-			}else{
-				$arrKpmonth["IS_CANCEL"] = FALSE;
-			}
+			$arrKpmonth["PERIOD"] = $rowPeriod["DEPTSLIP_NO"];
+			$arrKpmonth["MONTH_RECEIVE"] = "ประจำปี ".$rowPeriod["KEEP_YEAR"];
+			$arrKpmonth["SLIP_NO"] = $rowPeriod["DEPTSLIP_NO"];
+			$arrKpmonth["SLIP_DATE"] = $lib->convertdate($rowPeriod["DEPTSLIP_DATE"],'d m Y');
+			$arrKpmonth["RECEIVE_AMT"] = number_format($rowPeriod["DEPTSLIP_AMT"],2);
 			$arrayGroupPeriod[] = $arrKpmonth;
 		}
+		
+		$getRegister = $conoracle->prepare("
+			SELECT
+				WB.DEPTSLIPBRANCH_NO,
+				WS.DEPTSLIP_DATE,
+				(select sum(PRNCSLIP_AMT) from wcdeptslipdet where deptslip_no = WS.DEPTSLIP_NO and  coop_id =   WS.COOP_ID) as total
+			FROM WCREQDEPOSIT WQ
+				JOIN WCDEPTSLIP WS ON (WQ.DEPTREQUEST_DOCNO = WS.DEPTACCOUNT_NO AND WQ.COOP_ID = WS.COOP_ID ) 
+				JOIN WCDEPTSLIPBRANCH WB ON (WB.DEPTSLIP_NO = WS.DEPTSLIP_NO AND WB.COOP_ID = WS.COOP_ID)
+			WHERE 
+				WS.DEPTITEMTYPE_CODE  = 'WFF'
+				AND TRIM(WQ.DEPTACCOUNT_NO) = :member_no
+		");
+		$getRegister->execute([
+			':member_no' => $member_no
+		]);
+		while($rowRegister = $getRegister->fetch(PDO::FETCH_ASSOC)){
+			$arrReg = array();
+			$arrReg["PERIOD"] = 'register';
+			$arrReg["MONTH_RECEIVE"] = "สมัครใหม่";
+			$arrReg["SLIP_NO"] = $rowRegister["DEPTSLIPBRANCH_NO"];
+			$arrReg["SLIP_DATE"] = $lib->convertdate($rowRegister["DEPTSLIP_DATE"],'d m Y');
+			$arrReg["RECEIVE_AMT"] = number_format($rowRegister["TOTAL"],2);
+			
+			$arrayGroupPeriod[] = $arrReg;
+		}
+		
 		$arrayResult['KEEPING_LIST'] = $arrayGroupPeriod;
 		$arrayResult['RESULT'] = TRUE;
+		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
+		$arrayResult['DISABLE_SLIPDETAIL'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

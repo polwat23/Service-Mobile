@@ -29,11 +29,10 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$payload["member_no"] = $rowCheckBill["member_no"];
 				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
 				$payload["app_version"] = $rowCheckBill["app_version"];
-				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-				$slipnoFee = $arrSlipDPnoFee["SLIP_NO"];
-				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
-				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+				$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+				$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
+				$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
+				$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
 													LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
 													WHERE gba.member_no = :member_no 
@@ -49,27 +48,27 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$arrDpSlip = array();
 				while($rowDetailDP = $getDetailTranDP->fetch(PDO::FETCH_ASSOC)){
 					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
-					$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
+					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 					$arrDpSlip[$rowDetailDP["ref_account"]] = $arrSlipDPnoDest["SLIP_NO"];
 					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
+					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				}
-				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
-				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
+				$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
+				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
 				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 				$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 				$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
+				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
 				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
+				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
 				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$conoracle->beginTransaction();
 				$conmysql->beginTransaction();
 				$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
 				$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
-				'WFS',$conmysql,0,'999');
+				'WFS',$conmysql,0,'006');
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
 													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no
 													FROM gcqrcodegendetail 
@@ -80,9 +79,9 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
 						$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
 						$getlastseq_noDest = $cal_dep->getLastSeqNo($deptaccount_no);
-						$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$vccAccID,'DTE',
+						$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$vccAccID,'DTX',
 						$rowDetail["qrtransferdt_amt"],0,$dateOper,$config,$log,$dataComing["bank_ref"],$payload,
-						$arrDpSlip[$rowDetail["ref_account"]],$lib,$getlastseq_noDest["MAX_SEQ_NO"],"TransactionDeposit",null,'999');
+						$arrDpSlip[$rowDetail["ref_account"]],$lib,$getlastseq_noDest["MAX_SEQ_NO"],"TransactionDeposit",null,'006');
 						if($depositMoney["RESULT"]){
 							$have_dep = TRUE;
 							if($rowPayFee["account_payfee"] == $deptaccount_no){
@@ -183,12 +182,14 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
 					}
 				}else{
+					$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
+					$depositMoney["DEPTSLIP_NO"] = $arrSlipDPnoDest["SLIP_NO"];
 					$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
 					$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
 				}
 				$vccamtPenalty = $cal_dep->getVcMapID('00');
 				$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowPayFee["account_payfee"],$vccamtPenalty["ACCOUNT_ID"],'FEE',
-				$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,null,$lib,$maxno_deptfee,$dataAccFee,null,null,$slipnoFee);
+				$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,$depositMoney["DEPTSLIP_NO"],$lib,$maxno_deptfee,$dataAccFee);
 				if($penaltyWtd["RESULT"]){
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,

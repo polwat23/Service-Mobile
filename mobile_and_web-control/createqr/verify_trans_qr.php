@@ -6,9 +6,9 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		if($dataComing["trans_code"] == '01'){
 			$deptaccount_no = preg_replace('/-/','',$dataComing["destination"]);
-			$checkSeqAmt = $cal_dep->getSequestAmt($deptaccount_no,'DTE');
+			$checkSeqAmt = $cal_dep->getSequestAmt($deptaccount_no,'DIM');
 			if($checkSeqAmt["CAN_DEPOSIT"]){
-				$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["trans_amount"],"TransactionDeposit","999");
+				$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["trans_amount"],"TransactionDeposit","006");
 				if($arrRightDep["RESULT"]){
 				}else{
 					$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
@@ -33,8 +33,9 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 													WHERE loancontract_no = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["destination"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			$interest = $cal_loan->calculateIntAPI($dataComing["destination"],$dataComing["trans_amount"]);
-			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]){
+			$interest = $cal_loan->calculateInterest($dataComing["destination"],$dataComing["trans_amount"]);
+			$amt_prin = $dataComing["trans_amount"] - $interest;
+			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

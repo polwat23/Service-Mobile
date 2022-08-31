@@ -73,7 +73,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$qrTransferAmtFormat = number_format($qrTransferAmt, 2, '', '');
 			$qrTransferFeeFormat = number_format($qrTransferFee, 2, '', '');
-			$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".$qrTransferAmtFormat;
+			$stringQRGenerate = "|".$config["CROSSBANK_TAX_SUFFIX"]."\r\n".$member_no."\r\n".$randQrRef."\r\n".$qrTransferAmtFormat."\r\n".$qrTransferFeeFormat;
 			$qrCode = new QrCode($stringQRGenerate);
 			header('Content-Type: '.$qrCode->getContentType());
 			$qrCode->writeString();

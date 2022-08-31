@@ -19,8 +19,8 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$member_no = strtoupper($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
+	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
+	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE TRIM(member_no) = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
 		$arrayResult['RESPONSE_CODE'] = "WS0020";
@@ -29,15 +29,15 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}else{
-		$checkValid = $conoracle->prepare("SELECT mb.memb_name,mb.memb_surname,mb.resign_status,mp.prename_desc,trim(mb.card_person) as card_person
-											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											WHERE mb.member_no = :member_no");
+		$checkValid = $conoracle->prepare("SELECT MB.WFACCOUNT_NAME,TRIM(MB.CARD_PERSON) AS CARD_PERSON,MB.DEPTCLOSE_STATUS
+											FROM wcdeptmaster mb
+											WHERE TRIM(mb.deptaccount_no) = :member_no");
 		$checkValid->execute([
 			':member_no' => $member_no
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMember["MEMB_NAME"])){
-			if($rowMember["RESIGN_STATUS"] == '1'){
+		if(isset($rowMember["WFACCOUNT_NAME"])){
+			if($rowMember["DEPTCLOSE_STATUS"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -53,8 +53,16 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			}
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
-			$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
+			$arrayResult['MEMBER_FULLNAME'] = $rowMember["WFACCOUNT_NAME"];
 			$arrayResult['RESULT'] = TRUE;
+			
+			if ($forceNewSecurity == true) {
+				$newArrayResult = array();
+				$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
+				$arrayResult = array();
+				$arrayResult = $newArrayResult;
+			}
+			
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0003";

@@ -9,19 +9,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGroupAccBind = array();
 		$formatDept = $func->getConstant('dep_format');
 		$formatDeptHidden = $func->getConstant('hidden_dep');
-		$getMemberRetryDate = $conoracle->prepare("SELECT RETRY_DATE FROM mbmembmaster WHERE member_no = :member_no");
-		$getMemberRetryDate->execute([':member_no' => $member_no]);
-		$rowMemberRetryDate = $getMemberRetryDate->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMemberRetryDate["RETRY_DATE"]) && $rowMemberRetryDate["RETRY_DATE"] != ""){
-			$dateRetry = new DateTime(date('d-m-Y',strtotime($rowMemberRetryDate["RETRY_DATE"])));
-			$dateNow = new DateTime(date('d-m-Y'));
-			$date_duration = $dateRetry->diff($dateNow);
-			if($date_duration->days <= 365){
-				$arrayResult['RESPONSE_MESSAGE'] = $configError["RECEIVE_LOAN_RETRY_BEFORE"][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
-		}
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_receive_loan = '1'");
@@ -30,7 +17,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
-			$getDataBalAcc = $conoracle->prepare("SELECT DPM.DEPTACCOUNT_NO,DPM.DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.WITHDRAWABLE_AMT AS PRNCBAL,DPM.PRNCBAL as BALANCE,DPM.DEPTTYPE_CODE
+			$getDataBalAcc = $conoracle->prepare("SELECT DPM.DEPTACCOUNT_NO,DPM.DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.prncbal AS PRNCBAL,DPM.DEPTTYPE_CODE
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.deptclose_status = 0
 													ORDER BY dpm.deptaccount_no ASC");
@@ -44,7 +31,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccAllow["DEPTACCOUNT_NO_FORMAT"],$formatDeptHidden);
 					$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAllow["DEPTACCOUNT_NAME"]);
 					$arrAccAllow["DEPT_TYPE"] = $rowDataAccAllow["DEPTTYPE_DESC"];
-					$arrAccAllow["BALANCE"] = $rowDataAccAllow["BALANCE"];
+					$arrAccAllow["BALANCE"] = $rowDataAccAllow["PRNCBAL"];
 					$arrAccAllow["BALANCE_FORMAT"] = number_format($arrAccAllow["BALANCE"],2);
 					$arrGroupAccAllow[] = $arrAccAllow;
 				}

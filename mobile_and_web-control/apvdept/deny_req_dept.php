@@ -27,7 +27,7 @@ if($lib->checkCompleteArgument(['menu_component','apv_docno'],$dataComing)){
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
-			
+		
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -35,7 +35,7 @@ if($lib->checkCompleteArgument(['menu_component','apv_docno'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		
+	
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -53,6 +53,6 @@ if($lib->checkCompleteArgument(['menu_component','apv_docno'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	
+
 }
 ?>

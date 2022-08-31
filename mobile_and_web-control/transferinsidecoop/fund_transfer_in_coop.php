@@ -25,27 +25,24 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-			$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
+			$arrSlipDPno = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 			$deptslip_no = $arrSlipDPno["SLIP_NO"];
-			$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			if($dataComing["penalty_amt"] > 0){
-				$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-				$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
-				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
-				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
+				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 2;
+			}else{
+				$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			}
 			$getlastseq_no = $cal_dep->getLastSeqNo($from_account_no);
-			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
+			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
-			$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
+			$arrSlipDPnoDest = $cal_dep->generateDocNo('DPSLIPNO',$lib);
 			$deptslip_noDest = $arrSlipDPnoDest["SLIP_NO"];
 			$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
+			$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 			$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 			$conoracle->beginTransaction();
 			$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$from_account_no,$destvcid["ACCOUNT_ID"],$itemtypeWithdraw,$dataComing["amt_transfer"],
-			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noFee);
+			$dataComing["penalty_amt"],$dateOperC,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc);
 			if($wtdResult["RESULT"]){
 				$getlastseq_noDest = $cal_dep->getLastSeqNo($to_account_no);
 				$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$to_account_no,$srcvcid["ACCOUNT_ID"],$itemtypeDepositDest,
@@ -116,6 +113,46 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 						':slip_no' => $deptslip_no,
 						':id_userlogin' => $payload["id_userlogin"]
 					]);
+					if($payload["member_no"] != $constToAcc["MEMBER_NO"]){
+						$arrToken = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
+						$templateMessage = $func->getTemplateSystem('DestinationReceive',1);
+						$dataMerge = array();
+						$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($to_account_no,$func->getConstant('hidden_dep'));
+						$dataMerge["AMT_TRANSFER"] = number_format($dataComing["amt_transfer"],2);
+						$dataMerge["DATETIME"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
+						$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
+						foreach($arrToken["LIST_SEND"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = 'system';
+								if($func->insertHistory($arrPayloadNotify,'2')){
+									$lib->sendNotify($arrPayloadNotify,"person");
+								}
+							}
+						}
+						foreach($arrToken["LIST_SEND_HW"] as $dest){
+							if($dest["RECEIVE_NOTIFY_TRANSACTION"] == '1'){
+								$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
+								$arrPayloadNotify["MEMBER_NO"] = array($dest["MEMBER_NO"]);
+								$arrMessage["SUBJECT"] = $message_endpoint["SUBJECT"];
+								$arrMessage["BODY"] = $message_endpoint["BODY"];
+								$arrMessage["PATH_IMAGE"] = null;
+								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+								$arrPayloadNotify["TYPE_SEND_HISTORY"] = "onemessage";
+								$arrPayloadNotify["SEND_BY"] = 'system';
+								if($func->insertHistory($arrPayloadNotify,'2')){
+									$lib->sendNotifyHW($arrPayloadNotify,"person");
+								}
+							}
+						}
+					}
+
 					if($payload["member_no"] != $constToAcc["MEMBER_NO"]){
 						$arrToken = $func->getFCMToken('person', $constToAcc["MEMBER_NO"]);
 						$templateMessage = $func->getTemplateSystem('DestinationReceive',1);
