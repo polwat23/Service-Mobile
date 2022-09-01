@@ -36,17 +36,10 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				foreach($dataComing["message_importData"] as $dest){
 					$indexFound = array_search($dest["DESTINATION"], $arrToken["MEMBER_NO"]);
 					if($indexFound !== false){
-						if(isset($arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"]) && $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"] != ""){
-							$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
-							$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
-							$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
-							$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
-						}else{
-							$member_no = $arrToken["LIST_SEND_HW"][$indexFound]["MEMBER_NO"];
-							$token = $arrToken["LIST_SEND_HW"][$indexFound]["TOKEN"];
-							$recv_noti_news = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
-							$recv_noti_trans = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
-						}
+						$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
+						$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
+						$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
+						$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
 						if(isset($token) && $token != ""){
 							if($recv_noti_news == "1"){
 								$arrGroupSuccess["DESTINATION"] = $member_no;
