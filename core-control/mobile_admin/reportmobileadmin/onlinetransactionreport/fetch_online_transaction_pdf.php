@@ -125,9 +125,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowDepttype["depttype_code"] =='01'){
 						$deposit_external_10 += $rowRecon["amount"];
 						$dept_count10++;
-					}else if($rowDepttype["depttype_code"] =='20'){
-						$deposit_external_20 += $rowRecon["amount"];
-						$dept_count20++;
+					}else if($rowDepttype["depttype_code"] =='09'){
+						$deposit_external_09 += $rowRecon["amount"];
+						$dept_count09++;
 					}
 				}if($rowRecon["transaction_type_code"] == 'DTX'){//โอนฝากภายนอก 	
 					$getDepttype = $conmssql->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
@@ -138,9 +138,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowDepttype["depttype_code"] =='01'){
 						$deposit_external_10 += $rowRecon["amount"];
 						$dept_count10++;
-					}else if($rowDepttype["depttype_code"] =='20'){
-						$deposit_external_20 += $rowRecon["amount"];
-						$dept_count20++;
+					}else if($rowDepttype["depttype_code"] =='09'){
+						$deposit_external_09 += $rowRecon["amount"];
+						$dept_count09++;
 					}
 				}else if($rowRecon["transaction_type_code"] == 'WTX'){ //ถอนภายนอก
 					$getDepttype = $conmssql->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :from_account");
@@ -151,9 +151,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowDepttype["depttype_code"] =='01'){
 						$withdraw_external_10 += $rowRecon["amount"];
 						$withdraw10++;
-					}else if($rowDepttype["depttype_code"] =='20'){
-						$withdraw_external_20 += $rowRecon["amount"];
-						$withdraw20++;
+					}else if($rowDepttype["depttype_code"] =='09'){
+						$withdraw_external_09 += $rowRecon["amount"];
+						$withdraw09++;
 					}				
 				}else if($rowRecon["transaction_type_code"] == 'WFS'){ //โอนชำระหนี้
 					$getLontype = $conmssql->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
@@ -192,9 +192,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowDepttype["depttype_code"] =='01'){
 						$deposit_inside_10 += $rowRecon["amount"];
 						$inside_dept10 ++;
-					}else if($rowDepttype["depttype_code"] =='20'){
-						$deposit_inside_20 += $rowRecon["amount"];
-						$inside_dept20++;					
+					}else if($rowDepttype["depttype_code"] =='09'){
+						$deposit_inside_09 += $rowRecon["amount"];
+						$inside_dept09++;					
 					}
 				}
 				if($rowRecon["transaction_type_code"] == 'WIM'){ //ถอนภายใน
@@ -206,9 +206,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowDepttype["depttype_code"] =='01'){
 						$withdraw_inside_10 += $rowRecon["amount"];
 						$inside_withdraw10++;
-					}else if($rowDepttype["depttype_code"] =='20'){
-						$withdraw_inside_20 += $rowRecon["amount"];
-						$inside_withdraw20++;
+					}else if($rowDepttype["depttype_code"] =='09'){
+						$withdraw_inside_09 += $rowRecon["amount"];
+						$inside_withdraw09++;
 					}				
 				}else if($rowRecon["transaction_type_code"] == 'WFS'){ //โอนชำระหนี้ภายใน
 					$getLontype = $conmssql->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
@@ -237,10 +237,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						$payment10 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
 						$inside_withdraw10++;
 						$inside_dept10 ++;
-					}else if($rowWithdraw["depttype_code"] =='20'){
-						$payment20 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
-						$inside_withdraw20++;
-						$inside_dept20 ++;
+					}else if($rowWithdraw["depttype_code"] =='09'){
+						$payment09 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
+						$inside_withdraw09++;
+						$inside_dept09 ++;
 					}		
 				}else if($rowRecon["transaction_type_code"] == 'DAP'){ //จ่ายเงินกู้
 					$getLontype = $conmssql->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :from_account");
@@ -261,9 +261,9 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						if($rowDept["depttype_code"] =='01'){ 
 							$depositinside_10 = ($getloan_inside_01 ?? 0);
 							$inside_dept10++;
-						}else if($rowDept["depttype_code"] =='20'){
-							$depositinside_20 += ($getloan_inside_01 ?? 0);
-							$inside_dept20++;
+						}else if($rowDept["depttype_code"] =='09'){
+							$depositinside_09 += ($getloan_inside_01 ?? 0);
+							$inside_dept09++;
 						}		
 					}					
 				}
@@ -273,17 +273,17 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayGrpAll[] = $arrayRecon;
 		}
 		$withdraw_inside_10  = ($withdraw_inside_10 ?? 0) + ($payment10 ?? 0); //ถอนเงินชำระหนี้
-		$withdraw_inside_20  = ($withdraw_inside_20 ?? 0) + ($payment20 ?? 0);	
+		$withdraw_inside_09  = ($withdraw_inside_09 ?? 0) + ($payment09 ?? 0);	
 		
 		$deposit_inside_10 = ($deposit_inside_10 ?? 0) + ($depositinside_10 ?? 0); //จ่ายเงิยกู้
-		$deposit_inside_20 = ($deposit_inside_20 ?? 0) + ($depositinside_20 ?? 0);
+		$deposit_inside_09 = ($deposit_inside_09 ?? 0) + ($depositinside_09 ?? 0);
 		//รวมโอนภายนอก
-		$sum_deposit_external = ($deposit_external_10 ?? 0)  + ($deposit_external_20 ?? 0) + ($payment_external_01 ?? 0) + ($payment_external_02 ?? 0) + ($payment_external_03 ?? 0);
-		$sum_withdraw_external = ($withdraw_external_10 ?? 0) + ($withdraw_external_20 ?? 0) + ($getloan_external_01 ?? 0);
+		$sum_deposit_external = ($deposit_external_10 ?? 0)  + ($deposit_external_09 ?? 0) + ($payment_external_01 ?? 0) + ($payment_external_02 ?? 0) + ($payment_external_03 ?? 0);
+		$sum_withdraw_external = ($withdraw_external_10 ?? 0) + ($withdraw_external_09 ?? 0) + ($getloan_external_01 ?? 0);
 
 		//รวมโอนภายใน
-		$sum_deposit_inside = ($deposit_inside_10 ?? 0) + ($deposit_inside_20 ?? 0) + ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
-		$sum_withdraw_inside = ($withdraw_inside_10 ?? 0) + ($withdraw_inside_20 ?? 0) + ($getloan_inside_01 ?? 0) ;
+		$sum_deposit_inside = ($deposit_inside_10 ?? 0) + ($deposit_inside_09 ?? 0) + ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
+		$sum_withdraw_inside = ($withdraw_inside_10 ?? 0) + ($withdraw_inside_09 ?? 0) + ($getloan_inside_01 ?? 0) ;
 		
 		$arrayResult['SUMMARY_FEEAMT'] = number_format($summary_feeamt,2);
 		$arrayResult['PENALTY_AMT'] = number_format($penalty_amt,2);
@@ -291,12 +291,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['SUM_WITHDRAW_INSIDE'] = number_format($sum_withdraw_inside,2); 
 		$arrayResult['DEPOSIT_INSIDE_10'] = number_format($deposit_inside_10  ?? '0',2);
 		$arrayResult['INSIDE_DEPT10'] = $inside_dept10 ?? 0;
-		$arrayResult['DEPOSIT_INSIDE_20'] = number_format($deposit_inside_20 ?? '0',2);
-		$arrayResult['INSIDE_DEPT20'] = $inside_dept20 ?? 0;
+		$arrayResult['DEPOSIT_INSIDE_09'] = number_format($deposit_inside_09 ?? '0',2);
+		$arrayResult['INSIDE_DEPT09'] = $inside_dept09 ?? 0;
 		$arrayResult['WITHDRAW_INSIDE_10'] = number_format($withdraw_inside_10 ?? '0',2);
 		$arrayResult['INSIDE_WITHDRAW10'] = $inside_withdraw10 ?? 0;
-		$arrayResult['WITHDRAW_INSIDE_20'] = number_format($withdraw_inside_20 ?? '0',2);
-		$arrayResult['INSIDE_WITHDRAW20'] = $inside_withdraw20 ?? 0;
+		$arrayResult['WITHDRAW_INSIDE_09'] = number_format($withdraw_inside_09 ?? '0',2);
+		$arrayResult['INSIDE_WITHDRAW09'] = $inside_withdraw09 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_01'] = number_format($payment_inside_01 ?? '0',2);
 		$arrayResult['INSIDE_PAYMENT01'] = $inside_payment01 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_02'] = number_format($payment_inside_02 ?? '0',2);
@@ -310,12 +310,12 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['SUM_WITHDRAW_EXTERNAL'] = number_format($sum_withdraw_external,2);
 		$arrayResult['DEPOSIT_EXTERNAL_10'] = number_format($deposit_external_10 ?? '0',2);
 		$arrayResult['DEPT_COUNT10'] = $dept_count10 ?? 0;
-		$arrayResult['DEPOSIT_EXTERNAL_20'] = number_format($deposit_external_20 ?? '0',2);
-		$arrayResult['DEPT_COUNT20'] = $dept_count20 ?? 0;
+		$arrayResult['DEPOSIT_EXTERNAL_09'] = number_format($deposit_external_09 ?? '0',2);
+		$arrayResult['DEPT_COUNT09'] = $dept_count09 ?? 0;
 		$arrayResult['WITHDRAW_EXTERNAL_10'] = number_format($withdraw_external_10 ?? '0',2);
 		$arrayResult['WITHDRAW10'] = $withdraw10 ?? 0;
-		$arrayResult['WITHDRAW_EXTERNAL_20'] = number_format($withdraw_external_20 ?? '0',2);
-		$arrayResult['WITHDRAW20'] = $withdraw20 ?? 0;
+		$arrayResult['WITHDRAW_EXTERNAL_09'] = number_format($withdraw_external_09 ?? '0',2);
+		$arrayResult['WITHDRAW09'] = $withdraw09 ?? 0;
 		$arrayResult['PAYMENT_EXTERNAL_01'] = number_format($payment_external_01 ?? '0',2);
 		$arrayResult['PAYMENT01'] = $payment01 ?? 0;
 		$arrayResult['PAYMENT_EXTERNAL_02'] = number_format($payment_external_02 ?? '0',2);
