@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getAccept->execute([':member_no' => $payload["member_no"]]);
 		if($getAccept->rowCount() == 0){
 			$arrConsentForm = array();
-			if(preg_replace('/\./','',$dataComing["app_version"]) >= '350'){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '350' || $dataComing["channel"] == "web"){
 				$arrayResult['TERMS']["TERMS_URL"] = $config["URL_POLICY"];
 				$arrayResult['TERMS']["TERMS_ID"] = 'v1';
 			}
