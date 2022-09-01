@@ -41,15 +41,19 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE dpm.member_no = :member_no and dpm.deptclose_status = 0  ORDER BY DPM.DEPTTYPE_CODE ASC");
 			$getDataAcc->execute([':member_no' => $member_no]);
 			while($rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC)){
-				$arrAccCoop = array();
-				$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAcc["DEPTACCOUNT_NO"];
-				$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAcc["DEPTACCOUNT_NO"],$dep_format);
-				$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
-				$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
-				$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-				$arrAccCoop["BALANCE"] = $rowDataAcc["PRNCBAL"];
-				$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-				$arrGroupAccBind["COOP"][] = $arrAccCoop;
+				$getConstantDept = $conmysql->prepare("SELECT dept_type_code FROM gcconstantaccountdept WHERE allow_deposit_outside = '1' and dept_type_code = :depttype_code");
+				$getConstantDept->execute([':depttype_code' => $rowDataAcc["DEPTTYPE_CODE"]]);
+				if($getConstantDept->rowCount() > 0){
+					$arrAccCoop = array();
+					$arrAccCoop["DEPTACCOUNT_NO"] = $rowDataAcc["DEPTACCOUNT_NO"];
+					$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAcc["DEPTACCOUNT_NO"],$dep_format);
+					$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
+					$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
+					$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+					$arrAccCoop["BALANCE"] = $rowDataAcc["PRNCBAL"];
+					$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
+					$arrGroupAccBind["COOP"][] = $arrAccCoop;
+				}
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
