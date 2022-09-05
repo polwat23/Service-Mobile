@@ -75,9 +75,10 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conmssql->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE
+																kpd.OPERATE_DATE,
+																kpd.INTEREST_ACCUM
 																FROM kptempreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+																WHERE kpd.member_no = :member_no and RTRIM(LTRIM(kpd.recv_period)) = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -85,6 +86,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
 		$header["recv_period"] = $lib->convertperiodkp(trim($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
+		$header["int_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -194,6 +196,10 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
+			</tr>
+			<tr>
+			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม:</td>
+			<td style="width: 350px;">'.$header["int_accum"].' บาท</td>
 			</tr>
 			</tbody>
 			</table>
