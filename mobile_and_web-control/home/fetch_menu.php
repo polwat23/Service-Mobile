@@ -64,7 +64,7 @@ if(!$anonymous){
 				$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 				$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 			}
-			$arrMenuDep["LAST_STATEMENT"] = TRUE;
+			$arrMenuDep["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 		}else if($dataComing["menu_component"] == "LoanInfo"){
 			$arrMenuLoan = array();
@@ -97,7 +97,7 @@ if(!$anonymous){
 				$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 				$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			}
-			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+			$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
 		$arrayResult['RESULT'] = TRUE;
@@ -252,7 +252,7 @@ if(!$anonymous){
 								$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 								$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 							}
-							$arrMenuDep["LAST_STATEMENT"] = TRUE;
+							$arrMenuDep["LAST_STATEMENT"] = FALSE;
 						}else if($rowMenu["menu_component"] == "LoanInfo"){
 							$arrMenuLoan = array();
 							if(isset($dataComing["home_loan_account"])) {
@@ -284,7 +284,7 @@ if(!$anonymous){
 								$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
-							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+							$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 						}			
 					}
 				}else{
@@ -335,7 +335,7 @@ if(!$anonymous){
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
-						$arrMenuDep["LAST_STATEMENT"] = TRUE;
+						$arrMenuDep["LAST_STATEMENT"] = FALSE;
 					}else if($dataComing["menu_component"] == "LoanInfo"){
 						$arrMenuLoan = array();
 						if(isset($dataComing["home_loan_account"])) {
@@ -367,7 +367,7 @@ if(!$anonymous){
 							$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 							$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 						}
-						$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+						$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 					}
 				}
 			}

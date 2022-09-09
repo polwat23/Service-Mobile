@@ -465,38 +465,47 @@ class functions {
 						$arrayMemberTemp[] = "'".$rowMember["smscsp_member"]."'";
 					}
 					if(sizeof($arrayMemberTemp) > 0){
-						$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN(".implode(',',$arrayMemberTemp).") and
-																resign_status = 0 and MEM_TELMOBILE IS NOT NULL");
+						$fetchDataOra = $this->conmssql->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc + mb.memb_name +' '+mb.memb_surname as FULLNAME
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																 WHERE mb.member_no IN(".implode(',',$arrayMemberTemp).") and
+																 mb.resign_status = 0 and mb.MEM_TELMOBILE IS NOT NULL");
 						$fetchDataOra->execute();
 						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
-							if(isset($rowDataOra["MEM_TELMOBILE"])){
+							if(isset($rowDataOra["mem_telmobile"])){
 								$arrayMT = array();
-								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMT["TEL"] = $rowDataOra["mem_telmobile"];
+								$arrayMT["MEMBER_NO"] = $rowDataOra["member_no"];
+								$arrayMT["FULLNAME"] = $rowDataOra["fullname"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}
 					}
 				}else{
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no IN('".implode("','",$member_no)."')");
+						$fetchDataOra = $this->conmssql->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																WHERE mb.member_no IN('".implode("','",$member_no)."')");
 						$fetchDataOra->execute();
 					}else{
-						$fetchDataOra = $this->conmssql->prepare("SELECT MEM_TELMOBILE,MEMBER_NO FROM mbmembmaster WHERE member_no = :member_no");
+						$fetchDataOra = $this->conmssql->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																WHERE  mb.member_no = :member_no");
 						$fetchDataOra->execute([':member_no' => $member_no]);
 					}
 					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
 						if($check_tel){
-							if(isset($rowDataOra["MEM_TELMOBILE"])){
+							if(isset($rowDataOra["mem_telmobile"])){
 								$arrayMT = array();
-								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+								$arrayMT["TEL"] = $rowDataOra["mem_telmobile"];
+								$arrayMT["MEMBER_NO"] = $rowDataOra["member_no"];
+								$arrayMT["FULLNAME"] = $rowDataOra["fullname"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
 						}else{
 							$arrayMT = array();
-							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+							$arrayMT["TEL"] = $rowDataOra["mem_telmobile"];
+							$arrayMT["MEMBER_NO"] = $rowDataOra["member_no"];
+							$arrayMT["FULLNAME"] = $rowDataOra["fullname"];
 							$arrayMemberGRP[] = $arrayMT;
 						}
 					}
@@ -790,8 +799,6 @@ class functions {
 				}else if($rowPrefix["prefix_data_type"] == 'running'){
 					if($rowPrefix["connection_db"] == 'mysql'){
 						$getRunning = $this->con->prepare($rowPrefix["query_string"]);
-					}else if($rowPrefix["connection_db"] == 'oracle'){
-						//$getRunning = $this->conora->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'mssql'){
 						$getRunning = $this->conmssql->prepare($rowPrefix["query_string"]);
 					}
@@ -801,8 +808,6 @@ class functions {
 				}else if($rowPrefix["prefix_data_type"] == 'column'){
 					if($rowPrefix["connection_db"] == 'mysql'){
 						$getData = $this->con->prepare($rowPrefix["query_string"]);
-					}else if($rowPrefix["connection_db"] == 'oracle'){
-						//$getData = $this->conora->prepare($rowPrefix["query_string"]);
 					}else if($rowPrefix["connection_db"] == 'mssql'){
 						$getData = $this->conmssql->prepare($rowPrefix["query_string"]);
 					}

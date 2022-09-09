@@ -219,11 +219,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์สาธารณสุขจังหวัดน่าน จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">480 หมู่ 5 ต.ผาสิงห์</p>
-				<p style="margin-top: -25px;font-size: 18px;">อ.เมืองน่าน จ.น่าน 55000 </p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร.  054-718846  , 088-5530032</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold"></p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมการแพทย์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">88/23 หมู่ 4 ถนนติวานนท์</p>
+				<p style="margin-top: -25px;font-size: 18px;">ตำบลตลาดขวัญ อำเภอเมือง จังหวัดนนทบุรี 11000 </p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร.  02 580 7648  , 085 908 2513</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.dmscoop.com/</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">

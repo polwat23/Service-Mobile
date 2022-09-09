@@ -36,6 +36,39 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
 		}
+		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
+		$structureReqLoan = array();
+		$structureReqLoan["coop_id"] = $config["COOP_ID"];
+		$structureReqLoan["member_no"] = $member_no;
+		$structureReqLoan["loantype_code"] = "สม";
+		$structureReqLoan["operate_date"] = date("c");
+		$structureReqLoan["loancolltype_code"] = "01";
+		try {
+			$argumentWS = [
+				"as_wspass" => $config["WS_STRC_DB"],
+				"atr_lnatm" => $structureReqLoan
+			];
+			$resultWS = $clientWS->__call("of_getcollpermissmemno_IVR", array($argumentWS));
+			$responseSoap = $resultWS->atr_lnatm;
+			$arrayResult['LIMIT_GUARANTEE_LIST'] = $responseSoap->loanrequest_amt;
+		}catch(SoapFault $e){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0061",
+				":error_desc" => "ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n"."Error => ".$e->getMessage()."\n".json_encode($e),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			//$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n"."Error => "."\n".json_encode($e)."\n"."DATA => ".json_encode($dataComing);
+			$lib->sendLineNotify(json_encode( $e, JSON_UNESCAPED_UNICODE ));
+			$arrayResult['RESPONSE_CODE'] = 'WS0061';
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}
+
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');

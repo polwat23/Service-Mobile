@@ -160,6 +160,9 @@
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],
+	"WS4005" : [{"th" : "มีใบคำขอสวัสดิการอยู่แล้วกรุณารอการอนุมัติ","en" : "Please update application and try again if not yet please contact cooperative"}],
+	
+	
 	"KBANK_ERR" : [{
 		"1001" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],
@@ -247,6 +250,14 @@
 			"8" : [{"th" : "รอดำเนินการ","en" : "Wait for accept"}],
 			"1" : [{"th" : "อนุมัติ","en" : "Approve"}],
 			"0" : [{"th" : "ไม่อนุมัติ","en" : "Disapproval"}]
+		}],
+		"REQ_WELFARE_STATUS" : [{
+			"8" : 
+				[{"th" : "รออนุมัติ","en" : "Pending"}],
+			"1" : 
+				[{"th" : "อนุมัติ","en" : "Approved"}],	
+			"0" : 
+				[{"th" : "ไม่อุนมัติ","en" : "Reject"}]
 		}],
 		"REQ_FLAG_DESC" : [{"th" : "ท่านมีใบคำขอรออนุมัติอยู่แล้วไม่สามารถกู้ซ้ำได้ หากต้องการกู้ซ้ำให้ยกเลิกใบคำขอเดิม","en" : "Your request has wait for approve already exist cannot request repeat if you want to request please cancel previous request"}],
 		"RECEIVE_LOAN_RETRY_BEFORE" : [{"th" : "อายุของท่านไม่สามารถรับเงินกู้เพิ่มได้","en" : "Your age cannot withdraw loan"}],

@@ -28,7 +28,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayExecute[':end_date'] = $dataComing["end_date"];
 		}
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,bookbank_img,req_status,request_date,approve_date,contractdoc_url
+			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
 															FROM gcreqloan WHERE req_status = :req_status". 
 															($dataComing["is_filtered"] ? (
 															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["REQDOC_NO"] = $rowDocno["reqloan_doc"];
 				$arrDocno["MEMBER_NO"] = $rowDocno["member_no"];
 				
-					$fetchMember = $conmssql->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
+					$fetchMember = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,
 									mb.member_no,mb.MEMBGROUP_CODE 
 									FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 									WHERE mb.member_no = :member_no");
@@ -100,7 +100,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrGrp[] = $arrDocno;
 			}
 		}else{
-			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,bookbank_img,req_status,request_date,approve_date,contractdoc_url
+			$getAllReqDocno = $conmysql->prepare("SELECT reqloan_doc,member_no,loantype_code,request_amt,period_payment,period,loanpermit_amt,salary_img,citizen_img,req_status,request_date,approve_date,contractdoc_url
 															FROM gcreqloan WHERE 1=1". 
 															($dataComing["is_filtered"] ? (
 															(isset($dataComing["filter_member_no"]) && $dataComing["filter_member_no"] != '' ? " and member_no = :filter_member_no" : null).
@@ -115,8 +115,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrDocno["REQDOC_NO"] = $rowDocno["reqloan_doc"];
 				$arrDocno["MEMBER_NO"] = $rowDocno["member_no"];
 				
-				$fetchMember = $conmssql->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,
-									mb.member_no,mb.MEMBGROUP_CODE 
+				$fetchMember = $conmssql->prepare("SELECT mp.PRENAME_SHORT,mb.MEMB_NAME,mb.MEMB_SURNAME,
+									mb.MEMBER_NO,mb.MEMBGROUP_CODE 
 									FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 									WHERE mb.member_no = :member_no");
 				$fetchMember->execute([
