@@ -222,10 +222,10 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกาฬสินธุ์ จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">8/1 ถนนสนามบิน  ตำบลกาฬสินธุ์  อำเภอเมือง  จังหวัดกาฬสินธุ์ 46000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 043-840-126</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.kalasintsc.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์พนักงานการไฟฟ้าส่วนภูมิภาค จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">เลขที่ 200 อาคาร 3 ชั้น 1 ตึก อสก. 3 ถนนงามวงศ์วาน แขวงลาดยาว เขตจตุจักร กทม. 10900</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทรศัพท์ : 0-2953-1201-6</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">peacoop.or.th</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
