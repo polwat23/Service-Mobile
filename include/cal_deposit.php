@@ -104,16 +104,15 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		
-		$getSumOfDeposit = $this->conora->prepare("SELECT NVL(SUM(DEPTITEM_AMT),0) as SUM_AMOUNT FROM dpdeptmaster dm 
-														LEFT JOIN dpdeptstatement ds ON dm.deptaccount_no = ds.deptaccount_no
-														WHERE dm.member_no = :member_no and dm.deptclose_status = '0' 
-														and ds.deptitemtype_code <> 'INT' AND SUBSTR(ds.deptitemtype_code,0,1) = 'D'
-														and TO_CHAR(ds.operate_date,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')");
+		$getConstantLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_balance_deposit_all_accounts'");
+		$getConstantLimitDept->execute();
+		$rowConstant = $getConstantLimitDept->fetch(PDO::FETCH_ASSOC);
+		$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0'
+													and member_no = :member_no");
 		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
-		$amout_dept = $rowSumOfDeposit["SUM_AMOUNT"] + $amt_transfer;		
-		if( $amout_dept > 50000){
+		$amout_dept = $rowSumOfDeposit["SUM_PRIN"] + $amt_transfer;		
+		if( $amout_dept > $rowConstant["constant_value"]){
 			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
@@ -1410,6 +1409,7 @@ class CalculateDep {
 			$arrayResult["RESPONSE_CODE"] = 'WS0037';
 			$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'."\n".json_encode($conoracle->errorInfo());
 			$arrayResult['RESULT'] = FALSE;
+			file_put_contents(__DIR__.'Msgresponse.txt', json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 			return $arrayResult;
 		}
 	}

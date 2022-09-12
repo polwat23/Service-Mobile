@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 					0,$int_returnSrc,$interestPeriod,'1');
 					if($payslipdet["RESULT"]){
 						$repayloan = $cal_loan->repayLoan($conoracle,$dataComing["contract_no"],$dataComing["amt_transfer"],$dataComing["penalty_amt"],
-						$config,$payinslipdoc_no,$dateOperC,
+						$config,$payinslip_no,$dateOperC,
 						$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$dataComing["app_version"],$interestFull,$int_returnSrc,
 						$interest["INT_PERIOD"]);
 						if($repayloan["RESULT"]){
