@@ -248,7 +248,7 @@ class CalculateLoan {
 				':lpd_username' => "APP01",
 				':flag_tpay' => "1",
 				':sum_sal' => $amt_transfer,
-				':lcont_bal_amount' => $dataCont["LCONT_AMOUNT_SAL"] - $prinPay,
+				':lcont_bal_amount' => $dataCont["LCONT_AMOUNT_SAL"] - $amt_transfer,
 				':line' => $line_no ,
 				':page' => $page_no,
 				':cardline' => $line_card,
@@ -267,7 +267,7 @@ class CalculateLoan {
 				// update loan contract
 				$executeUpdateLoanContract = [
 					":lcont_amount_inst" => $dataCont["LCONT_AMOUNT_INST"] - 1,
-					":lcont_amount_sal" => $dataCont["LCONT_AMOUNT_SAL"] - $prinPay,
+					":lcont_amount_sal" => $dataCont["LCONT_AMOUNT_SAL"] - $amt_transfer,
 					":lcont_num_inst" => $dataCont["LCONT_NUM_INST"]+1,
 					":lcont_profit" => $dataCont["LCONT_PROFIT"] - $interestFull,
 					':line' => $line_no ,
@@ -285,7 +285,7 @@ class CalculateLoan {
 				if($updateLoanContract->execute($executeUpdateLoanContract)){
 				file_put_contents(__DIR__.'Msgresponse.txt', json_encode($executeUpdateLoanContract,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 					// close dept
-					if(($dataCont["LCONT_AMOUNT_SAL"] - $prinPay) <= 0){
+					if(($dataCont["LCONT_AMOUNT_SAL"] - $amt_transfer) <= 0){
 						//update loan_t_guar
 						$updateLoanGuar = $conoracle->prepare("update loan_t_guar set lg_be_avail = 0,mem_chk = 'Y'  where lcont_id = :lcont_id and br_no = :br_no and code = :code");
 						if($updateLoanGuar->execute([

@@ -1,275 +1,567 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
-	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
-		$request_date = $dataComing['request_date'];
-		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
-		$pay_date = date("Y-m-t", strtotime($request_date));
-		$payment_sumbalance = (float) preg_replace('/,/','',$dataComing['payment_sumbalance']);
-		$int_rate = $dataComing["int_rate"]/100;
-		$calint_type = $dataComing["calint_type"];
-		$arrPayment = array();
-		$lastDateofMonth = strtotime(date('M Y',strtotime($pay_date)));
-		$payment_per_period = 0;
-		$sumInt = 0;
-		$sumPayment = 0;
-		$period_payment = isset($dataComing['period_payment']) ? (float) preg_replace('/,/','',$dataComing['period_payment']) : 0;
-		$getRoundType = $conoracle->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
-		$getRoundType->execute();
-		$rowRoundType = $getRoundType->fetch(PDO::FETCH_ASSOC);
-		$getConstantYear = $conoracle->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
-		$getConstantYear->execute();
-		$rowConstant = $getConstantYear->fetch(PDO::FETCH_ASSOC);
-		if($rowConstant["DAYINYEAR"] == 0 || !isset($rowConstant["DAYINYEAR"])){
-			$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
-		}else{
-			$dayinYear = $rowConstant["DAYINYEAR"];
-		}
-		$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
-		$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
-		$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
-		if($lib->checkCompleteArgument(['period'],$dataComing)){
-			$period = $dataComing["period"];
-		}else{
-			if($calint_type === "1"){ // คงต้น
-				$period = ceil($payment_sumbalance / $period_payment);
-			}else{ 
-				$period = 0;
-				$amt = $payment_sumbalance;
-				$paymentPerPeriod = $period_payment;
-				$princPerPeriod = 0;
-				while ($amt > 0) {
-					if($period == 0){
-						if($cal_start_pay_date == "next"){
-							$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
-						}else{
-							$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
-						}
-					}else {
-						$lastDate = date('Y-m-t',strtotime("+".($period)." months",$lastDateofMonth));
-						$dayOfMonth = date('d',strtotime($lastDate));
-					}
-					
-					$intPerPeroid = ($amt * ($int_rate) * $dayOfMonth) / $dayinYear;
+if ($lib->checkCompleteArgument(['menu_component', 'int_rate', 'payment_sumbalance', 'calint_type', 'request_date'], $dataComing)) {
+    if ($func->check_permission($payload["user_type"], $dataComing["menu_component"], 'PaymentSimulateTable')) {
+        $request_date = $dataComing['request_date'];
+        $cal_start_pay_date = $func->getConstant('cal_start_pay_date');
+        $pay_date = date("Y-m-t", strtotime($request_date));
+        $payment_sumbalance = (float) preg_replace('/,/', '', $dataComing['payment_sumbalance']);
+        $int_rate = $dataComing["int_rate"] / 100;
+        $calint_type = $dataComing["calint_type"];
+        $arrPayment = array();
+        $lastDateofMonth = strtotime(date('M Y', strtotime($pay_date)));
+        $payment_per_period = 0;
+        $sumInt = 0;
+        $sumPayment = 0;
+        $period_payment = isset($dataComing['period_payment']) ? (float) preg_replace('/,/', '', $dataComing['period_payment']) : 0;
+        $getRoundType = $conoracle->prepare("SELECT ROUND_TYPE FROM CMROUNDMONEY WHERE APPLGROUP_CODE = 'LON'");
+        $getRoundType->execute();
+        $rowRoundType = $getRoundType->fetch(PDO::FETCH_ASSOC);
+        $getConstantYear = $conoracle->prepare("SELECT DAYINYEAR FROM LNLOANCONSTANT");
+        $getConstantYear->execute();
+        $rowConstant = $getConstantYear->fetch(PDO::FETCH_ASSOC);
+        if ($rowConstant["DAYINYEAR"] == 0 || !isset($rowConstant["DAYINYEAR"])) {
+            $dayinYear = $lib->getnumberofYear(date('Y', strtotime($pay_date)));
+        } else {
+            $dayinYear = $rowConstant["DAYINYEAR"];
+        }
+        $getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
+        $getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
+        $rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
+        $period = $dataComing["period"];
+        /*if ($lib->checkCompleteArgument(['period'], $dataComing)) {
+            $period = $dataComing["period"];
+        } else {
+            if ($calint_type === "1") { // คงต้น
+                $period = ceil($payment_sumbalance / $period_payment);
+            } else {
+                $period = 0;
+                $amt = $payment_sumbalance;
+                $paymentPerPeriod = $period_payment;
+                $princPerPeriod = 0;
+                while ($amt > 0) {
+                    if ($period == 0) {
+                        if ($cal_start_pay_date == "next") {
+                            $dayOfMonth = date('d', strtotime($pay_date)) + (date("t", strtotime($request_date)) - date("d", strtotime($request_date)));
+                        } else {
+                            $dayOfMonth = date('d', strtotime($pay_date)) - date("d", strtotime($request_date));
+                        }
+                    } else {
+                        $lastDate = date('Y-m-t', strtotime("+" . ($period) . " months", $lastDateofMonth));
+                        $dayOfMonth = date('d', strtotime($lastDate));
+                    }
 
-					if ($amt < $paymentPerPeriod) {
-						$princPerPeriod = $amt;
-						$paymentPerPeriod = $princPerPeriod + $intPerPeroid;
-					} else {
-						$princPerPeriod = $paymentPerPeriod - $intPerPeroid;
-					}
+                    $intPerPeroid = ($amt * ($int_rate) * $dayOfMonth) / $dayinYear;
 
-					$amt = $amt - $princPerPeriod;
-					$period++;
-				}
-			}
-		}
-		
-		if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
-			$pay_period = $period_payment;
-		}else{
-			if($calint_type === "1"){ // คงต้น
-				$pay_period = $payment_sumbalance / $period;
-			}else{ 
-				$payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
-				$pay_period = ($payment_sumbalance * ($int_rate / 12) / (1 - ($payment_per_period)));
-				
-				$modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
-				$roundMod = fmod($pay_period,abs($modFactor));
-				if($modFactor > 0){
-					if($roundMod > 0){
-						$pay_period = $pay_period - $roundMod + abs($modFactor);
-					}
-				}else if($modFactor < 0){
-					if($roundMod > 0){
-						$pay_period = $pay_period - $roundMod;
-					}
-				}
-			}
-		}
-		
-		for($i = 1;$i <= $period;$i++){
-			$arrPaymentPerPeriod = array();
-			if($calint_type === "1"){ // คงต้น
-				if($i == 1){
-					if($cal_start_pay_date == "next"){
-						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
-					}else{
-						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
-					}
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-				}else {
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-					$dayOfMonth = date('d',strtotime($lastDate));
-				}
-				if($rowConstant["DAYINYEAR"] == 0){
-					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($lastDate)));
-				}else{
-					$dayinYear = $rowConstant["DAYINYEAR"];
-				}
-				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
-				if (($payment_sumbalance) < $pay_period) {
-					$prn_amount = $payment_sumbalance;
-				}else{
-					$prn_amount = $pay_period;
-				}
-				$periodPayment = $prn_amount + $period_int;
-				$payment_sumbalance = $payment_sumbalance - $prn_amount;
-				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
-				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
-				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
-				$arrPaymentPerPeriod["PERIOD"] = $i;
-				$arrPaymentPerPeriod["INTEREST"] = number_format($period_int,2);
-				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment,2);
-				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
-				
-			}else if($calint_type === "2"){ // คงยอด ต้น + ดอก เท่ากันทุกเดือน
-				if($i == 1){
-					if($cal_start_pay_date == "next"){
-						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
-					}else{
-						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
-					}
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-				}else {
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-					$dayOfMonth = date('d',strtotime($lastDate));
-				}
-				if($rowConstant["DAYINYEAR"] == 0){
-					$dayinYear = $lib->getnumberofYear(date('Y',strtotime($lastDate)));
-				}else{
-					$dayinYear = $rowConstant["DAYINYEAR"];
-				}
-				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
-				$prn_amount = $pay_period - $period_int;
-				
-				
-				if (($payment_sumbalance) < $pay_period) {
-				  $prn_amount = $payment_sumbalance;
-				}else if($i == $period){
-				  $prn_amount = $payment_sumbalance;
-				}
-				$periodPaymentRaw = $prn_amount + $period_int;
-				if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
-					$periodPayment = $periodPaymentRaw;
-				}else{
-					if($i == $period){
-						$periodPayment = $periodPaymentRaw;
-					}else{
-						$modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
-						$roundMod = fmod($periodPaymentRaw,abs($modFactor));
-						if($modFactor > 0){
-							if($roundMod > 0){
-								$periodPayment = $periodPaymentRaw - $roundMod + abs($modFactor);
-							}else{
-								$periodPayment = $periodPaymentRaw;
-							}
-						}else if($modFactor < 0){
-							if($roundMod > 0){
-								$periodPayment = $periodPaymentRaw - $roundMod;
-							}else{
-								$periodPayment = $periodPaymentRaw;
-							}
-						}else{
-							$periodPayment = $periodPaymentRaw;
-						}
-					}
-				}
-				$payment_sumbalance = $payment_sumbalance - ($prn_amount);
-				$sumInt += $period_int;
-				$sumPayment += $periodPayment;
-				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
-				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
-				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
-				$arrPaymentPerPeriod["PERIOD"] = $i;
-				$arrPaymentPerPeriod["INTEREST"] = number_format($period_int,2);
-				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment,2);
-				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
-			}
-			if($prn_amount > 0){
-				$arrPayment[] = $arrPaymentPerPeriod;
-			}
-		
-		
-		//ibaf
-		/*if($dataComing["loantype_code"] == 0){
-			//----------เงินต้นและเงินต้นสุดท้าย
-			$Per_Stair = ceil($payment_sumbalance / $period);
-			$Per_Stair_last = $payment_sumbalance - ((ceil($payment_sumbalance / $period)) * ($period - 1));
-			
-			$PerFeeL= 0;
-			$PerFeeLLast = 0;
-			if($int_rate == 0){
-				$PayUnitL = ($payment_sumbalance * (((($int_rate / 100) * ($period +1)) / (24 / 1)+1) / $period));// ชำระต่องวด
-				$PerFeeL = $PayUnitL;
-				$PerFeeLLast = $PayUnitL;
-			}else{
-				$PayUnitL = Round($payment_sumbalance * (((($int_rate / 100) * ($period +1)) / (24 / 1)+1) / $period));// ชำระต่องวด
-				$PerFeeL = $PayUnitL;
-				$PerFeeLLast = $PayUnitL;
-			}
-			
-			//loop table simulate
-			for($i = 1;$i <= $period;$i++){
-				$arrPaymentPerPeriod = array();
-				if($i == 1){
-					if($cal_start_pay_date == "next"){
-						$dayOfMonth = date('d',strtotime($pay_date)) + (date("t",strtotime($request_date)) - date("d",strtotime($request_date)));
-					}else{
-						$dayOfMonth = date('d',strtotime($pay_date)) - date("d",strtotime($request_date));
-					}
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-				}else {
-					$lastDate = date('Y-m-t',strtotime("+".($i-1)." months",$lastDateofMonth));
-					$dayOfMonth = date('d',strtotime($lastDate));
-				}
-				if(date('Y',strtotime("+".($i-1)." months",$lastDateofMonth)) % 4 == 0){
-					$dayinYear = 366;
-				}else{
-					$dayinYear = 365;
-				}
-				$period_int= $payment_sumbalance * ($int_rate/100) * $dayOfMonth / $dayinYear;
-				$prn_amount = $PerFeeL - $period_int;
-				$payment_sumbalance = $payment_sumbalance - ($prn_amount);
-				$sumInt += $period_int;
-				$sumPayment += $PerFeeL;
-				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
-				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
-				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
-				$arrPaymentPerPeriod["PERIOD"] = $i;
-				$arrPaymentPerPeriod["INTEREST"] = number_format($period_int,2);
-				$arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($PerFeeL,2);
-				$arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance,2);
-				$arrPayment[] = $arrPaymentPerPeriod;
-			}*/
-		}
-		
+                    if ($amt < $paymentPerPeriod) {
+                        $princPerPeriod = $amt;
+                        $paymentPerPeriod = $princPerPeriod + $intPerPeroid;
+                    } else {
+                        $princPerPeriod = $paymentPerPeriod - $intPerPeroid;
+                    }
+
+                    $amt = $amt - $princPerPeriod;
+                    $period++;
+                }
+            }
+        }
+
+        if ($lib->checkCompleteArgument(['period_payment'], $dataComing)) {
+            $pay_period = $period_payment;
+        } else {
+            if ($calint_type === "1") { // คงต้น
+                $pay_period = $payment_sumbalance / $period;
+            } else {
+                $payment_per_period = exp(($period * (-1)) * log(((1 + ($int_rate / 12)))));
+                $pay_period = ($payment_sumbalance * ($int_rate / 12) / (1 - ($payment_per_period)));
+
+                $modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
+                $roundMod = fmod($pay_period, abs($modFactor));
+                if ($modFactor > 0) {
+                    if ($roundMod > 0) {
+                        $pay_period = $pay_period - $roundMod + abs($modFactor);
+                    }
+                } else if ($modFactor < 0) {
+                    if ($roundMod > 0) {
+                        $pay_period = $pay_period - $roundMod;
+                    }
+                }
+            }
+        }
+
+        for ($i = 1; $i <= $period; $i++) {
+            $arrPaymentPerPeriod = array();
+            if ($calint_type === "1") { // คงต้น
+                if ($i == 1) {
+                    if ($cal_start_pay_date == "next") {
+                        $dayOfMonth = date('d', strtotime($pay_date)) + (date("t", strtotime($request_date)) - date("d", strtotime($request_date)));
+                    } else {
+                        $dayOfMonth = date('d', strtotime($pay_date)) - date("d", strtotime($request_date));
+                    }
+                    $lastDate = date('Y-m-t', strtotime("+" . ($i - 1) . " months", $lastDateofMonth));
+                } else {
+                    $lastDate = date('Y-m-t', strtotime("+" . ($i - 1) . " months", $lastDateofMonth));
+                    $dayOfMonth = date('d', strtotime($lastDate));
+                }
+                if ($rowConstant["DAYINYEAR"] == 0) {
+                    $dayinYear = $lib->getnumberofYear(date('Y', strtotime($lastDate)));
+                } else {
+                    $dayinYear = $rowConstant["DAYINYEAR"];
+                }
+                $period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear, $rowRoundType["ROUND_TYPE"]);
+                if (($payment_sumbalance) < $pay_period) {
+                    $prn_amount = $payment_sumbalance;
+                } else {
+                    $prn_amount = $pay_period;
+                }
+                $periodPayment = $prn_amount + $period_int;
+                $payment_sumbalance = $payment_sumbalance - $prn_amount;
+                $arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate, 'D m Y');
+                $arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount, 2);
+                $arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
+                $arrPaymentPerPeriod["PERIOD"] = $i;
+                $arrPaymentPerPeriod["INTEREST"] = number_format($period_int, 2);
+                $arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment, 2);
+                $arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance, 2);
+            } else if ($calint_type === "2") { // คงยอด ต้น + ดอก เท่ากันทุกเดือน
+                if ($i == 1) {
+                    if ($cal_start_pay_date == "next") {
+                        $dayOfMonth = date('d', strtotime($pay_date)) + (date("t", strtotime($request_date)) - date("d", strtotime($request_date)));
+                    } else {
+                        $dayOfMonth = date('d', strtotime($pay_date)) - date("d", strtotime($request_date));
+                    }
+                    $lastDate = date('Y-m-t', strtotime("+" . ($i - 1) . " months", $lastDateofMonth));
+                } else {
+                    $lastDate = date('Y-m-t', strtotime("+" . ($i - 1) . " months", $lastDateofMonth));
+                    $dayOfMonth = date('d', strtotime($lastDate));
+                }
+                if ($rowConstant["DAYINYEAR"] == 0) {
+                    $dayinYear = $lib->getnumberofYear(date('Y', strtotime($lastDate)));
+                } else {
+                    $dayinYear = $rowConstant["DAYINYEAR"];
+                }
+                $period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear, $rowRoundType["ROUND_TYPE"]);
+                $prn_amount = $pay_period - $period_int;
+
+
+                if (($payment_sumbalance) < $pay_period) {
+                    $prn_amount = $payment_sumbalance;
+                } else if ($i == $period) {
+                    $prn_amount = $payment_sumbalance;
+                }
+                $periodPaymentRaw = $prn_amount + $period_int;
+                if ($lib->checkCompleteArgument(['period_payment'], $dataComing)) {
+                    $periodPayment = $periodPaymentRaw;
+                } else {
+                    if ($i == $period) {
+                        $periodPayment = $periodPaymentRaw;
+                    } else {
+                        $modFactor = $rowPayRound["PAYROUND_FACTOR"] ?? 5;
+                        $roundMod = fmod($periodPaymentRaw, abs($modFactor));
+                        if ($modFactor > 0) {
+                            if ($roundMod > 0) {
+                                $periodPayment = $periodPaymentRaw - $roundMod + abs($modFactor);
+                            } else {
+                                $periodPayment = $periodPaymentRaw;
+                            }
+                        } else if ($modFactor < 0) {
+                            if ($roundMod > 0) {
+                                $periodPayment = $periodPaymentRaw - $roundMod;
+                            } else {
+                                $periodPayment = $periodPaymentRaw;
+                            }
+                        } else {
+                            $periodPayment = $periodPaymentRaw;
+                        }
+                    }
+                }
+                $payment_sumbalance = $payment_sumbalance - ($prn_amount);
+                $sumInt += $period_int;
+                $sumPayment += $periodPayment;
+                $arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate, 'D m Y');
+                $arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount, 2);
+                $arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
+                $arrPaymentPerPeriod["PERIOD"] = $i;
+                $arrPaymentPerPeriod["INTEREST"] = number_format($period_int, 2);
+                $arrPaymentPerPeriod["PAYMENT_PER_PERIOD"] = number_format($periodPayment, 2);
+                $arrPaymentPerPeriod["PRINCIPAL_BALANCE"] = number_format($payment_sumbalance, 2);
+            }
+            if ($prn_amount > 0) {
+                $arrPayment[] = $arrPaymentPerPeriod;
+            }
+        }*/
+
+        //ibaf
+        $PerMonth = $dataComing["each_period"];
+        $AllApprove = $payment_sumbalance;
+        $Unit = $period;
+        $PersentL = $dataComing["int_rate"];
+        $Formula = $dataComing["loantype_code"];
+        //$AllApprove = (double)($AllApprove1);
+        //echo $AllApprove;
+        $AllMonth = ($Unit * $PerMonth) / 12; //------------------เดือนทั้งหมด
+        if ($Formula == 0) {
+
+            //----------เงินต้นและเงินต้นสุดท้าย
+            $Per_Stair = ceil($AllApprove / $Unit);
+            $Per_Stair_last = $AllApprove - ((ceil($AllApprove / $Unit)) * ($Unit - 1));
+            //echo("Per_Stair = " . $Per_Stair . " Per_Stair_last = " . $Per_Stair_last);
+
+            $PerFeeL = 0;
+            $PerFeeLLast = 0;
+            if ($PersentL == 0) {
+                $PayUnitL = ($AllApprove * (((($PersentL / 100) * ($Unit + 1)) / (24 / $PerMonth) + 1) / $Unit)); // ชำระต่องวด
+                $PerFeeL = $PayUnitL;
+                $PerFeeLLast = $PayUnitL;
+            } else {
+                $PayUnitL = Round($AllApprove * (((($PersentL / 100) * ($Unit + 1)) / (24 / $PerMonth) + 1) / $Unit)); // ชำระต่องวด
+                $PerFeeL = $PayUnitL;
+                $PerFeeLLast = $PayUnitL;
+            }
+
+            $ArrayPerPay  = array();
+            for ($i = 0; $i <= 2; $i++) {
+
+                $InputUnit = "1 - " . ($Unit - 1);
+                $InputPerAppove = $Per_Stair; //------------------------------------------------------------เก็บข้อมูลเงินต้น
+                $InputPerPayL = $PerFeeL;
+                if ($i == (1)) //----------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                {
+                    $InputUnit = $Unit;
+                    $InputPerAppove = $Per_Stair_last;
+                    $InputPerPayL = $PerFeeLLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                else if ($i == (2)) //----------------------------------------------------------------------------เก็บข้อมูลเงินรวม
+                {
+                    $InputUnit = "รวมยอด";
+                    $InputPerAppove = $AllApprove;
+                    $InputPerPayL = ($PerFeeL * ($Unit - 1)) + $PerFeeLLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินรวม
+                $InputPerFeeL = $InputPerPayL - $InputPerAppove;
+
+                $ArrayPerPay[] = array(
+                    'Count' => $i,
+                    'Unit' => $InputUnit,
+                    'PerAppove' => $InputPerAppove,
+                    'PerFeeL' => $InputPerFeeL,
+                    'PerPayL' => $InputPerPayL,
+                );
+                //echo ($i);
+
+            }
+        } else if ($Formula == 1) {
+            //----------เงินต้นและเงินต้นสุดท้าย
+            $Per_Stair = ceil($AllApprove / $Unit);
+            $Per_Stair_last = $AllApprove - ((ceil($AllApprove / $Unit)) * ($Unit - 1));
+            //echo("Per_Stair = " . $Per_Stair . " Per_Stair_last = " . $Per_Stair_last);
+
+            $All_FeeL = ($AllApprove * ($PersentL / 100) * ($AllMonth));
+            $PayUnitL = ceil(($All_FeeL + $AllApprove) / $Unit); // ชำระต่องวด
+            $PerFeeL = $PayUnitL;
+            $LastPayL = ($All_FeeL + $AllApprove) - ($PayUnitL * ($Unit - 1));
+            $PerFeeLLast = $LastPayL;
+
+            $ArrayPerPay  = array();
+            for ($i = 0; $i <= 2; $i++) {
+
+                $InputUnit = "1 - " . ($Unit - 1);
+                $InputPerAppove = $Per_Stair; //------------------------------------------------------------เก็บข้อมูลเงินต้น
+                $InputPerPayL = $PerFeeL;
+                if ($i == (1)) //----------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                {
+                    $InputUnit = $Unit;
+                    $InputPerAppove = $Per_Stair_last;
+                    $InputPerPayL = $PerFeeLLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                else if ($i == (2)) //----------------------------------------------------------------------------เก็บข้อมูลเงินรวม
+                {
+                    $InputUnit = "รวมยอด";
+                    $InputPerAppove = $AllApprove;
+                    $InputPerPayL = ($PerFeeL * ($Unit - 1)) + $PerFeeLLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินรวม
+                $InputPerFeeL = $InputPerPayL - $InputPerAppove;
+
+                $ArrayPerPay[] = array(
+                    'Count' => $i,
+                    'Unit' => $InputUnit,
+                    'PerAppove' => $InputPerAppove,
+                    'PerFeeL' => $InputPerFeeL,
+                    'PerPayL' => $InputPerPayL,
+                );
+                //echo ($i);
+
+            }
+        } else if ($Formula == 2) {
+			 //----------เงินต้นและเงินต้นสุดท้าย
+            $Per_Stair = ceil($AllApprove / $Unit);
+            $Per_Stair_last = $AllApprove - ((ceil($AllApprove / $Unit)) * ($Unit - 1));
+            //echo("Per_Stair = " . $Per_Stair . " Per_Stair_last = " . $Per_Stair_last);
+
+            $All_FeeL = ($AllApprove * ($PersentL / 100) * ($AllMonth));
+            $PayUnitL = ceil(($All_FeeL + $AllApprove) / $Unit); // ชำระต่องวด
+            $PerFeeL = $PayUnitL;
+            $LastPayL = ($All_FeeL + $AllApprove) - ($PayUnitL * ($Unit - 1));
+            $PerFeeLLast = $LastPayL;
+
+            $ArrayPerPayMax  = array();
+            $PayMax  = "";
+            $PayMaxLast  = "";
+            $PayMaxSum  = "";
+            for ($i = 0; $i <= 2; $i++) {
+
+                $InputUnit = "1 - " . ($Unit - 1);
+                $InputPerAppove = $Per_Stair; //------------------------------------------------------------เก็บข้อมูลเงินต้น
+                $InputPerPayL = $PerFeeL;
+				$PayMax = $PerFeeL;
+                if ($i == (1)) //----------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                {
+                    $InputUnit = $Unit;
+                    $InputPerAppove = $Per_Stair_last;
+                    $InputPerPayL = $PerFeeLLast;
+					$PayMaxLast  = $PerFeeLLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                else if ($i == (2)) //----------------------------------------------------------------------------เก็บข้อมูลเงินรวม
+                {
+                    $InputUnit = "รวมยอด";
+                    $InputPerAppove = $AllApprove;
+                    $InputPerPayL = ($PerFeeL * ($Unit - 1)) + $PerFeeLLast;
+					$PayMaxSum  = ($PerFeeL * ($Unit - 1)) + $PerFeeLLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินรวม
+                $InputPerFeeL = $InputPerPayL - $InputPerAppove;
+
+                $ArrayPerPayMax[] = array(
+                    'Count' => $i,
+                    'Unit' => $InputUnit,
+                    'PerAppove' => $InputPerAppove,
+                    'PerFeeL' => $InputPerFeeL,
+                    'PerPayL' => $InputPerPayL,
+                );
+                //echo ($i);
+
+            }
+
+
+            $ArrayPerPay  = array();
+			$PersentL = $dataComing["min_int"];
+            $Stairs = $dataComing["group_period"]; //--------------------บันไดขั้น
+            $PerStairsY = $dataComing["group_period_range"]; //----------------บันไดละกี่ปี
+            $PerFee = $dataComing["int_period_range"]; //------------------กำไรเพิ่มแต่ละบันได
+            $PerStairsM = ($PerStairsY * 12) / $PerMonth; //---------บันไดละกี่เดือน
+            $PerStairsL = Floor(($Stairs - ($Unit / ($PerStairsY * 12))) + 1);
+            //echo(PerStairsL);
+
+            //----------เงินต้นและเงินต้นสุดท้าย
+            $Per_Stair = ceil($AllApprove / $Unit);
+            $Per_Stair_last = $AllApprove - ((ceil($AllApprove / $Unit)) * ($Unit - 1));
+            //echo("Per_Stair = " . $Per_Stair . " Per_Stair_last = " . $Per_Stair_last);
+
+            //-----------------Start หาช่วงกี่ช่วง
+            $AllFloor = ceil($Unit / $PerStairsM);
+            if ($AllFloor >= $Stairs) {
+                $AllFloor = $Stairs;
+            }
+            //-----------------หากี่บันไดที่โชว์
+            $AllFloorPart = ceil(($Unit - 1) / ($PerStairsM));
+            if ($AllFloorPart >= $Stairs) {
+                $AllFloorPart = $Stairs;
+            }
+            $AllFloorPart  = $AllFloorPart + 1;
+            //echo("AllFlore" . $AllFloor . "</br>");
+            //echo("AllFlore" . $AllFloorPart . "</br>");
+            //-----------------End หาช่วงกี่ช่วง
+            //###################################################################################################
+
+            //-----------------Start หางวดแต่ละขั้นพร้อมงวดสุดท้าย
+            $AllPart = array();
+            $AllNumStart = 1;
+            for ($i = 0; $i < $AllFloorPart; $i++) {
+                $UnitString = ""; //------------------------------------------เก็บข้อมูลงวด
+
+                $NumStart = $AllNumStart; //-----------------------------------เริ่มงวดที่
+                $NumEnd = 0; //-----------------------------------------------จบงวดที่
+                $AllNumStart = $AllNumStart + $PerStairsM; //---------ใส่เริ่มงวดที่
+                $NumEnd = $AllNumStart - 1; //-----------------------------------------ใส่จบงวดที่
+                if (($i + 1) == $AllFloor) {
+                    $NumEnd = $Unit - 1;
+                } //-------------------ใส่จบงวดที่
+                //System.Console.WriteLine("NumEnd " + i + " : " + NumEnd);
+
+                $UnitString = $NumStart . " - " . $NumEnd;
+                if ($NumStart == $NumEnd) {
+                    $UnitString = $NumEnd;
+                }
+                if (($i + 1) == $AllFloorPart) {
+                    $UnitString = $Unit;
+                }
+
+                array_push($AllPart, $UnitString);
+            }
+            /*
+        for ($i = 0; $i < count($AllPart); $i++)
+        {
+            echo $i . " " . $AllPart[$i] . "</br>";
+        }*/
+            //echo "---------------------";
+            //-----------------End หางวดแต่ละขั้นพร้อมงวดสุดท้าย
+
+
+            //-----------Start ในแต่ละขั้นมีกี่งวด
+            $AllUnitInFloor = array();
+            $UnitLeft = $Unit;
+            for ($i = 0; $i < $AllFloor; $i++) {
+                $UnitLeftIn = 0;
+                if ($UnitLeft > $PerStairsM && ($i + 1) != $AllFloor) {
+                    $UnitLeftIn = $PerStairsM;
+                } else {
+                    $UnitLeftIn = $UnitLeft;
+                }
+
+                array_push($AllUnitInFloor, $UnitLeftIn);
+                $UnitLeft = $UnitLeft - $PerStairsM;
+            }/*
+        for ($i = 0; $i < count($AllUnitInFloor); $i++)
+        {
+            echo $i . " " . $AllUnitInFloor[$i] . "</br>";
+        }
+        echo  ("---------------------"); */
+            //-----------End ในแต่ละขั้นมีกี่งวด
+
+
+            //----------Start กำไรตำ
+            ///---------------------------St หาค่าบริการในแต่ละขั้น
+            $PerFeeL = array();
+            $StartPersentL1 = $PersentL;
+            $SumAllPay = 0;
+            for ($i = 0; $i < $AllFloor; $i++) {
+                $All_Fee = ($AllApprove * ($StartPersentL1 / 100) * ($AllMonth)); //----------------------กำไรทั้งหมด
+                $PayUnit = ceil(($All_Fee + $AllApprove) / $Unit); //----------------------------กำไรต่องวด
+                array_push($PerFeeL, $PayUnit); //---------------------------------------------------------------------ใส่ข้อมูลชำระต่องวด
+
+                $UnitIn = $AllUnitInFloor[$i];
+                if (($i + 1) == $AllFloor) {
+                    $UnitIn = $AllUnitInFloor[$i] - 1;
+                }
+                $SumAllPay = $SumAllPay + ($PayUnit * $UnitIn);
+                $StartPersentL1 = $StartPersentL1 + $PerFee;
+            }
+
+            ///---------------------------En หาค่าบริการในแต่ละขั้น
+
+            ///---------------------------St หากำไรทั้งหมด
+            $StartPersentL2 = $PersentL;
+            $AllPerFeeL =  array(); //-------------กำไรแต่ละช่วง
+            $SumAllFee = 0;
+            for ($i = 0; $i < $AllFloor; $i++) {
+                $All_Fee1 = ($AllApprove * ($StartPersentL2 / 100) * (($AllUnitInFloor[$i] * $PerMonth) / 12));
+                array_push($AllPerFeeL, $All_Fee1);
+                $SumAllFee = $SumAllFee + $All_Fee1;
+
+                $StartPersentL2 = $StartPersentL2 + $PerFee;
+            }
+            /*for ($i = 0; $i < count($AllPerFeeL); $i++)
+        {
+            echo ($i . " " . $AllPerFeeL[$i] . "</br>");
+        }
+        //echo ("SumAllFee : " . $SumAllFee . "</br>");
+        echo ("---------------------"); */
+            ///---------------------------En หากำไรทั้งหมด
+            for ($i = $AllFloorPart; $i <= $AllFloorPart; $i++) {
+                $PerFeeL[$i - 1] = (($SumAllFee + $AllApprove) - $SumAllPay);
+            }
+            /*for ($i = 0; $i < count($PerFeeL); $i++)
+        {
+            echo  ($i . " " . $PerFeeL[$i] . "</br>");
+        }
+        echo  ("---------------------"); */
+            //echo  ("$SumAllFee   :" . $SumAllFee + "" . " $SumAllFee   :" . $SumAllPay) ;
+            //----------End กำไรตำ
+
+            //###################################################################################################
+
+            $ArrayPerPay  = array();
+            $y = 1; //-------------สร้างตัวเพื่อแต่ละขั้น
+            for ($i = 0; $i < ($AllFloorPart + 1); $i++) {
+                $InputUnit = "";
+                $InputPerAppove = "";
+                $InputPerPayL = "";
+                $InputPerPayLNormal = "";
+                if (($i + 1) < ($AllFloorPart)) {
+                    $InputUnit = $AllPart[$i];
+                    $InputPerAppove = $Per_Stair; //------------------------------------------------------------เก็บข้อมูลเงินต้น
+                    $InputPerPayL = $PerFeeL[$i];
+                    $InputPerPayLNormal = $PayMax;
+                } else if (($i + 1) == ($AllFloorPart)) //----------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                {
+                    $InputUnit = $AllPart[$i];
+                    $InputPerAppove = $Per_Stair_last;
+                    $InputPerPayL = $PerFeeL[($AllFloorPart) - 1];
+                    $InputPerPayLNormal = $PayMaxLast;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                else if (($i + 1) == ($AllFloorPart + 1)) //----------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                {
+                    $InputUnit = "ยอดรวม";
+                    $InputPerAppove = $AllApprove;
+                    $InputPerPayL = $SumAllFee + $AllApprove;
+                    $InputPerPayLNormal = $PayMaxSum;
+                } //-----------------------------------------------------------------------------------------เก็บข้อมูลเงินต้นสุดท้าย
+                $InputPerFeeL = $InputPerPayL - $InputPerAppove;
+
+
+                array_push(
+                    $ArrayPerPay,
+                    array(
+                        'Count' => $i,
+                        'Unit' => $InputUnit,
+                        'PerAppove' => $InputPerAppove,
+                        'PerFeeL' => $InputPerFeeL,
+                        'PerPayLNormal' => $InputPerPayLNormal,
+                        'PerPayL' => $InputPerPayL,
+                    )
+                );
+                //echo ($i);
+
+            }
+        }
+        $L_Unit = array_column($ArrayPerPay, 'Unit', 'Count');
+        $L_PerAppove = array_column($ArrayPerPay, 'PerAppove', 'Count');
+        $L_PerFeeL = array_column($ArrayPerPay, 'PerFeeL', 'Count');
+        $L_PerPayL = array_column($ArrayPerPay, 'PerPayL', 'Count');
+        $L_PerPayLNormal = array_column($ArrayPerPay, 'PerPayLNormal', 'Count');
+        
+		ob_start();
 		include(__DIR__.'/show_table_payment.php');
-	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../include/exit_footer.php');
+		$response = ob_get_clean();
 		
-	}
-}else{
-	$filename = basename(__FILE__, '.php');
-	$logStruc = [
-		":error_menu" => $filename,
-		":error_code" => "WS4004",
-		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
-		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-	];
-	$log->writeLog('errorusage',$logStruc);
-	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
-	$lib->sendLineNotify($message_error);
-	$arrayResult['RESPONSE_CODE'] = "WS4004";
-	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-	$arrayResult['RESULT'] = FALSE;
-	http_response_code(400);
-	require_once('../../include/exit_footer.php');
-	
+		if ($forceNewSecurity == true) {
+			$signature = "";
+			openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+			header("Response_token: ".base64_encode($signature));
+		}
+		
+		echo $response;
+
+    } else {
+        $arrayResult['RESPONSE_CODE'] = "WS0006";
+        $arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+        $arrayResult['RESULT'] = FALSE;
+        http_response_code(403);
+        require_once('../../include/exit_footer.php');
+    }
+} else {
+    $filename = basename(__FILE__, '.php');
+    $logStruc = [
+        ":error_menu" => $filename,
+        ":error_code" => "WS4004",
+        ":error_desc" => "ส่ง Argument มาไม่ครบ " . "\n" . json_encode($dataComing),
+        ":error_device" => $dataComing["channel"] . ' - ' . $dataComing["unique_id"] . ' on V.' . $dataComing["app_version"]
+    ];
+    $log->writeLog('errorusage', $logStruc);
+    $message_error = "ไฟล์ " . $filename . " ส่ง Argument มาไม่ครบมาแค่ " . "\n" . json_encode($dataComing);
+    $lib->sendLineNotify($message_error);
+    $arrayResult['RESPONSE_CODE'] = "WS4004";
+    $arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+    $arrayResult['RESULT'] = FALSE;
+    http_response_code(400);
+    require_once('../../include/exit_footer.php');
 }
-?>

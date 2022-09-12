@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 											FROM LOAN_M_PAYDEPT lsm 
 											WHERE lsm.LCONT_ID = :contract_no and lsm.LPD_DATE
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											ORDER BY lsm.LPD_DATE DESC ) WHERE rownum <= ".$rownum." ");
+											ORDER BY lsm.LPD_DATE DESC,lsm.PAGE DESC,lsm.LINE DESC ) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,

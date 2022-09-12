@@ -127,7 +127,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$qrData["ACC_NO"] = "";
 				}
 				$qrData["AMT_TRANSFER"] = number_format($dataComing["transList"][0]["amt_transfer"],2);
-				$qrData["FEE"] = number_format(0,2);
+				$qrData["FEE"] = number_format(7,2);
 				$qrData["datainQR"] = $stringQRGenerate;
 				$qrData["OPERATE_DATE"] = $lib->convertdate(date_format($currentDate,"Y-m-d"),"D m Y")." - ".date_format($currentDate,"H : i");
 				$qrGen = $lib->generateQrCodeImg($qrData);

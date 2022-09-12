@@ -11,14 +11,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['LIMIT_DURATION'] = $limit;
 		$date_before = date('Y-m-d',strtotime('-'.$limit.' months'));
 		$date_now = date('Y-m-d');
-		$fetchLastStmAcc = $conoracle->prepare("SELECT * FROM (SELECT lnm.loancontract_no,lt.LOANTYPE_DESC AS LOAN_TYPE,lnm.principal_balance as LOAN_BALANCE,
-												lnm.loanapprove_amt as APPROVE_AMT,lnm.startcont_date,lnm.period_payment,lnm.period_payamt as PERIOD,
-												LAST_PERIODPAY as LAST_PERIOD,lns.operate_date as LAST_OPERATE_DATE
-												from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
-												lnm.loancontract_no = lns.loancontract_no and lnm.coop_id = lns.coop_id LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-												WHERE lnm.member_no = :member_no and lnm.contract_status > 0 and lnm.contract_status <> 8
-												and lns.entry_date IS NOT NULL
-												ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
+		$fetchLastStmAcc = $conoracle->prepare("SELECT * FROM (SELECT lnm.LCONT_ID as loancontract_no,lnm.LCONT_AMOUNT_SAL as LOAN_BALANCE,
+												lnm.LCONT_APPROVE_SAL as APPROVE_AMT,lnm.LCONT_DATE as startcont_date,lnm.LCONT_SAL as period_payment,
+												lnm.LCONT_MAX_INSTALL as PERIOD,
+												lnm.LCONT_MAX_INSTALL - lnm.LCONT_NUM_INST as LAST_PERIOD,lnm.LCONT_PAY_LAST_DATE as LAST_OPERATE_DATE
+												from LOAN_M_CONTACT lnm
+												WHERE  lnm.account_id = :member_no and lnm.LCONT_STATUS_CONT IN('H','A')
+												ORDER BY lnm.LCONT_PAY_LAST_DATE DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
@@ -35,21 +34,21 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if($dataComing["channel"] == 'mobile_app'){
 			$rownum = $func->getConstant('limit_fetch_stm_loan');
 			if(isset($dataComing["fetch_type"]) && $dataComing["fetch_type"] == 'refresh'){
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO > ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO > 0";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.LPD_NUM_INST > ".$dataComing["old_seq_no"] : "and lsm.LPD_NUM_INST > 0";
 			}else{
-				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+				$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.LPD_NUM_INST < ".$dataComing["old_seq_no"] : "and lsm.LPD_NUM_INST < 999999";
 			}
 		}else{
 			$rownum = 999999;
-			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
+			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.LPD_NUM_INST < ".$dataComing["old_seq_no"] : "and lsm.LPD_NUM_INST < 999999";
 		}
-		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
-											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
-											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
-											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
+		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lsm.REMARK AS TYPE_DESC,lsm.LPD_DATE as operate_date,
+											lsm.LPD_SAL as PRN_PAYMENT,lsm.LPD_NUM_INST as SEQ_NO,lsm.LPD_NO as SLIP_NO,
+											lsm.LPD_INTE as INT_PAYMENT,lsm.LCONT_BAL_AMOUNT as loan_balance
+											FROM LOAN_M_PAYDEPT lsm 
+											WHERE lsm.LCONT_ID = :contract_no and lsm.LPD_DATE
 											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
-											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+											ORDER BY lsm.LPD_DATE DESC,lsm.PAGE DESC,lsm.LINE DESC ) WHERE rownum <= ".$rownum." ");
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,

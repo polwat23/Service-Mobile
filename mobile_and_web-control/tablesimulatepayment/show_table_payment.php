@@ -44,101 +44,53 @@ table thead th {
 <table>
 <thead>
 	<tr>
-		<th colspan="3"  style="font-weight: bold;border-right: solid 1px grey;">งวด</th>
-		<th colspan="4">ชำระต่องวด</th>
+		<th colspan="1"  style="font-weight: bold;border-right: solid 1px grey;background-color: #2fa1dc;color: white;">งวด</th>
+		<?php
+		if($Formula == "2"){
+		?>
+			<th colspan="1"  style="font-weight: bold;background-color: #2fa1dc;color: white;">ชำระต่องวด (ส่วนลด)</th>
+		<?php
+		}else{
+		?>
+			<th colspan="1"  style="font-weight: bold;background-color: #2fa1dc;color: white;">ชำระต่องวด</th>
+		<?php
+		}
+		?>
+		<?php
+		if($Formula == "2"){
+		?>
+			<th colspan="1"  style="font-weight: bold;background-color: #2fa1dc;color: white;">ชำระต่องวด (ปกติ)</th>
+		<?php
+		}
+		?>
 	</tr>
 </thead>
 <tbody class="body-card-table">
-	<tr>
-		<td colspan="3" style="font-weight: bold;border-right: solid 1px grey;">
-			1 - <?php echo $period - 1;?>
-		</td>
-		<td colspan="4" style="font-weight: bold;">
-			<?php echo $arrPayment[0]["PAYMENT_PER_PERIOD"] ?? 0;?>
-		</td>
-	</tr>
-	<tr>
-		<td colspan="3" style="font-weight: bold;border-right: solid 1px grey;">
-			<?php echo $period;?>
-		</td>
-		<td colspan="4" style="font-weight: bold;">
-			<?php echo $arrPayment[$period-1]["PAYMENT_PER_PERIOD"] ?? 0;?>
-		</td>
-	</tr>
-	<tr>
-		<td colspan="3" style="font-weight: bold;border-right: solid 1px grey;">
-			รวมยอด
-		</td>
-		<td colspan="4" style="font-weight: bold;">
-			<?php echo number_format($sumPayment,2) ?>
-		</td>
-	</tr>
-	<tr style="background-color: black;">
+	<?php 
+	for ($i = 0; $i < (count($L_Unit)); $i++)
+	{
+	?>
+		<tr>
+			<td colspan="1" style="font-weight: bold;border-right: solid 1px grey;background-color: #2fa1dc11;"><?php echo ($L_Unit[$i]) ?></td>
+			<td colspan="1" style="font-weight: bold;background-color: #2fa1dc11;"><?php echo number_format($L_PerPayL[$i], 2);  ?></td>
+			<?php
+			if($Formula == "2"){
+			?>
+			<td colspan="1" style="font-weight: bold;background-color: #2fa1dc11;"><?php echo number_format($L_PerPayLNormal[$i], 2);  ?></td>
+			<?php
+			}
+			?>
+		</tr>
+	<?php } ?>
+	<tr style="background-color: #606060;">
 		<td colspan="7" style="font-weight: bold;">
 		
 		</td>
 	</tr>
 </tbody>
-<thead>
-	<tr>
-		<th>งวด</th>
-		<th>วันที่ชำระ</th>
-		<th>จำนวนวัน</th>
-		<th>เงินต้น</th>
-		<th>ดอกเบี้ย</th>
-		<th>ยอดชำระ</th>
-		<th>หนี้คงเหลือ</th>
-	</tr>
-</thead>
 <tbody class="body-card-table">
-<?php
-if(isset($arrPayment)){
-for($i = 0;$i < sizeof($arrPayment);$i++){ ?>
-<tr>
-	<td>
-	<?php echo $arrPayment[$i]["PERIOD"];?>
-	</td>
-	<td>
-	<?php echo $arrPayment[$i]["MUST_PAY_DATE"];?>
-	</td>
-	<td>
-	<?php echo $arrPayment[$i]["DAYS"];?>
-	</td>
-	<td>
-	<?php echo $arrPayment[$i]["PRN_AMOUNT"];?>
-	</td>
-	<td>
-	<?php echo $arrPayment[$i]["INTEREST"];?>
-	</td>
-	<td>
-	<?php echo $arrPayment[$i]["PAYMENT_PER_PERIOD"];?>
-	</td>
-	<td>
-	<?php echo $arrPayment[$i]["PRINCIPAL_BALANCE"];?>
-	</td>
-</tr>
-<?php 
-}
-}
-?>
 
 </tbody>
-<tfoot>
-<tr>
-<td colspan="4" style="background-color:#E8E7E7;padding: 5px;text-align: right;font-weight:bold">
-รวมดอกเบี้ย
-</td>
-<td colspan="1" style="background-color:black;padding: 5px;text-align: center;color:white;">
-<?php echo number_format($sumInt,2) ?>
-</td>
-<td colspan="1" style="background-color:#E8E7E7;padding: 5px;text-align: right;font-weight:bold">
-รวมชำระ
-</td>
-<td colspan="1" style="background-color:black;padding: 5px;text-align: center;color:white;">
-<?php echo number_format($sumPayment,2) ?>
-</td>
-</tr>
-</tfoot>
 </table>
 <div style="margin-bottom: 10px;" >
 </div>

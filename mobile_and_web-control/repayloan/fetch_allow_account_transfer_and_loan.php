@@ -110,7 +110,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
+				//$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
+				$arrayResult['BANK_ACCOUNT_ALLOW'] = array();
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
 				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;

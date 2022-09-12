@@ -4,11 +4,12 @@ require_once('../../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantdeptaccount')){
 		$arrayGroup = array();
-		$fetchConstant = $conmysql->prepare("SELECT id_bankconstant, transaction_cycle, max_numof_deposit, max_numof_withdraw, min_deposit, max_deposit, min_withdraw, max_withdraw, each_bank FROM gcbankconstant");
+		$fetchConstant = $conmysql->prepare("SELECT id_bankconstant,transaction_name, transaction_cycle, max_numof_deposit, max_numof_withdraw, min_deposit, max_deposit, min_withdraw, max_withdraw, each_bank FROM gcbankconstant");
 		$fetchConstant->execute();
 		while($rowAccount = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
 			$arrConstans["ID_BANKCONSTANT"] = $rowAccount["id_bankconstant"];
+			$arrConstans["TRANSACTION_NAME"] = $rowAccount["transaction_name"];
 			$arrConstans["TRANSACTION_CYCLE"] = $rowAccount["transaction_cycle"];
 			$arrConstans["MAX_NUMOF_DEPOSIT"] = $rowAccount["max_numof_deposit"];
 			$arrConstans["MAX_NUMOF_WITHDRAW"] = $rowAccount["max_numof_withdraw"];
