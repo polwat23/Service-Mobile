@@ -37,7 +37,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 				}else{
 					$arrayResult['RESPONSE_CODE'] = $arrRightDeposit["RESPONSE_CODE"];
 					if($arrRightDeposit["RESPONSE_CODE"] == 'WS0056'){
-						file_put_contents('response.txt', json_encode(($arrRightDeposit),JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 						$arrayResult['RESPONSE_MESSAGE'] = str_replace('${min_amount_deposit}',number_format(($arrRightDeposit["MINDEPT_AMT"]??$arrRightDeposit["MINWITD_AMT"]),2),$configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale]);
 					}else{
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

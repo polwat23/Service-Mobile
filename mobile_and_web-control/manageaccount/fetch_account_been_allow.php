@@ -49,7 +49,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 			$arrayResult['RESULT'] = TRUE;
-			file_put_contents('Msgresponse.txt', json_encode($arrDATA,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 			require_once('../../include/exit_footer.php');
 		}else{
 			http_response_code(204);

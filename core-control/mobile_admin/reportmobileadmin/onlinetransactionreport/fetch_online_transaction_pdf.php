@@ -72,6 +72,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 
 		$summary = 0;
 		$formatDept = $func->getConstant('dep_format');
+		$arrayLoanExternal = array();
+		$arrayLoanExternalList = array();
+		$arrayLoanInside = array();
+		$arrayLoanInsideList = array();
 		while($rowRecon = $fetchReconcile->fetch(PDO::FETCH_ASSOC)){
 			$arrayRecon = array();
 			
@@ -116,46 +120,97 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			}
 			
 			if($rowRecon["transfer_mode"] == '9'){
-				if($rowRecon["transaction_type_code"] == 'DIM'){//โอนฝากภายนอก 	
+				if($rowRecon["transaction_type_code"] == 'WTX'){//ฝากภายนอกธนาคาร
 					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
 					$getDepttype->execute([
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
-						$deposit_external_10 += $rowRecon["amount"];
-						$dept_count10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
-						$deposit_external_20 += $rowRecon["amount"];
-						$dept_count20++;
-					}
+					$deposit_external_10 += $rowRecon["amount"];
+					$summary_feeamt_withdraw += ($rowRecon["fee_amt"] ?? 0);
+					$dept_count10++;
+				}else if($rowRecon["transaction_type_code"] == 'DTX'){//ฝากภายนอกออมทรัพย์
+					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
+					$getDepttype->execute([
+						':destination' => $rowRecon["destination"]
+					]);
+					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
+					$deposit_external_20 += $rowRecon["amount"];
+					$summary_feeamt_deposit += ($rowRecon["fee_amt"] ?? 0);
+					$dept_count20++;
+				}
+				
+				if($rowRecon["transaction_type_code"] == 'WTX'){//ถอนภายนอกออมทรัพย์
+					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
+					$getDepttype->execute([
+						':destination' => $rowRecon["destination"]
+					]);
+					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
+					$withdraw_external_20 += $rowRecon["amount"]  + $rowRecon["fee_amt"];
+					$withdraw20++;
+				}else if($rowRecon["transaction_type_code"] == 'DTX'){//ถอนภายนอกธนาคาร
+					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
+					$getDepttype->execute([
+						':destination' => $rowRecon["destination"]
+					]);
+					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
+					$withdraw_external_10 += $rowRecon["amount"];
+					$withdraw10++;
 				}else if($rowRecon["transaction_type_code"] == 'WIM'){ //ถอนภายนอก
 					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :from_account");
 					$getDepttype->execute([
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
-						$withdraw_external_10 += $rowRecon["amount"];
-						$withdraw10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$withdraw_external_20 += $rowRecon["amount"];
 						$withdraw20++;
-					}				
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='02'){
+						$withdraw_external_30 += $rowRecon["amount"];
+						$withdraw30++;
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='07'){
+						$withdraw_external_70 += $rowRecon["amount"];
+						$withdraw70++;
+					}					
 				}else if($rowRecon["transaction_type_code"] == 'WFS'){ //โอนชำระหนี้
-					$getLontype = $conoracle->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
+					$getLontype = $conoracle->prepare("SELECT lty.loangroup_code, lty.loantype_desc, lty.loantype_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
 					$getLontype->execute([
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowLontype = $getLontype->fetch(PDO::FETCH_ASSOC);
+					
+					$getRePayLoan = $conmysql->prepare("SELECT amount, fee_amt, penalty_amt, principal, interest FROM gcrepayloan WHERE ref_no = :ref_no");
+					$getRePayLoan->execute([
+						':ref_no' => $rowRecon["ref_no"]
+					]);
+					$rowRePayLoan = $getRePayLoan->fetch(PDO::FETCH_ASSOC);
+					if(isset($arrayLoanInsideList[$rowLontype["LOANTYPE_CODE"]])){
+						$arrayLoanInsideList[$rowLontype["LOANTYPE_CODE"]]["PRN_AMT"] += ($rowRePayLoan["principal"] ?? 0);
+						$arrayLoanInsideList[$rowLontype["LOANTYPE_CODE"]]["INT_AMT"] += ($rowRePayLoan["interest"] ?? 0);
+						$arrayLoanInsideList[$rowLontype["LOANTYPE_CODE"]]["COUNT"]++;
+					}else{
+						$arrayLoanInside[] = $rowLontype["LOANTYPE_CODE"];
+						$arrData = array();
+						$arrData["LOANTYPE_DESC"] = $rowLontype["LOANTYPE_DESC"];
+						$arrData["PRN_AMT"] = $rowRePayLoan["principal"] ?? 0;
+						$arrData["INT_AMT"] = $rowRePayLoan["interest"] ?? 0;
+						$arrData["COUNT"] = 1;
+						$arrayLoanInsideList[$rowLontype["LOANTYPE_CODE"]] = $arrData;
+					}
 					if($rowLontype["LOANGROUP_CODE"] == '01'){ //ชำระหนี้ ฉฉ
 						$payment_external_01 += $rowRecon["amount"];
+						$prn_external_01 += $rowRePayLoan["principal"];
+						$int_external_01 += $rowRePayLoan["interest"];
 						$payment01++;
 					}else if($rowLontype["LOANGROUP_CODE"] == '02'){//ชำระหนี้ สามัญ
 						$payment_external_02 += $rowRecon["amount"];
+						$prn_external_02 += $rowRePayLoan["principal"];
+						$int_external_02 += $rowRePayLoan["interest"];
 						$payment02++;
 					}else if($rowLontype["LOANGROUP_CODE"] == '03'){//ชำระหนี้ พิเศษ
 						$payment_external_03 += $rowRecon["amount"];
+						$prn_external_03 += $rowRePayLoan["principal"];
+						$int_external_03 += $rowRePayLoan["interest"];
 						$payment03++;
 					}	 
 				}else if($rowRecon["transaction_type_code"] == 'DAP'){ //จ่ายเงินกู้
@@ -167,21 +222,24 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowLontype["LOANGROUP_CODE"] == '01'){ //ชำระหนี้ ฉฉ
 						$getloan_external_01 += $rowRecon["amount"];
 						$getloan01++;
-					}		
-				}	
+					}	
+				}
 			}else{
-				if($rowRecon["transaction_type_code"] == 'WIM'){//โอนฝากภายใน	
+				if($rowRecon["transaction_type_code"] == 'WIM'){//ฝากภายใน	
 					$getDepttype = $conoracle->prepare("SELECT depttype_code FROM dpdeptmaster  WHERE deptaccount_no = :destination");
 					$getDepttype->execute([
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$deposit_inside_10 += $rowRecon["amount"];
 						$inside_dept10 ++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] == '02'){
 						$deposit_inside_20 += $rowRecon["amount"];
 						$inside_dept20++;					
+					}else if($rowDepttype["DEPTTYPE_CODE"] == '07'){
+						$deposit_inside_70 += $rowRecon["amount"];
+						$inside_dept70++;					
 					}
 				}
 				if($rowRecon["transaction_type_code"] == 'WIM'){ //ถอนภายใน
@@ -190,27 +248,54 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					if($rowDepttype["DEPTTYPE_CODE"] =='00'){
+					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
 						$withdraw_inside_10 += $rowRecon["amount"];
 						$inside_withdraw10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='02'){
 						$withdraw_inside_20 += $rowRecon["amount"];
 						$inside_withdraw20++;
-					}				
+					}else if($rowDepttype["DEPTTYPE_CODE"] == '07'){
+						$withdraw_inside_70 += $rowRecon["amount"];
+						$inside_withdraw70++;		
+					}			
 				}else if($rowRecon["transaction_type_code"] == 'WFS'){ //โอนชำระหนี้ภายใน
-					$getLontype = $conoracle->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
+					$getLontype = $conoracle->prepare("SELECT lty.loangroup_code, lty.loantype_desc, lty.loantype_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
 					$getLontype->execute([
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowLontype = $getLontype->fetch(PDO::FETCH_ASSOC);
+					$getRePayLoan = $conmysql->prepare("SELECT amount, fee_amt, penalty_amt, principal, interest FROM gcrepayloan WHERE ref_no = :ref_no");
+					$getRePayLoan->execute([
+						':ref_no' => $rowRecon["ref_no"]
+					]);
+					$rowRePayLoan = $getRePayLoan->fetch(PDO::FETCH_ASSOC);
+					if(isset($arrayLoanExternalList[$rowLontype["LOANTYPE_CODE"]])){
+						$arrayLoanExternalList[$rowLontype["LOANTYPE_CODE"]]["PRN_AMT"] += ($rowRePayLoan["principal"] ?? 0);
+						$arrayLoanExternalList[$rowLontype["LOANTYPE_CODE"]]["INT_AMT"] += ($rowRePayLoan["interest"] ?? 0);
+						$arrayLoanExternalList[$rowLontype["LOANTYPE_CODE"]]["COUNT"]++;
+					}else{
+						$arrayLoanExternal[] = $rowLontype["LOANTYPE_CODE"];
+						$arrData = array();
+						$arrData["LOANTYPE_DESC"] = $rowLontype["LOANTYPE_DESC"];
+						$arrData["PRN_AMT"] = $rowRePayLoan["principal"] ?? 0;
+						$arrData["INT_AMT"] = $rowRePayLoan["interest"] ?? 0;
+						$arrData["COUNT"] = 1;
+						$arrayLoanExternalList[$rowLontype["LOANTYPE_CODE"]] = $arrData;
+					}
 					if($rowLontype["LOANGROUP_CODE"] == '01'){ //ชำระหนี้ ฉฉ
 						$payment_inside_01 += $rowRecon["amount"];
+						$prn_inside_01 += $rowRePayLoan["principal"];
+						$int_inside_01 += $rowRePayLoan["interest"];
 						$inside_payment01++;
 					}else if($rowLontype["LOANGROUP_CODE"] == '02'){//ชำระหนี้ สามัญ
 						$payment_inside_02 += $rowRecon["amount"];
+						$prn_inside_02 += $rowRePayLoan["principal"];
+						$int_inside_02 += $rowRePayLoan["interest"];
 						$inside_payment02++;
 					}else if($rowLontype["LOANGROUP_CODE"] == '03'){//ชำระหนี้ พิเศษ
 						$payment_inside_03 += $rowRecon["amount"];
+						$prn_inside_03 += $rowRePayLoan["principal"];
+						$int_inside_03 += $rowRePayLoan["interest"];
 						$inside_payment03++;
 					}
 							
@@ -220,14 +305,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':from_account' => $rowRecon["from_account"]
 					]);
 					$rowWithdraw= $getWithdraw->fetch(PDO::FETCH_ASSOC);
-					if($rowWithdraw["DEPTTYPE_CODE"] =='00'){ 
+					if($rowWithdraw["DEPTTYPE_CODE"] =='01'){ 
 						$payment10 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
 						$inside_withdraw10++;
-						$inside_dept10 ++;
-					}else if($rowWithdraw["DEPTTYPE_CODE"] =='01'){
+					}else if($rowWithdraw["DEPTTYPE_CODE"] =='02'){
 						$payment20 = ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
 						$inside_withdraw20++;
-						$inside_dept20 ++;
+					}else if($rowWithdraw["DEPTTYPE_CODE"] =='07'){
+						$payment70 = ($payment_inside_07 ?? 0) + ($payment_inside_07 ?? 0) + ($payment_inside_07 ?? 0);
+						$inside_withdraw70++;
 					}		
 				}else if($rowRecon["transaction_type_code"] == 'DAP'){ //จ่ายเงินกู้
 					$getLontype = $conoracle->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :from_account");
@@ -245,12 +331,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 							':destination' => $rowRecon["destination"]
 						]);
 						$rowDept= $getDept->fetch(PDO::FETCH_ASSOC);
-						if($rowDept["DEPTTYPE_CODE"] =='00'){ 
+						if($rowDept["DEPTTYPE_CODE"] =='01'){ 
 							$depositinside_10 = ($getloan_inside_01 ?? 0);
 							$inside_dept10++;
-						}else if($rowDept["DEPTTYPE_CODE"] =='01'){
+						}else if($rowDept["DEPTTYPE_CODE"] =='02'){
 							$depositinside_20 += ($getloan_inside_01 ?? 0);
 							$inside_dept20++;
+						}else if($rowDept["DEPTTYPE_CODE"] =='07'){
+							$depositinside_70 += ($getloan_inside_01 ?? 0);
+							$inside_dept70++;
 						}		
 					}					
 				}
@@ -272,14 +361,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$deposit_inside_10 = ($deposit_inside_10 ?? 0) + ($depositinside_10 ?? 0); //จ่ายเงิยกู้
 		$deposit_inside_20 = ($deposit_inside_20 ?? 0) + ($depositinside_20 ?? 0);
 		//รวมโอนภายนอก
-		$sum_deposit_external = ($deposit_external_10 ?? 0)  + ($deposit_external_20 ?? 0) + ($payment_external_01 ?? 0) + ($payment_external_02 ?? 0) + ($payment_external_03 ?? 0);
-		$sum_withdraw_external = ($withdraw_external_10 ?? 0) + ($withdraw_external_20 ?? 0) + ($getloan_external_01 ?? 0);
+		$sum_deposit_external = ($deposit_external_10 ?? 0)  + ($deposit_external_20 ?? 0)  + ($deposit_external_30 ?? 0)  + ($deposit_external_70 ?? 0) + ($payment_external_01 ?? 0) + ($payment_external_02 ?? 0) + ($payment_external_03 ?? 0);
+		$sum_withdraw_external = ($withdraw_external_10 ?? 0) + ($withdraw_external_20 ?? 0) + ($withdraw_external_30 ?? 0) + ($withdraw_external_70 ?? 0) + ($getloan_external_01 ?? 0);
 
 		//รวมโอนภายใน
-		$sum_deposit_inside = ($deposit_inside_10 ?? 0) + ($deposit_inside_20 ?? 0) + ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
-		$sum_withdraw_inside = ($withdraw_inside_10 ?? 0) + ($withdraw_inside_20 ?? 0) + ($getloan_inside_01 ?? 0) ;
+		$sum_deposit_inside = ($deposit_inside_10 ?? 0) + ($deposit_inside_20 ?? 0) + ($deposit_inside_70 ?? 0) + ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
+		$sum_withdraw_inside = ($withdraw_inside_10 ?? 0) + ($withdraw_inside_20 ?? 0) + ($withdraw_inside_70 ?? 0) + ($getloan_inside_01 ?? 0) ;
 		
 		$arrayResult['SUMMARY_FEEAMT'] = number_format($summary_feeamt,2);
+		$arrayResult['SUMMARY_FEEAMT_DEPOSIT'] = number_format($summary_feeamt_deposit,2);
+		$arrayResult['SUMMARY_FEEAMT_WITHDRAW'] = number_format($summary_feeamt_withdraw,2);
 		$arrayResult['PENALTY_AMT'] = number_format($penalty_amt,2);
 		$arrayResult['SUM_DEPOSIT_INSIDE'] = number_format($sum_deposit_inside,2);
 		$arrayResult['SUM_WITHDRAW_INSIDE'] = number_format($sum_withdraw_inside,2); 
@@ -287,16 +378,27 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['INSIDE_DEPT10'] = $inside_dept10 ?? 0;
 		$arrayResult['DEPOSIT_INSIDE_20'] = number_format($deposit_inside_20 ?? '0',2);
 		$arrayResult['INSIDE_DEPT20'] = $inside_dept20 ?? 0;
+		$arrayResult['DEPOSIT_INSIDE_70'] = number_format($deposit_inside_70 ?? '0',2);
+		$arrayResult['INSIDE_DEPT70'] = $inside_dept70 ?? 0;
 		$arrayResult['WITHDRAW_INSIDE_10'] = number_format($withdraw_inside_10 ?? '0',2);
 		$arrayResult['INSIDE_WITHDRAW10'] = $inside_withdraw10 ?? 0;
 		$arrayResult['WITHDRAW_INSIDE_20'] = number_format($withdraw_inside_20 ?? '0',2);
 		$arrayResult['INSIDE_WITHDRAW20'] = $inside_withdraw20 ?? 0;
+		$arrayResult['WITHDRAW_INSIDE_70'] = number_format($withdraw_inside_70 ?? '0',2);
+		$arrayResult['INSIDE_WITHDRAW70'] = $inside_withdraw70 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_01'] = number_format($payment_inside_01 ?? '0',2);
 		$arrayResult['INSIDE_PAYMENT01'] = $inside_payment01 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_02'] = number_format($payment_inside_02 ?? '0',2);
 		$arrayResult['INSIDE_PAYMENT02'] = $inside_payment02 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_03'] = number_format($payment_inside_03 ?? '0',2);
 		$arrayResult['INSIDE_PAYMENT03'] = $inside_payment03 ?? 0;
+		$arrayResult['PRN_INSIDE_01'] = number_format($prn_inside_01 ?? '0',2);
+		$arrayResult['INT_INSIDE_01'] = number_format($int_inside_01 ?? '0',2);
+		$arrayResult['PRN_INSIDE_02'] = number_format($prn_inside_02 ?? '0',2);
+		$arrayResult['INT_INSIDE_02'] = number_format($int_inside_02 ?? '0',2);
+		$arrayResult['PRN_INSIDE_03'] = number_format($prn_inside_03 ?? '0',2);
+		$arrayResult['INT_INSIDE_03'] = number_format($int_inside_03 ?? '0',2);
+		
 		$arrayResult['GETLOAN_INSIDE_01'] = number_format($getloan_inside_01 ?? '0',2);
 		$arrayResult['INSIDE_GETLOAN01'] = $inside_getloan01 ?? 0;
 
@@ -306,24 +408,109 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['DEPT_COUNT10'] = $dept_count10 ?? 0;
 		$arrayResult['DEPOSIT_EXTERNAL_20'] = number_format($deposit_external_20 ?? '0',2);
 		$arrayResult['DEPT_COUNT20'] = $dept_count20 ?? 0;
+		$arrayResult['DEPOSIT_EXTERNAL_30'] = number_format($deposit_external_30 ?? '0',2);
+		$arrayResult['DEPT_COUNT30'] = $dept_count30 ?? 0;
+		$arrayResult['DEPOSIT_EXTERNAL_70'] = number_format($deposit_external_70 ?? '0',2);
+		$arrayResult['DEPT_COUNT70'] = $dept_count70 ?? 0;
 		$arrayResult['WITHDRAW_EXTERNAL_10'] = number_format($withdraw_external_10 ?? '0',2);
 		$arrayResult['WITHDRAW10'] = $withdraw10 ?? 0;
 		$arrayResult['WITHDRAW_EXTERNAL_20'] = number_format($withdraw_external_20 ?? '0',2);
 		$arrayResult['WITHDRAW20'] = $withdraw20 ?? 0;
+		$arrayResult['WITHDRAW_EXTERNAL_30'] = number_format($withdraw_external_30 ?? '0',2);
+		$arrayResult['WITHDRAW30'] = $withdraw30 ?? 0;
+		$arrayResult['WITHDRAW_EXTERNAL_70'] = number_format($withdraw_external_70 ?? '0',2);
+		$arrayResult['WITHDRAW70'] = $withdraw70 ?? 0;
 		$arrayResult['PAYMENT_EXTERNAL_01'] = number_format($payment_external_01 ?? '0',2);
 		$arrayResult['PAYMENT01'] = $payment01 ?? 0;
 		$arrayResult['PAYMENT_EXTERNAL_02'] = number_format($payment_external_02 ?? '0',2);
 		$arrayResult['PAYMENT02'] = $payment02 ?? 0;
 		$arrayResult['PAYMENT_EXTERNAL_03'] = number_format($payment_external_03 ?? '0',2);
 		$arrayResult['PAYMENT03'] = $payment03 ?? 0;
+		$arrayResult['PRN_EXTERNAL_01'] = number_format($prn_external_01 ?? '0',2);
+		$arrayResult['INT_EXTERNAL_01'] = number_format($int_external_01 ?? '0',2);
+		$arrayResult['PRN_EXTERNAL_02'] = number_format($prn_external_02 ?? '0',2);
+		$arrayResult['INT_EXTERNAL_02'] = number_format($int_external_02 ?? '0',2);
+		$arrayResult['PRN_EXTERNAL_03'] = number_format($prn_external_03 ?? '0',2);
+		$arrayResult['INT_EXTERNAL_03'] = number_format($int_external_03 ?? '0',2);
+		
 		$arrayResult['GETLOAN_EXTERNAL_01'] = number_format($getloan_external_01 ?? '0',2);
 		$arrayResult['GETLOAN01'] = $getloan01 ?? 0;
 		$arrayResult['SUM_AMT_EXPORT'] = number_format($sum_deposit_external+$sum_withdraw_external+$sum_deposit_inside+$sum_withdraw_inside ?? '0',2);
-		
 
 		$arrayResult['SUMMARY'] = $summary;
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['DEPT_TRANSACTION'] = $arrayGrpAll;
+		
+		//ภายนอก
+		$arrExternalList = array();
+		//ฝาก
+		$arrExternalList[] = "รวมฝาก : ".number_format($sum_deposit_external,2)." บาท";
+		if($dept_count10 > 0){
+			$arrExternalList[] = "- ธนาคาร : ".($dept_count10 ?? 0)." รายการ ".number_format($deposit_external_10 ?? '0',2)." บาท";
+		}
+		if($dept_count20 > 0){
+			$arrExternalList[] = "- ออมทรัพย์ : ".($dept_count20 ?? 0)." รายการ ".number_format($deposit_external_20 ?? '0',2)." บาท";
+		}
+		if($dept_count30 > 0){
+			$arrExternalList[] = "- ออมทรัพย์พิเศษ : ".($dept_count30 ?? 0)." รายการ ".number_format($deposit_external_30 ?? '0',2)." บาท";
+		}
+		if($dept_count70 > 0){
+			$arrExternalList[] = "- ออมทรัพย์พิเศษเกษียณอายุ : ".($dept_count70 ?? 0)." รายการ ".number_format($deposit_external_70 ?? '0',2)." บาท";
+		}
+		//ถอน
+		$arrExternalList[] = "รวมถอน : ".number_format($sum_withdraw_external,2)." บาท";
+		if($withdraw10 > 0){
+			$arrExternalList[] = "- ธนาคาร : ".($withdraw10 ?? 0)." รายการ ".number_format($withdraw_external_10 ?? '0',2)." บาท";
+		}
+		if($withdraw20 > 0){
+			$arrExternalList[] = "- ออมทรัพย์ : ".($withdraw20 ?? 0)." รายการ ".number_format($withdraw_external_20 ?? '0',2)." บาท";
+		}
+		if($withdraw30 > 0){
+			$arrExternalList[] = "- ออมทรัพย์พิเศษ : ".($withdraw30 ?? 0)." รายการ ".number_format($withdraw_external_30 ?? '0',2)." บาท";
+		}
+		if($withdraw70 > 0){
+			$arrExternalList[] = "- ออมทรัพย์พิเศษเกษียณอายุ : ".($withdraw70 ?? 0)." รายการ ".number_format($withdraw_external_70 ?? '0',2)." บาท";
+		}
+		//ค่าธรรมเนียม
+		if($summary_feeamt_withdraw > 0){
+			$arrExternalList[] = "ค่าธรรมเนียมถอน : ".number_format($summary_feeamt_withdraw ?? '0',2)." บาท";
+		}
+		if($summary_feeamt_deposit > 0){
+			$arrExternalList[] = "ค่าธรรมเนียมฝาก : ".number_format($summary_feeamt_deposit ?? '0',2)." บาท";
+		}
+		if($penalty_amt > 0){
+			$arrExternalList[] = "รวมค่าปรับ : ".number_format($penalty_amt ?? '0',2)." บาท";
+		}
+		$arrayResult['EXTERNAL_LIST'] = $arrExternalList;
+		//ภายใน
+		$arrInsideList = array();
+		//ฝาก
+		$arrInsideList[] = "รวมฝาก : ".number_format($sum_deposit_inside,2)." บาท";
+		if($inside_dept10 > 0){
+			$arrInsideList[] = "- ออมทรัพย์ : ".($inside_dept10 ?? 0)." รายการ ".number_format($deposit_inside_10 ?? '0',2)." บาท";
+		}
+		if($inside_dept20 > 0){
+			$arrInsideList[] = "- ออมทรัพย์พิเศษ : ".($inside_dept20 ?? 0)." รายการ ".number_format($deposit_inside_20 ?? '0',2)." บาท";
+		}
+		if($inside_dept70 > 0){
+			$arrInsideList[] = "- ออมทรัพย์พิเศษเกษียณอายุ : ".($inside_dept70 ?? 0)." รายการ ".number_format($deposit_inside_70 ?? '0',2)." บาท";
+		}
+		foreach($arrayLoanExternal as $value){
+			$arrInsideList[] = "- ".$arrayLoanExternalList[$value]["LOANTYPE_DESC"]." : ".($arrayLoanExternalList[$value]["COUNT"] ?? 0)." รายการ ".number_format($arrayLoanExternalList[$value]["PRN_AMT"] ?? '0',2)." / ".number_format($arrayLoanExternalList[$value]["INT_AMT"] ?? '0',2)." บาท";
+		}
+		//ถอน
+		$arrInsideList[] = "รวมถอน : ".number_format($sum_withdraw_inside,2)." บาท";
+		if($inside_withdraw10 > 0){
+			$arrInsideList[] = "- ออมทรัพย์ : ".($inside_withdraw10 ?? 0)." รายการ ".number_format($withdraw_inside_10 ?? '0',2)." บาท";
+		}
+		if($inside_withdraw20 > 0){
+			$arrInsideList[] = "- ออมทรัพย์พิเศษ : ".($inside_withdraw20 ?? 0)." รายการ ".number_format($withdraw_inside_20 ?? '0',2)." บาท";
+		}
+		if($inside_withdraw70 > 0){
+			$arrInsideList[] = "- ออมทรัพย์พิเศษเกษียณอายุ : ".($inside_withdraw70 ?? 0)." รายการ ".number_format($withdraw_inside_70 ?? '0',2)." บาท";
+		}
+		$arrayResult['INSIDE_LIST'] = $arrInsideList;
+		
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

@@ -65,7 +65,6 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
 			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
 			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
-			file_put_contents(__DIR__.'Msgresponse.txt', json_encode($deptslip_noFee,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 		
 			$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FEE',
 			$dataComing["SUM_AMT"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,$deptslip_noFee);
