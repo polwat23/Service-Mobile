@@ -125,7 +125,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					
 				}
 				$ref_slipno = $responseSoap->ref_slipno;
-				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
+				$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
 				$updateSyncNoti->execute([
 					':ref_slipno' => $ref_slipno,
 					':deptaccount_no' => $coop_account_no

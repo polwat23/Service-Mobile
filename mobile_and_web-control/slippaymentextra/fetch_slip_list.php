@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrp = array();
 		$limit_show_slip_extra = $func->getConstant("limit_show_slip_extra");
 		$getListCountSlip = $conoracle->prepare("SELECT * FROM (SELECT EXTRACT(YEAR FROM SLIP_DATE) AS EACH_YEAR,COUNT(PAYINSLIP_NO) AS C_SLIP 
-										FROM SLSLIPPAYIN WHERE TRIM(MEMBER_NO) = :member_no and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX' ) and slip_status = '1'
+										FROM SLSLIPPAYIN WHERE TRIM(MEMBER_NO) = :member_no and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX','CLC' ) and slip_status = '1'
 										GROUP BY EXTRACT(YEAR FROM SLIP_DATE) 
 										ORDER BY EXTRACT(YEAR FROM SLIP_DATE) DESC) WHERE rownum <= :limit_show_slip_extra");
 		$getListCountSlip->execute([
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayYear["COUNT"] = $rowListCountSlip["C_SLIP"];
 			$getMonthSlip = $conoracle->prepare("SELECT EXTRACT(MONTH FROM SLIP_DATE) AS EACH_MONTH
 												FROM SLSLIPPAYIN WHERE TRIM(MEMBER_NO) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year
-												and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX' ) and slip_status = '1'
+												and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX','CLC' ) and slip_status = '1'
 												GROUP BY EXTRACT(MONTH FROM SLIP_DATE) ORDER BY EXTRACT(MONTH FROM SLIP_DATE) ASC");
 			$getMonthSlip->execute([
 				':member_no' => $member_no,
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayMonth["MONTH"] = $thaimonth[$rowMonth["EACH_MONTH"]];
 				$getListSlip = $conoracle->prepare("SELECT DOCUMENT_NO FROM SLSLIPPAYIN 
 													WHERE TRIM(member_no) = :member_no and EXTRACT(YEAR FROM SLIP_DATE) = :year 
-													and EXTRACT(MONTH FROM SLIP_DATE) = :month and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX' ) and slip_status = '1' ");
+													and EXTRACT(MONTH FROM SLIP_DATE) = :month and SLIPTYPE_CODE IN( 'TSL','PMP', 'PX','CLC' ) and slip_status = '1' ");
 				$getListSlip->execute([
 					':member_no' => $member_no,
 					':year' => $rowListCountSlip["EACH_YEAR"],

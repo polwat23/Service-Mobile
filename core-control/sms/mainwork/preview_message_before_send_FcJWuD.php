@@ -35,13 +35,17 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			}
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
+			$arrMemberBOD = array();
+			$getBirthDay = $conoracle->prepare("SELECT MEMBER_NO FROM mbmembmaster WHERE TO_CHAR(birth_date,'MMDD') = TO_CHAR(SYSDATE,'MMDD') ORDER BY MEMBER_NO");
+			$getBirthDay->execute();
+			while($rowBOD = $getBirthDay->fetch(PDO::FETCH_ASSOC)){
+				$arrMemberBOD[] = "'".$rowBOD["MEMBER_NO"]."'";
+			}
 			$getNormCont = $conoracle->prepare("SELECT asp.ASSISTSLIP_NO,aspd.DESCRIPTION,asp.member_no,
 												TO_CHAR(asp.slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date 
 												FROM assslippayout asp LEFT JOIN assslippayoutdet aspd ON asp.ASSISTSLIP_NO = aspd.ASSISTSLIP_NO 
 												where 
-												TRUNC(TO_CHAR(asp.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
-												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and assisttype_code = '70' and slip_status = '1' 
+												asp.MEMBER_NO in(".implode(",",$arrMemberBOD).") and assisttype_code = '70' and slip_status = '1' 
 												and sync_notify_flag = '0'");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
@@ -101,13 +105,17 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 		}else{
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
+			$arrMemberBOD = array();
+			$getBirthDay = $conoracle->prepare("SELECT MEMBER_NO FROM mbmembmaster WHERE TO_CHAR(birth_date,'MMDD') = TO_CHAR(SYSDATE,'MMDD') ORDER BY MEMBER_NO");
+			$getBirthDay->execute();
+			while($rowBOD = $getBirthDay->fetch(PDO::FETCH_ASSOC)){
+				$arrMemberBOD[] = "'".$rowBOD["MEMBER_NO"]."'";
+			}
 			$getNormCont = $conoracle->prepare("SELECT asp.ASSISTSLIP_NO,aspd.DESCRIPTION,asp.member_no,
 												TO_CHAR(asp.slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date 
 												FROM assslippayout asp LEFT JOIN assslippayoutdet aspd ON asp.ASSISTSLIP_NO = aspd.ASSISTSLIP_NO 
 												where 
-												TRUNC(TO_CHAR(asp.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
-												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and assisttype_code = '70' and slip_status = '1' 
+												asp.MEMBER_NO in(".implode(",",$arrMemberBOD).") and assisttype_code = '70' and slip_status = '1' 
 												and sync_notify_flag = '0'");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){

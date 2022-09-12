@@ -18,9 +18,10 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','coop_account_no']
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$checkAccBankBeenbind = $conoracle->prepare("SELECT id_bindaccount FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
+			$checkAccBankBeenbind = $conoracle->prepare("SELECT ID_BINDACCOUNT FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status IN('0','1')");
 			$checkAccBankBeenbind->execute([':member_no' => $payload["member_no"]]);
-			if($checkAccBankBeenbind->rowCount() > 0){
+			$rowBankBind = $checkAccBankBeenbind->fetch(PDO::FETCH_ASSOC);
+			if(isset($rowBankBind["ID_BINDACCOUNT"])){
 				$arrayResult['RESPONSE_CODE'] = "WS0036";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
@@ -31,11 +32,11 @@ if($lib->checkCompleteArgument(['menu_component','citizen_id','coop_account_no']
 			$checkBeenBindForPending->execute([
 				':member_no' => $payload["member_no"]
 			]);
-			if($checkBeenBindForPending->rowCount() > 0){
-				$arrayAccPending = array();
-				while($rowAccPending = $checkBeenBindForPending->fetch(PDO::FETCH_ASSOC)){
-					$arrayAccPending[] = $rowAccPending["ID_BINDACCOUNT"];
-				}
+			$arrayAccPending = array();
+			while($rowAccPending = $checkBeenBindForPending->fetch(PDO::FETCH_ASSOC)){
+				$arrayAccPending[] = $rowAccPending["ID_BINDACCOUNT"];
+			}
+			if(sizeof($arrayAccPending) > 0){
 				$deleteAccForPending = $conoracle->prepare("DELETE FROM gcbindaccount WHERE id_bindaccount IN(".implode(',',$arrayAccPending).")");
 				$deleteAccForPending->execute();
 			}

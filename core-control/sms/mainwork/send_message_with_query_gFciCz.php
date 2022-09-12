@@ -176,7 +176,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$arrayMerge = array();
 			$bulkInsert = array();
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
-			$getNormCont = $conoracle->prepare("select lr.LOANCONTRACT_NO,llc.REF_COLLNO,TRIM(TO_CHAR(lr.loanrequest_amt, '999,999,999,999.99')) as LOANREQUEST_AMT,
+			$getNormCont = $conoracle->prepare("select lr.LOANCONTRACT_NO,lr.LOANREQUEST_DOCNO,llc.REF_COLLNO,TRIM(TO_CHAR(lr.loanrequest_amt, '999,999,999,999.99')) as LOANREQUEST_AMT,
 											lt.LOANTYPE_DESC,lr.MEMBER_NO,TO_CHAR(lr.LOANREQUEST_DATE, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as request_date,
 											TRIM(TO_CHAR(llc.collactsequest_amt, '999,999,999,999.99')) as COLLACTIVE_AMT,mp.prename_desc||mb.memb_name|| ' ' ||mb.memb_surname as FULL_NAME 
 											from lnreqloan lr LEFT JOIN lnreqloancoll llc ON lr.loanrequest_docno = llc.loanrequest_docno LEFT JOIN lnloantype lt 
@@ -197,14 +197,18 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				$arrTarget["FULL_NAME"] = $rowTarget["FULL_NAME"];
 				$arrTarget["COLLACTIVE_AMT"] = $rowTarget["LOANREQUEST_AMT"];
 				$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);
+						
 				if(!in_array($rowTarget["REF_COLLNO"].'_'.$arrMessage["BODY"],$dataComing["destination_revoke"])){
 					$arrayTel = $func->getSMSPerson('person',$rowTarget["REF_COLLNO"],$conoracle);
 					if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
 						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 						$arraySendSMS = $lib->sendSMS($arrayDest);
 						if($arraySendSMS["RESULT"]){
-							$arrayMerge[] = $arrayTel[0];
-							$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+							$func->logSMSWasSentPerson($id_template,$arrMessage["BODY"],$rowTarget["REF_COLLNO"],$arrayTel[0]["TEL"],$payload["username"],$conoracle);
+						
+							$updateFlagDP = $conoracle->prepare("UPDATE lnreqloan  SET sync_notify_sms_flag = 1 WHERE  loanrequest_docno = :docno");
+							$updateFlagDP->execute([':docno' => $rowTarget["LOANREQUEST_DOCNO"]]);
+						
 						}else{
 							$bulkInsert[] = "('".$id_smsnotsent."','".$arrMessageMerge["SUBJECT"]."','".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
 									'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -231,13 +235,14 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				unset($bulkInsert);
 				$bulkInsert = array();
 			}
-			if(sizeof($arrGRPAll) > 0){
+			/*if(sizeof($arrGRPAll) > 0){
 				$arrayLogSMS = $func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
 				$arrayResult['RESULT'] = $arrayLogSMS;
 				
 			}else{
 				$arrayResult['RESULT'] = TRUE;
-			}
+			}*/
+			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../include/exit_footer.php');
 		}
 	}else{

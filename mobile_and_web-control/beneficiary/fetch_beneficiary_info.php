@@ -58,7 +58,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						http_response_code(204);
 					}
 				}else{
-					$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg';
+					$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg?vd='.$rowBenefit["UPDATE_DATE"];
 				}
 			}else{
 				file_put_contents($pathnameTmp,stream_get_contents($rowBenefit["BASE64_IMG"]));
@@ -88,7 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 					$arrResponse = json_decode($responseAPI);
 					if($arrResponse->RESULT){
-						$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg';
+						$DataURLBase64 = '/resource/beneficiary/'.$member_no.'.jpg?vd='.$rowBenefit["UPDATE_DATE"];
 					}else{
 						unlink($pathname);
 						$message_error = "ไม่สามารถ CONVERT ผู้รับผลได้ เพราะ ".json_encode($arrResponse->RESPONSE_MESSAGE);

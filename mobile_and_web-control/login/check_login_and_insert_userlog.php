@@ -139,7 +139,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 						
 						$id_blacklist  = $func->getMaxTable('id_blacklist' , 'gcdeviceblacklist');	
 						$bulkInsert[] = "INTO gcdeviceblacklist(id_blacklist,unique_id,type_blacklist,member_no,new_id_token,old_id_token)
-										VALUES(".($id_blacklist + $index + $tempInsert).",'".$rowIdToken["UNIQUE_ID"]."','".($dataComing["is_root"] ?? 0)."','".$dataComing["member_no"]."',".$id_token.",".$rowIdToken["ID_TOKEN"].")";
+										VALUES(".($id_blacklist + $index + $tempInsert).",'".$rowIdToken["UNIQUE_ID"]."','".($dataComing["is_root"] ?? 0)."','".$member_no."',".$id_token.",".$rowIdToken["ID_TOKEN"].")";
 						$index++;
 						$tempInsert = 0;
 					}

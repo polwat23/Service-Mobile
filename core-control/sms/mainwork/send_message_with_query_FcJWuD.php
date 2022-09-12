@@ -35,15 +35,19 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 				}
 			}
+			$arrMemberBOD = array();
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
+			$getBirthDay = $conoracle->prepare("SELECT MEMBER_NO FROM mbmembmaster WHERE TO_CHAR(birth_date,'MMDD') = TO_CHAR(SYSDATE,'MMDD') ORDER BY MEMBER_NO");
+			$getBirthDay->execute();
+			while($rowBOD = $getBirthDay->fetch(PDO::FETCH_ASSOC)){
+				$arrMemberBOD[] = "'".$rowBOD["MEMBER_NO"]."'";
+			}
 			$getNormCont = $conoracle->prepare("SELECT asp.ASSISTSLIP_NO,aspd.DESCRIPTION,asp.member_no,
 												TO_CHAR(asp.slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date 
 												FROM assslippayout asp LEFT JOIN assslippayoutdet aspd ON asp.ASSISTSLIP_NO = aspd.ASSISTSLIP_NO 
 												where 
-												TRUNC(TO_CHAR(asp.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
-												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and assisttype_code = '70' and slip_status = '1' 
+												asp.MEMBER_NO in(".implode(",",$arrMemberBOD).") and assisttype_code = '70' and slip_status = '1' 
 												and sync_notify_flag = '0'");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
@@ -169,14 +173,18 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$arrGRPAll = array();
 			$arrayMerge = array();
 			$bulkInsert = array();
+			$arrMemberBOD = array();
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
+			$getBirthDay = $conoracle->prepare("SELECT MEMBER_NO FROM mbmembmaster WHERE TO_CHAR(birth_date,'MMDD') = TO_CHAR(SYSDATE,'MMDD') ORDER BY MEMBER_NO");
+			$getBirthDay->execute();
+			while($rowBOD = $getBirthDay->fetch(PDO::FETCH_ASSOC)){
+				$arrMemberBOD[] = "'".$rowBOD["MEMBER_NO"]."'";
+			}
 			$getNormCont = $conoracle->prepare("SELECT asp.ASSISTSLIP_NO,aspd.DESCRIPTION,asp.member_no,
 												TO_CHAR(asp.slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date 
 												FROM assslippayout asp LEFT JOIN assslippayoutdet aspd ON asp.ASSISTSLIP_NO = aspd.ASSISTSLIP_NO 
 												where 
-												TRUNC(TO_CHAR(asp.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
-												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and assisttype_code = '70' and slip_status = '1' 
+												asp.MEMBER_NO in(".implode(",",$arrMemberBOD).") and assisttype_code = '70' and slip_status = '1' 
 												and sync_notify_flag = '0'");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
@@ -192,8 +200,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 						$arraySendSMS = $lib->sendSMS($arrayDest);
 						if($arraySendSMS["RESULT"]){
-							$arrayMerge[] = $arrayTel[0];
-							$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+							$func->logSMSWasSentPerson($id_template,$arrMessage["BODY"],$rowTarget["MEMBER_NO"],$arrayTel[0]["TEL"],$payload["username"],$conoracle);
 						}else{
 							$bulkInsert[] = "('".$id_smsnotsent."','".$arrMessageMerge["SUBJECT"]."','".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
 									'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -220,12 +227,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				unset($bulkInsert);
 				$bulkInsert = array();
 			}
-			if(sizeof($arrGRPAll) > 0){
+			/*if(sizeof($arrGRPAll) > 0){
 				$arrayLogSMS = $func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
 				$arrayResult['RESULT'] = $arrayLogSMS;
 			}else{
 				$arrayResult['RESULT'] = TRUE;
-			}
+			}*/
+			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../include/exit_footer.php');
 		}
 	}else{

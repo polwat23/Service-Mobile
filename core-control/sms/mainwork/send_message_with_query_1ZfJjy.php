@@ -192,8 +192,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
 						$arraySendSMS = $lib->sendSMS($arrayDest);
 						if($arraySendSMS["RESULT"]){
-							$arrayMerge[] = $arrayTel[0];
-							$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
+							$func->logSMSWasSentPerson($id_template,$arrMessage["BODY"],$rowTarget["MEMBER_NO"],$arrayTel[0]["TEL"],$payload["username"],$conoracle);
 						}else{
 							$bulkInsert[] = "('".$id_smsnotsent."','".$arrMessageMerge["SUBJECT"]."','".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
 									'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
@@ -220,12 +219,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				unset($bulkInsert);
 				$bulkInsert = array();
 			}
-			if(sizeof($arrGRPAll) > 0){
+			/*if(sizeof($arrGRPAll) > 0){
 				$arrayLogSMS = $func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
 				$arrayResult['RESULT'] = $arrayLogSMS;
 			}else{
 				$arrayResult['RESULT'] = TRUE;
-			}
+			}*/
+			$arrayResult['RESULT'] = TRUE;
 			require_once('../../../include/exit_footer.php');
 		}
 	}else{

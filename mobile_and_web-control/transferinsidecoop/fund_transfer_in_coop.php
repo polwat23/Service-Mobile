@@ -118,7 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 							if($lib->sendNotify($arrPayloadNotify,"person")){
 								$func->insertHistory($arrPayloadNotify,'2');
-								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptslip_no = :ref_slipno");
 								$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
 							}
 						}
@@ -136,7 +136,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 							$arrPayloadNotify["TYPE_NOTIFY"] = "2";
 							if($lib->sendNotifyHW($arrPayloadNotify,"person")){
 								$func->insertHistory($arrPayloadNotify,'2');
-								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno");
+								$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptslip_no = :ref_slipno");
 								$updateSyncNoti->execute([':ref_slipno' => $responseSoap->ref_slipno]);
 							}
 						}

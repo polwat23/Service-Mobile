@@ -24,14 +24,14 @@ $getSMSConstant->execute();
 while($rowSMSConstant = $getSMSConstant->fetch(PDO::FETCH_ASSOC)){
 	$arrSMSCont[$rowSMSConstant["SMSCS_NAME"]] = $rowSMSConstant["SMSCS_VALUE"];
 }
-$formatDept = $func->getConstant('hidden_dep');
-$templateMessage = $func->getTemplateSystem('DepositInfo',1);
+$formatDept = $func->getConstant('hidden_dep' ,$conoracle);
+$templateMessage = $func->getTemplateSystem('DepositInfo',1 ,$conoracle);
 if(isset($templateMessage)){
 	$fetchDataSTM = $conoracle->prepare("SELECT dit.SIGN_FLAG,dsm.PRNCBAL,dsm.DEPTACCOUNT_NO,dit.DEPTITEMTYPE_DESC,dsm.DEPTITEM_AMT as AMOUNT,dm.MEMBER_NO,dsm.OPERATE_DATE,dsm.SEQ_NO,
 										mb.MEM_TELMOBILE
 										FROM dpdeptstatement dsm LEFT JOIN dpucfdeptitemtype dit ON dsm.deptitemtype_code = dit.deptitemtype_code
 										LEFT JOIN dpdeptmaster dm ON dsm.deptaccount_no = dm.deptaccount_no and dsm.coop_id = dm.coop_id
-										LEFT JOIN mbmembmaster mb ON dm.member_no = mb.member_no
+										LEFT JOIN mbmembmaster mb ON dm.member_no = mb.member_no  
 										WHERE dsm.operate_date BETWEEN (SYSDATE - 1) and SYSDATE and dsm.sync_notify_sms_flag = '0' and dsm.deptitemtype_code IN(".implode(',',$arrayStmItem).")");
 	$fetchDataSTM->execute();
 	while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
@@ -80,7 +80,7 @@ if(isset($templateMessage)){
 							if($rowRights["smscsp_pay_type"] == '1'){
 								if($MonthNow > $rowRights["REQUEST_FLAT_DATE"]){
 									$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -115,7 +115,7 @@ if(isset($templateMessage)){
 									}
 								}else{
 									$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -151,7 +151,7 @@ if(isset($templateMessage)){
 								}
 							}else{
 								$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-								$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+								$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 								$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 								$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -192,7 +192,7 @@ if(isset($templateMessage)){
 		}else{
 			if($rowSTM["AMOUNT"] >= $arrSMSCont["limit_withdraw_send_free"] || $durationIdle >= $arrSMSCont["limit_period_idle"]){
 				$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+				$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 				$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 				$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 				$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -202,7 +202,8 @@ if(isset($templateMessage)){
 					$arrayComing["TEL"] = $rowSTM["MEM_TELMOBILE"];
 					$arrayComing["MEMBER_NO"] = $rowSTM["MEMBER_NO"];
 					$arrayTel[] = $arrayComing;
-					$func->logSMSWasSent(null,$message_endpoint["BODY"],$arrayTel,'system');
+					//$func->logSMSWasSent(null,$message_endpoint["BODY"],$arrayTel,'system',$conoracle);
+					$func->logSMSWasSentPerson($null,$message_endpoint["BODY"],$rowSTM["MEMBER_NO"],$arrayTel[0]["TEL"],'system',$conoracle);
 					$updateFlagDP = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptaccount_no = :deptaccount_no and seq_no = :seq_no");
 					$updateFlagDP->execute([
 						':deptaccount_no' => $rowSTM["DEPTACCOUNT_NO"],
@@ -223,7 +224,7 @@ if(isset($templateMessage)){
 							if($rowRights["SMSCSP_PAY_TYPE"] == '1'){
 								if($MonthNow > $rowRights["REQUEST_FLAT_DATE"]){
 									$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -258,7 +259,7 @@ if(isset($templateMessage)){
 									}
 								}else{
 									$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+									$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 									$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 									$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 									$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);
@@ -294,7 +295,7 @@ if(isset($templateMessage)){
 								}
 							}else{
 								$dataMerge["ITEMTYPE_DESC"] = $rowSTM["DEPTITEMTYPE_DESC"];
-								$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
+								$dataMerge["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($rowSTM["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep',$conoracle));
 								$dataMerge["AMOUNT"] = number_format($rowSTM["AMOUNT"],2);
 								$dataMerge["DATETIME"] = $lib->convertdate($rowSTM["OPERATE_DATE"],'d m Y');
 								$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);

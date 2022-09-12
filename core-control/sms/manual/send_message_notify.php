@@ -1,4 +1,6 @@
 <?php
+ini_set('max_execution_time', 0);
+set_time_limit(0);
 require_once('../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataComing)){
@@ -42,7 +44,6 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				$arrToken = $func->getFCMToken('person',$destination,$conoracle);
 				
 				$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
-				$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 				foreach($destinationFull as $dest){
 					$indexFound = array_search($dest["DESTINATION"], $arrToken["MEMBER_NO"]);
 					if($indexFound !== false){
@@ -71,8 +72,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 										$blukInsert = array();
 									}
 								}else{
-									$blukInsertNot[] = "('".$id_smsnotsent."','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".$member_no."','".$dataComing["channel_send"]."',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").",'".($pathImg ?? null)."')";
-									$id_smsnotsent++;
+									$blukInsertNot[] = "('".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".$member_no."','".$dataComing["channel_send"]."',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").",'".($pathImg ?? null)."')";
 									if(sizeof($blukInsertNot) == 1000){
 										$func->logSMSWasNotSent($blukInsertNot,$conoracle,false,'0',true);
 										unset($blukInsertNot);
@@ -110,7 +110,6 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrToken = $func->getFCMToken('person',$destination,$conoracle);
 					
 					$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
-					$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 					foreach($arrToken["LIST_SEND"] as $dest){
 						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 							$arrPayloadNotify["TO"] = array($dest["TOKEN"]);
@@ -133,8 +132,8 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 									$blukInsert = array();
 								}
 							}else{
-								$blukInsertNot[] = "('".$id_smsnotsent."','".$dataComing["topic_emoji_"]."','".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").",'".($pathImg ?? null)."')";
-								$id_smsnotsent++;
+								$blukInsertNot[] = "('".$dataComing["topic_emoji_"]."','".$message."','".$dest["MEMBER_NO"]."','".$dataComing["channel_send"]."',null,'".$dest["TOKEN"]."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").",'".($pathImg ?? null)."')";
+
 								if(sizeof($blukInsertNot) == 1000){
 									$func->logSMSWasNotSent($blukInsertNot,$conoracle,false,'0',true);
 									unset($blukInsertNot);
@@ -162,16 +161,14 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrToken = $func->getFCMToken('all',null,$conoracle);
 					$arrAllToken = array();
 					$arrAllMember_no = array();
-					$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 					foreach($arrToken["LIST_SEND"] as $dest){
 						if(isset($dest["TOKEN"]) && $dest["TOKEN"] != ""){
 							if($dest["RECEIVE_NOTIFY_NEWS"] == "1"){
 								$arrAllMember_no[] = $dest["MEMBER_NO"];
 								$arrAllToken[] = $dest["TOKEN"];
 							}else{
-								$bulkInsert[] = "('".$id_smsnotsent."','".$dataComing["topic_emoji_"]."','".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
+								$bulkInsert[] = "('".$dataComing["topic_emoji_"]."','".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
 								'mobile_app',null,'".$dest["TOKEN"]."','บัญชีปลายทางไม่ประสงค์เปิดรับการแจ้งเตือน','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").",'".($pathImg ?? null)."')";
-								$id_smsnotsent++;
 							}
 							if(sizeof($bulkInsert) == 1000){
 								$func->logSMSWasNotSent($bulkInsert,$conoracle,false,'0',true);
@@ -180,9 +177,8 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 							}
 						}else{
 							
-							$bulkInsert[] = "('".$id_smsnotsent."','".$dataComing["topic_emoji_"]."','".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
+							$bulkInsert[] = "('".$dataComing["topic_emoji_"]."','".$dataComing["message_emoji_"]."','".$dest["MEMBER_NO"]."',
 							'mobile_app',null,null,'หา Token ในการส่งไม่เจออาจจะเพราะไม่อนุญาตให้ส่งแจ้งเตือนเข้าเครื่อง','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").",'".($pathImg ?? null)."')";
-							$id_smsnotsent++;
 							if(sizeof($bulkInsert) == 1000){
 								$func->logSMSWasNotSent($bulkInsert,$conoracle,false,'0',true);
 								unset($bulkInsert);
@@ -263,8 +259,7 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					$arrayMerge = $arrayTel;
 				}
 				$arrSend = array();
-				
-				$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
+
 				foreach($arrDestSend as $dest){
 					$indexFound = array_search($dest["DESTINATION"], array_column($arrayMerge, 'MEMBER_NO')) !== false ? 
 					array_search($dest["DESTINATION"], array_column($arrayMerge, 'MEMBER_NO')) : array_search($dest["DESTINATION"], array_column($arrayMerge, 'TEL'));
@@ -273,33 +268,13 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 						$telMember = $arrayMerge[$indexFound]["TEL"];
 						if(isset($telMember) && $telMember != ""){
 							$message_body = $dest["MESSAGE"];
-							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($telMember,1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
-							$arraySendSMS = $lib->sendSMS($arrayDest);
-							if($arraySendSMS["RESULT"]){
-								$arrSendTemp = array();
-								$arrGRPAll[$member_no] = $message_body;
-								$arrSendTemp["TEL"] = $telMember;
-								$arrSendTemp["MEMBER_NO"] = $member_no;
-								$arrSend[] = $arrSendTemp;
-							}else{
-								$bulkInsert[] = "('".$id_smsnotsent."',null,'".$message_body."','".$member_no."',
-										'sms','".$telMember."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-								$id_smsnotsent++;
-								if(sizeof($bulkInsert) == 1000){
-									$func->logSMSWasNotSent($bulkInsert,$conoracle);
-									unset($bulkInsert);
-								}
+							//$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($telMember,1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
+							//$arraySendSMS = $lib->sendSMS($arrayDest);
+							if(1==1){
+								$func->logTempSMSWasSentPerson($id_template,$message_body,$member_no,$telMember,$payload["username"],$conoracle);
 							}
 						}
 					}
-				}
-				if(sizeof($arrGRPAll) > 0){
-					$func->logSMSWasSent($id_template,$arrGRPAll,$arrSend,$payload["username"],$conoracle,true);
-				}
-				if(sizeof($bulkInsert) > 0){
-					$func->logSMSWasNotSent($bulkInsert,$conoracle);
-					unset($bulkInsert);
-					$bulkInsert = array();
 				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../../include/exit_footer.php');
@@ -328,32 +303,22 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 					}else{
 						$arrayMerge = $arrayTel;
 					}
-					$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 					foreach($arrayMerge as $dest){
 						if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 							$message_body = $dataComing["message_emoji_"];
 							$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($dest["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($message_body);
 							$arraySendSMS = $lib->sendSMS($arrayDest);
 							if($arraySendSMS["RESULT"]){
-								$arrGRPAll[$dest["MEMBER_NO"]] = $dataComing["message_emoji_"];
+								$func->logSMSWasSentPerson($id_template,$message_body,$dest["MEMBER_NO"],$dest["TEL"],$payload["username"],$conoracle);
 							}else{
-								$bulkInsert[] = "('".$id_smsnotsent."',null,'".$message_body."','".$dest["MEMBER_NO"]."',
+								/*$bulkInsert[] = "(null,'".$message_body."','".$dest["MEMBER_NO"]."',
 										'sms','".$dest["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-								$id_smsnotsent++;
 								if(sizeof($bulkInsert) == 1000){
 									$func->logSMSWasNotSent($bulkInsert,$conoracle);
 									unset($bulkInsert);
-								}
+								}*/
 							}
 						}
-					}
-					if(sizeof($arrGRPAll) > 0){
-						$func->logSMSWasSent($id_template,$arrGRPAll,$arrayMerge,$payload["username"],$conoracle,true);
-					}
-					if(sizeof($bulkInsert) > 0){
-						$func->logSMSWasNotSent($bulkInsert,$conoracle);
-						unset($bulkInsert);
-						$bulkInsert = array();
 					}
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../../include/exit_footer.php');

@@ -3,7 +3,7 @@
 	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง","en" : "Invalid password please check password again"}],
 	"WS0003" : [{"th" : "ไม่พบข้อมูลผู้ใช้นี้ในระบบ กรุณาตรวจสอบเลขสมาชิก","en" : "Not found this user in system please check member no"}],
 	"WS0004" : [{"th" : "รหัสผ่านที่ท่านกรอกไม่ตรงกับรหัสผ่านเดิม","en" : "Password does not match"}],
-	"WS0005" : [{"th" : "ไม่พบบัญชีที่สามารถผูกได้ หากท่านต้องการผูกบัญชีกรุณาไปอนุญาตบัญชีที่สามารถทำธุรกรรมได้ที่หน้าจัดการบัญชีสหกรณ์","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
+	"WS0005" : [{"th" : "ท่านต้องเพิ่มบัญชีสหกรณ์ก่อนที่จะทำการเพิ่มบัญชีกรุงไทย","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
 	"WS0006" : [{"th" : "ท่านไม่สามารถใช้งานเมนูนี้ได้ อาจจะเป็นเพราะสหกรณ์ปิดปรับปรุงระบบหรือสหกรณ์ได้ทำการจำกัดสิทธิ์ในการเข้าถึงเมนู","en" : "You not have permission for this menu because system maintenance or cooperative has restricted access this menu"}],
 	"WS0007" : [{"th" : "คุณสามารถอัพโหลดรูปภาพได้เฉพาะนามสกุลไฟล์ JPG, JPEG, PNG","en" : "You can upload picture only files type JPG, JPEG, PNG"}],
 	"WS0008" : [{"th" : "ขนาดของไฟล์ใหญ่เกินไป ไฟล์ต้องมีขนาดไม่เกิน 1.5 MB","en" : "File size too big allow file size only  1.5 MB"}],

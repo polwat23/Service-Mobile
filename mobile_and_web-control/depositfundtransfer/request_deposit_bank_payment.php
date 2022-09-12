@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$fetchRecpPaytype->execute([':itemtype' => $rowDataDeposit["ITEMTYPE_DEP"]]);
 			$rowAccid = $fetchRecpPaytype->fetch(PDO::FETCH_ASSOC);
 			$arrayGroup = array();
-			$arrayGroup["account_id"] = $rowAccid["DEFAULT_ACCID"];
+			$arrayGroup["account_id"] = $func->getConstant("operative_account");
 			$arrayGroup["action_status"] = "1";
 			$arrayGroup["atm_no"] = "mobile";
 			$arrayGroup["atm_seqno"] = null;
@@ -119,7 +119,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					$responseSoap = $resultWS->of_dept_inf_servResult;
 					if($responseSoap->msg_status == '0000'){
 						$ref_slipno = $responseSoap->ref_slipno;
-						$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
+						$updateSyncNoti = $conoracle->prepare("UPDATE dpdeptstatement SET sync_notify_sms_flag = '1' WHERE deptslip_no = :ref_slipno and deptaccount_no = :deptaccount_no");
 						$updateSyncNoti->execute([
 							':ref_slipno' => $ref_slipno,
 							':deptaccount_no' => $coop_account_no

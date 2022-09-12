@@ -14,6 +14,23 @@ class functions {
 				return false;
 			}
 		}
+		public function getTemplateSystem($component_system,$seq_no='1',$conora){
+			$getTemplatedata = $conora->prepare("SELECT subject,body ,id_systemplate
+													FROM smssystemtemplate WHERE component_system = :component_system and is_use = '1' and seq_no = :seq_no");
+			$getTemplatedata->execute([
+				':component_system' => $component_system,
+				':seq_no' => $seq_no
+			]);
+			$rowTemplate = $getTemplatedata->fetch(\PDO::FETCH_ASSOC);
+			if(isset($rowTemplate["ID_SYSTEMPLATE"])){
+				$arrayResult = array();
+				$arrayResult["SUBJECT"] = $rowTemplate["SUBJECT"];
+				$arrayResult["BODY"] =  $rowTemplate["BODY"];
+			return $arrayResult;
+			}else{
+				return null;
+			}
+		}
 		public function logout($id_token,$type_login,$conora) {
 			$logout = $conora->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = sysdate WHERE id_token = :id_token");
 			if($logout->execute([
@@ -74,23 +91,23 @@ class functions {
 			}
 		}
 		public function insertHistory($payload,$type_history='1',$is_sendahead = '0',$conora) {
-			$id_history = $this->getMaxTable('id_history' , 'gchistory',$conora);
+			
 			if($payload["TYPE_SEND_HISTORY"] == "onemessage"){
 				if($is_sendahead == '1'){
 					foreach($payload["MEMBER_NO"] as $member_no){
+						$id_history = $this->getMaxTable('id_history' , 'gchistory',$conora);
 						$bulkInsert = "(".$id_history.",'".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").",'".$is_sendahead."')";
 						$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate,is_sendahead) 
 												VALUES".$bulkInsert);
 						$insertHis->execute();
-						$id_history++;
 					}
 					return true;
 				}else{
 					foreach($payload["MEMBER_NO"] as $member_no){
+						$id_history = $this->getMaxTable('id_history' , 'gchistory',$conora);
 						$bulkInsert = "(".$id_history.",'".$type_history."','".$payload["PAYLOAD"]["SUBJECT"]."','".$payload["PAYLOAD"]["BODY"]."','".$payload["PAYLOAD"]["PATH_IMAGE"]."','".$member_no."','".$payload["SEND_BY"]."'".(isset($payload["ID_TEMPLATE"]) ? ",".$payload["ID_TEMPLATE"] : ",null").")";
 						$insertHis = $conora->prepare("INSERT INTO gchistory(id_history,his_type,his_title,his_detail,his_path_image,member_no,send_by,id_smstemplate) 
 													VALUES".$bulkInsert);
-						$id_history++;
 					}
 					return true;
 
@@ -243,33 +260,108 @@ class functions {
 					}
 				}else{
 					if(is_array($member_no) && sizeof($member_no) > 0){
-						$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
-																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
-																WHERE mb.member_no IN('".implode("','",$member_no)."')");
-						$fetchDataOra->execute();
+						if(sizeof($member_no) > 1000){
+							$arrayMemerLoop = array();
+							foreach($member_no as $memb_loop){
+								$arrayMemerLoop[] = $memb_loop;
+								if(sizeof($arrayMemerLoop) == 1000){
+									$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																			FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																			WHERE mb.member_no IN('".implode("','",$arrayMemerLoop)."')");
+									$fetchDataOra->execute();
+									while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
+										if($check_tel){
+											if(isset($rowDataOra["MEM_TELMOBILE"])){
+												$arrayMT = array();
+												$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+												$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+												$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+												$arrayMemberGRP[] = $arrayMT;
+											}
+										}else{
+											$arrayMT = array();
+											$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+											$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+											$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+											$arrayMemberGRP[] = $arrayMT;
+										}
+									}
+									unset($arrayMemerLoop);
+									$arrayMemerLoop = array();
+								}
+							}
+							if(sizeof($arrayMemerLoop) > 0){
+								$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																		FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																		WHERE mb.member_no IN('".implode("','",$arrayMemerLoop)."')");
+								$fetchDataOra->execute();
+								while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
+									if($check_tel){
+										if(isset($rowDataOra["MEM_TELMOBILE"])){
+											$arrayMT = array();
+											$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+											$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+											$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+											$arrayMemberGRP[] = $arrayMT;
+										}
+									}else{
+										$arrayMT = array();
+										$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+										$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+										$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+										$arrayMemberGRP[] = $arrayMT;
+									}
+								}
+								unset($arrayMemerLoop);
+								$arrayMemerLoop = array();
+							}
+						}else{
+							$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
+																	FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
+																	WHERE mb.member_no IN('".implode("','",$member_no)."')");
+							$fetchDataOra->execute();
+							while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
+								if($check_tel){
+									if(isset($rowDataOra["MEM_TELMOBILE"])){
+										$arrayMT = array();
+										$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+										$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+										$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+										$arrayMemberGRP[] = $arrayMT;
+									}
+								}else{
+									$arrayMT = array();
+									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+									$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+									$arrayMemberGRP[] = $arrayMT;
+								}
+							}
+						}
 					}else{
 						$fetchDataOra = $conora->prepare("SELECT mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as FULLNAME 
 																FROM mbmembmaster mb LEFT JOIN mbucfprename mp  ON mb.prename_code  = mp.prename_code 
 																WHERE  mb.member_no = :member_no");
 						$fetchDataOra->execute([':member_no' => $member_no]);
-					}
-					while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
-						if($check_tel){
-							if(isset($rowDataOra["MEM_TELMOBILE"])){
+						while($rowDataOra = $fetchDataOra->fetch(\PDO::FETCH_ASSOC)){
+							if($check_tel){
+								if(isset($rowDataOra["MEM_TELMOBILE"])){
+									$arrayMT = array();
+									$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
+									$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
+									$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
+									$arrayMemberGRP[] = $arrayMT;
+								}
+							}else{
 								$arrayMT = array();
 								$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
 								$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
 								$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
 								$arrayMemberGRP[] = $arrayMT;
 							}
-						}else{
-							$arrayMT = array();
-							$arrayMT["TEL"] = $rowDataOra["MEM_TELMOBILE"];
-							$arrayMT["MEMBER_NO"] = $rowDataOra["MEMBER_NO"];
-							$arrayMT["FULLNAME"] = $rowDataOra["FULLNAME"];
-							$arrayMemberGRP[] = $arrayMT;
 						}
 					}
+					
 				}
 			}else{
 				$fetchDataOra = $conora->prepare("SELECT  mb.MEM_TELMOBILE,mb.MEMBER_NO ,mp.prename_desc || mb.memb_name ||' '||mb.memb_surname as fullname 
@@ -304,20 +396,20 @@ class functions {
 		}
 		public function logSMSWasSent($id_smstemplate=null,$message,$destination,$send_by,$conora,
 		$multi_message=false,$trans_flag=false,$is_sendahead = '0') {
-			$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
 			if($is_sendahead){
 				if($trans_flag){
 				}else{
 					if($multi_message){
 						foreach($destination as $dest){
+							$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
 							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
 																VALUES('".$id_logsent."','".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')");
 							$insertToLogSMS->execute();
-							$id_logsent++;
 						}
 						return true;
 					}else{
 						foreach($destination as $dest){
+							$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
 							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 								$textcombine = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").",'".$is_sendahead."')";
 								$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate,is_sendahead)
@@ -329,7 +421,6 @@ class functions {
 																		VALUES".$textcombinenotsent);
 								$insertToLogNotSentSMS->execute();
 							}
-							$id_logsent++;
 						}
 						return true;
 					}
@@ -338,16 +429,17 @@ class functions {
 				if($trans_flag){
 				}else{
 					if($multi_message){
+						$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
 						foreach($destination as $dest){
 							$textcombine = "('".$id_logsent."','".$message[$dest["MEMBER_NO"]]."','".($dest["MEMBER_NO"] ?? null)."','".($dest["TEL"] ?? null)."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 							$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
 																VALUES".$textcombine);
 							$insertToLogSMS->execute();
-							$id_logsent++;
 						}
 						return true;
 					}else{
 						foreach($destination as $dest){
+							$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
 							if(isset($dest["TEL"]) && $dest["TEL"] != ""){
 								$textcombine = "('".$id_logsent."','".$message."','".$dest["MEMBER_NO"]."','".$dest["TEL"]."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
 								$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
@@ -359,13 +451,28 @@ class functions {
 																		VALUES".$textcombinenotsent);
 								$insertToLogNotSentSMS->execute();
 							}
-							$id_logsent++;
 						}
 						return true;
 					}
 				}
 			}
 		}
+		public function logSMSWasSentPerson($id_smstemplate=null,$message,$destination,$tel,$send_by,$conora) {
+			$id_logsent = $this->getMaxTable('id_logsent' , 'smslogwassent',$conora);
+			$textcombine = "('".$id_logsent."','".$message."','".$destination."','".$tel."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+			$insertToLogSMS = $conora->prepare("INSERT INTO smslogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+												VALUES".$textcombine);
+			$insertToLogSMS->execute();
+		}
+		public function logTempSMSWasSentPerson($id_smstemplate=null,$message,$destination,$tel,$send_by,$conora) {
+			//file_put_contents('Msgresponse.txt', json_encode($destination,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+			$id_logsent = $this->getMaxTable('id_logsent' , 'smstemplogwassent',$conora);
+			$textcombine = "('".$id_logsent."','".$message."','".$destination."','".$tel."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+			$insertToLogSMS = $conora->prepare("INSERT INTO smstemplogwassent(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+												VALUES".$textcombine);
+			$insertToLogSMS->execute();
+		}
+				
 		public function logSMSWasNotSent($bulkInsert,$conora,$multi_message=false,$is_sendahead = '0',$his_img=false) {
 			if($is_sendahead == '1'){
 				if($multi_message){

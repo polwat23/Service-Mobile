@@ -22,16 +22,16 @@ if($lib->checkCompleteArgument(['api_token'],$dataComing)){
 		
 	$getBackground = $conoracle->prepare("SELECT image FROM gcconstantbackground WHERE is_use = '1'");
 	$getBackground->execute();
-		if($getBackground->rowCount() > 0){
-			$rowInfo = $getBackground->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowInfo["IMAGE"])){
-				$arrayResult['IMAGE'] = $config["URL_SERVICE"].$rowInfo["IMAGE"];
-			}else {
-				$arrayResult['IMAGE'] = null;
-			}
+	$rowInfo = $getBackground->fetch(PDO::FETCH_ASSOC);
+	if(isset($rowInfo["IMAGE"])){
+		if(isset($rowInfo["IMAGE"])){
+			$arrayResult['IMAGE'] = $config["URL_SERVICE"].$rowInfo["IMAGE"];
+		}else {
+			$arrayResult['IMAGE'] = null;
 		}
-		$arrayResult['RESULT'] = TRUE;
-		require_once('../../include/exit_footer.php');
+	}
+	$arrayResult['RESULT'] = TRUE;
+	require_once('../../include/exit_footer.php');
 }else{
 	$filename = basename(__FILE__, '.php');
 	$logStruc = [

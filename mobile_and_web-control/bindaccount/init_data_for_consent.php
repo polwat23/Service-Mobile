@@ -12,16 +12,17 @@ if($lib->checkCompleteArgument(['menu_component','bank_code'],$dataComing)){
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$fetchConstantAllowDept = $conoracle->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 															LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
-															WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.is_use = '1' 
+															WHERE gat.member_no = :member_no and gat.is_use = '1' and gat.is_use = '1' 
 															and gad.allow_deposit_outside = '1' and gad.allow_withdraw_outside = '1'");
 			$fetchConstantAllowDept->execute([
 				':member_no' => $payload["member_no"]
 			]);
-			if($fetchConstantAllowDept->rowCount() > 0){
-				$arrayDeptAllow = array();
-				while($rowAllowDept = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC)){
-					$arrayDeptAllow[] = $rowAllowDept["DEPTACCOUNT_NO"];
-				}
+			$arrayDeptAllow = array();
+			while($rowAllowDept = $fetchConstantAllowDept->fetch(PDO::FETCH_ASSOC)){
+				$arrayDeptAllow[] = $rowAllowDept["DEPTACCOUNT_NO"];
+			}
+			if(sizeof($arrayDeptAllow) > 0){
+				
 				$arrAccBeenBind = array();
 				$InitDeptAccountBeenBind = $conoracle->prepare("SELECT deptaccount_no_coop FROM gcbindaccount WHERE member_no = :member_no and bindaccount_status NOT IN('8','-9')");
 				$InitDeptAccountBeenBind->execute([':member_no' => $payload["member_no"]]);

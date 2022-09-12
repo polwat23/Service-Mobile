@@ -6,11 +6,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccBind = array();
 		$fetchBindAccount = $conoracle->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
-												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name
+												csb.bank_format_account,csb.bank_format_account_hide,csb.bank_short_name,gba.bindaccount_status
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
-												WHERE gba.member_no = :member_no and gba.bindaccount_status IN('1','7') ORDER BY gba.deptaccount_no_coop");
+												WHERE gba.member_no = :member_no and gba.bindaccount_status IN('1','7') ORDER BY gba.deptaccount_no_coop,gba.bindaccount_status");
 		$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
-		while($rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC)){
+		$rowAccBind = $fetchBindAccount->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowAccBind["SIGMA_KEY"])){
 			$getAccBankAllow = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
 													FROM atmregistermobile atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
 													WHERE atr.member_no = :member_no and atr.expense_bank = '006' and atr.appl_status = '1' 
@@ -19,6 +20,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$rowAccBank = $getAccBankAllow->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowAccBank["ACCOUNT_CODE"]) && $rowAccBank["ACCOUNT_CODE"] != "" && 
 			$rowAccBind["DEPTACCOUNT_NO_BANK"] == $rowAccBank["ACCOUNT_CODE"]){
+				if($rowAccBind["BINDACCOUNT_STATUS"] == '7'){
+					$updateStatus = $conoracle->prepare("UPDATE gcbindaccount SET bindaccount_status = '1' WHERE sigma_key = :sigma_key");
+					$updateStatus->execute(['sigma_key' => $rowAccBind["SIGMA_KEY"]]);
+					$rowAccBind["BINDACCOUNT_STATUS"] = '1';
+				}
 			}else{
 				$getAccBankAllowATM = $conoracle->prepare("SELECT atr.account_code,REPLACE(cmb.account_format,'@','x') as account_format 
 														FROM atmregister atr LEFT JOIN cmucfbank cmb ON atr.expense_bank = cmb.bank_code
@@ -28,6 +34,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$rowAccBankATM = $getAccBankAllowATM->fetch(PDO::FETCH_ASSOC);
 				if(isset($rowAccBankATM["ACCOUNT_CODE"]) && $rowAccBankATM["ACCOUNT_CODE"] != "" &&
 				$rowAccBind["DEPTACCOUNT_NO_BANK"] == $rowAccBankATM["ACCOUNT_CODE"]){
+					if($rowAccBind["BINDACCOUNT_STATUS"] == '7'){
+						$updateStatus = $conoracle->prepare("UPDATE gcbindaccount SET bindaccount_status = '1' WHERE sigma_key = :sigma_key");
+						$updateStatus->execute(['sigma_key' => $rowAccBind["SIGMA_KEY"]]);
+						$rowAccBind["BINDACCOUNT_STATUS"] = '1';
+					}
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0099";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -41,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE gct.allow_withdraw_outside = '1' and gat.deptaccount_no = :deptaccount_no and gat.is_use = '1'");
 			$fetchAccountBeenAllow->execute([':deptaccount_no' =>  $rowAccBind["DEPTACCOUNT_NO_COOP"]]);
 			$rowDataAccAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowDataAccAllow["DEPTACCOUNT_NO"])){
+			if(isset($rowDataAccAllow["DEPTACCOUNT_NO"]) && $rowAccBind["BINDACCOUNT_STATUS"] == '1'){
 				$checkSeqAmt = $cal_dep->getSequestAmount($rowAccBind["DEPTACCOUNT_NO_COOP"],'WTX');
 				if($checkSeqAmt["RESULT"]){
 					if($checkSeqAmt["CAN_WITHDRAW"]){

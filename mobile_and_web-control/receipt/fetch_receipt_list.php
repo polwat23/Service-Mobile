@@ -8,7 +8,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGroupPeriod = array();
 		$getPeriodKP = $conoracle->prepare("SELECT * from ((
 															SELECT KPSLIP_NO,RECV_PERIOD,KEEPING_STATUS,RECEIPT_DATE,RECEIPT_NO,RECEIVE_AMT
-															from kpmastreceive where member_no = :member_no
+															from kpmastreceive where member_no = :member_no and RECEIVE_AMT > 0 and RECEIPT_NO IS NOT NULL
 														) ORDER BY recv_period DESC) where rownum <= :limit_period");
 		$getPeriodKP->execute([
 				':member_no' => $member_no,
@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrKpmonth = array();
 			$arrKpmonth["PERIOD"] = $rowPeriod["RECV_PERIOD"];
 			$arrKpmonth["MONTH_RECEIVE"] = $lib->convertperiodkp(TRIM($rowPeriod["RECV_PERIOD"]));
-			$getKPDetail = $conoracle->prepare("SELECT NVL(SUM(kpd.ITEM_PAYMENT * kut.sign_flag),0) as ITEM_PAYMENT 
+			$getKPDetail = $conoracle->prepare("SELECT NVL(SUM(kpd.real_payment * kut.sign_flag),0) as ITEM_PAYMENT 
 													FROM kpmastreceivedet kpd
 													LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 													kpd.keepitemtype_code = kut.keepitemtype_code
