@@ -498,7 +498,8 @@ class library {
 	private $hw_access_token = null;
     private $hw_token_expiredtime = null;
     public function sendNotifyHW($payload,$type_send){
-		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		return true;
+		/*$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		if (!defined('HW_APPID')) define('HW_APPID', $json_data["HW_APPID"] ?? "");
 		if (!defined('HW_APPSECRET')) define('HW_APPSECRET', $json_data["HW_APPSECRET"] ?? "");
@@ -609,7 +610,7 @@ class library {
 			}
 		}else {
 			return false;
-		}
+		}*/
 	}
 
 	public function fetch_payloadJWT($token,$jwt_function,$secret_key){

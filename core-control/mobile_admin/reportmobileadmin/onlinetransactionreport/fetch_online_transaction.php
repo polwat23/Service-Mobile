@@ -5,6 +5,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','onlinetransactionreport')){
 		$arrayExecute = array();
 		$arrayGrpAll = array();
+		$deptItemTypeData = array();
+		$getDeptItemType = $conoracle->prepare("SELECT DEPTITEMTYPE_CODE,DEPTITEMTYPE_DESC,SIGN_FLAG FROM DPUCFDEPTITEMTYPE");
+		$getDeptItemType->execute();
+		while($rowDeptItemType = $getDeptItemType->fetch(PDO::FETCH_ASSOC)){
+			$arrDeptItemType = array();
+			$arrDeptItemType["DEPTITEMTYPE_CODE"] = $rowDeptItemType["DEPTITEMTYPE_CODE"];
+			$arrDeptItemType["DEPTITEMTYPE_DESC"] = $rowDeptItemType["DEPTITEMTYPE_DESC"];
+			$arrDeptItemType["SIGN_FLAG"] = $rowDeptItemType["SIGN_FLAG"];
+			$deptItemTypeData[] = $arrDeptItemType;
+		}
 		
 		if(isset($dataComing["trrans_type"]) && $dataComing["trrans_type"] != ""){
 			if($dataComing["trrans_type"] == "payloan"){
@@ -246,6 +256,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['SUMMARY_FORMAT'] = number_format($summary,2);
 		$arrayResult['DEPT_TRANSACTION'] = $arrayGrpAll;
 		$arrayResult['fetchReconcile'] = $fetchReconcile;
+		$arrayResult['DEPT_ITEM_TYPE_DATA'] = $deptItemTypeData;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../../../include/exit_footer.php');
 	}else{

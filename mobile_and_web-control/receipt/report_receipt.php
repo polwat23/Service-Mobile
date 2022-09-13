@@ -168,12 +168,22 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrUCollWho[] = $rowUCollWho["PRENAME_DESC"].$rowUCollWho["MEMB_NAME"].' '.$rowUCollWho["MEMB_SURNAME"];
 		}
 		
-		$getText = $conoracle->prepare("SELECT TEXT1,TEXT2,TEXT3,TEXT4 FROM KPTEMPTEXT");
-		$getText->execute();
+		//$getText = $conoracle->prepare("SELECT TEXT1,TEXT2,TEXT3,TEXT4 FROM KPTEMPTEXT");
+		$getText = $conoracle->prepare("SELECT TEXT1,TEXT2,TEXT3,TEXT4,
+									nvl((select s. membshort_desc from mbmembmaster m ,mbucfmembgroupshort s 
+									where nvl(subgroup_code,'00') = s. membgroup_code and m.member_no = :member_no and rownum = 1),'') as membshort_desc
+									FROM KPTEMPTEXT");
+		$getText->execute([
+			':member_no' => $member_no
+		]);
+		
 		$rowgetText= $getText->fetch(PDO::FETCH_ASSOC);
+		
 		$text = $rowgetText["TEXT1"];
+		$text3 = $rowgetText["TEXT3"];
+		$membshort_desc = $rowgetText["MEMBSHORT_DESC"];
 		$header["guarantee"] = $arrUCollWho;
-		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib,$text);
+		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib,$text,$text3,$membshort_desc);
 		if($arrayPDF["RESULT"]){
 			if ($forceNewSecurity == true) {
 				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
@@ -227,7 +237,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 	
 }
 
-function GenerateReport($dataReport,$header,$lib,$text){
+function GenerateReport($dataReport,$header,$lib,$text,$text3,$membshort_desc){
 	$sumBalance = 0;
 	
 	
@@ -444,6 +454,8 @@ foreach($dataReport AS $arrReport){
             <div style="font-size:10pt">แขวงถนนนครไซยศรี เขตดุสิต กรุงเทพ 10300</div>
             <div style="font-size:10pt">โทร. 0-2669-6595 โทรสาร 0-2669-6575 http://www.ridsaving.com</div>
             <div style="font-size:10pt; margin-top:10px; text-align:left;">'.($text ?? null).'</div>
+            <div  style="font-size:10pt; margin-top:30px; text-align:center; font-weight:bold">'.($text3 ?? '-').'</div>
+            <div style="font-size:10pt; margin-top:10px; text-align:center;">'.($membshort_desc ?? '-').'</div>
         </div>
   </div>';
 

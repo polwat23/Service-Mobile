@@ -40,46 +40,77 @@ if($lib->checkCompleteArgument(['unique_id','type_send','channel_send'],$dataCom
 				foreach($destinationFull as $dest){
 					$indexFound = array_search($dest["DESTINATION"], $arrToken["MEMBER_NO"]);
 					if($indexFound !== false){
-						if(isset($arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"]) && $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"] != ""){
+						if(isset($arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"]) && !$arrToken["LIST_SEND"][$indexFound]["IS_HW"]){
 							$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
 							$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
 							$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
 							$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
-						}else{
-							$member_no = $arrToken["LIST_SEND_HW"][$indexFound]["MEMBER_NO"];
-							$token = $arrToken["LIST_SEND_HW"][$indexFound]["TOKEN"];
-							$recv_noti_news = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
-							$recv_noti_trans = $arrToken["LIST_SEND_HW"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
-						}
-						if(isset($token) && $token != ""){
-							if($recv_noti_news == "1"){
-								$arrPayloadNotify["TO"] = array($token);
-								$arrPayloadNotify["MEMBER_NO"] = $member_no;
-								$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
-								$arrMessage["BODY"] = $dest["MESSAGE"] ?? "-";
-								$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
-								$arrPayloadNotify["PAYLOAD"] = $arrMessage;
-								$arrPayloadNotify["SEND_BY"] = $payload["username"];
-								$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
-								if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"]) || $lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
-									$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-									if(sizeof($blukInsert) == 1000){
-										$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
-										$arrPayloadHistory["bulkInsert"] = $blukInsert;
-										$func->insertHistory($arrPayloadHistory);
-										unset($blukInsert);
-										$blukInsert = array();
+							if(isset($token) && $token != ""){
+								if($recv_noti_news == "1"){
+									$arrPayloadNotify["TO"] = array($token);
+									$arrPayloadNotify["MEMBER_NO"] = $member_no;
+									$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+									$arrMessage["BODY"] = $dest["MESSAGE"] ?? "-";
+									$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+									$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+									$arrPayloadNotify["SEND_BY"] = $payload["username"];
+									$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+									
+									if($lib->sendNotify($arrPayloadNotify,$dataComing["type_send"])){
+										$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										if(sizeof($blukInsert) == 1000){
+											$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+											$arrPayloadHistory["bulkInsert"] = $blukInsert;
+											$func->insertHistory($arrPayloadHistory);
+											unset($blukInsert);
+											$blukInsert = array();
+										}
+									}else{
+										$blukInsertNot[] = "('".$dest["MESSAGE"]."','".$member_no."','".$dataComing["channel_send"]."',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										if(sizeof($blukInsertNot) == 1000){
+											$func->logSMSWasNotSent($blukInsertNot);
+											unset($blukInsertNot);
+											$blukInsertNot = array();
+										}
 									}
-								}else{
-									$blukInsertNot[] = "('".$dest["MESSAGE"]."','".$member_no."','".$dataComing["channel_send"]."',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-									if(sizeof($blukInsertNot) == 1000){
-										$func->logSMSWasNotSent($blukInsertNot);
-										unset($blukInsertNot);
-										$blukInsertNot = array();
+								}
+							}
+						}else{
+							$member_no = $arrToken["LIST_SEND"][$indexFound]["MEMBER_NO"];
+							$token = $arrToken["LIST_SEND"][$indexFound]["TOKEN"];
+							$recv_noti_news = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_NEWS"] ?? null;
+							$recv_noti_trans = $arrToken["LIST_SEND"][$indexFound]["RECEIVE_NOTIFY_TRANSACTION"] ?? null;
+							if(isset($token) && $token != ""){
+								if($recv_noti_news == "1"){
+									$arrPayloadNotify["TO"] = array($token);
+									$arrPayloadNotify["MEMBER_NO"] = $member_no;
+									$arrMessage["SUBJECT"] = $dataComing["topic_emoji_"];
+									$arrMessage["BODY"] = $dest["MESSAGE"] ?? "-";
+									$arrMessage["PATH_IMAGE"] = $pathImg ?? null;
+									$arrPayloadNotify["PAYLOAD"] = $arrMessage;
+									$arrPayloadNotify["SEND_BY"] = $payload["username"];
+									$arrPayloadNotify["ID_TEMPLATE"] = $id_template;
+									if($lib->sendNotifyHW($arrPayloadNotify,$dataComing["type_send"])){
+										$blukInsert[] = "('1','".$dataComing["topic_emoji_"]."','".$dest["MESSAGE"]."','".($pathImg ?? null)."','".$member_no."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										if(sizeof($blukInsert) == 1000){
+											$arrPayloadHistory["TYPE_SEND_HISTORY"] = "manymessage";
+											$arrPayloadHistory["bulkInsert"] = $blukInsert;
+											$func->insertHistory($arrPayloadHistory);
+											unset($blukInsert);
+											$blukInsert = array();
+										}
+									}else{
+										$blukInsertNot[] = "('".$dest["MESSAGE"]."','".$member_no."','".$dataComing["channel_send"]."',null,'".$token."','ไม่สามารถส่งได้ให้ดู LOG','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
+										if(sizeof($blukInsertNot) == 1000){
+											$func->logSMSWasNotSent($blukInsertNot);
+											unset($blukInsertNot);
+											$blukInsertNot = array();
+										}
 									}
 								}
 							}
 						}
+						
 					}
 				}
 				if(sizeof($blukInsert) > 0){
