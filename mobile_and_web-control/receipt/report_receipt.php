@@ -419,9 +419,9 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="width:100px;margin-left: 570px;display:flex;">
 					<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
 				
-					<div style="font-size: 18px;margin-left: 0px;margin-top:60px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
+					<div style="font-size: 18px;margin-left: 0px;margin-top:70px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
 				</div>
-				<div style="position:absolute; font-size: 18px;margin-left: 750px;top:20px;">ผู้จัดการ</div>
+				<div style="position:absolute; font-size: 18px;margin-left: 610px;top:100px;">ผู้จัดการ</div>
 			</div>
 		
 			';

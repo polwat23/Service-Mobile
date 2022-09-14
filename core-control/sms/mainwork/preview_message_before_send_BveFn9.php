@@ -106,7 +106,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 				}
 			}
-			$getNormContDP = $conoracle->prepare("SELECT 
+			$getNormContDP = $conoracle->prepare("SELECT dp.deptaccount_no,
 												 dpm.member_no,dp.deptslip_amt,dpc.recppaytype_desc,dp.prncbal,TO_CHAR(dp.deptslip_date,'YYYY-MM-DD') as deptslip_date
 												FROM dpdeptslip dp LEFT JOIN dpdeptmaster dpm ON dp.deptaccount_no = dpm.deptaccount_no
 												LEFT JOIN dpucfrecppaytype dpc ON dp.recppaytype_code = dpc.recppaytype_code
@@ -117,19 +117,11 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			while($rowTarget = $getNormContDP->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
 				$arrTarget = array();
-				$prefixText = '';
-				if($rowTarget["SLIPITEMTYPE_CODE"] == 'I01'){
-					$prefixText = 'ชำระ ';
-					$arrTarget["LOANCONTRACT_NO"] = '';
-				}else if($rowTarget["SLIPITEMTYPE_CODE"] == 'LON'){
-					$arrTarget["LOANCONTRACT_NO"] = $rowTarget["LOANCONTRACT_NO"];
-				}else{
-					$arrTarget["LOANCONTRACT_NO"] = '';
-				}
-				$arrTarget["SLIPITEM_DESC"] = $prefixText.$rowTarget["SLIPITEM_DESC"];
-				$arrTarget["ITEM_BALANCE"] = number_format($rowTarget["ITEM_BALANCE"],2);
-				$arrTarget["ITEM_PAYAMT"] = number_format($rowTarget["ITEM_PAYAMT"],2);
-				$arrTarget["SLIP_DATE"] = $lib->convertdate($rowTarget["ENTRY_DATE"],'d m Y');
+				$arrTarget["LOANCONTRACT_NO"] = $rowTarget["DEPTACCOUNT_NO"];
+				$arrTarget["SLIPITEM_DESC"] = 'ฝากเงินเข้าบัญชี';
+				$arrTarget["ITEM_BALANCE"] = number_format($rowTarget["PRNCBAL"],2);
+				$arrTarget["ITEM_PAYAMT"] = number_format($rowTarget["DEPTSLIP_AMT"],2);
+				$arrTarget["SLIP_DATE"] = $lib->convertdate($rowTarget["DEPTSLIP_DATE"],'d m Y');
 				$arrToken = $func->getFCMToken('person',$rowTarget["MEMBER_NO"],$conoracle);
 				$arrMessage = $lib->mergeTemplate($dataComing["topic_emoji_"],$dataComing["message_emoji_"],$arrTarget);
 				$getName = $conoracle->prepare("SELECT MP.PRENAME_DESC || MB.MEMB_NAME ||' '|| MB.MEMB_SURNAME AS FULLNAME 
@@ -227,7 +219,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 					}
 				}
 			}
-			$getNormContDP = $conoracle->prepare("SELECT 
+			$getNormContDP = $conoracle->prepare("SELECT dp.deptaccount_no,
 												 dpm.member_no,dp.deptslip_amt,dpc.recppaytype_desc,dp.prncbal,TO_CHAR(dp.deptslip_date,'YYYY-MM-DD') as deptslip_date
 												FROM dpdeptslip dp LEFT JOIN dpdeptmaster dpm ON dp.deptaccount_no = dpm.deptaccount_no
 												LEFT JOIN dpucfrecppaytype dpc ON dp.recppaytype_code = dpc.recppaytype_code
@@ -238,10 +230,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			while($rowTarget = $getNormContDP->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
 				$arrTarget = array();
-				$prefixText = '';
-				$arrTarget["SLIPITEM_DESC"] = $prefixText.$rowTarget["RECPPAYTYPE_DESC"];
+				$arrTarget["LOANCONTRACT_NO"] = $rowTarget["DEPTACCOUNT_NO"];
+				$arrTarget["SLIPITEM_DESC"] = 'ฝากเงินเข้าบัญชี';
 				$arrTarget["ITEM_BALANCE"] = number_format($rowTarget["PRNCBAL"],2);
-				$arrTarget["LOANCONTRACT_NO"] = '';
 				$arrTarget["ITEM_PAYAMT"] = number_format($rowTarget["DEPTSLIP_AMT"],2);
 				$arrTarget["SLIP_DATE"] = $lib->convertdate($rowTarget["DEPTSLIP_DATE"],'d m Y');
 				$arrMessage = $lib->mergeTemplate(null,$dataComing["message_emoji_"],$arrTarget);

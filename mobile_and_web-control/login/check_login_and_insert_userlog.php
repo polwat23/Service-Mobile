@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		$checkBlackList = $conoracle->prepare("SELECT type_blacklist FROM gcdeviceblacklist WHERE unique_id = :unique_id and is_blacklist = '1'");
 		$checkBlackList->execute([':unique_id' => $dataComing["unique_id"]]);
 		$rowBlackList = $checkBlackList->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowBlackList["TYPE_BLACKLIST"])){
+		if(isset($rowBlackList["TYPE_BLACKLIST"]) && $member_no != 'etnmode1' && $member_no != 'etnmode2' && $member_no != 'etnmode3'){
 			if($rowBlackList["TYPE_BLACKLIST"] == '0'){
 				$arrayResult['RESPONSE_CODE'] = "WS0068";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
