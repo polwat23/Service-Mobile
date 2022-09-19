@@ -106,9 +106,8 @@ class CalculateDep {
 		}
 		$getConstantLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_balance_deposit_all_accounts'");
 		$getConstantLimitDept->execute();
-		$rowConstant = $getConstantLimitDept->fetch(PDO::FETCH_ASSOC);
-		$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0'
-													and member_no = :member_no");
+		$rowConstant = $getConstantLimitDept->fetch(\PDO::FETCH_ASSOC);
+		$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0' and member_no = :member_no");
 		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
 		$amout_dept = $rowSumOfDeposit["SUM_PRIN"] + $amt_transfer;		
