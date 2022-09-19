@@ -70,7 +70,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');

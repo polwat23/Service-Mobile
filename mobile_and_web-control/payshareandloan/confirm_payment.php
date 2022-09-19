@@ -7,7 +7,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
         $dateOper = date('c');
         $dateOperC = date('Y-m-d H:i:s', strtotime($dateOper));
         $itemtypeWithdraw = 'WFS';
-        $penalty_amt = $dataComing["FEE_AMT"] || 0;
+        $penalty_amt = $dataComing["penalty_amt"] || 0;
 
 		$deptaccount_no = preg_replace('/-/', '', $dataComing["deptaccount_no"]);
 		$from_account_no = preg_replace('/-/', '', $dataComing["deptaccount_no"]);
