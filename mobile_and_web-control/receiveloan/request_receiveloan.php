@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 		$itemtypeDeposit = 'DTL';
 		$dataCont = $cal_loan->getContstantLoanContract($contract_no);
 		$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
-		if($dataComing["amt_transfer"] > $dataCont["WITHDRAWABLE_AMT"]){
+		if($dataComing["amt_transfer"] > ($dataCont["LOANAPPROVE_AMT"] - $dataCont["PRINCIPAL_BALANCE"])){
 			$arrayResult["RESPONSE_CODE"] = 'WS0093';
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -124,6 +124,8 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
+					
+					file_put_contents('test2.txt',json_encode($depositMoney));
 					$conoracle->rollback();
 					$arrayResult['RESPONSE_CODE'] = $depositMoney["RESPONSE_CODE"];
 					if($depositMoney["RESPONSE_CODE"] == "WS0056"){
@@ -135,6 +137,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 					require_once('../../include/exit_footer.php');
 				}
 			}else{
+				file_put_contents('test.txt',json_encode($receiveLon));
 				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = $receiveLon["RESPONSE_CODE"];
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

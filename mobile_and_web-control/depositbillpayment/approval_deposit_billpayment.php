@@ -58,8 +58,8 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 																		WHERE loancontract_no = :loancontract_no");
 								$fetchLoanRepay->execute([':loancontract_no' => $rowDetail["ref_account"]]);
 								$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-								$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
-								if($rowDetail["qrtransferdt_amt"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+								$interest = $cal_loan->calculateIntAPI($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+								if($rowDetail["qrtransferdt_amt"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]){
 									$arrayResult['RESPONSE_CODE'] = "WS0098";
 									$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 									$arrayResult['RESULT'] = FALSE;

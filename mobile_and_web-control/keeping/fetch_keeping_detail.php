@@ -58,7 +58,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																	NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																	NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																	NVL(kpd.interest_payment,0) AS INT_BALANCE
+																	NVL(kpd.interest_payment,0) AS INT_BALANCE,
+																	( kpd.calintto_date) -  (kpd.calintfrom_date)  as int_day
 																	FROM kptempreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																	kpd.keepitemtype_code = kut.keepitemtype_code
 																	LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -92,8 +93,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
+			
+			$arrayResult['OTHER_INFO'] = array();
+			$arrayResult['OTHER_INFO'][] = ["LABEL" => "จำนวนวันคิดดอกเบี้ย", "VALUE" => $rowDetail["INT_DAY"]." วัน"];
+		
 			$arrGroupDetail[] = $arrDetail;
 		}
+		
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;

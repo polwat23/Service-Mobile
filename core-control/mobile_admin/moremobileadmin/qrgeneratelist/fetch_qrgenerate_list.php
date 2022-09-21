@@ -15,8 +15,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
                                         qrc.trans_desc_qr
 										FROM gcqrcodegenmaster qrm
 										LEFT JOIN gcqrcodegendetail qrd ON qrd.qrgenerate = qrm.qrgenerate
-										LEFT JOIN gcconttypetransqrcode qrc ON qrd.trans_code_qr = qrc.trans_code_qr");
-			
+										LEFT JOIN gcconttypetransqrcode qrc ON qrd.trans_code_qr = qrc.trans_code_qr order by  update_date desc");
+			 
 		$fetchQrgenerateList->execute();
 		while($rowQr = $fetchQrgenerateList->fetch(PDO::FETCH_ASSOC)){
 			$arrayQr = array();

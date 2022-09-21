@@ -40,7 +40,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 																		NVL(kpd.ITEM_PAYMENT * kut.SIGN_FLAG,0) AS ITEM_PAYMENT,
 																		NVL(kpd.ITEM_BALANCE,0) AS ITEM_BALANCE,
 																		NVL(kpd.principal_payment,0) AS PRN_BALANCE,
-																		NVL(kpd.interest_payment,0) AS INT_BALANCE
+																		NVL(kpd.interest_payment,0) AS INT_BALANCE,
+																		( kpd.calintto_date) -  (kpd.calintfrom_date)  as int_day
 																		FROM kpmastreceivedet kpd LEFT JOIN KPUCFKEEPITEMTYPE kut ON 
 																		kpd.keepitemtype_code = kut.keepitemtype_code
 																		LEFT JOIN lnloantype lt ON kpd.shrlontype_code = lt.loantype_code
@@ -117,6 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			}
 			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			$header["INT_DAY"] = $rowDetail["INT_DAY"];
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
@@ -248,6 +250,9 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 350px;">'.$header["fullname"].'</td>
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
+			</tr>
+			<td style="width: 50px;font-size: 18px;">จำนวนวันคิดดอกเบี้ย :</td>
+			<td style="width: 350px;">'.$header["INT_DAY"].'</td>
 			</tr>
 			</tbody>
 			</table>

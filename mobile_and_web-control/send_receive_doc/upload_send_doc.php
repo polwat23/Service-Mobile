@@ -34,7 +34,7 @@ if($lib->checkCompleteArgument(['menu_component','upload_doc','doc_name'],$dataC
 					$directory = __DIR__.'/../../resource/document/'.$member_no;
 					$fullPathSalary = __DIR__.'/../../resource/document/'.$member_no.'/'.$createFile["normal_path"];
 					$doc_address = $config["URL_SERVICE"]."resource/document/".$member_no."/".$createFile["normal_path"];
-					$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
+					$insertDocMaster = $conmysql->prepare("INSERT INTO documentreceive(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 															VALUES(:doc_no,:docgrp_no,:doc_filename,:doc_type,:doc_address,:member_no)");
 					$insertDocMaster->execute([
 						':doc_no' => $req_doc,

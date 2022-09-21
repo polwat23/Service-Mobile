@@ -1,6 +1,5 @@
 <?php
 require_once('../autoload.php');
-
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestTrack')){
 		$arrGrpReq = array();
@@ -33,6 +32,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
+				$fetchReqLoan = $conmysql->prepare("SELECT rf.reqattach_id,rf.file_id,rf.reqdoc_no,rf.file_path,f.file_name FROM gcreqloanattachment rf 
+									LEFT JOIN gcreqfileattachment f ON f.file_id = rf.file_id
+									WHERE rf.reqdoc_no = :reqloan_doc");
+				$fetchReqLoan->execute([':reqloan_doc' => $rowReqLoan["reqloan_doc"]]);
+				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
+					if ($forceNewSecurity == true) {
+						$path_explode = $rowReqLoan["file_path"] ? explode('/resource/', $rowReqLoan["file_path"]) : "";
+						$parts = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						$arrayFile['IMG_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $parts);
+						$arrayFile["IMG_TOKEN"] = $lib->generate_token_access_resource($parts, $jwt_token, $config["SECRET_KEY_JWT"]);
+					} else {
+						$arrayFile["IMG_URL"] = $rowReqLoan["file_path"];
+					}
+					$arrImg[] = $arrayFile;
+				}
+				$arrayReq['OTHER_REQ_IMG'] = $arrImg;
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
@@ -61,10 +76,28 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REMARK"] = $rowReqLoan["remark"];
 				$arrayReq["CONTRACTDOC_URL"] = $rowReqLoan["contractdoc_url"];
 				$arrayReq["APPROVE_DATE"] = isset($rowReqLoan["approve_date"]) && $rowReqLoan["approve_date"] != "" ? $lib->convertdate($rowReqLoan["approve_date"],'d m Y') : null;
+				$fetchReqLoan = $conmysql->prepare("SELECT rf.reqattach_id,rf.file_id,rf.reqdoc_no,rf.file_path,f.file_name FROM gcreqloanattachment rf 
+									LEFT JOIN gcreqfileattachment f ON f.file_id = rf.file_id
+									WHERE rf.reqdoc_no = :reqloan_doc");
+				$fetchReqLoan->execute([':reqloan_doc' => $rowReqLoan["reqloan_doc"]]);
+				while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
+					if ($forceNewSecurity == true) {
+						$path_explode = $rowReqLoan["file_path"] ? explode('/resource/', $rowReqLoan["file_path"]) : "";
+						$parts = (sizeof($path_explode) > 1) ? "/resource/" . $path_explode[1] : "";
+						$arrayFile['IMG_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $parts);
+						$arrayFile["IMG_TOKEN"] = $lib->generate_token_access_resource($parts, $jwt_token, $config["SECRET_KEY_JWT"]);
+					} else {
+						$arrayFile["IMG_URL"] = $rowReqLoan["file_path"];
+					}
+					$arrImg[] = $arrayFile;
+				}
+				$arrayReq['OTHER_REQ_IMG'] = $arrImg;
 				$arrGrpReq[] = $arrayReq;
 			}
 		}
 		$arrayResult['REQ_LIST'] = $arrGrpReq;
+		$arrayResult['FILTER'] = $filter;
+		$arrayResult['IS_ATTACHFILE'] = TRUE;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{
@@ -73,7 +106,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -91,6 +123,5 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	
 }
 ?>

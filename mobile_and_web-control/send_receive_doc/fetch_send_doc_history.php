@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SendReceiveDocuments')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupHis = array();
-		$getHistory = $conmysql->prepare("SELECT doc_no, doc_filename, doc_address, create_date  FROM doclistmaster WHERE member_no = :member_no AND doc_status ='1'");
+		$getHistory = $conmysql->prepare("SELECT doc_no, doc_filename, doc_address, create_date  FROM documentreceive WHERE member_no = :member_no AND doc_status ='1'");
 		$getHistory->execute([':member_no' => $member_no]);
 		while($rowHistory = $getHistory->fetch(PDO::FETCH_ASSOC)){
 			$arrHistory = array();

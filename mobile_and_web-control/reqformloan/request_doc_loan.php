@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 		$conmysql->beginTransaction();
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$getDocSystemPrefix = $conmysql->prepare("SELECT prefix_docno FROM docsystemprefix WHERE menu_component = :menu_component and is_use = '1'");
-		$getDocSystemPrefix->execute([':menu_component' => $dataComing["menu_component"]]);
+		$getDocSystemPrefix->execute([':menu_component' => $dataComing["menu_component"]]);		
 		if($getDocSystemPrefix->rowCount() > 0){
 			$rowDocPrefix = $getDocSystemPrefix->fetch(PDO::FETCH_ASSOC);
 			$reqloan_doc = null;
@@ -360,6 +360,9 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["mate_cardperson"] = $rowMate["MATE_CARDPERSON"];
 					$arrData["mateaddr_phone"] = $rowMate["MATEADDR_PHONE"];
 					
+					$arrData["send_doc"] = $dataComing["other_select"]["recv_doc"];
+					$arrData["assign_date"] = $dataComing["other_date"]["recv_doc"];
+					
 					$arrData["loantype_code"] = $dataComing["loantype_code"];
 					$arrData["objective"] = $dataComing["objective"];
 					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
@@ -405,7 +408,6 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					$arrData["period_payment"] = $dataComing["period_payment"];
 					$arrData["period"] = $dataComing["period"];					
 					$arrData["recv_account"] = $deptaccount_no_bank;
-					//$lib->sendLineNotify(json_encode($dataComing));
 					//ดึงชื่อคนค้ำ
 					$contcollArr = array();
 					$arrDataMember = array();

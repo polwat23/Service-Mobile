@@ -39,6 +39,10 @@ $data["ตำบล"] = $data["tambol_desc"];
 $data["รหัสไปรษณีย์"] = $data["addr_postcode"];
 $data["เกี่ยวข้องกับผู้กู้เป็น"] = 'ลูกชาย';
 $data["เงินค่าหุ้น"] = $data["sharestk_amt"];
+
+$data["send_doc"] = $data["send_doc"];
+$data["assign_date"] = $lib->convertdate($data["assign_date"],"d M Y");
+
 $data["เงินฝาก"] = '111,000.00';
 $data["เลขบัญชี"] = '1542451525';
 $data["จำนวนเงิน"] = '111,000.00';
@@ -79,7 +83,7 @@ if($loangroup_code == "01"){
 	$เงินกู้เพื่อเหตุฉุกเฉิน = "checked";
 }else if($loangroup_code == "03"){
 	$เงินกู้พิเศษ = "checked";  //
-}else if($loangroup_code == "02" && $loantype_code !="42" || $loantype_code !="43"){
+}else if($loangroup_code == "02" && $loantype_code !="42" && $loantype_code !="43"){
 	$เงินกู้สามัญเพื่อการอันจำเป็น = "checked";
 }else if($loangroup_code == "02" && $loantype_code =="42" || $loantype_code =="43"){
 	$เงินกู้สามัญเพื่อชำระหนี้สถาบันการเงินอื่น = "checked";
@@ -251,8 +255,9 @@ $html .= '<div class="wrapper-page">';
 $html .= '
 	<div>
 		<div>
-			<div style=" text-align: left; "><img src="../../resource/logo/logo.jpg" alt="" width="80" height="80"></div>
-			<div class="absolute bold center" style="top:55px; margin-left:70px; font-size:20pt; width:225px;">คำขอกู้เงิน</div>
+		   <div class="bold absolute right"  style="font-size:14pt; color:red; margin-left:90px; margin-top:px; width:280px; ">'.($data["send_doc"] =="coop" ? 'รับเอกสารที่สหกรณ์' : 'รับสัญญาออนไลน์'  ??null).'</div>
+		   <div style=" text-align: left; "><img src="../../resource/logo/logo.jpg" alt="" width="80" height="80"></div>
+		   <div class="absolute bold center" style="top:55px; margin-left:70px; font-size:20pt; width:225px;">คำขอกู้เงิน</div>
 		</div>
 		<div class="bold" style="margin-left:60px; font-size:16pt">
 			สหกรณ์ออมทรัพย์ครูระยอง จำกัด
@@ -499,7 +504,7 @@ $html .= '
 				อำเภอ...........................................................................จังหวัด...........................................................................อัตราเงินเดือน................................บาท
 			</div>
 			<div>
-				<div class="absolute" style="margin-left:115px; width:220px; "><div class="data nowrap center">'.($data["วันที่บรรจุเป็นข้าราชการ"]??null).'</div></div>
+				<div class="absolute" style="margin-left:115px; width:220px; "><div class="data nowrap center">'.($data["assign_date"]??null).'</div></div>
 				<div class="absolute" style="margin-left:370px; width:65px; "><div class="data nowrap center">'.($data["อายุงานบรรจุปี"]??null).'</div></div>
 				<div class="absolute" style="margin-left:445px; width:35px; "><div class="data nowrap center">'.($data["อายุงานบรรจุเดือน"]??null).'</div></div>
 				<div class="absolute" style="margin-left:640px; width:80px; "><div class="data nowrap center">'.($data["เกษียณอายุราชการ"]??null).'</div></div>

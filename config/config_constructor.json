@@ -1,6 +1,7 @@
 {
 	"NAME_APP" : "RYT Saving Connect",
 	"COOP_KEY" : "ryt-test",
+	"COOP_KEY_PROD" : "ryt",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=ryt",
 	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=ryt",
 	"URL_LINEBOT": "https://line.me/R/ti/p/%40784paxpa",
@@ -8,6 +9,7 @@
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.ryt.mobile",
 	"URL_SERVICE" : "https://proxy.thaicoop.co/RYTCOOP-TEST/",
+	"URL_CONSTANT" : "https://api-node.thaicoop.co/constant-Test/",
 	"URL_SMS" : "https://sms.thaicoop.co/",
 	"KEYCODE" : "Te3r3dp3&w2v",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
