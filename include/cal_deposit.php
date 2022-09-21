@@ -1285,6 +1285,7 @@ class CalculateDep {
 							return $arrayResult;
 						}
 					}else{
+
 						$arrayResult["RESPONSE_CODE"] = 'WS0066';
 						$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecute);
 						$arrayResult['RESULT'] = FALSE;
