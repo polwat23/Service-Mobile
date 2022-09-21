@@ -2,105 +2,93 @@
 set_time_limit(150);
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['menu_component','auth_code','sigma_key','coop_account_no'],$dataComing)){
+if($lib->checkCompleteArgument(['menu_component','id_bindaccount','sigma_key'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
-		$conmysql->beginTransaction();
-		$updateBindAcc = $conmysql->prepare("UPDATE gcbindaccount SET bindaccount_status = '1',bind_date = NOW() WHERE sigma_key = :sigma_key");
-		if($updateBindAcc->execute([':sigma_key' => $dataComing["sigma_key"]])){
-			$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
-			$arrPayloadverify = array();
-			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
-			$arrPayloadverify['auth_code'] = $dataComing["auth_code"];
+		$arrPayloadverify = array();
+		$arrPayloadverify['member_no'] = $payload["member_no"];
+		$check_account = $conmysql->prepare("SELECT citizen_id FROM gcbindaccount WHERE sigma_key = :sigma_key and id_bindaccount = :id_bindaccount and member_no = :member_no
+											and bindaccount_status IN('0','1')");
+		$check_account->execute([
+			':sigma_key' => $dataComing["sigma_key"],
+			':id_bindaccount' => $dataComing["id_bindaccount"],
+			':member_no' => $payload["member_no"]
+		]);
+		if($check_account->rowCount() > 0){
+			$rowAcc = $check_account->fetch(PDO::FETCH_ASSOC);
 			$arrPayloadverify["coop_key"] = $config["COOP_KEY"];
+			$arrPayloadverify['member_no'] = $payload["member_no"];
 			$arrPayloadverify['exp'] = time() + 300;
+			$arrPayloadverify['citizen_id'] = $rowAcc["citizen_id"];
+			$arrPayloadverify['sigma_key'] = $dataComing["sigma_key"];
 			$verify_token = $jwt_token->customPayload($arrPayloadverify, $config["SIGNATURE_KEY_VERIFY_API"]);
 			$arrSendData = array();
 			$arrSendData["verify_token"] = $verify_token;
 			$arrSendData["app_id"] = $config["APP_ID"];
-			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/bay/authTokenAccount',$arrSendData);
+			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].'/ktb/revoke_register_account',$arrSendData);
 			if(!$responseAPI["RESULT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0022";
+				$conmysql->rollback();
+				$arrayResult['RESPONSE_CODE'] = "WS0029";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
-					':bind_status' => '-9',
+					':unbind_status' => '-9',
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $responseAPI["RESPONSE_MESSAGE"],
-					':coop_account_no' => $coop_account_no,
+					':id_bindaccount' => $dataComing["id_bindaccount"],
 					':query_flag' => '1'
 				];
-				$log->writeLog('bindaccount',$arrayStruc);
-				$message_error = "ผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/bay/authTokenAccount ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
+				$log->writeLog('unbindaccount',$arrayStruc);
+				$message_error = "ยกเลิกผูกบัญชีไม่ได้เพราะต่อ Service ไปที่ ".$config["URL_API_COOPDIRECT"]."/ktb/revoke_register_account ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
 				$lib->sendLineNotify($message_error);
 				$func->MaintenanceMenu($dataComing["menu_component"]);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 			$arrResponse = json_decode($responseAPI);
 			if($arrResponse->RESULT){
-				$updateMask = $conmysql->prepare("UPDATE gcbindaccount SET deptaccount_no_bank = :mask_acc WHERE sigma_key = :sigma_key");
-				if($updateMask->execute([
-					':mask_acc' => $arrResponse->MASK_BANK_ACCOUNT,
-					':sigma_key' => $dataComing["sigma_key"]
-				])){
-				}else{
-					$message_error = "อัปเดตเลขบัญชีธนาคารไม่ได้ของ Sigma_key : ".$dataComing["sigma_key"]." เลขบัญชี : ".$arrResponse->MASK_BANK_ACCOUNT." ไม่ได้ ตอนเวลา ".date('Y-m-d H:i:s');
-					$lib->sendLineNotify($message_error);
-				}
-				$conmysql->commit();
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
-					':bind_status' => '1',
-					':coop_account_no' => $coop_account_no
+					':id_bindaccount' => $dataComing["id_bindaccount"],
+					':unbind_status' => '1'
 				];
-				$log->writeLog('bindaccount',$arrayStruc);
+				$log->writeLog('unbindaccount',$arrayStruc);
+				$arrayResult["URL_CONSENT"] = $arrResponse->URL_CONSENT;
 				$arrayResult['RESULT'] = TRUE;
-				echo json_encode($arrayResult);
+				require_once('../../include/exit_footer.php');
 			}else{
-				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = "WS0039";
+				$arrayResult['RESPONSE_CODE'] = "WS0040";
 				$arrayStruc = [
 					':member_no' => $payload["member_no"],
 					':id_userlogin' => $payload["id_userlogin"],
-					':bind_status' => '-9',
+					':unbind_status' => '-9',
 					':response_code' => $arrayResult['RESPONSE_CODE'],
 					':response_message' => $arrResponse->RESPONSE_MESSAGE,
-					':coop_account_no' => $coop_account_no,
+					':id_bindaccount' => $dataComing["id_bindaccount"],
 					':query_flag' => '1'
 				];
-				$log->writeLog('bindaccount',$arrayStruc);
+				$log->writeLog('unbindaccount',$arrayStruc);
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
-				exit();
+				require_once('../../include/exit_footer.php');
+				
 			}
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0038";
-			$arrayStruc = [
-				':member_no' => $payload["member_no"],
-				':id_userlogin' => $payload["id_userlogin"],
-				':bind_status' => '-9',
-				':response_code' => $arrayResult['RESPONSE_CODE'],
-				':response_message' => $arrResponse->RESPONSE_MESSAGE,
-				':coop_account_no' => $coop_account_no,
-				':query_flag' => '1'
-			];
-			$log->writeLog('bindaccount',$arrayStruc);
+			$arrayResult['RESPONSE_CODE'] = "WS0021";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			echo json_encode($arrayResult);
-			exit();
+			require_once('../../include/exit_footer.php');
+			
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
-		echo json_encode($arrayResult);
-		exit();
+		require_once('../../include/exit_footer.php');
+		
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -117,7 +105,7 @@ if($lib->checkCompleteArgument(['menu_component','auth_code','sigma_key','coop_a
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
-	exit();
+	require_once('../../include/exit_footer.php');
+	
 }
 ?>

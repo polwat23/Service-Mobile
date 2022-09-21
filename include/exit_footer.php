@@ -1,5 +1,5 @@
 <?php
-$response = json_encode($arrayResult);
+$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
 if ($forceNewSecurity == true) {
 	$signature = "";
 	openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);

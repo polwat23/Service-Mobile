@@ -4,17 +4,56 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchLnConstant= $conoracle->prepare("SELECT FIXPAYCAL_TYPE from lnloanconstant");
+		$fetchLnConstant->execute();
+		$rowLnConstant = $fetchLnConstant->fetch(PDO::FETCH_ASSOC);
+		$minsalary = 0;
+		if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
+			include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
+		}else{
+			include(__DIR__.'/../credit/calculate_loan_etc.php');
+		}
+		
 		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
-			$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+			$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE , lnt.LOANPAYMENT_TYPE  FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 													ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 													WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-			$period_payment = round($dataComing["request_amt"] * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($dataComing["period"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
-			if($period_payment % 100 > 0){
-				$period_payment =$period_payment  + (100 - ($period_payment % 100));
+
+			if ($rowLnConstant["FIXPAYCAL_TYPE"] == 1){
+				$ldb_fd = 1.00 / 12.00;
+			}
+			else{
+				$ldb_fd = 30.00 / 365.00;
+			}
+			if($rowIntRate["LOANPAYMENT_TYPE"] == "2"){
+				$ldc_intrate = ($rowIntRate["INTEREST_RATE"] /100);
+				$inttemp = log(1 + ($ldc_intrate * $ldb_fd));
+				$periodtemp = exp(-$dataComing["period"] * $inttemp);
+				$period_payment = round(($dataComing["request_amt"] * ($ldc_intrate * $ldb_fd)) / ((1.00 - $periodtemp)));			
+				$period_payment = $period_payment  + (10 - ($period_payment % 10));	
+			}else{
+				$period_payment = round($dataComing["request_amt"] * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($dataComing["period"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));		
+			}
+
+			if($period_payment % 10 > 0){
+				$period_payment = $period_payment  + (10 - ($period_payment % 10));
+			}
+			if($dataComing["remain_salary"] > $dataComing["salary"]){
+				$arrayResult['RESPONSE_MESSAGE'] = "เงินเดือนคงเหลือ มากกว่าเงินเดือน กรุณากรอกให้ถูกต้อง";
+				$arrayResult['REVERT_VALUE'] = TRUE;
+				$arrayResult['RESULT'] = FALSE; 
+				require_once('../../include/exit_footer.php');
 			}
 			
+			if($dataComing["remain_salary"] > 0 && $dataComing["remain_salary"] < $minsalary){
+				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถขอกู้ได้ เนื่องจากเงินเดือนคงเหลือน้อยกว่า 30 % ";
+				$arrayResult['REVERT_VALUE'] = TRUE;
+				$arrayResult['RESULT'] = FALSE; 
+				require_once('../../include/exit_footer.php');
+			}
+
 			$arrayResult["RECEIVE_NET"] = $dataComing["request_amt"];
 			$arrayResult["PERIOD"] = $dataComing["period"];
 			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
@@ -36,6 +75,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				require_once('../../include/exit_footer.php');
 				
 			}
+			
 			$request_amt = $dataComing["request_amt"] ?? $maxloan_amt;
 			if($request_amt < $oldBal){
 				$request_amt = $oldBal;
@@ -49,14 +89,47 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMaxPeriod["MAX_PERIOD"])){
-				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE,lnt.LOANGROUP_CODE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
+				$fetchLoanIntRate = $conoracle->prepare("SELECT lnd.INTEREST_RATE,lnt.LOANGROUP_CODE, lnt.LOANPAYMENT_TYPE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
 														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
 														WHERE lnt.loantype_code = :loantype_code and SYSDATE BETWEEN lnd.EFFECTIVE_DATE and lnd.EXPIRE_DATE ORDER BY lnt.loantype_code");
 				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-				$period_payment = round($maxloan_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
-				$period_payment =$period_payment  + (100 - ($period_payment % 100));
 				
+				if ($rowLnConstant["FIXPAYCAL_TYPE"] == 1){
+					$ldb_fd = 1.00 / 12.00;
+				}
+				else{
+					$ldb_fd = 30.00 / 365.00;
+				}
+				if($request_amt > $maxloan_amt){
+					$request_amt = $maxloan_amt;		
+				}
+				if($rowIntRate["LOANPAYMENT_TYPE"] == "1"){
+					$ldc_temp = log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)));
+					$ldc_fr =   exp(-$rowMaxPeriod["MAX_PERIOD"] * $ldc_temp);
+					$request_amt =  round(($request_amt  * (1 - $ldc_fr)) / ((($rowIntRate["INTEREST_RATE"] /100) / 12)));
+					$request_amt = $request_amt  + (100 - ($request_amt % 100));
+					$period_payment = ($request_amt / $rowMaxPeriod["MAX_PERIOD"]);
+					$period_payment = $period_payment  + (10 - ($period_payment % 10));			
+				}else if($rowIntRate["LOANPAYMENT_TYPE"] == "2"){
+					$ldc_temp = log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)));
+					$ldc_fr =  exp(-$rowMaxPeriod["MAX_PERIOD"] * $ldc_temp);
+					$request_amt =  round(($request_amt  * (1 - $ldc_fr)) / ((($rowIntRate["INTEREST_RATE"] /100) / 12)));
+					$request_amt = $request_amt  + (100 - ($request_amt % 100));
+					
+					$ldc_intrate = ($rowIntRate["INTEREST_RATE"] /100);
+					$inttemp = log(1 + ($ldc_intrate * $ldb_fd));
+					$periodtemp = exp(-$rowMaxPeriod["MAX_PERIOD"] * $inttemp);
+					$period_payment = round(($request_amt * ($ldc_intrate * $ldb_fd)) / ((1.00 - $periodtemp)));
+					$period_payment = $period_payment  + (10 - ($period_payment % 10));	
+				}else{
+					$ldc_temp = log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)));
+					$ldc_fr =  exp(-$rowMaxPeriod["MAX_PERIOD"] * $ldc_temp);
+					$request_amt =  round(($request_amt  * (1 - $ldc_fr)) / ((($rowIntRate["INTEREST_RATE"] /100) / 12)));
+					$request_amt = $request_amt  + (100 - ($request_amt % 100));
+					$period_payment = round($request_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+					$period_payment = $period_payment  + (10 - ($period_payment % 10));	
+				}
 				//อัปโหลดไฟล์เเนบ
 				$arrayUploadFileGroup = array();
 				if(isset($rowIntRate["LOANGROUP_CODE"]) && $rowIntRate["LOANGROUP_CODE"] != ''){
@@ -80,12 +153,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 						$arrayUploadFileGroup[] = $arrConst;
 					}
 				}
-
-				
+				if($request_amt > $maxloan_amt){
+					$request_amt = $maxloan_amt;
+					$period_payment = round($request_amt * (($rowIntRate["INTEREST_RATE"] /100) / 12) / (1 - (exp(($rowMaxPeriod["MAX_PERIOD"] * (-1)) * log((1 + (($rowIntRate["INTEREST_RATE"] /100) / 12)))))));
+					$period_payment = $period_payment  + (10 - ($period_payment % 10));		
+				}
 				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
-				$arrayResult["RECEIVE_NET"] = $maxloan_amt;
+				$arrayResult["RECEIVE_NET"] = $request_amt;
 				$arrayResult["REQUEST_AMT"] = $request_amt;
-				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
+				$arrayResult["LOAN_PERMIT_AMT"] = $loan_permit_amt;
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
