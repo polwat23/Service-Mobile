@@ -8,9 +8,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 															ms.schedule_start, ms.start_menu_status, ms.start_menu_channel, ms.schedule_end, ms.end_menu_status, ms.end_menu_channel, 
 															ms.create_by, ms.create_date, ms.update_by, ms.update_date, ms.is_use,ms.time_end,
                                                             mn.menu_name, mn.menu_status as current_status, mn.menu_channel as current_channel
-															FROM gcmenuschedule ms
+                                                            FROM gcmenuschedule ms 
                                                             JOIN gcmenu mn ON mn.id_menu = ms.id_menu
-															ORDER BY ms.is_use DESC, ms.update_date DESC, ms.schedule_start DESC");
+                                                            WHERE ms.is_use = '1'
+															ORDER BY ms.is_use DESC, ms.update_date DESC, ms.schedule_start DESC;");
 		$fetchMenuSchedule->execute();
 		while($rowMenuMobile = $fetchMenuSchedule->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupMenu = array();
