@@ -97,7 +97,7 @@ if(!$anonymous){
 				$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 				$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 			}
-			$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+			$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 			$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 		}
 		$arrayResult['RESULT'] = TRUE;
@@ -285,7 +285,7 @@ if(!$anonymous){
 								$arrMenuLoan["BALANCE"] = number_format($rowMenuLoan["BALANCE"],2);
 								$arrMenuLoan["AMT_CONTRACT"] = $rowMenuLoan["C_CONTRACT"] ?? 0;
 							}
-							$arrMenuLoan["LAST_STATEMENT"] = TRUE;
+							$arrMenuLoan["LAST_STATEMENT"] = FALSE;
 						}			
 					}
 				}else{
