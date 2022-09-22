@@ -8,6 +8,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$keep_forward = $func->getConstant('process_keep_forward');
 		$MonthForCheck = date('m');
 		$DayForCheck = date('d');
+		$fetchMembcatCode = $conmssql->prepare("SELECT MEMBCAT_CODE
+												FROM MBMEMBMASTER 
+												WHERE member_no = :member_no");
+		$fetchMembcatCode->execute([
+			':member_no' => $member_no
+		]);
+		$rowMembcatCode = $fetchMembcatCode->fetch(PDO::FETCH_ASSOC);
 		$getLastReceive = $conmssql->prepare("SELECT TOP 1 MAX(recv_period) as MAX_RECV,RECEIPT_NO,RECEIVE_AMT
 															FROM kptempreceive WHERE member_no = :member_no GROUP BY RECEIPT_NO,RECEIVE_AMT ORDER BY MAX_RECV DESC");
 		$getLastReceive->execute([':member_no' => $member_no]);
@@ -39,6 +46,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			http_response_code(204);
 			
 		}
+		
 		$arrayResult["RECEIVE_AMT"] = number_format($rowLastRecv["RECEIVE_AMT"],2);
 		$arrayResult["RECV_PERIOD"] = $rowLastRecv["MAX_RECV"];
 		$arrayResult["SLIP_NO"] = $rowLastRecv["RECEIPT_NO"];
@@ -68,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 																	ORDER BY kut.SORT_IN_RECEIVE ASC");
 		$getPaymentDetail->execute([
 			':member_no' => $member_no,
-			':membcat_code' => $rowName["MEMBCAT_CODE"],
+			':membcat_code' => $rowMembcatCode["MEMBCAT_CODE"],
 			':recv_period' => $rowLastRecv["MAX_RECV"]
 		]);
 	
@@ -98,7 +106,40 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		
-		
+		$fetchName = $conmssql->prepare("SELECT MEMBCAT_CODE
+												FROM MBMEMBMASTER 
+												WHERE member_no = :member_no");
+		$fetchName->execute([
+			':member_no' => $member_no
+		]);
+		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+
+		//สมาชิกอ้างอิง
+		$arrMemberNoRef = array();
+		$fetchRefmemno = $conmssql->prepare("select member_no as  member_ref  
+																	from mbmembmaster
+																	where  member_ref = :member_no ");
+		$fetchRefmemno->execute([
+			':member_no' => $member_no
+		]);
+		while($rowRefmemno = $fetchRefmemno->fetch(PDO::FETCH_ASSOC)){
+			$arrMemberNoRef[] = "'".$rowRefmemno["member_ref"]."'";
+		}
+		if(sizeof($arrMemberNoRef) > 0){
+			$getPaymentDetailRef = $conmssql->prepare("SELECT ITEM_PAYMENT ,MEMBER_NO  FROM KPTEMPRECEIVEDET WHERE MEMBER_NO IN(".implode(',',$arrMemberNoRef).") AND recv_period = :recv_period");
+			$getPaymentDetailRef->execute([':recv_period' => $rowLastRecv["MAX_RECV"]]);
+			$asslnvitData = array();
+			while($rowRefAssoInvite = $getPaymentDetailRef->fetch(PDO::FETCH_ASSOC)){
+				$arrAsslnvit = array();
+				$arrAsslnvit["REF_MEMBER_NO"] = $rowRefAssoInvite["MEMBER_NO"];
+				$arrAsslnvit["REF_AMOUNT"] =  number_format($rowRefAssoInvite["ITEM_PAYMENT"],2);
+				$arrAsslnvit["SHOW_SLIP_REPORT"] = TRUE;
+				$asslnvitData[] =$arrAsslnvit;
+			}
+			if(sizeof($asslnvitData) > 0){
+				$arrayResult['REF_ASSO_INVITE'] = $asslnvitData;
+			}
+		}
 		$arrayResult['SHOW_SLIP_REPORT'] = TRUE;
 		$arrayResult['DETAIL'] = $arrGroupDetail;
 		$arrayResult['RESULT'] = TRUE;

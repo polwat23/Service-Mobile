@@ -103,6 +103,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
 		$arrayResult["REQUEST_STATEMENT"] = TRUE;
+		$arrayResult["LIMIT_FETCH_STM_DEPT"] = $rownum;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

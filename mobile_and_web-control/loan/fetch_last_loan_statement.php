@@ -67,6 +67,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$arrayResult["HEADER"] = $arrContract;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["LIMIT_FETCH_STM_LOAN"] = $rownum;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

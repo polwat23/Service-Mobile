@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 		$arrayHeaderAcc["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 		$arrayHeaderAcc["DATA_TIME"] = date('H:i');
 		$getStatement = $conmssql->prepare("SELECT TOP ".$rownum." lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.OPERATE_DATE,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as LOAN_BALANCE
+											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as LOAN_BALANCE , lsm.PERIOD , lsm.LOANITEMTYPE_CODE
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
 											WHERE RTRIM(lsm.loancontract_no) = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.OPERATE_DATE
@@ -58,10 +58,14 @@ if($lib->checkCompleteArgument(['menu_component','contract_no'],$dataComing)){
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);
 			$arrSTM["SUM_PAYMENT"] = number_format($rowStm["INT_PAYMENT"] + $rowStm["PRN_PAYMENT"],2);
 			$arrSTM["LOAN_BALANCE"] = number_format($rowStm["LOAN_BALANCE"],2);
+			if($rowStm["LOANITEMTYPE_CODE"] != "LRC"){
+				$arrSTM["PERIOD"] = $rowStm["PERIOD"];
+			}
 			$arrayGroupSTM[] = $arrSTM;
 		}
 		$arrayResult["HEADER"] = $arrayHeaderAcc;
 		$arrayResult["STATEMENT"] = $arrayGroupSTM;
+		$arrayResult["LIMIT_FETCH_STM_LOAN"] = $rownum;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

@@ -303,7 +303,7 @@ if(!$anonymous){
 					}else if($rowMenu["menu_parent"] == '18'){
 						$arrayMenuTransaction[] = $arrMenu;
 					}
-					if($dataComing["menu_component"] == "DepositInfo"){
+					if($rowMenu["menu_component"] == "DepositInfo"){
 						$arrMenuDep = array();
 						if(isset($dataComing["home_deposit_account"])) {
 							$account_no = preg_replace('/-/','',$dataComing["home_deposit_account"]);
@@ -336,7 +336,7 @@ if(!$anonymous){
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
 						}
 						$arrMenuDep["LAST_STATEMENT"] = FALSE;
-					}else if($dataComing["menu_component"] == "LoanInfo"){
+					}else if($rowMenu["menu_component"] == "LoanInfo"){
 						$arrMenuLoan = array();
 						if(isset($dataComing["home_loan_account"])) {
 							$contract_no = preg_replace('/\//','',$dataComing["home_loan_account"]);
@@ -410,6 +410,11 @@ if(!$anonymous){
 				$rowLimitTrans = $fetchLimitTrans->fetch(PDO::FETCH_ASSOC);
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
+				
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '101' || $dataComing["channel"] == 'web'){
+					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+				}
+
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -470,6 +475,11 @@ if(!$anonymous){
 		}
 		if(isset($arrayAllMenu)){
 			$arrayResult['MENU'] = $arrayAllMenu;
+			
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '101' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+			}
+				
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

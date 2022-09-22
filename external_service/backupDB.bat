@@ -10,9 +10,9 @@ set DAY_OF_LIFE=3
 set DBHOST=localhost
 set DBPORT=3306
 set DBUSER=root
-set DBPASS=@NHP2021
-set DBNAME=mobile_nhp
-set PROJECT_PATH=C:\Mobile\service-nhp\
+set DBPASS=@SMSK2022
+set DBNAME=mobile_smsk
+set PROJECT_PATH=C:\Mobile\service-smsk\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%

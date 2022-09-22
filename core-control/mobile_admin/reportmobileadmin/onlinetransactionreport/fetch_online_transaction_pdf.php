@@ -184,9 +184,6 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					}else if($rowDepttype["depttype_code"] =='02'){
 						$deposit_inside_20 += $rowRecon["amount"];
 						$inside_dept20++;					
-					}else if($rowDepttype["depttype_code"] =='06'){
-						$deposit_inside_60 += $rowRecon["amount"];
-						$inside_dept60++;					
 					}
 				}
 				if($rowRecon["transaction_type_code"] == 'WTA'){ //ถอนภายใน
@@ -201,13 +198,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					}else if($rowDepttype["depttype_code"] =='02'){
 						$withdraw_inside_20 += $rowRecon["amount"];
 						$inside_withdraw20++;
-					}else if($rowDepttype["depttype_code"] =='03'){
-						$withdraw_inside_30 += $rowRecon["amount"];
-						$inside_withdraw30++;
-					}else if($rowDepttype["depttype_code"] =='04'){
-						$withdraw_inside_40 += $rowRecon["amount"];
-						$inside_withdraw40++;
-					}			
+					}				
 				}else if($rowRecon["transaction_type_code"] == 'WFS'){ //โอนชำระหนี้ภายใน
 					$getLontype = $conmssql->prepare("SELECT lty.loangroup_code FROM lncontmaster ln LEFT JOIN lnloantype lty ON ln.loantype_code = lty.loantype_code  WHERE ln.loancontract_no = :destination");
 					$getLontype->execute([
@@ -272,19 +263,16 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		$withdraw_inside_10  = ($withdraw_inside_10 ?? 0) + ($payment10 ?? 0); //ถอนเงินชำระหนี้
 		$withdraw_inside_20  = ($withdraw_inside_20 ?? 0) + ($payment20 ?? 0);	
-		$withdraw_inside_30  = ($withdraw_inside_30 ?? 0) + ($payment30 ?? 0);	
-		$withdraw_inside_40  = ($withdraw_inside_40 ?? 0) + ($payment40 ?? 0);	
 		
 		$deposit_inside_10 = ($deposit_inside_10 ?? 0) + ($depositinside_10 ?? 0); //จ่ายเงิยกู้
 		$deposit_inside_20 = ($deposit_inside_20 ?? 0) + ($depositinside_20 ?? 0);
-		$deposit_inside_60 = ($deposit_inside_60 ?? 0) + ($depositinside_60 ?? 0);
 		//รวมโอนภายนอก
 		$sum_deposit_external = ($deposit_external_10 ?? 0)  + ($deposit_external_20 ?? 0) + ($payment_external_01 ?? 0) + ($payment_external_02 ?? 0) + ($payment_external_03 ?? 0);
 		$sum_withdraw_external = ($withdraw_external_10 ?? 0) + ($withdraw_external_20 ?? 0) + ($getloan_external_01 ?? 0);
 
 		//รวมโอนภายใน
-		$sum_deposit_inside = ($deposit_inside_10 ?? 0) + ($deposit_inside_20 ?? 0)  + ($deposit_inside_60 ?? 0) + ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
-		$sum_withdraw_inside = ($withdraw_inside_10 ?? 0) + ($withdraw_inside_20 ?? 0) + ($withdraw_inside_30 ?? 0) + ($withdraw_inside_40 ?? 0) + ($getloan_inside_01 ?? 0) ;
+		$sum_deposit_inside = ($deposit_inside_10 ?? 0) + ($deposit_inside_20 ?? 0) + ($payment_inside_01 ?? 0) + ($payment_inside_02 ?? 0) + ($payment_inside_03 ?? 0);
+		$sum_withdraw_inside = ($withdraw_inside_10 ?? 0) + ($withdraw_inside_20 ?? 0) + ($getloan_inside_01 ?? 0) ;
 		
 		
 		$arrayResult['SUMMARY_FEEAMT'] = number_format($summary_feeamt,2);
@@ -295,16 +283,10 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayResult['INSIDE_DEPT10'] = $inside_dept10 ?? 0;
 		$arrayResult['DEPOSIT_INSIDE_20'] = number_format($deposit_inside_20 ?? '0',2);
 		$arrayResult['INSIDE_DEPT20'] = $inside_dept20 ?? 0;
-		$arrayResult['DEPOSIT_INSIDE_60'] = number_format($deposit_inside_60 ?? '0',2);
-		$arrayResult['INSIDE_DEPT60'] = $inside_dept60 ?? 0;
 		$arrayResult['WITHDRAW_INSIDE_10'] = number_format($withdraw_inside_10 ?? '0',2);
 		$arrayResult['INSIDE_WITHDRAW10'] = $inside_withdraw10 ?? 0;
 		$arrayResult['WITHDRAW_INSIDE_20'] = number_format($withdraw_inside_20 ?? '0',2);
 		$arrayResult['INSIDE_WITHDRAW20'] = $inside_withdraw20 ?? 0;
-		$arrayResult['WITHDRAW_INSIDE_30'] = number_format($withdraw_inside_30 ?? '0',2);
-		$arrayResult['INSIDE_WITHDRAW30'] = $inside_withdraw30 ?? 0;
-		$arrayResult['WITHDRAW_INSIDE_40'] = number_format($withdraw_inside_40 ?? '0',2);
-		$arrayResult['INSIDE_WITHDRAW40'] = $inside_withdraw40 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_01'] = number_format($payment_inside_01 ?? '0',2);
 		$arrayResult['INSIDE_PAYMENT01'] = $inside_payment01 ?? 0;
 		$arrayResult['PAYMENT_INSIDE_02'] = number_format($payment_inside_02 ?? '0',2);
