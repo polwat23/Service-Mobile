@@ -520,39 +520,32 @@ class CalculateLoan {
 		}else{
 			$intarrear = $amt_transfer;
 		}
-		$int_returnSrc = 0;
 		$int_returnFull = 0;
-		$interest = $this->calculateInterestArr($contract_no,$amt_transfer);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interest = $this->calculateIntAPI($contract_no,$amt_transfer);
+		$interestFull = $interest["INT_PAYMENT"];
+		if($interest["INT_PERIOD"] > 0){
+			$interestPeriod = $interest["INT_PERIOD"];
+		}else{
+			$interestPeriod = $interest["INT_PAYMENT"];
+		}
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($int_return >= $interest){
-			$int_return = $int_return - $interest;
-			$interest = 0;
-		}else{
-			$interest = $interest - $int_return;
-			$int_return = 0;
-		}
-		if($interest > 0){
-			if($amt_transfer < $interest){
-				$interest = $amt_transfer;
+		$int_returnSrc = $interest["INT_RETURN"] ?? 0;
+		$prinPay = 0;
+		if($interest["INT_PAYMENT"] > 0){
+			if($amt_transfer < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $amt_transfer;
 			}else{
-				$prinPay = $amt_transfer - $interest;
+				$prinPay = $amt_transfer - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
 			}
 		}else{
 			$prinPay = $amt_transfer;
-		}	
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = $this->calculateIntReturn($contract_no,$prinPay,$interest);
-				$int_returnFull = $int_returnSrc;
-			}
 		}
+
 		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$updateInterestAccum = $conmssql->prepare("UPDATE mbmembmaster SET ACCUM_INTEREST = :int_accum WHERE member_no = :member_no");
@@ -818,6 +811,7 @@ class CalculateLoan {
 			$config["COOP_ID"],
 			$payinslip_no,
 			$config["COOP_ID"],
+			$rowMember["MEMBGROUP_CODE"],
 			$member_no,
 			$slipdoc_no,'PX',
 			$operate_date,
@@ -826,13 +820,14 @@ class CalculateLoan {
 			$rowShare["SHARESTK_AMT"] * 10,
 			$interest_accum,
 			$slipwtd ?? null,
-			$amt_transfer
+			$amt_transfer,
+			$config["COOP_ID"]
 		];
-		$insertPayinSlip = $conmssql->prepare("INSERT INTO slslippayin(COOP_ID,PAYINSLIP_NO,MEMCOOP_ID,MEMBER_NO,DOCUMENT_NO,SLIPTYPE_CODE,
-												SLIP_DATE,OPERATE_DATE,SHARESTKBF_VALUE,SHARESTK_VALUE,INTACCUM_AMT,REF_SYSTEM,REF_SLIPNO,SLIP_AMT,SLIP_STATUS,ENTRY_ID,ENTRY_DATE)
-												VALUES(?,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),?,20),
+		$insertPayinSlip = $conmssql->prepare("INSERT INTO slslippayin(COOP_ID,PAYINSLIP_NO,MEMCOOP_ID,MEMBGROUP_CODE,MEMBER_NO,DOCUMENT_NO,SLIPTYPE_CODE,
+												SLIP_DATE,OPERATE_DATE,SHARESTKBF_VALUE,SHARESTK_VALUE,INTACCUM_AMT,REF_SYSTEM,REF_SLIPNO,SLIP_AMT,SLIP_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID)
+												VALUES(?,?,?,?,?,?,?,CONVERT(VARCHAR(10),?,20),CONVERT(VARCHAR(10),?,20),
 												?,?,?,'DEP',?,?,1,
-												'MOBILE',GETDATE())");
+												'MOBILE',GETDATE(),?)");
 		if($insertPayinSlip->execute($arrExecuteSlSlip)){
 			$arrayResult['RESULT'] = TRUE;
 			return $arrayResult;
