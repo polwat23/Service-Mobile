@@ -275,7 +275,9 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
 					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
+					ob_flush();
+					echo json_encode($arrayResult);
+					exit();
 				}
 				
 			}else{

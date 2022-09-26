@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		if(isset($rowDataMember["CARD_PERSON"])){
 			$getDepositAcc = $conoracle->prepare("SELECT dp.DEPTACCOUNT_NO,dp.DEPTACCOUNT_NAME,dp.PRNCBAL,dt.DEPTTYPE_DESC 
 												FROM dpdeptmaster dp LEFT JOIN dpdepttype dt ON dp.DEPTTYPE_CODE = dt.DEPTTYPE_CODE
-												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code = '04'");
+												WHERE dp.member_no = :member_no and dp.deptclose_status = '0' and dp.depttype_code IN('04','05')");
 			$getDepositAcc->execute([':member_no' => $member_no]);
 			while($rowDepAcc = $getDepositAcc->fetch(PDO::FETCH_ASSOC)){
 				$arrAccFee = array();
