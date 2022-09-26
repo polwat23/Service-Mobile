@@ -2,6 +2,7 @@
 	"NAME_APP" : "SCR Saving Connect",
 	"COOP_KEY" : "scr",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=scr",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=scr",
 	"COOP_ID" : "038001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.scrsaving.mobile",

@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 		
 	}
 	$conmysql->beginTransaction();
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = strtoupper($lib->mb_str_pad($dataComing["member_no"]));
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
 	$reference = $lib->randomText('all',6);
