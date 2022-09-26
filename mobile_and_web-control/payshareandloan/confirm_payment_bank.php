@@ -209,6 +209,9 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
                 $fetchLoanRepay->execute([':loancontract_no' => $listPayment["destination"]]);
                 $rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
                 $interest = $cal_loan->calculateIntAPI($listPayment["destination"], $listPayment["amt_transfer"]);
+				if($interest["INT_PAYMENT"] < 0){
+					$interest["INT_PAYMENT"] = 0;
+				}
                 if ($interest["INT_PAYMENT"] > 0) {
                     $conoracle->rollback();
                     if ($listPayment["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]) {

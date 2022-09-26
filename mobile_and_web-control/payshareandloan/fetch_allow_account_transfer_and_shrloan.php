@@ -46,6 +46,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$interest = 0;
 				$arrLoan = array();
 				$interest = $cal_loan->calculateIntAPI($rowLoan["LOANCONTRACT_NO"]);
+				if($interest["INT_PAYMENT"] < 0){
+					$interest["INT_PAYMENT"] = 0;
+				}
 				if($interest["INT_PAYMENT"] > 0){
 					$arrLoan["INT_BALANCE"] = $interest["INT_PAYMENT"];
 				}

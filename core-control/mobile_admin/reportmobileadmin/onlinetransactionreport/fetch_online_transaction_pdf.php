@@ -135,9 +135,21 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 						':destination' => $rowRecon["destination"]
 					]);
 					$rowDepttype = $getDepttype->fetch(PDO::FETCH_ASSOC);
-					$deposit_external_20 += $rowRecon["amount"];
+					//$deposit_external_20 += $rowRecon["amount"];
+					if($rowDepttype["DEPTTYPE_CODE"] =='01'){
+						$deposit_external_20 += $rowRecon["amount"];
+						$deposit20++;
+						$dept_count20++;
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='02'){
+						$deposit_external_30 += $rowRecon["amount"];
+						$deposit30++;
+						$dept_count30++;
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='07'){
+						$deposit_external_70 += $rowRecon["amount"];
+						$deposit70++;
+						$dept_count70++;
+					}	
 					$summary_feeamt_deposit += ($rowRecon["fee_amt"] ?? 0);
-					$dept_count20++;
 				}
 				
 				if($rowRecon["transaction_type_code"] == 'WTX'){//ถอนภายนอกออมทรัพย์

@@ -1244,7 +1244,7 @@ class CalculateDep {
 						':entry_date' => $operate_date,
 						':laststmno' => $lastStmSrcNo,
 						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-						':acc_id' => $rowMapAccFee["ACCOUNT_ID"],
+						':acc_id' => '42020300',
 						':refer_deptslip_no' => $deptslip_no
 					];
 					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   

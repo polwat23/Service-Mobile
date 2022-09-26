@@ -131,9 +131,9 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 
 				$payslip = $cal_loan->paySlip(
 					$conoracle,
-					$dataComing["SUM_AMT"],
+					$dataComing["SUM_AMT"] - $dataComing["penalty_amt"],
 					$config,
-					$payinslipdoc_no,
+					$payinslip_no,
 					$dateOperC,
 					$srcvcid["ACCOUNT_ID"],
 					$wtdResult["DEPTSLIP_NO"],
@@ -218,7 +218,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 							$listPayment["amt_transfer"],
 							0,
 							$config,
-							$payinslipdoc_no,
+							$payinslip_no,
 							$dateOperC,
 							$srcvcid["ACCOUNT_ID"],
 							$wtdResult["DEPTSLIP_NO"],
@@ -265,6 +265,9 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 						$fetchLoanRepay->execute([':loancontract_no' => $listPayment["destination"]]);
 						$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
 						$interest = $cal_loan->calculateIntAPI($listPayment["destination"], $listPayment["amt_transfer"]);
+						if($interest["INT_PAYMENT"] < 0){
+							$interest["INT_PAYMENT"] = 0;
+						}
 						if ($interest["INT_PAYMENT"] > 0) {
 							if ($listPayment["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]) {
 								$arrayResult['RESPONSE_CODE'] = "WS0098";
@@ -369,7 +372,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 						$newArrSuccess["FROM_ACCOUNT_NO"] = $from_account_no;
 						$newArrSuccess["TO_ACCOUNT_NO"] = $listPayment["destination"];
 						$newArrSuccess["AMOUNT"] = $listPayment["amt_transfer"];
-						$newArrSuccess["PENALTY_AMT"] = $listPayment["fee_amt"];
+						$newArrSuccess["PENALTY_AMT"] = $dataComing["penalty_amt"];
 						$newArrSuccess["AMOUNT_RECEIVE"] = $listPayment["amt_transfer"] - $listPayment["fee_amt"];
 						$newArrSuccess["OPERATE_DATE"] = $dateOperC;
 						$newArrSuccess["DEPTSLIP_NO"] = $deptslip_no;
@@ -411,7 +414,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 							':from_account' => $value["FROM_ACCOUNT_NO"],
 							':destination' => $value["TO_ACCOUNT_NO"],
 							':amount' => $value["AMOUNT"],
-							':penalty_amt' => $value["PENALTY_AMT"],
+							':penalty_amt' => $dataComing["penalty_amt"],
 							':amount_receive' => $value["AMOUNT_RECEIVE"],
 							':operate_date' => $dateOperC,
 							':member_no' => $payload["member_no"],
@@ -430,7 +433,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 							':from_account' => $value["FROM_ACCOUNT_NO"],
 							':destination' => $value["TO_ACCOUNT_NO"],
 							':amount' => $value["AMOUNT"],
-							':penalty_amt' => $value["PENALTY_AMT"],
+							':penalty_amt' => $dataComing["penalty_amt"],
 							':amount_receive' => $value["AMOUNT_RECEIVE"],
 							':operate_date' => $dateOperC,
 							':member_no' => $payload["member_no"],

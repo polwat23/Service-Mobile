@@ -80,7 +80,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','list_payment'],
 					}
 					$arrayResult['LIST_PAYMENT'] = $grpListPayment;
 					$arrayResult['FEE_AMT'] = $sum_fee_amt;
-					$arrayResult['SUM_AMT'] = $dataComing["amt_transfer"] + $sum_fee_amt;
 					if(isset($arrInitDep["PENALTY_AMT"]) && $arrInitDep["PENALTY_AMT"] > 0){
 						$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
 						$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
@@ -89,6 +88,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','list_payment'],
 						$arrayResult['PENALTY_AMT'] = $arrInitDep["PENALTY_AMT"];
 						$arrayResult['PENALTY_AMT_FORMAT'] = number_format($arrInitDep["PENALTY_AMT"],2);
 					}
+					$arrayResult['SUM_AMT'] = $dataComing["amt_transfer"] + $sum_fee_amt + ($arrInitDep["PENALTY_AMT"] ?? 0);
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
