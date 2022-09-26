@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+											WHERE dp.member_no = :member_no and dp.deptclose_status  = 0 ORDER BY dp.deptaccount_no ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();

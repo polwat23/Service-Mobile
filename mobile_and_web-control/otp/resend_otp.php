@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 		
 	}
 	$conmysql->beginTransaction();
-	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	$member_no = strtoupper($lib->mb_str_pad($dataComing["member_no"]));
 	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
 	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
