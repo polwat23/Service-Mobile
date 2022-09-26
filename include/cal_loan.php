@@ -300,7 +300,7 @@ class CalculateLoan {
 						':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] - $prinPay,
 						':loancontract_no' => $contract_no,
 						':lastperiod_pay' => $lastperiod,
-						':withdrawable_amt' => $dataCont["LOANAPPROVE_AMT"] - $dataCont["PRINCIPAL_BALANCE"],
+						':withdrawable_amt' => $dataCont["LOANAPPROVE_AMT"] - ($dataCont["PRINCIPAL_BALANCE"] - $prinPay),
 						':int_arr' => $intArr,
 						':int_accum' => $interest_accum + $interest["INT_PAYMENT"],
 						':prinpay' => $prinPay,
@@ -503,7 +503,7 @@ class CalculateLoan {
 	public function paySlip($conoracle,$amt_transfer,$config,$slipdoc_no,$operate_date,
 	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWTD,$conmysql,$penalty_amt=0){
 		$interest_accum = $this->calculateIntAccum($member_no);
-		$getShareinfo = $conoracle->prepare("SELECT SHARESTK_AMT FROM SHSHAREMASTER WHERE member_no = :member_no");
+		$getShareinfo = $conoracle->prepare("SELECT SHARESTK_AMT,SHAREBEGIN_AMT FROM SHSHAREMASTER WHERE member_no = :member_no");
 		$getShareinfo->execute([':member_no' => $member_no]);
 		$rowShare = $getShareinfo->fetch(\PDO::FETCH_ASSOC);
 		$getMemberInfo = $conoracle->prepare("SELECT MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
@@ -516,6 +516,7 @@ class CalculateLoan {
 			':document_no' => $slipdoc_no,
 			':sliptype_code' => 'PX',
 			':operate_date' => $operate_date,
+			':sharebf_value' => $rowShare["SHAREBEGIN_AMT"] * 50,
 			':sharevalue' => $rowShare["SHARESTK_AMT"] * 50,
 			':intaccum_amt' => $interest_accum,
 			':moneytype_code' => 'TRN',
@@ -531,7 +532,7 @@ class CalculateLoan {
 												VALUES(:coop_id,:payinslip_no,:coop_id,:member_no,:document_no,:sliptype_code,
 												TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
 												TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
-												:sharevalue,:sharevalue,:intaccum_amt,:moneytype_code,1,:tofrom_accid,'DEP',:slipdep,:slip_amt,:membgroup_code,
+												:sharebf_value,:sharevalue,:intaccum_amt,:moneytype_code,1,:tofrom_accid,'DEP',:slipdep,:slip_amt,:membgroup_code,
 												'MOBILE',SYSDATE)");
 		if($insertPayinSlip->execute($arrExecuteSlSlip)){
 			$arrayResult['RESULT'] = TRUE;
