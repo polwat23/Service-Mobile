@@ -131,7 +131,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 
 				$payslip = $cal_loan->paySlip(
 					$conoracle,
-					$dataComing["SUM_AMT"],
+					$dataComing["SUM_AMT"] - $dataComing["penalty_amt"],
 					$config,
 					$payinslip_no,
 					$dateOperC,
