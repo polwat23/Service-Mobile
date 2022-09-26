@@ -411,6 +411,7 @@ class functions {
 							$arrayMT = array();
 							if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
 								$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+								$arrayMT["IS_HW"] = FALSE;
 								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
 								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
@@ -418,10 +419,12 @@ class functions {
 								$arrayMemberGRP[] = $arrayMT;
 							}else{
 								$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
+								$arrayMT["IS_HW"] = TRUE;
 								$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
 								$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 								$arrayMT["RECEIVE_NOTIFY_TRANSACTION"] = $rowFCMToken["receive_notify_transaction"];
 								$arrayMember[] = $rowFCMToken["member_no"];
+								$arrayMemberGRP[] = $arrayMT;
 								$arrayMemberGRPHW[] = $arrayMT;
 							}
 						}
@@ -435,23 +438,26 @@ class functions {
 						$arrayMT = array();
 						if(isset($rowFCMToken["fcm_token"]) && $rowFCMToken["fcm_token"] != ""){
 							$arrayMT["TOKEN"] = $rowFCMToken["fcm_token"];
+							$arrayMT["IS_HW"] = FALSE;
 							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 							$arrayMember[] = $rowFCMToken["member_no"];
 							$arrayMemberGRP[] = $arrayMT;
 						}else{
 							$arrayMT["TOKEN"] = $rowFCMToken["hms_token"];
+							$arrayMT["IS_HW"] = TRUE;
 							$arrayMT["MEMBER_NO"] = $rowFCMToken["member_no"];
 							$arrayMT["RECEIVE_NOTIFY_NEWS"] = $rowFCMToken["receive_notify_news"];
 							$arrayMember[] = $rowFCMToken["member_no"];
+							$arrayMemberGRP[] = $arrayMT;
 							$arrayMemberGRPHW[] = $arrayMT;
 						}
 					}
 				}
 			}
 			$arrayAll["MEMBER_NO"] = $arrayMember;
-			$arrayAll["LIST_SEND_HW"] = $arrayMemberGRPHW;
 			$arrayAll["LIST_SEND"] = $arrayMemberGRP;
+			$arrayAll["LIST_SEND_HW"] = $arrayMemberGRPHW;
 			return $arrayAll;
 		}
 		

@@ -187,8 +187,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
 				}
 				$vccamtPenalty = $cal_dep->getVcMapID('00');
-				$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowPayFee["account_payfee"],$vccamtPenalty["ACCOUNT_ID"],'FEE',
-				$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,null,$lib,$maxno_deptfee,$dataAccFee,null,null,$slipnoFee);
+				if($rowPayFee["fee_deposit"] > 0){
+					$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowPayFee["account_payfee"],$vccamtPenalty["ACCOUNT_ID"],'FEE',
+					$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,null,$lib,$maxno_deptfee,$dataAccFee,null,null,$slipnoFee);
+				}else{
+					$penaltyWtd["RESULT"] = true;
+				}
 				if($penaltyWtd["RESULT"]){
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
@@ -271,7 +275,9 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					];
 					$log->writeLog('deposittrans',$arrayStruc);
 					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
+					ob_flush();
+					echo json_encode($arrayResult);
+					exit();
 				}
 				
 			}else{

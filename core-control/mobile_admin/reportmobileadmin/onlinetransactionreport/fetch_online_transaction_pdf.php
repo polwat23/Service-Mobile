@@ -58,11 +58,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".($dataComing["trrans_type"] == "payloan" ? 
 														"or (transfer_mode = '9' and transaction_type_code = 'WFS')" : null)."
 														".($dataComing["trrans_type"] == "receiveloan" ? 
-														"or (transfer_mode = '9' and transaction_type_code = 'DAP')" : null).")
+																	"or (transfer_mode = '9' and transaction_type_code = 'DAP')" : null).")
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and operate_date >= :start_date" : null)."
+														"and date_format(operate_date,'%Y') >= :start_date" : null)."
 														".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and operate_date <= :end_date" : null)." 
+														"and date_format(operate_date,'%Y') <= :end_date" : null)." 
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no <= :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
