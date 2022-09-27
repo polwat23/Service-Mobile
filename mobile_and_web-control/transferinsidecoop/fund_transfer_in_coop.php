@@ -56,10 +56,6 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 			$arrayGroup["system_cd"] = "02";
 			$arrayGroup["withdrawable_amt"] = null;
 			try {
-				$arrayData = array();
-				$arrayData["serviceName"] = 'transfer';
-				$arrHeader[] = "requestId: ".$lib->randomText('all',10);
-				$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 				$argumentWS = [
 					"as_wspass" => $config["WS_PASS"],
 					"astr_dept_inf_serv" => $arrayGroup

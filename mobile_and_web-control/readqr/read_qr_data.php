@@ -3,7 +3,41 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'QRCodeScanner')){
+		
 		if($dataComing["type"] == "linebotregister"){
+			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+			//เช็คเฉพาะเจ้าหน้าที่ 
+			$checkMemberStaff = $conoracle->prepare("SELECT
+																mb.member_no,
+																mp.prename_short,
+																mb.memb_name,
+																mb.memb_surname,
+																mt.membtype_desc
+														FROM
+																mbmembmaster mb
+																LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+																LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+														where  mb.RESIGN_STATUS = '0'
+														and mb.MEMBCAT_CODE = '10'
+														and mb.MEMBTYPE_CODE = '18'
+														and mb.member_no = :member_no");
+			$checkMemberStaff->execute([':member_no' => $member_no]);
+			$rowStaff = $checkMemberStaff->fetch(PDO::FETCH_ASSOC);
+			
+			
+			$checkUserForTest = $conmysql->prepare("SELECT member_no FROM lbmeberfortest WHERE member_no = :member_no");
+			$checkUserForTest->execute([':member_no' => $member_no]);
+			$rowUserTest = $checkUserForTest->fetch(PDO::FETCH_ASSOC);
+			
+			if(empty($rowStaff) && $rowStaff ==""){
+				if(empty($rowUserTest) && $rowUserTest==""){
+					$arrayResult['RESPONSE_MESSAGE'] = "ขออภัยในความไม่สะดวก ขณะนี้อยู่ในช่วงการทดสอบ ท่านไม่ได้รับสิทธิ์ในการทดสอบ";
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
+			
+			}
+			
 			if(isset($dataComing["expire_date"])){
 				if(date('YmdHis',strtotime($dataComing["expire_date"])) <= date('YmdHis')){
 					$arrayResult['RESPONSE_CODE'] = "WS0131";

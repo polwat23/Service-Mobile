@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 		if($rowCheckBill["member_no"] == $dataComing["member_no"]){
 			if($rowCheckBill["qrtransfer_amt"] == $dataComing["amt_transfer"]){
 				if($rowCheckBill["transfer_status"] == '0'){
+					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 					if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
 						$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
 															WHERE qrgenerate = :tran_id");
@@ -22,47 +23,62 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 						while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
 							if($rowDetail["trans_code_qr"] == '001'){ //ฝากเงิน
 								$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
+								$constantDep = $cal_dep->getConstantAcc($deptaccount_no);
 								$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","006");
 								if($arrRightDep["RESULT"]){
-									$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-									$arrDataAPI["MemberID"] = substr($member_no,-6);
-									$arrDataAPI["ToCoopAccountNo"] = $deptaccount_no;
-									$arrDataAPI["FromBankCode"] = $lib->mb_str_pad($dataComing["bank_code"],'3');
-									$arrDataAPI["FromBankAccountNo"] = $lib->mb_str_pad($dataComing["member_no"],'10');
-									$arrDataAPI["TransferFee"] = 0;
-									$arrDataAPI["DepositAmount"] = $rowDetail["qrtransferdt_amt"];
-									$arrDataAPI["UserRequestDate"] = date('c');
-									$arrDataAPI["Note"] = "Check Fee of VerifyData in Deposit";
-									$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/CheckDepositFee",$arrDataAPI,$arrHeaderAPI);
-									if(!$arrResponseAPI["RESULT"]){
-										$filename = basename(__FILE__, '.php');
-										$logStruc = [
-											":error_menu" => $filename,
-											":error_code" => "WS9999",
-											":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckDepositFee",
-											":error_device" => $dataComing["member_no"].' ref with Bank App'
+									$dateOperC = date('c');
+									$arrayGroup = array();
+									$arrayGroup["account_id"] = null;
+									$arrayGroup["action_status"] = "9";
+									$arrayGroup["atm_no"] = "MOBILE";
+									$arrayGroup["atm_seqno"] = null;
+									$arrayGroup["aviable_amt"] = null;
+									$arrayGroup["bank_accid"] = null;
+									$arrayGroup["bank_cd"] = '025';
+									$arrayGroup["branch_cd"] = null;
+									$arrayGroup["coop_code"] = $config["COOP_KEY"];
+									$arrayGroup["coop_id"] = "065001";
+									$arrayGroup["deptaccount_no"] = $deptaccount_no;
+									$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
+									$arrayGroup["entry_id"] = "MOBILE";
+									$arrayGroup["fee_amt"] = 0;
+									$arrayGroup["fee_operate_cd"] = '0';
+									$arrayGroup["feeinclude_status"] = '1';
+									$arrayGroup["item_amt"] = $rowDetail["qrtransferdt_amt"];
+									$arrayGroup["member_no"] = $dataComing["member_no"];
+									$arrayGroup["moneytype_code"] = "CBT";
+									$arrayGroup["msg_output"] = null;
+									$arrayGroup["msg_status"] = null;
+									$arrayGroup["operate_date"] = $dateOperC;
+									$arrayGroup["oprate_cd"] = "003";
+									$arrayGroup["post_status"] = "1";
+									$arrayGroup["principal_amt"] = null;
+									$arrayGroup["ref_app"] = "MOBILE";
+									$arrayGroup["ref_slipno"] = null;
+									$arrayGroup["slipitemtype_code"] = 'DQR';
+									$arrayGroup["stmtitemtype_code"] = 'DQR';
+									$arrayGroup["system_cd"] = "02";
+									$arrayGroup["withdrawable_amt"] = null;
+									try {
+										$argumentWS = [
+											"as_wspass" => $config["WS_PASS"],
+											"astr_dept_inf_serv" => $arrayGroup
 										];
-										$log->writeLog('errorusage',$logStruc);
-										$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/CheckDepositFee";
-										$lib->sendLineNotify($message_error);
-										$func->MaintenanceMenu($dataComing["menu_component"]);
+										$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
+										$responseSoap = $resultWS->of_dept_inf_servResult;
+										if($responseSoap->msg_status == '0000'){
+											
+										}else{
+											$arrayResult['RESPONSE_CODE'] = "WS0444";
+											$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output;
+											$arrayResult['RESULT'] = FALSE;
+											ob_flush();
+											echo json_encode($arrayResult);
+											exit();
+										}
+									}catch(SoapFault $e){
 										$arrayResult['RESPONSE_CODE'] = "WS9999";
 										$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-										$arrayResult['RESULT'] = FALSE;
-										ob_flush();
-										echo json_encode($arrayResult);
-										exit();
-										
-									}
-									$arrResponseAPI = json_decode($arrResponseAPI);
-									if($arrResponseAPI->responseCode == "200"){
-									}else{
-										$arrayResult['RESPONSE_CODE'] = "WS0028";
-										if(isset($configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale])){
-											$arrayResult['RESPONSE_MESSAGE'] = $configError["SAVING_EGAT_ERR"][0][$arrResponseAPI->responseCode][0][$lang_locale];
-										}else{
-											$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-										}
 										$arrayResult['RESULT'] = FALSE;
 										ob_flush();
 										echo json_encode($arrayResult);

@@ -200,7 +200,7 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 		}
 		
 		echo $response;
-
+		
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

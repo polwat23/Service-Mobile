@@ -16,10 +16,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataWithdraw["bank_code"]);
 			if($arrRightDep["RESULT"]){
 				try {
-					$arrayData = array();
-					$arrayData["serviceName"] = 'verifywithdraw';
-					$arrHeader[] = "requestId: ".$lib->randomText('all',10);
-					$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 					try{
 						$argumentWS = [

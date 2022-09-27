@@ -149,7 +149,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'OPTIONS') {
 							require_once(__DIR__.'/../include/exit_footer.php');
 							
 						}
-						$rowStatus = $func->checkAccStatus($payload["member_no"]);
+						if(isset($dataComing["channel"]) && $dataComing["channel"] == 'mobile_app'){
+							$rowStatus = $func->checkAccStatus($payload["member_no"]);
+						}else{
+							$rowStatus = $func->checkAccStatusWeb($payload["member_no"]);
+						}
 						if(!$rowStatus){
 							$func->revoke_alltoken($payload["id_token"],'-88');
 							$arrayResult['RESPONSE_CODE'] = "WS0010";

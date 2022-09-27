@@ -9,11 +9,6 @@ require_once(__DIR__.'/../include/connection.php');
 require_once(__DIR__.'/../include/lib_util.php');
 require_once(__DIR__.'/../include/validate_input.php');
 
-if( isset( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') ) {
-   ob_start("ob_gzhandler");
-}else{
-   ob_start();
-}
 
 use Utility\library;
 use Connection\connection;
@@ -54,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	}
 	$arrayResult["USER_NOT_REGISTER"] = $arrayGroup;
 	$arrayResult["RESULT"] = TRUE;
-	require_once(__DIR__.'/../include/exit_footer.php');
+	echo json_encode($arrayResult);
 }else{
 	http_response_code(500);
 }

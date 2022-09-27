@@ -1,0 +1,14 @@
+{
+	"LINEBOT_NAME" : "สอ.กฟผ.",
+	"COOP_ID" : "008001",
+	"COOP_NAME" : "สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิต จำกัด",
+	"COOP_KEY" : "EGAT",
+	"LIFF_ID" : "1657389897-X3jd5p07",
+	"LINE_ID" : "@gix8669z",
+	"LINK_BIND" : "egatsaving://app/home?qrdata=",
+	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
+	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",
+	"LINEBOT_CHANNELID" : "1657374702",
+	"LINEBOT_SECRETKEY" : "f65f38701d85e899992b3f23775d30d2",
+	"LINE_AUTH_KEY" : "VN2J53tFHMCy4A2Hjp3WTUyQRnH+UIFfDdnwt3XwbQdnYZod/DimLHqFKC8BzlyDpnQz7oecweautZMd02TYaR2w+0+pwNEPepulmNeoq2+yRI/tldIIkupkxVR/QuHNdMdGe7G1l/R/PG70WnrnhAdB04t89/1O/w1cDnyilFU="
+}

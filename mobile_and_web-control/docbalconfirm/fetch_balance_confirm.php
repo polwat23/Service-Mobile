@@ -5,6 +5,8 @@ use Dompdf\Dompdf;
 
 $dompdf = new DOMPDF();
 
+$conoracle = $con->connecttooldoracle();
+
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DocBalanceConfirm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -178,13 +180,13 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 			</div>
 			<div style="margin-top:20px; text-indent:50px; line-height: 17px; ">
 			หนังสือนี้มิใช่คําเตือนให้ชําระเงิน แต่เพื่อประโยชน์ในการสอบบัญชีของสหกรณ์ ขอให้สมาชิกได้โปรดตรวจสอบ รายการด้าน  ล่างนี้ ว่าถูกต้องหรือคลาดเคลื่อนอย่างไร โดยกรอกรายการตามแบบตอบที่ด้านล่าง 
-			<b><u>และส่งแบบตอบไปยังกรรมการผู้จัดการใหญ่ สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จํากัด ภายในกําหนด 15 วัน นับแต่วันที่ได้ประกาศ</u></b> มิฉะนั้นจะถือว่าถูกต้อง
+			<b><u>และส่งแบบตอบไปยังผู้จัดการใหญ่ สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จํากัด ภายในกําหนด 15 วัน นับแต่วันที่ได้ประกาศ</u></b> มิฉะนั้นจะถือว่าถูกต้อง
 			</div>
 			<div class="text-right"style="padding-right:110px; margin-top:30px;" >ขอแสดงความนับถือ</div>
-			<div class="text-right"style="padding-right:100px; margin-top:100px;">(นายพูนสุข โตชนาการ) </div>
-			<div class="text-right"style="padding-right:103px; margin-top:-5px;">กรรมการผู้จัดการใหญ่</div>
+			<div class="text-right"style="padding-right:100px; margin-top:100px;">(นางสิริวรรณ วิชญาเดชะ) </div>
+			<div class="text-right"style="padding-right:103px; margin-top:-5px;">ผู้จัดการใหญ่</div>
 			<div  style="position:absolute; right:80px; top:355px; ">
-				<img src="../../resource/utility_icon/signature/signature.png" style="width:130px;">
+				<img src="../../resource/utility_icon/signature/sign_siriwan.png" style="width:130px;">
 			</div>
 			<div style="position:absolute; left:110px; top:86px;">
 				ขอแจ้งรายการบัญชีของท่านเพียงสิ้นวันที่ '.$arrHeader["date_confirm"].'

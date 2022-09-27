@@ -64,9 +64,18 @@ if(!$anonymous){
 				while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
 					$arrTypeAllow[] = "'".$rowTypeAllow["deptaccount_no"]."'";
 				}
-				$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
-												WHERE deptaccount_no IN(".implode(',',$arrTypeAllow).") and deptclose_status = 0");
-				$fetchMenuDep->execute();
+				
+				if($dataComing["channel"] == "web"){
+					$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+													WHERE member_no = :member_no and deptclose_status = 0");
+					$fetchMenuDep->execute([
+						':member_no' => $member_no
+					]);
+				}else{
+					$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+													WHERE deptaccount_no IN(".implode(',',$arrTypeAllow).") and deptclose_status = 0");
+					$fetchMenuDep->execute();
+				}
 				$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 				$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 				$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
@@ -346,9 +355,17 @@ if(!$anonymous){
 							while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
 								$arrTypeAllow[] = "'".$rowTypeAllow["deptaccount_no"]."'";
 							}
-							$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
-															WHERE deptaccount_no IN(".implode(',',$arrTypeAllow).") and deptclose_status = 0");
-							$fetchMenuDep->execute();
+							if($dataComing["channel"] == "web"){
+								$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+																WHERE member_no = :member_no and deptclose_status = 0");
+								$fetchMenuDep->execute([
+									':member_no' => $member_no
+								]);
+							}else{
+								$fetchMenuDep = $conoracle->prepare("SELECT SUM(prncbal) as BALANCE,COUNT(deptaccount_no) as C_ACCOUNT FROM dpdeptmaster 
+																WHERE deptaccount_no IN(".implode(',',$arrTypeAllow).") and deptclose_status = 0");
+								$fetchMenuDep->execute();
+							}
 							$rowMenuDep = $fetchMenuDep->fetch(PDO::FETCH_ASSOC);
 							$arrMenuDep["BALANCE"] = number_format($rowMenuDep["BALANCE"],2);
 							$arrMenuDep["AMT_ACCOUNT"] = $rowMenuDep["C_ACCOUNT"] ?? 0;
@@ -411,14 +428,14 @@ if(!$anonymous){
 				if($dataComing["channel"] == 'mobile_app'){
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
-					$arrayResult['MENU_FAVORITE'] = [];//$arrFavMenuGroup;
+					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 				}else{
 					$arrayResult['MENU_HOME'] = $arrayAllMenu;
 					$arrayResult['MENU_SETTING'] = $arrayMenuSetting;
 					$arrayResult['MENU_TRANSACTION'] = $arrayMenuTransaction;
-					$arrayResult['MENU_FAVORITE'] = [];//$arrFavMenuGroup;
+					$arrayResult['MENU_FAVORITE'] = $arrFavMenuGroup;
 					$arrayResult['MENU_DEPOSIT'] = $arrMenuDep;
 					$arrayResult['MENU_LOAN'] = $arrMenuLoan;
 
@@ -431,7 +448,7 @@ if(!$anonymous){
 				$arrayLiveMenu["LIVE_TITLE"] = $rowLive["live_title"];
 				$arrayResult['MENU_LIVE'] = $arrayLiveMenu;
 				
-				if(preg_replace('/\./','',$dataComing["app_version"]) >= '1171' || $dataComing["channel"] == 'web'){
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '1172' || $dataComing["channel"] == 'web'){
 					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
 				}
 			
@@ -504,7 +521,7 @@ if(!$anonymous){
 		if(isset($arrayAllMenu)){
 			$arrayResult['MENU'] = $arrayAllMenu;
 			
-			if(preg_replace('/\./','',$dataComing["app_version"]) >= '1171' || $dataComing["channel"] == 'web'){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '1172' || $dataComing["channel"] == 'web'){
 				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
 			}
 

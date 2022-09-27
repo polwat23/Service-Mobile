@@ -55,6 +55,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
 					'WFS',$conmysql,0,'006');
 				}
+				$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,qrcodegendt_id,
 													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no
 													FROM gcqrcodegendetail 
@@ -64,22 +65,76 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$ref_no = time().$lib->randomText('all',3);
 					if($rowDetail["trans_code_qr"] == '001'){ //ฝากเงิน
 						$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
-						$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-						$arrDataAPI["MemberID"] = substr($dataComing["member_no"],-6);
-						$arrDataAPI["ToCoopAccountNo"] = $deptaccount_no;
-						$arrDataAPI["FromBankCode"] = $lib->mb_str_pad($dataComing["bank_code"],'3');
-						$arrDataAPI["FromBankAccountNo"] = $lib->mb_str_pad($dataComing["member_no"],'10');
-						$arrDataAPI["DepositAmount"] = $rowDetail["qrtransferdt_amt"];
-						$arrDataAPI["UserRequestDate"] = $dateOperC;
-						$arrDataAPI["TransferFee"] = 0;
-						$arrDataAPI["DepositBankRefCode"] = $dataComing["bank_ref"];
-						$arrDataAPI["Note"] = "Deposit from billpayment";
-						$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/DepositFromBillPaymentCrossBank",$arrDataAPI,$arrHeaderAPI);
-						if(!$arrResponseAPI["RESULT"]){
-							$can_notpay[] = $rowDetail["ref_account"];
-						}
-						$ResponseAPI = json_decode($arrResponseAPI);
-						if($ResponseAPI->responseCode != "200"){
+						$constantDep = $cal_dep->getConstantAcc($deptaccount_no);
+						$dateOperC = date('c');
+						$arrayGroup = array();
+						$arrayGroup["account_id"] = null;
+						$arrayGroup["action_status"] = "1";
+						$arrayGroup["atm_no"] = "MOBILE";
+						$arrayGroup["atm_seqno"] = null;
+						$arrayGroup["aviable_amt"] = null;
+						$arrayGroup["bank_accid"] = null;
+						$arrayGroup["bank_cd"] = '025';
+						$arrayGroup["branch_cd"] = null;
+						$arrayGroup["coop_code"] = $config["COOP_KEY"];
+						$arrayGroup["coop_id"] = "065001";
+						$arrayGroup["deptaccount_no"] = $deptaccount_no;
+						$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
+						$arrayGroup["entry_id"] = "MOBILE";
+						$arrayGroup["fee_amt"] = 0;
+						$arrayGroup["fee_operate_cd"] = '0';
+						$arrayGroup["feeinclude_status"] = '1';
+						$arrayGroup["item_amt"] = $rowDetail["qrtransferdt_amt"];
+						$arrayGroup["member_no"] = $dataComing["member_no"];
+						$arrayGroup["moneytype_code"] = "CBT";
+						$arrayGroup["msg_output"] = null;
+						$arrayGroup["msg_status"] = null;
+						$arrayGroup["operate_date"] = $dateOperC;
+						$arrayGroup["oprate_cd"] = "003";
+						$arrayGroup["post_status"] = "1";
+						$arrayGroup["principal_amt"] = null;
+						$arrayGroup["ref_app"] = "MOBILE";
+						$arrayGroup["ref_slipno"] = null;
+						$arrayGroup["slipitemtype_code"] = "DQR";
+						$arrayGroup["stmtitemtype_code"] = "DQR";
+						$arrayGroup["system_cd"] = "02";
+						$arrayGroup["withdrawable_amt"] = null;
+						try {
+							$argumentWS = [
+								"as_wspass" => $config["WS_PASS"],
+								"astr_dept_inf_serv" => $arrayGroup
+							];
+							$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
+							$responseSoap = $resultWS->of_dept_inf_servResult;
+							if($responseSoap->msg_status != '0000'){
+								$can_notpay[] = $rowDetail["ref_account"];
+								if($rowDetail["trans_code_qr"] == '001' || $rowDetail["trans_code_qr"] == '002'){
+									$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9',auto_adj = '1' WHERE qrcodegendt_id = :qrcodegendt_id");
+									$updateNotpayDetail->execute([
+										':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
+									]);
+
+								}else{
+									$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9' WHERE qrcodegendt_id = :qrcodegendt_id");
+									$updateNotpayDetail->execute([
+										':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
+									]);
+								}
+							}else {
+								$can_pay[] = $rowDetail["ref_account"];
+								if($rowDetail["trans_code_qr"] == '001' || $rowDetail["trans_code_qr"] == '002'){
+									$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1',auto_adj = '1' WHERE qrcodegendt_id = :qrcodegendt_id");
+									$updatepayDetail->execute([
+										':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
+									]);
+								}else{
+									$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1' WHERE qrcodegendt_id = :qrcodegendt_id");
+									$updatepayDetail->execute([
+										':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
+									]);
+								}
+							}
+						}catch(SoapFault $e){
 							$can_notpay[] = $rowDetail["ref_account"];
 							if($rowDetail["trans_code_qr"] == '001' || $rowDetail["trans_code_qr"] == '002'){
 								$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9',auto_adj = '1' WHERE qrcodegendt_id = :qrcodegendt_id");
@@ -90,19 +145,6 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							}else{
 								$updateNotpayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '9' WHERE qrcodegendt_id = :qrcodegendt_id");
 								$updateNotpayDetail->execute([
-									':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
-								]);
-							}
-						}else{
-							$can_pay[] = $rowDetail["ref_account"];
-							if($rowDetail["trans_code_qr"] == '001' || $rowDetail["trans_code_qr"] == '002'){
-								$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1',auto_adj = '1' WHERE qrcodegendt_id = :qrcodegendt_id");
-								$updatepayDetail->execute([
-									':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
-								]);
-							}else{
-								$updatepayDetail = $conmysql->prepare("UPDATE gcqrcodegendetail SET trans_status = '1' WHERE qrcodegendt_id = :qrcodegendt_id");
-								$updatepayDetail->execute([
 									':qrcodegendt_id' => $rowDetail["qrcodegendt_id"]
 								]);
 							}
