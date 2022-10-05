@@ -1,7 +1,7 @@
 <?php
 require_once('../autoload.php');
 
-//$conwc = $con->connecttowcoracle();
+$conwc = $con->connecttowcoracle();
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'CremationInfo')){
@@ -30,6 +30,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
                                 wcdeptmaster.deptaccount_no as deptaccount_no  ,
                                 mbucfprename.prename_desc || wcdeptmaster.deptaccount_name || '  ' ||  wcdeptmaster.deptaccount_sname as FULL_NAME,
                                 wcdeptmaster.deptopen_date ,
+								wcdeptmaster.remark,
 							to_char(wcdeptmaster.deptopen_date,'dd/mm/')||to_char(EXTRACT(YEAR from wcdeptmaster.deptopen_date) +543) as T_date,
                                 wcdeptmaster.prncbal,wcdeptmaster.deptclose_status as wfmember_status  
                                 from wcdeptmaster , mbucfprename , mbmembmaster  , wcucfmembtype 
@@ -64,6 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
                                 wcdeptmaster.deptaccount_no as deptaccount_no  ,
                                 mbucfprename.prename_desc || wcdeptmaster.deptaccount_name || '  ' ||  wcdeptmaster.deptaccount_sname as FULL_NAME,
                                 wcdeptmaster.deptopen_date ,
+								wcdeptmaster.remark,
 						to_char(wcdeptmaster.deptopen_date,'dd/mm/')||to_char(EXTRACT(YEAR from wcdeptmaster.deptopen_date) +543) as T_date,
                                   wcdeptmaster.prncbal,wcdeptmaster.deptclose_status as wfmember_status  
                                 from wcdeptmaster , mbucfprename , mbmembmaster  , wcucfmembtype 
@@ -81,9 +83,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayDataWc["DEPTACCOUNT_NO"] = $lib->formataccount($rowDataWc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrayDataWc["ACCOUNT_NAME"] = $rowDataWc["FULL_NAME"];
 				$arrayDataWc["CREMATION_TYPE"] = $rowDataWc["COOPBRANCH_DESC"];
-				//$arrayDataWc["CREMATION_CODE"] = $rowDataWc["WFTYPE_CODE"];
+				$arrayDataWc["REMARK"] = $rowDataWc["REMARK"];
 				$arrayDataWc["AMOUNT_WC"] = number_format($rowDataWc["PAYMENT"],2);
-				/*$getPersonAccountWC = $conwc->prepare("SELECT WCCODEPOSIT.TRANSFEREE_NAME,WCCODEPOSIT.SEQ_NO
+				$getPersonAccountWC = $conwc->prepare("SELECT DISTINCT WCCODEPOSIT.TRANSFEREE_NAME,WCCODEPOSIT.SEQ_NO
 													FROM WCDEPTMASTER LEFT JOIN WCCODEPOSIT 
 													ON WCDEPTMASTER.DEPTACCOUNT_NO= WCCODEPOSIT.DEPTACCOUNT_NO 
 													WHERE WCDEPTMASTER.DEPTCLOSE_STATUS = 0 AND TRIM(WCDEPTMASTER.DEPTACCOUNT_NO) = :account_no
@@ -93,9 +95,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					if(isset($rowPerson["TRANSFEREE_NAME"]) && $rowPerson["TRANSFEREE_NAME"] != ""){
 						$arrPerson = array();
 						$arrPerson["NAME"] = $rowPerson["TRANSFEREE_NAME"];
-						$arrayDataWc["PERSON"][] = $arrPerson;
+						$arrayDataWc["BENEFICIARY_LIST"][] = $arrPerson;
 					}
-				}*/
+				}
 				$arrayDataWcGrp[] = $arrayDataWc;
 			}
 		}

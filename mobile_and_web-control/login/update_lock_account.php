@@ -11,7 +11,9 @@ if($lib->checkCompleteArgument(['member_no','unique_id','api_token'],$dataComing
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+	$arrayResult['RESULT'] = TRUE;
+	require_once('../../include/exit_footer.php');
+	/*$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
 	if($updateAccountStatus->execute([':member_no' => $dataComing["member_no"]])){
 		$struc = [
 			':member_no' =>  $dataComing["member_no"],
@@ -39,7 +41,7 @@ if($lib->checkCompleteArgument(['member_no','unique_id','api_token'],$dataComing
 		$arrayResult['RESULT'] = FALSE;
 		require_once('../../include/exit_footer.php');
 		
-	}
+	}*/
 }else{
 	$filename = basename(__FILE__, '.php');
 	$logStruc = [

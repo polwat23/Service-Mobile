@@ -4,15 +4,14 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'News')){
 		$arrayGroupNews = array();
-		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,create_by,update_date,id_news,link_news_more,news_html,file_upload
-										FROM gcnews WHERE is_use = '1' ORDER BY create_date DESC LIMIT 5");
+		$fetchNews = $conmysql->prepare("SELECT news_title,news_detail,path_img_header,create_by,update_date,id_news,link_news_more,file_upload
+										FROM gcnews WHERE is_use = '1' ORDER BY create_date DESC LIMIT 20");
 		$fetchNews->execute();
 		while($rowNews = $fetchNews->fetch(PDO::FETCH_ASSOC)){
 			$arrayNews = array();
 			$arrayNews["TITLE"] = $lib->text_limit($rowNews["news_title"]);
 			$arrayNews["DETAIL"] = $lib->text_limit($rowNews["news_detail"],100);
 			$arrayNews["DETAIL_FULL"] = $rowNews["news_detail"];
-			$arrayNews["NEWS_HTML"] = $rowNews["news_html"];
 			$arrayNews["IMAGE_HEADER"] = $rowNews["path_img_header"];
 			$arrayNews["UPDATE_DATE"] = $lib->convertdate($rowNews["update_date"],'D m Y',true);
 			$arrayNews["ID_NEWS"] = $rowNews["id_news"];
@@ -48,6 +47,5 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	
 }
 ?>
