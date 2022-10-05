@@ -28,6 +28,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
         $listIndex = 0;
         $i = 1;
 
+		$dataComing["SUM_AMT"] -= $rowBankDisplay["fee_deposit"];
         $arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;

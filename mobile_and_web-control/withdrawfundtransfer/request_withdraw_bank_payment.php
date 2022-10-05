@@ -76,7 +76,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$conoracle->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,
-		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noFee);
+		$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$deptslip_noFee,true);
 		if($wtdResult["RESULT"]){
 			$ref_slipno = $wtdResult["DEPTSLIP_NO"];
 			$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_withdraw_coopdirect"],$arrSendData);

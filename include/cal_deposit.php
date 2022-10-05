@@ -367,17 +367,18 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
+		$getAmountTXPerDay = $this->conora->prepare("SELECT COUNT(seq_no) as C_SEQ FROM dpdeptstatement 
+													WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
+		$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
+		$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
+		if($amountTx["C_SEQ"] > 1){
+			$arrayResult['RESPONSE_CODE'] = "WS0101";
+			
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
 		if($dataConst["DEPTTYPE_CODE"] == '01'){
-			$getAmountTXPerDay = $this->conora->prepare("SELECT COUNT(seq_no) as C_SEQ FROM dpdeptstatement 
-														WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
-			$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
-			$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
-			if($amountTx["C_SEQ"] > 1){
-				$arrayResult['RESPONSE_CODE'] = "WS0101";
-				
-				$arrayResult['RESULT'] = FALSE;
-				return $arrayResult;
-			}
+			
 			if($amt_transfer < 100 ){
 				$arrayResult['RESPONSE_CODE'] = "WS0056";
 				$arrayResult['MINWITD_AMT'] = 100;
@@ -1145,7 +1146,7 @@ class CalculateDep {
 		}
 	}
 	public function WithdrawMoneyInside($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd,$amt_transfer,$penalty_amt,
-	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null){
+	$operate_date,$config,$log,$payload,$deptslip,$lib,$max_seqno,$constFromAcc,$penaltyslip=null,$is_bank=false){
 		$arrSlipno = $this->generateDocNo('DPSLIPNO',$lib);
 		$checkSeqAmtSrc = $this->getSequestAmt($deptaccount_no,$itemtype_wtd);
 		if($checkSeqAmtSrc["CAN_WITHDRAW"]){
@@ -1235,7 +1236,7 @@ class CalculateDep {
 						':deptaccount_no' => $deptaccount_no,
 						':depttype_code' => $constFromAcc["DEPTTYPE_CODE"],
 						':deptgrp_code' => $constFromAcc["DEPTGROUP_CODE"],
-						':itemtype_code' => 'FEM',
+						':itemtype_code' => $is_bank ? 'FTX' : 'FEM',
 						':slip_amt' => $penalty_amt,
 						':cash_type' => $rowDepPay["MONEYTYPE_SUPPORT"],
 						':prncbal' => $constFromAcc["PRNCBAL"],
@@ -1244,7 +1245,7 @@ class CalculateDep {
 						':entry_date' => $operate_date,
 						':laststmno' => $lastStmSrcNo,
 						':lastcalint_date' => date('Y-m-d H:i:s',strtotime($constFromAcc["LASTCALINT_DATE"])),
-						':acc_id' => '42020300',
+						':acc_id' => $is_bank ? null : '42020300',
 						':refer_deptslip_no' => $deptslip_no
 					];
 					$insertDpSlipPenalty = $conoracle->prepare("INSERT INTO DPDEPTSLIP(DEPTSLIP_NO,COOP_ID,DEPTACCOUNT_NO,DEPTTYPE_CODE,   
@@ -1263,7 +1264,7 @@ class CalculateDep {
 							':coop_id' => $config["COOP_ID"],
 							':from_account_no' => $deptaccount_no,
 							':seq_no' => $lastStmSrcNo,
-							':itemtype_code' => 'FEM',
+							':itemtype_code' => $is_bank ? 'FTX' : 'FEM',
 							':slip_amt' => $penalty_amt,
 							':balance_forward' => $constFromAcc["PRNCBAL"] - $amt_transfer,
 							':after_trans_amt' => $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt,
