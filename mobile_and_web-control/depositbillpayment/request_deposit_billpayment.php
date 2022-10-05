@@ -106,6 +106,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						if($interestPeriod < 0){
 							$interestPeriod = 0;
 						}
+						$prinPay = 0;
 						$int_returnSrc = $interest["INT_RETURN"];
 						$interestFull = $interest["INT_PERIOD"];
 						if($interestFull > 0){
