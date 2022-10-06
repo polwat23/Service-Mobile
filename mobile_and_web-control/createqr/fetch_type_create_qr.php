@@ -88,6 +88,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
 					$arrContract['LOAN_TYPE'] = $rowContract["LOAN_TYPE"];
 					if($rowContract["KEEPING_AMOUNT"] > 0){
+						$arrContract['INT_BALANCE'] = number_format(0,2);
 					}else{
 						$arrContract['INT_BALANCE'] = number_format($interest["INT_PAYMENT"],2);
 					}
