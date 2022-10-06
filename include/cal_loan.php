@@ -33,7 +33,7 @@ class CalculateLoan {
 			"keepingAmount" => (float)$dataCont["SPACE_KEEPING"],
 			"prinKeepingAmount" => (float)$dataCont["RKEEP_PRINCIPAL"],
 			"calintFrom" => date('Y-m-d',strtotime($dataCont["LASTCALINT_DATE"])),
-			"keepingDate" => date('Y-m-d',strtotime($dataCont["LASTKEEPING_DATE"])),
+			"keepingDate" => date('Y-m-d',strtotime($dataCont["LASTPROCESS_DATE"])),
 			"calintTo" => date('Y-m-d'),
 			"intArrear" => (float)$dataCont["INTEREST_ARREAR_SRC"],
 			"intRate" => (float)$intRate["INTEREST_RATE"],
@@ -490,7 +490,7 @@ class CalculateLoan {
 											,LNT.PXAFTERMTHKEEP_TYPE,LNM.RKEEP_PRINCIPAL,LNM.RKEEP_INTEREST,
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,LNM.LASTKEEPING_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
-											(CASE WHEN LNM.LASTKEEPING_DATE < LNM.LASTCALINT_DATE OR LNM.LASTKEEPING_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
+											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
 											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE
 											FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE
 											WHERE lnm.loancontract_no = :contract_no and lnm.contract_status > 0 and lnm.contract_status <> 8");

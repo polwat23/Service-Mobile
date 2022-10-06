@@ -72,7 +72,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrLoantypeAllow[] = $rowCanGen["loantype_code"];
 				}
 				$getContract = $conmssql->prepare("SELECT lt.LOANTYPE_DESC AS LOAN_TYPE,ln.LOANCONTRACT_NO,ln.principal_balance as LOAN_BALANCE,
-											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,
+											ln.loanapprove_amt as APPROVE_AMT,ln.startcont_date,ln.period_payment,ln.period_payamt as PERIOD,ln.RKEEP_PRINCIPAL + ln.RKEEP_INTEREST as KEEPING_AMOUNT,
 											ln.LAST_PERIODPAY as LAST_PERIOD,ln.LOANTYPE_CODE,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
@@ -81,13 +81,16 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 					$arrContract = array();
 					$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
-					$interest = $cal_loan->calculateInterestArr($contract_no);
+					$interest = $cal_loan->calculateIntAPI($contract_no);
 					$arrContract["ACCOUNT_NO"] = $contract_no;
 					$arrContract["ACCOUNT_NO_HIDE"] = $contract_no;
 					$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 					$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
 					$arrContract['LOAN_TYPE'] = $rowContract["LOAN_TYPE"];
-					$arrContract['INT_BALANCE'] = number_format($interest,2);
+					if($rowContract["KEEPING_AMOUNT"] > 0){
+					}else{
+						$arrContract['INT_BALANCE'] = number_format($interest["INT_PAYMENT"],2);
+					}
 					$arrContract["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 					$arrGrpAcc[] = $arrContract;
 				}
