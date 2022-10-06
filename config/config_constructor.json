@@ -3,6 +3,8 @@
 	"COOP_KEY" : "sps-test",
 	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=sps",
 	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=sps",
+	"COOP_KEY_PROD" : "sps",
+	"URL_CONSTANT" : "https://api-node.thaicoop.co/constant-Test/",
 	"COOP_ID" : "073001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.sps.mobile",

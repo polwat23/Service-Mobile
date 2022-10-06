@@ -12,12 +12,6 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 		':member_no' => $dataComing["member_no"]
 	]);
 	if($checkBillAvailable->rowCount() > 0){
-		if($dataComing["tran_id"] == '202202231057045420'){
-			$arrayResult['RESULT'] = TRUE;
-			ob_flush();
-			echo json_encode($arrayResult);
-			exit();
-		}
 		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
 		$fee_amt = 0;
 		$dateOperC = date('c');
@@ -45,28 +39,30 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				}
-				/*$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
-				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
+				
+				$ref_no = time().$lib->randomText('all',3);
+				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
+				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
 				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
 				$lastdocument_noPayin = $arrSlipnoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
 				$lastdocument_noDocPayin = $arrSlipDocNoPayin["QUERY"]["LAST_DOCUMENTNO"] + 1;
-				$updateDocuControlPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
+				$updateDocuControlPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXLON'");
 				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
-				$updateDocuControlDocPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
-				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);*/
+				$updateDocuControlDocPayin = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXRECEIPT'");
+				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$conmssql->beginTransaction();
 				$conmysql->beginTransaction();
-				/*$paykeeping = $cal_loan->paySlip($conmssql,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
+				$paykeeping = $cal_loan->paySlip($conmssql,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
 				$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
-				'WFS',$conmysql,0,'006');*/
+				'WFS',$conmysql,0,'006');
+			
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
 													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no
 													FROM gcqrcodegendetail 
 													WHERE qrgenerate = :tran_id");
 				$getDetailTran->execute([':tran_id' => $dataComing["tran_id"]]);
 				while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
-					$ref_no = time().$lib->randomText('all',3);
 					if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
 						$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
 						$getlastseq_noDest = $cal_dep->getLastSeqNo($deptaccount_no);
@@ -96,7 +92,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							exit();
 						}
 					}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
-						/*$dataCont = $cal_loan->getContstantLoanContract($rowDetail["ref_account"]);
+						$dataCont = $cal_loan->getContstantLoanContract($rowDetail["ref_account"]);
 						$int_return = $dataCont["INTEREST_RETURN"];
 						if($rowDetail["qrtransferdt_amt"] > $dataCont["INTEREST_ARREAR"]){
 							$intarrear = $dataCont["INTEREST_ARREAR"];
@@ -105,17 +101,19 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}
 						$int_returnSrc = 0;
 						$int_returnFull = 0;
-						$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
-						$interestFull = $interest;
-						$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+						$interest = $cal_loan->calculateIntAPI($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+						$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
 						if($interestPeriod < 0){
 							$interestPeriod = 0;
 						}
-						if($interest > 0){
-							if($rowDetail["qrtransferdt_amt"] < $interest){
-								$interest = $rowDetail["qrtransferdt_amt"];
+						$prinPay = 0;
+						$int_returnSrc = $interest["INT_RETURN"];
+						$interestFull = $interest["INT_PERIOD"];
+						if($interestFull > 0){
+							if($rowDetail["qrtransferdt_amt"] < $interestFull){
+								$interestFull = $rowDetail["qrtransferdt_amt"];
 							}else{
-								$prinPay = $rowDetail["qrtransferdt_amt"] - $interest;
+								$prinPay = $rowDetail["qrtransferdt_amt"] - $interestFull;
 							}
 							if($prinPay < 0){
 								$prinPay = 0;
@@ -123,14 +121,8 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}else{
 							$prinPay = $rowDetail["qrtransferdt_amt"];
 						}
-						if($dataCont["CHECK_KEEPING"] == '0'){
-							if($dataCont["SPACE_KEEPING"] != 0){
-								$int_returnSrc = 0;
-								$int_returnFull = $int_returnSrc;
-							}
-						}
 						$paykeepingdet = $cal_loan->paySlipLonDet($conmssql,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
-						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
+						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest["INT_PAYMENT"],
 						$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
 						if($paykeepingdet["RESULT"]){
 							$ref_noLN = time().$lib->randomText('all',3);
@@ -148,15 +140,16 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 								exit();
 							}
 						}else{
+						
 							$conmssql->rollback();
 							$conmysql->rollback();
-							$arrayResult['RESPONSE_CODE'] = $paykeepingdet["RESPONSE_CODE"];
-							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESPONSE_CODE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
 							ob_flush();
 							echo json_encode($arrayResult);
 							exit();
-						}*/
+						}
+
 					}else{
 						$conmssql->rollback();
 						$conmysql->rollback();

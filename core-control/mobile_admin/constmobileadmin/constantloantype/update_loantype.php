@@ -66,7 +66,7 @@ if($lib->checkCompleteArgument(['unique_id','loandata'],$dataComing)){
 			require_once('../../../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESULT'] = FALSE;
-			$arrayResult['RESPONSE'] = "ข้อมูลไม่มีการเปลี่ยนแปลง กรุณาเลือกทำรายการ";
+			$arrayResult['RESPONSE'] = "เนเธกเนเธชเธณเน€เธฃเนเธ";
 			require_once('../../../../include/exit_footer.php');
 			
 		}

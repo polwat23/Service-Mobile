@@ -39,28 +39,33 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$dep_format = $func->getConstant('dep_format');
 				$dep_formathide = $func->getConstant('hidden_dep');
 				while($rowAccCoop = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
-					$checkSeqAmt = $cal_dep->getSequestAmt($rowAccCoop["deptaccount_no"]);
-					if($checkSeqAmt["CAN_WITHDRAW"]){
-						$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
-															DPM.PRNCBAL,DPT.MINPRNCBAL
-															FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpm.membcat_code = dpt.membcat_code
-															WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
-						$getDataAcc->execute([
-							':deptaccount_no' => $rowAccCoop["deptaccount_no"]
-						]);
-						$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
-						if(isset($rowDataAcc["DEPTTYPE_DESC"])){
-							$arrAccCoop = array();
-							$arrAccCoop["DEPTACCOUNT_NO"] = $rowAccCoop["deptaccount_no"];
-							$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccCoop["deptaccount_no"],$dep_format);
-							$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
-							$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
-							$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
-							$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowAccCoop["deptaccount_no"]) - $checkSeqAmt["SEQUEST_AMOUNT"];
-							$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
-							$arrGroupAccBind["COOP"][] = $arrAccCoop;
+					$checkAccJoint = $conmysql->prepare("SELECT deptaccount_no FROM gcdeptaccountjoint WHERE deptaccount_no = :deptaccount_no and is_joint = '1'");
+				   $checkAccJoint->execute([':deptaccount_no' => TRIM($rowAccCoop["deptaccount_no"])]);
+				   if($checkAccJoint->rowCount() > 0){
+				   }else{
+						$checkSeqAmt = $cal_dep->getSequestAmt($rowAccCoop["deptaccount_no"]);
+						if($checkSeqAmt["CAN_WITHDRAW"]){
+							$getDataAcc = $conmssql->prepare("SELECT RTRIM(LTRIM(dpm.deptaccount_name)) as DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.DEPTTYPE_CODE,
+																DPM.PRNCBAL,DPT.MINPRNCBAL
+																FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpm.membcat_code = dpt.membcat_code
+																WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
+							$getDataAcc->execute([
+								':deptaccount_no' => $rowAccCoop["deptaccount_no"]
+							]);
+							$rowDataAcc = $getDataAcc->fetch(PDO::FETCH_ASSOC);
+							if(isset($rowDataAcc["DEPTTYPE_DESC"])){
+								$arrAccCoop = array();
+								$arrAccCoop["DEPTACCOUNT_NO"] = $rowAccCoop["deptaccount_no"];
+								$arrAccCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccCoop["deptaccount_no"],$dep_format);
+								$arrAccCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($arrAccCoop["DEPTACCOUNT_NO_FORMAT"],$dep_formathide);
+								$arrAccCoop["ACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDataAcc["DEPTACCOUNT_NAME"]));
+								$arrAccCoop["DEPT_TYPE"] = $rowDataAcc["DEPTTYPE_DESC"];
+								$arrAccCoop["BALANCE"] = $cal_dep->getWithdrawable($rowAccCoop["deptaccount_no"]) - $checkSeqAmt["SEQUEST_AMOUNT"];
+								$arrAccCoop["BALANCE_FORMAT"] = number_format($arrAccCoop["BALANCE"],2);
+								$arrGroupAccBind["COOP"][] = $arrAccCoop;
+							}
 						}
-					}
+				   }
 				}
 			}
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
