@@ -331,7 +331,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 760px;margin-top:20px;">เจ้าหน้าที่การเงิน</div>
+			<div style="font-size: 18px;margin-left: 760px;margin-top:20px;"></div>
 			';
 
 	$dompdf = new Dompdf([
