@@ -8,6 +8,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
         $dateOperC = date('Y-m-d H:i:s', strtotime($dateOper));
         $itemtypeWithdraw = 'WFS';
         $penalty_amt = $dataComing["penalty_amt"];
+		$dataComing["SUM_AMT"] -= $dataComing["penalty_amt"];
 		$deptaccount_no = preg_replace('/-/', '', $dataComing["deptaccount_no"]);
 		$from_account_no = preg_replace('/-/', '', $dataComing["deptaccount_no"]);
 		$arrInitDep = $cal_dep->initDept($deptaccount_no, $dataComing["SUM_AMT"], $itemtypeWithdraw);
@@ -71,7 +72,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 					$deptaccount_no,
 					null,
 					$itemtypeWithdraw,
-					$dataComing["SUM_AMT"],
+					$dataComing["SUM_AMT"] - $penalty_amt,
 					$penalty_amt,
 					$dateOperC,
 					$config,
@@ -131,7 +132,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 
 				$payslip = $cal_loan->paySlip(
 					$conoracle,
-					$dataComing["SUM_AMT"] - $dataComing["penalty_amt"],
+					$dataComing["SUM_AMT"],
 					$config,
 					$payinslip_no,
 					$dateOperC,

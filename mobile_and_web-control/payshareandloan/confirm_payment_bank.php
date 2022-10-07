@@ -28,6 +28,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
         $listIndex = 0;
         $i = 1;
 
+		$dataComing["SUM_AMT"] -= $rowBankDisplay["fee_deposit"];
         $arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
@@ -58,35 +59,6 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../include/exit_footer.php');
 
-		}
-		if($rowBankDisplay["fee_deposit"] > 0){
-			$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
-			$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
-			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-			$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
-			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
-		
-			$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowBankDisplay["account_payfee"],$vccamtPenalty,'FEE',
-			$dataComing["SUM_AMT"],$rowBankDisplay["fee_deposit"],$dateOperC,$config,$deptslip_no,$lib,$getlastseqFeeAcc["MAX_SEQ_NO"],$dataAccFee,true,$payinslip_no,$deptslip_noFee);
-			if($penaltyWtd["RESULT"]){
-			}else{
-				$conoracle->rollback();
-				$conmysql->rollback();
-				$arrayResult['RESPONSE_CODE'] = $penaltyWtd["RESPONSE_CODE"];
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayStruc = [
-					':member_no' => $payload["member_no"],
-					':id_userlogin' => $payload["id_userlogin"],
-					':operate_date' => $dateOper,
-					':sigma_key' => $dataComing["sigma_key"],
-					':amt_transfer' => $dataComing["SUM_AMT"],
-					':response_code' => $arrayResult['RESPONSE_CODE'],
-					':response_message' => 'ชำระค่าธรรมเนียมไม่สำเร็จ / '.$penaltyWtd["ACTION"]
-				];
-				$log->writeLog('deposittrans',$arrayStruc);
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}
 		}
 		
 		$payslip = $cal_loan->paySlip($conoracle,$dataComing["SUM_AMT"],$config,$payinslipdoc_no,$dateOperC,

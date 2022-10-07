@@ -20,6 +20,7 @@ while($rowSch = $getSchduler->fetch(PDO::FETCH_ASSOC)){
 			':menu_channel' => $rowSch["end_menu_channel"],
 			':id_menu' => $rowSch["id_menu"]
 		]);
+		echo $rowSch;
 		$updateSchedule = $conmysql->prepare("UPDATE gcmenuschedule SET is_use = '0' WHERE id_menuschedule = :id_menuschedule");
 		$updateSchedule->execute([':id_menuschedule' => $rowSch["id_menuschedule"]]);
 	}else{
