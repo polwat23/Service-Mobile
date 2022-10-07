@@ -1,0 +1,3 @@
+["HY000",1400,"OCIStmtExecute: ORA-01400: cannot insert NULL into (\"ISCOEXAT\".\"DPDEPTSLIP\".\"DEPTACCOUNT_NO\")\n (ext\\pdo_oci\\oci_statement.c:157)"]
+["HY000",1400,"OCIStmtExecute: ORA-01400: cannot insert NULL into (\"ISCOEXAT\".\"DPDEPTSLIP\".\"DEPTACCOUNT_NO\")\n (ext\\pdo_oci\\oci_statement.c:157)"]
+["HY000",1400,"OCIStmtExecute: ORA-01400: cannot insert NULL into (\"ISCOEXAT\".\"DPDEPTSLIP\".\"DEPTACCOUNT_NO\")\n (ext\\pdo_oci\\oci_statement.c:157)"]

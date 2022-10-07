@@ -371,7 +371,7 @@ class CalculateDep {
 													WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
 		$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
 		$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
-		if($amountTx["C_SEQ"] > 1){
+		if($amountTx["C_SEQ"] > 0){
 			$arrayResult['RESPONSE_CODE'] = "WS0101";
 			
 			$arrayResult['RESULT'] = FALSE;
