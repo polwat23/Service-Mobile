@@ -239,7 +239,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
                     0,
                     $int_returnSrc,
                     $interestPeriod,
-                    $i,$penaltyWtd["DEPTSLIP_NO"]
+                    $i,null
                 );
 
                 if (!$payslipdet["RESULT"]) {
