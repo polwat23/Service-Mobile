@@ -23,8 +23,6 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
         $dateOperC = date('Y-m-d H:i:s', strtotime($dateOper));
 
         $arraySuccess = array();
-        $conoracle->beginTransaction();
-        $conmysql->beginTransaction();
         $listIndex = 0;
         $i = 1;
 
@@ -51,9 +49,10 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
 		$dataAccFee = $cal_dep->getConstantAcc($rowBankDisplay["account_payfee"]);
 		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowBankDisplay["account_payfee"]);
 		$vccamtPenalty = $func->getConstant("map_account_id_ktb");
+		
+        $conoracle->beginTransaction();
+        $conmysql->beginTransaction();
 		if($rowBalFee["PRNCBAL"] - $rowBankDisplay["fee_deposit"] < $dataAccFee["MINPRNCBAL"]){
-			$conoracle->rollback();
-			$conmysql->rollback();
 			$arrayResult['RESPONSE_CODE'] = "WS0100";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -185,7 +184,6 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
 					$interest["INT_PAYMENT"] = 0;
 				}
                 if ($interest["INT_PAYMENT"] > 0) {
-                    $conoracle->rollback();
                     if ($listPayment["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]) {
                         $arrayResult['RESPONSE_CODE'] = "WS0098";
                         $arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -239,7 +237,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
                     0,
                     $int_returnSrc,
                     $interestPeriod,
-                    $i,null
+                    $i
                 );
 
                 if (!$payslipdet["RESULT"]) {

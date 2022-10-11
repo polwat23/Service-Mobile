@@ -371,7 +371,7 @@ class CalculateDep {
 													WHERE deptaccount_no = :deptaccount_no and TRUNC(operate_date) = TRUNC(SYSDATE) and SUBSTR(deptitemtype_code,0,1) = 'W'");
 		$getAmountTXPerDay->execute([':deptaccount_no' => $deptaccount_no]);
 		$amountTx = $getAmountTXPerDay->fetch(\PDO::FETCH_ASSOC);
-		if($amountTx["C_SEQ"] > 0){
+		if($amountTx["C_SEQ"] > 3){
 			$arrayResult['RESPONSE_CODE'] = "WS0101";
 			
 			$arrayResult['RESULT'] = FALSE;
@@ -1305,7 +1305,11 @@ class CalculateDep {
 														lastaccess_date = TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),laststmseq_no = :seq_no
 														WHERE deptaccount_no = :from_account_no");
 				if($updateDeptMaster->execute($arrUpdateMaster)){
-					$arrayResult['DEPTSLIP_NO'] = $slipWithdraw;
+					$constFromAcc["PRNCBAL"] = $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt;
+					$constFromAcc["WITHDRAWABLE_AMT"] = $constFromAcc["WITHDRAWABLE_AMT"] - $amt_transfer - $penalty_amt;
+					$arrayResult['DEPTSLIP_NO'] = $deptslip_no;
+					$arrayResult['MAX_SEQNO'] = $lastStmSrcNo;
+					$arrayResult['DATA_CONT'] = $constFromAcc;
 					$arrayResult['RESULT'] = TRUE;
 					return $arrayResult;
 				}else{
@@ -1327,8 +1331,8 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEM',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null,$deptfeeslip_no){
+	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FTX',$amt_transfer,$penalty_amt,
+	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$deptfeeslip_no){
 		$deptslip_noPenalty = $deptfeeslip_no;
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
@@ -1365,7 +1369,7 @@ class CalculateDep {
 				':coop_id' => $config["COOP_ID"],
 				':from_account_no' => $deptaccount_no,
 				':seq_no' => $lastStmSrcNo,
-				':itemtype_code' => 'FEM',
+				':itemtype_code' => 'FTX',
 				':slip_amt' => $penalty_amt,
 				':balance_forward' => $constFromAcc["PRNCBAL"],
 				':after_trans_amt' => $constFromAcc["PRNCBAL"] - $penalty_amt,
@@ -1410,7 +1414,6 @@ class CalculateDep {
 			$arrayResult["RESPONSE_CODE"] = 'WS0037';
 			$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'."\n".json_encode($conoracle->errorInfo());
 			$arrayResult['RESULT'] = FALSE;
-			file_put_contents(__DIR__.'Msgresponse.txt', json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 			return $arrayResult;
 		}
 	}
