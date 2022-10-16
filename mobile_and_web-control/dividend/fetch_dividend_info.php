@@ -6,8 +6,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conmssql->prepare("SELECT TOP ".$limit_year."  (yr.DIV_YEAR)-543 AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
-												ON (yrm.DIV_YEAR)+543= yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.WEBSHOW_FLAG = '1' 
+		$getYeardividend = $conmssql->prepare("SELECT TOP ".$limit_year." yr.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
+												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.WEBSHOW_FLAG = '1' 
 												GROUP BY yr.DIV_YEAR ORDER BY yr.DIV_YEAR DESC");
 		$getYeardividend->execute([
 			':member_no' => $member_no

@@ -20,10 +20,10 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	if($member_no != "00004491" && $member_no != "00005060" && $member_no != "00004378" && $member_no != "00002728" && $member_no != "00002799" && $member_no != "00003379"
-	&& $member_no != "00004356" && $member_no != "00005061" && $member_no != "00005357" && $member_no != "00005367" && $member_no != "00004408" && $member_no != "00002949"
-	&& $member_no != "00002539" && $member_no != "00002232" && $member_no != "00003171" && $member_no != "00003785" && $member_no != "00000873" && $member_no != "00003089" 
-	&& $member_no != "00003337" && $member_no != "00003823" && $member_no != "00003076"){
+	$getMembGroup = $conmssql->prepare("SELECT MEMBGROUP_CODE FROM mbmembmaster WHERE member_no = :member_no");
+	$getMembGroup->execute([':member_no' => $member_no]);
+	$rowMemb = $getMembGroup->fetch(PDO::FETCH_ASSOC);
+	if($rowMemb["MEMBGROUP_CODE"] == "000012"){
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
