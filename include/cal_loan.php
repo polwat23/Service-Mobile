@@ -39,7 +39,7 @@ class CalculateLoan {
 			"keepingDate" => date('Y-m-d',strtotime($dataCont["LASTPROCESS_DATE"])),
 			"calintTo" => date('Y-m-d'),
 			"intArrear" => (float)$dataCont["INTEREST_ARREAR_SRC"],
-			"intRate" => (float)$intRate["INTEREST_RATE"],
+			"intRate" => (float)($intRate["INTEREST_RATE"] * 100),
 			"changeRateInt" => $dataInt["is_change"],
 			"changeRateInfo" => $dataInt,
 			"intReturn" => (float)$dataCont["INTEREST_RETURN"],
@@ -227,7 +227,7 @@ class CalculateLoan {
 				"calintFrom" => date('Y-m-d'),
 				"calintTo" => date('Y-m-d',strtotime($dataCont["LASTPROCESS_DATE"])),
 				"intArrear" => (float)$dataCont["INTEREST_ARREAR_SRC"],
-				"intRate" => (float)$intRate["INTEREST_RATE"],
+				"intRate" => (float)($intRate["INTEREST_RATE"] * 100),
 				"changeRateInt" => $dataInt["is_change"],
 				"changeRateInfo" => $dataInt,
 				"intReturn" => (float)$dataCont["INTEREST_RETURN"]
@@ -240,7 +240,7 @@ class CalculateLoan {
 				"calintFrom" => date('Y-m-d',strtotime($dataCont["LASTCALINT_DATE"])),
 				"calintTo" => date('Y-m-d'),
 				"intArrear" => (float)$dataCont["INTEREST_ARREAR_SRC"],
-				"intRate" => (float)$intRate["INTEREST_RATE"],
+				"intRate" => (float)($intRate["INTEREST_RATE"] * 100),
 				"changeRateInt" => $dataInt["is_change"],
 				"changeRateInfo" => $dataInt,
 				"intReturn" => (float)$dataCont["INTEREST_RETURN"]
@@ -1088,31 +1088,35 @@ class CalculateLoan {
 			if(isset($dataCont["STARTCONT_DATE"]) && $dataCont["STARTCONT_DATE"] != ""){
 				if($intArr > 0){
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
-																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																PRINCIPAL_BALANCE = ?,
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
+																PERIOD_PAYMENT = ?
 																WHERE loancontract_no = ?");
 				}else{
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
-																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																PRINCIPAL_BALANCE = ?,
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
+																PERIOD_PAYMENT = ?
 																WHERE loancontract_no = ?");
 				}
 			}else{
 				if($intArr > 0){
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
-																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																PRINCIPAL_BALANCE = ?,
 																STARTCONT_DATE = TRUNC(SYSDATE),
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
+																PERIOD_PAYMENT = ?
 																WHERE loancontract_no = ?");
 				}else{
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
-																PRINCIPAL_BALANCE = ?,LAST_PERIODPAY = ?,
+																PRINCIPAL_BALANCE = ?,
 																STARTCONT_DATE = TRUNC(SYSDATE),
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
+																PERIOD_PAYMENT = ?
 																WHERE loancontract_no = ?");
 				}
 			}

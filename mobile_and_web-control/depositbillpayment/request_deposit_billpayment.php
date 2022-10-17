@@ -100,6 +100,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						if($interestPeriod < 0){
 							$interestPeriod = 0;
 						}
+						$prinPay = 0;
 						$int_returnSrc = $interest["INT_RETURN"];
 						$interestFull = $interest["INT_PERIOD"];
 						if($interestFull > 0){
@@ -114,6 +115,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}else{
 							$prinPay = $rowDetail["qrtransferdt_amt"];
 						}
+
 
 						$paykeepingdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
 						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest["INT_PAYMENT"],

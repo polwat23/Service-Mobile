@@ -27,7 +27,6 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
 	$addr_phone =  preg_replace('/-/','',$rowTel["MEM_TELMOBILE"]);
 	$addr_phone =  preg_replace('/\s+/', '', $addr_phone);
-	
 	if($dataComing["tel"] != $addr_phone){
 		$arrayResult['RESPONSE_CODE'] = "WS0095";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

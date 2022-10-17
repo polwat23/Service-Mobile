@@ -23,23 +23,23 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 															WHERE loancontract_no = :loancontract_no");
 					$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 					$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-					$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-					if($interest > 0){
-						if($dataComing["amt_transfer"] < $interest){
-							$interest = $dataComing["amt_transfer"];
+					$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+					if($interest["INT_PAYMENT"] > 0){
+						$prinPay = 0;
+						if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+							$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 						}else{
-							$prinPay = $dataComing["amt_transfer"] - $interest;
+							$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 						}
 						if($prinPay < 0){
 							$prinPay = 0;
 						}
-						if($interest > 0){
-							$arrayResult["PAYMENT_INT"] = $interest;
-						}
+						$arrayResult["PAYMENT_INT"] = $interest["INT_PAYMENT"];
 						$arrayResult["PAYMENT_PRIN"] = $prinPay;
 					}else{
 						$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 					}
+
 					if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
 						$arrayResult['RESPONSE_CODE'] = "WS0098";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -164,23 +164,23 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 													WHERE loancontract_no = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			$interest = $cal_loan->calculateInterest($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
-			if($interest > 0){
-				if($dataComing["amt_transfer"] < $interest){
-					$interest = $dataComing["amt_transfer"];
+			$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);
+			if($interest["INT_PAYMENT"] > 0){
+				$prinPay = 0;
+				if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+					$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 				}else{
-					$prinPay = $dataComing["amt_transfer"] - $interest;
+					$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 				}
 				if($prinPay < 0){
 					$prinPay = 0;
 				}
-				if($interest > 0){
-					$arrayResult["PAYMENT_INT"] = $interest;
-				}
+				$arrayResult["PAYMENT_INT"] = $interest["INT_PAYMENT"];
 				$arrayResult["PAYMENT_PRIN"] = $prinPay;
 			}else{
 				$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 			}
+
 			if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

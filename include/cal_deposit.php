@@ -928,9 +928,11 @@ class CalculateDep {
 					':seq_no' => $lastStmDestNo,
 					':to_account_no' => $deptaccount_no
 				];
-				$updateDeptMasterDest = $conoracle->prepare("UPDATE DPDEPTMASTER SET withdrawable_amt = :withdraw_after_pay,prncbal = :prncbal_after_pay,
+				$updateDeptMasterDest = $conoracle->prepare("UPDATE DPDEPTMASTER SET withdrawable_amt = :withdraw_after_pay,
+														prncbal = :prncbal_after_pay,
 														lastmovement_date = TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
-														lastaccess_date = TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),laststmseq_no = :seq_no
+														lastaccess_date = TRUNC(TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss')),
+														laststmseq_no = :seq_no
 														WHERE deptaccount_no = :to_account_no");
 				if($updateDeptMasterDest->execute($arrUpdateMasterDest)){
 					if(isset($bank_code)){

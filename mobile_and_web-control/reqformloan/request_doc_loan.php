@@ -365,7 +365,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					
 					$arrData["loantype_code"] = $dataComing["loantype_code"];
 					$arrData["objective"] = $dataComing["objective"];
-					$arrData["salary_amount"] = number_format($rowData["SALARY_AMOUNT"],2);
+					$arrData["salary_amount"] = $rowData["SALARY_AMOUNT"];
 					$arrData["share_bf"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 					$arrData["sharestk_amt"] = number_format($rowData["SHAREBEGIN_AMT"],2);
 					$arrData["periodshare_amt"] = number_format($rowData["PERIODSHARE_AMT"],2);

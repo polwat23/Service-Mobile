@@ -22,17 +22,18 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		}else{
 			$intarrear = $dataComing["amt_transfer"];
 		}
-		$interest = $cal_loan->calculateInterest($dataComing["contract_no"],$dataComing["amt_transfer"]);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interest = $cal_loan->calculateIntAPI($dataComing["contract_no"],$dataComing["amt_transfer"]);
+		$intarrear = $interest["INT_ARREAR"];
+		$int_returnFull = $interest["INT_RETURN"];
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($interest > 0){
-			if($dataComing["amt_transfer"] < $interest){
-				$interest = $dataComing["amt_transfer"];
+		if($interest["INT_PAYMENT"] > 0){
+			if($dataComing["amt_transfer"] < $interest["INT_PAYMENT"]){
+				$interest["INT_PAYMENT"] = $dataComing["amt_transfer"];
 			}else{
-				$prinPay = $dataComing["amt_transfer"] - $interest;
+				$prinPay = $dataComing["amt_transfer"] - $interest["INT_PAYMENT"];
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
@@ -40,12 +41,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 		}else{
 			$prinPay = $dataComing["amt_transfer"];
 		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = 0;
-				$int_returnFull = $int_returnSrc;
-			}
-		}
+
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);
 		$destvcid = $cal_dep->getVcMapID($dataCont["LOANTYPE_CODE"],'LON');
