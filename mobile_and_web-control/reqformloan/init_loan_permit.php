@@ -38,7 +38,21 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$module = 100 - ($period_payment % 100);
 				if($module < 100){
 					$period_payment = floor($period_payment + $module);
-				}
+				}			
+			}
+			if($dataComing["loantype_code"] != '10' && $dataComing["loantype_code"] != '11'){
+				//เช็คเงื่อนไขคนค้ำ
+				$iscountcoll = 0;
+				$fetchCollReqgrt = $conoracle->prepare("SELECT USEMAN_AMT FROM LNLOANTYPEREQGRT WHERE loantype_code = :loantype_code 
+														 AND  :request_amt between money_from AND  money_to");
+				$fetchCollReqgrt->execute([':loantype_code' => $dataComing["loantype_code"],
+											':request_amt' => $dataComing["request_amt"]]);
+				$rowCollReqgrt =  $fetchCollReqgrt->fetch(PDO::FETCH_ASSOC);				
+				$arrayResult["IS_GUARANTEE"] = TRUE;
+				$arrayResult["IS_GUARANTEE_NAME"] = true;
+				$arrayResult["IS_GUARANTEE"] = true;
+				$iscountcoll = $rowCollReqgrt["USEMAN_AMT"];
+				$arrayResult["GUARANTOR"] = $rowCollReqgrt["USEMAN_AMT"];
 			}
 			$arrayResult["RECEIVE_NET"] = $receive_net - $oldBal;
 			//$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
@@ -186,7 +200,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 						$arrayUploadFileGroup[] = $arrConst;
 					}
 				}
-				
+				$fetchWorkdate = $conoracle->prepare("SELECT work_date  FROM mbmembmaster WHERE member_no = :member_no");
+				$fetchWorkdate->execute([
+					':member_no' => $member_no
+				]);
+				$rowWorkdate = $fetchWorkdate->fetch(PDO::FETCH_ASSOC);
 				//$arrayResult["DIFFOLD_CONTRACT"] = $oldBal == 0 ? null : $oldBal;
 				$arrayResult["LOANREQ_AMT_STEP"] = 100;
 				$arrayResult["RECEIVE_NET"] = $maxloan_amt - $oldBal;
@@ -217,7 +235,42 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["HIDE_LOAN_PERMIT_BALANCE"] = TRUE;
 				$arrayResult["HIDE_RECEIVE_NET"] = TRUE;
 				$arrayResult['UPLOADFILE_GRP'] = $arrayUploadFileGroup;		
-				$arrayResult['OBJECTIVE'] = $arrGrpObj;			
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;	
+				//dropdown เลือกวันที่
+				$arrayDropdown = array();
+				$arrayList = array();
+				$arraySelect = array();
+				$arrayOption = array();
+				$arrayOption["VALUE"] = 'coop';
+				$arrayOption["DESC"] = 	 'รับเอกสารที่สหกรณ์';					
+				$arraySelect[] = $arrayOption;	
+				$arrayOption = array();
+				$arrayOption["VALUE"] = 'send';
+				$arrayOption["DESC"] = 	 'รับสัญญาออนไลน์';					
+				$arraySelect[] = $arrayOption;	
+				$arrayList["LABEL"] = 'ตัวเลือกรับสัญญา'; 
+				$arrayList["NAME"] = 'recv_doc'; 
+				$arrayList["IS_REQUIRE"] = true; 
+				$arrayList["IS_EVENT"] = false; 
+				$arrayList["DEFAULT"] = '';
+				$arrayList["OPTION"] = $arraySelect;
+				$arrayDropdown[] = $arrayList;
+				$arrayResult['OTHER_SELECT'] = $arrayDropdown;
+				
+				//วันที่บรรจุ
+				$arrayAssignDate = array();
+				$arrayDate = array();
+				$arrayDate["LABEL"] = 'วันที่บรรจุ';
+				$arrayDate["NAME"] = 'recv_doc';
+				$arrayDate["IS_REQUIRE"] = true;
+				$arrayDate["IS_EVENT"] = false; 
+				if(isset($rowWorkdate["WORK_DATE"]) &&  $rowWorkdate["WORK_DATE"] != ""){
+					$arrayDate["DEFAULT"] = $arrayDate["DEFAULT"] = date('Y-m-d', strtotime($rowWorkdate["WORK_DATE"]));
+				}else{
+					$arrayDate["DEFAULT"] = "";
+				}
+				$arrayAssignDate[] = $arrayDate;
+				$arrayResult['OTHER_DATE'] =  $arrayAssignDate;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{

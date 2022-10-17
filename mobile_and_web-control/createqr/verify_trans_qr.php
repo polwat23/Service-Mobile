@@ -33,9 +33,9 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount','de
 													WHERE loancontract_no = :loancontract_no");
 			$fetchLoanRepay->execute([':loancontract_no' => $dataComing["destination"]]);
 			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			$interest = $cal_loan->calculateInterest($dataComing["destination"],$dataComing["trans_amount"]);
-			$amt_prin = $dataComing["trans_amount"] - $interest;
-			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+			$interest = $cal_loan->calculateIntAPI($dataComing["destination"],$dataComing["trans_amount"]);
+			$amt_prin = $dataComing["trans_amount"] - $interest["INT_PAYMENT"];
+			if($dataComing["trans_amount"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

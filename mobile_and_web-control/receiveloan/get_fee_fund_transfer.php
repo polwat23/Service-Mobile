@@ -3,93 +3,100 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanReceive')){
-		if(isset($dataComing["deptaccount_no"]) && $dataComing["deptaccount_no"] != ""){
-			$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
-			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-			$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
-			$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT
-													FROM lncontmaster
-													WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
-			$fetchLoanRepay->execute([':contract_no' => $contract_no]);
-			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			if($dataComing["amt_transfer"] > $rowLoan["WITHDRAWABLE_AMT"]){
-				$arrayResult["RESPONSE_CODE"] = 'WS0093';
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
-				$arrOther = array();
-				if($interest["INT_ARREAR"] > 0){
-					$arrOther["LABEL"] = 'ดอกเบี้ย';
-					$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchAccAtm = $conoracle->prepare("SELECT  DEPTACCOUNT_NO FROM dpdeptmaster WHERE member_no =:member_no AND depttype_code ='88'");
+		$fetchAccAtm->execute([':member_no' => $member_no]);
+		$rowAccAtm = $fetchAccAtm->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowAccAtm["DEPTACCOUNT_NO"]) && $rowAccAtm["DEPTACCOUNT_NO"] !=""){
+			if(isset($dataComing["deptaccount_no"]) && $dataComing["deptaccount_no"] != ""){
+				$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
+				$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+				$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
+				$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT ,LOANAPPROVE_AMT
+														FROM lncontmaster
+														WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
+				$fetchLoanRepay->execute([':contract_no' => $contract_no]);
+				$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
+				if($dataComing["amt_transfer"] > ($rowLoan["LOANAPPROVE_AMT"] - $rowLoan["PRINCIPAL_BALANCE"])){
+					$arrayResult["RESPONSE_CODE"] = 'WS0093';
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}else{
+					$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
+					$arrOther = array();
+					if($interest["INT_ARREAR"] > 0){
+						$arrOther["LABEL"] = 'ดอกเบี้ย';
+						$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
+						$arrayResult["OTHER_INFO"][] = $arrOther;
+					}
+					$arrOther["LABEL"] = 'หนี้คงเหลือหลังทำรายการ';
+					$arrOther["VALUE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] + $dataComing["amt_transfer"],2)." บาท";
 					$arrayResult["OTHER_INFO"][] = $arrOther;
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
 				}
-				$arrOther["LABEL"] = 'หนี้คงเหลือหลังทำรายการ';
-				$arrOther["VALUE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] + $dataComing["amt_transfer"],2)." บาท";
-				$arrayResult["OTHER_INFO"][] = $arrOther;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
+			}else{
+				$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
+				$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+				$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT, LOANAPPROVE_AMT
+														FROM lncontmaster
+														WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
+				$fetchLoanRepay->execute([':contract_no' => $contract_no]);
+				$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
+				if($dataComing["amt_transfer"] > ($rowLoan["LOANAPPROVE_AMT"] - $rowLoan["PRINCIPAL_BALANCE"])){
+					$arrayResult["RESPONSE_CODE"] = 'WS0093';
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}else{
+					$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
+					$arrOther = array();
+					if($interest["INT_ARREAR"] > 0){
+						$arrOther["LABEL"] = 'ดอกเบี้ย';
+						$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
+						$arrayResult["OTHER_INFO"][] = $arrOther;
+					}
+					$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
+															csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
+															FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
+															WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
+					$fetchDataDeposit->execute([':member_no' => $payload["member_no"]]);
+					$rowDataWithdraw = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
+					$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
+																transfer_mode = '9' and result_transaction = '1' and DATE_FORMAT(operate_date,'%Y%m') = DATE_FORMAT(NOW(),'%Y%m')");
+					$getTransactionForFee->execute([
+						':member_no' => $payload["member_no"]
+					]);
+					$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
+					$fee_amt = $rowDataWithdraw["fee_withdraw"];
+					if($fee_amt > 0){
+						$getBalanceAccFee = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+						$getBalanceAccFee->execute([':deptaccount_no' => $rowDataWithdraw["account_payfee"]]);
+						$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
+						$dataAccFee = $cal_dep->getConstantAcc($rowDataWithdraw["account_payfee"]);
+						if($rowBalFee["PRNCBAL"] - $fee_amt < $dataAccFee["MINPRNCBAL"]){
+							$arrayResult['RESPONSE_CODE'] = "WS0100";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+						$arrOther["LABEL"] = 'ค่าธรรมเนียม';
+						$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
+						$arrayResult["OTHER_INFO"][] = $arrOther;
+					}
+					$arrOther["LABEL"] = 'หนี้คงเหลือหลังทำรายการ';
+					$arrOther["VALUE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] + $dataComing["amt_transfer"],2)." บาท";
+					$arrayResult["OTHER_INFO"][] = $arrOther;
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
+				}
 			}
 		}else{
-			$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
-			$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-			$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT
-													FROM lncontmaster
-													WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
-			$fetchLoanRepay->execute([':contract_no' => $contract_no]);
-			$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
-			if($dataComing["amt_transfer"] > $rowLoan["WITHDRAWABLE_AMT"]){
-				$arrayResult["RESPONSE_CODE"] = 'WS0093';
-				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
-				$arrOther = array();
-				if($interest["INT_ARREAR"] > 0){
-					$arrOther["LABEL"] = 'ดอกเบี้ย';
-					$arrOther["VALUE"] = number_format($interest["INT_PERIOD"],2)." บาท";
-					$arrayResult["OTHER_INFO"][] = $arrOther;
-				}
-				$fetchDataDeposit = $conmysql->prepare("SELECT gba.citizen_id,gba.bank_code,gba.deptaccount_no_bank,csb.itemtype_wtd,csb.itemtype_dep,csb.fee_withdraw,
-														csb.link_withdraw_coopdirect,csb.bank_short_ename,gba.account_payfee
-														FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
-														WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
-				$fetchDataDeposit->execute([':member_no' => $payload["member_no"]]);
-				$rowDataWithdraw = $fetchDataDeposit->fetch(PDO::FETCH_ASSOC);
-				$getTransactionForFee = $conmysql->prepare("SELECT COUNT(ref_no) as C_TRANS FROM gctransaction WHERE member_no = :member_no and trans_flag = '-1' and
-															transfer_mode = '9' and result_transaction = '1' and MONTH(operate_date) = MONTH(NOW())");
-				$getTransactionForFee->execute([
-					':member_no' => $payload["member_no"]
-				]);
-				$rowCountFee = $getTransactionForFee->fetch(PDO::FETCH_ASSOC);
-				if($rowCountFee["C_TRANS"] + 1 > 2){
-					$fee_amt = $rowDataWithdraw["fee_withdraw"];
-				}else{
-					$fee_amt = 0;
-				}
-				if($fee_amt > 0){
-					$getBalanceAccFee = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
-					$getBalanceAccFee->execute([':deptaccount_no' => $rowDataWithdraw["account_payfee"]]);
-					$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
-					$dataAccFee = $cal_dep->getConstantAcc($rowDataWithdraw["account_payfee"]);
-					if($rowBalFee["PRNCBAL"] - $fee_amt < $dataAccFee["MINPRNCBAL"]){
-						$arrayResult['RESPONSE_CODE'] = "WS0100";
-						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-						$arrayResult['RESULT'] = FALSE;
-						require_once('../../include/exit_footer.php');
-					}
-					$arrOther["LABEL"] = 'ค่าธรรมเนียม';
-					$arrOther["VALUE"] = number_format($fee_amt,2)." บาท";
-					$arrayResult["OTHER_INFO"][] = $arrOther;
-				}
-				$arrOther["LABEL"] = 'หนี้คงเหลือหลังทำรายการ';
-				$arrOther["VALUE"] = number_format($rowLoan["PRINCIPAL_BALANCE"] + $dataComing["amt_transfer"],2)." บาท";
-				$arrayResult["OTHER_INFO"][] = $arrOther;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}
+			$arrayResult['RESPONSE_CODE'] = "NF4006";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

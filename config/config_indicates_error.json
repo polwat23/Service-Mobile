@@ -159,6 +159,7 @@
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],
 	"WS4005" : [{"th" : "กรุณากรอกเลขสมาชิกคนค้ำประกันให้ถูกต้อง","en" : "Well educated, guarantor is worth it"}],
+	"NF4006" : [{"th" : "ไม่พบบัญชีเงินฝากสหกรณ์ประเภทออมทรัพย์ ATM ทำให้ไม่สามารถทำรายการได้","en" : "Not found ATM deposit account cannot continue transaction"}],
 	"KBANK_ERR" : [{
 		"1001" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],

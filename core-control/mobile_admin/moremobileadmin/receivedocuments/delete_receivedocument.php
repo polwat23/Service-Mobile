@@ -3,7 +3,7 @@ require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','doc_no'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','uploaddocuments')){
-		$update_email = $conmysql->prepare("UPDATE doclistmaster 
+		$update_email = $conmysql->prepare("UPDATE documentreceive 
 																SET doc_status = '0'
 																WHERE  doc_no = :doc_no");
 		if($update_email->execute([

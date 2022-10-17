@@ -42,7 +42,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'DPSLIPNO'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 				}
-				/*$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
+				$arrSlipnoPayin = $cal_dep->generateDocNo('SLSLIPPAYIN',$lib);
 				$arrSlipDocNoPayin = $cal_dep->generateDocNo('SLRECEIPTNO',$lib);
 				$payinslip_no = $arrSlipnoPayin["SLIP_NO"];
 				$payinslipdoc_no = $arrSlipDocNoPayin["SLIP_NO"];
@@ -51,12 +51,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$updateDocuControlPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLSLIPPAYIN'");
 				$updateDocuControlPayin->execute([':lastdocument_no' => $lastdocument_noPayin]);
 				$updateDocuControlDocPayin = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'SLRECEIPTNO'");
-				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);*/
+				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$conoracle->beginTransaction();
 				$conmysql->beginTransaction();
-				/*$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
+				$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
 				$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
-				'WFS',$conmysql,0,'006');*/
+				'WFS',$conmysql,0,'006');
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
 													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no
 													FROM gcqrcodegendetail 
@@ -86,7 +86,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							exit();
 						}
 					}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
-						/*$dataCont = $cal_loan->getContstantLoanContract($rowDetail["ref_account"]);
+						$dataCont = $cal_loan->getContstantLoanContract($rowDetail["ref_account"]);
 						$int_return = $dataCont["INTEREST_RETURN"];
 						if($rowDetail["qrtransferdt_amt"] > $dataCont["INTEREST_ARREAR"]){
 							$intarrear = $dataCont["INTEREST_ARREAR"];
@@ -95,17 +95,19 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}
 						$int_returnSrc = 0;
 						$int_returnFull = 0;
-						$interest = $cal_loan->calculateInterest($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
-						$interestFull = $interest;
-						$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+						$interest = $cal_loan->calculateIntAPI($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);
+						$interestPeriod = $interest["INT_PERIOD"] - $dataCont["INTEREST_ARREAR"];
 						if($interestPeriod < 0){
 							$interestPeriod = 0;
 						}
-						if($interest > 0){
-							if($rowDetail["qrtransferdt_amt"] < $interest){
-								$interest = $rowDetail["qrtransferdt_amt"];
+						$prinPay = 0;
+						$int_returnSrc = $interest["INT_RETURN"];
+						$interestFull = $interest["INT_PERIOD"];
+						if($interestFull > 0){
+							if($rowDetail["qrtransferdt_amt"] < $interestFull){
+								$interestFull = $rowDetail["qrtransferdt_amt"];
 							}else{
-								$prinPay = $rowDetail["qrtransferdt_amt"] - $interest;
+								$prinPay = $rowDetail["qrtransferdt_amt"] - $interestFull;
 							}
 							if($prinPay < 0){
 								$prinPay = 0;
@@ -113,14 +115,10 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						}else{
 							$prinPay = $rowDetail["qrtransferdt_amt"];
 						}
-						if($dataCont["CHECK_KEEPING"] == '0'){
-							if($dataCont["SPACE_KEEPING"] != 0){
-								$int_returnSrc = 0;
-								$int_returnFull = $int_returnSrc;
-							}
-						}
+
+
 						$paykeepingdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$rowDetail["qrtransferdt_amt"],$config,$dateOper,$log,$payload,
-						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest,
+						$dataComing["bank_ref"],$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$rowDetail["ref_account"],$prinPay,$interest["INT_PAYMENT"],
 						$intarrear,$int_returnSrc,$interestPeriod,$rowDetail["seq_no"]);
 						if($paykeepingdet["RESULT"]){
 							$ref_noLN = time().$lib->randomText('all',3);
@@ -146,7 +144,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							ob_flush();
 							echo json_encode($arrayResult);
 							exit();
-						}*/
+						}
 					}else{
 						$conoracle->rollback();
 						$conmysql->rollback();

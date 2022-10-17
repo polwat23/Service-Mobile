@@ -32,7 +32,7 @@ if(isset($jsonData) && is_array($jsonData)){
 			}
 			
 			if(strpos($key,'_spc_') === false && strpos($key,'_emoji_') === false && strpos($key,'_root_') === false && $key != 'remark'){
-				$dataComing[$key] = preg_replace('/[^\p{Thai}A-Za-z0-9 \/\-@_${}(),#*<>=:+!?.]/u','', strip_tags($data));
+				$dataComing[$key] = preg_replace('/[^\p{Thai}A-Za-z0-9 \/\-@_${}()%,#*<>=:+!?.]/u','', strip_tags($data));
 			}else if(strpos($key,'_emoji_') === false && strpos($key,'_root_') === false && $key != 'remark'){
 				$dataComing[$key] = preg_replace("/[^\p{Thai}A-Za-z0-9 \/\-@_%(),'#|<>=:+!?.]/u",'', $data);
 			}else if(strpos($key,'_root_') === false || $key == 'remark'){
@@ -42,7 +42,7 @@ if(isset($jsonData) && is_array($jsonData)){
 			}
 		}else{
 			$dataComing[$key] = array_map(function($text){
-				return preg_replace('/[^\p{Thai}A-Za-z0-9 \/\-@_${}(),#<>=:+!?.]/u','', $text);
+				return preg_replace('/[^\p{Thai}A-Za-z0-9 \/\-@_${}()%,#<>=:+!?.]/u','', $text);
 			},$data);
 		}
 	}

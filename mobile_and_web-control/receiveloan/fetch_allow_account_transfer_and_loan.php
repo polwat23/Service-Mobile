@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowLoanConst = $fetchAllowReceiveLoantype->fetch(PDO::FETCH_ASSOC)){
 				$arrGrpLoan[] = $rowLoanConst["loantype_code"];
 			}
-			$fetchLoanRepay = $conoracle->prepare("SELECT LN.LOANCONTRACT_NO,LT.LOANTYPE_CODE,LT.LOANTYPE_DESC,LN.PRINCIPAL_BALANCE,LN.WITHDRAWABLE_AMT
+			$fetchLoanRepay = $conoracle->prepare("SELECT LN.LOANCONTRACT_NO,LT.LOANTYPE_CODE,LT.LOANTYPE_DESC,LN.PRINCIPAL_BALANCE,LN.WITHDRAWABLE_AMT, LN.LOANAPPROVE_AMT
 													FROM lncontmaster ln LEFT JOIN lnloantype lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 													WHERE ln.loantype_code IN(".implode(',',$arrGrpLoan).") and ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
@@ -63,8 +63,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrLoan = array();
 				$arrLoan["CONTRACT_NO"] = $rowLoan["LOANCONTRACT_NO"];
 				$arrLoan["LOAN_TYPE"] = $rowLoan["LOANTYPE_DESC"];
-				$arrLoan["PRN_BALANCE"] = number_format($rowLoan["WITHDRAWABLE_AMT"],2);
-				$arrLoan["BALANCE"] = $rowLoan["WITHDRAWABLE_AMT"];
+				$arrLoan["PRN_BALANCE"] = number_format(($rowLoan["LOANAPPROVE_AMT"] -  $rowLoan["PRINCIPAL_BALANCE"]),2);
+				$arrLoan["BALANCE"] = $rowLoan["LOANAPPROVE_AMT"]-  $rowLoan["PRINCIPAL_BALANCE"];
 				$arrLoan["BALANCE_FORMAT"] = number_format($rowLoan["PRINCIPAL_BALANCE"],2);
 				$arrLoanGrp[] = $arrLoan;
 			}
@@ -96,6 +96,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 			if(sizeof($arrGroupAccAllow) > 0 || sizeof($arrGroupAccBind) > 0){
+				$arrayResult['FIRST_INIT_ACCOUNT'] = 'bank';
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
 				$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
 				$arrayResult['LOAN'] = $arrLoanGrp;

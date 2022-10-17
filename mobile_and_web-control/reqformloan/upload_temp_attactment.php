@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component','temp_img'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 	
 		if(isset($dataComing["temp_img"]) && $dataComing["temp_img"] != ""){
-			$subpath = $member_no.time();
+			$subpath = $member_no.time().$lib->randomText("" ,8);
 			$destination = __DIR__.'/../../resource/reqloan_doc_temp';
 			$data_Img = explode(',',$dataComing["temp_img"]);
 			$info_img = explode('/',$data_Img[0]);
