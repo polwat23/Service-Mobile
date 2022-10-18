@@ -26,6 +26,11 @@ if($lib->checkCompleteArgument(['unique_id','arr_id_editdata'],$dataComing)){
 				$log->writeLog('manageuser',$arrayStruc);
 				$updateSuccess = $conmssql->prepare("UPDATE gcmembereditdata SET is_updateoncore = '1' WHERE id_editdata = :id_editdata");
 				$updateSuccess->execute([':id_editdata' => $id_edit]);
+				$updateMobile = $conmssql->prepare("UPDATE gcmemberaccount SET phone_number = :mobile WHERE member_no = :member_no");
+				$updateMobile->execute([
+					':mobile' => $rowUserAcc["incoming_data"],
+					':member_no' => TRIM($rowUserAcc["member_no"])
+				]);
 				$arrayResult["RESULT"] = TRUE;
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขข้อมูลได้ กรุณาติดต่อผู้พัฒนา";
@@ -47,6 +52,11 @@ if($lib->checkCompleteArgument(['unique_id','arr_id_editdata'],$dataComing)){
 				$log->writeLog('manageuser',$arrayStruc);
 				$updateSuccess = $conmssql->prepare("UPDATE gcmembereditdata SET is_updateoncore = '1' WHERE id_editdata = :id_editdata");
 				$updateSuccess->execute([':id_editdata' => $id_edit]);
+				$updateEmail = $conmssql->prepare("UPDATE gcmemberaccount SET email = :email WHERE member_no = :member_no");
+				$updateEmail->execute([
+					':email' => $rowUserAcc["incoming_data"],
+					':member_no' => TRIM($rowUserAcc["member_no"])
+				]);
 				$arrayResult["RESULT"] = TRUE;
 			}else{
 				$arrayResult['RESPONSE'] = "ไม่สามารถแก้ไขข้อมูลได้ กรุณาติดต่อผู้พัฒนา";

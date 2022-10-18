@@ -171,6 +171,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					foreach($dataComing["data_api"]["result"]["purposes"] as $purpose){
 						$arrPurpose = array();
 						$arrPurpose["ID"] = $purpose["id"];
+						$arrPurpose["CONSENT_ID"] = $purpose["id"];
 						$arrPurpose["DETAIL"] = $purpose["name"];
 						$arrPurposeGrp[] = $arrPurpose;
 					}
@@ -261,7 +262,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrListPurpose = array();
 					foreach($dataComing["data_api"]["purposes"] as $purposes){
 						$arrPurposes = array();
-						$arrPurposes['id'] = $purposes["ID"];
+						$arrPurposes['id'] = $purposes["CONSENT_ID"] ?? $purposes["ID"];
 						$arrPurposes['consentStatus'] = $purposes["ACTIVE"] == 0 ? 'false' : 'true';
 						$arrListPurpose[] = $arrPurposes;
 					}
