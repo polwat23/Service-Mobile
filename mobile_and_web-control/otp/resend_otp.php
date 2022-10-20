@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp WHERE otp_status = '0'");
+	$updateOldOTP = $conmysql->prepare("UPDATE gcotp SET otp_status = '-9' WHERE refno_otp = :ref_old_otp and otp_status = '0'");
 	$updateOldOTP->execute([':ref_old_otp' => $dataComing["ref_old_otp"]]);
 	$templateMessage = $func->getTemplateSystem("OTPChecker",1);
 	$otp_password = $lib->randomText('number',6);
@@ -47,10 +47,19 @@ if($lib->checkCompleteArgument(['member_no','tel','ref_old_otp'],$dataComing)){
 			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
-			$arrayDest["member_no"] = $member_no;
-			$arrayDest["tel"] = $arrayTel[0]["TEL"];
-			$arrayDest["message"] = $arrMessage["BODY"];
-			$arraySendSMS = $lib->sendSMS($arrayDest);
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['action'] = "sendmsg";
+			$arrVerifyToken["mode"] = "eachmsg";
+			$arrVerifyToken['typeMsg'] = 'OTP';
+			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
+			$arrMsg[0]["msg"] = $arrMessage["BODY"];
+			$arrMsg[0]["to"] = $arrayTel[0]["TEL"];
+			$arrSendData["dataMsg"] = $arrMsg;
+			$arrSendData["custId"] = 'kbt';
+			$arrHeader[] = "version: v1";
+			$arrHeader[] = "OAuth: Bearer ".$verify_token;
+			$arraySendSMS = $lib->posting_data($config["URL_SMS"].'/navigator',$arrSendData,$arrHeader);
+
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
 				$conmysql->commit();

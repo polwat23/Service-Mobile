@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayGrpForm = array();
 		$arrayPaymentGrp = array();
 		
-		$getPaymentSlip = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, reqdoc_no,
+		$getPaymentSlip = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, reqdoc_no, payment_acc,
 											payment_amt, slip_url, create_date FROM gcslippaydept 
 											WHERE member_no = :member_no ORDER BY create_date DESC");
 		$getPaymentSlip->execute([
@@ -24,6 +24,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayDoc["REQUEST_DATE"] = $lib->convertdate($rowPaymentSlip["create_date"],"D m Y", true);
 			$arrayDoc["REQUEST_DATE_RAW"] = $rowPaymentSlip["create_date"];
 			$arrayDoc["REMARK"] = $rowPaymentSlip["remark"];
+			$arrayDoc["PAYMENT_ACC"] = $rowPaymentSlip["payment_acc"];
 			$arrayDoc["REQ_STATUS"] = $rowPaymentSlip["req_status"];
 			$arrayDoc["REQDOC_NO"] = $rowPaymentSlip["reqdoc_no"];
 			if($rowPaymentSlip["req_status"] == '1'){

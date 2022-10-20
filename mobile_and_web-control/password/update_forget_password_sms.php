@@ -62,14 +62,18 @@ if($lib->checkCompleteArgument(['api_token','unique_id','member_no','tel','devic
 			':member_no' => $member_no
 		])){
 			$arrMessage = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
-			$arrayDest["member_no"] = $member_no;
-			$arrayDest["phone"] = $dataComing["tel"];
-			$arrayDest["message"] = $arrMessage["BODY"];
-			$arrayDest["sender"] = $config["SMS_SENDER"];
-			$arrayComing["TEL"] = $dataComing["tel"];
-			$arrayComing["MEMBER_NO"] = $member_no;
-			$arrayTel[] = $arrayComing;
-			$arraySendSMS = $lib->sendSMS($arrayDest);
+			$arrVerifyToken['exp'] = time() + 300;
+			$arrVerifyToken['action'] = "sendmsg";
+			$arrVerifyToken["mode"] = "eachmsg";
+			$arrVerifyToken['typeMsg'] = 'OTP';
+			$verify_token =  $jwt_token->customPayload($arrVerifyToken, $config["KEYCODE"]);
+			$arrMsg[0]["msg"] = $arrMessage["BODY"];
+			$arrMsg[0]["to"] = $dataComing["tel"];
+			$arrSendData["dataMsg"] = $arrMsg;
+			$arrSendData["custId"] = 'kbt';
+			$arrHeader[] = "version: v1";
+			$arrHeader[] = "OAuth: Bearer ".$verify_token;
+			$arraySendSMS = $lib->posting_data($config["URL_SMS"].'/navigator',$arrSendData,$arrHeader);
 			if($arraySendSMS["RESULT"]){
 				$arrayLogSMS = $func->logSMSWasSent(null,$arrMessage["BODY"],$arrayTel,'system');
 				if($func->logoutAll(null,$member_no,'-9')){

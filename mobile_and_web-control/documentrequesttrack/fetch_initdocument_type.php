@@ -21,8 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$getFormatForm = $conmysql->prepare("SELECT id_format_req_doc, documenttype_code, form_label, form_key, group_id, max_value, min_value,
 										form_type, colspan, fullwidth, required, placeholder, default_value, form_option, maxwidth 
-										FROM gcformatreqdocument
-										WHERE is_use = '1'");
+										FROM gcformatreqdocument order by form_order");
 		$getFormatForm->execute();
 		
 		while($rowForm = $getFormatForm->fetch(PDO::FETCH_ASSOC)){

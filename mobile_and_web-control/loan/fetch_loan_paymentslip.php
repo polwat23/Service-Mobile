@@ -23,7 +23,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no'],$dataComing)
 		$arrContract = array();
 		
 		$arrayPaymentGrp = array();
-		$getPaymentSlip = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, 
+		$getPaymentSlip = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, payment_acc,
 											payment_amt, slip_url, create_date FROM gcslippaydept 
 											WHERE member_no = :member_no and loancontract_no = :loancontract_no ORDER BY create_date DESC limit 2");
 		$getPaymentSlip->execute([
@@ -38,6 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no'],$dataComing)
 			$arrayDoc["PRINCIPLE"] =  number_format($rowPaymentSlip["principle"],2);
 			$arrayDoc["INTEREST"] = number_format($rowPaymentSlip["interest"],2);
 			$arrayDoc["PAYMENT_AMT"] = number_format($rowPaymentSlip["payment_amt"],2);
+			$arrayDoc["PAYMENT_ACC"] = $rowPaymentSlip["payment_acc"];
 			$arrayDoc["SLIP_URL"] = $rowPaymentSlip["slip_url"];
 			$arrayDoc["REQUEST_DATE"] = $lib->convertdate($rowPaymentSlip["create_date"],"D m Y", true);
 			$arrayDoc["REQUEST_DATE_RAW"] = $rowPaymentSlip["create_date"];
@@ -88,7 +89,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no'],$dataComing)
 		
 		if(!(date("d") >= $startPayDate || date("d") <= 7)){
 			$arrContract['IS_CANUPLOAD'] = false;
-			$arrContract['REMARK'] = 'เปิดให้ชำหนี้เฉพาะวันที่ 28 - 7 กรุณาทำรายการใหม่อีกครั้งในวันเวลาดังกล่าว';
+			$arrContract['REMARK'] = 'เปิดให้ชำระหนี้เฉพาะวันที่ 28 - 7 กรุณาทำรายการใหม่อีกครั้งในวันเวลาดังกล่าว';
 		}else if($rowContract["LOANGROUP_CODE"] == '01'){
 			$getActiveSlip = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, 
 											payment_amt, slip_url, create_date FROM gcslippaydept 
@@ -108,9 +109,39 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no'],$dataComing)
 				$arrContract['REMARK'] = 'ไม่สามารถทำรายรายเพิ่มได้ เนื่องจากมีรายการชำระหนี้เดิมรอดำเนินการอยู่';
 			}
 		}else{
-			if(date("d") != $startPayDate){
-				$arrContract['IS_DISABLE_PAYMENT'] = true;
+			$day = date('d');
+			if($day <= 7){
+				$start_date = new DateTime('first day of this month');
+				$start_date->modify('-2 month');
+				$start_date = $start_date->format('Y-m-08');
+				$end_date = new DateTime('first day of this month');
+				$end_date->modify('-1 month');
+				$end_date = $end_date->format('Y-m-07');
+			}else{
+				$start_date = new DateTime('first day of this month');
+				$start_date->modify('-1 month');
+				$start_date = $start_date->format('Y-m-08');
+				$end_date = new DateTime('first day of this month');
+				$end_date = $end_date->format('Y-m-07');
 			}
+			$getActiveSlip = $conmysql->prepare("SELECT * FROM gcreqdoconline
+							WHERE member_no = :member_no AND documenttype_code = 'PAYD' AND req_status = '1' 
+							AND DATE_FORMAT(request_date,'%Y-%m-%d') >= :start_date 
+							AND DATE_FORMAT(request_date,'%Y-%m-%d') <= :end_date");
+			$getActiveSlip->execute([
+				':member_no' => $payload["member_no"],
+				':start_date' => $start_date,
+				':end_date' => $end_date
+			]);
+			$rowActiveSlip = $getActiveSlip->fetch(PDO::FETCH_ASSOC);
+			if($getActiveSlip->rowCount() > 0){
+				$arrContract['IS_DISABLE_PAYMENT'] =  false;
+			}else{
+				$arrContract['IS_DISABLE_PAYMENT'] = true;
+				$arrContract['REMARK'] = 'กรณีต้องการชำระหนี้บางส่วน กรุณากรอกข้อมูลใบคำขอชำระหนี้บางส่วนในหน้าจอ "ใบคำขอชำระหนี้บางส่วน" หลังจากใบคำขออนุมัติเเล้วจึงจะทำรายการชำระหนี้บางส่วนได้';
+				$arrContract['REMARK_BG_COLOR'] = '#f2a365';
+			}
+			
 		}
 		$arrContract['MAX_PAYMENT'] = $rowContract["LOAN_BALANCE"] + $interest;
 		$arrContract['MIN_PAYMENT'] = 0;

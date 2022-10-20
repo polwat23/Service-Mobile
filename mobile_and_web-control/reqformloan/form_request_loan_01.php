@@ -168,14 +168,7 @@ function GeneratePDFContract($data,$lib) {
 							'.$data["period"].'
 						</span>
                 </span>
-                <span style="display: inline-block; padding-right: 4px;padding-left: 8px;">งวด (สูงสุดไม่เกิน 6 งวด) พร้อมดอกเบี้ย ทั้งนี้ตั้งแต่เดือน</span>
-                <span
-                    style="display: inline-block;width: 60px;padding-left: 4px;padding-right: 4px; border: 1px dashed blue;margin-left: 45px;">
-						'.'&nbsp;'.'
-						<span style="position: absolute;">
-							'.$data["pay_month"].'
-						</span>
-                </span>
+                <span style="display: inline-block; padding-right: 4px;padding-left: 8px;">งวด (สูงสุดไม่เกิน 6 งวด) พร้อมดอกเบี้ย </span>
                 <span style="display: inline-block; padding-right: 4px;">ได้รับเงินหลังวันที่ 10 จะหักเดือนถัดไป</span>
             </div>
             <div class="line-margin">

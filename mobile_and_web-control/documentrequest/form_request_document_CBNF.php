@@ -50,7 +50,7 @@ function GenerateReport($dataReport,$lib){
 					</div>
 				</div>
 				<div style="font-weight: bold;padding-top: 24px;">
-					แบบขอแจ้งเปลี่ยนแปลงผู้รับประโยชน์ของสหกรณ์ออมทรัพย์พนักงานฯ
+					เรียน     ประธานคณะกรรมการดำเนินการ ฯ
 				</div>
 				<div style="padding-left: 60px;padding-top: 24px;">
 					ข้าพเจ้า (นาย/ นาง/ น.ส.) <span class="input-zone"><span class="input-value">'.$dataReport["MEMBER_FULLNAME"].'
@@ -67,36 +67,40 @@ function GenerateReport($dataReport,$lib){
 				</div>
 				<div style="padding-top: 16px;">
 					1<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_1"].'
-					</span>…..............…………………………………….................</span> 3 <span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_3"].'
-					</span>………………................……………………...................</span>
+					</span>…..............…………………………………….................</span>ความสัมพันธ์กับสมาชิก<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_MEMBER_1"].'
+					</span>………………................……………</span>เปอร์เซ็นต์<span class="input-zone"><span class="input-value">'.(isset($dataReport["BENEF_PERCENT_1"]) && $dataReport["BENEF_PERCENT_1"] != "" ? $dataReport["BENEF_PERCENT_1"]."%" : "" ).'
+					</span>………………..........</span>
 				</div>
 				<div style="padding-top: 16px;">
-					2<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_2"].'
-					</span>…..............…………………………………….................</span> 4 <span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_4"].'
-					</span>………………................……………………...................</span>
+					1<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_2"].'
+					</span>…..............…………………………………….................</span>ความสัมพันธ์กับสมาชิก<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_MEMBER_2"].'
+					</span>………………................……………</span>เปอร์เซ็นต์<span class="input-zone"><span class="input-value">'.(isset($dataReport["BENEF_PERCENT_2"]) && $dataReport["BENEF_PERCENT_2"] != "" ? $dataReport["BENEF_PERCENT_2"]."%" : "" ).'
+					</span>………………..........</span>
 				</div>
-				<div style="padding-top: 48px;">
-					ตามเงื่อนไข (โปรดทำเครื่องหมาย X ใน <div
-						style="display: inline-block;width: 1em; height: 1em; border: 1px solid #000000; border-radius: 0.5em;"></div>
-					ที่ท่านเลือก)
+				<div style="padding-top: 16px;">
+					1<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_3"].'
+					</span>…..............…………………………………….................</span>ความสัมพันธ์กับสมาชิก<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_MEMBER_3"].'
+					</span>………………................……………</span>เปอร์เซ็นต์<span class="input-zone"><span class="input-value">'.(isset($dataReport["BENEF_PERCENT_3"]) && $dataReport["BENEF_PERCENT_3"] != "" ? $dataReport["BENEF_PERCENT_3"]."%" : "" ).'
+					</span>………………..........</span>
 				</div>
-				<div style="width: 100%;padding-top: 24px;">
-					<div style="display: inline-block; width: 25%;">
-						<div
-							style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000; border-radius: 0.4em;position: relative;"><span style="position: absolute;top: -9px;left: 5px;">'.($dataReport["BENEF_OPTION"] == '1' ? 'X' : '').'</span></div>
-						<div style="display: inline-block;white-space: nowrap;">ตามส่วนเท่ากัน</div>
-					</div>
-					<div style="display: inline-block; width: 25%;">
-						<div
-							style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000; border-radius: 0.4em;position: relative;"><span style="position: absolute;top: -9px;left: 5px;">'.($dataReport["BENEF_OPTION"] == '2' ? 'X' : '').'</span></div>
-						<div style="display: inline-block;white-space: nowrap;">ตามลำดับก่อนหลัง</div>
-					</div>
-					<div style="display: inline-block; width: 25%;">
-						<div
-							style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000; border-radius: 0.4em;position: relative;"><span style="position: absolute;top: -9px;left: 5px;">'.($dataReport["BENEF_OPTION"] == '3' ? 'X' : '').'</span></div>
-						<div style="display: inline-block;white-space: nowrap;">อื่น ๆ <span class="input-zone">…………………………<span class="input-value">'.$dataReport["OPTION_VALUE"].'
-					</span</span></div>
-					</div>
+				<div style="padding-top: 16px;">
+					1<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_4"].'
+					</span>…..............…………………………………….................</span>ความสัมพันธ์กับสมาชิก<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_MEMBER_4"].'
+					</span>………………................……………</span>เปอร์เซ็นต์<span class="input-zone"><span class="input-value">'.(isset($dataReport["BENEF_PERCENT_4"]) && $dataReport["BENEF_PERCENT_4"] != "" ? $dataReport["BENEF_PERCENT_4"]."%" : "" ).'
+					</span>………………..........</span>
+				</div>
+				<div style="padding-top: 16px;">
+					1<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_NAME_5"].'
+					</span>…..............…………………………………….................</span>ความสัมพันธ์กับสมาชิก<span class="input-zone"><span class="input-value">'.$dataReport["BENEF_MEMBER_5"].'
+					</span>………………................……………</span>เปอร์เซ็นต์<span class="input-zone"><span class="input-value">'.(isset($dataReport["BENEF_PERCENT_5"]) && $dataReport["BENEF_PERCENT_5"] != "" ? $dataReport["BENEF_PERCENT_5"]."%" : "" ).'
+					</span>………………..........</span>
+				</div>
+				<div style="padding-top: 16px;">
+					ข้าพเจ้าขอรับรองว่าข้อมูลข้างต้นเป็นความจริงและสมบูรณ์ ข้าพเจ้ารับทราบและตกลงยอมรับตามข้อมูลดังกล่าว
+				</div>
+				<div style="padding-top: 16px;padding-left: 256px;">
+					ลงชื่อ <span class="input-zone"><span class="input-value">'.$dataReport["MEMBER_NAME"].'
+					</span>…………………………………………………</span> ผู้แจ้งความประสงค์
 				</div>
 			</div>
 			';

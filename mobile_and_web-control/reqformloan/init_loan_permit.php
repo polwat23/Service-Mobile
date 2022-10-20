@@ -5,6 +5,21 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		//get loangroup_code
+		$getCollAcc = $conmssql->prepare("SELECT REMARK, MEMBER_NO FROM MBMEMBMASTER WHERE REMARK != '' AND REMARK IS NOT NULL AND MEMBER_NO = :member_no");
+		$getCollAcc->execute([
+			':member_no' => $member_no
+		]);
+		$rowCollAcc = $getCollAcc->fetch(PDO::FETCH_ASSOC);
+		//$isNoCollAcc = true;
+		$isNoCollAcc = false;
+		if(isset($rowCollAcc["REMARK"])){
+			$isNoCollAcc = false;
+		}
+		if($member_no == '00006166'){
+			$isNoCollAcc = true;
+		}
+		
+		//get loangroup_code
 		$getLoanGroup = $conmssql->prepare("SELECT LOANGROUP_CODE FROM lnloantype WHERE loantype_code = :loantype_code");
 		$getLoanGroup->execute([
 			':loantype_code' => $dataComing["loantype_code"]
@@ -113,6 +128,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
+			if($isNoCollAcc && ($dataComing["request_amt"] + $oldConsBal) > $emp_fund_amt){
+				$arrayResult['IS_POPUP_BANKACC'] = true;
+				$arrayResult['emp_fund_amt'] = $emp_fund_amt;
+				$arrayResult['dept'] = ($dataComing["request_amt"] + $oldConsBal);
+			}else{
+				$arrayResult['IS_POPUP_BANKACC'] = false;
+				$arrayResult['emp_fund_amt'] = $emp_fund_amt;
+				$arrayResult['dept'] = ($dataComing["request_amt"] + $oldConsBal);
+			}
 			
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
@@ -128,7 +152,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$m_birthdate = date('m',strtotime($rowMember["BIRTH_DATE"]));
 			$y_birthdate = date('Y')-date('Y',strtotime($rowMember["BIRTH_DATE"]));
-			if($rowMember["MEMBGROUP_CODE"] == "SKCM" || $rowMember["MEMBGROUP_CODE"] == "SKLM"){
+			if($rowMember["MEMBGROUP_CODE"] == "SKCM" || $rowMember["MEMBGROUP_CODE"] == "SKLM" || $rowMember["MEMBGROUP_CODE"] == "SCG"){
 				$max_member_period = ((60 - $y_birthdate)*12) + (12 - date('m'));
 			}else{
 				$max_member_period = ((55 - $y_birthdate)*12) + (12 - date('m'));
@@ -185,10 +209,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$max_member_period = 0;
 			}
 			$arrMinPeriod = array();
-			$arrMinPeriod[] = $max_member_period;
+			$arrMinPeriod[] = $max_member_period - 1;
 			$arrMinPeriod[] = $rowMaxPeriod["MAX_PERIOD"];
 			$rowMaxPeriod["MAX_PERIOD"] =  min($arrMinPeriod);
 
+			$arrayResult["rowMaxPeriod"] = $arrMinPeriod;
 			if(isset($rowMaxPeriod["MAX_PERIOD"]) && $rowMaxPeriod["MAX_PERIOD"] > 0){
 				$getLoanObjective = $conmssql->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective");
 				$getLoanObjective->execute();
@@ -276,11 +301,11 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult['CALCULATE_VALUE'] = $calculate_arr;
 				$receive_date = null;
 				//วันหยุด
-				$holiday_date = "2022-06-03";
+				$holiday_date = "2022-08-12";
 				//วันที่เลื่อน
-				$holiday_change_date = "2022-06-02";
+				$holiday_change_date = "2022-08-11";
 				if($rowLoanGroup["LOANGROUP_CODE"] == '01'){
-					if(date('w') > 3 || date('w') == 0){
+					if(date('w') > 3 || date('w') == 0 || date( 'Y-m-d') == "2022-08-10"){
 						$receive_date = date( 'Y-m-d', strtotime( 'friday next week' ) );
 						if($receive_date == $holiday_date){
 							$arrayResult['RECEIVE_DATE'] = $holiday_change_date;
@@ -385,6 +410,15 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 					$arrayResult['RESPONSE_MESSAGE'] = $error_desc ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
+				}
+				if($isNoCollAcc && ($request_amt + $oldConsBal) > $emp_fund_amt){
+					$arrayResult['IS_POPUP_BANKACC'] = true;
+					$arrayResult['emp_fund_amt'] = $emp_fund_amt;
+					$arrayResult['dept'] = ($request_amt + $oldConsBal);
+				}else{
+					$arrayResult['IS_POPUP_BANKACC'] = false;
+					$arrayResult['emp_fund_amt'] = $emp_fund_amt;
+					$arrayResult['dept'] = ($dataComing["request_amt"] + $oldConsBal);
 				}
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

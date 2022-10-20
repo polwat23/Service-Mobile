@@ -105,7 +105,7 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 		$getFormatForm = $conmysql->prepare("SELECT id_format_req_doc, documenttype_code, form_label, form_key, group_id, max_value, min_value,
 										form_type, colspan, fullwidth, required, placeholder, default_value, form_option, maxwidth, mask
 										FROM gcformatreqdocument
-										WHERE is_use = '1' AND documenttype_code = :documenttype_code");
+										WHERE is_use = '1' AND documenttype_code = :documenttype_code ORDER BY form_order");
 		$getFormatForm->execute([
 			':documenttype_code' => $dataComing["documenttype_code"]
 		]);
@@ -543,7 +543,7 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 				
 				//ลาออกหากหนี้มากกว่าทุนเรือนหุ้นให้เลือกว่าลาออกจากสหกรณ์หรือบริษัท
 				$arrayForm = array();
-				if($dataComing["documenttype_code"] == "RRSN" && $rowForm["form_key"] == "RESIGN_FROM_OPTION"){
+				if($dataComing["documenttype_code"] == "RRSN" && $rowForm["form_key"] == "RESIGN_PAY_OPTION"){
 					if($dataComing["documenttype_code"] == "RRSN" && $receive_net < 0){
 						$arrayForm = array();
 						$arrayForm["ID_FORMAT_REQ_DOC"] = null;
@@ -656,6 +656,24 @@ if($lib->checkCompleteArgument(['menu_component','documenttype_code'],$dataComin
 					$arrayForm["PLACEHOLDER"] = $rowForm["form_label"].' '.$date_arr[1].' '.$date_arr[2];
 					$arrayForm["MAX_VALUE"] = '#ffffff';
 					$arrayForm["MIN_VALUE"] = '#dc5349';
+				}
+				if($dataComing["documenttype_code"] == "PAYD" && $rowForm["form_key"] == "DEPT_MONTH"){
+					$day = date('d');
+					if($day > 7){
+						$dateNow = new DateTime('first day of this month');
+						$dateNow->modify('+1 month');
+						$dateNow = $dateNow->format('Y-m-d');
+						$arrayForm["DEFAULT_VALUE"] = $dateNow;
+					}else{
+						$dateNow = new DateTime('first day of this month');
+						$dateNow = $dateNow->format('Y-m-d');
+						$arrayForm["DEFAULT_VALUE"] = $dateNow;
+					}
+					$arrayForm["FORM_TYPE"] = "remark";
+					$date_arr = explode(" ",$lib->convertdate($dateNow,"D M Y"));
+					$arrayForm["PLACEHOLDER"] = $rowForm["form_label"].' '.$date_arr[1].' '.$date_arr[2];
+					$arrayForm["MAX_VALUE"] = '#dc5349';
+					$arrayForm["MIN_VALUE"] = '#dc534922';
 				}
 				$arrayGrpForm[] = $arrayForm;
 				

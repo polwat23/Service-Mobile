@@ -744,7 +744,7 @@ class library {
 				//ปัดที่ละสลึง
 				if ($fraction > 0.00 && $fraction <= 0.25) { $roundFrac = 0.25; }
 				if ($fraction > 0.25 && $fraction <= 0.50) { $roundFrac = 0.50; }
-				if ($fraction > 0.25 && $fraction <= 0.75) { $roundFrac = 0.75; }
+				if ($fraction > 0.50 && $fraction <= 0.75) { $roundFrac = 0.75; }
 				if ($fraction > 0.75 && $fraction <= 0.99) { $roundFrac = 1.00; }
 				break;
 			case 2:

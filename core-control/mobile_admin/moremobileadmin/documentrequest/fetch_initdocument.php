@@ -19,9 +19,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		
 		$getFormatForm = $conmysql->prepare("SELECT id_format_req_doc, documenttype_code, form_label, form_key, group_id, max_value, min_value,
-										form_type, colspan, fullwidth, required, placeholder, default_value, form_option, maxwidth 
-										FROM gcformatreqdocument
-										WHERE is_use = '1'");
+										form_type, colspan, fullwidth, required, placeholder, default_value, form_option, maxwidth ,is_use
+										FROM gcformatreqdocument");
 		$getFormatForm->execute();
 		
 		while($rowForm = $getFormatForm->fetch(PDO::FETCH_ASSOC)){
@@ -30,6 +29,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayForm["FORM_KEY"] = $rowForm["form_key"];
 			$arrayForm["FORM_TYPE"] = $rowForm["form_type"];
 			$arrayForm["FORM_OPTION"] = $rowForm["form_option"];
+			$arrayForm["IS_USE"] = $rowForm["is_use"];
 			$arrayGrpForm[$rowForm["documenttype_code"]][] = $arrayForm;
 		}
 		$arrayForm = array();

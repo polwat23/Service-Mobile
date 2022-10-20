@@ -1,10 +1,12 @@
 {
 	"NAME_APP" : "KBT Saving",
 	"COOP_KEY" : "kbt",
-	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=kbt",
+	"URL_POLICY" : "https://policy.thaicoop.co/kbt_pdpa.html?v=3",
 	"COOP_ID" : "066001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.kbtsaving.mobile",
+	"URL_SMS" : "https://sms.thaicoop.co/",
+	"KEYCODE" : "Q2e!c93dx&x2e",
 	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/KBTCOOP/",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",

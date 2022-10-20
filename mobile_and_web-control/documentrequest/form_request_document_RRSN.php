@@ -82,8 +82,20 @@ function GenerateReport($dataReport,$lib){
 							</span>....................................</span> มีความประสงค์ที่จะขอลาออกจากการเป็นสมาชิกสหกรณ์ฯ
 					</div>
 					<div>
-						เนื่องจาก <span class="input-zone"><span class="input-value">'.$dataReport["REASON"].'
-							</span>………………………….................................................................</span> วันที่มีผล <span class="input-zone"><span class="input-value">'.$dataReport["EFFECT_DATE"].'
+						เนื่องจาก
+						<div
+							style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000;position: relative;margin-left: 30px;">
+							'.($dataReport["RESIGN_FROM_OPTION"] == "1" ? $checked : "").'
+						</div>
+						ลาออกจากสหกรณ์    เหตุผล<span class="input-zone"><span class="input-value">'.$dataReport["REASON"].'
+							</span>………………………….................................................................</span>
+					</div>
+					<div style="padding-left: 75px;">
+						<div
+							style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000;position: relative;">
+							'.($dataReport["RESIGN_FROM_OPTION"] == "2" ? $checked : "").'
+						</div>
+						พ้นสภาพการเป็นพนักงานบริษัท  โดยมีผลตั้งแต่วันที่ <span class="input-zone"><span class="input-value">'.$dataReport["EFFECT_DATE"].'
 							</span>.......................................</span>
 					</div>
 					<div>
@@ -116,6 +128,7 @@ function GenerateReport($dataReport,$lib){
 					</div>
 					<div>
 						จึงเรียนมาเพื่อโปรดพิจารณาให้ลาออกจากการเป็นสมาชิกสหกรณ์ฯ ตามความประสงค์ด้วย
+					</div>
 					</div>
 				</div>
 				<div style="font-weight: bold;padding-left: 12px;padding-bottom: 2px;">
@@ -219,6 +232,25 @@ function GenerateReport($dataReport,$lib){
 							<td></td>
 						</tr>
 						<tr>
+							<td colspan="8" style="padding-left: 12px;">
+								<div>
+									หมายเหตุเพิ่มเติม (เนื่องจากหนี้มากกว่าทุนเรือนหุ้น)
+								</div>
+								<div style="padding-left: 120px;">
+									<div
+										style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000;position: relative;">
+										'.($dataReport["RESIGN_PAY_OPTION"] == "1" ? $checked : "").'
+									</div>
+									ชำระหนี้กับสหกรณ์โดยโอนเข้าบัญชีสหกรณ์
+									<div
+										style="display: inline-block;width: 0.8em; height: 0.8em; border: 1px solid #000000;position: relative;margin-left: 24px">
+										'.($dataReport["RESIGN_PAY_OPTION"] == "2" ? $checked : "").'
+									</div>
+									รอเช็คกองทุนสำรองเลี้ยงชีพ (PF)
+								</div>
+							</td>
+						</tr>
+						<tr>
 							<td colspan="8" style="font-size: 1.1em;color: red;font-weight: bold;padding-left: 12px;">
 								สมาชิกจะได้รับเงินคืนในวันเดียวกันกับค่าจ้างประจำเดือนแต่เงินจะเข้าภายใน 17.00
 								น.และไม่มียอดแจ้งในสลิปเงินเดือน</td>
@@ -233,17 +265,15 @@ function GenerateReport($dataReport,$lib){
 						บันทึกสำหรับเจ้าหน้าที่สหกรณ์
 					</div>
 					<div style="padding-left: 30px;">
-						1. มีเงินหุ้นคงเหลือในสหกรณ์ฯเมื่อวันที่ <span class="input-zone"><span class="input-value">
-							</span>....…..</span>/<span class="input-zone"><span class="input-value">
-							</span>….....….</span>/<span class="input-zone"><span class="input-value">
-							</span>……..</span>เป็นจำนวนเงิน<span class="input-zone"><span class="input-value">
-							</span>…………….....……….</span>บาท
+						1. มีเงินหุ้นคงเหลือในสหกรณ์ฯ ณ เดือน <span class="input-zone"><span class="input-value">'.(explode(" ", $dataReport["INFO_DATE"])[0] ?? "").'
+							</span>....….....</span>/<span class="input-zone"><span class="input-value">'.(explode(" ", $dataReport["INFO_DATE"])[1] ?? "").'
+							</span>…........….</span>เป็นจำนวนเงิน<span class="input-zone"><span class="input-value">'.(number_format($dataReport["SHARE_STK"],2)).'
+							</span>……………..........……….</span>บาท
 					</div>
 					<div style="padding-left: 30px;">
-						2. มีหนี้ต่อสหกรณ์ฯในฐานะผู้กู้คงเหลือเมื่อวันที่ <span class="input-zone"><span class="input-value">
-							</span>....…..</span>/<span class="input-zone"><span class="input-value">
-							</span>….....….</span>/<span class="input-zone"><span class="input-value">
-							</span>……..</span>
+						2. มีหนี้ต่อสหกรณ์ฯในฐานะผู้กู้คงเหลือ ณ เดือน <span class="input-zone"><span class="input-value">'.(explode(" ", $dataReport["INFO_DATE"])[0] ?? "").'
+							</span>.......…..</span>/<span class="input-zone"><span class="input-value">'.(explode(" ", $dataReport["INFO_DATE"])[1] ?? "").'
+							</span>…........….</span>
 					</div>
 					<div style="padding-left: 50px;">
 						- เงินกู้ฉุกเฉิน (เงินต้น<span class="input-zone"><span class="input-value">'.number_format($dataReport["LOAN_GROUP_BAL_1"],2).'

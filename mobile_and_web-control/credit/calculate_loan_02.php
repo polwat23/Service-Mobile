@@ -14,6 +14,8 @@ $sum_old_payment = 0;
 $is_cant_refinance = false;
 $other_amt = 0;
 $cal_period = 0;
+$emp_fund_amt = 0;
+$is_morethan_funding = false;
 
 $getMemberIno = $conmssql->prepare("SELECT MEMBER_DATE,SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
 $getMemberIno->execute([':member_no' => $member_no]);
@@ -43,12 +45,22 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 		//$arrContract['INTEREST'] = round($cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]), 0, PHP_ROUND_HALF_DOWN);
 		$arrContract['INTEREST_AMT'] = $cal_loan->calculateInterest($rowOldContract["LOANCONTRACT_NO"]);
 		if($rowOldContract["LOANTYPE_CODE"] == $loantype_code){
-			
-			if($rowOldContract["LAST_PERIODPAY"] <= 3){
+			$getMoraStatement = $conmssql->prepare("SELECT COUNT(lsm.SEQ_NO) as COUNT_MORA
+						FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
+						ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE
+						WHERE RTRIM(lsm.loancontract_no) = :loancontract_no and lsm.LOANITEMTYPE_CODE = 'LPM' and lsm.PRINCIPAL_PAYMENT = 0 and lsm.ENTRY_ID != 'CNV'");
+			$getMoraStatement->execute([
+				':loancontract_no' => $rowOldContract["LOANCONTRACT_NO"],
+			]);
+			$rowMoraStatement = $getMoraStatement->fetch(PDO::FETCH_ASSOC);
+			$contract_period = $rowOldContract["LAST_PERIODPAY"] ?? 0;
+			$moratorium_period = $rowMoraStatement["COUNT_MORA"] ?? 0;
+			$last_periodpay = $contract_period - $moratorium_period;
+			if($last_periodpay <= 2){
 				$is_cant_refinance = true;
+			}else{
+				$arrOldContract[] = $arrContract;
 			}
-			
-			$arrOldContract[] = $arrContract;
 		}
 		if(isset($dataComing["old_contract_selected"]) && $dataComing["old_contract_selected"] != ""){
 			if(strpos($dataComing["old_contract_selected"], $arrContract["CONTRACT_NO"]) === false){
@@ -74,6 +86,11 @@ $duration_month = $lib->count_duration($rowMember["MEMBER_DATE"],'m');
 	$arrMin[] = (($rowShareBF["SHARESTK_AMT"] + $rowFund["FUND_AMT"]) - $oldConsBal) + $dataComing["old_contract_balance"];
 	//$arrMin[] = $maxloanpermit_amt;
 	//$arrMin[] = $rowMember["SALARY_AMOUNT"];
+	$emp_fund_amt = ($rowShareBF["SHARESTK_AMT"]);
+	
+	if($loantype_code == "117" || $loantype_code == "216"){
+		$arrMin[] = 50000;
+	}
 	$maxloan_amt = min($arrMin);
 
 	$getMthOther = $conmssql->prepare("SELECT SUM(mthother_amt) as MTHOTHER_AMT FROM mbmembmthother WHERE member_no = :member_no and sign_flag = '-1'");

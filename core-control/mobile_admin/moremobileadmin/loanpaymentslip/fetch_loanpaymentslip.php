@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGrp = array();
 		$arrayDocGrp = array();
 		
-		$getReqDocument = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, reqdoc_no,
+		$getReqDocument = $conmysql->prepare("SELECT id_slip_paydept, member_no, loancontract_no, principle, interest, req_status, remark, reqdoc_no, payment_acc,
 											payment_amt, slip_url, create_date FROM gcslippaydept 
 											ORDER BY create_date DESC");
 		$getReqDocument->execute();
@@ -19,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayDoc["INTEREST"] = number_format($rowPaymentSlip["interest"],2);
 			$arrayDoc["PAYMENT_AMT"] = number_format($rowPaymentSlip["payment_amt"],2);
 			$arrayDoc["SLIP_URL"] = $rowPaymentSlip["slip_url"];
+			$arrayDoc["PAYMENT_ACC"] = $rowPaymentSlip["payment_acc"];
 			$arrayDoc["REQUEST_DATE"] = $lib->convertdate($rowPaymentSlip["create_date"],"D m Y", true);
 			$arrayDoc["REQUEST_DATE_RAW"] = $rowPaymentSlip["create_date"];
 			$arrayDoc["REMARK"] = $rowPaymentSlip["remark"];
@@ -41,6 +42,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				$arrayDoc["REQ_STATUS_COLOR"] = "#f5222d";
 			}else if($rowPaymentSlip["req_status"] == '7'){
 				$arrayDoc["REQ_STATUS_DESC"] = "ลงรับรอตรวจสิทธิ์เพิ่มเติม";
+				if(isset($rowPaymentSlip["reqdoc_no"])){
+					$arrayDoc["ALLOW_CANCEL"] = false;
+				}else{
+					$arrayDoc["ALLOW_CANCEL"] = true;
+				}
 			}
 			$arrayDocGrp[] = $arrayDoc;
 		}

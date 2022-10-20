@@ -155,6 +155,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$receive_net = $rowMastershare["SHARE_AMT"]-($loan_prn_2 + $loan_int_2+$loan_prn_1 + $loan_int_1);
 						
 						$resign_form_option = $dataComing["form_value_root_"]["RESIGN_FROM_OPTION"]["VALUE"] ?? "";
+						$resign_pay_option = $dataComing["form_value_root_"]["RESIGN_PAY_OPTION"]["VALUE"] ?? "";
 						/*if($receive_net < 0){
 							if($resign_form_option == '1'){
 								$conmysql->rollback();
@@ -168,6 +169,16 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$effect_month_arr = $dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"] ? $lib->convertdate($dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"],"D m Y") : "";
 						$effect_month_arr = explode(" ", $effect_month_arr);
 						$effect_month = ($effect_month_arr[1] ?? "")." ".($effect_month_arr[2] ?? "");
+						$info_month_value_arr  = explode("-", $dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"] ?? "");
+						$info_month_temp = ($info_month_value_arr[1] ?? "0") - 1;
+						if($info_month_temp < 1){
+							$info_month_value = (isset($info_month_value_arr[0]) ? $info_month_value_arr[0] - 1 : "")."-".("12")."-".($info_month_value_arr[2] ?? "");
+						}else{
+							$info_month_value = ($info_month_value_arr[0] ?? "")."-".($info_month_temp ?? "")."-".($info_month_value_arr[2] ?? "");
+						}
+						$info_month_arr = $info_month_value ? $lib->convertdate($info_month_value,"D m Y") : "";
+						$info_month_arr = explode(" ", $info_month_arr);
+						$info_month = ($info_month_arr[1] ?? "")." ".($info_month_arr[2] ?? "");
 						
 						$arrGroupDetail = array();
 						$arrGroupDetail["MEMBER_NO"] =  $member_no;
@@ -178,6 +189,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$arrGroupDetail["MEMBER_NAME"] =  $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"];
 						$arrGroupDetail["MEMBER_SURNAME"] =  $rowData["MEMB_SURNAME"];
 						$arrGroupDetail["EFFECT_DATE"] =  $effect_month;
+						$arrGroupDetail["INFO_DATE"] =  $info_month;
 						$arrGroupDetail["REASON"] =  $dataComing["form_value_root_"]["REASON"]["VALUE"] ?? "";
 						$arrGroupDetail["SHARE_STK"] =  $dataComing["is_confirm"] ? ($dataComing["form_value_root_"]["SHARE_STK"]["VALUE"] ?? "0") : number_format($dataComing["form_value_root_"]["SHARE_STK"]["VALUE"] ?? "0",2);
 						$arrGroupDetail["LOAN_GROUP_BAL_2"] =  $dataComing["is_confirm"] ? ($dataComing["form_value_root_"]["LOAN_GROUP_BAL_2"]["VALUE"] ?? "0") : number_format($dataComing["form_value_root_"]["LOAN_GROUP_BAL_2"]["VALUE"] ?? "0",2);
@@ -187,6 +199,7 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$arrGroupDetail["RECEIVE_NET"] =  $dataComing["is_confirm"] ? ($dataComing["form_value_root_"]["RECEIVE_NET"]["VALUE"] ?? "0") : number_format($dataComing["form_value_root_"]["RECEIVE_NET"]["VALUE"] ?? "0",2);
 						$arrGroupDetail["RESIGN_OPTION"] =  $dataComing["form_value_root_"]["RESIGN_OPTION"]["VALUE"] ?? "";
 						$arrGroupDetail["RESIGN_FROM_OPTION"] =  $resign_form_option;
+						$arrGroupDetail["RESIGN_PAY_OPTION"] =  $resign_pay_option;
 						$arrGroupDetail["RECEIVE_ACC"] =  $rowData["EXPENSE_ACCID"];
 						$arrGroupDetail["RECEIVE_BANK"] =  $rowData["BANK_DESC"];
 						$arrGroupDetail["LOAN_PAYMENT"] =  $dataComing["slip_payment_root_"];
@@ -197,12 +210,24 @@ if($lib->checkCompleteArgument(['menu_component','form_value_root_','documenttyp
 						$arrGroupDetail["POSITION"] = $rowData["POSITION_DESC"];
 						$arrGroupDetail["PHONE_NUMBER"] =  $rowInfoMobile["phone_number"];
 						$arrGroupDetail["REQDOC_NO"] = $reqdoc_no;
+						$arrGroupDetail["MEMBER_NAME"] =  $rowData["MEMB_NAME"]." ".$rowData["MEMB_SURNAME"];
 						$arrGroupDetail["MEMBER_FULLNAME"] =  $rowData["PRENAME_DESC"].$rowData["MEMB_NAME"]." ".$rowData["MEMB_SURNAME"];
 						$arrGroupDetail["EFFECT_DATE"] =  $dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"] ? $lib->convertdate($dataComing["form_value_root_"]["EFFECT_DATE"]["VALUE"],"D m Y") : "";
 						$arrGroupDetail["BENEF_NAME_1"] =  $dataComing["form_value_root_"]["BENEF_NAME_1"]["VALUE"] ?? "";
 						$arrGroupDetail["BENEF_NAME_2"] =  $dataComing["form_value_root_"]["BENEF_NAME_2"]["VALUE"] ?? "";
 						$arrGroupDetail["BENEF_NAME_3"] =  $dataComing["form_value_root_"]["BENEF_NAME_3"]["VALUE"] ?? "";
 						$arrGroupDetail["BENEF_NAME_4"] =  $dataComing["form_value_root_"]["BENEF_NAME_4"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_NAME_5"] =  $dataComing["form_value_root_"]["BENEF_NAME_5"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_MEMBER_1"] =  $dataComing["form_value_root_"]["BENEF_MEMBER_1"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_MEMBER_2"] =  $dataComing["form_value_root_"]["BENEF_MEMBER_2"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_MEMBER_3"] =  $dataComing["form_value_root_"]["BENEF_MEMBER_3"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_MEMBER_4"] =  $dataComing["form_value_root_"]["BENEF_MEMBER_4"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_MEMBER_5"] =  $dataComing["form_value_root_"]["BENEF_MEMBER_5"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_PERCENT_1"] =  $dataComing["form_value_root_"]["BENEF_PERCENT_1"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_PERCENT_2"] =  $dataComing["form_value_root_"]["BENEF_PERCENT_2"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_PERCENT_3"] =  $dataComing["form_value_root_"]["BENEF_PERCENT_3"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_PERCENT_4"] =  $dataComing["form_value_root_"]["BENEF_PERCENT_4"]["VALUE"] ?? "";
+						$arrGroupDetail["BENEF_PERCENT_5"] =  $dataComing["form_value_root_"]["BENEF_PERCENT_5"]["VALUE"] ?? "";
 						$arrGroupDetail["BENEF_OPTION"] =  $dataComing["form_value_root_"]["BENEF_OPTION"]["VALUE"] ?? "";
 						$arrGroupDetail["OPTION_VALUE"] =  $dataComing["form_value_root_"]["BENEF_OPTION"]["OPTION_VALUE"][$dataComing["form_value_root_"]["BENEF_OPTION"]["VALUE"]];
 					}else if($dataComing["documenttype_code"] == "CSHR"){

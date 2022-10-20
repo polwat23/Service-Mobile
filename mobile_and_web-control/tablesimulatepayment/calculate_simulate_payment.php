@@ -3,7 +3,80 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
+		$getLoanGroup = $conmssql->prepare("SELECT LOANGROUP_CODE FROM lnloantype WHERE loantype_code = :loantype_code");
+		$getLoanGroup->execute([
+			':loantype_code' => $dataComing["loantype_code"]
+		]);
+		$rowLoanGroup = $getLoanGroup->fetch(PDO::FETCH_ASSOC);
 		$request_date = date("Y-m-d");
+		//วันหยุด
+		$holiday_date = "2022-06-03";
+		//วันที่เลื่อน
+		$holiday_change_date = "2022-06-02";
+		if($rowLoanGroup["LOANGROUP_CODE"] == '01'){
+			if(date('w') > 3 || date('w') == 0){
+				$request_date = date( 'Y-m-d', strtotime( 'friday next week' ) );
+				if($request_date == $holiday_date){
+					$request_date = $holiday_change_date;
+				}
+			}else{
+				$request_date = date( 'Y-m-d', strtotime( 'friday this week' ) );
+				if($request_date == $holiday_date){
+					$request_date = $holiday_change_date;
+				}
+			}
+		}else{
+			if(date('d')>=1 && date('d')<=10){
+				$middle_month = new DateTime(date('Y')."-".date('m')."-20");
+				$middle_month = $middle_month->format('Y-m-d');
+				$getLoanPayDate = $conmysql->prepare("SELECT loanpaydate FROM gcconstantloanpaydate WHERE is_use = '1' AND :middle_month < loanpaydate ORDER BY loanpaydate ASC LIMIT 1");
+				$getLoanPayDate->execute([':middle_month' => $middle_month]);
+				$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
+				if(isset($rowLoanPayDate["loanpaydate"])){
+					if(date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 0 || date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 6){
+						$request_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]." friday this week"));
+					}else{
+						$request_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]));
+					}
+				}
+			}else if(date('d')>=20){
+				#mid month
+				$mid_date = new DateTime(date('Y')."-".date('m')."-15");
+				$mid_date->modify('+1 month');
+				$mid_date = $mid_date->format('Y-m-d');
+				
+				$mid_date_from = new DateTime(date('Y')."-".date('m')."-01");
+				$mid_date_from->modify('+1 month');
+				$mid_date_from = $mid_date_from->format('Y-m-d');
+				$mid_date_to = new DateTime(date('Y')."-".date('m')."-20");
+				$mid_date_to->modify('+1 month');
+				$mid_date_to = $mid_date_to->format('Y-m-d');
+				
+				$getLoanPayDate = $conmysql->prepare("SELECT loanpaydate FROM gcconstantloanpaydate 
+								WHERE is_use = '1' AND :mid_date_from <= loanpaydate AND :mid_date_to >= loanpaydate 
+								ORDER BY loanpaydate ASC LIMIT 1");
+				$getLoanPayDate->execute([
+					':mid_date_from' => $mid_date_from,
+					':mid_date_to' => $mid_date_to
+				]);
+				$rowLoanPayDate = $getLoanPayDate->fetch(\PDO::FETCH_ASSOC);
+				
+				if(isset($rowLoanPayDate["loanpaydate"])){
+					if(date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 0 || date('w', strtotime($rowLoanPayDate["loanpaydate"])) == 6){
+						$request_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]." friday this week"));
+					}else{
+						$request_date = date('Y-m-d', strtotime($rowLoanPayDate["loanpaydate"]));
+					}
+				}else{
+					if(date('w', strtotime($mid_date)) == 0 || date('w', strtotime($mid_date)) == 6){
+						$request_date = date('Y-m-d', strtotime($mid_date." friday this week"));
+					}else{
+						$request_date = date('Y-m-d', strtotime($mid_date));
+					}
+				}
+			}
+		}
+		
 		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
 		$pay_date = date("Y-m-d", strtotime($dataComing['request_date']));
 		$payment_sumbalance = (float) preg_replace('/,/','',$dataComing['payment_sumbalance']);

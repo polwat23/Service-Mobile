@@ -73,8 +73,16 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','principle','
 			}
 			
 			if(isset($slipPayment) && $slipPayment != ""){
-				$InsertSlipPayDept = $conmysql->prepare("INSERT INTO gcslippaydept(member_no, loancontract_no, principle, interest, payment_amt, slip_url) 
-													VALUES (:member_no, :loancontract_no, :principle, :interest, :payment_amt, :slip_url)");
+				$payment_acc = null;
+				if($dataComing["payment_acc"] == 0){
+					$payment_acc = "ธนาคารกรุงเทพ - นวนคร 083-052-3395";
+				}else if($dataComing["payment_acc"] == 1){
+					$payment_acc = "ธนาคารกสิกรไทย - นวนคร 405-240-5219";
+				}else if($dataComing["payment_acc"] == 2){
+					$payment_acc = "ธนาคารไทยพาณิชย์ - คลองหลวง 314-417-3129";
+				}
+				$InsertSlipPayDept = $conmysql->prepare("INSERT INTO gcslippaydept(member_no, loancontract_no, principle, interest, payment_amt, slip_url, payment_acc) 
+													VALUES (:member_no, :loancontract_no, :principle, :interest, :payment_amt, :slip_url, :payment_acc)");
 				if($InsertSlipPayDept->execute([
 					':member_no' => $payload["member_no"],
 					':loancontract_no' => $dataComing["loancontract_no"],
@@ -82,6 +90,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','principle','
 					':interest' => str_replace(',', '', $dataComing["interest"]),
 					':payment_amt' => str_replace(',', '', $dataComing["payment_amt"]),
 					':slip_url' => $slipPayment,
+					':payment_acc' => $payment_acc,
 				])){
 				
 				}else{
@@ -119,6 +128,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','principle','
 				$arrayResult['PRINCIPLE'] = $dataComing["principle"];
 				$arrayResult['INTEREST'] =  $dataComing["interest"];
 				$arrayResult['PAYMENT_AMT'] =  $dataComing["payment_amt"];
+				$arrayResult['PAYMENT_ACC'] = $payment_acc;
 				$arrayResult['SLIP_URL'] = $slipPayment;
 				$arrayResult['OPERATE_DATE'] = $lib->convertdate(date("Y-m-d h:i:s"),"D m Y",true);
 				$arrayResult['RESULT'] = TRUE;
