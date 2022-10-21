@@ -60,7 +60,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
 
 		}
 		
-		$payslip = $cal_loan->paySlip($conoracle,$dataComing["SUM_AMT"],$config,$payinslipdoc_no,$dateOperC,
+		$payslip = $cal_loan->paySlip($conoracle,$dataComing["SUM_AMT"],$config,$payinslip_no,$dateOperC,
 		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
 		if (!$payslip["RESULT"]) {
             $conoracle->rollback();
