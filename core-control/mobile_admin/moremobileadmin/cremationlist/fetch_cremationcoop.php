@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','cremationlist')){
 	
 		$conmssqlcmt = $con->connecttosqlservercmt();
-		$fetchCremationList = $conmssqlcmt->prepare("SELECT WC_ID,COOP_SHORTNAME,COOP_NAME FROM WCCONTCOOP");
+		$fetchCremationList = $conmssqlcmt->prepare("SELECT WC_ID,COOP_SHORTNAME,COOP_NAME,COOP_CONTROL FROM WCCONTCOOP WHERE  coop_control = '051001'");
 		$fetchCremationList->execute();
 		
 		$arrayCremation = array();

@@ -38,6 +38,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}else{
 			$amt_transfer = $dataComing["amt_transfer"];
 		}
+		
 		$arrVerifyToken['exp'] = $time + 300;
 		$arrVerifyToken['sigma_key'] = $dataComing["sigma_key"];
 		$arrVerifyToken["coop_key"] = $config["COOP_KEY"];
@@ -74,6 +75,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
+		
+		
 		$updateDocuControl = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
@@ -81,7 +84,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$constFromAccFee = $cal_dep->getConstantAcc($from_account_no);
 		$vccamtPenalty = $func->getConstant("accidfee_receive");
 		$vccamtPenaltyPromo = $func->getConstant("accidfee_promotion");
-		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataDeposit["account_payfee"]);
+		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataWithdraw["account_payfee"]);
 		$conmssql->beginTransaction();
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conmssql,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
 		$fee_amt,$dateOper,$config,$log,$payload,$deptslip_no,$lib,$getlastseq_no["MAX_SEQ_NO"],$constFromAcc,$rowCountFee["C_TRANS"] + 1);
@@ -97,7 +100,6 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
 			$updateDocuControlFee = $conmssql->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
 			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
-
 			$penaltyWtd = $cal_dep->insertFeeTransaction($conmssql,$from_account_no,$vccamtPenalty,'FEM',
 			$dataComing["amt_transfer"],$fee_amt,$dateOper,$config,$wtdResult["DEPTSLIP_NO"],$lib,$wtdResult["MAX_SEQNO"],$constFromAccFee,false,null,$rowCountFee["C_TRANS"] + 1,$deptslip_noFee);
 			if($penaltyWtd["RESULT"]){

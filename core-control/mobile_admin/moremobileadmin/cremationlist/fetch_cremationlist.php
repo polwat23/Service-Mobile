@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	
 	
 		$conmssqlcmt = $con->connecttosqlservercmt();
-		$fetchCremationCoop = $conmssqlcmt->prepare("SELECT WC_ID,COOP_SHORTNAME,COOP_NAME FROM WCCONTCOOP");
+		$fetchCremationCoop = $conmssqlcmt->prepare("SELECT WC_ID,COOP_SHORTNAME,COOP_NAME,COOP_CONTROL FROM WCCONTCOOP WHERE  coop_control = '051001'");
 		$fetchCremationCoop->execute();
 		
 		$arrayCremationCoop = array();
