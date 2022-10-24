@@ -6,14 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$deptaccount_no = preg_replace('/-/','',$dataComing["deptaccount_no"]);
 		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
-		$checkSeqAmt = $cal_dep->getSequestAmt($dataComing["deptaccount_no"],'DTX');
-		if($checkSeqAmt["CAN_DEPOSIT"]){
-		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0104";
-			$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
-			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-		}
+
 		$fetchMemberName = $conmssql->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME 
 													FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
 													WHERE MB.member_no = :member_no");
