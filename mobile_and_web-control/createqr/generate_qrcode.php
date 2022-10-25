@@ -13,6 +13,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 
 		$randQrRef = date_format($currentDate,"YmdHis").rand(1000,9999);
 		$generateDate = date_format($currentDate,"Y-m-d H:i:s").rand(1000,9999);
+		$getFee = $conmysql->prepare("SELECT fee_deposit FROM csbankdisplay WHERE bank_code = '999'");
+		$getFee->execute();
+		$rowFee = $getFee->fetch(PDO::FETCH_ASSOC);
 		$qrTransferAmt = 0;
 		$qrTransferFee = 0;
 		$expireDate = $tempExpire->add(new DateInterval('PT15M'));
@@ -33,6 +36,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		])){
 			//insert success
 			foreach ($dataComing["transList"] as $transValue) {
+				if($transValue["trans_code"] == '02') {
+					$qrTransferAmt += $rowFee["fee_deposit"];
+				}
 				$account_no = preg_replace('/-/','',$transValue["account_no"]);
 				$insertQrDetail = $conmysql->prepare("INSERT INTO gcqrcodegendetail(qrgenerate, trans_code_qr, ref_account, qrtransferdt_amt, qrtransferdt_fee) 
 													VALUES (:qrgenerate, :trans_code_qr, :ref_account, :qrtransferdt_amt, :qrtransferdt_fee)");

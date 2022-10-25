@@ -56,13 +56,13 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 														".($dataComing["trrans_type"] == "deposit" ? 
 														"and (transaction_type_code = 'DIM' and trans_flag = '1')" : null)."
 														".($dataComing["trrans_type"] == "payloan" ? 
-														"or (transfer_mode = '9' and transaction_type_code = 'WFS')" : null)."
+														"or (transfer_mode = '9' and transaction_type_code = 'WTE')" : null)."
 														".($dataComing["trrans_type"] == "receiveloan" ? 
-																	"or (transfer_mode = '9' and transaction_type_code = 'DAP')" : null).")
+														"or (transfer_mode = '9' and transaction_type_code = 'DAP')" : null).")
 														".(isset($dataComing["start_date"]) && $dataComing["start_date"] != "" ? 
-														"and date_format(operate_date,'%Y') >= :start_date" : null)."
+														"and operate_date >= :start_date" : null)."
 														".(isset($dataComing["end_date"]) && $dataComing["end_date"] != "" ? 
-														"and date_format(operate_date,'%Y') <= :end_date" : null)." 
+														"and operate_date <= :end_date" : null)." 
 														".(isset($dataComing["ref_no"]) && $dataComing["ref_no"] != "" ? 
 														"and ref_no <= :ref_no" : null)." 
 														".(isset($dataComing["member_no"]) && $dataComing["member_no"] != "" ? 
@@ -138,7 +138,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					if($rowDepttype["DEPTTYPE_CODE"] =='04'){
 						$withdraw_external_10 += $rowRecon["amount"];
 						$withdraw10++;
-					}else if($rowDepttype["DEPTTYPE_CODE"] =='20'){
+					}else if($rowDepttype["DEPTTYPE_CODE"] =='05'){
 						$withdraw_external_20 += $rowRecon["amount"];
 						$withdraw20++;
 					}				

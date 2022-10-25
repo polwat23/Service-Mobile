@@ -113,7 +113,7 @@
 	"WS0099" : [{"th" : "ไม่สามารถผูกบัญชีธนาคารได้เนื่องจากท่านต้องไปลงทะเบียนการทำธุรกรรมออนไลน์ผ่านโมบายที่สหกรณ์ก่อน","en" : "You have not registered for transaction online please register at the cooperative"}],
 	"WS0100" : [{"th" : "ยอดคงเหลือหลังทำรายการรวมค่าธรรมเนียมของท่านน้อยกว่าที่สหกรณ์กำหนด กรุณาตรวจสอบยอดทำรายการอีกครั้งก่อนทำรายการ","en" : "Your balance and fee amount after transaction lower than the cooperative is define"}],
 	"WS0101" : [{"th" : "จำนวนครั้งในการทำรายการต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of day over than the cooperative is define"}],
-	"WS0102" : [{"th" : "จำนวนครั้งในการทำรายการต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
+	"WS0102" : [{"th" : "ไม่สามารถทำรายการได้เนื่องจากถอนเงินเกินจำนวนที่สหกรณ์กำหนด","en" : "Your number of transaction of month over than the cooperative is define"}],
 	"WS0103" : [{"th" : "จำนวนครั้งในการทำรายการต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "Your number of transaction of year over than the cooperative is define"}],
 	"WS0104" : [{"th" : "ไม่สามารถหายอดอายัดบัญชีได้ โปรดลองอีกครั้งในภายหลัง","en" : "Cannot calculate sequest amount please try again later"}],
 	"WS0107" : [{"th" : "ไม่พบรหัสรายการ QR ดังกล่าว กรุณาลองอีกครั้ง","en" : "Not found this transaction id please try again"}],
