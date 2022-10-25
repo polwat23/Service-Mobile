@@ -22,8 +22,16 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 		$fee_amt = 0;
 		$dateOperC = date('c');
 		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		$deptaccount_no = "";
+		$deptslip = "";
+		$dataAccFee = array();
+		$deptslip_noFee = "";
+		$lastSeq_no = 0;
 		if($rowCheckBill["transfer_status"] == '0'){
 			if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
+				$getFee = $conmysql->prepare("SELECT fee_deposit FROM csbankdisplay WHERE bank_code = '999'");
+				$getFee->execute();
+				$rowFee = $getFee->fetch(PDO::FETCH_ASSOC);
 				$have_dep = FALSE;
 				$payload = array();
 				$payload["member_no"] = $rowCheckBill["member_no"];
@@ -40,7 +48,6 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 													and gba.bindaccount_status = '1' and gba.bank_code = '999'");
 				$getPayAccFee->execute([':member_no' => $payload["member_no"]]);
 				$rowPayFee = $getPayAccFee->fetch(PDO::FETCH_ASSOC);
-				$dataAccFee = $cal_dep->getConstantAcc($rowPayFee["account_payfee"]);
 				$amt_transferLon = $dataComing["amt_transfer"];
 				$vccAccID = $func->getConstant('map_account_id_ktb');
 				$getDetailTranDP = $conmysql->prepare("SELECT ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
@@ -54,6 +61,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
 					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
+					
+					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
+					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
+					$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 				}
 				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
 				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
@@ -79,12 +92,15 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$ref_no = time().$lib->randomText('all',3);
 					if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
 						$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
+						$dataAccFee = $cal_dep->getConstantAcc($deptaccount_no);
 						$getlastseq_noDest = $cal_dep->getLastSeqNo($deptaccount_no);
 						$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$vccAccID,'DTE',
 						$rowDetail["qrtransferdt_amt"],0,$dateOper,$config,$log,$dataComing["bank_ref"],$payload,
 						$arrDpSlip[$rowDetail["ref_account"]],$lib,$getlastseq_noDest["MAX_SEQ_NO"],"TransactionDeposit",null,'999');
 						if($depositMoney["RESULT"]){
+							$deptslip = $arrDpSlip[$rowDetail["ref_account"]];
 							$have_dep = TRUE;
+							$lastSeq_no = $depositMoney["MAX_SEQNO"];
 							if($rowPayFee["account_payfee"] == $deptaccount_no){
 								$dataAccFee["PRNCBAL"] = $dataAccFee["PRNCBAL"] + $rowDetail["qrtransferdt_amt"];
 								$maxno_deptfee = $depositMoney["MAX_SEQNO"];
@@ -108,6 +124,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					}else if($rowDetail["trans_code_qr"] == '02'){ //ชำระหนี้
 						$dataCont = $cal_loan->getContstantLoanContract($rowDetail["ref_account"]);
 						$int_return = $dataCont["INTEREST_RETURN"];
+						$rowDetail["qrtransferdt_amt"] = $rowDetail["qrtransferdt_amt"] - $rowFee["fee_deposit"];
 						if($rowDetail["qrtransferdt_amt"] > $dataCont["INTEREST_ARREAR"]){
 							$intarrear = $dataCont["INTEREST_ARREAR"];
 						}else{
@@ -174,22 +191,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					}
 				}
 				
-				if($have_dep){
-					$depositMoney = $depositMoney;
-					if(isset($maxno_deptfee) && $maxno_deptfee != ""){
-						
-					}else{
-						$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
-						$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
-					}
-				}else{
-					$lastseq_no = $cal_dep->getLastSeqNo($rowPayFee["account_payfee"]);
-					$maxno_deptfee = $lastseq_no["MAX_SEQ_NO"];
-				}
-				$vccamtPenalty = $cal_dep->getVcMapID('00');
-				if($rowPayFee["fee_deposit"] > 0){
-					$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$rowPayFee["account_payfee"],$vccamtPenalty["ACCOUNT_ID"],'FEE',
-					$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,null,$lib,$maxno_deptfee,$dataAccFee,null,null,$slipnoFee);
+				
+				$vccamtPenalty = $func->getConstant('map_account_id_cimb');
+				$penaltyWtd["RESULT"] = true;
+				if($have_dep && ($rowPayFee["fee_deposit"] > 0 || $rowPayFee["fee_deposit"] == 0) && isset($deptaccount_no)){
+					$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$deptaccount_no,$vccamtPenalty["ACCOUNT_ID"],'FEM',
+					$dataComing["amt_transfer"],$rowPayFee["fee_deposit"],$dateOper,$config,$deptslip,$lib,$lastSeq_no,$dataAccFee,$deptslip_noFee);
 				}else{
 					$penaltyWtd["RESULT"] = true;
 				}
