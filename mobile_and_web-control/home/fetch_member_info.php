@@ -3,7 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		$arrayResult = array();
+		
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
@@ -28,39 +28,27 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
-													mb.member_date,mpos.position_desc,mg.membgroup_desc,mt.membtype_desc,
-													mb.ADDR_NO as ADDR_REG_NO,
-													mb.ADDR_MOO as ADDR_REG_MOO,
-													mb.ADDR_SOI as ADDR_REG_SOI,
-													mb.ADDR_VILLAGE as ADDR_REG_VILLAGE,
-													mb.ADDR_ROAD as ADDR_REG_ROAD,
-													MBTR.TAMBOL_DESC AS TAMBOL_REG_DESC,
-													MBDR.DISTRICT_DESC AS DISTRICT_REG_DESC,
-													MB.PROVINCE_CODE AS PROVINCE_REG_CODE,
-													MBPR.PROVINCE_DESC AS PROVINCE_REG_DESC,
-													MB.ADDR_POSTCODE AS ADDR_REG_POSTCODE,
-													mb.CURRADDR_NO as ADDR_NO,
-													mb.CURRADDR_MOO as ADDR_MOO,
-													mb.CURRADDR_SOI as ADDR_SOI,
-													mb.CURRADDR_VILLAGE as ADDR_VILLAGE,
-													mb.CURRADDR_ROAD as ADDR_ROAD,
-													MBT.TAMBOL_DESC AS TAMBOL_DESC,
-													MBD.DISTRICT_DESC AS DISTRICT_DESC,
-													MB.CURRPROVINCE_CODE AS PROVINCE_CODE,
-													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.CURRADDR_POSTCODE AS ADDR_POSTCODE
-													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-													LEFT JOIN mbucfposition mpos ON mb.position_code = mpos.position_code
-													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
-													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.CURRTAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.CURRAMPHUR_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.CURRPROVINCE_CODE = MBP.PROVINCE_CODE
-													LEFT JOIN MBUCFTAMBOL MBTR ON mb.TAMBOL_CODE = MBTR.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBDR ON mb.AMPHUR_CODE = MBDR.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBPR ON mb.PROVINCE_CODE = MBPR.PROVINCE_CODE
-													WHERE mb.member_no = :member_no");
+			$memberInfo = $conoracle->prepare("select mp.prename_desc AS prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+												mb.member_date,mps.position_desc,mt.membtype_desc,
+												mb.ADDR_NO as ADDR_NO,
+												mb.ADDR_MOO as ADDR_MOO,
+												mb.ADDR_SOI as ADDR_SOI, 
+												mb.ADDR_VILLAGE as ADDR_VILLAGE,
+												mb.ADDR_ROAD as ADDR_ROAD,
+												MBT.TAMBOL_DESC AS TAMBOL_DESC,
+												MBD.DISTRICT_DESC AS DISTRICT_DESC,
+												MB.PROVINCE_CODE AS PROVINCE_CODE,
+												MBP.PROVINCE_DESC AS PROVINCE_DESC,
+												MB.ADDR_POSTCODE AS ADDR_POSTCODE,
+												mbg.membgroup_desc as MEMBGROUP_DESC
+												from mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												LEFT JOIN mbucfposition mps ON mb.position_code = mps.position_code
+												LEFT JOIN mbucfmembgroup mbg ON mb.membgroup_code = mbg.membgroup_code
+												LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+												LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+												LEFT JOIN MBUCFDISTRICT MBD ON mb.amphur_code = MBD.DISTRICT_CODE
+												LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
+												WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
@@ -83,26 +71,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
-			$addressReg = (isset($rowMember["ADDR_REG_NO"]) ? $rowMember["ADDR_REG_NO"] : null);
-			if(isset($rowMember["PROVINCE_REG_CODE"]) && $rowMember["PROVINCE_REG_CODE"] == '10'){
-				$addressReg .= (isset($rowMember["ADDR_REG_MOO"]) ? ' ม.'.$rowMember["ADDR_REG_MOO"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_SOI"]) ? ' ซอย'.$rowMember["ADDR_REG_SOI"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_REG_VILLAGE"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_ROAD"]) ? ' ถนน'.$rowMember["ADDR_REG_ROAD"] : null);
-				$addressReg .= (isset($rowMember["TAMBOL_REG_DESC"]) ? ' แขวง'.$rowMember["TAMBOL_REG_DESC"] : null);
-				$addressReg .= (isset($rowMember["DISTRICT_REG_DESC"]) ? ' เขต'.$rowMember["DISTRICT_REG_DESC"] : null);
-				$addressReg .= (isset($rowMember["PROVINCE_REG_DESC"]) ? ' '.$rowMember["PROVINCE_REG_DESC"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_POSTCODE"]) ? ' '.$rowMember["ADDR_REG_POSTCODE"] : null);
-			}else{
-				$addressReg .= (isset($rowMember["ADDR_REG_MOO"]) ? ' ม.'.$rowMember["ADDR_REG_MOO"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_SOI"]) ? ' ซอย'.$rowMember["ADDR_REG_SOI"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_VILLAGE"]) ? ' หมู่บ้าน'.$rowMember["ADDR_REG_VILLAGE"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_ROAD"]) ? ' ถนน'.$rowMember["ADDR_REG_ROAD"] : null);
-				$addressReg .= (isset($rowMember["TAMBOL_REG_DESC"]) ? ' ต.'.$rowMember["TAMBOL_REG_DESC"] : null);
-				$addressReg .= (isset($rowMember["DISTRICT_REG_DESC"]) ? ' อ.'.$rowMember["DISTRICT_REG_DESC"] : null);
-				$addressReg .= (isset($rowMember["PROVINCE_REG_DESC"]) ? ' จ.'.$rowMember["PROVINCE_REG_DESC"] : null);
-				$addressReg .= (isset($rowMember["ADDR_REG_POSTCODE"]) ? ' '.$rowMember["ADDR_REG_POSTCODE"] : null);
-			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
@@ -115,8 +83,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBER_TYPE"] = $rowMember["MEMBTYPE_DESC"];
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
-			$arrayResult["FULL_ADDRESS_REG"] = $addressReg;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			$arrayResult["DATA_PROTECTION"] = 'ข้อมูลส่วนตัวของท่านได้รับความคุ้มครองตาม พรบ PDPA2562';
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

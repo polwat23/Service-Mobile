@@ -10,9 +10,9 @@ set DAY_OF_LIFE=3
 set DBHOST=localhost
 set DBPORT=3306
 set DBUSER=root
-set DBPASS=@KLS2022
-set DBNAME=mobile_kls
-set PROJECT_PATH=C:\Mobile\service-kls\
+set DBPASS=@PEA2022
+set DBNAME=mobile_pea
+set PROJECT_PATH=C:\Mobile\service-pea\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%
