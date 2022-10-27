@@ -20,13 +20,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrAccAllowed[] = "'".$rowAccountAllowed["DEPTACCOUNT_NO"]."'";
 		}
 		if(sizeof($arrAccAllowed) > 0){
-			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
+			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name ,dpm.DEPT_OBJECTIVE,dpt.depttype_desc,dpm.depttype_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
 														and dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01' ORDER BY dpm.deptaccount_no");
 		}else{
-			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
+			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpm.DEPT_OBJECTIVE,dpt.depttype_desc,dpm.depttype_code
 														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.member_no = :member_no and dpm.deptclose_status = 0 and dpm.acccont_type = '01' ORDER BY dpm.deptaccount_no");
@@ -64,7 +64,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccInCoop["DEPTACCOUNT_NO"] = $rowAccIncoop["DEPTACCOUNT_NO"];
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccInCoop["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccIncoop["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowAccIncoop["DEPTACCOUNT_NAME"]));
+				$arrAccInCoop["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowAccIncoop["DEPTACCOUNT_NAME"]).' '.$rowAccIncoop["DEPT_OBJECTIVE"]);
 				$arrAccInCoop["DEPT_TYPE"] = $rowAccIncoop["DEPTTYPE_DESC"];
 				if(file_exists(__DIR__.'/../../resource/dept-type/'.$rowAccIncoop["DEPTTYPE_CODE"].'.png')){
 					$arrAccInCoop["DEPT_TYPE_IMG"] = $config["URL_SERVICE"].'resource/dept-type/'.$rowAccIncoop["DEPTTYPE_CODE"].'.png?v='.date('Ym');

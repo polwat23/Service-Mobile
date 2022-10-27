@@ -61,12 +61,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 					$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
-					$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster
+					$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME ,DEPT_OBJECTIVE FROM dpdeptmaster
 														WHERE deptaccount_no = :deptaccount_no");
 					$whocolluDept->execute([':deptaccount_no' => $rowColl["REF_COLLNO"]]);
 					$rowCollDept = $whocolluDept->fetch(PDO::FETCH_ASSOC);
 					$arrGroupAllMember["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
-					$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
+					$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"].' '.$rowCollDept["DEPT_OBJECTIVE"];
 					$arrGroupAllMember["DEPT_AMT"] = number_format(($rowWhocollu["PRNBAL"] * $rowColl["COLLACTIVE_PERCENT"]) / $rowColl["COLLBASE_PERCENT"],2);
 				}else if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
 					$whocolluAsset = $conoracle->prepare("SELECT lcm.COLLMAST_REFNO,lcd.LAND_LANDNO,lcd.POS_TUMBOL,MBD.DISTRICT_DESC,MBP.PROVINCE_DESC,lcm.COLLMAST_NO
@@ -155,12 +155,12 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrGroupAllMember["FULL_NAME"] = $rowCollMember["PRENAME_DESC"].$rowCollMember["MEMB_NAME"].' '.$rowCollMember["MEMB_SURNAME"];
 						$arrGroupAllMember["MEMBER_NO"] = $rowColl["REF_COLLNO"];
 					}else if($rowColl["LOANCOLLTYPE_CODE"] == '03'){
-						$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME FROM dpdeptmaster
+						$whocolluDept = $conoracle->prepare("SELECT DEPTACCOUNT_NAME ,DEPT_OBJECTIVE FROM dpdeptmaster
 															WHERE deptaccount_no = :deptaccount_no");
 						$whocolluDept->execute([':deptaccount_no' => $rowColl["REF_COLLNO"]]);
 						$rowCollDept = $whocolluDept->fetch(PDO::FETCH_ASSOC);
 						$arrGroupAllMember["DEPTACCOUNT_NO"] = $lib->formataccount_hidden($lib->formataccount($rowColl["REF_COLLNO"],$func->getConstant('dep_format')),$func->getConstant('hidden_dep'));
-						$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"];
+						$arrGroupAllMember["DEPTACCOUNT_NAME"] = $rowCollDept["DEPTACCOUNT_NAME"].' '.$rowCollDept["DEPT_OBJECTIVE"];;
 						$arrGroupAllMember["DEPT_AMT"] = number_format($rowWhocollu["PRNBAL"] * $rowColl["COLL_PERCENT"],2);
 					}else if($rowColl["LOANCOLLTYPE_CODE"] == '04'){
 						$whocolluAsset = $conoracle->prepare("SELECT lcm.COLLMAST_REFNO,lcd.LAND_LANDNO,lcd.POS_TUMBOL,MBD.DISTRICT_DESC,MBP.PROVINCE_DESC,lcm.COLLMAST_NO

@@ -1,2 +1,0 @@
-["HY000",904,"OCIStmtExecute: ORA-00904: \"ID_LOGSENT\": invalid identifier\n (ext\\pdo_oci\\oci_statement.c:157)"]
-["HY000",904,"OCIStmtExecute: ORA-00904: \"ID_LOGSENT\": invalid identifier\n (ext\\pdo_oci\\oci_statement.c:157)"]

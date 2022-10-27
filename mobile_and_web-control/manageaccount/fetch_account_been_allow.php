@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchAccountBeenAllow->execute([':member_no' => $payload["member_no"]]);
 		while($rowAccBeenAllow = $fetchAccountBeenAllow->fetch(PDO::FETCH_ASSOC)){
 			$arrAccBeenAllow = array();
-			$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME,dpt.depttype_desc,dpm.depttype_code,dpm.acccont_type
+			$getDetailAcc = $conoracle->prepare("SELECT TRIM(dpm.deptaccount_name) as DEPTACCOUNT_NAME ,dpm.DEPT_OBJECTIVE,dpt.depttype_desc,dpm.depttype_code,dpm.acccont_type
 													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 													WHERE dpm.deptaccount_no = :deptaccount_no and dpm.deptclose_status = 0");
 			$getDetailAcc->execute([':deptaccount_no' => $rowAccBeenAllow["DEPTACCOUNT_NO"]]);
@@ -50,7 +50,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}else{
 					$arrAccBeenAllow["DEPT_TYPE_IMG"] = null;
 				}
-				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDetailAcc["DEPTACCOUNT_NAME"]));
+				$arrAccBeenAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',trim($rowDetailAcc["DEPTACCOUNT_NAME"].' '.$rowDetailAcc["DEPT_OBJECTIVE"]));
 				$arrAccBeenAllow["DEPT_TYPE"] = $rowDetailAcc["DEPTTYPE_DESC"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO"] = $rowAccBeenAllow["DEPTACCOUNT_NO"];
 				$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));

@@ -3,9 +3,9 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
-		
+		$arrGroupRootUserlogin = array();	
 		//web
-		$fetchUserloginWeb = $conoracle->prepare("SELECT COUNT(member_no) AS c_user_login_web FROM gcuserlogin WHERE is_login = '1' AND channel = 'web'");
+		/*$fetchUserloginWeb = $conoracle->prepare("SELECT COUNT(member_no) AS c_user_login_web FROM gcuserlogin WHERE is_login = '1' AND channel = 'web'");
 		$fetchUserloginWeb->execute();
 	    $rowUserloginWeb = $fetchUserloginWeb->fetch(PDO::FETCH_ASSOC);
 		
@@ -22,12 +22,11 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchUserRegis->execute();
 		$rowUserRegis = $fetchUserRegis->fetch(PDO::FETCH_ASSOC);
 		
-		$arrGroupRootUserlogin = array();
 		$arrGroupRootUserlogin["USER_LOGIN_TODAY"] = number_format($rowUserloginWeb["C_USER_LOGIN_WEB"] + $rowUserloginMobile["C_USER_LOGIN_MOBILE"],0);
 		$arrGroupRootUserlogin["USER_LOGIN_TODAY_WEB"] = number_format($rowUserloginWeb["C_USER_LOGIN_WEB"],0);
 		$arrGroupRootUserlogin["USER_LOGIN_TODAY_MOBILE"] = number_format($rowUserloginMobile["C_USER_LOGIN_MOBILE"],0);
 		$arrGroupRootUserlogin["USER_NOT_REGISTER"] = number_format($rowUserNotRegis["C_USERNOTREGIS"] - $rowUserRegis["C_USERREGIT"],0);
-		$arrGroupRootUserlogin["USER_REGISTER"] = number_format($rowUserRegis["C_USERREGIT"],0);
+		$arrGroupRootUserlogin["USER_REGISTER"] = number_format($rowUserRegis["C_USERREGIT"],0);*/
 
 
 		$arrayGroup[] = $arrGroupRootUserlogin;	

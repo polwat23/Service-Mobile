@@ -9,10 +9,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getSumAllAccount->execute([':member_no' => $member_no]);
 		$rowSumbalance = $getSumAllAccount->fetch(PDO::FETCH_ASSOC);
 		$arrayResult['SUM_BALANCE'] = number_format($rowSumbalance["SUM_BALANCE"],2);
-		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dp.membcat_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.prncbal as BALANCE,
+		$getAccount = $conoracle->prepare("SELECT dp.depttype_code,dp.membcat_code,dt.depttype_desc,dp.deptaccount_no,dp.deptaccount_name,dp.dept_objective,dp.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dp.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dp LEFT JOIN DPDEPTTYPE dt ON dp.depttype_code = dt.depttype_code and dp.membcat_code = dt.membcat_code
-											WHERE dp.member_no = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
+											WHERE dp.member_no = :member_no and dp.deptclose_status = 0 ORDER BY dp.deptaccount_no ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
 			$arrAccount = array();
@@ -54,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrAccount["DEPTACCOUNT_NO"] = $account_no;
 			$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = $lib->formataccount_hidden($account_no,$func->getConstant('hidden_dep'));
-			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccount["DEPTACCOUNT_NAME"]);
+			$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',($rowAccount["DEPTACCOUNT_NAME"].' '.$rowAccount["DEPT_OBJECTIVE"]));
 			$arrAccount["BALANCE"] = number_format($rowAccount["BALANCE"],2);
 			$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'y-n-d');
 			$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccount["LAST_OPERATE_DATE"],'D m Y');

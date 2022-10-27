@@ -66,12 +66,12 @@ class CalculateDep {
 					"as_deptaccount_no" => $deptaccount,
 					"as_deptitemtype_code" => $itemtype_code,
 					"adc_deptitem_amt" => $amt_transfer,
+					"adtm_date" => date('c'),
 					"ai_status" => 0,
 					"as_msglog" => null,
 					"adc_amt" => 0.00
 				];
 				$resultWS = $clientWS->__call("of_check_sequest_online", array($argumentWS));
-				file_put_contents('text.txt',json_encode($argumentWS));
 				if($resultWS->ai_status == '0'){
 					$arrayResult["CAN_DEPOSIT"] = TRUE;
 					$arrayResult["CAN_WITHDRAW"] = TRUE;
@@ -107,562 +107,852 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
+	public function checkDepositMaxMin($deptaccount_no ,$amt_transfer){	
+		$arrayResult['RESULT'] = TRUE;
+		return $arrayResult;
+	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
-		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
-			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0093";
+		$resultDeposit = $this->checkDepositMaxMin($deptaccount_no,$amt_transfer);
+		if($resultDeposit["RESULT"]){
+			if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
+				if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
+					$arrayResult['RESPONSE_CODE'] = "WS0093";
+					$arrayResult['RESULT'] = FALSE;
+					return $arrayResult;
+				}
+			}
+			if($dataConst["DEPTCLOSE_STATUS"] != '0'){
+				$arrayResult['RESPONSE_CODE'] = "WS0089";
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
 			}
-		}
-		if($dataConst["DEPTCLOSE_STATUS"] != '0'){
-			$arrayResult['RESPONSE_CODE'] = "WS0089";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
-		if($dataConst["DEPTGROUP_CODE"] == '01'){
-			$arrayResult['RESPONSE_CODE'] = "WS0090";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
-		if($amt_transfer < $dataConst["MINDEPT_AMT"]){
-			$arrayResult['RESPONSE_CODE'] = "WS0056";
-			$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
-		/*$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
-		$getLimitAllDay->execute();
-		$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
-		if($rowLimitAllDay["FIXED_UNIT"] == '1'){
-			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
-												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
-												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
-												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
-												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
-			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
-		}else{
-			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
-												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
-												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
-												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
-												and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
-			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
-		}
-		$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
-		$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $amt_transfer;
-		if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
-			$arrayResult["RESPONSE_CODE"] = 'WS0043';
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}*/
-		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
-			$menucheckrights = "and gca.allow_deposit_inside = '1'";
-			$transfer_mode = "1";
-		}else if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
-			$menucheckrights = "and gca.allow_deposit_outside = '1'";
-			$transfer_mode = "9";
-		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
-			$transfer_mode = "3";
-		}else if($menu_component == 'TransferDepPayLoan'){
-			$menucheckrights = "and gca.allow_pay_loan = '1'";
-			$transfer_mode = "2";
-		}
-		$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
-												LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
-												WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
-		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
-		$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
-		if($rowUserAllow["IS_USE"] == "1"){
-			if($amt_transfer > $rowUserAllow["LIMIT_TRANSACTION_AMT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0093";
+			if($dataConst["DEPTGROUP_CODE"] == '01'){
+				$arrayResult['RESPONSE_CODE'] = "WS0090";
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
 			}
-			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
-														FROM gcbankconstantmapping gbm 
-														LEFT JOIN gcbankconstant gbc 
-														ON gbm.id_bankconstant = gbc.id_bankconstant
-														WHERE gbm.bank_code = :bank_code and gbm.is_use = '1'");
-				$getConstantMapMenu->execute([':bank_code' => $bank_code]);
-				while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
-					if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
+			if($amt_transfer < $dataConst["MINDEPT_AMT"]){
+				$arrayResult['RESPONSE_CODE'] = "WS0056";
+				$arrayResult['MINDEPT_AMT'] = $dataConst["MINDEPT_AMT"];
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+			/*$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
+			$getLimitAllDay->execute();
+			$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
+			if($rowLimitAllDay["FIXED_UNIT"] == '1'){
+				$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+													FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+													ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+													WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
+													and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+				$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+			}else{
+				$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+													FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+													ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+													WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
+													and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+				$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+			}
+			$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
+			$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $amt_transfer;
+			if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
+				$arrayResult["RESPONSE_CODE"] = 'WS0043';
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}*/
+			if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
+				$menucheckrights = "and gca.allow_deposit_inside = '1'";
+				$transfer_mode = "1";
+			}else if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
+				$menucheckrights = "and gca.allow_deposit_outside = '1'";
+				$transfer_mode = "9";
+			}else if($menu_component == 'TransferDepBuyShare'){
+				$menucheckrights = "and gca.allow_buy_share = '1'";
+				$transfer_mode = "3";
+			}else if($menu_component == 'TransferDepPayLoan'){
+				$menucheckrights = "and gca.allow_pay_loan = '1'";
+				$transfer_mode = "2";
+			}
+			$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
+													LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
+													WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
+			$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
+			$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
+			if($rowUserAllow["IS_USE"] == "1" || $menu_component == 'TransferDepInsideCoop'){
+				if($amt_transfer > $rowUserAllow["LIMIT_TRANSACTION_AMT"] && $menu_component != 'TransferDepInsideCoop'){
+					$arrayResult['RESPONSE_CODE'] = "WS0093";
+					$arrayResult['RESULT'] = FALSE;
+					return $arrayResult;
+				}
+				if(isset($bank_code)){
+					$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit,gbc.each_bank
+															FROM gcbankconstantmapping gbm 
+															LEFT JOIN gcbankconstant gbc 
+															ON gbm.id_bankconstant = gbc.id_bankconstant
+															WHERE gbm.bank_code = :bank_code and gbm.is_use = '1'");
+					$getConstantMapMenu->execute([':bank_code' => $bank_code]);
+					while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
+						if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							
+							if($rowConstMapMenu["MIN_DEPOSIT"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0056";
+								$arrayResult['MINDEPT_AMT'] = $rowConstMapMenu["MIN_DEPOSIT"];
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
+							if($rowConstMapMenu["EACH_BANK"] == '0'){
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
+																		and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':transfer_mode' => $transfer_mode
+								]);
+							}else{
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
+																		and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':bank_code' => $bank_code,
+									':transfer_mode' => $transfer_mode
+								]);
+							}
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0101";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
+							if($rowConstMapMenu["EACH_BANK"] == '0'){
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
+																		and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':transfer_mode' => $transfer_mode
+								]);
+							}else{
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
+																		and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM') and bank_code = :bank_code
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':bank_code' => $bank_code,
+									':transfer_mode' => $transfer_mode
+								]);
+							}
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0102";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
+							if($rowConstMapMenu["EACH_BANK"] == '0'){
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
+																		and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':transfer_mode' => $transfer_mode
+								]);
+							}else{
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
+																		and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY') and bank_code = :bank_code
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':bank_code' => $bank_code,
+									':transfer_mode' => $transfer_mode
+								]);
+							}
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0103";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
 						}
-						
-						if($rowConstMapMenu["MIN_DEPOSIT"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0056";
-							$arrayResult['MINDEPT_AMT'] = $rowConstMapMenu["MIN_DEPOSIT"];
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
-						if($rowConstMapMenu["EACH_BANK"] == '0'){
+					}
+				}else{
+					$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
+															FROM gcmenuconstantmapping gmm 
+															LEFT JOIN gcbankconstant gbc 
+															ON gmm.id_bankconstant = gbc.id_bankconstant
+															WHERE gmm.menu_component = :menu_component and gmm.is_use = '1'");
+					$getConstantMapMenu->execute([':menu_component' => $menu_component]);
+					while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
+						if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MIN_DEPOSIT"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0056";
+								$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["MIN_DEPOSIT"];
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+																	and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
 								':transfer_mode' => $transfer_mode
 							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
-																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0101";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
-						if($rowConstMapMenu["EACH_BANK"] == '0'){
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0101";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+																	and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
 								':transfer_mode' => $transfer_mode
 							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
-																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0102";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
-						if($rowConstMapMenu["EACH_BANK"] == '0'){
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0102";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
 																	and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+																	and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
 								':transfer_mode' => $transfer_mode
 							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
-																	and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0103";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0103";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
 						}
 					}
 				}
+				$arrayResult['RESULT'] = TRUE;
+				return $arrayResult;
 			}else{
-				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_deposit,gbc.max_deposit,gbc.min_deposit
-														FROM gcmenuconstantmapping gmm 
-														LEFT JOIN gcbankconstant gbc 
-														ON gmm.id_bankconstant = gbc.id_bankconstant
-														WHERE gmm.menu_component = :menu_component and gmm.is_use = '1'");
-				$getConstantMapMenu->execute([':menu_component' => $menu_component]);
-				while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
-					if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MIN_DEPOSIT"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0056";
-							$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["MIN_DEPOSIT"];
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
-						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
-																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
-																and result_transaction = '1' and transfer_mode = :transfer_mode");
-						$getTransaction->execute([
-							':deptaccount_no' => $deptaccount_no,
-							':transfer_mode' => $transfer_mode
-						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0101";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
-						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
-																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
-																and result_transaction = '1' and transfer_mode = :transfer_mode");
-						$getTransaction->execute([
-							':deptaccount_no' => $deptaccount_no,
-							':transfer_mode' => $transfer_mode
-						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0102";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
-						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE destination = :deptaccount_no and trans_flag = '1'
-																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
-																and result_transaction = '1' and transfer_mode = :transfer_mode");
-						$getTransaction->execute([
-							':deptaccount_no' => $deptaccount_no,
-							':transfer_mode' => $transfer_mode
-						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_DEPOSIT"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0103";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_DEPOSIT"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_DEPOSIT"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}
-				}
+				$arrayResult['RESPONSE_CODE'] = "WS0023";
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
 			}
-			$arrayResult['RESULT'] = TRUE;
-			return $arrayResult;
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_CODE'] = $resultDeposit["RESPONSE_CODE"];
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
 	}
-	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
+	public function getMemberDestination($deptaccount_no){	
+		$getDestination= $this->conora->prepare("SELECT MEMBER_NO
+											FROM DPDEPTMASTER  WHERE DEPTACCOUNT_NO = :deptaccount_no");
+		$getDestination->execute([':deptaccount_no' => $deptaccount_no]);
+		while($rowDestination = $getDestination->fetch(\PDO::FETCH_ASSOC)){	
+			return $rowDestination["MEMBER_NO"];
+		}
+	
+	}
+	public function checkWithdrawMaxMin($deptaccount_no ,$amt_transfer ,$menu_component){	
 		$dataConst = $this->getConstantAcc($deptaccount_no);
-		if($dataConst["DEPTCLOSE_STATUS"] != '0'){
-			$arrayResult['RESPONSE_CODE'] = "WS0089";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
+		$getConstantMaxMin= $this->conora->prepare("SELECT  menu_component , amount , count , times  
+													FROM  GCCONSTANTLIMITTX WHERE  menu_component =:menu_component AND sign_flag  = '-1' AND is_use = '1' ");
+		$getConstantMaxMin->execute([':menu_component' => $menu_component]);
+		while($rowConstMaxMin = $getConstantMaxMin->fetch(\PDO::FETCH_ASSOC)){			
+			if($rowConstMaxMin["TIMES"] == 'day'){
+				if($menu_component == 'TransferDepInsideCoop' ){ //โอคนอื่น
+					$sumamunt = 0 ;
+					
+					$getDayTransaction = $this->con->prepare("SELECT dpm.destination ,amount,member_no
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	 WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode='1' ");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						$member_no = $this->getMemberDestination($rowDayTrans["DESTINATION"]); //get เลขสมาชิก ปลายทางเช็คว่าโอนเเบบไหน
+						if($member_no != $rowDayTrans["MEMBER_NO"]){
+							$sumamunt += $rowDayTrans["AMOUNT"];		
+						}
+					}
+				
+					if((($amt_transfer + $sumamunt) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+						$arrayResult['RESPONSE_CODE'] = "WS4007";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($menu_component == 'TransferSelfDepInsideCoop'){ //โอนภายในตัวเอง
+					$sumamunt = 0 ;
+					$getDayTransaction = $this->con->prepare("SELECT dpm.destination ,amount,member_no
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode='1' ");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						$member_no = $this->getMemberDestination($rowDayTrans["DESTINATION"]); //get เลขสมาชิก ปลายทางเช็คว่าโอนเเบบไหน
+						if($member_no == $rowDayTrans["MEMBER_NO"]){
+							$sumamunt += $rowDayTrans["AMOUNT"];		
+						}
+					}
+					file_put_contents('Msgresponse.txt', json_encode($amt_transfer + $sumamunt,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+					if((($amt_transfer + $sumamunt) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+						$arrayResult['RESPONSE_CODE'] = "WS4007";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($menu_component == 'TransactionWithdrawDeposit'){ //โอนธนาคาร
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '9'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4007";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}		
+				}else if($menu_component == 'TransferDepBuyShare'){ //โอนเงินฝากไปชื้อหุ้น
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '3'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4007";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}	
+				}else if($menu_component == 'TransferDepPayLoan'){ // โอนเงินฝ่ากชำระหนี้
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '2'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4007";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}	
+				}
+			}else if($rowConstMaxMin["TIMES"] == 'month'){
+				//get Withdraw month
+				if($menu_component == 'TransferDepInsideCoop' ){ //โอคนอื่น
+					$sumamunt = 0 ;
+					$getDayTransaction = $this->con->prepare("SELECT dpm.destination ,amount,member_no
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	 WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode='1' ");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						$member_no = $this->getMemberDestination($rowDayTrans["DESTINATION"]); //get เลขสมาชิก ปลายทางเช็คว่าโอนเเบบไหน
+						if($member_no != $rowDayTrans["MEMBER_NO"]){
+							$sumamunt += $rowDayTrans["AMOUNT"];		
+						}
+					}
+					if((($amt_transfer + $sumamunt) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+						$arrayResult['RESPONSE_CODE'] = "WS4008";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($menu_component == 'TransferSelfDepInsideCoop'){ //โอนภายในตัวเอง
+					$sumamunt = 0 ;
+					$getDayTransaction = $this->con->prepare("SELECT dpm.destination ,amount,member_no
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	 WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode='1' ");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						$member_no = $this->getMemberDestination($rowDayTrans["DESTINATION"]); //get เลขสมาชิก ปลายทางเช็คว่าโอนเเบบไหน
+						if($member_no == $rowDayTrans["MEMBER_NO"]){
+							$sumamunt += $rowDayTrans["AMOUNT"];		
+						}
+					}
+					if((($amt_transfer + $sumamunt) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+						$arrayResult['RESPONSE_CODE'] = "WS4008";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($menu_component == 'TransactionWithdrawDeposit'){ //โอนธนาคาร
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '9'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4008";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}		
+				}else if($menu_component == 'TransferDepBuyShare'){ //โอนเงินฝากไปชื้อหุ้น
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '3'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4008";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}	
+				}else if($menu_component == 'TransferDepPayLoan'){ // โอนเงินฝ่ากชำระหนี้
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '2'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4008";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}	
+				}
+			}else if($rowConstMaxMin["TIMES"] == 'year'){
+				//get Withdraw year
+				if($menu_component == 'TransferDepInsideCoop' ){ //โอคนอื่น
+					$sumamunt = 0 ;
+					$getDayTransaction = $this->con->prepare("SELECT dpm.destination ,amount,member_no
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode='1' ");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						$member_no = $this->getMemberDestination($rowDayTrans["DESTINATION"]); //get เลขสมาชิก ปลายทางเช็คว่าโอนเเบบไหน
+						if($member_no != $rowDayTrans["MEMBER_NO"]){
+							$sumamunt += $rowDayTrans["AMOUNT"];		
+						}
+					}
+					if((($amt_transfer + $sumamunt) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+						$arrayResult['RESPONSE_CODE'] = "WS4009";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($menu_component == 'TransferSelfDepInsideCoop'){ //โอนภายในตัวเอง
+					$sumamunt = 0 ;
+					$getDayTransaction = $this->con->prepare("SELECT dpm.destination ,amount,member_no
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode='1' ");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						$member_no = $this->getMemberDestination($rowDayTrans["DESTINATION"]); //get เลขสมาชิก ปลายทางเช็คว่าโอนเเบบไหน
+						if($member_no == $rowDayTrans["MEMBER_NO"]){
+							$sumamunt += $rowDayTrans["AMOUNT"];		
+						}
+					}
+					if((($amt_transfer + $sumamunt) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+						$arrayResult['RESPONSE_CODE'] = "WS4009";
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
+					}
+				}else if($menu_component == 'TransactionWithdrawDeposit'){ //โอนธนาคาร
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '9'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4009";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}		
+				}else if($menu_component == 'TransferDepBuyShare'){ //โอนเงินฝากไปชื้อหุ้น
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '3'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4009";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}	
+				}else if($menu_component == 'TransferDepPayLoan'){ // โอนเงินฝ่ากชำระหนี้
+					$getDayTransaction = $this->con->prepare("SELECT SUM(amount) as amount
+																	FROM gctransaction dpm LEFT JOIN dpucfdeptitemtype dpt ON dpm.transaction_type_code  = dpt.deptitemtype_code 
+																	WHERE dpm.member_no = :member_no
+																	and TO_CHAR(TRUNC(dpm.operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																	and dpt.sign_flag = -1 and dpm.transaction_type_code ='WTX' and dpm.transfer_mode = '2'");
+					$getDayTransaction->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+					while($rowDayTrans = $getDayTransaction->fetch(\PDO::FETCH_ASSOC)){
+						if((($amt_transfer + $rowDayTrans["AMOUNT"]) > $rowConstMaxMin["AMOUNT"])  && $rowConstMaxMin["AMOUNT"] > -1){
+							$arrayResult['RESPONSE_CODE'] = "WS4009";
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}	
+					}	
+				}
+			}
 		}
-		if($dataConst["DEPTGROUP_CODE"] == '01'){
-			$arrayResult['RESPONSE_CODE'] = "WS0090";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
-		if($amt_transfer < $dataConst["MINWITD_AMT"]){
-			$arrayResult['RESPONSE_CODE'] = "WS0056";
-			$arrayResult['MINWITD_AMT'] = $dataConst["MINWITD_AMT"];
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
-		$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
-		$getLimitAllDay->execute();
-		$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
-		if($rowLimitAllDay["FIXED_UNIT"] == '1'){
-			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
-												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
-												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
-												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
-												and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
-			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
-		}else{
-			$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
-												FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
-												ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
-												WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
-												and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
-			$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
-		}
-		$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
-		$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $amt_transfer;
-		if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
-			$arrayResult["RESPONSE_CODE"] = 'WS0043';
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
-		}
-		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
-			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
-			$transfer_mode = "1";
-		}else if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
-			$menucheckrights = "and gca.allow_withdraw_outside = '1'";
-			$transfer_mode = "9";
-		}else if($menu_component == 'TransferDepBuyShare'){
-			$menucheckrights = "and gca.allow_buy_share = '1'";
-			$transfer_mode = "3";
-		}else if($menu_component == 'TransferDepPayLoan'){
-			$menucheckrights = "and gca.allow_pay_loan = '1'";
-			$transfer_mode = "2";
-		}
-		$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
-												LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
-												WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
-		$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
-		$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
-		if($rowUserAllow["IS_USE"] == "1"){
-			if($amt_transfer > $rowUserAllow["LIMIT_TRANSACTION_AMT"]){
-				$arrayResult['RESPONSE_CODE'] = "WS0093";
+		$arrayResult['RESULT'] = TRUE;
+		return $arrayResult;
+	}
+	
+	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
+		$resultWithdraw = $this->checkWithdrawMaxMin($deptaccount_no,$amt_transfer ,$menu_component);
+		if($resultWithdraw["RESULT"]){
+			$dataConst = $this->getConstantAcc($deptaccount_no);
+			if($dataConst["DEPTCLOSE_STATUS"] != '0'){
+				$arrayResult['RESPONSE_CODE'] = "WS0089";
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
 			}
-			if(isset($bank_code)){
-				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw,gbc.each_bank
-														FROM gcbankconstantmapping gbm 
-														LEFT JOIN gcbankconstant gbc 
-														ON gbm.id_bankconstant = gbc.id_bankconstant
-														WHERE gbm.bank_code = :bank_code and gbm.is_use = '1'");
-				$getConstantMapMenu->execute([':bank_code' => $bank_code]);
-				while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
-					if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
+			if($dataConst["DEPTGROUP_CODE"] == '01'){
+				$arrayResult['RESPONSE_CODE'] = "WS0090";
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+			if($amt_transfer < $dataConst["MINWITD_AMT"]){
+				$arrayResult['RESPONSE_CODE'] = "WS0056";
+				$arrayResult['MINWITD_AMT'] = $dataConst["MINWITD_AMT"];
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+			$getLimitAllDay = $this->conora->prepare("SELECT TOTAL_LIMIT,FIXED_UNIT FROM atmucftranslimit WHERE tran_desc = 'MCOOP' and tran_status = 1");
+			$getLimitAllDay->execute();
+			$rowLimitAllDay = $getLimitAllDay->fetch(\PDO::FETCH_ASSOC);
+			if($rowLimitAllDay["FIXED_UNIT"] == '1'){
+				$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+													FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+													ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+													WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
+													and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+				$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+			}else{
+				$getSumAllDay = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) AS SUM_AMT 
+													FROM DPDEPTMASTER DPM LEFT JOIN DPDEPTSTATEMENT DPS
+													ON DPM.DEPTACCOUNT_NO = DPS.DEPTACCOUNT_NO and DPM.COOP_ID = DPS.COOP_ID
+													WHERE DPM.MEMBER_NO = :member_no AND TO_CHAR(DPS.OPERATE_DATE,'YYYY-MM') = TO_CHAR(SYSDATE,'YYYY-MM') 
+													and SUBSTR(dps.DEPTITEMTYPE_CODE,0,1) = 'W' and DPS.ITEM_STATUS = '1' and DPS.entry_id IN('MCOOP','ICOOP')");
+				$getSumAllDay->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+			}
+			$rowSumAllDay = $getSumAllDay->fetch(\PDO::FETCH_ASSOC);
+			$paymentAllDay = $rowSumAllDay["SUM_AMT"] + $amt_transfer;
+			if($paymentAllDay > $rowLimitAllDay["TOTAL_LIMIT"]){
+				$arrayResult["RESPONSE_CODE"] = 'WS0043';
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
+			if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
+				$menucheckrights = "and gca.allow_withdraw_inside = '1'";
+				$transfer_mode = "1";
+			}else if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
+				$menucheckrights = "and gca.allow_withdraw_outside = '1'";
+				$transfer_mode = "9";
+			}else if($menu_component == 'TransferDepBuyShare'){
+				$menucheckrights = "and gca.allow_buy_share = '1'";
+				$transfer_mode = "3";
+			}else if($menu_component == 'TransferDepPayLoan'){
+				$menucheckrights = "and gca.allow_pay_loan = '1'";
+				$transfer_mode = "2";
+			}
+			$checkUserAllow = $this->con->prepare("SELECT gua.is_use,gua.limit_transaction_amt FROM gcuserallowacctransaction gua 
+													LEFT JOIN gcconstantaccountdept gca ON gua.id_accountconstant = gca.id_accountconstant
+													WHERE gua.deptaccount_no = :deptaccount_no and gua.is_use = '1' ".$menucheckrights);
+			$checkUserAllow->execute([':deptaccount_no' => $deptaccount_no]);
+			$rowUserAllow = $checkUserAllow->fetch(\PDO::FETCH_ASSOC);
+			if($rowUserAllow["IS_USE"] == "1"){
+				if($amt_transfer > $rowUserAllow["LIMIT_TRANSACTION_AMT"]){
+					$arrayResult['RESPONSE_CODE'] = "WS0093";
+					$arrayResult['RESULT'] = FALSE;
+					return $arrayResult;
+				}
+				if(isset($bank_code)){
+					$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw,gbc.each_bank
+															FROM gcbankconstantmapping gbm 
+															LEFT JOIN gcbankconstant gbc 
+															ON gbm.id_bankconstant = gbc.id_bankconstant
+															WHERE gbm.bank_code = :bank_code and gbm.is_use = '1'");
+					$getConstantMapMenu->execute([':bank_code' => $bank_code]);
+					while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
+						if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MIN_WITHDRAW"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0056";
+								$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["MIN_WITHDRAW"];
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
+							if($rowConstMapMenu["EACH_BANK"] == '0'){
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																		and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':transfer_mode' => $transfer_mode
+								]);
+							}else{
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																		and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':bank_code' => $bank_code,
+									':transfer_mode' => $transfer_mode
+								]);
+							}
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0101";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
+							if($rowConstMapMenu["EACH_BANK"] == '0'){
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																		and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':transfer_mode' => $transfer_mode
+								]);
+							}else{
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																		and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM') and bank_code = :bank_code
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':bank_code' => $bank_code,
+									':transfer_mode' => $transfer_mode
+								]);
+							}
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0102";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
+							if($rowConstMapMenu["EACH_BANK"] == '0'){
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																		and to_char(TRUNC(operate_date),'YYYY')  = to_char(TRUNC(SYSDATE),'YYYY')
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':transfer_mode' => $transfer_mode
+								]);
+							}else{
+								$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
+																		FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
+																		and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY') and bank_code = :bank_code
+																		and result_transaction = '1' and transfer_mode = :transfer_mode");
+								$getTransaction->execute([
+									':deptaccount_no' => $deptaccount_no,
+									':bank_code' => $bank_code,
+									':transfer_mode' => $transfer_mode
+								]);
+							}
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0103";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
 						}
-						if($rowConstMapMenu["MIN_WITHDRAW"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0056";
-							$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["MIN_WITHDRAW"];
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
-						if($rowConstMapMenu["EACH_BANK"] == '0'){
+					}
+				}else{
+					$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw 
+															FROM gcmenuconstantmapping gmm 
+															LEFT JOIN gcbankconstant gbc 
+															ON gmm.id_bankconstant = gbc.id_bankconstant
+															WHERE gmm.menu_component = :menu_component and gmm.is_use = '1'");
+					$getConstantMapMenu->execute([':menu_component' => $menu_component]);
+					while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
+						if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MIN_WITHDRAW"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0056";
+								$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["MIN_WITHDRAW"];
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
 																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+																	and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
 								':transfer_mode' => $transfer_mode
 							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0101";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
-						if($rowConstMapMenu["EACH_BANK"] == '0'){
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0101";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
 																	and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+																	and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
 								':transfer_mode' => $transfer_mode
 							]);
-						}else{
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0102";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+						}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
 							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
 																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0102";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
-						if($rowConstMapMenu["EACH_BANK"] == '0'){
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and to_char(TRUNC(operate_date),'YYYY')  = to_char(TRUNC(SYSDATE),'YYYY')
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
+																	and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
+																	and result_transaction = '1' and transfer_mode = :transfer_mode");
 							$getTransaction->execute([
 								':deptaccount_no' => $deptaccount_no,
 								':transfer_mode' => $transfer_mode
 							]);
-						}else{
-							$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																	FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																	and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY') and bank_code = :bank_code
-                                                                    and result_transaction = '1' and transfer_mode = :transfer_mode");
-							$getTransaction->execute([
-								':deptaccount_no' => $deptaccount_no,
-								':bank_code' => $bank_code,
-								':transfer_mode' => $transfer_mode
-							]);
-						}
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0103";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["max_withdraw"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["max_withdraw"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
+							$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
+							if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0103";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
+							if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0093";
+								$arrayResult['RESULT'] = FALSE;
+								return $arrayResult;
+							}
 						}
 					}
 				}
+				$arrayResult['RESULT'] = TRUE;
+				return $arrayResult;
 			}else{
-				$getConstantMapMenu = $this->con->prepare("SELECT TRIM(gbc.transaction_cycle) as transaction_cycle,gbc.max_numof_withdraw,gbc.max_withdraw,gbc.min_withdraw 
-														FROM gcmenuconstantmapping gmm 
-														LEFT JOIN gcbankconstant gbc 
-														ON gmm.id_bankconstant = gbc.id_bankconstant
-														WHERE gmm.menu_component = :menu_component and gmm.is_use = '1'");
-				$getConstantMapMenu->execute([':menu_component' => $menu_component]);
-				while($rowConstMapMenu = $getConstantMapMenu->fetch(\PDO::FETCH_ASSOC)){
-					if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'time'){
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MIN_WITHDRAW"] >= '0' && $amt_transfer < $rowConstMapMenu["MIN_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0056";
-							$arrayResult['MINWITD_AMT'] = $rowConstMapMenu["MIN_WITHDRAW"];
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'day'){
-						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																and to_char(TRUNC(operate_date),'YYYYMMDD') = to_char(TRUNC(SYSDATE),'YYYYMMDD')
-																and result_transaction = '1' and transfer_mode = :transfer_mode");
-						$getTransaction->execute([
-							':deptaccount_no' => $deptaccount_no,
-							':transfer_mode' => $transfer_mode
-						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0101";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'month'){
-						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																and to_char(TRUNC(operate_date),'YYYYMM') = to_char(TRUNC(SYSDATE),'YYYYMM')
-																and result_transaction = '1' and transfer_mode = :transfer_mode");
-						$getTransaction->execute([
-							':deptaccount_no' => $deptaccount_no,
-							':transfer_mode' => $transfer_mode
-						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0102";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}else if($rowConstMapMenu["TRANSACTION_CYCLE"] == 'year'){
-						$getTransaction = $this->con->prepare("SELECT COUNT(ref_no) as NUMOF_TRANS,SUM(amount) as SUM_AMT 
-																FROM gctransaction WHERE from_account = :deptaccount_no and trans_flag = '-1'
-																and to_char(TRUNC(operate_date),'YYYY') = to_char(TRUNC(SYSDATE),'YYYY')
-																and result_transaction = '1' and transfer_mode = :transfer_mode");
-						$getTransaction->execute([
-							':deptaccount_no' => $deptaccount_no,
-							':transfer_mode' => $transfer_mode
-						]);
-						$rowTrans = $getTransaction->fetch(\PDO::FETCH_ASSOC);
-						if($rowConstMapMenu["MAX_NUMOF_WITHDRAW"] >= '0' && $rowTrans["NUMOF_TRANS"] > $rowConstMapMenu["MAX_NUMOF_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0103";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-						if($rowConstMapMenu["MAX_WITHDRAW"] >= '0' && $rowTrans["SUM_AMT"] + $amt_transfer > $rowConstMapMenu["MAX_WITHDRAW"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0093";
-							$arrayResult['RESULT'] = FALSE;
-							return $arrayResult;
-						}
-					}
-				}
+				$arrayResult['RESPONSE_CODE'] = "WS0023";
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
 			}
-			$arrayResult['RESULT'] = TRUE;
-			return $arrayResult;
 		}else{
-			$arrayResult['RESPONSE_CODE'] = "WS0023";
+			$arrayResult['RESPONSE_CODE'] = $resultWithdraw["RESPONSE_CODE"];
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}

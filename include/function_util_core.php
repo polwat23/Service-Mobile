@@ -472,6 +472,16 @@ class functions {
 												VALUES".$textcombine);
 			$insertToLogSMS->execute();
 		}
+		public function logTempSMSBirthdateWasSent($id_smstemplate=null,$message,$destination,$tel,$send_by,$conora) {
+			//file_put_contents('Msgresponse.txt', json_encode($destination,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+			$id_logsent = $this->getMaxTable('id_logsent' , 'SMSTEMPBIRTHDATEWASSENT',$conora);
+			$textcombine = "('".$id_logsent."','".$message."','".$destination."','".$tel."','".$send_by."'".(isset($id_smstemplate) ? ",".$id_smstemplate : ",null").")";
+			$insertToLogSMS = $conora->prepare("INSERT INTO SMSTEMPBIRTHDATEWASSENT(id_logsent,sms_message,member_no,tel_mobile,send_by,id_smstemplate)
+												VALUES".$textcombine);
+			$insertToLogSMS->execute();
+		}
+		
+		
 				
 		public function logSMSWasNotSent($bulkInsert,$conora,$multi_message=false,$is_sendahead = '0',$his_img=false) {
 			if($is_sendahead == '1'){

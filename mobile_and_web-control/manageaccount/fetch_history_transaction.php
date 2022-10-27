@@ -55,11 +55,11 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 																	WHERE mb.member_no = :member_no");
 						$fetchNameAccDes->execute([':member_no' => $member_no]);
 					}else{
-						$fetchNameAccDes = $conoracle->prepare("SELECT TRIM(DEPTACCOUNT_NAME) as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+						$fetchNameAccDes = $conoracle->prepare("SELECT TRIM(DEPTACCOUNT_NAME) as DEPTACCOUNT_NAME ,DEPT_OBJECTIVE FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 						$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 					}
 					$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
-					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
+					$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]).' '.$rowNameAcc["DEPT_OBJECTIVE"]);
 					$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
 					$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$rowBankDS["BANK_FORMAT_ACCOUNT"]);
 					$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$rowBankDS["BANK_FORMAT_ACCOUNT_HIDE"]);
@@ -84,10 +84,10 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','source_type']
 					$arrayTrans["DESTINATION_HIDDEN"] = $rowTrans["DESTINATION"];
 				}
 			}else{
-				$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME as DEPTACCOUNT_NAME FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+				$fetchNameAccDes = $conoracle->prepare("SELECT DEPTACCOUNT_NAME as DEPTACCOUNT_NAME ,DEPT_OBJECTIVE FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 				$fetchNameAccDes->execute([':deptaccount_no' => $rowTrans["DESTINATION"]]);
 				$rowNameAcc = $fetchNameAccDes->fetch(PDO::FETCH_ASSOC);
-				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]));
+				$arrayTrans["DESTINATION_NAME"] = preg_replace('/\"/','',trim($rowNameAcc["DEPTACCOUNT_NAME"]).' '.$rowNameAcc["DEPT_OBJECTIVE"]);
 				$arrayTrans["DESTINATION_TYPE_DESC"] = 'เลขบัญชี';
 				$arrayTrans["DESTINATION"] = $lib->formataccount($rowTrans["DESTINATION"],$func->getConstant('dep_format'));
 				$arrayTrans["DESTINATION_HIDDEN"] = $lib->formataccount_hidden($rowTrans["DESTINATION"],$func->getConstant('hidden_dep'));

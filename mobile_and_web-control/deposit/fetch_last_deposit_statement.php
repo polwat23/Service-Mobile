@@ -19,7 +19,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}else{
 			$date_now = date('Y-m-d');
 		}
-		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dpm.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.prncbal as BALANCE,
+		$fetchLastStmAcc = $conoracle->prepare("SELECT * from (SELECT dpm.deptaccount_no,dt.depttype_desc,dpm.deptaccount_name,dpm.DEPT_OBJECTIVE,dpm.prncbal as BALANCE,
 											(SELECT max(OPERATE_DATE) FROM dpdeptstatement WHERE deptaccount_no = dpm.deptaccount_no) as LAST_OPERATE_DATE
 											FROM dpdeptmaster dpm LEFT JOIN dpdeptslip dps ON dpm.deptaccount_no = dps.deptaccount_no  and dpm.coop_id = dps.coop_id
 											LEFT JOIN DPDEPTTYPE dt ON dpm.depttype_code = dt.depttype_code
@@ -32,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$account_no_format = isset($account_no) && $account_no != "" ? $lib->formataccount($account_no,$func->getConstant('dep_format')) : null;
 		$arrAccount["DEPTACCOUNT_NO"] = $account_no_format;
 		$arrAccount["DEPTACCOUNT_NO_HIDDEN"] = isset($account_no_format) ? $lib->formataccount_hidden($account_no_format,$func->getConstant('hidden_dep')) : null;
-		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccountLastSTM["DEPTACCOUNT_NAME"]);
+		$arrAccount["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowAccountLastSTM["DEPTACCOUNT_NAME"].' '.$rowAccountLastSTM["DEPT_OBJECTIVE"]);
 		$arrAccount["BALANCE"] = number_format($rowAccountLastSTM["BALANCE"],2);
 		$arrAccount["LAST_OPERATE_DATE"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'y-n-d');
 		$arrAccount["LAST_OPERATE_DATE_FORMAT"] = $lib->convertdate($rowAccountLastSTM["LAST_OPERATE_DATE"],'D m Y');

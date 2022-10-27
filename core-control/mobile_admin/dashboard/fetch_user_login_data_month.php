@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroupWeb = array();
 		$arrayGroupMobile = array();
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conoracle->prepare("SELECT COUNT(MEMBER_NO) as C_NAME, TO_CHAR(login_date,'MM') as MONTH, TO_CHAR(login_date,'YYYY') as YEAR
+		/*$fetchUserlogin = $conoracle->prepare("SELECT COUNT(MEMBER_NO) as C_NAME, TO_CHAR(login_date,'MM') as MONTH, TO_CHAR(login_date,'YYYY') as YEAR
 										FROM gcuserlogin
 										WHERE TO_CHAR(login_date,'YYYY-MM-DD')  BETWEEN TO_CHAR(ADD_MONTHS(sysdate, -6),'YYYY-MM-DD') and  TO_CHAR(sysdate,'YYYY-MM-DD')
 										GROUP BY login_date
@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupRootUserlogin["AMT"] = $rowUserlogin["C_NAME"];
 			$arrayGroupMobile[] = $arrGroupRootUserlogin;
 		}
-					
+					*/
 		$arrayResult["USER_LOGIN_DATA"] = $arrayGroup;
 		$arrayResult["USER_LOGIN_DATA_WEB"] = $arrayGroupWeb;
 		$arrayResult["USER_LOGIN_DATA_MOBILE"] = $arrayGroupMobile;

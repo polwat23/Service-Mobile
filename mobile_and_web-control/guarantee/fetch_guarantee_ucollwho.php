@@ -96,7 +96,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayColl["AVATAR_PATH_WEBP"] = $config["URL_SERVICE"].$explodePathAvatar[0].'.webp';
 			}
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
-			$arrayColl["LOAN_BALANCE"] = number_format(($rowUcollwho["LOANBALANCE_AMT"] * $rowUcollwho["COLLACTIVE_PERCENT"]) / $rowUcollwho["COLLBASE_PERCENT"],2);
+			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOANBALANCE_AMT"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
 			$arrayGroupLoan[] = $arrayColl;
 		}

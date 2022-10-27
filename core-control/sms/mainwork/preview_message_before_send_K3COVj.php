@@ -28,7 +28,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
 			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
-												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0
+												AND RECV_PERIOD = (SELECT MAX(RECV_PERIOD) FROM KPKEPNOTENOUGHMONEYTOSMS)
+												 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
@@ -89,7 +91,9 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
 			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
-												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0
+												AND RECV_PERIOD = (SELECT MAX(RECV_PERIOD) FROM KPKEPNOTENOUGHMONEYTOSMS)
+												 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();

@@ -35,13 +35,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			}
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
-			$getNormCont = $conoracle->prepare("select asp.ASSISTSLIP_NO,NVL(TRIM(TO_CHAR(asp.payoutnet_amt, '999,999,999,999.99')),0) as payoutnet_amt,
-												asp.member_no,ast.assisttype_desc from assslippayout asp LEFT JOIN 
-												assucfassisttype ast ON  asp.assisttype_code = ast.assisttype_code 
-												where ast.assisttype_group = '01' and
-												TRUNC(TO_CHAR(asp.SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
-												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and asp.sync_notify_flag = 0");
+			$getNormCont = $conoracle->prepare("select assistslip_no,member_no,
+												TO_CHAR(slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date,
+												TRIM(TO_CHAR(payoutnet_amt, '999,999,999,999.99')) as payoutnet_amt from assslippayout 
+												where assisttype_code = '51' and slip_status = '1' and
+												TRUNC(TO_CHAR(SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and sync_notify_flag = 0 ORDER BY member_no ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
@@ -100,13 +100,13 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 		}else{
 			$arrGroupAllSuccess = array();
 			$arrGroupAllFailed = array();
-			$getNormCont = $conoracle->prepare("select asp.ASSISTSLIP_NO,NVL(TRIM(TO_CHAR(asp.payoutnet_amt, '999,999,999,999.99')),0) as payoutnet_amt,
-												asp.member_no,ast.assisttype_desc from assslippayout asp LEFT JOIN 
-												assucfassisttype ast ON  asp.assisttype_code = ast.assisttype_code 
-												where ast.assisttype_group = '01' and
-												TRUNC(TO_CHAR(asp.SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
-												(($dataComing["type_send"] == "person") ? (" and asp.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and asp.sync_notify_flag = 0");
+			$getNormCont = $conoracle->prepare("select assistslip_no,member_no,
+												TO_CHAR(slip_date, 'dd MON yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') as slip_date,
+												TRIM(TO_CHAR(payoutnet_amt, '999,999,999,999.99')) as payoutnet_amt from assslippayout 
+												where assisttype_code = '51' and slip_status = '1' and
+												TRUNC(TO_CHAR(SLIP_DATE,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												(($dataComing["type_send"] == "person") ? (" and MEMBER_NO in('".implode("','",$member_destination)."')") : "").
+												" and sync_notify_flag = 0 ORDER BY member_no ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();

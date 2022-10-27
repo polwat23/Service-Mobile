@@ -30,8 +30,10 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			}
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
 			$id_history = $func->getMaxTable('id_history' , 'gchistory',$conoracle);
-			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO ,SEQ_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
-												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
+			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0
+												AND RECV_PERIOD = (SELECT MAX(RECV_PERIOD) FROM KPKEPNOTENOUGHMONEYTOSMS)
+												 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupMessage = array();
@@ -165,8 +167,10 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 			$arrayMerge = array();
 			$bulkInsert = array();
 			$id_smsnotsent = $func->getMaxTable('id_smsnotsent' , 'smswasnotsent',$conoracle);
-			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO,SEQ_NO FROM KPKEPNOTENOUGHMONEYTOSMS 
-												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0 ORDER BY MEMBER_NO ASC");
+			$getNormCont = $conoracle->prepare("SELECT KEPITEM_AMT,DEPTBAL_AMT,RECV_PERIOD,MEMBER_NO FROM  KPKEPNOTENOUGHMONEYTOSMS 
+												WHERE POST_STATUS = '8' AND EXPENSE_CODE IS NULL AND KEPITEM_AMT > 0
+												AND RECV_PERIOD = (SELECT MAX(RECV_PERIOD) FROM KPKEPNOTENOUGHMONEYTOSMS)
+												 ORDER BY MEMBER_NO ASC");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
@@ -179,30 +183,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 				if(!in_array($rowTarget["MEMBER_NO"].'_'.$arrMessage["BODY"],$dataComing["destination_revoke"])){
 					$arrayTel = $func->getSMSPerson('person',$rowTarget["MEMBER_NO"],$conoracle);
 					if(isset($arrayTel[0]["TEL"]) && $arrayTel[0]["TEL"] != ""){
-						$arrayDest["cmd_sms"] = "CMD=".$config["CMD_SMS"]."&FROM=".$config["FROM_SERVICES_SMS"]."&TO=66".(substr($arrayTel[0]["TEL"],1,9))."&REPORT=Y&CHARGE=".$config["CHARGE_SMS"]."&CODE=".$config["CODE_SMS"]."&CTYPE=UNICODE&CONTENT=".$lib->unicodeMessageEncode($arrMessage["BODY"]);
-						$arraySendSMS = $lib->sendSMS($arrayDest);
-						if($arraySendSMS["RESULT"]){
-							
-							$func->logSMSWasSentPerson($id_template,$arrMessage["BODY"],$rowTarget["MEMBER_NO"],$arrayTel[0]["TEL"],$payload["username"],$conoracle);
-							
-							$updateData = $conoracle->prepare("UPDATE KPKEPNOTENOUGHMONEYTOSMS SET POST_STATUS = '1' 
-																WHERE RECV_PERIOD = :recv_period and MEMBER_NO = :member_no and SEQ_NO = :seq_no");
-							$updateData->execute([
-								':recv_period' => $rowTarget["RECV_PERIOD"],
-								':member_no' => $rowTarget["MEMBER_NO"],
-								':seq_no' => $rowTarget["SEQ_NO"]
-							]);
-							$arrayMerge[] = $arrayTel[0];
-							$arrGRPAll[$arrayTel[0]["MEMBER_NO"]] = $arrMessage["BODY"];
-						}else{
-							$bulkInsert[] = "('".$id_smsnotsent."','".$arrMessageMerge["SUBJECT"]."','".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
-									'sms','".$arrayTel[0]["TEL"]."',null,'".$arraySendSMS["MESSAGE"]."','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";
-							if(sizeof($bulkInsert) == 1000){
-								$func->logSMSWasNotSent($bulkInsert,$conoracle);
-								unset($bulkInsert);
-								$bulkInsert = array();
-							}
-						}
+						$func->logTempSMSWasSentPerson($id_template,$arrMessage["BODY"],$rowTarget["MEMBER_NO"],$arrayTel[0]["TEL"],$payload["username"],$conoracle);
 					}else{
 						$bulkInsert[] = "('".$id_smsnotsent."','".$arrMessageMerge["SUBJECT"]."','".$arrMessage["BODY"]."','".$arrayTel[0]["MEMBER_NO"]."',
 						'sms',null,null,'ไม่พบเบอร์โทรศัพท์','".$payload["username"]."'".(isset($id_template) ? ",".$id_template : ",null").")";

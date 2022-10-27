@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		
 
 		$arrGroupMonth = array();
-		$fetchUserlogin = $conoracle->prepare("SELECT
+		/*$fetchUserlogin = $conoracle->prepare("SELECT
 												TO_CHAR(login_date, 'MM') AS  MONTH,
 												TO_CHAR(login_date, 'YYYY') AS YEAR,
 												NVL((
@@ -57,7 +57,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupRootUserlogin["C_MEM_LOGOUT_MOBILE"] = $rowUserlogin["C_MEM_LOGOUT_MOBILE"];
 			$arrayGroup[] = $arrGroupRootUserlogin;
 		}
-					
+		*/		
 		$arrayResult["USER_LOGIN_LOGOUT_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../include/exit_footer.php');

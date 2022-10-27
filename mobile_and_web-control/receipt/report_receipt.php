@@ -149,6 +149,8 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount(preg_replace("/[^0-9]/", "", $rowDetail["PAY_ACCOUNT"]),$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+				$arrDetail["TYPE_DESC"] = '';
 				if(isset($rowDetail["SEQ_NO"]) && $rowDetail["SEQ_NO"] != "" && $rowDetail["SEQ_NO"] > 0){
 					$arrDetail["PERIOD"] = $rowDetail["SEQ_NO"];
 				}
@@ -175,8 +177,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		]);
 		while($rowReturn = $getReturnAmt->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
-			$arrDetail["TYPE_DESC"] = "เงินคืน ".number_format($rowReturn["REALRETURN_AMT"],2)." บาท";
-			$arrGroupDetail[] = $arrDetail;
+			if($rowReturn["REALRETURN_AMT"] > 0){
+				$arrDetail["TYPE_DESC"] = "เงินคืน ".number_format($rowReturn["REALRETURN_AMT"],2)." บาท";
+				$arrGroupDetail[] = $arrDetail;
+			}
+			
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
@@ -413,18 +418,24 @@ function GenerateReport($dataReport,$header,$lib){
 			$html .= '<div class="wrapper-page"></div>';
 		}
 			// หมายเหตุ - ลายเซ็น
-	$html .= '
-			<div style="display:flex; position:relative">
-				<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
-				<div style="width:100px;margin-left: 570px;display:flex;">
-					<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
-				
-					<div style="font-size: 18px;margin-left: 0px;margin-top:70px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
-				</div>
-				<div style="position:absolute; font-size: 18px;margin-left: 610px;top:100px;">ผู้จัดการ</div>
+		$html .= '
+	<div style="display:flex; position:relative">
+		<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
+	</div>
+	<div>
+		<div style="margin-left: 650px; width: 150px;  text-align:center; position:absolute ">
+			<img src="../../resource/utility_icon/finance.png" width="120" height="60"/>
+			<div style="font-size: 18px;margin-top: 0px; white-space: nowrap; margin-top: -10px;">(นางวิไลวรรณ นิวาสเวช) </div>
+				<div>เจ้าหน้าที่ผู้รับเงิน</dvi>
 			</div>
-		
-			';
+		</div>
+		<div style="margin-left: 835px; width: 150px;  text-align:center; position:absolute">
+			<img src="../../resource/utility_icon/manager.png" width="120" height="60"/>
+			<div style="font-size: 18px;margin-left: 0px; white-space: nowrap; margin-top: -10px;">(นางวรีย์พรรณ โหมดเทศ)</div>
+				<div>ผู้จัดการ</dvi>
+			</div>
+		</div>
+	</div>';
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),

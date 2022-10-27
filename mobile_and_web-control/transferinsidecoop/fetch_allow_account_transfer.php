@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 			$arrayDept[] = $rowAccAllow["DEPTACCOUNT_NO"];
 		}
-		$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal
+		$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpm.DEPT_OBJECTIVE,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal
 										FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
 										WHERE dpm.deptclose_status = '0' and dpm.acccont_type = '01' and dpm.member_no = :member_no
 										ORDER BY dpm.deptaccount_no");
@@ -37,7 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrAccAllow["DEPTACCOUNT_NO"] = $rowDataAccAll["DEPTACCOUNT_NO"];
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
 				$arrAccAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowDataAccAll["DEPTACCOUNT_NO"],$func->getConstant('hidden_dep'));
-				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"]);
+				$arrAccAllow["DEPTACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccAll["DEPTACCOUNT_NAME"].' '.$rowDataAccAll["DEPT_OBJECTIVE"]);
 				$arrAccAllow["DEPT_TYPE"] = $rowDataAccAll["DEPTTYPE_DESC"];
 				$arrAccAllow["CAN_DEPOSIT"] = $rowContAllow["ALLOW_DEPOSIT_INSIDE"] ?? '0';
 				$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["ALLOW_WITHDRAW_INSIDE"] ?? '0';

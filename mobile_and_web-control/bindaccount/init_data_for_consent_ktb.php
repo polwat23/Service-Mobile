@@ -32,13 +32,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBeenBind[] = $rowAccountBeenbind["DEPTACCOUNT_NO_COOP"];
 				}
 				if(sizeof($arrAccBeenBind) > 0){
-					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
+					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name ,dpm.DEPT_OBJECTIVE FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 															ON dpm.depttype_code = dpt.depttype_code 
 															WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
 															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0 and dpm.acccont_type = '01'
 															and dpm.deptaccount_no NOT IN(".implode(',',$arrAccBeenBind).")");
 				}else{
-					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
+					$fetchDataAccount = $conoracle->prepare("SELECT dpt.depttype_desc,dpm.deptaccount_no,dpm.deptaccount_name,dpm.DEPT_OBJECTIVE FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt 
 															ON dpm.depttype_code = dpt.depttype_code 
 															WHERE dpm.member_no = :member_no and dpt.membcat_code = :membcat_code and 
 															dpm.deptaccount_no IN(".implode(',',$arrayDeptAllow).") and dpm.deptclose_status = 0 and dpm.acccont_type = '01'");
@@ -52,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayAccount = array();
 					$arrayAccount["DEPTTYPE_DESC"] = $rowDataAccount["DEPTTYPE_DESC"];
 					$arrayAccount["ACCOUNT_NO"] = $lib->formataccount($rowDataAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-					$arrayAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccount["DEPTACCOUNT_NAME"]);
+					$arrayAccount["ACCOUNT_NAME"] = preg_replace('/\"/','',$rowDataAccount["DEPTACCOUNT_NAME"] .' '. $rowDataAccount["DEPT_OBJECTIVE"]);
 					$arrayGroupAccount[] = $arrayAccount;
 				}
 				if(sizeof($arrayGroupAccount) > 0){

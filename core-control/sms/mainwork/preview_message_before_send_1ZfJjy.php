@@ -41,7 +41,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												ON slo.assisttype_code = slu.assisttype_code 
 												WHERE TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
 												(($dataComing["type_send"] == "person") ? (" and slo.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and slo.sync_notify_flag = 0");
+												" and slo.sync_notify_flag = 0 and slo.assisttype_code NOT IN('51','80')");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();
@@ -107,7 +107,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												ON slo.assisttype_code = slu.assisttype_code 
 												WHERE TRUNC(TO_CHAR(slo.slip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
 												(($dataComing["type_send"] == "person") ? (" and slo.MEMBER_NO in('".implode("','",$member_destination)."')") : "").
-												" and slo.sync_notify_flag = 0");
+												" and slo.sync_notify_flag = 0 and slo.assisttype_code NOT IN('51','80')");
 			$getNormCont->execute();
 			while($rowTarget = $getNormCont->fetch(PDO::FETCH_ASSOC)){
 				$arrGroupCheckSend = array();

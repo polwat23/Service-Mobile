@@ -132,6 +132,14 @@
 	"WS8001" : [{"th" : "ไม่สามารถโอนภายในได้ กรุณาติดต่อสหกรณ์ #WS8001","en" : "Cannot fund transfer in cooperative please contact cooperative #WS8001"}],
 	"WS8002" : [{"th" : "ไม่สามารถคำนวณค่าปรับได้ กรุณาติดต่อสหกรณ์ #WS8002","en" : "Cannot calculate penalty please contact cooperative #WS8002"}],
 	"WS4004" : [{"th" : "กรุณาอัปเดตแอปพลิเคชันแล้วลองใหม่อีกครั้ง หากยังไม่ได้กรุณาติดต่อสหกรณ์","en" : "Please update application and try again if not yet please contact cooperative"}],
+	"WS4005" : [{"th" : "จำนวนเงินที่ทำรายการต่อครั้งน้อยกว่าที่สหกรณ์กำหนด","en" : "The amount of the transaction is less than that specified by the cooperative"}],
+	"WS4006" : [{"th" : "จำนวนเงินที่ทำรายการต่อครั้งการมากกว่าที่สหกรณ์กำหนด","en" : "The amount of income per transaction is more than the cooperative's limit"}],
+	"WS4007" : [{"th" : "จำนวนเงินในทำรายการถอนต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "The amount of your daily withdrawal transaction exceeds the limit set by the cooperative"}],
+	"WS4008" : [{"th" : "จำนวนเงินในทำรายการถอนต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "The amount of your monthly withdrawal transaction exceeds the limit set by the cooperative"}],
+	"WS4009" : [{"th" : "จำนวนเงินในทำรายการถอนต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "The amount of your withdrawal transaction per year exceeds the limit set by the cooperative."}],
+	"WS4010" : [{"th" : "จำนวนเงินในทำรายการฝากต่อวันของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "The amount of your deposit per day exceeds the limit set by the cooperative."}],
+	"WS4011" : [{"th" : "จำนวนเงินในทำรายการฝากต่อเดือนของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "The amount of your deposit withdrawal transaction exceeds the limit set by the cooperative"}],
+	"WS4012" : [{"th" : "จำนวนเงินในทำรายการฝากต่อปีของท่านเกินกว่าที่สหกรณ์กำหนด","en" : "The amount of your deposit transaction per year exceeds the limit set by the cooperative."}],
 	"KBANK_ERR" : [{
 		"1001" : 
 			[{"th" : "ขออภัย ขณะนี้ปิดปรับปรุงระบบ เพื่อเพิ่มประสิทธิภาพการให้บริการ กรุณาลองใหม่อีกครั้งในอีก 3 ชม.","en" : "Sorry, now closed system maintenance to increase service efficiency please try again next 3 hours"}],

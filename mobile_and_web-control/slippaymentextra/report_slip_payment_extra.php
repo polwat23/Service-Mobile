@@ -37,11 +37,14 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 		$header["slip_date"] = $lib->convertdate($rowSlip["SLIP_DATE"],'d/n/Y');
 		$header["slip_no"] = $dataComing["slip_no"];
 		$header["slip_amt"] = $rowSlip["SLIP_AMT"];
+		
+		
 		$detailReceipt = $conoracle->prepare("SELECT cld.LOANCONTRACT_NO,
 											CASE cld.SLIPITEMTYPE_CODE 
 											WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,cld.slipitem_desc) 
 											ELSE cld.slipitem_desc END as TYPE_DESC,
-											cld.PERIOD,cld.PRINCIPAL_PAYAMT,cld.INTEREST_PAYAMT,cld.ITEM_PAYAMT,cld.ITEM_BALANCE
+											cld.PERIOD,cld.PRINCIPAL_PAYAMT,cld.INTEREST_PAYAMT,cld.ITEM_PAYAMT,cld.ITEM_BALANCE,
+											cld.SLIPITEMTYPE_CODE
 											FROM SLSLIPPAYINDET cld LEFT JOIN lnloantype lt ON cld.shrlontype_code = lt.loantype_code 
 											WHERE TRIM(cld.PAYINSLIP_NO) = :slip_no");
 		$detailReceipt->execute([':slip_no' => $rowSlip["PAYINSLIP_NO"]]);
@@ -54,7 +57,15 @@ if($lib->checkCompleteArgument(['menu_component','slip_no'],$dataComing)){
 			$arrayData["INT_BALANCE"] = number_format($rowDetail["INTEREST_PAYAMT"],2);
 			$arrayData["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYAMT"],2);
 			$arrayData["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYAMT"];
-			$arrayData["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			
+			if($rowDetail["SLIPITEMTYPE_CODE"] == 'SHR'){
+				$lsitReceipt = $conoracle->prepare("select SHARESTK_VALUE from slslippayin where payinslip_no = :slip_no");
+				$lsitReceipt->execute([':slip_no' => $rowSlip["PAYINSLIP_NO"]]);
+				$lsitrowDetail = $lsitReceipt->fetch(PDO::FETCH_ASSOC);
+				$arrayData["ITEM_BALANCE"] = number_format($lsitrowDetail["SHARESTK_VALUE"],2);	
+			}else{
+				$arrayData["ITEM_BALANCE"] = number_format(($rowDetail["ITEM_BALANCE"]),2);
+			}
 			$arrGroupDetail[] = $arrayData;
 		}
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
@@ -277,15 +288,23 @@ $html .= '
 			
 			// หมายเหตุ - ลายเซ็น
 	$html .= '
-			<div style="display:flex;">
-			<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
-			<div style="width:100px;margin-left: 570px;display:flex;">
-			<img src="../../resource/utility_icon/manager.png" width="120" height="60" style="margin-top:0px;"/>
-			<div style="font-size: 18px;margin-left: 0px;margin-top:60px; white-space: nowrap;">(นางวรีย์พรรณ โหมดเทศ) </div>
+			<div style="display:flex; position:relative">
+		<div style="width:400px;font-size: 18px;">หมายเหตุ : ใบเสร็จฉบับนี้จะสมบูรณ์ก็ต่อเมื่อสหกรณ์ได้รับเงินครบถ้วน</div>
+	</div>
+	<div>
+		<div style="margin-left: 650px; width: 150px;  text-align:center; position:absolute ">
+			<img src="../../resource/utility_icon/H_finance.png" width="120" height="60"/>
+			<div style="font-size: 18px;margin-top: 0px; white-space: nowrap; margin-top: -10px;">(นางเกวรินทร์	ทิศาเลิศไพศาล) </div>
+				<div>หัวหน้าฝ่ายการเงิน</dvi>
 			</div>
+		</div>
+		<div style="margin-left: 835px; width: 150px;  text-align:center; position:absolute">
+			<img src="../../resource/utility_icon/manager.png" width="120" height="60"/>
+			<div style="font-size: 18px;margin-left: 0px; white-space: nowrap; margin-top: -10px;">(นางวรีย์พรรณ โหมดเทศ)</div>
+				<div>ผู้จัดการ</dvi>
 			</div>
-			<div style="font-size: 18px;margin-left: 610px;margin-top:-25px;">ผู้จัดการ</div>
-			';
+		</div>
+	</div>';
 			
 	
 			

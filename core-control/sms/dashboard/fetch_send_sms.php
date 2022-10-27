@@ -3,7 +3,7 @@ require_once('../../autoload.php');
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayGroup = array();
 		$arrGroupMonth = array();
-		$fetchSmsSend = $conoracle->prepare("SELECT
+		/*$fetchSmsSend = $conoracle->prepare("SELECT
 												COUNT(MEMBER_NO) AS C_NAME,
 												TO_CHAR(send_date, 'MM') AS MONTH
 											FROM
@@ -17,7 +17,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrGroupSystemSendSMS["MONTH"] = $rowSMSsend["MONTH"];;
 			$arrGroupSystemSendSMS["AMT"] = $rowSMSsend["C_NAME"];
 			$arrayGroup[] = $arrGroupSystemSendSMS;
-		}
+		}*/
 					
 		$arrayResult["SYSTEM_SEND_SMS_DATA"] = $arrayGroup;
 		$arrayResult["RESULT"] = TRUE;

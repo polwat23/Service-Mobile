@@ -111,7 +111,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												FROM dpdeptslip dp LEFT JOIN dpdeptmaster dpm ON dp.deptaccount_no = dpm.deptaccount_no
 												LEFT JOIN dpucfrecppaytype dpc ON dp.recppaytype_code = dpc.recppaytype_code
 												WHERE dp.recppaytype_code = 'DTB' 
-												and TRUNC(TO_CHAR(dp.deptslip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												and TRUNC(TO_CHAR(dp.entry_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
 												(($dataComing["type_send"] == "person") ? (" and dpm.MEMBER_NO in('".implode("','",$member_destination)."')") : ""));
 			$getNormContDP->execute();
 			while($rowTarget = $getNormContDP->fetch(PDO::FETCH_ASSOC)){
@@ -224,7 +224,7 @@ if($lib->checkCompleteArgument(['unique_id','message_emoji_','type_send','channe
 												FROM dpdeptslip dp LEFT JOIN dpdeptmaster dpm ON dp.deptaccount_no = dpm.deptaccount_no
 												LEFT JOIN dpucfrecppaytype dpc ON dp.recppaytype_code = dpc.recppaytype_code
 												WHERE dp.recppaytype_code = 'DTB' 
-												and TRUNC(TO_CHAR(dp.deptslip_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
+												and TRUNC(TO_CHAR(dp.entry_date,'YYYYMMDD')) = '".$dataComing["date_send"]."'".
 												(($dataComing["type_send"] == "person") ? (" and dpm.MEMBER_NO in('".implode("','",$member_destination)."')") : ""));
 			$getNormContDP->execute();
 			while($rowTarget = $getNormContDP->fetch(PDO::FETCH_ASSOC)){
