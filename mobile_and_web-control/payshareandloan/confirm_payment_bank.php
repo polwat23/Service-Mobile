@@ -165,7 +165,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment','si
                 $newArrSuccess["REF_NO"] = $ref_no;
                 $newArrSuccess["ITEM_TYPE_WITHDRAW"] = $itemtypeWithdraw;
                 $newArrSuccess["FROM_ACCOUNT_NO"] = $from_account_no;
-                $newArrSuccess["TO_ACCOUNT_NO"] = $to_account_no;
+                $newArrSuccess["TO_ACCOUNT_NO"] = $listPayment["destination"];
                 $newArrSuccess["AMOUNT"] = $listPayment["amt_transfer"];
                 $newArrSuccess["PENALTY_AMT"] = $listPayment["fee_amt"];
                 $newArrSuccess["AMOUNT_RECEIVE"] = $listPayment["amt_transfer"] - $listPayment["fee_amt"];
