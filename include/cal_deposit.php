@@ -19,7 +19,16 @@ class CalculateDep {
 	}
 	
 	public function initDept($deptaccount_no,$amt_transfer,$itemtype,$fee_amt=0){
-		$dataConst = $this->getConstantAcc($deptaccount_no);
+		if($deptaccount_no == '0501003982' || $deptaccount_no == '0501006775' || $deptaccount_no == '0501005212' || $deptaccount_no == '0501003364' || 
+		$deptaccount_no == '0501004575' || $deptaccount_no == '0501006183' || $deptaccount_no == '0501005991' || $deptaccount_no == '0501006315' || 
+		$deptaccount_no == '0501006627' || $deptaccount_no == '0501007050' || $deptaccount_no == '0501007156' || $deptaccount_no == '0501007167' || 
+		$deptaccount_no == '0501007244' || $deptaccount_no == '0501007245' || $deptaccount_no == '0501007255' || $deptaccount_no == '0501007246' || 
+		$deptaccount_no == '0501007228' || $deptaccount_no == '0501007243') {
+			$arrayResult['RESPONSE_CODE'] = "WS0092";
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+		$dataConst = $this->getConstantAcc($deptaccount_no);	
 		$penalty_amt = 0;
 		if($dataConst["IS_CHECK_PENALTY"] == '1'){
 			$penalty_amt = $this->calculatePenalty($dataConst,$amt_transfer,$itemtype,$deptaccount_no);
@@ -852,6 +861,7 @@ class CalculateDep {
 				];
 			}
 			$log->writeLog('transferinside',$arrayStruc);
+			$arrayResult['ERROR'] = $conoracle->errorInfo();
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
@@ -887,6 +897,7 @@ class CalculateDep {
 				];
 			}
 			$log->writeLog('transferinside',$arrayStruc);
+			$arrayResult['ERROR'] = $conoracle->errorInfo();
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
@@ -923,6 +934,7 @@ class CalculateDep {
 			}
 			$log->writeLog('transferinside',$arrayStruc);
 			$arrayResult["MINDEPT_AMT"] = $constToAcc["MINDEPT_AMT"];
+			$arrayResult['ERROR'] = $conoracle->errorInfo();
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
@@ -1048,6 +1060,7 @@ class CalculateDep {
 						];
 					}
 					$log->writeLog('transferinside',$arrayStruc);
+					$arrayResult['ERROR'] = $conoracle->errorInfo();
 					$arrayResult['RESULT'] = FALSE;
 					return $arrayResult;
 				}
@@ -1083,6 +1096,7 @@ class CalculateDep {
 					];
 				}
 				$log->writeLog('transferinside',$arrayStruc);
+				$arrayResult['ERROR'] = $conoracle->errorInfo();
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
 			}
@@ -1118,6 +1132,7 @@ class CalculateDep {
 				];
 			}
 			$log->writeLog('transferinside',$arrayStruc);
+			$arrayResult['ERROR'] = $conoracle->errorInfo();
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
@@ -1564,12 +1579,14 @@ class CalculateDep {
 					return $arrayResult;
 				}else{
 					$arrayResult["RESPONSE_CODE"] = 'WS0037';
+					$arrayResult['ERROR'] = $conoracle->errorInfo();
 					$arrayResult['ACTION'] = 'UPDATE DPDEPTMASTER ไม่ได้'.$updateDeptMaster->queryString."\n".json_encode($arrUpdateMaster);
 					$arrayResult['RESULT'] = FALSE;
 					return $arrayResult;
 				}
 			}else{
 				$arrayResult["RESPONSE_CODE"] = 'WS0037';
+				$arrayResult['ERROR'] = $conoracle->errorInfo();
 				$arrayResult['ACTION'] = 'Insert DPDEPTSTATEMENT ค่าปรับ ไม่ได้'.$insertStatementPenalty->queryString."\n".json_encode($arrExecuteStmPenalty);
 				file_put_contents('test.txt',json_encode($conoracle->errorInfo()));
 				$arrayResult['RESULT'] = FALSE;
@@ -1577,6 +1594,7 @@ class CalculateDep {
 			}
 		}else{
 			$arrayResult["RESPONSE_CODE"] = 'WS0037';
+			$arrayResult['ERROR'] = $conoracle->errorInfo();
 			$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'.$insertDpSlipPenalty->queryString."\n".json_encode($arrExecutePenalty);
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;

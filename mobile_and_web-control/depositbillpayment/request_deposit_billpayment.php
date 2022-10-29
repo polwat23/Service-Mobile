@@ -101,6 +101,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							$dataAccFee["PRNCBAL"] = $dataAccFee["PRNCBAL"] + $rowDetail["qrtransferdt_amt"];
 							$maxno_deptfee = $depositMoney["MAX_SEQNO"];
 						}else{
+							
 							$conoracle->rollback();
 							$conmysql->rollback();
 							$arrayResult['RESPONSE_CODE'] = $depositMoney["RESPONSE_CODE"];
