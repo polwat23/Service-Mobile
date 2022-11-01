@@ -50,6 +50,8 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','deptaccount_no'
 				if($paykeeping["RESULT"]){
 					$paykeepingdet = $cal_loan->paySlipDet($conoracle,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
 					$deptaccount_no,$payinslip_no,'SHR','01','ซื้อหุ้นเพิ่ม','1','SPX',$getShareData["SHARE_AMT"],$wtdResult["DEPTSLIP_NO"]);
+					
+					
 					if($paykeepingdet["RESULT"]){
 						$buyshare = $cal_shr->buyShare($conoracle,$member_no,$dataComing["amt_transfer"],0,$config,$payinslipdoc_no,$dateOperC,
 						$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$deptaccount_no,$payinslip_no,$ref_no);

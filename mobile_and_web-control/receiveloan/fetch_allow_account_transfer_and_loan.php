@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayAcc[] = "'".$rowAccAllow["deptaccount_no"]."'";
 			}
 			$getDataBalAcc = $conoracle->prepare("SELECT DPM.DEPTACCOUNT_NO,DPM.DEPTACCOUNT_NAME,DPT.DEPTTYPE_DESC,DPM.prncbal AS PRNCBAL,DPM.DEPTTYPE_CODE
-													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+													FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code and dpm.membcat_code= dpt.membcat_code
 													WHERE dpm.deptaccount_no IN(".implode(',',$arrayAcc).") and dpm.deptclose_status = 0
 													ORDER BY dpm.deptaccount_no ASC");
 			$getDataBalAcc->execute();

@@ -21,22 +21,18 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		if(sizeof($arrAccAllowed) > 0){
 			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code AND dpm.membcat_code= dpt.membcat_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.deptaccount_no NOT IN(".implode(',',$arrAccAllowed).")
 														and dpm.member_no = :member_no 
 														and dpm.deptclose_status = 0 
-														and (dpm.condforwithdraw is null and dpm.dept_objective is null or dpm.condforwithdraw like '%ผู้เดียว%' 
-														and  dpm.dept_objective is null  or dpm.condforwithdraw like '%ผุ้เดียว%'  and dpm.dept_objective is null)
 														ORDER BY dpm.deptaccount_no");
 		}else{
 			$getAccountAllinCoop = $conoracle->prepare("SELECT dpm.deptaccount_no,TRIM(dpm.deptaccount_name) as deptaccount_name,dpt.depttype_desc,dpm.depttype_code
-														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
+														FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code AND dpm.membcat_code= dpt.membcat_code
 														WHERE dpm.depttype_code IN(".implode(',',$arrDeptAllowed).")
 														and dpm.member_no = :member_no 
 														and dpm.deptclose_status = 0 
-														and (dpm.condforwithdraw is null and dpm.dept_objective is null or dpm.condforwithdraw like '%ผู้เดียว%' 
-														and  dpm.dept_objective is null  or dpm.condforwithdraw like '%ผุ้เดียว%'  and dpm.dept_objective is null)
 														ORDER BY dpm.deptaccount_no");
 
 		}

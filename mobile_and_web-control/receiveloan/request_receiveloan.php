@@ -9,6 +9,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 		$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
 		$itemtypeDeposit = 'DTL';
 		$dataCont = $cal_loan->getContstantLoanContract($contract_no);
+		//file_put_contents('Msgresponse.txt', json_encode($dataCont,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 		$interest = $cal_loan->calculateIntArrAPI($contract_no,$dataComing["amt_transfer"]);
 		if($dataComing["amt_transfer"] > $dataCont["WITHDRAWABLE_AMT"]){
 			$arrayResult["RESPONSE_CODE"] = 'WS0093';

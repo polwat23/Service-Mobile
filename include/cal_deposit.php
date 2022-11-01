@@ -1022,7 +1022,7 @@ class CalculateDep {
 						':transfer_flag' => '1',
 						':destination' => $deptaccount_no,
 						':response_code' => $arrayResult['RESPONSE_CODE'],
-						':response_message' => 'insert for deposit ลงตาราง DPDEPTSTATEMENT ไม่ได้'.$insertStatementDest->queryString.json_encode($arrExecuteStmDest)
+						':response_message' => 'insert for deposit ลงตาราง DPDEPTSTATEMENT 44 ไม่ได้'.$insertStatementDest->queryString.json_encode($arrExecuteStmDest)
 					];
 				}
 				$log->writeLog('transferinside',$arrayStruc);

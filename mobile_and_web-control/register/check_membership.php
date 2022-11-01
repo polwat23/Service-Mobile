@@ -20,9 +20,23 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		
 	}
 	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
-	if($member_no != '00191480'){
+	
+	$userTest = array();
+	$userTest[]['member_no'] = "00167635";
+	$userTest[]['member_no'] = "00275129";
+	$userTest[]['member_no'] = "00001075";
+	$userTest[]['member_no'] = "00415028";
+
+   $regiter = false;
+   foreach($userTest as $memberNoTest){
+		if($member_no == $memberNoTest["member_no"]){
+			$regiter = true;
+		}
+   }
+	
+	if(!$regiter){
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale].$regiter;
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
