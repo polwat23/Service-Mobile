@@ -9,7 +9,7 @@
 	"URL_SERVICE" : "https://proxy.thaicoop.co/PEACOOP-TEST/",
 	"URL_CORE_COOP" : "http://192.168.99.208/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
-	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=001001;coop_control=001001;",
+	"WS_STRC_DB" : "Data Source=192.168.99.123:1522/iorcl;Persist Security Info=True;User ID=iscocen;Password=Icoop2012;Unicode=True;coop_id=008001;coop_control=008001;",
 	"FIREBASE_API_KEY" : "",
 	"FIREBASE_SERVER_KEY" : "AAAAPJ_qRUo:APA91bHZo6nO4CBxcMd4saPjNRJrOYsX2mTdu4cJFEow3fo94ta4jNCpfe1IZBcfdTdvPI-9P9ltPyGq2pHU74yyWOMbj_5DcjOgejfd-qMSi5XMsBdLWR-6OJglS2d8H0kMh463JU9M",
 	"SECRET_KEY_JWT" : "PEA!/-Gcoop+Connect^008001*!&",

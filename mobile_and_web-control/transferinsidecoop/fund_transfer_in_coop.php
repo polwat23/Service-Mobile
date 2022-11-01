@@ -11,7 +11,7 @@ if($lib->checkCompleteArgument(['menu_component','from_deptaccount_no','to_depta
 		$ref_no = time().$lib->randomText('all',3);
 		$dateOper = date('c');
 		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
-		// Start-Withdraw
+		//Start-Withdraw
 		$constFromAcc = $cal_dep->getConstantAcc($from_account_no);
 		$constToAcc = $cal_dep->getConstantAcc($to_account_no);
 		$srcvcid = $cal_dep->getVcMapID($constFromAcc["DEPTTYPE_CODE"]);

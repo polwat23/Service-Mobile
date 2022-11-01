@@ -102,7 +102,7 @@ class CalculateShare {
 					':response_message' => 'UPDATE shsharemaster ไม่ได้'.$updateMaster->queryString."\n".json_encode($arrExecuteMaster)
 				];
 				$log->writeLog('buyshare',$arrayStruc);
-				file_put_contents('test.txt',json_encode($arrayStruc));
+				file_put_contents('Msgresponse.txt', json_encode($arrayStruc,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 				$arrayResult["RESPONSE_CODE"] = 'WS0065';
 				$arrayResult['RESULT'] = FALSE;
 				return $arrayResult;
