@@ -22,11 +22,14 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$getTel = $conoracle->prepare("SELECT  ADDR_MOBILEPHONE as MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
+	$getTel = $conoracle->prepare("SELECT CURRADDR_PHONE as MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
 	$getTel->execute([':member_no' => $member_no]);
 	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
-	$addr_phone =  preg_replace('/-/','',$rowTel["MEM_TELMOBILE"]);
+	$addr_phone = filter_var($rowTel["MEM_TELMOBILE"], FILTER_SANITIZE_NUMBER_INT)
+	$addr_phone =  preg_replace('/-/','',$addr_phone);
 	$addr_phone =  preg_replace('/\s+/', '', $addr_phone);
+	
+	
 	if($dataComing["tel"] != $addr_phone){
 		$arrayResult['RESPONSE_CODE'] = "WS0095";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
