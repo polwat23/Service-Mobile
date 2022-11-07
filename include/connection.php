@@ -5,6 +5,7 @@ namespace Connection;
 class connection {
 	public $conmysql;
 	public $conoracle;
+	public $conoracletest;
 	
 	public function connecttomysql() {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
@@ -45,6 +46,35 @@ class connection {
 			$this->conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
 			$this->conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
 			return $this->conoracle;
+		}catch(\Throwable $e){
+			$arrayError = array();
+			$arrayError["ERROR"] = $e->getMessage();
+			$arrayError["RESULT"] = FALSE;
+			$arrayError["MESSAGE"] = "Can't connect To Oracle";
+			return $arrayError;
+			http_response_code(200);
+			exit();
+		}
+	}
+	
+	public function connecttooracletest() {
+		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
+		$json_data = json_decode($json,true);
+		try{
+			$dbuser = $json_data["DBORACLE_USERNAME_TEST"];
+			$dbpass = $json_data["DBORACLE_USERNAME_TEST"];
+			$dbname = "(DESCRIPTION =
+						(ADDRESS_LIST =
+						  (ADDRESS = (PROTOCOL = TCP)(HOST = ".$json_data["DBORACLE_HOST"].")(PORT = ".$json_data["DBORACLE_PORT"]."))
+						)
+						(CONNECT_DATA =
+						  (".$json_data["DBORACLE_TYPESERVICE"]." = ".$json_data["DBORACLE_SERVICE"].")
+						)
+					  )";
+			$this->conoracletest = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+			$this->conoracletest->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
+			$this->conoracletest->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+			return $this->conoracletest;
 		}catch(\Throwable $e){
 			$arrayError = array();
 			$arrayError["ERROR"] = $e->getMessage();

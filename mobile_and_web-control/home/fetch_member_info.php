@@ -69,6 +69,11 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$address .= (isset($rowMember["PROVINCE_DESC"]) ? ' จ.'.$rowMember["PROVINCE_DESC"] : null);
 				$address .= (isset($rowMember["ADDR_POSTCODE"]) ? ' '.$rowMember["ADDR_POSTCODE"] : null);
 			}
+			$getDivAcc = $conoracle->prepare("SELECT mtr.bank_accid,cb.bank_desc,cbb.branch_name FROM mbmembmoneytr mtr LEFT JOIN cmucfbank cb ON mtr.bank_code = cb.bank_code
+											LEFT JOIN cmucfbankbranch cbb ON mtr.bank_code = cbb.bank_code and mtr.bank_branch = cbb.branch_id
+											WHERE mtr.member_no = :member_no and mtr.trtype_code = 'DVAV1'");
+			$getDivAcc->execute([':member_no' => $member_no]);
+			$rowDiv = $getDivAcc->fetch(PDO::FETCH_ASSOC);
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
@@ -82,6 +87,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MEMBERGROUP_DESC"] = $rowMember["MEMBGROUP_DESC"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $address;
 			$arrayResult["MEMBER_NO"] = $member_no;
+			if(isset($rowDiv["BANK_ACCID"]) && $rowDiv["BANK_ACCID"] != ""){
+				$arrayResult["RECEIVE_DIV"] = $rowDiv["BANK_DESC"].' '.$rowDiv["branch_name"].'เลขบัญชี'.$rowDiv["BANK_ACCID"];
+			}
 			$arrayResult["RESULT"] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
