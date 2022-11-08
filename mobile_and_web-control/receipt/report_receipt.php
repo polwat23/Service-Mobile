@@ -313,7 +313,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : เเจ้งหนี้จะมีผลเป็นใบเสร็จรับเงินที่สมบูรณ์เมื่อสหกรณ์ได้รับชำระเงินตามรายการที่เรียกเก็บครบถ้วนเเล้ว
-วันครบกำหนดชำระ หมายถึงวันทำการสุดท้ายของเดือน เงินที่ชำระต้องถึงสหกรณ์ ภายในวันครบกำหนดชำระไม่เกิน เวลา 16.00 น. ของวันดังกล่าว
+วันครบกำหนดชำระ หมายถึงวันทำการสุดท้ายของเดือน เงินที่ชำระต้องถึงสหกรณ์ ภายในวันครบกำหนดชำระไม่เกิน เวลา 15.30 น. ของวันดังกล่าว
 			</div>
 			<div style="width:200px;margin-left: 750px;display:flex;">
 			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>

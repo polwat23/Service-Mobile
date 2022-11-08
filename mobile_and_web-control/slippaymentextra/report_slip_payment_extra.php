@@ -282,8 +282,8 @@ function GenerateReport($dataReport,$header,$lib){
 	if(!file_exists($pathfile)){
 		mkdir($pathfile, 0777, true);
 	}
-	$pathfile = $pathfile.'/'.$header["member_no"].$header["slip_no"].'.pdf';
-	$pathfile_show = '/resource/pdf/cremation/'.urlencode($header["member_no"]).$header["slip_no"].'.pdf?v='.time();
+	$pathfile = $pathfile.'/payment'.$header["slip_no"].'.pdf';
+	$pathfile_show = '/resource/pdf/cremation/payment'.$header["slip_no"].'.pdf?v='.time();
 	$arrayPDF = array();
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){
