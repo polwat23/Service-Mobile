@@ -92,11 +92,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 					}
 				}else if($rowBankDisplay["bank_code"] == '006'){
 					if($rowBankDisplay["fee_deposit"] > 0){
-						if($dataComing["amt_transfer"] > 30000){
-							$arrayResult['FEE_AMT'] = $dataComing["amt_transfer"] * 0.001;
-						}else{
-							$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
-						}
+						$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 					}
 					$arrayResult['ACCOUNT_NAME'] = $account_name_th;
