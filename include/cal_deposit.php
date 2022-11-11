@@ -68,7 +68,7 @@ class CalculateDep {
 		$DataAcc = $this->getConstantAcc($deptaccount_no);
 		return $DataAcc["PRNCBAL"] - $DataAcc["MINPRNCBAL"];
 	}
-	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
+	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null,$ignoreCheck=false){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
 		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
@@ -104,17 +104,19 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		$getConstantLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_balance_deposit_all_accounts'");
-		$getConstantLimitDept->execute();
-		$rowConstant = $getConstantLimitDept->fetch(\PDO::FETCH_ASSOC);
-		$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0' and member_no = :member_no");
-		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
-		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
-		$amout_dept = $rowSumOfDeposit["SUM_PRIN"] + $amt_transfer;		
-		if( $amout_dept > $rowConstant["constant_value"]){
-			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
+		if(!$ignoreCheck){
+			$getConstantLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_balance_deposit_all_accounts'");
+			$getConstantLimitDept->execute();
+			$rowConstant = $getConstantLimitDept->fetch(\PDO::FETCH_ASSOC);
+			$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0' and member_no = :member_no");
+			$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+			$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
+			$amout_dept = $rowSumOfDeposit["SUM_PRIN"] + $amt_transfer;		
+			if( $amout_dept > $rowConstant["constant_value"]){
+				$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
 		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
