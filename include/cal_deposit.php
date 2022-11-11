@@ -68,7 +68,7 @@ class CalculateDep {
 		$DataAcc = $this->getConstantAcc($deptaccount_no);
 		return $DataAcc["PRNCBAL"] - $DataAcc["MINPRNCBAL"];
 	}
-	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
+	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null,$ignoreCheck=false){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
 		if($dataConst["MAXBALANCE_FLAG"] == '1' && $dataConst["MAXBALANCE"] > 0){
 			if($dataConst["PRNCBAL"] + $amt_transfer > $dataConst["MAXBALANCE"]){
@@ -104,17 +104,19 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}
-		$getConstantLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_balance_deposit_all_accounts'");
-		$getConstantLimitDept->execute();
-		$rowConstant = $getConstantLimitDept->fetch(\PDO::FETCH_ASSOC);
-		$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0' and member_no = :member_no");
-		$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
-		$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
-		$amout_dept = $rowSumOfDeposit["SUM_PRIN"] + $amt_transfer;		
-		if( $amout_dept > $rowConstant["constant_value"]){
-			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
-			$arrayResult['RESULT'] = FALSE;
-			return $arrayResult;
+		if(!$ignoreCheck){
+			$getConstantLimitDept = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_balance_deposit_all_accounts'");
+			$getConstantLimitDept->execute();
+			$rowConstant = $getConstantLimitDept->fetch(\PDO::FETCH_ASSOC);
+			$getSumOfDeposit = $this->conora->prepare("SELECT SUM(prncbal) as SUM_PRIN FROM dpdeptmaster WHERE deptclose_status = '0' and member_no = :member_no");
+			$getSumOfDeposit->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+			$rowSumOfDeposit = $getSumOfDeposit->fetch(\PDO::FETCH_ASSOC);
+			$amout_dept = $rowSumOfDeposit["SUM_PRIN"] + $amt_transfer;		
+			if( $amout_dept > $rowConstant["constant_value"]){
+				$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT_OF_MONTH";
+				$arrayResult['RESULT'] = FALSE;
+				return $arrayResult;
+			}
 		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_deposit_inside = '1'";
@@ -1305,7 +1307,11 @@ class CalculateDep {
 														lastaccess_date = TO_DATE(:entry_date,'yyyy/mm/dd hh24:mi:ss'),laststmseq_no = :seq_no
 														WHERE deptaccount_no = :from_account_no");
 				if($updateDeptMaster->execute($arrUpdateMaster)){
-					$arrayResult['DEPTSLIP_NO'] = $slipWithdraw;
+					$constFromAcc["PRNCBAL"] = $constFromAcc["PRNCBAL"] - $amt_transfer - $penalty_amt;
+					$constFromAcc["WITHDRAWABLE_AMT"] = $constFromAcc["WITHDRAWABLE_AMT"] - $amt_transfer - $penalty_amt;
+					$arrayResult['DEPTSLIP_NO'] = $deptslip_no;
+					$arrayResult['MAX_SEQNO'] = $lastStmSrcNo;
+					$arrayResult['DATA_CONT'] = $constFromAcc;
 					$arrayResult['RESULT'] = TRUE;
 					return $arrayResult;
 				}else{
@@ -1327,8 +1333,8 @@ class CalculateDep {
 			return $arrayResult;
 		}
 	}
-	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FEM',$amt_transfer,$penalty_amt,
-	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$slslip=null,$count_wtd=null,$deptfeeslip_no){
+	public function insertFeeTransaction($conoracle,$deptaccount_no,$tofrom_accid,$itemtype_wtd='FTX',$amt_transfer,$penalty_amt,
+	$operate_date,$config,$deptslip_no,$lib,$max_seqno,$constFromAcc,$deptfeeslip_no){
 		$deptslip_noPenalty = $deptfeeslip_no;
 		$lastStmSrcNo = $max_seqno + 1;
 		$rowDepPay = $this->getConstPayType($itemtype_wtd);
@@ -1365,7 +1371,7 @@ class CalculateDep {
 				':coop_id' => $config["COOP_ID"],
 				':from_account_no' => $deptaccount_no,
 				':seq_no' => $lastStmSrcNo,
-				':itemtype_code' => 'FEM',
+				':itemtype_code' => 'FTX',
 				':slip_amt' => $penalty_amt,
 				':balance_forward' => $constFromAcc["PRNCBAL"],
 				':after_trans_amt' => $constFromAcc["PRNCBAL"] - $penalty_amt,
@@ -1410,7 +1416,6 @@ class CalculateDep {
 			$arrayResult["RESPONSE_CODE"] = 'WS0037';
 			$arrayResult['ACTION'] = 'Insert DPDEPTSLIP ค่าปรับ ไม่ได้'."\n".json_encode($conoracle->errorInfo());
 			$arrayResult['RESULT'] = FALSE;
-			file_put_contents(__DIR__.'Msgresponse.txt', json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 			return $arrayResult;
 		}
 	}

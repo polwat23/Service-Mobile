@@ -251,7 +251,7 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 						$newArrSuccess["REF_NO"] = $ref_no;
 						$newArrSuccess["ITEM_TYPE_WITHDRAW"] = $itemtypeWithdraw;
 						$newArrSuccess["FROM_ACCOUNT_NO"] = $from_account_no;
-						$newArrSuccess["TO_ACCOUNT_NO"] = $to_account_no;
+						$newArrSuccess["TO_ACCOUNT_NO"] = $listPayment["destination"];
 						$newArrSuccess["AMOUNT"] = $listPayment["amt_transfer"];
 						$newArrSuccess["PENALTY_AMT"] = $listPayment["fee_amt"];
 						$newArrSuccess["AMOUNT_RECEIVE"] = $listPayment["amt_transfer"] - $listPayment["fee_amt"];
@@ -405,10 +405,10 @@ if ($lib->checkCompleteArgument(['menu_component', 'SUM_AMT', 'list_payment'], $
 				foreach ($arraySuccess as $value) {
 					if ($value["PAY_TYPE"] == "share") {
 						$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
-						,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
-						coop_slip_no,id_userlogin,ref_no_source)
-						VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
-						:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
+																	,amount,penalty_amt,amount_receive,trans_flag,operate_date,result_transaction,member_no,
+																	coop_slip_no,id_userlogin,ref_no_source)
+																	VALUES(:ref_no,:slip_type,:from_account,:destination,'1',:amount,:penalty_amt,
+																	:amount_receive,'-1',:operate_date,'1',:member_no,:slip_no,:id_userlogin,:slip_no)");
 						$insertTransactionLog->execute([
 							':ref_no' => $value["REF_NO"],
 							':slip_type' => $value["ITEM_TYPE_WITHDRAW"],
