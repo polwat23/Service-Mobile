@@ -57,7 +57,8 @@ class CalculateShare {
 				':period' => $dataShare["LAST_PERIOD"] + 1,
 				':share_amt' => $amt_transfer / 10,
 				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
-				':moneytype_code' => 'TRN'
+				':moneytype_code' => 'TRN',
+				':operate_date' => $operate_date
 			];
 		}else{
 			$arrExecuteShStm = [
@@ -70,13 +71,14 @@ class CalculateShare {
 				':period' => $dataShare["LAST_PERIOD"] + 1,
 				':share_amt' => $amt_transfer / 10,
 				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
-				':moneytype_code' => 'TRN'
+				':moneytype_code' => 'TRN',
+				':operate_date' => $operate_date
 			];
 		}
 		$insertSTMShare = $conoracle->prepare("INSERT INTO shsharestatement(COOP_ID,MEMBER_NO,SHARETYPE_CODE,SEQ_NO,SLIP_DATE,OPERATE_DATE,SHARE_DATE,ACCOUNT_DATE,
 												REF_DOCNO,REF_SLIPNO,SHRITEMTYPE_CODE,PERIOD,SHARE_AMOUNT,SHARESTK_AMT,MONEYTYPE_CODE,ENTRY_ID,ENTRY_DATE,SYNC_NOTIFY_FLAG)
-												VALUES(:coop_id,:member_no,'01',:last_seq,TRUNC(SYSDATE),TRUNC(SYSDATE),TRUNC(SYSDATE),TRUNC(SYSDATE),:ref_docno,:ref_slipno,
-												:itemtype,:period,:share_amt,:sharebal,:moneytype_code,'MOBILE',SYSDATE,'1')");
+												VALUES(:coop_id,:member_no,'01',:last_seq,TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss')),TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss')),:ref_docno,:ref_slipno,
+												:itemtype,:period,:share_amt,:sharebal,:moneytype_code,'MOBILE',TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss'),'1')");
 		if($insertSTMShare->execute($arrExecuteShStm)){
 			$arrExecuteMaster = [
 				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
@@ -85,7 +87,7 @@ class CalculateShare {
 				':member_no' => $member_no
 			];
 			$updateMaster = $conoracle->prepare("UPDATE shsharemaster SET SHARESTK_AMT = :sharebal,LAST_PERIOD = :last_period,LAST_STM_NO = :last_stm,
-												LASTKEEPING_DATE = TRUNC(SYSDATE) WHERE member_no = :member_no");
+												LASTKEEPING_DATE = TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd hh24:mi:ss')) WHERE member_no = :member_no");
 			if($updateMaster->execute($arrExecuteMaster)){
 				$arrayResult['RESULT'] = TRUE;
 				return $arrayResult;

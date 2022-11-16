@@ -90,10 +90,10 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 			$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 		}
 		$conoracle->beginTransaction();
-		$slipPayout = $cal_loan->paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,'LWD',null,$dateOper,$dataCont["LOANTYPE_CODE"],
+		$slipPayout = $cal_loan->paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,'LWD',$ref_no,$dateOper,$dataCont["LOANTYPE_CODE"],
 		$contract_no,$dataComing["amt_transfer"],$payload,$deptaccount_no,'CBT',$rowDataWithdraw["bank_code"],$vccAccID,$log);
 		if($slipPayout["RESULT"]){
-			$receiveLon = $cal_loan->receiveLoanOD($conoracle,$config,$contract_no,$dataCont,null,$dataComing["amt_transfer"],
+			$receiveLon = $cal_loan->receiveLoanOD($conoracle,$config,$contract_no,$dataCont,$ref_no,$dataComing["amt_transfer"],
 			$payoutslip_no,$ref_no,$deptaccount_no,0,$payload,$dataComing["app_version"],$dateOper,$log);
 			if($receiveLon["RESULT"]){
 				$penaltyWtd = $cal_dep->insertFeeTransaction($conoracle,$from_account_no,$vccamtPenalty,'FEM',$dataComing["amt_transfer"],$fee_amt,

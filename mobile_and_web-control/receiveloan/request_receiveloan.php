@@ -33,10 +33,10 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 		$getlastseq_noDest = $cal_dep->getLastSeqNo($deptaccount_no);
 		$conoracle->beginTransaction();
-		$slipPayout = $cal_loan->paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,'LWD',null,$dateOper,$dataCont["LOANTYPE_CODE"],
+		$slipPayout = $cal_loan->paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,'LWD',$ref_no,$dateOper,$dataCont["LOANTYPE_CODE"],
 		$contract_no,$dataComing["amt_transfer"],$payload,$deptaccount_no,'TRN',null,$srcvcid["ACCOUNT_ID"],$log);
 		if($slipPayout["RESULT"]){
-			$receiveLon = $cal_loan->receiveLoanOD($conoracle,$config,$contract_no,$dataCont,null,$dataComing["amt_transfer"],
+			$receiveLon = $cal_loan->receiveLoanOD($conoracle,$config,$contract_no,$dataCont,$ref_no,$dataComing["amt_transfer"],
 			$payoutslip_no,$ref_no,$deptaccount_no,0,$payload,$dataComing["app_version"],$dateOper,$log);
 			if($receiveLon["RESULT"]){
 				$depositMoney = $cal_dep->DepositMoneyInside($conoracle,$deptaccount_no,$destvcid["ACCOUNT_ID"],$itemtypeDeposit,
@@ -134,7 +134,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','deptaccount_no',
 					require_once('../../include/exit_footer.php');
 				}
 			}else{
-				file_put_contents('test.txt',json_encode($receiveLon["ERR"]));
+				file_put_contents('test.txt',json_encode($receiveLon));
 				$conoracle->rollback();
 				$arrayResult['RESPONSE_CODE'] = $receiveLon["RESPONSE_CODE"];
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

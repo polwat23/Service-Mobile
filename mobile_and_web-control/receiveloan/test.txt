@@ -1,0 +1,1 @@
+{"ERR":"[\"HY000\",1008,\"OCIStmtExecute: ORA-01008: not all variables bound\\n (ext\\\\pdo_oci\\\\oci_statement.c:157)\"]","RESPONSE_CODE":"WS1040","RESULT":false}

@@ -1,0 +1,10 @@
+{"member_no":"00014025","tel_db":"0656147830","tel_dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":null,"dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":null,"dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":"0656147830","dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":null,"dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":null,"tel_dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":["065-6147830"],"tel_dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":"-1","tel_dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":"0656147830","tel_dataComing":"0992409191"}
+{"member_no":"00014025","tel_db":"0656147830","tel_dataComing":"0992409191"}
