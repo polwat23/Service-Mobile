@@ -1013,10 +1013,10 @@ class CalculateLoan {
 			':coop_id' => $config["COOP_ID"],
 			':payoutslip_no' => $payoutslip_no,
 			':member_no' => $member_no,
-			':sliptype_code' => $loantype_code,
+			':sliptype_code' => $sliptype_code,
 			':document_no' => $document_no ?? null,
 			':operate_date' => date('Y-m-d H:i:s',strtotime($operate_date)),
-			':shrlontype_code' => 'LWD',
+			':shrlontype_code' => $loantype_code,
 			':loancontract_no' => $loancontract_no,
 			':payout_amt' => $amt_transfer,
 			':bfloanapprove_amt' => $dataCont["LOANAPPROVE_AMT"],
@@ -1057,7 +1057,7 @@ class CalculateLoan {
 				':request_amt' => $amt_transfer,
 				':status_flag' => '0',
 				':response_code' => "WS1040",
-				':response_message' => 'Insert slslippayout ไม่ได้'.$insertSLSlipPayout->queryString."\n".json_encode($arrExecuteSlOutSlip)
+				':response_message' => 'Insert slslippayout ไม่ได้'.json_encode($conoracle->errorInfo())
 			];
 			$log->writeLog('receiveloan',$arrayStruc);
 			$arrayResult["RESPONSE_CODE"] = 'WS1040';
@@ -1301,7 +1301,7 @@ class CalculateLoan {
 					':request_amt' => $amt_transfer,
 					':status_flag' => '0',
 					':response_code' => "WS1040",
-					':response_message' => 'UPDATE lncontmaster ไม่ได้'.$updateLnContmaster->queryString."\n".json_encode($executeLnMaster)
+					':response_message' => 'UPDATE lncontmaster ไม่ได้'.json_encode($conoracle->errorInfo())
 				];
 				$log->writeLog('receiveloan',$arrayStruc);
 				$arrayResult["ERR"] = json_encode($conoracle->errorInfo());
