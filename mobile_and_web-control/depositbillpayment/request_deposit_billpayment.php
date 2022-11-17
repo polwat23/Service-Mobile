@@ -24,7 +24,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$payload["member_no"] = $rowCheckBill["member_no"];
 				$payload["id_userlogin"] = $rowCheckBill["id_userlogin"];
 				$payload["app_version"] = $rowCheckBill["app_version"];
-				
+				$filename = basename(__FILE__, '.php');
 				$conoracle->beginTransaction();
 				$conmysql->beginTransaction();
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
@@ -40,6 +40,13 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						$dataComing["tran_id"],$payload,$dataComing["menu_component"],$log,$ref_no,true);
 						if($depositMoney["RESULT"]){
 						}else{
+							$logStruc = [
+								":error_menu" => $filename,
+								":error_code" => "WS4004",
+								":error_desc" => "ฝากเงิน Error".json_encode($depositMoney,JSON_UNESCAPED_UNICODE)." >> ".json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE),
+								":error_device" => $payload["member_no"].' - '.$payload["app_version"]
+							];
+							$log->writeLog('errorusage',$logStruc);
 							$conoracle->rollback();
 							$conmysql->rollback();
 							$arrayResult['RESPONSE_CODE'] = $depositMoney["RESPONSE_CODE"];
@@ -63,6 +70,15 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						$log,$lib,$payload,$dataComing["tran_id"],$payinslip_no,$payload["member_no"],$ref_no,$payload["app_version"]);
 						if($repayloan["RESULT"]){
 						}else{
+							$logStruc = [
+								":error_menu" => $filename,
+								":error_code" => "WS4004",
+								":error_desc" => "ชำระหนี้ Error".json_encode($repayloan,JSON_UNESCAPED_UNICODE)." >> ".json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE),
+								":error_device" => $payload["member_no"].' - '.$payload["app_version"]
+							];
+							$log->writeLog('errorusage',$logStruc);
+							$conoracle->rollback();
+							$conmysql->rollback();
 							$arrayResult['RESPONSE_CODE'] = $repayloan["RESPONSE_CODE"];
 							$arrayResult['RESPONSE_MESSAGE'] = json_encode($repayloan);
 							$arrayResult['RESULT'] = FALSE;
@@ -74,6 +90,13 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						$buyshare = $cal_shr->buyShare($conoracle,$rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"],$config,$dateOperC,$log,$lib,$payload,$dataComing["tran_id"],$ref_no);
 						if($buyshare["RESULT"]){
 						}else{
+							$logStruc = [
+								":error_menu" => $filename,
+								":error_code" => "WS4004",
+								":error_desc" => "ชำระหนี้ Error".json_encode($buyshare,JSON_UNESCAPED_UNICODE)." >> ".json_encode($conoracle->errorInfo(),JSON_UNESCAPED_UNICODE),
+								":error_device" => $payload["member_no"].' - '.$payload["app_version"]
+							];
+							$log->writeLog('errorusage',$logStruc);
 							$conoracle->rollback();
 							$conmysql->rollback();
 							$arrayResult['RESPONSE_CODE'] = $buyshare["RESPONSE_CODE"];
@@ -98,6 +121,8 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						exit();
 					}
 				}
+				$conoracle->commit();
+				$conmysql->commit();
 				$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
 													LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
 													WHERE gba.member_no = :member_no 
@@ -125,8 +150,6 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 						':source_no' => $dataComing["source_ref"],
 						':id_userlogin' => $payload["id_userlogin"]
 					]);
-					$conoracle->commit();
-					$conmysql->commit();
 					$arrToken = $func->getFCMToken('person',$payload["member_no"]);
 					$templateMessage = $func->getTemplateSystem("Billpayment",1);
 					$dataMerge = array();

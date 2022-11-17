@@ -53,7 +53,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											ln.LCONT_MAX_INSTALL - ln.LCONT_NUM_INST as LAST_PERIOD,
 											ln.LCONT_PAY_LAST_DATE as LAST_OPERATE_DATE
 											FROM LOAN_M_CONTACT ln LEFT JOIN LOAN_M_TYPE_NAME lt ON ln.L_TYPE_CODE = lt.L_TYPE_CODE 
-											WHERE ln.account_id = :member_no and ln.LCONT_STATUS_CONT IN('H','A') and ln.L_TYPE_CODE IN('".implode("','",$arrLoantypeAllow)."')");
+											WHERE ln.account_id = :member_no and ln.LCONT_STATUS_CONT IN('H','A','A1') and ln.L_TYPE_CODE IN('".implode("','",$arrLoantypeAllow)."')");
 				$getContract->execute([':member_no' => $member_no]);
 				while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 					$arrContract = array();

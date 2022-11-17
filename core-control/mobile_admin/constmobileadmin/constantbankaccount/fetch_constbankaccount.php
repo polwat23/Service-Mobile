@@ -43,6 +43,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			
 			$arrConstans["BANK_CONSTANT"] = [];
 			$fetchBankMapping = $conmysql->prepare("SELECT bc.id_bankconstant,
+											bc.transaction_name,
 											bc.transaction_cycle,
 											bc.max_numof_deposit,
 											bc.max_numof_withdraw,
@@ -72,6 +73,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 				}else{
 					$arrMapping["TRANSACTION_CYCLE"] = $rowBankMapping["transaction_cycle"];
 				}
+				$arrMapping["TRANSACTION_NAME"] = $rowBankMapping["transaction_name"];
 				$arrMapping["MAX_NUMOF_DEPOSIT"] = $rowBankMapping["max_numof_deposit"] == "-1" ? "ไม่จำกัด" : number_format($rowBankMapping["max_numof_deposit"],0)." ครั้ง";
 				$arrMapping["MAX_NUMOF_WITHDRAW"] = $rowBankMapping["max_numof_withdraw"] == "-1" ? "ไม่จำกัด" : number_format($rowBankMapping["max_numof_withdraw"],0)." ครั้ง";
 				$arrMapping["MIN_DEPOSIT"] = $rowBankMapping["min_deposit"] == "-1" ? "ไม่จำกัด" :  number_format($rowBankMapping["min_deposit"],2)." บาท";

@@ -15,6 +15,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$generateDate = date_format($currentDate,"Y-m-d H:i:s").rand(1000,9999);
 		$qrTransferAmt = 0;
 		$qrTransferFee = 0;
+		if($dataComing["trans_mode"] === 'bank'){
+			$qrTransferFee = 7;
+		}
 		$expireDate = $tempExpire->add(new DateInterval('PT15M'));
 		if(date_format($expireDate,"His") > "235959"){
 			$expireDate = date("Y-m-d")." 23:59:59";
@@ -127,7 +130,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$qrData["ACC_NO"] = "";
 				}
 				$qrData["AMT_TRANSFER"] = number_format($dataComing["transList"][0]["amt_transfer"],2);
-				$qrData["FEE"] = number_format(0,2);
+				$qrData["FEE"] = number_format($qrTransferFee,2);
 				$qrData["datainQR"] = $stringQRGenerate;
 				$qrData["OPERATE_DATE"] = $lib->convertdate(date_format($currentDate,"Y-m-d"),"D m Y")." - ".date_format($currentDate,"H : i");
 				$qrGen = $lib->generateQrCodeImg($qrData);
@@ -137,6 +140,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrayResult["REF_NO"] = $randQrRef;
 					$arrayResult["EXPIRE_DATE"] = $expireDate;
 					$arrayResult["QRCODE_IMG"] = "data:image/png;base64, ".$qrGen->response;
+					$arrayResult["qrData"] = $qrData;
 					$arrayResult["RESULT"] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{

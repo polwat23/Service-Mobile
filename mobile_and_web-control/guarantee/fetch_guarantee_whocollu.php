@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												lnm.LCONT_APPROVE_SAL as APPROVE_AMT
 												FROM LOAN_M_CONTACT lnm LEFT JOIN LOAN_M_TYPE_NAME lt 
 												ON lnm.L_TYPE_CODE = lt.L_TYPE_CODE WHERE lnm.LCONT_ID = :contract_no
-												and lnm.LCONT_STATUS_CONT IN('H','A')
+												and lnm.LCONT_STATUS_CONT IN('H','A','A1')
                          						GROUP BY lnm.LCONT_ID,lt.L_TYPE_NAME,lnm.LCONT_AMOUNT_SAL,
 												lnm.LCONT_MAX_INSTALL,lnm.LCONT_MAX_INSTALL - lnm.LCONT_NUM_INST,lnm.LCONT_APPROVE_SAL");
 			$getWhocollu->execute([':contract_no' => $contract_no]);
@@ -145,7 +145,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												lt.L_TYPE_NAME as TYPE_DESC
 												FROM LOAN_M_CONTACT lnm LEFT JOIN LOAN_M_TYPE_NAME lt 
 												ON lnm.L_TYPE_CODE = lt.L_TYPE_CODE WHERE lnm.account_id = :member_no
-												and lnm.LCONT_STATUS_CONT IN('H','A')
+												and lnm.LCONT_STATUS_CONT IN('H','A','A1')
                          						GROUP BY lnm.LCONT_ID,lt.L_TYPE_NAME,lnm.LCONT_AMOUNT_SAL,
 												lnm.LCONT_MAX_INSTALL,lnm.LCONT_MAX_INSTALL - lnm.LCONT_NUM_INST");
 			$getWhocollu->execute([':member_no' => $member_no]);

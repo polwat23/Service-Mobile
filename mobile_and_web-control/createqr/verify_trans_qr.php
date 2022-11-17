@@ -4,6 +4,20 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'GenerateQR')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		
+		if ($dataComing["trans_mode"] == 'bank') {
+			$fetchBindAccount = $conmysql->prepare("SELECT id_bindaccount 
+												FROM gcbindaccount
+												WHERE member_no = :member_no and bindaccount_status = '1' and bank_code = '999' ORDER BY deptaccount_no_coop");
+			$fetchBindAccount->execute([':member_no' => $payload["member_no"]]);
+			if($fetchBindAccount->rowCount() == 0){
+				$arrayResult['RESPONSE_CODE'] = "WS0021";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				require_once('../../include/exit_footer.php');
+			}
+		}
+		
 		if($dataComing["trans_code"] == '01'){
 			$deptaccount_no = preg_replace('/-/','',$dataComing["destination"]);
 			$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$dataComing["trans_amount"],"TransactionDeposit","999",false);
@@ -38,7 +52,7 @@ if($lib->checkCompleteArgument(['menu_component','trans_code','trans_amount'],$d
 			$getCurrShare->execute([':member_no' => $dataComing["destination"]]);
 			$rowCurrShare = $getCurrShare->fetch(PDO::FETCH_ASSOC);
 			$sharereq_value = $rowCurrShare["SHARESTK_AMT"] + $dataComing["trans_amount"];
-			$shareround_factor = 10;
+			$shareround_factor = 100;
 			if($sharereq_value < $shareround_factor){
 				$arrayResult['RESPONSE_CODE'] = "WS0075";
 				if(isset($configError["BUY_SHARES_ERR"][0]["0003"][0][$lang_locale])){

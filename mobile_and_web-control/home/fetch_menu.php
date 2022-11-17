@@ -75,7 +75,7 @@ if(!$anonymous){
 				$fetchMenuLoan = $conoracle->prepare("SELECT ln.LCONT_AMOUNT_SAL as BALANCE, lt.L_TYPE_NAME AS LOAN_TYPE,
 														ln.LCONT_ID as LOANCONTRACT_NO,ln.LCONT_STATUS_CONT as contract_status, 
 														(SELECT COUNT(LCONT_ID) FROM lncontmaster 
-														WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A')) as C_CONTRACT
+														WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A','A1')) as C_CONTRACT
 														FROM LOAN_M_CONTACT ln LEFT JOIN LOAN_M_TYPE_NAME lt ON ln.L_TYPE_CODE = lt.L_TYPE_CODE
 														WHERE LCONT_ID = :contract_no");
 				$fetchMenuLoan->execute([
@@ -93,7 +93,7 @@ if(!$anonymous){
 				}
 			}else {
 				$fetchMenuLoan = $conoracle->prepare("SELECT SUM(LCONT_AMOUNT_SAL) as BALANCE,COUNT(LCONT_ID) as C_CONTRACT FROM LOAN_M_CONTACT 
-													WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A')");
+													WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A','A1')");
 				$fetchMenuLoan->execute([
 					':member_no' => $member_no
 				]);
@@ -264,7 +264,7 @@ if(!$anonymous){
 								$fetchMenuLoan = $conoracle->prepare("SELECT ln.LCONT_AMOUNT_SAL as BALANCE, lt.L_TYPE_NAME AS LOAN_TYPE,
 																		ln.LCONT_ID as LOANCONTRACT_NO,ln.LCONT_STATUS_CONT as contract_status, 
 																		(SELECT COUNT(LCONT_ID) FROM lncontmaster 
-																		WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A')) as C_CONTRACT
+																		WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A','A1')) as C_CONTRACT
 																		FROM LOAN_M_CONTACT ln LEFT JOIN LOAN_M_TYPE_NAME lt ON ln.L_TYPE_CODE = lt.L_TYPE_CODE
 																		WHERE LCONT_ID = :contract_no");
 								$fetchMenuLoan->execute([
@@ -282,7 +282,7 @@ if(!$anonymous){
 								}
 							}else {
 								$fetchMenuLoan = $conoracle->prepare("SELECT SUM(LCONT_AMOUNT_SAL) as BALANCE,COUNT(LCONT_ID) as C_CONTRACT FROM LOAN_M_CONTACT 
-																	WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A')");
+																	WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A','A1')");
 								$fetchMenuLoan->execute([
 									':member_no' => $member_no
 								]);
@@ -349,7 +349,7 @@ if(!$anonymous){
 							$fetchMenuLoan = $conoracle->prepare("SELECT ln.LCONT_AMOUNT_SAL as BALANCE, lt.L_TYPE_NAME AS LOAN_TYPE,
 																ln.LCONT_ID as LOANCONTRACT_NO,ln.LCONT_STATUS_CONT as contract_status, 
 																(SELECT COUNT(LCONT_ID) FROM lncontmaster 
-																WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A')) as C_CONTRACT
+																WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A','A1')) as C_CONTRACT
 																FROM LOAN_M_CONTACT ln LEFT JOIN LOAN_M_TYPE_NAME lt ON ln.L_TYPE_CODE = lt.L_TYPE_CODE
 																WHERE LCONT_ID = :contract_no");
 							$fetchMenuLoan->execute([
@@ -367,7 +367,7 @@ if(!$anonymous){
 							}
 						}else {
 							$fetchMenuLoan = $conoracle->prepare("SELECT SUM(LCONT_AMOUNT_SAL) as BALANCE,COUNT(LCONT_ID) as C_CONTRACT FROM LOAN_M_CONTACT 
-																	WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A')");
+																	WHERE account_id = :member_no and LCONT_STATUS_CONT IN('H','A','A1')");
 							$fetchMenuLoan->execute([
 								':member_no' => $member_no
 							]);
@@ -419,6 +419,12 @@ if(!$anonymous){
 				$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
+				
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '107' || $dataComing["channel"] == 'web'){
+					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+					$arrayResult["APP_CONFIG"]["FORGETPASSWORD_MULTI_CHOOSE"] =  TRUE;
+				}
+				
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');
 			}else{
@@ -480,6 +486,12 @@ if(!$anonymous){
 		if(isset($arrayAllMenu)){
 			$arrayResult['LOGIN_BANNER'] = $config["URL_SERVICE"].'/resource/logo/login_banner.webp?v=2';
 			$arrayResult["APP_CONFIG"]["REGISTER_VERIFY_PHONE"] = TRUE;
+			
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '107' || $dataComing["channel"] == 'web'){
+				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
+				$arrayResult["APP_CONFIG"]["FORGETPASSWORD_MULTI_CHOOSE"] =  TRUE;
+			}
+				
 			$arrayResult['MENU'] = $arrayAllMenu;
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');

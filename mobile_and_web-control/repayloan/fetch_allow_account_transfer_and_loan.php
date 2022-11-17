@@ -44,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													lnt.L_TYPE_CODE as LOANTYPE_CODE
 													FROM LOAN_M_CONTACT lnm LEFT JOIN LOAN_M_TYPE_NAME lnt ON lnm.L_TYPE_CODE = lnt.L_TYPE_CODE  
 													WHERE lnm.account_id = :member_no
-													and lnm.LCONT_STATUS_CONT IN('H','A') ");
+													and lnm.LCONT_STATUS_CONT IN('H','A','A1') ");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$interest = 0;
@@ -110,7 +110,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
+				//$arrayResult['BANK_ACCOUNT_ALLOW'] = $arrGroupAccBind;
+				$arrayResult['BANK_ACCOUNT_ALLOW'] = array();
 				$arrayResult['ACCOUNT_FAV'] = $arrGroupAccFav;
 				$arrayResult['FAV_SAVE_SOURCE'] = FALSE;
 				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;

@@ -5,6 +5,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 	if($func->check_permission_core($payload,'mobileadmin','constantbankaccount')){
 		$updateConstants = $conmysql->prepare("UPDATE gcbankconstant
 		SET transaction_cycle= :transaction_cycle,
+		transaction_name = :transaction_name,
 		max_numof_deposit= :max_numof_deposit,
 		max_numof_withdraw= :max_numof_withdraw,
 		min_deposit= :min_deposit,
@@ -15,6 +16,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		WHERE id_bankconstant = :id_bankconstant");
 		if($updateConstants->execute([
 			':transaction_cycle' => $dataComing["transaction_cycle"],
+			':transaction_name' => $dataComing["transaction_name"],
 			':max_numof_deposit' => $dataComing["max_numof_deposit"],
 			':max_numof_withdraw' => $dataComing["max_numof_withdraw"],
 			':min_deposit' => $dataComing["min_deposit"],
@@ -29,6 +31,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 					':username' => $payload["username"],
 					':use_list' =>"update gcbankconstant",
 					':details' => "transaction_cycle => ".$dataComing["transaction_cycle"].
+								" transaction_name => ".$dataComing["transaction_name"].
 								" max_numof_deposit => ".$dataComing["max_numof_deposit"].
 								" max_numof_withdraw => ".$dataComing["max_numof_withdraw"].
 								" min_deposit => ".$dataComing["min_deposit"].

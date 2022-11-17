@@ -22,7 +22,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LEFT JOIN MEM_M_PTITLE PRE ON MEMB.ptitle_id = PRE.ptitle_id
 											LEFT JOIN LOAN_M_TYPE_NAME LNTYPE  ON LCM.L_TYPE_CODE = LNTYPE.L_TYPE_CODE
 											WHERE
-											LCM.LCONT_STATUS_CONT IN('H','A')
+											LCM.LCONT_STATUS_CONT IN('H','A','A1')
 											AND LCC.LG_SAL > 0
 											AND LCC.MEM_ID = :id_card and LCC.BR_NO_OTHER = :br_no");
 		$getUcollwho->execute([

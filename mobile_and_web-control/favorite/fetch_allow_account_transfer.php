@@ -15,10 +15,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowAccAllow = $fetchAccAllowTrans->fetch(PDO::FETCH_ASSOC)){
 				$arrayDept[] = $rowAccAllow["deptaccount_no"];
 			}
-			$getAllAcc = $conoracle->prepare("SELECT dpm.deptaccount_no,dpm.deptaccount_name,dpt.depttype_desc,dpm.depttype_code,dpm.PRNCBAL,
-											dpm.sequest_amount,dpm.sequest_status,dpt.minprncbal,dpm.CHECKPEND_AMT
-											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.depttype_code = dpt.depttype_code
-											WHERE dpm.deptclose_status = '0' and dpm.member_no = :member_no
+			$getAllAcc = $conoracle->prepare("SELECT dpm.account_no as DEPTACCOUNT_NO,dpm.account_name as DEPTACCOUNT_NAME,dpt.ACC_DESC as DEPTTYPE_DESC,
+											dpm.ACC_TYPE as depttype_code,dpm.BALANCE as PRNCBAL
+											FROM BK_H_SAVINGACCOUNT dpm LEFT JOIN BK_M_ACC_TYPE dpt ON dpm.ACC_TYPE = dpt.ACC_TYPE
+											WHERE dpm.ACC_STATUS = 'O' and dpm.account_id = :deptaccount_no
 											ORDER BY dpm.deptaccount_no");
 			$getAllAcc->execute([':member_no' => $member_no]);
 			while($rowDataAccAll = $getAllAcc->fetch(PDO::FETCH_ASSOC)){

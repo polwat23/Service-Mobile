@@ -39,7 +39,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 						while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
 							if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
 								$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
-								$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","999");
+								$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","999",false);
 								if($arrRightDep["RESULT"]){
 								}else{
 									$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];
@@ -57,7 +57,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 								$fetchLoanRepay = $conoracle->prepare("SELECT lnm.LCONT_AMOUNT_SAL as principal_balance, lnm.LCONT_PROFIT as int_balance
 																	FROM LOAN_M_CONTACT lnm LEFT JOIN LOAN_M_TYPE_NAME lnt ON lnm.L_TYPE_CODE = lnt.L_TYPE_CODE  
 																	WHERE lnm.LCONT_ID = :loancontract_no
-																	and lnm.LCONT_STATUS_CONT IN('H','A')");
+																	and lnm.LCONT_STATUS_CONT IN('H','A','A1')");
 								$fetchLoanRepay->execute([':loancontract_no' => $rowDetail["ref_account"]]);
 								$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
 								$interest = $cal_loan->calculateIntAPI($rowDetail["ref_account"],$rowDetail["qrtransferdt_amt"]);

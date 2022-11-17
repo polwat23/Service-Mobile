@@ -89,6 +89,8 @@ class library {
 			return (($date_duration->y)*12)+($date_duration->m);			
 		}else if($format == "d"){
 			return $date_duration->days;			
+		}else if($format == "y"){
+			return $date_duration->y;			
 		}     
 	}
 	public function formatcitizen($idcard,$separate=" "){
@@ -847,7 +849,8 @@ class library {
 			 'Content-Type: application/json'
 		];  
 		
-		curl_setopt( $ch,CURLOPT_URL, 'https://api-node.thaicoop.co/genSlip/genslipqr/ibnu' );                                                                  
+		curl_setopt( $ch,CURLOPT_URL, 'https://mobilecore.gensoft.co.th/api-node-link/genSlip/genslipqr/ibnu' );
+		// curl_setopt( $ch,CURLOPT_URL, 'https://api-node.thaicoop.co/genSlip/genslipqr/ibnu' );                                                                  
 		curl_setopt( $ch,CURLOPT_POST, true );  
 		curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );

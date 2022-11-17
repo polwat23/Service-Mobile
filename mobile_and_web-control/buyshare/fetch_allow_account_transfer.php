@@ -38,7 +38,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayShare["MEMBER_NO"] = $payload["member_no"];
 			if(sizeof($arrGroupAccAllow) > 0){
 				$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;
-				$arrayResult['STEP_MOD_AMT'] = 10;
+				$arrayResult['STEP_MOD_AMT'] = 100;
 				$arrayResult['SHARE'] = $arrayShare;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

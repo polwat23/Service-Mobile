@@ -16,12 +16,12 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 		$rowCardPerson = $getCardPerson->fetch(PDO::FETCH_ASSOC);
 		$passwordPDF = filter_var($rowCardPerson["CARD_PERSON"], FILTER_SANITIZE_NUMBER_INT);
 		foreach($dataComing["request_date"] as $date_between){
-			$fetchDataSTM = $conoracle->prepare("SELECT dpt.TRANS_DESC AS TYPE_TRAN,dps.T_TRNS_TYPE as SIGN_FLAG,
+			$fetchDataSTM = $conoracle->prepare("SELECT dpt.TRANS_DESC AS TYPE_TRAN, dpt.TRANS_CODE,
 												dps.CURR_DATE as OPERATE_DATE,(dps.DEP_CASH + dps.WDL_CASH) as TRAN_AMOUNT,dps.N_BALANCE as PRNCBAL 
 												FROM BK_T_NOBOOK dps LEFT JOIN BK_M_TRANSCODE dpt ON dps.TRANS_CODE = dpt.TRANS_CODE
 												WHERE dps.account_no = :account_no and TRUNC(dps.CURR_DATE) 
 												BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:dateafter,'YYYY-MM-DD')
-												ORDER BY dps.PAGE_NO DESC,dps.LINE_NO DESC");
+												ORDER BY dps.BOOK_ID DESC");
 			$fetchDataSTM->execute([
 				':account_no' => $account_no,
 				':datebefore' => $date_between[0],
@@ -31,10 +31,10 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 				$arraySTM = array();
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
-				if($rowStm["SIGN_FLAG"] == 'R'){
-					$arrSTM["SIGN_FLAG"] = '1';
+				if(substr($rowDataSTM["TRANS_CODE"],0,1) == 'D' || substr($rowDataSTM["TRANS_CODE"],0,1) == 'O' || substr($rowDataSTM["TRANS_CODE"],0,1) == 'T' || substr($rowDataSTM["TRANS_CODE"],0,1) == 'P' || substr($rowDataSTM["TRANS_CODE"],0,1) == 'B' || substr($rowDataSTM["TRANS_CODE"],0,1) == 'E'){
+					$arraySTM["SIGN_FLAG"] = '1';
 				}else{
-					$arrSTM["SIGN_FLAG"] = '-1';
+					$arraySTM["SIGN_FLAG"] = '-1';
 				}
 				$arraySTM["OPERATE_DATE"] = $lib->convertdate($rowDataSTM["OPERATE_DATE"],'d m Y');
 				$arraySTM["TRAN_AMOUNT"] = $rowDataSTM["TRAN_AMOUNT"];
@@ -295,13 +295,14 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
+	
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
 		'isRemoteEnabled' => true
 	]);
 	$dompdf->set_paper('A4');
-	$dompdf->load_html($html);
+	$dompdf->load_html($html, 'UTF-8');
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));

@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['menu_component','name_fav','show_menu','destina
 		$fav_refno = substr(time(),0,3).(date("Y") + 543).substr($payload["member_no"],4).date("i").date("s").$lib->randomText("all",2)."FAV";
 		$menu_component = '';
 		if($dataComing["flag_trans"] == 'TRN'){
-			$checkOwnAcc = $conoracle->prepare("SELECT MEMBER_NO FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
+			$checkOwnAcc = $conoracle->prepare("SELECT account_id as MEMBER_NO FROM BK_H_SAVINGACCOUNT WHERE account_no = :deptaccount_no");
 			$checkOwnAcc->execute([':deptaccount_no' => $dataComing["destination"]]);
 			$rowOwnAcc = $checkOwnAcc->fetch(PDO::FETCH_ASSOC);
 			if($rowOwnAcc["MEMBER_NO"] == $payload["member_no"]){

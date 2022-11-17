@@ -19,25 +19,22 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$handle = fopen("member.txt", "r");
+	$handle = fopen("member_not.txt", "r");
 	$member_no = $lib->mb_str_pad($dataComing["member_no"]);
 	
-	$found = false;
 	if ($handle) {
 		while (($line = fgets($handle)) !== false) {
 			if($member_no == trim($line)){
-				$found = true;
+				$arrayResult['RESPONSE_CODE'] = "WS0006";
+				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+				$arrayResult['RESULT'] = FALSE;
+				http_response_code(403);
+				require_once('../../include/exit_footer.php');
 			}
 		}
 		fclose($handle);
 	}
-	if(!$found){
-		$arrayResult['RESPONSE_CODE'] = "WS0006";
-		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-		$arrayResult['RESULT'] = FALSE;
-		http_response_code(403);
-		require_once('../../include/exit_footer.php');
-	}
+	
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){

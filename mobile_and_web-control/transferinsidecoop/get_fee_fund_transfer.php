@@ -10,7 +10,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 		if($arrInitDep["RESULT"]){
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($arrRightDep["RESULT"]){
-				$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
+				$arrRightDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],null,false);
 				if($arrRightDeposit["RESULT"]){
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');

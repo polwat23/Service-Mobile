@@ -20,7 +20,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','loancontract_
 				$fetchLoanRepay = $conoracle->prepare("SELECT lnm.LCONT_AMOUNT_SAL as principal_balance, lnm.LCONT_PROFIT as int_balance
 													FROM LOAN_M_CONTACT lnm LEFT JOIN LOAN_M_TYPE_NAME lnt ON lnm.L_TYPE_CODE = lnt.L_TYPE_CODE  
 													WHERE lnm.LCONT_ID = :loancontract_no
-													and lnm.LCONT_STATUS_CONT IN('H','A')");
+													and lnm.LCONT_STATUS_CONT IN('H','A','A1')");
 				$fetchLoanRepay->execute([':loancontract_no' => $dataComing["loancontract_no"]]);
 				$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
 				$interest = $cal_loan->calculateIntAPI($dataComing["loancontract_no"],$dataComing["amt_transfer"]);

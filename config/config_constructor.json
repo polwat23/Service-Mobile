@@ -9,7 +9,7 @@
 	"APP_ID" : "com.ibaf.mobile",
 	"URL_SERVICE" : "https://proxy.thaicoop.co/IBAFCOOP-TEST/",
 	"URL_CONSTANT" : "https://api-node.thaicoop.co/constant-Test/",
-	"URL_SMS" : "https://sms.thaicoop.co/beta/",
+	"URL_SMS" : "https://mobilecore.gensoft.co.th/api-sms-link/beta/",
 	"KEYCODE" : "5eP!343dx&w2v",
 	"URL_CORE_SMS" : "http://192.168.99.204/ATM/CoreCoop/SMScoopService/",
 	"FIREBASE_API_KEY" : " ",

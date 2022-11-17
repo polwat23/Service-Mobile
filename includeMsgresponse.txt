@@ -1,1 +1,0 @@
-{":lcont_amount_inst":52,":lcont_amount_sal":296939,":lcont_num_inst":26,":lcont_profit":54708,":line":2,":page":"1",":cardline":2,":cardpage":"1",":lcont_id":"สนญ-สม-2562-000015",":br_no":"001",":code":"13914"}
