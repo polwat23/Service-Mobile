@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		$getPaymentDetail = $conoracle->prepare("SELECT 
-																	CASE kut.keepitemtype_grp 
+																	CASE kut.system_code 
 																	WHEN 'LON' THEN NVL(lt.LOANTYPE_DESC,kut.keepitemtype_desc) 
 																	WHEN 'DEP' THEN NVL(dp.DEPTTYPE_DESC,kut.keepitemtype_desc) 
 																	ELSE kut.keepitemtype_desc
@@ -65,7 +65,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
-			$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			if($rowDetail["ITEM_BALANCE"] > 0){
+				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);
+			}
 			$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ITEM_PAYMENT"],2);
 			$arrDetail["ITEM_PAYMENT_NOTFORMAT"] = $rowDetail["ITEM_PAYMENT"];
 			$arrGroupDetail[] = $arrDetail;
@@ -86,7 +88,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -148,7 +155,6 @@ function GenerateReport($dataReport,$header,$lib){
 				* {
 				  font-family: TH Niramit AS;
 				}
-
 				body {
 				  padding: 0 30px;
 				}
@@ -160,10 +166,10 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์กรมชลประทาน จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">811 ถ.สามเสน แขวงถนนนครไชยศรี เขตดุสิต กรุงเทพฯ 10300</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร. 0-2243-4797 โทรสาร 0-2243-5086</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.ridsaving.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูกาฬสินธุ์ จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">8/1 ถนนสนามบิน  ตำบลกาฬสินธุ์  อำเภอเมือง  จังหวัดกาฬสินธุ์ 46000</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร. โทร. 043-840-126</p>
+				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.kalasintsc.com</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -266,13 +272,24 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			</div>
 			<div style="display:flex;">
-			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเรียกเก็บเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
+			</div>
+			<div style="width:200px;margin-left: 550px;display:flex;">
+			<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
+			</div>
+			<div style="width:200px;margin-left: 770px;display:flex;">
+			<img src="../../resource/utility_icon/signature/payee.png" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 650px;margin-top:-40px;">
-			.........................................................
-			<p style="margin-left: 50px;">ผู้จัดการ</p></div>
+			
+			<div style="font-size: 18px;margin-left: 580px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 805px;margin-top:-90px;">ผู้รับเงิน</div>
+			
+			
 			';
+			
+			//<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 550px;">( นายปัญญา สุรินทร์ )</div>
+			//<div style="position:absolute; bottom:70px; font-size: 18px;margin-left: 773px;">( นางอนงนุช สิทธิชัย )</div>
 
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),

@@ -19,7 +19,7 @@ class library {
 		$data[8] = chr( ord( $data[8] ) & 0x3f | 0x80 );
 		return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
 	}
-	public function convertdate($date,$format="D m Y",$is_time=false,$not_space=false){
+	public function convertdate($date,$format="D m Y",$is_time=false){
 		if(isset($date)){
 			$date = preg_replace('|/|','-',$date);
 			$thaimonth = ["","มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฏาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
@@ -52,41 +52,21 @@ class library {
 							break;				
 					}
 				}else{
-					if($not_space){
-						switch($value_format){
-							case "D" :
-							case "d" : $dateConverted .= $datearray[2];
-								break;
-							case "M" : $dateConverted .= $thaimonth[$datearray[1]*1];
-								break;
-							case "m" : $dateConverted .= $thaishort[$datearray[1]*1];
-								break;
-							case "N" :
-							case "n" : $dateConverted .= $datearray[1];
-								break;
-							case "Y" : $dateConverted .= ($datearray[0]+543);
-								break;
-							case "y" : $dateConverted .= ($datearray[0]);
-								break;
-						}
-
-					}else{
-						switch($value_format){
-							case "D" :
-							case "d" : $dateConverted .= $separate.$datearray[2];
-								break;
-							case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
-								break;
-							case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
-								break;
-							case "N" :
-							case "n" : $dateConverted .= $separate.$datearray[1];
-								break;
-							case "Y" : $dateConverted .= $separate.($datearray[0]+543);
-								break;
-							case "y" : $dateConverted .= $separate.($datearray[0]);
-								break;
-						}
+					switch($value_format){
+						case "D" :
+						case "d" : $dateConverted .= $separate.$datearray[2];
+							break;
+						case "M" : $dateConverted .= $separate.$thaimonth[$datearray[1]*1];
+							break;
+						case "m" : $dateConverted .= $separate.$thaishort[$datearray[1]*1];
+							break;
+						case "N" :
+						case "n" : $dateConverted .= $separate.$datearray[1];
+							break;
+						case "Y" : $dateConverted .= $separate.($datearray[0]+543);
+							break;
+						case "y" : $dateConverted .= $separate.($datearray[0]);
+							break;
 					}
 				}
 			}
@@ -98,7 +78,6 @@ class library {
 			return '-';
 		}
 	}
-
 	public function count_duration($date,$format="ym"){
 		$date = preg_replace('|/|','-',$date);
 		$dateconverted = new \DateTime($date);
@@ -112,7 +91,6 @@ class library {
 			return $date_duration->days;			
 		}     
 	}
-	
 	public function formatcitizen($idcard,$separate=" "){
 		if(isset($idcard)){
 			$str1 = substr($idcard,0,1);
@@ -278,7 +256,7 @@ class library {
 				'allow_self_signed' => true
 			]
 		];
-		$mailFunction->Host = 'mx1.gensoft.co.th';
+		$mailFunction->Host = 'mail.gensoft.co.th';
 		$mailFunction->SMTPAuth = true;
 		$mailFunction->Username = $json_data["MAIL"];
 		$mailFunction->Password = $json_data["PASS_MAIL"];
@@ -611,7 +589,7 @@ class library {
 			return false;
 		}
 	}
-
+		
 	public function fetch_payloadJWT($token,$jwt_function,$secret_key){
 		return $jwt_function->getPayload($token, $secret_key);
 	}
@@ -726,11 +704,11 @@ class library {
 
 		return $text;
 	}
-	public function mb_str_pad($input,$pad_length="8",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
+	public function mb_str_pad($input,$pad_length="6",$pad_string="0",$pad_style=STR_PAD_LEFT,$encoding="UTF-8"){
 		return str_pad($input,strlen($input)-mb_strlen($input,$encoding)+$pad_length,$pad_string,$pad_style);
 	}
 	public function sendLineNotify($message){
-		/*$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
+		$json = file_get_contents(__DIR__.'/../config/config_constructor.json');
 		$json_data = json_decode($json,true);
 		$token = $json_data["LINE_NOTIFY"];
 		$headers = array();
@@ -746,7 +724,7 @@ class library {
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt( $ch,CURLOPT_POSTFIELDS, "message="." | ".$json_data["COOP_KEY"]." | ".$message);                                                                  
 																													 
-		curl_exec($ch);*/
+		curl_exec($ch);
 	}
 	public function truncateDecimal($amt,$precision){
 		$step = pow(10,$precision);
@@ -814,6 +792,19 @@ class library {
 				break;
 		}
 		return $amtRaw + floatval($roundFrac);
+	}
+	public function generate_token_access_resource($path,$jwt_function,$secret_key) {
+		$payload = array();
+		$payload["path"] = $path;
+		$payload["exp"] = time() + 900; //2592000;
+
+		return $jwt_function->customPayload($payload, $secret_key);
+	}
+	public function generate_jwt_token($data,$jwt_function,$secret_key) {
+		if (!array_key_exists('exp', $data)) {
+			$data["exp"] = time() + 900;
+		}
+		return $jwt_function->customPayload($data, $secret_key);
 	}
 }
 ?>

@@ -13,7 +13,7 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 	if($checkBillAvailable->rowCount() > 0){
 		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
 		if($rowCheckBill["member_no"] == $dataComing["member_no"]){
-			if($dataComing["tran_id"] == '202203211948451840'){
+			if($dataComing["tran_id"] == '202202231057045420'){
 				$arrayResult['RESULT'] = TRUE;
 				ob_flush();
 				echo json_encode($arrayResult);
@@ -22,32 +22,15 @@ if($lib->checkCompleteArgument(['amt_transfer','tran_id'],$dataComing)){
 			if($rowCheckBill["qrtransfer_amt"] == $dataComing["amt_transfer"]){
 				if($rowCheckBill["transfer_status"] == '0'){
 					if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
-						
-						$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
-															LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
-															WHERE gba.member_no = :member_no 
-															and gba.bindaccount_status = '1' and gba.bank_code = '999'");
-						$getPayAccFee->execute([':member_no' => $dataComing["member_no"]]);
-						$rowPayFee = $getPayAccFee->fetch(PDO::FETCH_ASSOC);
-						$balanceMin = $cal_dep->getWithdrawable($rowPayFee["account_payfee"]);
-						if($balanceMin < $rowPayFee["fee_deposit"]){
-							$arrayResult['RESPONSE_CODE'] = "WS0100";
-							$arrayResult['RESPONSE_MESSAGE'] = $checkSeqAmt["SEQUEST_DESC"];
-							$arrayResult['RESULT'] = FALSE;
-							ob_flush();
-							echo json_encode($arrayResult);
-							exit();
-						}
-						
 						$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
 															WHERE qrgenerate = :tran_id");
 						$getDetailTran->execute([':tran_id' => $dataComing["tran_id"]]);
 						while($rowDetail = $getDetailTran->fetch(PDO::FETCH_ASSOC)){
 							if($rowDetail["trans_code_qr"] == '01'){ //ฝากเงิน
 								$deptaccount_no = preg_replace('/-/','',$rowDetail["ref_account"]);
-								$checkSeqAmt = $cal_dep->getSequestAmt($deptaccount_no,'DTE');
+								$checkSeqAmt = $cal_dep->getSequestAmt($deptaccount_no,'DTX');
 								if($checkSeqAmt["CAN_DEPOSIT"]){
-									$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","999");
+									$arrRightDep = $cal_dep->depositCheckDepositRights($deptaccount_no,$rowDetail["qrtransferdt_amt"],"TransactionDeposit","006");
 									if($arrRightDep["RESULT"]){
 									}else{
 										$arrayResult['RESPONSE_CODE'] = $arrRightDep["RESPONSE_CODE"];

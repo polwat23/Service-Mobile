@@ -54,7 +54,7 @@ class CalculateShare {
 				':ref_docno' => $shslip_docno,
 				':ref_slipno' => $shslip_no,
 				':itemtype' => 'SPM',
-				':period' => $dataShare["LAST_PERIOD"],
+				':period' => $dataShare["LAST_PERIOD"] + 1,
 				':share_amt' => $amt_transfer / 10,
 				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
 				':moneytype_code' => 'TRN'
@@ -67,7 +67,7 @@ class CalculateShare {
 				':ref_docno' => $shslip_docno,
 				':ref_slipno' => $shslip_no,
 				':itemtype' => 'SPX',
-				':period' => $dataShare["LAST_PERIOD"],
+				':period' => $dataShare["LAST_PERIOD"] + 1,
 				':share_amt' => $amt_transfer / 10,
 				':sharebal' => $dataShare["SHARESTK_AMT"] + ($amt_transfer / 10),
 				':moneytype_code' => 'TRN'

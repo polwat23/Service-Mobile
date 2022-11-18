@@ -1,10 +1,10 @@
 {
 	"WS0001" : [{"th" : "ไม่สามารถยืนยันการเข้าใช้งานได้เพราะเวลาในเครื่องไม่ตรง กรุณาตรวจสอบเวลาในเครื่องของท่าน","en" : "Unauthenticated because the time in device not correct please check time in your device"}],
-	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หากบัญชีถูกล็อคต้องติดต่อสหกรณ์เท่านั้น กรุณา คลิก ลืมรหัสผ่านเพื่อทำตามขั้นตอนของระบบ","en" : "Invalid password please check password again if account was locked you must contact cooperative only please click forget password for step by step of system"}],
+	"WS0002" : [{"th" : "รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง หากบัญชีถูกล็อคต้องติดต่อ สสธท. เท่านั้น กรุณา คลิก ลืมรหัสผ่านเพื่อทำตามขั้นตอนของระบบ","en" : "Invalid password please check password again if account was locked you must contact CPCT only please click forget password for step by step of system"}],
 	"WS0003" : [{"th" : "ไม่พบข้อมูลผู้ใช้นี้ในระบบ กรุณาตรวจสอบเลขสมาชิก","en" : "Not found this user in system please check member no"}],
 	"WS0004" : [{"th" : "รหัสผ่านที่ท่านกรอกไม่ตรงกับรหัสผ่านเดิม","en" : "Password does not match"}],
 	"WS0005" : [{"th" : "ไม่พบบัญชีที่สามารถผูกได้ หากท่านต้องการผูกบัญชีกรุณาไปอนุญาตบัญชีที่สามารถทำธุรกรรมได้ที่หน้าจัดการบัญชีสหกรณ์","en" : "Not found account for bind if you want to bind account please allow deposit account in page of manage account allow"}],
-	"WS0006" : [{"th" : "ท่านไม่สามารถใช้งานเมนูนี้ได้ อาจจะเป็นเพราะสหกรณ์ปิดปรับปรุงระบบหรือสหกรณ์ได้ทำการจำกัดสิทธิ์ในการเข้าถึงเมนู","en" : "You not have permission for this menu because system maintenance or cooperative has restricted access this menu"}],
+	"WS0006" : [{"th" : "ท่านไม่สามารถใช้งานเมนูนี้ได้ อาจจะเป็นเพราะ สสธท. ปิดปรับปรุงระบบหรือ สสธท. ได้ทำการจำกัดสิทธิ์ในการเข้าถึงเมนู","en" : "You not have permission for this menu because system maintenance or CPCT has restricted access this menu"}],
 	"WS0007" : [{"th" : "คุณสามารถอัพโหลดรูปภาพได้เฉพาะนามสกุลไฟล์ JPG, JPEG, PNG","en" : "You can upload picture only files type JPG, JPEG, PNG"}],
 	"WS0008" : [{"th" : "ขนาดของไฟล์ใหญ่เกินไป ไฟล์ต้องมีขนาดไม่เกิน 1.5 MB","en" : "File size too big allow file size only  1.5 MB"}],
 	"WS0009" : [{"th" : "กรุณาเข้าสู่ระบบก่อนเข้าใช้งาน","en" : "Please login before usage"}],
@@ -17,7 +17,7 @@
 		"LOGOUT-7" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบจากอุปกรณ์อื่น","en" : "You were forced logout from other device"}],
 		"LOGOUT-8" : 
-			[{"th" : "ท่านถูกบังคับออกจากระบบจากสหกรณ์","en" : "You were forced logout from cooperative"}],
+			[{"th" : "ท่านถูกบังคับออกจากระบบจากสสธท.","en" : "You were forced logout from CPCT"}],
 		"LOGOUT-9" : 
 			[{"th" : "ท่านถูกบังคับออกจากระบบเนื่องจากมีการเปลี่ยนแปลงรหัสผ่าน","en" : "You were forced logout because password has been change"}],
 		"LOGOUT-10" : 
@@ -63,7 +63,7 @@
 	"WS0044" : [{"th" : "ไม่สามารถสร้างไฟล์ PDF ได้กรุณาลองใหม่อีกครั้งหรือติดต่อสหกรณ์","en" : "Cannot create report in type PDF please try again or contact cooperative"}],
 	"WS0045" : [{"th" : "ไม่สามารถโอนเข้าบัญชีเดียวกันได้ กรุณาเปลี่ยนบัญชีปลายทาง","en" : "Cannot fund transfer same account please change account"}],
 	"WS0047" : [{"th" : "ไม่พบบัญชีปลายทางที่ระบุ กรุณาตรวจสอบเลขบัญชีอีกครั้ง","en" : "Not found account that specify please check the account number again"}],
-	"WS0048" : [{"th" : "บัญชีของท่านถูกระงับการใช้งาน กรุณาติดต่อสหกรณ์เพื่อปลดล็อคบัญชี","en" : "Your account is withhold please contact cooperative for unlock account"}],
+	"WS0048" : [{"th" : "บัญชีของท่านถูกระงับการใช้งาน กรุณาติดต่อ สสธท. ฝ่ายทะเบียนและเทคโนโลยี 095-712-9740","en" : "Your account is withhold please contact IT of CPCT tel 095-712-9740 for unlock account"}],
 	"WS0049" : [{"th" : "ไม่พบข้อมูลอีเมลของท่านในฐานข้อมูล กรุณาติดต่อสหกรณ์เพื่อระบุอีเมล","en" : "Not found information your email please contact cooperative for specify email"}],
 	"WS0050" : [{"th" : "อีเมลของท่านไม่ตรงกับในระบบ กรุณาตรวจสอบอีเมลอีกครั้ง","en" : "Your email does not match system please check email again"}],
 	"WS0051" : [{"th" : "ไม่สามารถใช้งานแอปพลิเคชันได้เนื่องจากท่านพ้นสภาพการเป็นสมาชิกแล้ว","en" : "Cannot use application because membership has terminated"}],

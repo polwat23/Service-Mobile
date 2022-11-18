@@ -5,18 +5,22 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ApproveWithdrawal')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGrp = array();
-		$getUseScoreInApv = $conmysql->prepare("SELECT APV_DOCNO,AMOUNT,DEPTACCOUNT_NO,FULL_NAME,STATUS,UPDATE_DATE
-												FROM gcapvdept WHERE status <> '8'");
-		$getUseScoreInApv->execute();
+		$getUseScoreInApv = $conoracle->prepare("SELECT dpa.apv_docno,dpa.remark,dpa.dept_amt,dpa.approve_date,dpa.deptaccount_no,amu.full_name 
+																FROM dpdeptapprovedet dad LEFT JOIN amsecusers amu ON TRIM(dad.apv_id) = amu.user_name 
+																LEFT JOIN dpdeptapprove dpa ON dad.APV_DOCNO = dpa.APV_DOCNO
+																WHERE amu.member_no = :member_no and dpa.apv_status = 1 and dpa.approve_date BETWEEN (SYSDATE - 8) and SYSDATE");
+		$getUseScoreInApv->execute([
+			':member_no' => $member_no
+		]);
 		while($rowUserScoreInApv = $getUseScoreInApv->fetch(PDO::FETCH_ASSOC)){
 			$arrayList = array();
 			$arrayList["APV_DOCNO"] = $rowUserScoreInApv["APV_DOCNO"];
-			$arrayList["APV_DESC"] = "ทดสอบอนุมัติถอนเงินฝาก";
-			$arrayList["DEPT_AMT"] = number_format($rowUserScoreInApv["AMOUNT"],2);
+			$arrayList["APV_DESC"] = $rowUserScoreInApv["REMARK"];
+			$arrayList["DEPT_AMT"] = number_format($rowUserScoreInApv["DEPT_AMT"],2);
 			$arrayList["REQ_NAME"] = $rowUserScoreInApv["FULL_NAME"];
-			$arrayList["DEPTACCOUNT_NO"] = $lib->formataccount($rowUserScoreInApv["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-			$arrayList["APV_DATE"] = isset($rowUserScoreInApv["UPDATE_DATE"]) ? $lib->convertdate($rowUserScoreInApv["UPDATE_DATE"],'d m Y') : null;
-			$arrayList["IS_REJECT"] = $rowUserScoreInApv["STATUS"] == '9' ? TRUE : FALSE;
+			$arrayList["DEPTACCOUNT_NO"] = $lib->formataccount($rowUserScoreInApv["DEPTACCOUNT_NO"],'-');
+			$arrayList["APV_DATE"] = $lib->convertdate($rowUserScoreInApv["APPROVE_DATE"],'d m Y');
+			$arrayList["IS_REJECT"] = FALSE;
 			$arrGrp[] = $arrayList;
 		}
 		$arrayResult['LIST_APV'] = $arrGrp;
@@ -28,7 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(403);
 		require_once('../../include/exit_footer.php');
-		
+	
 	}
 }else{
 	$filename = basename(__FILE__, '.php');
@@ -46,6 +50,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
 	require_once('../../include/exit_footer.php');
-	
+
 }
 ?>

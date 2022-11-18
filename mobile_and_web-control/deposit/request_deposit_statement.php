@@ -107,7 +107,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	//style table
 	  $html = '<style>
 
-		  @font-face {
+		    @font-face {
 			  font-family: TH Niramit AS;
 			  src: url(../../resource/fonts/TH Niramit AS.ttf);
 			}
@@ -119,6 +119,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			* {
 			  font-family: TH Niramit AS;
 			}
+
 
 		  body {
 			margin-top: 3.6cm;
@@ -139,11 +140,11 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 		  }
 		  th {
 			text-align:center;
-			color:white;
+			color:black;
 			padding: 5px;
 			font-size: 20px;
 			font-weight:bold;
-			background-color:#0C6DBF;
+			background-color:#5f9ea0;
 			border: 0.5px #DDDDDD solid;	
 		  }
 		  td{
@@ -183,6 +184,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			font-size: 18px;
 		}
 		  </style>
+
 		';
 	//head table
 	$html .='
@@ -191,10 +193,10 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:20px; font-weight:bold;">
-					สหกรณ์ออมทรัพย์กรมชลประทาน จำกัด
+					สหกรณ์ออมทรัพย์ครูกาฬสินธุ์ จำกัด
 			   </div>
-			   <div style=" position: fixed;top:25px; left: 60px;font-size:16px">
-					Royal Irrigation Department Savings and Credit Cooperative Limited.
+			   <div style=" position: fixed;top:25px; left: 60px;font-size:18px">
+					KALASIN TEACHER’S SAVING AND CREDIT COOPERATIVE, LIMITED
 			   </div>
 			   </div>
 				<div class="frame-info-user">
@@ -220,7 +222,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
+		  <th style="text-align:center;width:70px;">วัน เดือน ปี</th>
 		  <th>รายการ</th>
 		  <th>ฝาก</th>
 		  <th>ถอน</th>
@@ -293,6 +295,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
+
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
@@ -300,11 +303,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	]);
 
 	$dompdf->set_paper('A4');
+
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
 	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
-	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
+	$dompdf->getCanvas()->get_cpdf()->setEncryption("password");
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){
 		$arrayPDF["RESULT"] = TRUE;

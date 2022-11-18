@@ -1,8 +1,8 @@
 {
 	"DEV@MODE" : "00000048",
 	"SALEMODE" : "00000048",
-	"ETNMODE1" : "00000048",
-	"ETNMODE2" : "00021915",
-	"ETNMODE3" : "00000927",
-	"ETNMODE4" : "00000048"
+	"etnmode1" : "189086",
+	"etnmode2" : "000008",
+	"etnmode3" : "001176",
+	"etnmode4" : "232134"
 }

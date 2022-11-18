@@ -53,13 +53,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 					$arrContract = array();
 					$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
-					$interest = $cal_loan->calculateIntAPI($contract_no);
+					$interest = $cal_loan->calculateInterest($contract_no);
 					$arrContract["ACCOUNT_NO"] = $contract_no;
 					$arrContract["ACCOUNT_NO_HIDE"] = $contract_no;
 					$arrContract["LOAN_BALANCE"] = number_format($rowContract["LOAN_BALANCE"],2);
 					$arrContract["PERIOD"] = $rowContract["LAST_PERIOD"].' / '.$rowContract["PERIOD"];
 					$arrContract['LOAN_TYPE'] = $rowContract["LOAN_TYPE"];
-					$arrContract['INT_BALANCE'] = number_format($interest["INT_PAYMENT"],2);
+					$arrContract['INT_BALANCE'] = number_format($interest,2);
 					$arrContract["TRANS_CODE"] = $rowTypeQR["trans_code_qr"];
 					$arrGrpAcc[] = $arrContract;
 				}

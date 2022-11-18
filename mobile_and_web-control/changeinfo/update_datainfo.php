@@ -96,6 +96,68 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 			}
 		}
+		if(isset($dataComing["address"]) && $dataComing["address"] != ""){
+			if($arrConstInfo["address"] == '1'){
+				$getAddr = $conoracle->prepare("SELECT 
+													MB.CONTACT_ADDRESS||' '||(select p.district_desc from mbucfdistrict p where p.district_code = mb.other_ampher_code)||' '||(select p.province_desc from mbucfprovince p where p.province_code = mb.other_province_code)||' '||MB.other_postcode as OTHER_CONTACT_ADDRESS
+												FROM WCDEPTMASTER MB
+													WHERE  trim(MB.DEPTACCOUNT_NO) = :member_no");
+				$getAddr->execute([':member_no' => $member_no]);
+				$rowAddr = $getAddr->fetch(PDO::FETCH_ASSOC);
+				$getTambol = $conoracle->prepare("select p.TAMBOL_DESC from mbucftambol p where p.tambol_code = :amphur");
+				$getTambol->execute([':amphur' => $dataComing["address"]["tambol_code"]]);
+				$rowTambol = $getTambol->fetch(PDO::FETCH_ASSOC);
+				$arrd_no = $dataComing["address"]["addr_no"]." หมู่ ".($dataComing["address"]["addr_moo"] ?? '-')." หมู่บ้าน ".($dataComing["address"]["addr_village"] ?? '-')." ซอย ".
+					($dataComing["address"]["addr_soi"] ?? '-')." ถนน ".($dataComing["address"]["addr_road"] ?? '-')." ตำบล/แขวง ".($rowTambol["TAMBOL_DESC"] ?? '-');
+				$updateDataAddress = $conoracle->prepare("UPDATE WCDEPTMASTER SET 
+															CONTACT_ADDRESS = :addr_no,
+															other_ampher_code = :district_code,
+															other_province_code = :province_code,
+															postcode = :postcode
+															WHERE trim(DEPTACCOUNT_NO) = :member_no");
+				if($updateDataAddress->execute([
+					':addr_no' => $arrd_no,
+					':district_code' => $dataComing["address"]["district_code"],
+					':province_code' => $dataComing["address"]["province_code"],
+					':postcode' => $dataComing["address"]["addr_postcode"],
+					':member_no' => $member_no
+				])){
+					$arrayResult["RESULT_ADDRESS"] = TRUE;
+				}else{
+					$filename = basename(__FILE__, '.php');
+					$logStruc = [
+						":error_menu" => $filename,
+						":error_code" => "WS1003",
+						":error_desc" => "แก้ไขเบอร์โทรไม่ได้เพราะ update ลงตาราง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateDataAddress->queryString."\n"."Param => ". json_encode([
+							':addr_no' => $arrd_no,
+							':district_code' => $dataComing["address"]["district_code"],
+							':province_code' => $dataComing["address"]["province_code"],
+							':member_no' => $member_no
+						]),
+						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+					];
+					$log->writeLog('errorusage',$logStruc);
+					$message_error = "แก้ไขเบอร์โทรไม่ได้เพราะ update ลง gcmemberaccount ไม่ได้"."\n"."Query => ".$updateDataAddress->queryString."\n"."Param => ".json_encode([
+						':addr_no' => $arrd_no,
+						':district_code' => $dataComing["address"]["district_code"],
+						':province_code' => $dataComing["address"]["province_code"],
+						':member_no' => $member_no
+					]);
+					$lib->sendLineNotify($message_error);
+					$arrayResult["RESULT_ADDRESS"] = FALSE;
+					$arrayResult["RESULT"] = FALSE;
+					$conoracle->rollback();
+				}
+			}else{
+			}
+		}
+		if(isset($arrayResult["RESULT_ADDRESS"]) && !$arrayResult["RESULT_ADDRESS"]){
+			$arrayResult['RESPONSE_CODE'] = "WS1039";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		
+		}
 		if(isset($arrayResult["RESULT_EMAIL"]) && !$arrayResult["RESULT_EMAIL"]){
 			$arrayResult['RESPONSE_CODE'] = "WS1010";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
