@@ -59,10 +59,10 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 					
-					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETX',$lib);
 					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
 					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+					$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 				}
 				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
@@ -99,6 +99,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							$have_dep = TRUE;
 							$lastSeq_no = $depositMoney["MAX_SEQNO"];
 							$dataAccFee["PRNCBAL"] = $dataAccFee["PRNCBAL"] + $rowDetail["qrtransferdt_amt"];
+							$dataAccFee["WITHDRAWABLE_AMT"] = $dataAccFee["WITHDRAWABLE_AMT"] + $rowDetail["qrtransferdt_amt"];
 							$maxno_deptfee = $depositMoney["MAX_SEQNO"];
 						}else{
 							

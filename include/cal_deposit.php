@@ -373,10 +373,10 @@ class CalculateDep {
 			}else if($dataConst["DEPTTYPE_CODE"] == '05' || $dataConst["DEPTTYPE_CODE"] == '04'){
 				if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
 					if($amt_transfer < 1000){
-					$arrayResult['RESPONSE_CODE'] = "WS0056";
-					$arrayResult['MINWITD_AMT'] = 1000;
-					$arrayResult['RESULT'] = FALSE;
-					return $arrayResult;
+						$arrayResult['RESPONSE_CODE'] = "WS0056";
+						$arrayResult['MINWITD_AMT'] = 1000;
+						$arrayResult['RESULT'] = FALSE;
+						return $arrayResult;
 					}
 					$getSummaryTx = $this->conora->prepare("SELECT SUM(dpm.deptitem_amt) as SUM_AMT FROM dpdeptstatement dpm 
 															LEFT JOIN dpucfdeptitemtype dti ON dpm.deptitemtype_code = dti.deptitemtype_code
@@ -385,8 +385,7 @@ class CalculateDep {
 															ORDER BY dpm.seq_no desc");
 					$getSummaryTx->execute([':deptaccount_no' => $deptaccount_no]);
 					$rowSum = $getSummaryTx->fetch(\PDO::FETCH_ASSOC);
-					file_put_contents('SUM_AMTamt_transfer.txt', json_encode($rowSum["SUM_AMT"],JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
-					if(($rowSum["SUM_AMT"] + $amt_transfer) > 50000){
+					if((($rowSum["SUM_AMT"] ?? 0) + $amt_transfer) > 50000){
 						$arrayResult['RESPONSE_CODE'] = "WS0102";
 						$arrayResult['RESULT'] = FALSE;
 						return $arrayResult;

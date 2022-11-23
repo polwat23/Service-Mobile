@@ -71,21 +71,20 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$arrSlipDPno = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_no = $arrSlipDPno["SLIP_NO"];
 		$lastdocument_no = $arrSlipDPno["QUERY"]["LAST_DOCUMENTNO"] + 1;
-
-		$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
+		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
+		$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETX',$lib);
 		$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
 		if($dataComing["penalty_amt"] > 0){
 			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 2;
 		}else{
 			$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
 		}
-
-		$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+		$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 		$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 
 		$getlastseq_no = $cal_dep->getLastSeqNo($coop_account_no);
-		$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
-		$updateDocuControl->execute([':lastdocument_no' => $lastdocument_no]);
+		
 		$constFromAcc = $cal_dep->getConstantAcc($coop_account_no);
 		$conoracle->beginTransaction();	
 		$wtdResult = $cal_dep->WithdrawMoneyInside($conoracle,$coop_account_no,$vccAccID,$rowDataWithdraw["itemtype_wtd"],$dataComing["amt_transfer"],
