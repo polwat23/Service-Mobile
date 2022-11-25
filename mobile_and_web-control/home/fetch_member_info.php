@@ -41,24 +41,92 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MB.DIE_DATE as DIE_DATE,
 													MB.MANAGE_CORPSE_NAME as MANAGE_CORPSE_NAME,
 													MB.CONTACT_ADDRESS||' อำเภอ/เขต '||(select p.district_desc from mbucfdistrict p where p.district_code = mb.other_ampher_code)||' จังหวัด '||(select p.province_desc from mbucfprovince p where p.province_code = mb.other_province_code)||' '||MB.other_postcode as OTHER_CONTACT_ADDRESS,
-													trim(MB.MEMBER_NO) as MEMBER_NO_COOP,
-													trim(FMT.FUNDACCOUNT_NO) as FUND_NO,
-													FMT.FUNDOPEN_DATE AS FUND_DATE,
-													CASE FMT.FUNDCLOSE_STATUS WHEN 0 THEN 'ปกติ' WHEN -9 THEN 'ยกเลิก' ELSE RES_F.RESIGNCAUSE_DESC  END as FUND_STATUS,
-													trim(FR.ROUND_REGIS) AS FUND_ROUND
+													trim(MB.MEMBER_NO) as MEMBER_NO_COOP
 												FROM WCDEPTMASTER MB
 													JOIN CMUCFCOOPBRANCH MBG1 ON ( MB.COOP_ID = MBG1.COOP_ID ) 
 													LEFT JOIN WCMEMBERTYPE MBT ON ( MB.WFTYPE_CODE = MBT.WFTYPE_CODE  )  
-													LEFT JOIN WCUCFRESIGNCAUSE RES ON ( MB.RESIGNCAUSE_CODE = RES.RESIGNCAUSE_CODE )
-													LEFT JOIN WCFUNDMASTER FMT ON (FMT.DEPTACCOUNT_NO = MB.DEPTACCOUNT_NO AND FMT.COOP_ID = MB.COOP_ID
-													AND  (FMT.FUNDCLOSE_STATUS = 0 or FMT.RESIGNCAUSE_CODE = '02' ))
-													LEFT JOIN WCUCFFUNDROUND FR on (FR.fundopen_date = FMT.fundopen_date)
-													LEFT JOIN  MBUCFRESIGNCAUSE RES_F on (FMT.resigncause_code = RES_F.resigncause_code)
-													WHERE  ( MBG1.COOP_CONTROL ='060000'  )  
+													WHERE  ( MBG1.COOP_CONTROL ='060000')  
 														AND MB.DEPTCLOSE_STATUS <> -9
 														AND trim(MB.DEPTACCOUNT_NO) = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
+			
+			$fundInfo = $conoracle->prepare("SELECT 
+												WF.FUNDTYPE_CODE AS FUNDTYPE_CODE,
+												trim(WF.FUNDACCOUNT_NO) AS FUNDACCOUNT_NO,
+												WF.FUNDOPEN_DATE AS FUNDOPEN_DATE,
+												WF.FUNDTYPE_CODE AS FUNDTYPE_CODE,
+												WF.FUNDOPEN_DATE AS FUND_DATE,
+												trim((SELECT * FROM (select ROUND_REGIS from WCUCFFUNDROUND where fundopen_date = WF.fundopen_date ORDER BY ROUND_REGIS DESC) WHERE ROWNUM <= 1)) AS FUND_ROUND,
+												CASE WF.FUNDCLOSE_STATUS WHEN 0 THEN 'ปกติ' WHEN -9 THEN 'ยกเลิก' ELSE RES_F.RESIGNCAUSE_DESC  END as FUND_STATUS
+												FROM WCFUNDMASTER WF
+												LEFT JOIN  MBUCFRESIGNCAUSE RES_F on (WF.RESIGNCAUSE_CODE = RES_F.RESIGNCAUSE_CODE)
+												WHERE 
+												WF.FUNDTYPE_CODE IN ('001', '002')
+												AND trim(WF.DEPTACCOUNT_NO) = :member_no");
+			$fundInfo->execute([':member_no' => $member_no]);
+			
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			
+			$FUND_NO = "";
+			$FUND_DATE = "";
+			$FUND_STATUS = "";
+			$FUND_ROUND = "";
+			while($rowFund = $fundInfo->fetch(PDO::FETCH_ASSOC)){
+				if ($rowFund["FUNDTYPE_CODE"] == '001') {
+					if (strlen($FUND_NO) > 0) {
+						$FUND_NO.= "\n";
+					}
+					$FUND_NO.= $rowFund["FUNDACCOUNT_NO"];
+					$FUND_NO.=' (กองทุนล้านที่ 2)';
+					
+					if (strlen($FUND_DATE) > 0) {
+						$FUND_DATE.= "\n";
+					}
+					$FUND_DATE.= $rowFund["FUND_DATE"] ? $lib->convertdate($rowFund["FUND_DATE"],"D m Y") : "-";
+					$FUND_DATE.=' (กองทุนล้านที่ 2)';
+					
+					if (strlen($FUND_STATUS) > 0) {
+						$FUND_STATUS.= "\n";
+					}
+					$FUND_STATUS.= $rowFund["FUND_STATUS"];
+					$FUND_STATUS.=' (กองทุนล้านที่ 2)';
+					
+					if (strlen($FUND_ROUND) > 0) {
+						$FUND_ROUND.= "\n";
+					}
+					$FUND_ROUND.= $rowFund["FUND_ROUND"];
+					$FUND_ROUND.=' (กองทุนล้านที่ 2)';
+				} else {
+					if (strlen($FUND_NO) > 0) {
+						$FUND_NO.= "\n";
+					}
+					$FUND_NO.= $rowFund["FUNDACCOUNT_NO"];
+					$FUND_NO.=' (กองทุนล้านที่ 3)';
+					
+					if (strlen($FUND_DATE) > 0) {
+						$FUND_DATE.= "\n";
+					}
+					$FUND_DATE.= $rowFund["FUND_DATE"] ? $lib->convertdate($rowFund["FUND_DATE"],"D m Y") : "-";
+					$FUND_DATE.=' (กองทุนล้านที่ 3)';
+					
+					if (strlen($FUND_STATUS) > 0) {
+						$FUND_STATUS.= "\n";
+					}
+					$FUND_STATUS.= $rowFund["FUND_STATUS"];
+					$FUND_STATUS.=' (กองทุนล้านที่ 3)';
+					
+					if (strlen($FUND_ROUND) > 0) {
+						$FUND_ROUND.= "\n";
+					}
+					$FUND_ROUND.= $rowFund["FUND_ROUND"];
+					$FUND_ROUND.=' (กองทุนล้านที่ 3)';
+				}
+			}
+			$arrayResult["FUND_NO"] = $FUND_NO;
+			$arrayResult["FUND_DATE"] = $FUND_DATE;
+			$arrayResult["FUND_STATUS"] = $FUND_STATUS;
+			$arrayResult["FUND_ROUND"] = $FUND_ROUND;
+			
 			/*
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
@@ -115,11 +183,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayResult["MATE_NAME"] = $rowMember["MATE_NAME"];
 			$arrayResult["DIE_DATE"] = $rowMember["DIE_DATE"];
 			$arrayResult["MANAGE_CORPSE_NAME"] = $rowMember["MANAGE_CORPSE_NAME"];
-			$arrayResult["FUND_NO"] = $rowMember["FUND_NO"];
-			$arrayResult["FUND_DATE"] = $rowMember["FUND_DATE"] ? $lib->convertdate($rowMember["FUND_DATE"],"D m Y") : null;
-			$arrayResult["FUND_DATE_COUNT"] = $lib->count_duration($rowMember["FUND_DATE"],"ym");
-			$arrayResult["FUND_STATUS"] = $rowMember["FUND_STATUS"];
-			$arrayResult["FUND_ROUND"] = $rowMember["FUND_ROUND"];
 			$arrayResult["COORDINATION_CENTER"] = $rowMember["COORDINATION_CENTER"];
 			$arrayResult["MEMBER_NO_COOP"] = $rowMember["MEMBER_NO_COOP"];
 			$arrayResult["FULL_ADDRESS_CURR"] = $rowMember["OTHER_CONTACT_ADDRESS"];
