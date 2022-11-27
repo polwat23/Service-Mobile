@@ -369,14 +369,16 @@ class CalculateDep {
 					$arrayResult['RESULT'] = FALSE;
 					return $arrayResult;
 				}
-				
-			}else if($dataConst["DEPTTYPE_CODE"] == '05' || $dataConst["DEPTTYPE_CODE"] == '04'){
+			}
+			if($dataConst["DEPTTYPE_CODE"] == '05' || $dataConst["DEPTTYPE_CODE"] == '04'){
 				if($menu_component == 'TransactionDeposit' || $menu_component == 'TransactionWithdrawDeposit'){
-					if($amt_transfer < 1000){
-						$arrayResult['RESPONSE_CODE'] = "WS0056";
-						$arrayResult['MINWITD_AMT'] = 1000;
-						$arrayResult['RESULT'] = FALSE;
-						return $arrayResult;
+					if($dataConst["DEPTTYPE_CODE"] == '05'){
+						if($amt_transfer < 1000){
+							$arrayResult['RESPONSE_CODE'] = "WS0056";
+							$arrayResult['MINWITD_AMT'] = 1000;
+							$arrayResult['RESULT'] = FALSE;
+							return $arrayResult;
+						}
 					}
 					$getSummaryTx = $this->conora->prepare("SELECT SUM(dpm.deptitem_amt) as SUM_AMT FROM dpdeptstatement dpm 
 															LEFT JOIN dpucfdeptitemtype dti ON dpm.deptitemtype_code = dti.deptitemtype_code
@@ -384,7 +386,7 @@ class CalculateDep {
 															and TO_CHAR(dpm.operate_date,'YYYYMM') = TO_CHAR(SYSDATE,'YYYYMM')
 															ORDER BY dpm.seq_no desc");
 					$getSummaryTx->execute([':deptaccount_no' => $deptaccount_no]);
-					$rowSum = $getSummaryTx->fetch(\PDO::FETCH_ASSOC);
+					$rowSum = $getSummaryTx->fetch(\PDO::FETCH_ASSOC);				
 					if((($rowSum["SUM_AMT"] ?? 0) + $amt_transfer) > 50000){
 						$arrayResult['RESPONSE_CODE'] = "WS0102";
 						$arrayResult['RESULT'] = FALSE;
