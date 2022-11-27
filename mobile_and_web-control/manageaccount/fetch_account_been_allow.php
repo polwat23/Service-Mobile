@@ -41,8 +41,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT"] = $lib->formataccount($rowAccBeenAllow["deptaccount_no"],$func->getConstant('dep_format'));
 					$arrAccBeenAllow["DEPTACCOUNT_NO_FORMAT_HIDE"] = $lib->formataccount_hidden($rowAccBeenAllow["deptaccount_no"],$func->getConstant('hidden_dep'));
 					$arrAccBeenAllow["STATUS_ALLOW"] = $rowAccBeenAllow["is_use"];
-
-					$arrGroupAccAllow[] = $arrAccBeenAllow;
+					if($rowAccBeenAllow["deptaccount_no"] == '0501003982' || $rowAccBeenAllow["deptaccount_no"] == '0501006775' || $rowAccBeenAllow["deptaccount_no"] == '0501005212' || $rowAccBeenAllow["deptaccount_no"] == '0501003364' || 
+					$rowAccBeenAllow["deptaccount_no"] == '0501004575' || $rowAccBeenAllow["deptaccount_no"] == '0501006183' || $rowAccBeenAllow["deptaccount_no"] == '0501005991' || $rowAccBeenAllow["deptaccount_no"] == '0501006315' || 
+					$rowAccBeenAllow["deptaccount_no"] == '0501006627' || $rowAccBeenAllow["deptaccount_no"] == '0501007050' || $rowAccBeenAllow["deptaccount_no"] == '0501007156' || $rowAccBeenAllow["deptaccount_no"] == '0501007167' || 
+					$rowAccBeenAllow["deptaccount_no"] == '0501007244' || $rowAccBeenAllow["deptaccount_no"] == '0501007245' || $rowAccBeenAllow["deptaccount_no"] == '0501007255' || $rowAccBeenAllow["deptaccount_no"] == '0501007246' || 
+					$rowAccBeenAllow["deptaccount_no"] == '0501007228' || $rowAccBeenAllow["deptaccount_no"] == '0501007243') {
+						
+					}else{
+						$arrGroupAccAllow[] = $arrAccBeenAllow;
+					}
 				}
 			}
 			$arrayResult['ACCOUNT_ALLOW'] = $arrGroupAccAllow;

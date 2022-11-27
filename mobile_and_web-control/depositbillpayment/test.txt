@@ -1,1 +1,0 @@
-["HY000",1,"OCIStmtExecute: ORA-00001: unique constraint (ISCOTEST.SYS_C00268753) violated\n (ext\\pdo_oci\\oci_statement.c:157)"]

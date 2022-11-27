@@ -42,11 +42,8 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
 				$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
 				$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
-				$getPayAccFee = $conmysql->prepare("SELECT gba.account_payfee,cs.fee_deposit FROM gcbindaccount gba 
-													LEFT JOIN csbankdisplay cs ON gba.bank_code = cs.bank_code
-													WHERE gba.member_no = :member_no 
-													and gba.bindaccount_status = '1' and gba.bank_code = '999'");
-				$getPayAccFee->execute([':member_no' => $payload["member_no"]]);
+				$getPayAccFee = $conmysql->prepare("SELECT fee_deposit FROM csbankdisplay WHERE bank_code = '999'");
+				$getPayAccFee->execute();
 				$rowPayFee = $getPayAccFee->fetch(PDO::FETCH_ASSOC);
 				$amt_transferLon = $dataComing["amt_transfer"];
 				$vccAccID = $func->getConstant('map_account_id_ktb');
@@ -62,10 +59,10 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
 					
-					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETXFEE',$lib);
+					$arrSlipDPnoFee = $cal_dep->generateDocNo('ONLINETX',$lib);
 					$deptslip_noFee = $arrSlipDPnoFee["SLIP_NO"];
 					$lastdocument_noFee = $arrSlipDPnoFee["QUERY"]["LAST_DOCUMENTNO"] + 1;
-					$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETXFEE'");
+					$updateDocuControlFee = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
 					$updateDocuControlFee->execute([':lastdocument_no' => $lastdocument_noFee]);
 				}
 				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
@@ -101,13 +98,11 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 							$deptslip = $arrDpSlip[$rowDetail["ref_account"]];
 							$have_dep = TRUE;
 							$lastSeq_no = $depositMoney["MAX_SEQNO"];
-							if($rowPayFee["account_payfee"] == $deptaccount_no){
-								$dataAccFee["PRNCBAL"] = $dataAccFee["PRNCBAL"] + $rowDetail["qrtransferdt_amt"];
-								$maxno_deptfee = $depositMoney["MAX_SEQNO"];
-							}else{
-								
-							}
+							$dataAccFee["PRNCBAL"] = $dataAccFee["PRNCBAL"] + $rowDetail["qrtransferdt_amt"];
+							$dataAccFee["WITHDRAWABLE_AMT"] = $dataAccFee["WITHDRAWABLE_AMT"] + $rowDetail["qrtransferdt_amt"];
+							$maxno_deptfee = $depositMoney["MAX_SEQNO"];
 						}else{
+							
 							$conoracle->rollback();
 							$conmysql->rollback();
 							$arrayResult['RESPONSE_CODE'] = $depositMoney["RESPONSE_CODE"];
