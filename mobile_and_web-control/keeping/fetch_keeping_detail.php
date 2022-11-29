@@ -86,9 +86,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $lib->formataccount($rowDetail["PAY_ACCOUNT"],$func->getConstant('dep_format'));
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขบัญชี';
-			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
+			}else if($rowDetail["TYPE_GROUP"] == "MRT"){
+				$arrDetail["TYPE_DESC"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
-				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+				$arrDetail["PAY_ACCOUNT_LABEL"] = $rowDetail["TYPE_DESC"];
 			}
 			if($rowDetail["ITEM_BALANCE"] > 0){
 				$arrDetail["ITEM_BALANCE"] = number_format($rowDetail["ITEM_BALANCE"],2);

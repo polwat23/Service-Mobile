@@ -90,12 +90,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			]);
 		}
 		$arrGroupDetail = array();
+		$intinPeriod = 0;
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 			if($rowDetail["TYPE_GROUP"] == 'SHR'){
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
 			}else if($rowDetail["TYPE_GROUP"] == 'LON'){
+				$intinPeriod += $rowDetail["INT_BALANCE"];
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'เลขสัญญา';
 				$arrDetail["PERIOD"] = $rowDetail["PERIOD"];
@@ -112,6 +114,9 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			}else if($rowDetail["TYPE_GROUP"] == "OTH"){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
 				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
+			}else if($rowDetail["TYPE_GROUP"] == "MRT"){
+				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
+				$arrDetail["PAY_ACCOUNT_LABEL"] = 'จ่าย';
 			}
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["ITEM_PAYMENT"] = number_format($rowDetail["ADJUST_ITEMAMT"],2);
@@ -126,12 +131,12 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			$arrGroupDetail[] = $arrDetail;
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
-																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
-																kpd.KEEPING_STATUS,
-																NVL(kpd.INTEREST_ACCUM,0) as INTEREST_ACCUM
-																FROM kpmastreceive kpd
-																WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
+														kpd.RECEIPT_NO,
+														kpd.OPERATE_DATE,
+														kpd.KEEPING_STATUS,
+														NVL(kpd.INTEREST_ACCUM,0) as INTEREST_ACCUM
+														FROM kpmastreceive kpd
+												WHERE kpd.member_no = :member_no and kpd.recv_period = :recv_period");
 		$getDetailKPHeader->execute([
 			':member_no' => $member_no,
 			':recv_period' => $dataComing["recv_period"]
@@ -142,15 +147,20 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["member_no"] = $payload["member_no"];
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
-		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"],2);
+		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"]+$intinPeriod,2);
 		$getDataConstant = $conoracle->prepare("SELECT MANAGER,OFFICE_FINANCE FROM cmcoopconstant");
 		$getDataConstant->execute();
 		$rowDataConstant = $getDataConstant->fetch(PDO::FETCH_ASSOC);
 		$header["manager"] = $rowDataConstant["MANAGER"];
 		$header["finance"] = $rowDataConstant["OFFICE_FINANCE"];
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
-		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+		if($arrayPDF["RESULT"]){			
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

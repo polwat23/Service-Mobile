@@ -1,10 +1,12 @@
 {
 	"NAME_APP" : "SPT Saving Connect",
 	"COOP_KEY" : "spt",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=spt",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=spt",
 	"COOP_ID" : "052001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect/control",
 	"APP_ID" : "com.sptsaving.mobile",
-	"URL_SERVICE" : "https://mobilecore.gensoft.co.th/SPTSAVING/",
+	"URL_SERVICE" : "https://proxy.thaicoop.co/SPTSAVING/",
 	"URL_CORE_COOP" : "http://192.168.10.234/CORE/GCOOP/WcfService125/",
 	"URL_CORE_SMS" : "http://192.168.10.251:8081/websms/smsService.php",
 	"WS_STRC_DB" : "Data Source=192.168.10.235:1521/gcoop;Persist Security Info=True;User ID=iscokan;Password=iscokan;Unicode=True;coop_id=052001;coop_control=052001;",
