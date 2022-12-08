@@ -31,8 +31,9 @@ class libraryLine {
 		}
 	}
 	public function getLineConstant($constant) {
-		$getData = $this->con->prepare("SELECT constant_value FROM lbconstant WHERE constant_name = :theme_color");
-		$getData->execute([':theme_color' => $constant]);
+		$getData = $this->con->prepare("SELECT constant_value FROM lbconstant WHERE constant_name = :constant");
+		
+		$getData->execute([':constant' => $constant]);
 		if($getData->rowCount() > 0){
 			$rowLimit = $getData->fetch(\PDO::FETCH_ASSOC);
 			return $rowLimit["constant_value"];
@@ -40,12 +41,39 @@ class libraryLine {
 			return false;
 		}
 	}
-
-
+	public function getLineIdNotify($member_no=null) {
+		$getData = $this->con->prepare("SELECT line_token FROM lbnotify WHERE member_no = :member_no AND is_notify = '1'");
+		
+		$getData->execute([':member_no' => $member_no]);
+		if($getData->rowCount() > 0){
+			$rowLimit = $getData->fetch(\PDO::FETCH_ASSOC);
+			return $rowLimit["line_token"];
+		}else{
+			return false;
+		}
+	}
+	
+	public function checkNotify($member_no=null,$detail=null,$ref=null) {
+		$chkNotify = $this->con->prepare("SELECT * FROM lbhistory WHERE his_detail = :detail AND member_no = :member_no AND ref = :ref");
+		$chkNotify->execute([
+			":detail" => $detail,
+			":member_no" => $member_no,
+			":ref" => $ref
+		]);
+		$rowChkNotify = $chkNotify->fetch(\PDO::FETCH_ASSOC);
+		if(sizeof($rowChkNotify) == 0 || empty($rowChkNotify)){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+	
 	public function prepareMessageText($message){
 		$arrResponse[0]["type"] = "text";
 		$arrResponse[0]["label"] = $message;
 		$arrResponse[0]["text"] = $message;
+		//$arrResponse[0]["sender"]["name"] = 'Bot';
+		//$arrResponse[0]["sender"]["iconUrl"] = 'https://line.me/conyprof';
 		return $arrResponse;
 	}
 	public function prepareFlexMessage($altText,$body){
@@ -123,6 +151,29 @@ class libraryLine {
 			}
 		}
 		return $dataReturn;
+	}
+	
+	public function notBindAccount(){
+		$dataContent["type"] = "bubble";
+		$dataContent["body"]["type"] = "box";
+		$dataContent["body"]["layout"] = "vertical";
+		$dataContent["body"]["contents"][0]["type"] = "text";
+		$dataContent["body"]["contents"][0]["text"] = "ท่านยังไม่ได้ผูกบัญชี";
+		$dataContent["body"]["contents"][0]["color"] = "#0EA7CA";
+		$dataContent["body"]["contents"][1]["type"] = "text";
+		$dataContent["body"]["contents"][1]["text"] = " กรุณาผูกบัญชีเพื่อดูข้อมูล";
+		$dataContent["body"]["contents"][1]["size"] = "sm";
+		$dataContent["body"]["contents"][1]["wrap"] = true;
+		$dataContent["body"]["contents"][1]["offsetStart"] = "40px";
+		$dataContent["body"]["contents"][2]["type"] = "button";
+		$dataContent["body"]["contents"][2]["action"]["type"] = "message";
+		$dataContent["body"]["contents"][2]["action"]["label"] = "ผูกบัญชี";
+		$dataContent["body"]["contents"][2]["action"]["text"] = "ผูกบัญชี";
+		$dataContent["body"]["contents"][2]["height"] = "sm";
+		$dataContent["body"]["contents"][2]["style"] = "primary";
+		$dataContent["body"]["contents"][2]["margin"] = "xl";
+		$dataContent["body"]["contents"][2]["color"] = "#E3519D";
+		return $dataContent;
 	}
 
 	public function mergeTextMessage($id){

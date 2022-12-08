@@ -28,31 +28,39 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												LEFT JOIN WCMEMBERTYPE B ON M.WFTYPE_CODE = B.WFTYPE_CODE
 												LEFT JOIN CMUCFMONEYTYPE C ON S.CASH_TYPE = C.MONEYTYPE_CODE
 												LEFT JOIN MBUCFMEMBGROUP MG ON MM.MEMBGROUP_CODE = MG.MEMBGROUP_CODE
-		
-												WHERE S.DEPTSLIP_NO = :deptslip_no AND ITEM_STATUS=1
-												ORDER BY S.DEPTSLIP_NO");
+										WHERE S.DEPTSLIP_NO = :deptslip_no AND ITEM_STATUS=1 
+										ORDER BY S.DEPTSLIP_NO");
 		$getPaymentDetail->execute([
 			':deptslip_no' => $dataComing["deptslip_no"]
 		]);
+			
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
 			$header["deptslip_date"] = $lib->convertdate($rowDetail["DEPTSLIP_DATE"],'D m Y');
-			$header["name"] = $rowDetail["PRENAME_DESC"].$rowDetail["MEMB_NAME"]." ".$rowDetail["MEMB_SURNAME"];
+			$header["name"] = $rowDetail["PRENAME_DESC"].$rowDetail["DEPTACCOUNT_NAME"]." ".$rowDetail["DEPTACCOUNT_SNAME"];
 			$header["wcmember_desc"] = $rowDetail["WCMEMBER_DESC"];
 			$header["wftype_code"] = $rowDetail["WFTYPE_CODE"];
 			$header["membgroup_desc"] = $rowDetail["MEMBGROUP_CODE"]." ".$rowDetail["MEMBGROUP_DESC"];
 			$header["cash_type"] = $rowDetail["CASH_TYPE"];
-			$arrDetail["slip_desc"] = $rowDetail["SLIP_DESC"]." - (".$member_no.") ".$rowDetail["PRENAME_DESC"].$rowDetail["MEMB_NAME"]." ".$rowDetail["MEMB_SURNAME"];
+			$arrDetail["slip_desc"] = $rowDetail["SLIP_DESC"]." - (".$member_no.") ".$rowDetail["PRENAME_DESC"].$rowDetail["DEPTACCOUNT_NAME"]." ".$rowDetail["DEPTACCOUNT_SNAME"];
 			$arrDetail["deptslip_amt"] = number_format($rowDetail["DEPTSLIP_AMT"],2);
 			$arrDetail["amt"] = $rowDetail["DEPTSLIP_AMT"];
 			$arrGroupDetail[] = $arrDetail;
 		}	
 		$header["member_no"] = $member_no;
 		$header["deptslip_no"] = $dataComing["deptslip_no"];
+		file_put_contents('response.txt', json_encode($dataComing["deptslip_no"],JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -65,7 +73,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			];
 			$log->writeLog('errorusage',$logStruc);
 			$message_error = "สร้างไฟล์ PDF ไม่ได้ ".$filename."\n"."DATA => ".json_encode($dataComing);
-			$lib->sendLineNotify($message_error);
 			$arrayResult['RESPONSE_CODE'] = "WS0044";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;

@@ -5,8 +5,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$groupRespondMessage = array();
 		$fetchLineRespondMessage = $conmysql->prepare("SELECT COUNT(title) as C_TITLE,DATE_FORMAT(date,'%m') as MONTH,DATE_FORMAT(date,'%Y') as YEAR
 				FROM lbrespondmessage
-				WHERE date <= DATE_SUB(date,INTERVAL -6 MONTH) 
-				GROUP BY DATE_FORMAT(date,'%m') ORDER BY date ASC");
+				WHERE  date > curdate() - interval (dayofmonth(curdate()) - 1) day - interval 6 month
+				GROUP BY DATE_FORMAT(date,'%m%Y') ORDER BY date ASC");
 		$fetchLineRespondMessage->execute();
 		while($rowResponeMessage = $fetchLineRespondMessage->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupResponeMessage = array();
@@ -23,24 +23,31 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchSumTextIncome->execute();
 		$arrTextIncom = $fetchSumTextIncome->fetch(PDO::FETCH_ASSOC);
 		
+		$fetchSumNotRespone = $conmysql->prepare("SELECT COUNT(message) AS c_text FROM lbnotrespondmessage");
+		$fetchSumNotRespone->execute();
+		$arrTextNotRespone = $fetchSumNotRespone->fetch(PDO::FETCH_ASSOC);
+		
 		$fetchUserBindAccount = $conmysql->prepare("SELECT
-    COUNT(member_no) AS c_meber_no
-FROM
-    gcmemberaccount
-WHERE
-    line_token IS NOT NULL
-    AND member_no != 'etnmode1' AND member_no != 'etnmode2' AND member_no !='etnmode3' AND member_no !='etnmode4'");
+														COUNT(member_no) AS c_meber_no
+														FROM
+														gcmemberaccount
+													WHERE
+														line_token IS NOT NULL
+													");
 		$fetchUserBindAccount->execute();
 		$arrUserBindAccount = $fetchUserBindAccount->fetch(PDO::FETCH_ASSOC);
 
 		
-		$total_message  = intval($arrTextIncom["c_text"]);
-		$total_replay =   intval($arrReplay["c_reply"]);
+		$total_message  = intval($arrTextIncom["c_text"]??0);
+		$total_replay =   intval($arrReplay["c_reply"]??0);
+		$total_all_message = intval($arrTextNotRespone["c_text"]??0)+ $total_replay;
 		$arrayResult["RESPOND_MESSAGE_DATA"] = $groupRespondMessage;
 		$arrayResult["TOTAL_RESPOND"] = $arrReplay["c_reply"];
-		$arrayResult["TOTAL_MESSAGE_INCOME"] = $arrTextIncom["c_text"];
-		$arrayResult["TOTAL_NOT_RESPOND"] = $total_message - $total_replay;
+		$arrayResult["TOTAL_MESSAGE_INCOME"] = (string)$total_all_message;
+		$arrayResult["TOTAL_NOT_RESPOND"] = $arrTextNotRespone["c_text"];
 		$arrayResult["USER_BIND_ACCOUNT_DATA"] = $arrUserBindAccount["c_meber_no"];
+	
+		
 		$arrayResult["RESULT"] = TRUE;
 		require_once('../../../include/exit_footer.php');
 

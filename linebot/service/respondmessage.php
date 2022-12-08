@@ -1,15 +1,14 @@
 <?php
 $insertTextIncome = $conmysql->prepare("INSERT INTO lbrespondmessage (title,line_token,detail) VALUES (:title,:line_token,:detail)");
 $filename = basename(__FILE__, '.php');
-if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' || $member_no =='etnmode4' || $member_no =='dev@mode' || $member_no =='salemode'){
+//if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' || $member_no =='etnmode4' || $member_no =='dev@mode' || $member_no =='salemode'){
 	//none
-}else{	
+//}else{	
 	if($insertTextIncome->execute([
 		':title' => $message, 
 		':line_token' => $user_id,
 		':detail' => json_encode($arrPostData,JSON_UNESCAPED_UNICODE )
 	])){
-		
 		//none
 	}else{
 		$data = [
@@ -27,5 +26,5 @@ if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' ||
 		$message_error = "Line Bot insert ตาราง  lbrespondmessage  ไม่ได้".$filename."\n".'DATA => '.json_encode($data);
 		$lib->sendLineNotify($message_error);	
 	}
-}
+//}
 ?>

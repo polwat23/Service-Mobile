@@ -2,7 +2,7 @@
 $arrPostData = array();
 $arrPostData['replyToken'] = $reply_token;
 
-if($message == "จัดการบัญชี"){
+if($message == "จัดการบัญชี" || $message == "ผูกบัญชี"){
 	require_once('./service/bindaccount.php');
 }else if($message == "ยกเลิกผูกบัญชี"){
 	require_once('./service/unbindaccount.php');
@@ -12,7 +12,7 @@ if($message == "จัดการบัญชี"){
 	require_once('./service/deposit/deposit.php');
 }else if($message == "เงินกู้"){
 	require_once('./service/loan/loan.php');
-}else if($message == "ข้อมูลส่วนตัว" || $message == "ข้อมูลของฉัน"){
+}else if($message == "ข้อมูลส่วนตัว" || $message == "ข้อมูลของฉัน" || $message == 'ข้อมูลสมาชิก'){
 	require_once('./service/member_info.php');
 }else if($message == "หุ้น" || $message == "loan" ){
 	require_once('./service/share/share_info.php');
@@ -24,7 +24,7 @@ if($message == "จัดการบัญชี"){
 	require_once('./service/guarantee/guarantee_ucollwho.php');
 }else if($message == "เรียกเก็บประจำเดือน" || $message == "เรียกเก็บ"){
 	require_once('./service/keeping/keeping.php');
-}else if($message == "ปันผล" || $message == "เฉลี่ยคืน"){
+}else if($message == "ปันผล" || $message == "เฉลี่ยคืน" || $message == 'ปันผล-เฉลี่ยคืน'){
 	require_once('./service/dividend.php');
 }else if($message == "ผู้รับผลประโยชน์"){
 	require_once('./service/beneficiary.php');
@@ -36,16 +36,19 @@ if($message == "จัดการบัญชี"){
 	require_once('./service/receipt/receipt_list.php');
 }else if($message == "กองทุนสวัสดิการ"){
 	require_once('./service/fund/fund_type.php');
-}else if($message == "แจ้งปัญหา"){
-	require_once('./service/report/report_problem.php');
+}else if($message == "------แจ้งปัญหา"){
+	//require_once('./service/report/report_problem.php');
 }else if($message == "กิจกรรมสหกรณ์"){
 	require_once('./service/event.php');
-}else if($message == "-แจ้งเตือน"){
-	require_once('./service/line_notkfy.php');
+}else if($message == "แจ้งเตือน" || $message == 'แจ้งเตือนผ่านไลน์'){
+	require_once('./service/notify/line_notify.php');
+}else if($message == " เปิดการแจ้งเตือน" || $message == " ปิดการแจ้งเตือน" ){
+	require_once('./service/notify/update_notify.php');
+}else if($message == "-test"){
+	require_once('./service/testConnection.php');
 }else{
-	$pattern = "/[\s:\;\/]/"; 
+	$pattern = "/[\s:\;\/]/";  
 	$arrMessage = preg_split($pattern, $message,-1,PREG_SPLIT_NO_EMPTY);
-	//$arrMessage = explode(":",$message);
 	$incomeWord = $arrMessage[0]??null;
 	if($lineLib->checkBindAccount($user_id)){
 		if($incomeWord == "ดูรายการเคลื่อนไหวเงินฝาก" || $incomeWord == "รายการเคลื่อนไหวเงินฝาก"){
@@ -66,20 +69,20 @@ if($message == "จัดการบัญชี"){
 		}else if($incomeWord == "ใบเสร็จกองทุนสวัสดิการ" || $incomeWord == "ดูใบเสร็จกองทุนสวัสดิการ"){
 			$fund_account = $arrMessage[1]??null;
 			require_once('./service/fund/fund_recept.php'); 
-		}else if($incomeWord == "แจ้งปัญหา"){
-			require_once('./service/report/report_problem.php');
+		}else if($incomeWord == "------------แจ้งปัญหา"){
+			//require_once('./service/report/report_problem.php');
 		}else{
 			//บันทึกลงข้อความไม่ได้ตอบ
-			//require_once('./service/notrespondmessage.php');
+			require_once('./service/notrespondmessage.php');
 		}
-	}else if($incomeWord == "แจ้งปัญหา"){
-		require_once('./service/report/report_problem.php');
+	}else if($incomeWord == "---แจ้งปัญหา"){
+		//require_once('./service/report/report_problem.php');
 	}else{
 		require_once('./service/bindaccount_by_otp.php');
 	}
 }
-//00007368
-//require_once('./service/incomtext.php');
+
+require_once('./service/incomtext.php');
 require_once(__DIR__.'./replyresponse.php');
 	
 ?>

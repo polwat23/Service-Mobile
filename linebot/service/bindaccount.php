@@ -33,7 +33,6 @@ if($checkBeenBind->rowCount() > 0){
 	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataContent);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
-
 }else{
 	$currentDate = date_create();
 	$tempExpire = new DateTime(date_format($currentDate,"Y-m-d H:i:s"));
@@ -92,7 +91,7 @@ if($checkBeenBind->rowCount() > 0){
 	$dataContent["contents"][0]["body"]["contents"][2]["type"] = "button";
 	$dataContent["contents"][0]["body"]["contents"][2]["action"]["type"] = "uri";
 	$dataContent["contents"][0]["body"]["contents"][2]["action"]["label"] = "ใช้งานผ่านมือถือ";
-	$dataContent["contents"][0]["body"]["contents"][2]["action"]["uri"] = "https://liff.line.me/1656729415-nDx8JYBP?page=register";
+	$dataContent["contents"][0]["body"]["contents"][2]["action"]["uri"] = "https://liff.line.me/1598723788-oXwGxRPd?page=register";
 	$dataContent["contents"][0]["body"]["contents"][2]["color"] = "#E3519DFF";
 	$dataContent["contents"][0]["body"]["contents"][2]["margin"] = "lg";
 	$dataContent["contents"][0]["body"]["contents"][2]["height"] = "sm";

@@ -18,6 +18,14 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':member_no' => $member_no
 		]);
 		$rowName = $fetchName->fetch(PDO::FETCH_ASSOC);
+		$fetchIntAccum = $conmssql->prepare("SELECT INTEREST_ACCUM FROM KPMASTRECEIVE WHERE MEMBER_NO = :member_no AND RECV_PERIOD = :recv_period");
+		$fetchIntAccum->execute([
+			':member_no' => $member_no,
+			':recv_period' => $dataComing["recv_period"]
+		]);
+		$rowIntAccum = $fetchIntAccum->fetch(PDO::FETCH_ASSOC);
+
+
 		$header["fullname"] = $rowName["PRENAME_DESC"].$rowName["MEMB_NAME"].' '.$rowName["MEMB_SURNAME"];
 		$header["member_group"] = $rowName["MEMBGROUP_CODE"].' '.$rowName["MEMBGROUP_DESC"];
 		if($lib->checkCompleteArgument(['seq_no'],$dataComing)){
@@ -85,6 +93,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				':recv_period' => $dataComing["recv_period"]
 			]);
 		}
+		$sum_int = 0;
 		$arrGroupDetail = array();
 		while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 			$arrDetail = array();
@@ -98,9 +107,11 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 				if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
+					$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 				}else{
 					$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 					$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
+					$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 				}
 			}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 				$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -130,6 +141,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 			':recv_period' => $dataComing["recv_period"]
 		]);
 		$rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
+		$header["interest_accum"] = number_format((($rowIntAccum["INTEREST_ACCUM"] ?? 0) + $sum_int),2);
 		$header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 		$header["recv_period"] = $lib->convertperiodkp(TRIM($dataComing["recv_period"]));
 		$header["member_no"] = $payload["member_no"];
@@ -137,7 +149,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -242,6 +260,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
+			<tr>
+			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 350px;">'.($header["interest_accum"]??null).' บาท</td>
+			<td style="width: 50px;font-size: 18px;"></td>
+			<td style="width: 101px;"> </td>
+			</tr>
 			</tbody>
 			</table>
 			</div>
@@ -324,7 +348,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../../resource/utility_icon/signature/receive_money.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>

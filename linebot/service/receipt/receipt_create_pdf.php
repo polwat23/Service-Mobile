@@ -60,6 +60,12 @@ function GenerateReport($dataReport,$header,$lib){
 			<td style="width: 50px;font-size: 18px;">สังกัด :</td>
 			<td style="width: 101px;">'.$header["member_group"].'</td>
 			</tr>
+			<tr>
+			<td style="width: 50px;font-size: 18px;">ดอกเบี้ยสะสม :</td>
+			<td style="width: 350px;">'.($header["interest_accum"]??null).'</td>
+			<td style="width: 50px;font-size: 18px;"></td>
+			<td style="width: 101px;"> </td>
+			</tr>
 			</tbody>
 			</table>
 			</div>
@@ -142,7 +148,7 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
 			<div style="width:200px;margin-left: 700px;display:flex;">
-			<img src="../resource/utility_icon/signature/receive_money.jpg" width="100" height="50" style="margin-top:10px;"/>
+			<img src="../resource/utility_icon/signature/manager.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 730px;margin-top:-60px;">ผู้จัดการ</div>

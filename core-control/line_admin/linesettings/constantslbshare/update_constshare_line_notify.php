@@ -2,22 +2,22 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsshare')){
+	if($func->check_permission_core($payload,'line','constantslinenotifyshare')){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conmysql->prepare("SELECT
-																		id_smsconstantshare,
+																		id_lbconstantshare,
 																		share_itemtype_code,
-																		allow_smsconstantshare
+																		allow_lbconstantshare
 																	FROM
-																		smsconstantshare
+																		lbconstantshare
 																	ORDER BY share_itemtype_code ASC");
 		$fetchConstant->execute();
 		while($rowMenuMobile = $fetchConstant->fetch(PDO::FETCH_ASSOC)){
 			$arrConstans = array();
-			$arrConstans["ID_SMSCONSTANTSHARE"] = $rowMenuMobile["id_smsconstantshare"];
+			$arrConstans["ID_LBCONSTANTSHARE"] = $rowMenuMobile["id_lbconstantshare"];
 			$arrConstans["SHRITEMTYPE_CODE"] = $rowMenuMobile["share_itemtype_code"];
-			$arrConstans["ALLOW_SMSCONSTANTSHARE"] = $rowMenuMobile["allow_smsconstantshare"];
+			$arrConstans["ALLOW_LBCONSTANTSHARE"] = $rowMenuMobile["allow_lbconstantshare"];
 			$arrayChkG[] = $arrConstans;
 		}
 		$fetchDepttype = $conmssql->prepare("SELECT SHRITEMTYPE_CODE,SHRITEMTYPE_DESC FROM SHUCFSHRITEMTYPE ORDER BY SHRITEMTYPE_CODE ASC");
@@ -25,9 +25,9 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 		while($rowDepttype = $fetchDepttype->fetch(PDO::FETCH_ASSOC)){
 			$arrayDepttype = array();
 				if(array_search($rowDepttype["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE')) === False){
-						$arrayDepttype["ALLOW_SMSCONSTANTSHARE"] = 0;
+						$arrayDepttype["ALLOW_LBCONSTANTSHARE"] = 0;
 				}else{
-					$arrayDepttype["ALLOW_SMSCONSTANTSHARE"] = $arrayChkG[array_search($rowDepttype["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE'))]["ALLOW_SMSCONSTANTSHARE"];
+					$arrayDepttype["ALLOW_LBCONSTANTSHARE"] = $arrayChkG[array_search($rowDepttype["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE'))]["ALLOW_LBCONSTANTSHARE"];
 				}
 				
 			$arrayDepttype["SHRITEMTYPE_CODE"] = $rowDepttype["SHRITEMTYPE_CODE"];
@@ -45,18 +45,18 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				});
 				foreach($resultUDiff as $value_diff){
 					if(array_search($value_diff["SHRITEMTYPE_CODE"],array_column($arrayChkG,'SHRITEMTYPE_CODE')) === False){
-						$insertBulkCont[] = "('".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_SMSCONSTANTSHARE"]."')";
-						$insertBulkContLog[]='SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE ='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
+						$insertBulkCont[] = "('".$value_diff["SHRITEMTYPE_CODE"]."','".$value_diff["ALLOW_LBCONSTANTSHARE"]."')";
+						$insertBulkContLog[]='SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_LBCONSTANTSHARE ='.$value_diff["ALLOW_LBCONSTANTSHARE"];
 					}else{
-						$updateConst = $conmysql->prepare("UPDATE smsconstantshare SET allow_smsconstantshare = :ALLOW_SMSCONSTANTSHARE WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
+						$updateConst = $conmysql->prepare("UPDATE lbconstantshare SET ALLOW_LBCONSTANTSHARE = :ALLOW_LBCONSTANTSHARE WHERE share_itemtype_code = :SHRITEMTYPE_CODE");
 						$updateConst->execute([
-							':ALLOW_SMSCONSTANTSHARE' => $value_diff["ALLOW_SMSCONSTANTSHARE"],
+							':ALLOW_LBCONSTANTSHARE' => $value_diff["ALLOW_LBCONSTANTSHARE"],
 							':SHRITEMTYPE_CODE' => $value_diff["SHRITEMTYPE_CODE"]
 						]);
-						$updateConstLog = 'SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_SMSCONSTANTSHARE='.$value_diff["ALLOW_SMSCONSTANTSHARE"];
+						$updateConstLog = 'SHRITEMTYPE_CODE=> '.$value_diff["SHRITEMTYPE_CODE"].' ALLOW_LBCONSTANTSHARE='.$value_diff["ALLOW_LBCONSTANTSHARE"];
 					}
 				}
-				$insertConst = $conmysql->prepare("INSERT smsconstantshare(share_itemtype_code,allow_smsconstantshare)
+				$insertConst = $conmysql->prepare("INSERT lbconstantshare(share_itemtype_code,allow_lbconstantshare)
 																VALUES".implode(',',$insertBulkCont));
 				$insertConst->execute();
 				$arrayStruc = [
@@ -67,6 +67,7 @@ if($lib->checkCompleteArgument(['unique_id','contdata'],$dataComing)){
 				];
 				$log->writeLog('editsms',$arrayStruc);	
 				$arrayResult['RESULT'] = TRUE;
+				$arrayResult['data'] = $resultUDiff;
 				require_once('../../../../include/exit_footer.php');
 			}else{
 				$arrayResult['RESULT'] = FALSE;

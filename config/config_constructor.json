@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "NKH Saving",
 	"COOP_KEY" : "nkh-test",
+	"URL_POLICY" : "https://policy.thaicoop.co/index_v1.html?coop=nkh",
+	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=nkh",
 	"COOP_ID" : "059001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
 	"APP_ID" : "com.nkhsaving.mobile",

@@ -4,11 +4,11 @@
 	"COOP_NAME" : "Kfinance",
 	"COOP_KEY" : "KFN",
 	"LIFF_ID" : "1656729415-nDx8JYBP",
-	"LINE_ID" : "@414zgzmr",
+	"LINE_ID" : "@770bakwb",
 	"LINK_BIND" : "",
 	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
 	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",
-	"LINEBOT_CHANNELID" : "1656669120",
-	"LINEBOT_SECRETKEY" : "c9fdd00daa9b7ebbc26b580762ae6c2d",
-	"LINE_AUTH_KEY" : "hk6IMmsphqkw7Y4YMTypoqSccbkxhAsSmyGTPqk4gQDAVaDeZEzExQJBSdcSfdj/JyB9ZqggV+jvjNsROelmVSWgBF1JKBbUFYMNu4KChTd3vqAwz3G+znABGnjKA0X/mYPete+U4S8uPBhwA3hwLgdB04t89/1O/w1cDnyilFU="
+	"LINEBOT_CHANNELID" : "1657186330",
+	"LINEBOT_SECRETKEY" : "c56e9083a294ac2d8f8ecaf25d563cac",
+	"LINE_AUTH_KEY" : "ui8kw/xSDvMQAav5wGagoJVUuCRxCk++HCiBRXwfbSuxPOiCyLgTO8NAFUKtWneL2t49d4ZXj6kqPY9mYlrALYznn31O3g+CBK/dFvbsjHjfa1gOlqvLZPbjHTbGVyOVtRtGPorkueGiJTEs1DilHgdB04t89/1O/w1cDnyilFU="
 }

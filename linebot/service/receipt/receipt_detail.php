@@ -117,7 +117,13 @@ if($lineLib->checkBindAccount($user_id)){
 	$list['DETAIL'] = $arrGroupDetail;
 	
 	$head = ($arrayGroupPeriod[0]??NULL);
-	
+	$fetchIntAccum = $conmssql->prepare("SELECT INTEREST_ACCUM FROM KPMASTRECEIVE WHERE MEMBER_NO = :member_no AND RECV_PERIOD = :recv_period");
+	$fetchIntAccum->execute([
+		':member_no' => $member_no,
+		':recv_period' => $dataComing["recv_period"]
+	]);
+	$rowIntAccum = $fetchIntAccum->fetch(PDO::FETCH_ASSOC);
+	$header["interest_accum"] =  $rowIntAccum["INTEREST_ACCUM"];
 	if(sizeof($arrayGroupPeriod)>0){
 		require_once('receipt_report.php');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);	
@@ -225,33 +231,7 @@ if($lineLib->checkBindAccount($user_id)){
 		
 		if(sizeof($arrGroupDetail)>0){
 			$indexGroupDetail = 0;
-			foreach($arrGroupDetail as $rowReceiptData){
-			/*
-				$seq_no =  ($rowReceiptData["SEQ_NO"]??'');
-				require_once('receipt_report.php');
-				$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);	
-				$receipt_url = '';
-				
-				if($arrayPDF["RESULT"]){
-					$receipt_url = $config["URL_SERVICE"].$arrayPDF["PATH"];			
-				}else{
-					$receipt_url = '';
-					$filename = basename(__FILE__, '.php');
-					$logStruc = [
-						":error_menu" => $filename,
-						":error_code" => "WS0044",
-						":error_desc" => "สร้าง PDF ไม่ได้ "."\n".json_encode($data),
-						":error_device" => 'Line Bot'
-					];
-					$log->writeLog('errorusage',$logStruc);
-					$message_error = "สร้างไฟล์ PDF ไม่ได้ ".$filename."\n"."DATA => ".json_encode($data);
-					$lib->sendLineNotify($message_error);
-					$arrayResult['RESPONSE_CODE'] = "WS0044";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-				}
-			*/
-				
+			foreach($arrGroupDetail as $rowReceiptData){	
 				$titleLink = '-';
 				if(isset($rowReceiptData["PAY_ACCOUNT"]) && !$rowReceiptData["PAY_ACCOUNT"] == ""){
 					$titleLink = $rowReceiptData["PAY_ACCOUNT"];
@@ -413,8 +393,9 @@ if($lineLib->checkBindAccount($user_id)){
 	}
 
 }else{
-	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อดูข้อมูล";
-	$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+	$altText = "ท่านยังไม่ได้ผูกบัญชี";
+	$dataMs = $lineLib->notBindAccount();
+	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataMs);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
 }

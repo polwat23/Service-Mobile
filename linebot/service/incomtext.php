@@ -1,12 +1,11 @@
 <?php
 $filename = basename(__FILE__, '.php');
 
-
-
+if(isset($message)){
 $member_no = $lineLib->getMemberNo($user_id);
-if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' || $member_no =='etnmode4' || $member_no =='dev@mode' || $member_no =='salemode'){
+//if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' || $member_no =='etnmode4' || $member_no =='dev@mode' || $member_no =='salemode'){
 	//none
-}else{
+//}else{
 	$insertTextIncome = $conmysql->prepare("INSERT INTO lbincometext (text,line_token,detail) VALUES (:text,:line_token,:detail)");
 	if($insertTextIncome->execute([
 		':text' => $message, 
@@ -30,5 +29,7 @@ if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' ||
 		$message_error = "Line Bot insert ลง  lbincometext  ไม่ได้".$filename."\n".'DATA => '.json_encode($data);
 		$lib->sendLineNotify($message_error);
 	}
+//}
 }
+
 ?>

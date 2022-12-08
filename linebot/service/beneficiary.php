@@ -116,24 +116,20 @@ if($lineLib->checkBindAccount($user_id)){
 			$beneficiaryData["contents"]["contents"][$indexBeneficiary]["body"]["contents"][0]["contents"][6]["contents"][0]["size"] = "xs";
 			$beneficiaryData["contents"]["contents"][$indexBeneficiary]["body"]["contents"][0]["contents"][6]["contents"][0]["color"] = "#000000";
 			$beneficiaryData["contents"]["contents"][$indexBeneficiary]["body"]["contents"][0]["contents"][6]["contents"][0]["wrap"] = true;
-			$arrPostData["messages"][0] = $beneficiaryData;
-			//$arrPostData["replyToken"] = $arrGroupBNF; 
+			$arrPostData["messages"][0] = $beneficiaryData; 
 			$arrPostData["replyToken"] = $reply_token;
 			$indexBeneficiary++;
 		}
-		 
-	
 	}else{
 		$messageResponse = "ไม่พบข้อมูลผู้รับผลประโยชน์";
 		$dataPrepare = $lineLib->prepareMessageText($messageResponse);
 		$arrPostData["messages"] = $dataPrepare;
 		$arrPostData["replyToken"] = $reply_token;
 	}
-	
-	
 }else{
-	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อดูข้อมูล";
-	$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+	$altText = "ท่านยังไม่ได้ผูกบัญชี";
+	$dataMs = $lineLib->notBindAccount();
+	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataMs);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
 }
