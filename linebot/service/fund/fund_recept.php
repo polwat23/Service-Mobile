@@ -10,7 +10,7 @@ if($lineLib->checkBindAccount($user_id)){
 										(CASE WHEN CASH_TYPE = 'CSH'  THEN 'ชำระเงินสด'   WHEN CASH_TYPE ='TRN'  THEN 'ชำระเงินโอภายใน' 
 										WHEN CASH_TYPE ='CBT' THEN 'ชำระเงินโอนธนาคาร' ELSE '' END )  AS RECEIPT,
 										DEPTSLIP_AMT 
-										FROM WCDEPTSLIP WHERE DEPTACCOUNT_NO = :fund_account AND item_status = 1 ");
+										FROM WCDEPTSLIP WHERE DEPTACCOUNT_NO = :fund_account AND item_status = 1");
 	$getReceiptFund->execute([':fund_account' => $fund_account]);
 	while($rowReceipt = $getReceiptFund->fetch(PDO::FETCH_ASSOC)){
 		$arrayReceipt = array();		

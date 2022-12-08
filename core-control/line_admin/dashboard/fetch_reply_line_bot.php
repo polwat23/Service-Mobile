@@ -5,8 +5,8 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$groupRespondMessage = array();
 		$fetchLineRespondMessage = $conmysql->prepare("SELECT COUNT(title) as C_TITLE,DATE_FORMAT(date,'%m') as MONTH,DATE_FORMAT(date,'%Y') as YEAR
 				FROM lbrespondmessage
-				WHERE date <= DATE_SUB(date,INTERVAL -6 MONTH) 
-				GROUP BY DATE_FORMAT(date,'%m') ORDER BY date ASC");
+				WHERE  date > curdate() - interval (dayofmonth(curdate()) - 1) day - interval 6 month
+				GROUP BY DATE_FORMAT(date,'%m%Y') ORDER BY date ASC");
 		$fetchLineRespondMessage->execute();
 		while($rowResponeMessage = $fetchLineRespondMessage->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupResponeMessage = array();

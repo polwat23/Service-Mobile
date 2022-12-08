@@ -82,5 +82,7 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 			}
 		}
 	}
+	$exData[] = $rowSTM;
 }
+print_r($exData);
 ?>

@@ -79,16 +79,14 @@ $datas["contents"]["body"]["contents"][2]["contents"][0]["text"] = $btn_text."�
 $datas["contents"]["body"]["contents"][2]["contents"][0]["color"] = $btn_color;
 $datas["contents"]["body"]["contents"][2]["contents"][0]["align"] = "center";
 
-
-
 if($lineLib->checkBindAccount($user_id)){
-	
 	$arrPostData["messages"][0] = $datas; 
 	$arrPostData["replyToken"] = $reply_token;
 
 }else{
-	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อแจ่งเตือน";
-	$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+	$altText = "ท่านยังไม่ได้ผูกบัญชี";
+	$dataMs = $lineLib->notBindAccount();
+	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataMs);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
 }

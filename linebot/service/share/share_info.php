@@ -176,11 +176,11 @@ if($lineLib->checkBindAccount($user_id)){
 		}
 		$arrPostData["messages"][0] = $shareDataInfo;
 		$arrPostData["replyToken"] = $reply_token;
-	//	$arrPostData["replyToken"] = $reply_token;
 	}
 }else{
-	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อดูข้อมูลหุ้น";
-	$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+	$altText = "ท่านยังไม่ได้ผูกบัญชี";
+	$dataMs = $lineLib->notBindAccount();
+	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataMs);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
 }

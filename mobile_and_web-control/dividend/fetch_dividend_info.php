@@ -25,7 +25,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
 			
-			$getPaydiv = $conmssql->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.PAY_AMT as PAY_AMT
+			$getPaydiv = $conmssql->prepare("SELECT yucf.methpaytype_desc AS TYPE_DESC,ymp.PAY_AMT as PAY_AMT, ymp.bizzaccount_no as BIZZACCOUNT_NO
 											FROM yrdivmethpay ymp LEFT JOIN yrucfmethpay yucf ON ymp.methpaytype_code = yucf.methpaytype_code
 											WHERE ymp.MEMBER_NO = :member_no and ymp.div_year = :div_year and ymp.methpaytype_code NOT IN('NXT','CBT','CSH','DEP')");
 			$getPaydiv->execute([
@@ -37,6 +37,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowPay = $getPaydiv->fetch(PDO::FETCH_ASSOC)){
 				$arrPay = array();
 				$arrPay["TYPE_DESC"] = $rowPay["TYPE_DESC"];
+				$arrPay["BIZZACCOUNT_NO"] = $rowPay["BIZZACCOUNT_NO"];
 				$arrPay["PAY_AMT"] = number_format($rowPay["PAY_AMT"],2);
 				$sumPay += $rowPay["PAY_AMT"];
 				$arrayPayGroup[] = $arrPay;

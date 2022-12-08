@@ -51,57 +51,60 @@ while($rowSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
 		$dataPrepare = $lineLib->prepareMessageText($mesageData);
 		$arrPostData["messages"] = $dataPrepare;
 		$arrPostData["to"] = $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]);
-		$dataSendLib = $lineLib->sendPushLineBot($arrPostData);
 		
-		if($dataSendLib["RESULT"] == 1){
-			$insertNotify =  $conmysql->prepare("INSERT INTO lbhistory(line_token, his_title, his_detail, member_no, send_by) 
-												  VALUES (:line_token,:his_title,:his_detail,:member_no,:send_by)");
-			if($insertNotify->execute([
-				':line_token' => $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]),
-				':his_title' => $message_endpoint["SUBJECT"],
-				':his_detail' => $mesageData,
-				':member_no' => $rowSTM["MEMBER_NO"],
-				':send_by' => 'system'
-			])){
-			
-			
+		$dataChkNotify = $lineLib->checkNotify($rowSTM["MEMBER_NO"],$mesageData,$rowSTM["SEQ_NO"]);
+		if($dataChkNotify == 1){
+			$dataSendLib = $lineLib->sendPushLineBot($arrPostData);
+			if($dataSendLib["RESULT"] == 1){
+			$insertNotify =  $conmysql->prepare("INSERT INTO lbhistory(line_token, his_title, his_detail, member_no, send_by,ref) 
+												  VALUES (:line_token,:his_title,:his_detail,:member_no,:send_by, :ref)");
+				if($insertNotify->execute([
+					':line_token' => $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]),
+					':his_title' => $message_endpoint["SUBJECT"],
+					':his_detail' => $mesageData,
+					':member_no' => $rowSTM["MEMBER_NO"],
+					':send_by' => 'system',
+					':ref' => $rowGuarantee["SEQ_NO"]
+				])){
+				
+				
+				}else{
+					$message_error = "Line Bot insert ลง  lbnotify  ไม่ได้".''."\n".'data => '.$insertNotify;
+					$lib->sendLineNotify($message_error);
+				}
 			}else{
-				$message_error = "Line Bot insert ลง  lbnotify  ไม่ได้".''."\n".'data => '.$insertNotify;
-				$lib->sendLineNotify($message_error);
-			}
-		}else{
-			$insertNotNotify =  $conmysql->prepare("INSERT INTO lognotnotifyline(line_token, his_title, his_detail, member_no, send_by,error) 
-												  VALUES (:line_token,:his_title,:his_detail,:member_no,:send_by,:error)");
-			if($insertNotNotify->execute([
-				':line_token' => $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]),
-				':his_title' => $message_endpoint["SUBJECT"],
-				':his_detail' => $mesageData,
-				':member_no' => $rowSTM["MEMBER_NO"],
-				':send_by' => 'system',
-				':error' => $dataSendLib["message"]
-			])){
-			
-			
-			}else{
-				 $dataMessage = [
-				':line_token' => $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]),
-				':his_title' => $templateMessage["SUBJECT"],
-				':his_detail' => $mesageData,
-				':member_no' => $rowSTM["MEMBER_NO"],
-				':send_by' => 'system',
-				':error' => $dataSendLib["message"]
-			];
-				$message_error = "Line Bot insert ลง  lbnotnotify  ไม่ได้".''."\n".'data => '.$dataMessage;
-				$lib->sendLineNotify($message_error);
+				$insertNotNotify =  $conmysql->prepare("INSERT INTO lognotnotifyline(line_token, his_title, his_detail, member_no, send_by,error) 
+													  VALUES (:line_token,:his_title,:his_detail,:member_no,:send_by,:error)");
+				if($insertNotNotify->execute([
+					':line_token' => $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]),
+					':his_title' => $message_endpoint["SUBJECT"],
+					':his_detail' => $mesageData,
+					':member_no' => $rowSTM["MEMBER_NO"],
+					':send_by' => 'system',
+					':error' => $dataSendLib["message"]
+				])){
+				
+				
+				}else{
+					 $dataMessage = [
+					':line_token' => $lineLib->getLineIdNotify($rowSTM["MEMBER_NO"]),
+					':his_title' => $templateMessage["SUBJECT"],
+					':his_detail' => $mesageData,
+					':member_no' => $rowSTM["MEMBER_NO"],
+					':send_by' => 'system',
+					':error' => $dataSendLib["message"]
+				];
+					$message_error = "Line Bot insert ลง  lbnotnotify  ไม่ได้".''."\n".'data => '.$dataMessage;
+					$lib->sendLineNotify($message_error);
+				}
 			}
 		}
 		$data[] = $dataSendLib;
 	}
-
 	$exData[] = $rowSTM;
 }
 
 
-//print_r($data);
-//print_r($exData);
+print_r($data);
+print_r($exData);
 ?>

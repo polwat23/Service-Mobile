@@ -2,7 +2,7 @@
 require_once('../../../autoload.php');
 
 if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
-	if($func->check_permission_core($payload,'sms','constantsmsshare')){
+	if($func->check_permission_core($payload,'line','constantslinenotifyshare')){
 		$arrayGroup = array();
 		$arrayChkG = array();
 		$fetchConstant = $conmysql->prepare("SELECT

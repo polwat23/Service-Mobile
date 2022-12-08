@@ -92,9 +92,11 @@ if($lineLib->checkBindAccount($user_id)){
 			if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
+				$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 			}else{
 				$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 				$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
+				$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 			}
 		}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 			$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -112,10 +114,21 @@ if($lineLib->checkBindAccount($user_id)){
 		$arrDetail["SEQ_NO"] = $rowDetail["SEQ_NO"];
 		$arrGroupDetail[] = $arrDetail;
 	}
+	$fetchIntAccum = $conmssql->prepare("SELECT INTEREST_ACCUM FROM KPMASTRECEIVE WHERE MEMBER_NO = :member_no AND RECV_PERIOD = :recv_period");
+	$fetchIntAccum->execute([
+		':member_no' => $member_no,
+		':recv_period' => ($arrayGroupPeriod[0]["PERIOD"]??NULL)
+	]);
+	$rowIntAccum = $fetchIntAccum->fetch(PDO::FETCH_ASSOC);
+	
+
 	$list['SPLIT_SLIP'] = $showSplitSlip == "1" ? TRUE : FALSE;
 	$list['SHOW_SLIP_REPORT'] = TRUE;
 	$list['DETAIL'] = $arrGroupDetail;
-	
+	//$header["interest_accum"] = number_format((($rowIntAccum["INTEREST_ACCUM"] ?? 0) + $sum_int),2);
+	$arrayGroupPeriod[0]["interest_accum"] = number_format((($rowIntAccum["INTEREST_ACCUM"] ?? 0) + $sum_int),2);
+	//$message_error = "Line bot ".$filename."\n"."DATA => ".json_encode($rowIntAccum);
+		//$lib->sendLineNotify($header["interest_accum"]);
 	$head = ($arrayGroupPeriod[0]??NULL);
 	
 	if(sizeof($arrayGroupPeriod)>0){
@@ -141,7 +154,7 @@ if($lineLib->checkBindAccount($user_id)){
 		}
 		$receiptDetailData = array();
 		$receiptDetailData["type"] = "flex";
-		$receiptDetailData["altText"] = "ใบเสร็จ ".$recv_period;
+		$receiptDetailData["altText"] = "ใบเสร็จ".$recv_period;
 		$receiptDetailData["contents"]["type"] = "bubble";
 		$receiptDetailData["contents"]["direction"] = "ltr";
 		$receiptDetailData["contents"]["body"]["type"] = "box";
@@ -372,28 +385,7 @@ if($lineLib->checkBindAccount($user_id)){
 					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][7]["layout"] = "vertical";
 					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][7]["contents"][0]["type"] = "filler";
 				}
-				/*
-				if(isset($receipt_url) && $receipt_url !=''){
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["type"] = "box";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["layout"] = "vertical";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["margin"] = "md";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["height"] = "35px";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["justifyContent"] = "center";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["backgroundColor"] = "#E3519D";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["cornerRadius"] = "10px";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["type"] = "text";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["text"] = 'เรียกดูใบเสร็จรับเงิน '.$titleLink;
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["weight"] = "bold";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["action"]["type"] = "uri";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["action"]["label"] = "label";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["action"]["uri"] = $receipt_url;
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["size"] = "xs";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["color"] = "#FFFFFF";
-					$receiptDetailData["contents"]["body"]["contents"][5]["contents"][$indexGroupDetail] ["contents"][8]["contents"][0]["align"] = "center";
-					
-				}
-				*/
-
+				
 				$indexGroupDetail++;
 			}
 			
@@ -413,8 +405,9 @@ if($lineLib->checkBindAccount($user_id)){
 	}
 
 }else{
-	$messageResponse = "ท่านยังไม่ได้ผูกบัญชี กรุณาผูกบัญชีเพื่อดูข้อมูล";
-	$dataPrepare = $lineLib->prepareMessageText($messageResponse);
+	$altText = "ท่านยังไม่ได้ผูกบัญชี";
+	$dataMs = $lineLib->notBindAccount();
+	$dataPrepare = $lineLib->prepareFlexMessage($altText,$dataMs);
 	$arrPostData["messages"] = $dataPrepare;
 	$arrPostData["replyToken"] = $reply_token;
 }

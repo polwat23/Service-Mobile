@@ -93,9 +93,11 @@ while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
 		if($rowDetail["MONEY_RETURN_STATUS"] == '-99' || $rowDetail["ADJUST_ITEMAMT"] > 0){
 			$arrDetail["PRN_BALANCE"] = number_format($rowDetail["ADJUST_PRNAMT"],2);
 			$arrDetail["INT_BALANCE"] = number_format($rowDetail["ADJUST_INTAMT"],2);
+			$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 		}else{
 			$arrDetail["PRN_BALANCE"] = number_format($rowDetail["PRN_BALANCE"],2);
 			$arrDetail["INT_BALANCE"] = number_format($rowDetail["INT_BALANCE"],2);
+			$sum_int += ($rowDetail["ADJUST_INTAMT"] ?? 0);
 		}
 	}else if($rowDetail["TYPE_GROUP"] == 'DEP'){
 		$arrDetail["PAY_ACCOUNT"] = $rowDetail["PAY_ACCOUNT"];
@@ -124,7 +126,14 @@ $getDetailKPHeader->execute([
 	':member_no' => $member_no,
 	':recv_period' => $perid_no
 ]);
+$fetchIntAccum = $conmssql->prepare("SELECT INTEREST_ACCUM FROM KPMASTRECEIVE WHERE MEMBER_NO = :member_no AND RECV_PERIOD = :recv_period");
+$fetchIntAccum->execute([
+	':member_no' => $member_no,
+	':recv_period' => $perid_no
+]);
+$rowIntAccum = $fetchIntAccum->fetch(PDO::FETCH_ASSOC);
 $rowKPHeader = $getDetailKPHeader->fetch(PDO::FETCH_ASSOC);
+$header["interest_accum"] = number_format((($rowIntAccum["INTEREST_ACCUM"] ?? 0) + $sum_int),2);
 $header["keeping_status"] = $rowKPHeader["KEEPING_STATUS"];
 $header["recv_period"] = $lib->convertperiodkp(TRIM($perid_no));
 $header["member_no"] = $data;

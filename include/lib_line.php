@@ -68,6 +68,29 @@ class libraryLine {
 		}
 	}
 	
+	public function notBindAccount(){
+		$dataContent["type"] = "bubble";
+		$dataContent["body"]["type"] = "box";
+		$dataContent["body"]["layout"] = "vertical";
+		$dataContent["body"]["contents"][0]["type"] = "text";
+		$dataContent["body"]["contents"][0]["text"] = "ท่านยังไม่ได้ผูกบัญชี";
+		$dataContent["body"]["contents"][0]["color"] = "#0EA7CA";
+		$dataContent["body"]["contents"][1]["type"] = "text";
+		$dataContent["body"]["contents"][1]["text"] = " กรุณาผูกบัญชีเพื่อดูข้อมูล";
+		$dataContent["body"]["contents"][1]["size"] = "sm";
+		$dataContent["body"]["contents"][1]["wrap"] = true;
+		$dataContent["body"]["contents"][1]["offsetStart"] = "40px";
+		$dataContent["body"]["contents"][2]["type"] = "button";
+		$dataContent["body"]["contents"][2]["action"]["type"] = "message";
+		$dataContent["body"]["contents"][2]["action"]["label"] = "ผูกบัญชี";
+		$dataContent["body"]["contents"][2]["action"]["text"] = "ผูกบัญชี";
+		$dataContent["body"]["contents"][2]["height"] = "sm";
+		$dataContent["body"]["contents"][2]["style"] = "primary";
+		$dataContent["body"]["contents"][2]["margin"] = "xl";
+		$dataContent["body"]["contents"][2]["color"] = "#E3519D";
+		return $dataContent;
+	}
+	
 	public function prepareMessageText($message){
 		$arrResponse[0]["type"] = "text";
 		$arrResponse[0]["label"] = $message;

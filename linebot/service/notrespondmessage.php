@@ -4,9 +4,14 @@ $member_no = $lineLib->getMemberNo($user_id);
 //if($member_no =='etnmode1'||$member_no =='etnmode2' ||$member_no =='etnmode3' || $member_no =='etnmode4' || $member_no =='dev@mode' || $member_no =='salemode'){
 	//none
 //}else{
+	$insertMessage = $message;
+	if(empty($message) && $message == ""){
+		$insertMessage = "-";
+	}
+
 	$insertTextIncome = $conmysql->prepare("INSERT INTO lbnotrespondmessage (message,line_token,detail) VALUES (:message,:line_token,:detail)");
 	if($insertTextIncome->execute([
-		':message' => $message, 
+		':message' => $insertMessage, 
 		':line_token' => $user_id,
 		':detail' => json_encode($dataComing["events"][0],JSON_UNESCAPED_UNICODE )
 	])){
@@ -14,7 +19,7 @@ $member_no = $lineLib->getMemberNo($user_id);
 		//none
 	}else{
 		$data = [
-			':text' => $message, 
+			':text' => $insertMessage, 
 			':line_token' => $user_id,
 			':detail' => json_encode($dataComing["events"][0],JSON_UNESCAPED_UNICODE )
 		];
