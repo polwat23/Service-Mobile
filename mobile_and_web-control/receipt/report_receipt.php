@@ -234,14 +234,14 @@ function GenerateReport($dataReport,$header,$lib){
 			<table style="width: 100%;">
 			<tbody>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
-			<td style="width: 350px;">'.$header["member_no"].'</td>
+			<td style="width: 50px;font-size: 18px;"></td>
+			<td style="width: 350px;"></td>
 			<td style="width: 50px;font-size: 18px;">เลขที่ใบเสร็จ :</td>
 			<td style="width: 101px;">'.$header["receipt_no"].'</td>
 			</tr>
 			<tr>
-			<td style="width: 50px;font-size: 18px;">ด/บ สะสม :</td>
-			<td style="width: 350px;">'.$header["interest_accum"].'</td>
+			<td style="width: 50px;font-size: 18px;">เลขสมาชิก :</td>
+			<td style="width: 350px;">'.$header["member_no"].'</td>
 			<td style="width: 50px;font-size: 18px;">วันที่ :</td>
 			<td style="width: 101px;">'.$header["operate_date"].'</td>
 			</tr>

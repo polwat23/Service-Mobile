@@ -15,7 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		]);
 		while($rowYear = $getYeardividend->fetch(PDO::FETCH_ASSOC)){
 			$arrDividend = array();
-			$getDivMaster = $conoracle->prepare("SELECT div_amt,avg_amt FROM yrdivmaster WHERE member_no = :member_no and div_year = :div_year");
+			$getDivMaster = $conoracle->prepare("SELECT ym.div_amt,ym.avg_amt,yg.intacc_amt FROM yrdivmaster YM LEFT JOIN YRBGINFO YG ON YM.MEMBER_NO = YG.MEMBER_NO AND YM.DIV_YEAR = YG.BGYEAR WHERE YM.MEMBER_NO = :member_no and YM.DIV_YEAR = :div_year");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -25,6 +25,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["DIV_AMT"] = number_format($rowDiv["DIV_AMT"],2);
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["DIV_AMT"] + $rowDiv["AVG_AMT"],2);
+			
+			$arrIntaccAmt = array();
+			$arrIntaccAmt["LABEL"] = "ดอกเบี้ยสะสม";
+			$arrIntaccAmt["VALUE"] = number_format($rowDiv["INTACC_AMT"],2)." บาท";
+			$arrIntaccAmt["VALUE_PROPS"] = array("color" => "gray");
+			$arrDividend["OTHER_HEAD_ITEM"][] = $arrIntaccAmt;
+			
 			$getMethpay = $conoracle->prepare("SELECT
 													CUCF.MONEYTYPE_DESC AS TYPE_DESC,
 													CM.BANK_DESC AS BANK,
