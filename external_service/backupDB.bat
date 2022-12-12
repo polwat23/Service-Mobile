@@ -6,13 +6,13 @@ set fmonth=00%Month%
 set fday=00%Day%
 set today=%Year%%fmonth:~-2%%fday:~-2%
 
-set DAY_OF_LIFE=3
+set DAY_OF_LIFE=7
 set DBHOST=localhost
 set DBPORT=3306
 set DBUSER=root
-set DBPASS=@RYT2021
-set DBNAME=mobile_ryt
-set PROJECT_PATH=C:\Mobile\service-ryt\
+set DBPASS=@CPD2022
+set DBNAME=mobile_cpd
+set PROJECT_PATH=C:\Mobile\service-cpd\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%

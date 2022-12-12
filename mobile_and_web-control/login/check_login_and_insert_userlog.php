@@ -195,19 +195,6 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 								$arrayResult = array();
 								$arrayResult = $newArrayResult;
 							}
-							$line_token = $lineLib->getLineToken($member_no);
-							if($line_token){
-								$device_name = $arrPayload["PAYLOAD"]["device_name"];
-								$ip_address = $arrPayload["PAYLOAD"]["ip_address"];
-								$arrPostData["messages"][0] = $lineLib->notifyLineLogin($device_name,$ip_address);//$dataPrepare;
-								$arrPostData["to"] = $line_token;
-								$dataSendLineBot = $lineLib->sendPushLineBot($arrPostData);
-								if($dataSendLineBot["RESULT"] == false){
-									$filename = basename(__FILE__, '.php');
-									$message = "Line Bot| Can not push message |".$filename." |".json_encode($dataSendLineBot,JSON_UNESCAPED_UNICODE);
-									$lib->sendLineNotify($message);
-								}	
-							}
 							
 							require_once('../../include/exit_footer.php');
 						
