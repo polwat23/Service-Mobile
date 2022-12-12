@@ -163,11 +163,10 @@ function GenerateReport($dataReport,$header,$lib){
 				<div style="text-align: left;"><img src="../../resource/logo/logo.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 				<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">
 				<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเรียกเก็บเงิน</p>
-				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูระยอง จำกัด</p>
-				<p style="margin-top: -27px;font-size: 18px;">444 หมู่ 4 ตำบลเชิงเนิน</p>
-				<p style="margin-top: -25px;font-size: 18px;">อำเภอเมืองระยอง จังหวัดระยอง 21000</p>
-				<p style="margin-top: -25px;font-size: 18px;">โทร : 038 017 156 8</p>
-				<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.rycoop.com</p>
+				<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ศาลปกครอง จำกัด</p>
+				<p style="margin-top: -27px;font-size: 18px;">120 อาคารศาลปกครอง หมู่ที่ 3 ถนนแจ้งวัฒนะ</p>
+				<p style="margin-top: -25px;font-size: 18px;">ทุ่งสองห้อง หลักสี่ กทม. 10210</p>
+				<p style="margin-top: -25px;font-size: 18px;">โทร : 02-1420501</p>
 				</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">
@@ -273,19 +272,22 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
 			</div>
 			</div>
+			
 			<div style="display:flex;">
 				<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง</div>
-					<div style="width:200px;margin-left: 555px;display:flex;">
-						<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
-					</div>
-					<div style="width:200px;margin-left: 775px;display:flex;">
-					<img src="../../resource/utility_icon/signature/payee.png" width="100" height="50" style="margin-top:10px;"/>
+			
+					<div style="width:200px;margin-left: 755px;display:flex;">
+					<img src="../../resource/utility_icon/signature/mg.png" width="130" height="60" style="margin-top:10px;"/>
 				</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 585px;margin-top:-80px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-80px;">หัวหน้าฝ่ายการเงิน </div>
-			<div style="position:absolute; bottom:80px; font-size: 18px;margin-left: 530px;">(นางอรรยากานต์ วงษ์กวีวัฒนกูล)</div>
-			<div style="position:absolute; bottom:80px; font-size: 18px;margin-left: 773px;">( นายวิโชติ พันธุ์สกุล )</div>
+			<div style="font-size: 18px;margin-left: 790px;margin-top:-50px;">( ผู้จัดการ )</div>
+			
+			<!--
+				<div style="font-size: 18px;margin-left: 585px;margin-top:-80px;">ผู้จัดการ</div>
+				<div style="font-size: 18px;margin-left: 780px;margin-top:-80px;">หัวหน้าฝ่ายการเงิน </div>
+				<div style="position:absolute; bottom:80px; font-size: 18px;margin-left: 530px;">(  )</div>
+				<div style="position:absolute; bottom:80px; font-size: 18px;margin-left: 773px;">(  )</div>
+			-->
 			';
 
 	$dompdf = new Dompdf([

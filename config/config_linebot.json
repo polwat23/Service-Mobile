@@ -1,16 +1,16 @@
 {
-	"LINEBOT_NAME" : "EGAT SAVING CONNEXT",
-	"COOP_ID" : "008001",
-	"COOP_NAME" : "สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิตแห่งประเทศไทย จำกัด",
-	"COOP_KEY" : "EGAT",
-	"LIFF_ID" : "1657316889-yBwvxpNE",
-	"LIFF_CONSENT_ID":"1657316889-576AD28V",
-	"LIFF_LOCK_ACCOUNT":"-",
-	"LINE_ID" : "@339ysocv",
+	"LINEBOT_NAME" : "RYT Saving",
+	"COOP_ID" : "006001",
+	"COOP_NAME" : "สหกรณ์ออมทรัพย์ครูระยอง จำกัด",
+	"COOP_KEY" : "RYT",
+	"LIFF_ID" : "1656990983-gvX9v4jL",
+	"LIFF_CONSENT_ID":"1656990983-wlMKBnVx",
+	"LIFF_LOCK_ACCOUNT":"1656990983-3bMvpaQ9",
+	"LINE_ID" : "@784paxpa",
 	"LINK_BIND" : "rytsaving://app/home?qrdata=",
 	"LINEBOT_URL" : "https://api.line.me/v2/bot/message/reply",
 	"LINEBOTPUSH_URL" : "https://api.line.me/v2/bot/message/push",
-	"LINEBOT_CHANNELID" : "1657316808",
-	"LINEBOT_SECRETKEY" : "9fa9d45f7814b072608f8646359ee7dd",
-	"LINE_AUTH_KEY" : "2ZjGCsi1TyuN2uD/fsXc023S8jtkVmnf+e6UovKBsoigdFNn5rw/AacyHm+hojIFy1ehTI4nD4ysBffJWRQ2flQ91v53+hQoETnyyIgBI3IIEV7Rg/wBWsyQSw2xTJdVG4LOXwntWajsUNv6HmZzXgdB04t89/1O/w1cDnyilFU="
+	"LINEBOT_CHANNELID" : "1656991025",
+	"LINEBOT_SECRETKEY" : "ee89e2a316ddfc02d46cc35f3915d33d",
+	"LINE_AUTH_KEY" : "GlzUduiBw3ph8F9I4YVRHryfcFecOIDEr3Z1WnrwuIU4BGQgL0KEMWRx8AJjwp45SX/PVl6YJOCZyzTMRyeMJV6+bUyfZF83WqgLVM7SLATP5qHyaPeZRVlYLj2pz6vhRufP3oe4Ux9J5Eez9IUDYwdB04t89/1O/w1cDnyilFU="
 }

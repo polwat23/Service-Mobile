@@ -414,7 +414,7 @@ if(!$anonymous){
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION'] = $rowLimitTrans["limit_amount_transaction"];
 				$arrayResult['LIMIT_AMOUNT_TRANSACTION_COOP'] = $func->getConstant("limit_withdraw");
 				
-				if(preg_replace('/\./','',$dataComing["app_version"]) >= '131' || $dataComing["channel"] == 'web'){
+				if(preg_replace('/\./','',$dataComing["app_version"]) >= '100' || $dataComing["channel"] == 'web'){
 					$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
 					$arrayResult["APP_CONFIG"]["LINE_BOT_URL"] =  $config["URL_LINEBOT"];
 				}
@@ -478,7 +478,7 @@ if(!$anonymous){
 		if(isset($arrayAllMenu)){
 			$arrayResult['MENU'] = $arrayAllMenu;
 			
-			if(preg_replace('/\./','',$dataComing["app_version"]) >= '131' || $dataComing["channel"] == 'web'){
+			if(preg_replace('/\./','',$dataComing["app_version"]) >= '100' || $dataComing["channel"] == 'web'){
 				$arrayResult["APP_CONFIG"]["PRIVACY_POLICY_URL"] =  $config["URL_PRIVACY"];
 				$arrayResult["APP_CONFIG"]["LINE_BOT_URL"] =  $config["URL_LINEBOT"];
 			}

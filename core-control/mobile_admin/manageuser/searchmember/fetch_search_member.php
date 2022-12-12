@@ -25,22 +25,26 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrayResult['RESULT'] = FALSE;
 			require_once('../../../../include/exit_footer.php');
 		}
-		$fetchMember = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.ADDR_email as email,mb.mem_telmobile as MEM_TELMOBILE,
-											mb.member_date,mb.member_no,
-											mb.ADDR_NO as ADDR_NO,
-											mb.ADDR_MOO as ADDR_MOO,
-											mb.ADDR_SOI as ADDR_SOI,
-											mb.ADDR_VILLAGE as ADDR_VILLAGE,
-											mb.ADDR_ROAD as ADDR_ROAD,
-											MBT.TAMBOL_DESC AS TAMBOL_DESC,
-											MBD.DISTRICT_DESC AS DISTRICT_DESC,
-											MB.PROVINCE_CODE,
-											MBP.PROVINCE_DESC AS PROVINCE_DESC,
-											MB.POSTCODE AS ADDR_POSTCODE
-											FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-											LEFT JOIN mbucftambol MBT ON mb.tambol_code = MBT.tambol_code
-											LEFT JOIN mbucfdistrict MBD ON mb.DISTRICT_CODE = MBD.district_code
-											LEFT JOIN mbucfprovince MBP ON mb.province_code = MBP.province_code
+		$fetchMember = $conoracle->prepare("select mp.prename_desc AS prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+												mb.member_date,mb.member_no,mps.position_desc,mt.membtype_desc,
+												mb.ADDR_NO as ADDR_NO,
+												mb.ADDR_MOO as ADDR_MOO,
+												mb.ADDR_SOI as ADDR_SOI, 
+												mb.ADDR_VILLAGE as ADDR_VILLAGE,
+												mb.ADDR_ROAD as ADDR_ROAD,
+												MBT.TAMBOL_DESC AS TAMBOL_DESC,
+												MBD.DISTRICT_DESC AS DISTRICT_DESC,
+												MB.PROVINCE_CODE AS PROVINCE_CODE,
+												MBP.PROVINCE_DESC AS PROVINCE_DESC,
+												MB.ADDR_POSTCODE AS ADDR_POSTCODE,
+												mbg.membgroup_desc as MEMBGROUP_DESC
+												from mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
+												LEFT JOIN mbucfposition mps ON mb.position_code = mps.position_code
+												LEFT JOIN mbucfmembgroup mbg ON mb.membgroup_code = mbg.membgroup_code
+												LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
+												LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
+												LEFT JOIN MBUCFDISTRICT MBD ON mb.amphur_code = MBD.DISTRICT_CODE
+												LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 											WHERE 1=1".(isset($dataComing["member_no"]) && $dataComing["member_no"] != '' ? " and mb.member_no = :member_no" : null).
 											(isset($dataComing["member_name"]) && $dataComing["member_name"] != '' ? " and (TRIM(mb.memb_name) LIKE :member_name" : null).
 											(isset($arrayExecute[':member_surname']) ? " and TRIM(mb.memb_surname) LIKE :member_surname)" : (isset($arrayExecute[':member_name']) ? " OR TRIM(mb.memb_surname) LIKE :member_name)" : null)).

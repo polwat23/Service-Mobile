@@ -11,6 +11,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
+											LCC.COLLACTIVE_AMT,
 											NVL(LCM.LOANAPPROVE_AMT,0) as LOANAPPROVE_AMT,
 											NVL(LCM.principal_balance,0) as LOAN_BALANCE
 											FROM
@@ -28,7 +29,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl = array();
 			$arrayColl["CONTRACT_NO"] = $rowUcollwho["LOANCONTRACT_NO"];
 			$arrayColl["TYPE_DESC"] = $rowUcollwho["TYPE_DESC"];
-			$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
+			//$arrayColl["MEMBER_NO"] = $rowUcollwho["MEMBER_NO"];
+			$arrayColl["GUARANTEE_AMT"] = number_format($rowUcollwho["COLLACTIVE_AMT"],2);
 			$arrayAvarTar = $func->getPathpic($rowUcollwho["MEMBER_NO"]);
 			$arrayColl["AVATAR_PATH"] = isset($arrayAvarTar["AVATAR_PATH"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH"] : null;
 			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;

@@ -20,6 +20,36 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
+	
+	$userTest = array();
+	$userTest[]['member_no'] = "00000142";
+	$userTest[]['member_no'] = "00002408";
+	$userTest[]['member_no'] = "00002409";
+	$userTest[]['member_no'] = "00002664";
+	$userTest[]['member_no'] = "00002674";
+	$userTest[]['member_no'] = "00002755";
+	$userTest[]['member_no'] = "00002866";
+	$userTest[]['member_no'] = "00000008";
+	$userTest[]['member_no'] = "00002176";
+	$userTest[]['member_no'] = "00002939";
+	$userTest[]['member_no'] = "00003094";
+	$userTest[]['member_no'] = "00001364";
+
+	$regiter = false;
+	foreach($userTest as $memberNoTest){
+		if($member_no == $memberNoTest["member_no"]){
+			$regiter = true;
+		}
+	}
+   
+	if(!$regiter){
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale].$regiter;
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+	}
+	
 	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
 	$checkMember->execute([':member_no' => $member_no]);
 	if($checkMember->rowCount() > 0){
@@ -58,7 +88,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 				require_once('../../include/exit_footer.php');
 				
 			}
-
+		
 			$arrayResult['MEMBER_NO'] = $member_no;
 			$arrayResult['CARD_PERSON'] = $dataComing["id_card"];
 			$arrayResult['MEMBER_FULLNAME'] = $rowMember["PRENAME_DESC"].$rowMember["MEMB_NAME"].' '.$rowMember["MEMB_SURNAME"];
