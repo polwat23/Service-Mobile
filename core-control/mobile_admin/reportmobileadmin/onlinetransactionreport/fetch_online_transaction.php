@@ -15,6 +15,15 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 			$arrDeptItemType["SIGN_FLAG"] = $rowDeptItemType["SIGN_FLAG"];
 			$deptItemTypeData[] = $arrDeptItemType;
 		}
+		$arrDeptItemTypeDap = array();
+		$arrDeptItemTypeDap["DEPTITEMTYPE_CODE"] = "DAP";
+		$arrDeptItemTypeDap["DEPTITEMTYPE_DESC"] = "รับเงินกู้เข้าบัญชีเงินฝาก";
+		$deptItemTypeData[] = $arrDeptItemTypeDap;
+		
+		$arrDeptItemTypeWFS = array();
+		$arrDeptItemTypeWFS["DEPTITEMTYPE_CODE"] = "WFS";
+		$arrDeptItemTypeWFS["DEPTITEMTYPE_DESC"] = "ถอนเงินฝากไปชำระหนี้";
+		$deptItemTypeData[] = $arrDeptItemTypeWFS;
 		if(isset($dataComing["trrans_type"]) && $dataComing["trrans_type"] != ""){
 			if($dataComing["trrans_type"] == "payloan"){
 				$arrayExecute["trrans_type"] = "2";

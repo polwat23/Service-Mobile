@@ -456,7 +456,7 @@ class CalculateLoan {
 											LNM.LASTCALINT_DATE,LNM.LOANPAYMENT_TYPE,LNT.CONTINT_TYPE,LNT.INTEREST_METHOD,LNT.PAYSPEC_METHOD,LNT.INTSTEP_TYPE,LNM.LASTPROCESS_DATE,
 											(LNM.NKEEP_PRINCIPAL + LNM.NKEEP_INTEREST) as SPACE_KEEPING,LNM.INTEREST_RETURN,LNM.NKEEP_PRINCIPAL,LNM.NKEEP_INTEREST,
 											(CASE WHEN LNM.LASTPROCESS_DATE < LNM.LASTCALINT_DATE OR LNM.LASTPROCESS_DATE IS NULL THEN '1' ELSE '0' END) AS CHECK_KEEPING,LNM.LAST_STM_NO,
-											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE
+											LNM.INT_CONTINTTYPE,LNM.INT_CONTINTRATE,LNM.INT_CONTINTTABCODE,LNM.INTEREST_ARREAR as BFINTEREST_ARREAR
 											FROM lncontmaster lnm LEFT JOIN lnloantype lnt ON lnm.LOANTYPE_CODE = lnt.LOANTYPE_CODE
 											WHERE lnm.loancontract_no = :contract_no and lnm.contract_status > 0 and lnm.contract_status <> 8");
 		$contLoan->execute([':contract_no' => $loancontract_no]);
@@ -1011,7 +1011,7 @@ class CalculateLoan {
 		}
 		$prinPay = $amt_transfer;
 		$int_returnSrc = 0;
-		$intArr = $interest["INT_ARREAR"];
+		$intArr = $interest["INT_ARREAR"] + $interest["INT_PERIOD"];
 		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		
 		if($interestPeriod > 0){
@@ -1028,8 +1028,8 @@ class CalculateLoan {
 													INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
 													BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
 													VALUES(?,?,?,?,TRUNC(SYSDATE),TRUNC(SYSDATE),
-													TRUNC(SYSDATE),?,?,?,?,?,?,SYSDATE,
-													TO_DATE(?,'yyyy/mm/dd  hh24:mi:ss'),?,?,?,
+													TRUNC(SYSDATE),?,?,?,?,?,?,TO_DATE(?,'yyyy/mm/dd  hh24:mi:ss'),
+													TRUNC(SYSDATE),?,?,?,
 													?,?,1,'MOBILE',SYSDATE,?,?,?,SYSDATE,'1')");
 		}else{
 			if($dataCont["PRINCIPAL_BALANCE"] > 0){
@@ -1047,8 +1047,8 @@ class CalculateLoan {
 														INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
 														BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
 														VALUES(?,?,?,?,TRUNC(SYSDATE),TRUNC(SYSDATE),
-														TRUNC(SYSDATE),?,?,?,?,?,?,SYSDATE,
-														TO_DATE(?,'yyyy/mm/dd  hh24:mi:ss'),?,?,?,
+														TRUNC(SYSDATE),?,?,?,?,?,?,TO_DATE(?,'yyyy/mm/dd  hh24:mi:ss'),
+														TRUNC(SYSDATE),?,?,?,
 														?,?,1,'MOBILE',SYSDATE,?,?,?,SYSDATE,'1')");
 			}else{
 				$executeLnSTM = [
@@ -1065,8 +1065,8 @@ class CalculateLoan {
 														INTEREST_RETURN,MONEYTYPE_CODE,ITEM_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID,REF_SLIPNO,
 														BFINTRETURN_AMT,INTACCUM_DATE,SYNC_NOTIFY_FLAG)
 														VALUES(?,?,?,?,TRUNC(SYSDATE),TRUNC(SYSDATE),
-														TRUNC(SYSDATE),?,?,?,?,?,?,TRUNC(SYSDATE),
-														TO_DATE(?,'yyyy/mm/dd  hh24:mi:ss'),?,?,?,
+														TRUNC(SYSDATE),?,?,?,?,?,?,TO_DATE(?,'yyyy/mm/dd  hh24:mi:ss'),
+														TRUNC(SYSDATE),?,?,?,
 														?,?,1,'MOBILE',SYSDATE,?,?,?,SYSDATE,'1')");
 			}
 		}
@@ -1082,23 +1082,22 @@ class CalculateLoan {
 				$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
 				$intArr,
 				$dataCont["LAST_STM_NO"] + 1,
-				floor($periodPayment),
 				$contract_no
 			];
 			if(isset($dataCont["STARTCONT_DATE"]) && $dataCont["STARTCONT_DATE"] != ""){
 				if($intArr > 0){
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
 																PRINCIPAL_BALANCE = ?,
+																LASTCALINT_DATE = TRUNC(SYSDATE),
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
-																PERIOD_PAYMENT = ?
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
 																WHERE loancontract_no = ?");
 				}else{
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
 																PRINCIPAL_BALANCE = ?,
+																LASTCALINT_DATE = TRUNC(SYSDATE),
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
-																PERIOD_PAYMENT = ?
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
 																WHERE loancontract_no = ?");
 				}
 			}else{
@@ -1106,17 +1105,17 @@ class CalculateLoan {
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
 																PRINCIPAL_BALANCE = ?,
 																STARTCONT_DATE = TRUNC(SYSDATE),
+																LASTCALINT_DATE = TRUNC(SYSDATE),
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
-																PERIOD_PAYMENT = ?
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
 																WHERE loancontract_no = ?");
 				}else{
 					$updateLnContmaster = $conoracle->prepare("UPDATE lncontmaster SET WITHDRAWABLE_AMT = ?,
 																PRINCIPAL_BALANCE = ?,
 																STARTCONT_DATE = TRUNC(SYSDATE),
+																LASTCALINT_DATE = TRUNC(SYSDATE),
 																LASTPAYMENT_DATE = TRUNC(SYSDATE),
-																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE),
-																PERIOD_PAYMENT = ?
+																INTEREST_ARREAR = ?,LAST_STM_NO = ?,LASTACCESS_DATE = TRUNC(SYSDATE)
 																WHERE loancontract_no = ?");
 				}
 			}
