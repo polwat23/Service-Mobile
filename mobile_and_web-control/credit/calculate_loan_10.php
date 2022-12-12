@@ -11,11 +11,11 @@ $getDeptATM = $conoracle->prepare("SELECT DEPTACCOUNT_NO FROM dpdeptmaster WHERE
 $getDeptATM->execute([':member_no' => $member_no]);
 $rowDept = $getDeptATM->fetch(PDO::FETCH_ASSOC);
 if(isset($rowDept["DEPTACCOUNT_NO"]) && $rowDept["DEPTACCOUNT_NO"] != ""){
-	$getSalaryAmt = $conoracle->prepare("SELECT NVL(salary_amount + incomeetc_amt,0) as SALARY_AMOUNT FROM mbmembmaster WHERE member_no = :member_no");
+	$getSalaryAmt = $conoracle->prepare("SELECT NVL(salary_amount,0) as SALARY_AMOUNT ,NVL(incomeetc_amt,0) as INCOMEETC_AMT   FROM mbmembmaster WHERE member_no = :member_no");
 	$getSalaryAmt->execute([':member_no' => $member_no]);
 	$rowSalary = $getSalaryAmt->fetch(PDO::FETCH_ASSOC);
-
-	$maxloan_amt = $rowSalary["SALARY_AMOUNT"] * 3;
+	$salary_amount = $rowSalary["SALARY_AMOUNT"] + $rowSalary["INCOMEETC_AMT"];
+	$maxloan_amt = $salary_amount * 3;
 	if($maxloan_amt > 100000){
 		$maxloan_amt = 100000;
 	}
