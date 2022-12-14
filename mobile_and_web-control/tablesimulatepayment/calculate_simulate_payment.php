@@ -203,7 +203,18 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				$arrPayment[] = $arrPaymentPerPeriod;
 			}
 		}
+		ob_start();
 		include(__DIR__.'/show_table_payment.php');
+		$response = ob_get_clean();
+		
+		if ($forceNewSecurity == true) {
+			$signature = "";
+			openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+			header("Response_token: ".base64_encode($signature));
+		}
+		
+		echo $response;
+
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
