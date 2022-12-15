@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT YR.DIV_YEAR AS DIV_YEAR FROM YRDIVMASTER YR LEFT JOIN yrcfrate yc ON yr.div_year = yc.div_year
-																	WHERE YR.MEMBER_NO = :member_no and yc.webshow_flag = '1'
+																	WHERE YR.MEMBER_NO = :member_no 
 																GROUP BY YR.DIV_YEAR ORDER BY YR.DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,

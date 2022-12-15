@@ -1,0 +1,5 @@
+{"conmysql":null,"conoldmysql":null,"conoracle":null}
+{"conmysql":null,"conoldmysql":null,"conoracle":null}
+{"ERROR":"SQLSTATE[HY000] [1049] Unknown database 'mobile_ubl_test'","RESULT":false,"MESSAGE":"Can't connect To MySQL"}
+{"ERROR":"SQLSTATE[HY000] [1049] Unknown database 'mobile_ubl_test'","RESULT":false,"MESSAGE":"Can't connect To MySQL"}
+{"ERROR":"SQLSTATE[HY000] [1049] Unknown database 'mobile_ubl_test'","RESULT":false,"MESSAGE":"Can't connect To MySQL"}
