@@ -6,13 +6,13 @@ set fmonth=00%Month%
 set fday=00%Day%
 set today=%Year%%fmonth:~-2%%fday:~-2%
 
-set DAY_OF_LIFE=3
+set DAY_OF_LIFE=5
 set DBHOST=localhost
 set DBPORT=3306
 set DBUSER=root
-set DBPASS=@MSK2021
-set DBNAME=mobile_msk
-set PROJECT_PATH=C:\Mobile\service-msk\
+set DBPASS=@UBL2022
+set DBNAME=mobile_ubl
+set PROJECT_PATH=C:\Mobile\service-ubl\
 set BACKUP_PATH=%PROJECT_PATH%backup\
 
 IF NOT EXIST %BACKUP_PATH% mkdir %BACKUP_PATH%

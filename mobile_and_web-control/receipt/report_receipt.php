@@ -217,7 +217,7 @@ function GenerateReport($dataReport,$header,$lib){
 			</style>
 
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
-			<div style="text-align: left;"><img src="../../resource/logo/logo.png" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
+			<div style="text-align: left;"><img src="../../resource/logo/ubl.jpg" style="margin: 10px 0 0 5px" alt="" width="80" height="80" /></div>
 			<div style="text-align:left;position: absolute;width:100%;margin-left: 140px">';
 	if($header["keeping_status"] == '-99' || $header["keeping_status"] == '-9'){
 		if($header["kept_amt"] > 0){
@@ -228,11 +228,11 @@ function GenerateReport($dataReport,$header,$lib){
 	}else{
 		$html .= '<p style="margin-top: -5px;font-size: 22px;font-weight: bold">ใบเสร็จรับเงิน</p>';
 	}
-	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูมหาสารคาม จำกัด</p>
-			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 1102/6 ถ.สมถวิลราษฏร์ ต.ตลาด </p>
-			<p style="margin-top: -25px;font-size: 18px;">อ.เมือง จ.มหาสารคาม 44000 </p>
-			<p style="margin-top: -25px;font-size: 18px;">โทร : 043 711557  โทรสาร : 043 722731</p>
-			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.mkttc.com</p>
+	$html .= '<p style="margin-top: -30px;font-size: 22px;font-weight: bold">สหกรณ์ออมทรัพย์ครูอุบลราชธานี จำกัด</p>
+			<p style="margin-top: -27px;font-size: 18px;">เลขที่ 292 หมู่ 12 ตำบลไร่น้อย </p>
+			<p style="margin-top: -25px;font-size: 18px;">อำเภอเมือง  จังหวัดอุบลราชธานี  34000  </p>
+			<p style="margin-top: -25px;font-size: 18px;">โทร : 045-435246 ถึง 9</p>
+			<p style="margin-top: -27px;font-size: 19px;font-weight: bold">www.ubonteacher.com</p>
 			</div>
 			</div>
 			<div style="margin: 25px 0 10px 0;">

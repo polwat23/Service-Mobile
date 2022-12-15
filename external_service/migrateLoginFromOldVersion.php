@@ -36,6 +36,8 @@ $configError = json_decode($jsonConfigError,true);
 $jsonConfig = file_get_contents(__DIR__.'/../config/config_constructor.json');
 $config = json_decode($jsonConfig,true);
 
+$gensoftSCPrivatekey = openssl_pkey_get_private(file_get_contents(__DIR__.'/../config/cert/gensoft-server-to-client_privatekey.pem'));
+
 $lib = new library();
 $con = new connection();
 $auth = new Authorization();
@@ -62,7 +64,12 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+		$signature = "";
+		openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+		header("Response_token: ".base64_encode($signature));
+					
+		echo $response;
 		exit();
 	}
 	$member_no = $dataComing["member_no"];
@@ -84,7 +91,13 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 				$arrayResult['RESPONSE_CODE'] = "WS0051";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+
+				$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+				$signature = "";
+				openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+				header("Response_token: ".base64_encode($signature));
+					
+				echo $response;
 				exit();
 			}
 			$refresh_token = $lib->generate_token();
@@ -155,7 +168,14 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 							$arrayResult['REFRESH_TOKEN'] = $refresh_token;
 							$arrayResult['ACCESS_TOKEN'] = $access_token;
 							$arrayResult['RESULT'] = TRUE;
-							echo json_encode($arrayResult);
+							
+							$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+							$signature = "";
+							openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+							header("Response_token: ".base64_encode($signature));
+						
+							echo $response;
+							exit();
 						}else{
 							$conmysql->rollback();
 							$filename = basename(__FILE__, '.php');
@@ -174,7 +194,13 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 							$arrayResult['RESPONSE_CODE'] = "WS1001";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
-							echo json_encode($arrayResult);
+
+							$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+							$signature = "";
+							openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+							header("Response_token: ".base64_encode($signature));
+							
+							echo $response;
 							exit();
 						}
 					}else{
@@ -199,7 +225,12 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 						$arrayResult['RESPONSE_CODE'] = "WS1001";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
-						echo json_encode($arrayResult);
+						$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+						$signature = "";
+						openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+						header("Response_token: ".base64_encode($signature));
+							
+						echo $response;
 						exit();
 					}
 				}else{
@@ -223,7 +254,12 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 					$arrayResult['RESPONSE_CODE'] = "WS1001";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
-					echo json_encode($arrayResult);
+					$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+					$signature = "";
+					openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+					header("Response_token: ".base64_encode($signature));
+						
+					echo $response;
 					exit();
 				}
 			}catch (PDOExecption $e) {
@@ -241,7 +277,12 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 				$arrayResult['RESPONSE_CODE'] = "WS1001";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
-				echo json_encode($arrayResult);
+				$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+				$signature = "";
+				openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+				header("Response_token: ".base64_encode($signature));
+					
+				echo $response;
 				exit();
 			}
 		}else {
@@ -249,7 +290,12 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
 			http_response_code(401);
-			echo json_encode($arrayResult);
+			$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+			$signature = "";
+			openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+			header("Response_token: ".base64_encode($signature));
+							
+			echo $response;
 			exit();
 		}
 	}else {
@@ -257,7 +303,12 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
 		http_response_code(401);
-		echo json_encode($arrayResult);
+		$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+		$signature = "";
+		openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+		header("Response_token: ".base64_encode($signature));
+							
+		echo $response;
 		exit();
 	}
 }else{
@@ -275,7 +326,13 @@ if($lib->checkCompleteArgument(['member_no','logon_no','api_token','unique_id'],
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
 	http_response_code(400);
-	echo json_encode($arrayResult);
+	
+	$response = json_encode($arrayResult, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+	$signature = "";
+	openssl_sign($response, $signature, $gensoftSCPrivatekey, OPENSSL_ALGO_SHA512);
+	header("Response_token: ".base64_encode($signature));
+		
+	echo $response;
 	exit();
 }
 ?>
