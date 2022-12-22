@@ -43,7 +43,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SHARETYPE_DESC"] = $rowStm["SHRITEMTYPE_DESC"];
 				$arrayStm["PERIOD"] = $rowStm["PERIOD"];
 				$arrayStm["SLIP_NO"] = $rowStm["REF_SLIPNO"];
-				$arrGroupStm[] = $arrayStm;
+			//	$arrGroupStm[] = $arrayStm;
 			}
 			$arrayResult['STATEMENT'] = $arrGroupStm;
 			$arrayResult['RESULT'] = TRUE;
