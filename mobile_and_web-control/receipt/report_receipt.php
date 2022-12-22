@@ -209,12 +209,41 @@ function GenerateReport($dataReport,$header,$lib){
 				* {
 				  font-family: TH Niramit AS;
 				}
-
 				body {
 				  padding: 0 30px;
 				}
 				.sub-table div{
 					padding : 5px;
+				}
+				.center{
+					text-align:center
+				}
+				.right{
+					text-align:right;
+				}
+				th{
+					border: 1px solid;
+					font-size:18px;
+					padding:3px 5px 7px 5px;
+				}
+				td{
+					font-size 18px;
+				}
+				.border{
+					border:1px solid;
+				}
+				.table-data{
+					padding:0px 5px 0px 5px;
+				}
+				.wrapper-page {
+					page-break-after: always;
+				  }
+				  
+				.wrapper-page:last-child {
+					page-break-after: avoid;
+				}
+				.border-right{
+					border-right:1px solid;
 				}
 			</style>
 			<div style="display: flex;text-align: center;position: relative;margin-bottom: 20px;">
@@ -259,81 +288,75 @@ function GenerateReport($dataReport,$header,$lib){
 			</tbody>
 			</table>
 			</div>
-			<div style="border: 0.5px solid black;width: 100%; height: 325px;">
-			<div style="display:flex;width: 100%;height: 30px;" class="sub-table">
-			<div style="border-bottom: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 350px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;padding-top: 1px;">รายการชำระ</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 355px;padding-top: 1px;">งวดที่</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 465px;padding-top: 1px;">เงินต้น</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 580px;padding-top: 1px;">ดอกเบี้ย</div>
-			<div style="width: 120px;text-align: center;font-size: 18px;font-weight: bold;border-right : 0.5px solid black;margin-left: 700px;padding-top: 1px;">รวมเป็นเงิน</div>
-			<div style="width: 150px;text-align: center;font-size: 18px;font-weight: bold;margin-left: 815px;padding-top: 1px;">ยอดคงเหลือ</div>
-			</div>';
+			<div>
+				<table style=" border-collapse: collapse; width:100%">
+					<tr>
+						<th class="center" style="width:350px">รายการชำระ</th>
+						<th class="center" style="width:80px">งวดที่</th>
+						<th class="center">เงินต้น</th>
+						<th class="center">ดอกเบี้ย</th>
+						<th class="center">รวมเป็นเงิน</th>
+						<th class="center">ยอดเงินคงเหลือ</th>
+					</tr>
+				</table>
+				<div style=" ' . (sizeof($dataReport) <= 12 ? 'height: 270px;' : null) . '  border-left:1px solid; margin-left:-0.5px; border-right:1px solid; margin-right:-0.5px;">';
 				// Detail
-	$html .= '<div style="width: 100%;height: 260px" class="sub-table">';
-	for($i = 0;$i < sizeof($dataReport); $i++){
-		if($i == 0){
-			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;border-right: 0.5px solid black;height: 250px;">&nbsp;</div>
-			<div style="width: 100px;border-right: 0.5px solid black;height: 250px;margin-left: 355px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 465px;">&nbsp;</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 270px;margin-left: 580px;">&nbsp;</div>
-			<div style="width: 120px;border-right: 0.5px solid black;height: 270px;margin-left: 700px;">&nbsp;</div>
-			<div style="width: 350px;text-align: left;font-size: 18px">
-			<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
+	
+if (sizeof($dataReport) <= 12) {
+	$html .= '
+				<div style="border-right:1px solid; position:absolute; margin-left:360px; height:270px;"></div>
+				<div style="border-right:1px solid; position:absolute; margin-left:451px; height:270px;"></div>
+				<div style="border-right:1px solid; position:absolute; margin-left:559px; height:270px;"></div>
+				<div style="border-right:1px solid; position:absolute; margin-left:676.5px; height:270px;"></div>
+				<div style="border-right:1px solid; position:absolute; margin-left:811.5px; height:270px;"></div>
+';
+}
+
+$html .= '<table style=" border-collapse: collapse; width:100%">';
+// Detail
+
+$i = 0;
+$bordRight = sizeof($dataReport) > 12 ? 'border-right:1px solid;' : '';
+$endRow = -1;
+$startRow = -1;
+if (sizeof($dataReport) == 19 || sizeof($dataReport) == 20) {
+	$endRow = 18;
+	$startRow = 19;
+} else if (sizeof($dataReport) >= 21) {
+	$endRow = 19;
+	$startRow = 20;
+}
+foreach ($dataReport as $data) {
+	$html .= '
+			<tr>
+				<td class="table-data"  style="width:350.1px; ' . $bordRight . ($i == $endRow ? 'border-bottom:1px solid;' : null) . ($i == $startRow ? 'border-top:1px solid;' : null) . '" >' . ($data["TYPE_DESC"] ?? null) . ' ' . $dataReport[$i]["PAY_ACCOUNT"] . '</td>
+				<td class="center table-data " style="width:80.3px; ' . $bordRight . $bordRight . ($i == $endRow ? 'border-bottom:1px solid;' : null) . ($i == $startRow ? 'border-top:1px solid;' : null) . '">' . ($data["PERIOD"] ?? null) . '</td>
+				<td class="right table-data " style="width:97.8px; ' . $bordRight . $bordRight . ($i == $endRow ? 'border-bottom:1px solid;' : null) . ($i == $startRow ? 'border-top:1px solid;' : null) . '">' . ($data["PRN_BALANCE"] ?? null) . '</td>
+				<td class="right table-data " style="width:107px; ' . $bordRight . $bordRight . ($i == $endRow ? 'border-bottom:1px solid;' : null) . ($i == $startRow ? 'border-top:1px solid;' : null) . '">' . ($data["INT_BALANCE"] ?? null) . '</td>
+				<td class="right table-data " style="width:124.5px; ' . $bordRight . $bordRight . ($i == $endRow ? 'border-bottom:1px solid;' : null) . ($i == $startRow ? 'border-top:1px solid;' : null) . '">' . ($data["ITEM_PAYMENT"] ?? null) . '</td>
+				<td class="right table-data " style="' . ($i == $endRow ? 'border-bottom:1px solid;' : null) . ($i == $startRow ? 'border-top:1px solid;' : null) . '">' . ($data["ITEM_BALANCE"] ?? null) . '</td>
+			</tr>
+		';
+	$sumBalance += $data["ITEM_PAYMENT_NOTFORMAT"];
+	$i++;
+}
+$html .= '	
+		</table>
 			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
-			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
-			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
-			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
-			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
-			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
-			</div>
+			<table style=" border-collapse: collapse; width:100%">
+				<tr>
+					<td class="center border" style="width:557px;">' . $lib->baht_text($sumBalance) . '</td>
+					<td class="border center" style="width:114.5px">รวมเงิน</td>
+					<td class="border right" style="width:128px; padding-right:5px;">' . $sumBalance . '</td>
+					<td class="border right" style="padding-right:5px;"></td>
+				</tr>				
+			</table>
 			</div>';
-		}else{
-			$html .= '<div style="display:flex;height: 30px;padding:0px">
-			<div style="width: 350px;text-align: left;font-size: 18px">
-				<div>'.$dataReport[$i]["TYPE_DESC"].' '.$dataReport[$i]["PAY_ACCOUNT"].'</div>
-			</div>
-			<div style="width: 100px;text-align: center;font-size: 18px;margin-left: 355px;">
-			<div>'.($dataReport[$i]["PERIOD"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 465px;">
-			<div>'.($dataReport[$i]["PRN_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 110px;text-align: right;font-size: 18px;margin-left: 580px;">
-			<div>'.($dataReport[$i]["INT_BALANCE"] ?? null).'</div>
-			</div>
-			<div style="width: 120px;text-align: right;font-size: 18px;margin-left: 700px;">
-			<div>'.($dataReport[$i]["ITEM_PAYMENT"] ?? null).'</div>
-			</div>
-			<div style="width: 150px;text-align: right;font-size: 18px;margin-left: 814px;">
-			<div>'.($dataReport[$i]["ITEM_BALANCE"] ?? null).'</div>
-			</div>
-			</div>';
-		}
-		$sumBalance += $dataReport[$i]["ITEM_PAYMENT_NOTFORMAT"]; 
-	}
-	$html .= '</div>';
-			// Footer
-	$html .= '<div style="display:flex;width: 100%;height: 40px" class="sub-table">
-			<div style="border-top: 0.5px solid black;">&nbsp;</div>
-			<div style="width: 600px;text-align:center;height: 30px;font-size: 18px;padding-top: 0px;">'.$lib->baht_text($sumBalance).'</div>
-			<div style="width: 110px;border-right: 0.5px solid black;height: 30px;margin-left: 465px;padding-top: 0px;">&nbsp;</div>
-			<div style="width: 110px;text-align: center;font-size: 18px;border-right : 0.5px solid black;padding-top: 0px;height:30px;margin-left: 580px">
-			รวมเงิน
-			</div>
-			<div style="width: 120px;text-align: right;border-right: 0.5px solid black;height: 30px;margin-left: 700px;padding-top: 0px;font-size: 18px;">'.number_format($sumBalance,2).'</div>
-			</div>
-			</div>
+if (sizeof($dataReport) > 15 && sizeof($dataReport) < 19) {
+	$html .= '<div class="wrapper-page"></div>';
+}
+// Footer
+	$html .= '
 			<div style="display:flex;">
 			<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง
 			</div>
