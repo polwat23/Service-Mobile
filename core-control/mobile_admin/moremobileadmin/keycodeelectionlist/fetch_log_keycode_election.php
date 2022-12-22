@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrGrp = array();
 		
 		$getAllReqDocno = $conmysql->prepare("SELECT loe.id_regelection, loe.member_no, loe.keycode, loe.tel_mobile, loe.register_date, loe.update_date
-																FROM logregisterelection loe");
+																FROM logregisterelection loe WHERE YEAR(register_date) = YEAR(NOW())");
 		$getAllReqDocno->execute();
 		while($rowDocno = $getAllReqDocno->fetch(PDO::FETCH_ASSOC)){
 			$arrDocno = array();

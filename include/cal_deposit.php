@@ -327,6 +327,29 @@ class CalculateDep {
 	}
 	public function depositCheckWithdrawRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
+		$getLimitWithPerTimes = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_amount_transaction'");
+		$getLimitWithPerTimes->execute();
+		$rowLimitWithPerTimes = $getLimitWithPerTimes->fetch(\PDO::FETCH_ASSOC);
+		if($amt_transfer > $rowLimitWithPerTimes["constant_value"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0093";
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
+		$getLimitWith = $this->con->prepare("SELECT constant_value FROM gcconstant WHERE constant_name = 'limit_withdraw_in_day'");
+		$getLimitWith->execute();
+		$rowLimitWith = $getLimitWith->fetch(\PDO::FETCH_ASSOC);
+		$getSumDept = $this->conora->prepare("SELECT NVL(SUM(DPS.DEPTITEM_AMT),0) as SUM_AMT
+										FROM dpdeptmaster dpm LEFT JOIN dpdeptstatement dps ON dpm.deptaccount_no = dps.deptaccount_no
+										LEFT JOIN dpucfrecppaytype ducp ON dps.DEPTITEMTYPE_CODE = ducp.recppaytype_code
+										WHERE dpm.member_no = :member_no and to_char(dps.operate_date,'YYYYMM') = to_char(SYSDATE,'YYYYMM')
+										and ducp.chklimitdeptperson_flag = '1' and SUBSTR(DPS.DEPTITEMTYPE_CODE,0,1) = 'W'");
+		$getSumDept->execute([':member_no' => $dataConst["MEMBER_NO"]]);
+		$rowSumDept = $getSumDept->fetch(\PDO::FETCH_ASSOC);
+		if($rowSumDept["SUM_AMT"] + $amt_transfer > $rowLimitWith["constant_value"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0093";
+			$arrayResult['RESULT'] = FALSE;
+			return $arrayResult;
+		}
 		if($dataConst["DEPTCLOSE_STATUS"] != '0'){
 			$arrayResult['RESPONSE_CODE'] = "WS0089";
 			$arrayResult['RESULT'] = FALSE;

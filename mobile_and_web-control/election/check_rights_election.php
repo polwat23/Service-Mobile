@@ -7,14 +7,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$checkElection = $conoracle->prepare("SELECT NVL(POST_NO,'-99') as POST_NO FROM MBMEMBELECTION WHERE ELECTION_YEAR = EXTRACT(YEAR FROM SYSDATE) + 543 AND MEMBER_NO = :member_no");
 		$checkElection->execute([':member_no' => $member_no]);
 		$rowElection = $checkElection->fetch(PDO::FETCH_ASSOC);
-		if($rowElection["POST_NO"] == '-99' || $payload["member_no"] == 'etnmode2'){
+		if($rowElection["POST_NO"] == '-99' || $payload["member_no"] == 'etnmode1'  || $payload["member_no"] == 'etnmode3'){
 			$arrOption = array();
-			$arrOption[0]["LABEL"] = "สรรหาบนระบบออนไลน์";
+			$arrOption[0]["LABEL"] = "สรรหาโดยวิธีทางอิเล็กทรอนิกส์ (E–Vote)";
 			$arrOption[0]["VALUE"] = "3";
 			$arrayResult['OPTION_WISH'] = $arrOption;
-			$arrayResult['HEADER_ELECTION'] = "แจ้งความประสงค์ในการสรรหา";
+			$arrayResult['HEADER_ELECTION'] = "แจ้งความประสงค์ในการสรรหาประธานกรรมการและกรรมการดำเนินการ ประจำปี ".((date('Y'))+544);
+			$arrayResult['ELECTION_INFO_REMARK'] = "กรณีหมายเลขโทรศัพท์ไม่ถูกต้องกรุณาติดต่อสหกรณ์ฯด้วยตนเอง";
 			$arrayResult['RESULT'] = TRUE;
-			$arrayResult['REMARK'] = "เมื่อท่านสมาชิกลงทะเบียนการสรรหาทางอิเล็กทรอนิกส์ (E-VOTE) แล้ว ไม่สามารถเปลี่ยนเป็นวิธีการอื่นได้";
+			$arrayResult['REMARK'] = "เมื่อท่านลงทะเบียนการสรรหาทางอิเล็กทรอนิกส์ (E-Vote) แล้ว ไม่สามารถเปลี่ยนแปลงวิธีการสรรหาทางอื่นได้";
 			require_once('../../include/exit_footer.php');
 		}else{
 			$arrayResult['RESPONSE_CODE'] = "WS0000";

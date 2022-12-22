@@ -49,6 +49,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					}
 					if($checkDep["CAN_WITHDRAW"]){
 						$arrAccAllow["CAN_WITHDRAW"] = $rowContAllow["allow_withdraw_inside"] ?? '0';
+						$arrAccAllow["WITHDRAWABLE_LABEL"] = $lang_locale != 'en' ? "คงเหลือ (บาท)" : "Balance (Baht)";
+						$arrAccAllow["IS_SHOW_BALANCE"] = FALSE;
 					}else{
 						$arrAccAllow["CAN_WITHDRAW"] = '0';
 					}

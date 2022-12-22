@@ -45,7 +45,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 			':expire_date' => $expire_date,
 			':otp_text' => $arrMessage["BODY"]
 		])){
-			if($dataComing["menu_component"] == "Election"){
+			if($dataComing["menu_component"] == "??"){
 				$arrVerifyToken['exp'] = time() + 300;
 				$arrVerifyToken['action'] = "sendmsg";
 				$arrVerifyToken["mode"] = "eachmsg";

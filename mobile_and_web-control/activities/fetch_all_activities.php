@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$fetchEvent = $conmysql->prepare("SELECT id_task,task_topic,task_detail,start_date,end_date,
 										date_format(event_start_time,'%H:%i') as event_start_time,
 										date_format(event_end_time,'%H:%i') as event_end_time,
-										is_settime,create_date,update_date,is_notify,is_notify_before,create_by,event_html
+										is_settime,create_date,update_date,is_notify,is_notify_before,create_by
 										FROM gctaskevent WHERE is_use = '1' ORDER BY start_date DESC");
 		$fetchEvent->execute();
 		while($rowEvent = $fetchEvent->fetch(PDO::FETCH_ASSOC)){
@@ -27,7 +27,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayEvent["IS_NOTIFY"] = $rowEvent["is_notify"];
 			$arrayEvent["IS_NOTIFY_BEFORE"] = $rowEvent["is_notify_before"];
 			$arrayEvent["CREATE_BY"] = $rowEvent["create_by"];
-			$arrayEvent["EVENT_HTML"] = $rowEvent["event_html"];
 			$arrayGroupNews[] = $arrayEvent;
 		}
 		$arrayResult['EVENT'] = $arrayGroupNews;

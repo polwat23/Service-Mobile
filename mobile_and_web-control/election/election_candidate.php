@@ -4,21 +4,29 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Election')){
 		$conmysql->beginTransaction();
-		$getELectioned = $conmysql->prepare("SELECT id_election FROM gcelection WHERE member_no = :member_no");
-		$getELectioned->execute([':member_no' => $payload["member_no"]]);
+		$getELectioned = $conmysql->prepare("SELECT * FROM gcelection et
+														JOIN gccandidate cd On et.id_cdperson = cd.id_cdperson
+														JOIN gcgroupcandidate gc On gc.group_code = cd.group_code
+														WHERE et.member_no = :member_no and et.year_election = YEAR(CURDATE())+543 and gc.group_pages = :page_id");
+		$getELectioned->execute([
+			':member_no' => $payload["member_no"],
+			':page_id' => $dataComing["page_id"]
+		]);
 		if($getELectioned->rowCount() == 0){
 			if(in_array('999',$dataComing["number_candidate"])){
-				$insertElection = $conmysql->prepare("INSERT INTO gcelection(member_no,year_election,id_userlogin)
-																			VALUES(:member_no,YEAR(NOW())+543,:id_userlogin)");
+				$insertElection = $conmysql->prepare("INSERT INTO gcelection(member_no,year_election,id_userlogin,group_page)
+																			VALUES(:member_no,YEAR(NOW())+543,:id_userlogin,:page_id)");
 				if($insertElection->execute([
 					':member_no' => $payload["member_no"],
-					':id_userlogin' => $payload["id_userlogin"]
+					':id_userlogin' => $payload["id_userlogin"],
+					':page_id' => $dataComing["page_id"]
 				])){
 					$conmysql->commit();
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
 					$conmysql->rollback();
+					$arrayResult['IF'] = 1;
 					$arrayResult['RESULT'] = FALSE;
 					$arrayResult['RESPONSE_CODE'] = "WS0127";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -27,9 +35,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}else{
 				$bulkInsert = array();
 				foreach($dataComing["number_candidate"] as $id_cdperson){
-					$bulkInsert[] = "('".$payload["member_no"]."',".$id_cdperson.",'1',YEAR(NOW())+543,".$payload["id_userlogin"].")";
+					$bulkInsert[] = "('".$payload["member_no"]."',".$id_cdperson.",'1',YEAR(NOW())+543,".$payload["id_userlogin"].",".$dataComing["page_id"].")";
 				}
-				$insertElection = $conmysql->prepare("INSERT INTO gcelection(member_no,id_cdperson,is_countscore,year_election,id_userlogin)
+				$insertElection = $conmysql->prepare("INSERT INTO gcelection(member_no,id_cdperson,is_countscore,year_election,id_userlogin,group_page)
 																			VALUES".implode(',',$bulkInsert));
 				if($insertElection->execute()){
 					$conmysql->commit();
@@ -37,6 +45,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					require_once('../../include/exit_footer.php');
 				}else{
 					$conmysql->rollback();
+					$arrayResult['IF'] = 2;
 					$arrayResult['RESULT'] = FALSE;
 					$arrayResult['RESPONSE_CODE'] = "WS0127";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError["ELECTION"][0]["ELECTION_REPEAT"][0][$lang_locale];

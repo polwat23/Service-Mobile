@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
 			$fetchReqLoan = $conoracle->prepare("SELECT LOANREQUEST_DOCNO,LOANTYPE_CODE,LOANCREDIT_AMT,LOANREQUEST_AMT,LOANREQUEST_STATUS,
-															EXPENSE_ACCID FROM LNREQLOAN WHERE MEMBER_NO = :member_no AND LOANTYPE_CODE = '18' AND LOANREQUEST_STATUS = :req_status and TO_CHAR(LOANREQUEST_DATE,'YYYY-MM-DD') >= '2021-08-31'");
+															EXPENSE_ACCID, LOANREQUEST_DATE FROM LNREQLOAN WHERE MEMBER_NO = :member_no AND LOANTYPE_CODE = '18' AND LOANREQUEST_STATUS = :req_status and TO_CHAR(LOANREQUEST_DATE,'YYYY-MM-DD') >= '2021-08-31'");
 			$fetchReqLoan->execute([
 				':member_no' => $member_no,
 				':req_status' => $dataComing["req_status"]
@@ -21,6 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["LOANREQUEST_DOCNO"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["LOANREQUEST_AMT"];
+				$arrayReq["REQUEST_DATE"] = $lib->convertdate($rowReqLoan["LOANREQUEST_DATE"] ?? "","D m Y");
 				/*if($rowReqLoan["period_payment"] > 0){
 					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				}
@@ -53,7 +54,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 		}else{
 			$fetchReqLoan = $conoracle->prepare("SELECT LOANREQUEST_DOCNO,LOANTYPE_CODE,LOANCREDIT_AMT,LOANREQUEST_AMT,LOANREQUEST_STATUS,
-															EXPENSE_ACCID FROM lnreqloan WHERE member_no = :member_no and loantype_code = '18' and TO_CHAR(LOANREQUEST_DATE,'YYYY-MM-DD') >= '2021-08-31'");
+															EXPENSE_ACCID, LOANREQUEST_DATE FROM lnreqloan WHERE member_no = :member_no and loantype_code = '18' and TO_CHAR(LOANREQUEST_DATE,'YYYY-MM-DD') >= '2021-08-31'");
 			$fetchReqLoan->execute([':member_no' => $member_no]);
 			while($rowReqLoan = $fetchReqLoan->fetch(PDO::FETCH_ASSOC)){
 				$getLoanType = $conoracle->prepare("SELECT LOANTYPE_DESC FROM lnloantype WHERE loantype_code = :loantype_code");
@@ -64,6 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["LOANREQUEST_DOCNO"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["LOANTYPE_CODE"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["LOANREQUEST_AMT"];
+				$arrayReq["REQUEST_DATE"] = $lib->convertdate($rowReqLoan["LOANREQUEST_DATE"] ?? "","D m Y");
 				/*if($rowReqLoan["period_payment"] > 0){
 					$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				}

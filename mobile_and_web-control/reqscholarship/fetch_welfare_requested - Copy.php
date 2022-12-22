@@ -6,7 +6,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrChildGrp = array();
 		$arrChildCheck = array();
-		$isClosedWelfare = true;
 		//new
 		$checkChildAdd = $conoracle->prepare("SELECT REQUEST_STATUS, CANCEL_REMARK, CHILD_NAME, CHILD_SURNAME, CHILDCARD_ID FROM asnreqschshiponline 
 															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) AND MEMBER_NO = :member_no");
@@ -29,6 +28,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrChild["REMARK"] = $rowStatus["CANCEL_REMARK"];
 						$arrChild['REQUEST_STATUS_COLOR'] = "#FF0000";
 						
+					}
+					if($rowStatus["REQUEST_STATUS"] == '9'){
+						$arrChild['REQUEST_STATUS_COLOR'] = "#FF6000";
 					}
 					$arrChild['REQUEST_STATUS'] = $rowStatus["REQUEST_STATUS"];
 					$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["REQUEST_STATUS"][0][$rowStatus["REQUEST_STATUS"]][0][$lang_locale];
@@ -64,28 +66,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrChild["CAN_REQUEST"] = FALSE;
 						$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["APPROVE_STATUS"][0]["REQUESTED"][0][$lang_locale];
 					}else{
-						if($isClosedWelfare){
-							$arrChild["CAN_REQUEST"] = FALSE;
-						}else{
-							$arrChild["CAN_REQUEST"] = TRUE;
-						}
-					}
-				}else{
-					if($isClosedWelfare){
-						$arrChild["CAN_REQUEST"] = FALSE;
-					}else{
 						$arrChild["CAN_REQUEST"] = TRUE;
 					}
-				}
-				if($rowStatus["REQUEST_STATUS"] == '9'){
+				}else{
 					$arrChild["CAN_REQUEST"] = TRUE;
 				}
 			}else{
-				if($isClosedWelfare){
-					$arrChild["CAN_REQUEST"] = FALSE;
-				}else{
-					$arrChild["CAN_REQUEST"] = TRUE;
-				}
+				$arrChild["CAN_REQUEST"] = TRUE;
 				//$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["REQUEST_STATUS"][0]["99"][0][$lang_locale];
 			}
 			$arrChildGrp[] = $arrChild;
@@ -144,29 +131,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrChild["CAN_REQUEST"] = FALSE;
 						$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["APPROVE_STATUS"][0]["REQUESTED"][0][$lang_locale];
 					}else{
-						if($isClosedWelfare){
-							$arrChild["CAN_REQUEST"] = FALSE;
-						}else{
-							$arrChild["CAN_REQUEST"] = TRUE;
-						}
-					}
-				}else{
-					if($isClosedWelfare){
-						$arrChild["CAN_REQUEST"] = FALSE;
-					}else{
 						$arrChild["CAN_REQUEST"] = TRUE;
 					}
-				}
-				
-				if($rowStatus["REQUEST_STATUS"] == '9'){
+				}else{
 					$arrChild["CAN_REQUEST"] = TRUE;
 				}
 			}else{
-				if($isClosedWelfare){
-					$arrChild["CAN_REQUEST"] = FALSE;
-				}else{
-					$arrChild["CAN_REQUEST"] = TRUE;
-				}
+				$arrChild["CAN_REQUEST"] = TRUE;
 				//$arrChild["STATUS_DESC"] = $configError["STATUS_REQ_SCHOLAR"][0]["REQUEST_STATUS"][0]["99"][0][$lang_locale];
 			}
 			
@@ -229,8 +200,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayResult['CHILD'] = $arrChildGrp;
 		$arrayResult['REQ_UPLOAD'] = $arrUploadFiles;
-		
-		$arrayResult['IS_CLOSED'] = $isClosedWelfare;
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

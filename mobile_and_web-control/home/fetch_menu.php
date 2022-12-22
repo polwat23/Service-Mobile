@@ -224,7 +224,14 @@ if(!$anonymous){
 							$arrayGroupMenu["ID_PARENT"] = $rowMenu["menu_parent"];
 							$arrayGroupMenu["MENU"][] = $arrMenu;
 						}else if($rowMenu["menu_parent"] == '24'){
-							$arrayMenuSetting[] = $arrMenu;
+							if (
+								($rowMenu["menu_component"] == "SettingAccountDeletion") &&
+								(!in_array($payload["member_no"], array("etnmode1","etnmode2","etnmode3","etnmode4")))
+							) {
+								//ปิดการแสดงเมนูลบบัญชี ให้แสดงเฉพาะ etnmode
+							} else {
+								$arrayMenuSetting[] = $arrMenu;
+							}
 						}else if($rowMenu["menu_parent"] == '18'){
 							$arrayMenuTransaction["ID_PARENT"] = $rowMenu["menu_parent"];
 							$getMenuParentStatus = $conmysql->prepare("SELECT menu_status FROM gcmenu WHERE id_menu = 18");
@@ -443,25 +450,34 @@ if(!$anonymous){
 				$checkElection = $conoracle->prepare("SELECT NVL(POST_NO,'-99') as POST_NO FROM MBMEMBELECTION WHERE ELECTION_YEAR = EXTRACT(YEAR FROM SYSDATE) + 543 AND MEMBER_NO = :member_no");
 				$checkElection->execute([':member_no' => $payload["member_no"]]);
 				$rowElec = $checkElection->fetch(PDO::FETCH_ASSOC);
-				if($rowElec["POST_NO"] == '-99' || $payload["member_no"] == 'etnmode2'){
-					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
+				if($rowElec["POST_NO"] == '-99'){
+					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = false;
 					$arrayResult['ONPERIOD_ELECTION'] = FALSE;
+					$arrayResult['ONFORCE_ELECTION'] = FALSE;
+					$arrElectionData["WELCOME_TITLE"] = "การสรรหาคณะกรรมการดำเนินการ ประจำปี 2566 ทางอิเล็กทรอนิกส์";
+					$arrElectionData["PASSCODE_SUBTITLE"] = "กรุณากรอกรหัสผ่าน (Key code) ที่ได้รับข้อความ (SMS) จาก musaving ในวันแจ้งความประสงค์สรรหาส่งไปยังหมายเลขของท่าน หากไม่ทราบรหัสผ่าน(Key code) กรุณากดลืมรหัสผ่าน";
+					$arrayResult["ELECTION_DATA"] = $arrElectionData;
 				}else{
-					$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
+					if(date("Y-m-d") <= '2022-12-22'){
+						$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
+					}else{
+						$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
+					}
 					$arrayResult['ONPERIOD_REGISTER_ELECTION'] = FALSE;
-					if($rowElec["POST_NO"] == '3' || $payload["member_no"] == 'etnmode3'){
-						$getElection = $conmysql->prepare("SELECT id_election FROM gcelection WHERE member_no = :member_no and year_election = YEAR(NOW()) + 543");
+					if($rowElec["POST_NO"] == '3'){
+						$getElection = $conmysql->prepare("SELECT id_election FROM gcelection WHERE member_no = :member_no and year_election = YEAR(NOW()) + 543 GROUP BY group_page");
 						$getElection->execute([':member_no' => $payload["member_no"]]);
-						if($getElection->rowCount() > 0){
+						if($getElection->rowCount() > 1){
 							$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
 							$arrayResult['ONPERIOD_ELECTION'] = FALSE;
 						}else{
-							if(preg_replace('/\./','',$dataComing["app_version"]) >= '1162' || $dataComing["channel"] == 'web'){
-								$arrayResult['ONPERIOD_ELECTION'] = FALSE;
-								$arrElectionData["WELCOME_TITLE"] = "การสรรหาคณะกรรมการดำเนินการ ประจำปี 2565 ทางอิเล็กทรอนิกส์";
+							if(preg_replace('/\./','',$dataComing["app_version"]) >= '1200' || $dataComing["channel"] == 'web'){
+								$arrayResult['ONPERIOD_ELECTION'] = date("Y-m-d") >= '2022-12-13';
+								$arrayResult['ONFORCE_ELECTION'] = FALSE;
+								$arrElectionData["WELCOME_TITLE"] = "การสรรหาคณะกรรมการดำเนินการ ประจำปี 2566 ทางอิเล็กทรอนิกส์";
 								//$arrElectionData["WELCOME_SUBTITLE"] = "";
 								//$arrElectionData["PASSCODE_TITLE"] = "";
-								$arrElectionData["PASSCODE_SUBTITLE"] = "กรุณากรอกรหัสผ่าน (Key code) ที่ได้รับข้อความ (SMS) จาก Thaicoop ในวันแจ้งความประสงค์สรรหาส่งไปยังหมายเลขของท่าน หากไม่ทราบรหัสผ่าน(Key code) กรุณากดลืมรหัสผ่าน";
+								$arrElectionData["PASSCODE_SUBTITLE"] = "กรุณากรอกรหัสผ่าน (Key code) ที่ได้รับข้อความ (SMS) จาก musaving ในวันแจ้งความประสงค์สรรหาส่งไปยังหมายเลขของท่าน หากไม่ทราบรหัสผ่าน(Key code) กรุณากดลืมรหัสผ่าน";
 								$arrayResult["ELECTION_DATA"] = $arrElectionData;
 							}else{
 								$arrayResult['ONPERIOD_ELECTION'] = FALSE;	
@@ -482,30 +498,33 @@ if(!$anonymous){
 							$newArr["POST_REMARK"] = "สมาชิกได้แจ้งความประสงค์ลงคะแนนสรรหาทาง";
 							$newArr["POST_REMARK_SUFFIX"] = "ไว้เเล้ว";
 							$newArr["POST_REMARK_TYPE"] = " E-Vote ";
-							$newArr["POST_REMARK_DESC"] = "โปรดลงคะแนนสรรหา วันที่ 13 ธ.ค. 2564 ตั้งแต่เวลา 00.01 น. ถึงวันที่ 16 ธ.ค. 2564 เวลา 15.30 น.";
+							$newArr["POST_REMARK_DESC"] = "โปรดลงคะแนนสรรหา วันที่ 13 ธ.ค. 2565 ตั้งแต่เวลา 00.01 น. ถึง วันที่ 22 ธ.ค. 2565 เวลา 15.30 น.";
 						}else if($rowRegisteredData["POST_NO"] == "2"){
 							$newArr["POST_REMARK"] = "สมาชิกรับบัตรลงคะแนนสรรหาทาง";
 							$newArr["POST_REMARK_TYPE"] = "ไปรษณีย์";
-							$newArr["POST_REMARK_DESC"] = "เมื่อลงคะแนนแล้ว โปรดส่งกลับสหกรณ์ก่อนวันที่ 16 ธ.ค. 2564 ภายในเวลา 15.30 น.";
+							$newArr["POST_REMARK_DESC"] = "เมื่อลงคะแนนแล้ว โปรดส่งกลับสหกรณ์ก่อนวันที่ 22 ธ.ค. 2565 ภายในเวลา 15.30 น.";
 						}else if($rowRegisteredData["POST_NO"] == "1"){
-							$newArr["POST_REMARK"] = "สมาชิกรับบัตรลงคะแนนสรรหา ณ สหกรณ์";
+							$newArr["POST_REMARK"] = "สมาชิกรับบัตรลงคะแนนสรรหา ณ สหกรณ์ ";
 							if($rowRegisteredData["SELECT_NO"] == "1"){
 								$newArr["POST_REMARK_TYPE"] = "สำนักงานใหญ่ ศิริราช";
 							}else if($rowRegisteredData["SELECT_NO"] == "2"){
-								$newArr["POST_REMARK_TYPE"] = "สาขารามาธิบดี";
+								$newArr["POST_REMARK_TYPE"] = "สำนักงานสาขา โรงพยาบาลรามาธิบดี";
 							}else if($rowRegisteredData["SELECT_NO"] == "3"){
-								$newArr["POST_REMARK_TYPE"] = "สาขาเขตร้อน";
+								$newArr["POST_REMARK_TYPE"] = "สำนักงานสาขา คณะเวชศาสตร์เขตร้อน";
 							}else if($rowRegisteredData["SELECT_NO"] == "4"){
-								$newArr["POST_REMARK_TYPE"] = "สาขาศาลายา";
+								$newArr["POST_REMARK_TYPE"] = "สำนักงานสาขา ม.มหิดล ศาลายา";
 							}else if($rowRegisteredData["SELECT_NO"] == "5"){
-								$newArr["POST_REMARK_TYPE"] = "สาขาจักรี";
+								$newArr["POST_REMARK_TYPE"] = "สำนักงานสาขา สถาบันการแพทย์จักรีนฤบดินทร์";
 							}
 							
-							if($rowRegisteredData["SELECT_NO"] == "5"){
+							/*if($rowRegisteredData["SELECT_NO"] == "5"){
 								$newArr["POST_REMARK_DESC"] = "วันที่ 15 - 30 พ.ย. 2564 (เวลา 9.30 น. - 14.30 น.) โปรดหย่อนบัตรลงคะแนน วันที่ 7 - 16 ธ.ค. 2564 (เวลา 9.30 น. - 14.30 น.)";
 							}else{
 								$newArr["POST_REMARK_DESC"] = "วันที่ 15 - 30 พ.ย. 2564 (เวลา 8.30 น. - 15.00 น.) โปรดหย่อนบัตรลงคะแนน วันที่ 7 - 16 ธ.ค. 2564 (เวลา 8.30 น. - 15.30 น.)";
-							}
+							}*/
+							$newArr["POST_REMARK_DESC"] = "วันที่ 13-22 ธ.ค. 2565 (เวลา 8.30 น. – 15.30 น.) หย่อนบัตรลงคะแนนสรรหาได้ตั้งแต่ วันที่ 13-22 ธ.ค. 2565 (เวลา 8.30 น. – 15.30 น.)";
+						} else {
+							$arrayResult['ONREGISTERED_ELECTION'] = FALSE;
 						}
 						$arrayResult['REGISTERED_DATA'] = $newArr;
 					}

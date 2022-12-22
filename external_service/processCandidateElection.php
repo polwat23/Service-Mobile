@@ -12,66 +12,77 @@ use Dompdf\Dompdf;
 $lib = new library();
 $func = new functions();
 $mailFunction = new PHPMailer(false);
-
-$arrGrpCan = array();
-$getGroup = $conmysql->prepare("SELECT group_code,group_desc FROM gcgroupcandidate WHERE year_election = '2564' and group_number <> '999'");
-$getGroup->execute();
-while($rowGrp = $getGroup->fetch(PDO::FETCH_ASSOC)){
-	$arrGrp = array();
-	$arrGrp["GROUP_DESC"] = $rowGrp["group_desc"];
-	$getPerson = $conmysql->prepare("SELECT gcc.id_cdperson,gcc.candidate_name,gcc.number_candidate
-																	FROM gccandidate gcc 
-																	WHERE gcc.year_election = '2564' and gcc.group_code = :group_code");
-	$getPerson->execute([':group_code' => $rowGrp["group_code"]]);
-	while($rowPerson = $getPerson->fetch(PDO::FETCH_ASSOC)){
-		$arrScore = array();
-		if($rowPerson["number_candidate"] != '999'){
-			$getScore = $conmysql->prepare("SELECT COUNT(member_no) as SCORE_CANDIDATE FROM gcelection WHERE id_cdperson = :id_cdperson");
-			$getScore->execute([':id_cdperson' => $rowPerson["id_cdperson"]]);
-			$rowScore = $getScore->fetch(PDO::FETCH_ASSOC);
-			$arrScore["CANDIDATE_NAME"] = $rowPerson["candidate_name"];
-			$arrScore["CANDIDATE_NUMBER"] = $rowPerson["number_candidate"];
-			$arrScore["SCORE"] = $rowScore["SCORE_CANDIDATE"];
-		}
-		$arrGrp["PERSON"][] = $arrScore;
-	}
-	$arrGrpCan[] = $arrGrp;
-}
-$getScoreNot = $conmysql->prepare("SELECT COUNT(member_no) as SCORE_CANDIDATE FROM gcelection WHERE id_cdperson IS NULL");
-$getScoreNot->execute();
-$rowScoreNot = $getScoreNot->fetch(PDO::FETCH_ASSOC);
-$header["score_notchoose"] = $rowScoreNot["SCORE_CANDIDATE"];
-$header["elec_year"] = '2565';
-
-$textRan = $lib->randomText('all',10);
-$passwordFirst = substr($textRan,0,5);
-$passwordSecon = substr($textRan,5);
-$password = '1234';//$passwordFirst.$passwordSecon;
-$arrayPDF = GenerateReport($arrGrpCan,$header,$password,$lib);
 $arrayAttach = array();
-if($arrayPDF["RESULT"]){
-	$arrayAttach[] = $arrayPDF["PATH"];
+$arrayPDF = null;
+$getPage = $conmysql->prepare("SELECT group_pages FROM gcgroupcandidate WHERE year_election = '2565' and group_number <> '999' GROUP BY group_pages");
+$getPage->execute();
+while($rowPage = $getPage->fetch(PDO::FETCH_ASSOC)){
+	$arrGrpCan = array();
+	$getGroup = $conmysql->prepare("SELECT group_code,group_desc FROM gcgroupcandidate WHERE year_election = '2565' and group_number <> '999' and group_pages = :group_pages");
+	$getGroup->execute([':group_pages' => $rowPage["group_pages"]]);
+	while($rowGrp = $getGroup->fetch(PDO::FETCH_ASSOC)){
+		$arrGrp = array();
+		$arrGrp["GROUP_DESC"] = $rowGrp["group_desc"];
+		$getPerson = $conmysql->prepare("SELECT gcc.id_cdperson,gcc.candidate_name,gcc.number_candidate
+																		FROM gccandidate gcc 
+																		WHERE gcc.year_election = '2565' and gcc.group_code = :group_code");
+		$getPerson->execute([':group_code' => $rowGrp["group_code"]]);
+		while($rowPerson = $getPerson->fetch(PDO::FETCH_ASSOC)){
+			$arrScore = array();
+			if($rowPerson["number_candidate"] != '999'){
+				$getScore = $conmysql->prepare("SELECT COUNT(member_no) as SCORE_CANDIDATE FROM gcelection WHERE id_cdperson = :id_cdperson and year_election = '2565' and group_page = :group_page");
+				$getScore->execute([
+					':id_cdperson' => $rowPerson["number_candidate"],
+					':group_page' => $rowPage["group_pages"]
+				]);
+				$rowScore = $getScore->fetch(PDO::FETCH_ASSOC);
+				$arrScore["CANDIDATE_NAME"] = $rowPerson["candidate_name"];
+				$arrScore["CANDIDATE_NUMBER"] = $rowPerson["number_candidate"];
+				$arrScore["SCORE"] = $rowScore["SCORE_CANDIDATE"];
+			}
+			$arrGrp["PERSON"][] = $arrScore;
+		}
+		$arrGrpCan[] = $arrGrp;
+	}
+	$getScoreNot = $conmysql->prepare("SELECT COUNT(member_no) as SCORE_CANDIDATE FROM gcelection WHERE id_cdperson IS NULL  and year_election = '2565' and group_page = :group_page");
+	$getScoreNot->execute([':group_page' => $rowPage["group_pages"]]);
+	$rowScoreNot = $getScoreNot->fetch(PDO::FETCH_ASSOC);
+	$header["score_notchoose"] = $rowScoreNot["SCORE_CANDIDATE"];
+	$header["elec_year"] = '2565';
+
+	$textRan = $lib->randomText('all',10);
+	$passwordFirst = substr($textRan,0,5);
+	$passwordSecon = substr($textRan,5);
+	$prefix = $rowPage["group_pages"];
+	$password = $passwordFirst.$passwordSecon;
+	$arrayPDF = GenerateReport($arrGrpCan,$header,$password,$lib,$prefix);
+	
+	if($arrayPDF["RESULT"]){
+		$arrayAttach[] = $arrayPDF["PATH"];
+	}
 }
-/*
+
+
 $arrayDataTemplate = array();
-$arrayDataTemplate["TEXT"] = "ชุดแรก ของชื่อไฟล์ : ".$arrayPDF["FILE_NAME"];
+$arrayDataTemplate["TEXT"] = "ชุดแรก ไฟล์ผลคะแนน e-Vote : ชื่อไฟล์ ".$arrayPDF["FILE_NAME"];
 $arrayDataTemplate["PASSWORD"] = $passwordFirst;
 $template = $func->getTemplateSystem('PasswordElectionFile');
 $arrResponse = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate);
 $arrMailStatus = $lib->sendMail('wanna.sri@mahidol.ac.th',$arrResponse["SUBJECT"],$arrResponse["BODY"],$mailFunction,[]);
 $mailFunction = new PHPMailer(false);
 $arrayDataTemplate2 = array();
-$arrayDataTemplate2["TEXT"] = "ชุดสอง ของชื่อไฟล์ : ".$arrayPDF["FILE_NAME"];
+$arrayDataTemplate2["TEXT"] = "ชุดสอง ไฟล์ผลคะแนน e-Vote : ชื่อไฟล์ ".$arrayPDF["FILE_NAME"];
 $arrayDataTemplate2["PASSWORD"] = $passwordSecon;
 $arrResponse2 = $lib->mergeTemplate($template["SUBJECT"],$template["BODY"],$arrayDataTemplate2);
 $arrMailStatus2 = $lib->sendMail('yoot_ne@yahoo.com',$arrResponse2["SUBJECT"],$arrResponse2["BODY"],$mailFunction,[]);
+
 $mailFunction = new PHPMailer(false);
 $arrResponse3["SUBJECT"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์";
 $arrResponse3["BODY"] = "เอกสารสรุปคะแนนการสรรหาออนไลน์อยู่ในไฟล์แนบ";
-$arrMailStatus23 = $lib->sendMail('it.support@musaving.com',$arrResponse3["SUBJECT"],$arrResponse3["BODY"],$mailFunction,$arrayAttach);*/
+$arrMailStatus23 = $lib->sendMail('it.support@musaving.com',$arrResponse3["SUBJECT"],$arrResponse3["BODY"],$mailFunction,$arrayAttach);
 
 
-function GenerateReport($dataReport,$header,$password,$lib){
+function GenerateReport($dataReport,$header,$password,$lib,$prefix){
 	
 	$html = '
 		<style>
@@ -224,9 +235,9 @@ function GenerateReport($dataReport,$header,$password,$lib){
 		mkdir($pathfile, 0777, true);
 	}
 	$name = $header["elec_year"].date('YmdHi');
-	$pathfile = $pathfile.'/'.$name.'.pdf';
+	$pathfile = $pathfile.'/'.$name.$prefix.'.pdf';
 	$arrayPDF = array();
-	$pathOutput = __DIR__."/".$name.".pdf";
+	$pathOutput = __DIR__."/".$name.$prefix.".pdf";
 	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathfile, $output)){
@@ -234,7 +245,7 @@ function GenerateReport($dataReport,$header,$password,$lib){
 	}else{
 		$arrayPDF["RESULT"] = FALSE;
 	}
-	$arrayPDF["FILE_NAME"] = $name;
+	$arrayPDF["FILE_NAME"] = $name.$prefix;
 	$arrayPDF["PATH"] = $pathOutput;
 	return $arrayPDF; 
 }

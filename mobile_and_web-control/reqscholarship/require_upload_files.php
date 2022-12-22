@@ -38,16 +38,19 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			$arrayFileManda = [
 				(object) [
 					'seq_no' => 1,
-					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
+					'order' => 1,
+					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา '.(date("Y")-0+542).'  (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 2,
-					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
+					'order' => 2,
+					'document_desc' => 'ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา '.(date("Y")-0+542).'  (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F',
 					'mandatory' => '0',
 				],
 				(object) [
 					'seq_no' => 3,
+					'order' => 3,
 					'document_desc' => 'เอกสารอื่นๆ (ถ้ามี)',
 					'mandatory' => '0',
 				]
@@ -56,31 +59,37 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 			$arrayFileManda = [
 				(object) [
 					'seq_no' => 6,
-					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
+					'order' => 6,
+					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา ".(date("Y")-0+542)."  (ภาคเรียนที่ 1) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 7,
-					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา 2563  (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
+					'order' => 7,
+					'document_desc' => "ใบรับรองผลการศึกษารายวิชาหรือสมุดรายงานประจำตัวนักเรียน ปีการศึกษา ".(date("Y")-0+542)."  (ภาคเรียนที่ 2) โดยเกรดต้องสมบูรณ์ ไม่ติด 0, ร, มส, มผ, I และ F",
 					'mandatory' => '0',
 				],
 				(object) [
 					'seq_no' => 8,
+					'order' => 8,
 					'document_desc' => "สำเนาทะเบียนบ้านหรือสูติบัตรที่แสดงว่าเป็นบุตรโดยชอบด้วยกฎหมาย (ไม่รวมบุตรบุญธรรม)",
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 9,
+					'order' => 9,
 					'document_desc' => "สำเนาบัตรประชาชน (ผู้ยื่นเรื่อง)",
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 10,
+					'order' => 10,
 					'document_desc' => "สำเนาสมุดคู่บัญชีเงินฝากออมทรัพย์สหกรณ์ (แผ่นถัดจากหน้าปก)",
 					'mandatory' => '1',
 				],
 				(object) [
 					'seq_no' => 11,
+					'order' => 11,
 					'document_desc' => "เอกสารอื่นๆ (ถ้ามี)",
 					'mandatory' => '0',
 				]
@@ -109,8 +118,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 		}
 		
 		//new upload 
-		
-		/*$getUploadFiles = $conoracle->prepare("SELECT 5 as seq_no, 'ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
+		$getUploadFiles = $conoracle->prepare("SELECT 5 as seq_no, 'ใบรับรองการศึกษาจากสถาบันการศึกษา หรือ ใบเสร็จค่าเทอม ปีการศึกษา '||(EXTRACT(year from sysdate) +543) as document_desc,'1' as manda
 																		FROM ASNREQSCHOLARSHIP 
 																		WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +542) and APPROVE_STATUS = 1 and 
 																		school_level in ('13', '26', '33', '43', '53', '62') and
@@ -134,7 +142,7 @@ if($lib->checkCompleteArgument(['menu_component','childcard_id'],$dataComing)){
 				$arrayUpload["IS_UPLOADED"] = 1;
 				$arrUploadFiles[] = $arrayUpload;
 			}
-		}*/
+		}
 		$getFileUploadWaitforSend = $conoracle->prepare("SELECT seq_no, document_desc,'1' as manda FROM asnreqschshiponlinedet
 																		WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) and CHILDCARD_ID = :child_id and upload_status = 8 order by seq_no");
 		$getFileUploadWaitforSend->execute([':child_id' => $dataComing["childcard_id"]]);

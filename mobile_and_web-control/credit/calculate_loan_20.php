@@ -15,7 +15,7 @@ $getMemb->execute([':member_no' => $member_no]);
 $rowMemb = $getMemb->fetch(PDO::FETCH_ASSOC);
 if($rowMemb["MEMBTYPE_CODE"] != "05" && $rowMemb["MEMBTYPE_CODE"] != "10" && $rowMemb["MEMBGROUP_CONTROL"] < '82500000'){
 	$canRequest = TRUE;
-	$maxloan_amt = $rowMemb["SHARE_AMT"];
+	$maxloan_amt = $rowMemb["SHARE_AMT"] * 0.90;
 }else{
 	$canRequest = TRUE;
 	$maxloan_amt = $rowMemb["SHARE_AMT"] * 0.90;

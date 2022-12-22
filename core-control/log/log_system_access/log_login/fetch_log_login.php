@@ -19,6 +19,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 																				gcuserlogin g
 																			INNER JOIN gctoken k ON
 																				k.id_token = g.id_token
+																				where g.update_date > DATE_SUB(now(), INTERVAL 12 MONTH)
 																			ORDER BY g.login_date DESC");
 		$fetchfetchLoginLog->execute();
 		while($rowLoginLog = $fetchfetchLoginLog->fetch(PDO::FETCH_ASSOC)){

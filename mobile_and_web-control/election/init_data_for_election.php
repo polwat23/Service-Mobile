@@ -21,6 +21,7 @@ if($lib->checkCompleteArgument(['menu_component','value_election'],$dataComing))
 					$arrayResult['SKIP_INIT'] = FALSE;
 					$arrayResult['IS_OTP'] = TRUE;
 					$arrayResult['RESULT'] = TRUE;
+					$arrayResult['HEADER_ELECTION'] = "กรุณาตรวจสอบข้อมูล";
 					require_once('../../include/exit_footer.php');
 				}else{
 					$arrayResult['RESPONSE_CODE'] = "WS0017";

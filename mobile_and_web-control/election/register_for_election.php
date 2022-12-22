@@ -3,6 +3,13 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','value_election','tel_mobile'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'Election')){
+		
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
+		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
+		require_once('../../include/exit_footer.php');
+		
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$updateFlag = $conoracle->prepare("UPDATE MBMEMBELECTION SET POST_NO = :value_election WHERE ELECTION_YEAR = EXTRACT(YEAR FROM SYSDATE) + 543 AND MEMBER_NO = :member_no");
 		if($updateFlag->execute([
@@ -22,6 +29,29 @@ if($lib->checkCompleteArgument(['menu_component','value_election','tel_mobile'],
 				':id_token' => $payload["id_token"],
 				':app_version' => $dataComing["app_version"] ?? 'web'
 			]);
+			
+			$arrayTel = array();
+			$bulkInsert = array();
+			
+			$arrayComing = array();
+			$arrayComing["TEL"] = $dataComing["tel_mobile"];
+			$arrayComing["MEMBER_NO"] = $member_no;
+			$arrayTel[] = $arrayComing;
+			
+			$arrayDest["member_no"] = $member_no;
+			$arrayDest["tel"] =  $dataComing["tel_mobile"];
+			$arrayDest["message"] = 'รหัส Pincode '.$keycode.' นี้จะใช้ในการลงคะแนนสรรหาวันที่ 13 - 22 ธันวาคม 2565';
+			$arraySendSMS = $lib->sendSMS($arrayDest);
+			if($arraySendSMS["RESULT"]){
+				$arrayLogSMS = $func->logSMSWasSent(null,$arrayDest["message"],$arrayTel,'system');
+			}else{
+				$bulkInsert[] = "('".$arrayDest["message"]."','".$member_no."',
+						'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log'".json_encode($arraySendSMS).",'system',null)";
+				$func->logSMSWasNotSent($bulkInsert);
+				unset($bulkInsert);
+			}
+			
+			/*
 			$arrVerifyToken['exp'] = time() + 300;
 			$arrVerifyToken['action'] = "sendmsg";
 			$arrVerifyToken["mode"] = "eachmsg";
@@ -34,6 +64,11 @@ if($lib->checkCompleteArgument(['menu_component','value_election','tel_mobile'],
 			$arrHeader[] = "version: v1";
 			$arrHeader[] = "OAuth: Bearer ".$verify_token;
 			$arraySendSMS = $lib->posting_data($config["URL_SMS_ELECTION"].'/navigator',$arrSendData,$arrHeader);
+			*/
+			
+			$arrayResult['TEXT_HEADER'] = "ท่านได้แจ้งความประสงค์ในการสรรหาทางอิเล็กทรอนิกส์ (E-Vote)";
+			//$arrayResult['TEXT_TITLE'] = "สำเร็จเรียบร้อย";
+			$arrayResult['TEXT_SUBJECT'] = "ระบบจะทำการส่ง SMS เลขรหัส (Pincode) 6 หลัก ให้ท่านเพื่อใช้ในการลงคะแนนสรรหาทางอิเล็กทรอนิกส์ (E-Vote) ในวันที่ 13 - 22 ธ.ค.2565  (ระหว่างเวลา 00.01 น.  วันที่ 13 ธ.ค.2565 ถึงเวลา 15.30 น. ของวันที่ 22 ธ.ค.2565)";
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{

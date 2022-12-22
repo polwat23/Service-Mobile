@@ -10,6 +10,29 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getPhoneNumber = $conoracle->prepare("SELECT SMS_MOBILEPHONE FROM mbmembmaster WHERE member_no = :member_no");
 		$getPhoneNumber->execute([':member_no' => $member_no ]);
 		$rowPhoneNumber = $getPhoneNumber->fetch(PDO::FETCH_ASSOC);
+		
+		$arrayTel = array();
+		$bulkInsert = array();
+			
+		$arrayComing = array();
+		$arrayComing["TEL"] = $rowPhoneNumber["SMS_MOBILEPHONE"];
+		$arrayComing["MEMBER_NO"] = $member_no;
+		$arrayTel[] = $arrayComing;
+			
+		$arrayDest["member_no"] = $member_no;
+		$arrayDest["tel"] = $rowPhoneNumber["SMS_MOBILEPHONE"];
+		$arrayDest["message"] = 'รหัส Pincode '.$rowKeycode["keycode"].' นี้จะใช้ในการลงคะแนนสรรหาวันที่ 13 - 22 ธันวาคม 2565';
+		$arraySendSMS = $lib->sendSMS($arrayDest);
+		if($arraySendSMS["RESULT"]){
+			$arrayLogSMS = $func->logSMSWasSent(null,$arrayDest["message"],$arrayTel,'system');
+		}else{
+			$bulkInsert[] = "('".$arrayDest["message"]."','".$member_no."',
+					'mobile_app',null,null,'ส่ง SMS ไม่ได้เนื่องจาก Service ให้ไปดูโฟลเดอร์ Log'".json_encode($arraySendSMS).",'system',null)";
+			$func->logSMSWasNotSent($bulkInsert);
+			unset($bulkInsert);
+		}
+			
+		/*
 		$arrVerifyToken['exp'] = time() + 300;
 		$arrVerifyToken['action'] = "sendmsg";
 		$arrVerifyToken["mode"] = "eachmsg";
@@ -22,7 +45,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrHeader[] = "version: v1";
 		$arrHeader[] = "OAuth: Bearer ".$verify_token;
 		$arraySendSMS = $lib->posting_data($config["URL_SMS_ELECTION"].'/navigator',$arrSendData,$arrHeader);
-		$arrayResult['REMARK_FORGETPASS'] = "หมายเลขโทรศัพท์ : ".substr($rowPhoneNumber["SMS_MOBILEPHONE"],0,3)."-XXX-X".substr($rowPhoneNumber["SMS_MOBILEPHONE"],7)." (Thaicoop)";
+		*/
+		
+		$arrayResult['REMARK_FORGETPASS'] = "หมายเลขโทรศัพท์ : ".substr($rowPhoneNumber["SMS_MOBILEPHONE"],0,3)."-XXX-X".substr($rowPhoneNumber["SMS_MOBILEPHONE"],7)." (musaving)";
 		$arrayResult['RESULT'] = TRUE;
 		require_once('../../include/exit_footer.php');
 	}else{

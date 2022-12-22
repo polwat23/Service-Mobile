@@ -6,6 +6,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$conoracle->beginTransaction();
 		$arrChildCheck = array();
+		$isClosedWelfare = true;
+		if($isClosedWelfare){
+			$arrayResult['RESPONSE_CODE'] = "WS0121";
+			$arrayResult['RESPONSE_MESSAGE'] = "ปิดรับคำขอทุนสวัสดิการบุตรเเล้ว ขออภัยในความไม่สะดวก";
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+		}
 		//new
 		$checkChildAdd = $conoracle->prepare("SELECT REQUEST_STATUS, CANCEL_REMARK, CHILD_NAME, CHILD_SURNAME, CHILDCARD_ID FROM asnreqschshiponline 
 															WHERE SCHOLARSHIP_YEAR = (EXTRACT(year from sysdate) +543) AND MEMBER_NO = :member_no");
