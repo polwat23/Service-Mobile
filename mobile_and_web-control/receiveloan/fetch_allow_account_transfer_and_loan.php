@@ -55,7 +55,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			while($rowLoanConst = $fetchAllowReceiveLoantype->fetch(PDO::FETCH_ASSOC)){
 				$arrGrpLoan[] = $rowLoanConst["loantype_code"];
 			}
-			$fetchLoanRepay = $conoracle->prepare("SELECT LN.LOANCONTRACT_NO,LT.LOANTYPE_CODE,LT.LOANTYPE_DESC,LN.PRINCIPAL_BALANCE,LN.WITHDRAWABLE_AMT, LN.LOANAPPROVE_AMT
+			$fetchLoanRepay = $conoracle->prepare("SELECT LN.LOANCONTRACT_NO,LT.LOANTYPE_CODE,LT.LOANTYPE_DESC,LN.PRINCIPAL_BALANCE,LN.WITHDRAWABLE_AMT, LN.LOANAPPROVE_AMT,ln.HOLD_FLAG
 													FROM lncontmaster ln LEFT JOIN lnloantype lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
 													WHERE ln.loantype_code IN(".implode(',',$arrGrpLoan).") and ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);

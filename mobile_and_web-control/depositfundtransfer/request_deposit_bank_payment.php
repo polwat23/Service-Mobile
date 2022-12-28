@@ -15,7 +15,12 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		$coop_account_no = preg_replace('/-/','',$dataComing["coop_account_no"]);
 		$time = time();
 		$dateOperC = date('c');
-		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		if(date('Hi') >= 2300){ 
+			$dateOper = date('Y-m-d', strtotime($dateOperC. ' +1 days'));
+			$dateOper = $dateOper.' 00:00:00';
+		}else{
+			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		}
 		$ref_no = time().$lib->randomText('all',3);
 		$amt_transfer = $dataComing["amt_transfer"];
 		$vccAccID = null;

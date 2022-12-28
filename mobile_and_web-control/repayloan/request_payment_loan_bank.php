@@ -19,8 +19,13 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$from_account_no = $rowBankDisplay["deptaccount_no_bank"];
 		$itemtypeWithdraw = 'WFS';
 		$ref_no = time().$lib->randomText('all',3);
-		$dateOper = date('c');
-		$dateOperC = date('Y-m-d H:i:s',strtotime($dateOper));
+		$dateOperC = date('c');
+		if(date('Hi') >= 2300){ 
+			$dateOper = date('Y-m-d', strtotime($dateOperC. ' +1 days'));
+			$dateOper = $dateOper.' 00:00:00';
+		}else{
+			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		}
 		$dataCont = $cal_loan->getContstantLoanContract($dataComing["contract_no"]);
 		$int_returnSrc = 0;
 		$int_return = $dataCont["INTEREST_RETURN"];
@@ -77,7 +82,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','s
 		$conoracle->beginTransaction();
 		$conmysql->beginTransaction();
 		$payslip = $cal_loan->paySlip($conoracle,$dataComing["amt_transfer"],$config,$payinslipdoc_no,$dateOperC,
-		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
+		$vccAccID,null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql,0,true);
 		if($payslip["RESULT"]){
 			$payslipdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
 			$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest["INT_PAYMENT"],

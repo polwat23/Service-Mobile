@@ -334,17 +334,17 @@ function GenerateReport($dataReport,$header,$lib){
 			</div>
 			<div style="display:flex;">
 				<div style="width:500px;font-size: 18px;">หมายเหตุ : ใบรับเงินประจำเดือนจะสมบูรณ์ก็ต่อเมื่อทางสหกรณ์ได้รับเงินที่เรียกเก็บเรียบร้อยแล้ว<br>ติดต่อสหกรณ์ โปรดนำ 1. บัตรประจำตัว 2. ใบเสร็จรับเงิน 3. สลิปเงินเดือนมาด้วยทุกครั้ง</div>
-					<div style="width:200px;margin-left: 555px;display:flex;">
+					<div style="width:200px;margin-left: 555px; background-color=">
 						<img src="../../resource/utility_icon/signature/manager.png" width="100" height="50" style="margin-top:10px;"/>
 					</div>
 					<div style="width:200px;margin-left: 775px;display:flex;">
 					<img src="../../resource/utility_icon/signature/payee.png" width="100" height="50" style="margin-top:10px;"/>
 				</div>
 			</div>
-			<div style="font-size: 18px;margin-left: 585px;margin-top:-80px;">ผู้จัดการ</div>
-			<div style="font-size: 18px;margin-left: 780px;margin-top:-80px;">หัวหน้าฝ่ายการเงิน </div>
-			<div style="position:absolute; bottom:80px; font-size: 18px;margin-left: 530px;">(นางอรรยากานต์ วงษ์กวีวัฒนกูล)</div>
-			<div style="position:absolute; bottom:80px; font-size: 18px;margin-left: 773px;">( นายวิโชติ พันธุ์สกุล )</div>
+			<div style="font-size: 18px;margin-left: 585px;margin-top:-90px;">ผู้จัดการ</div>
+			<div style="font-size: 18px;margin-left: 780px;margin-top:-90px;">หัวหน้าฝ่ายการเงิน </div>
+			<div style="position:absolute; bottom:60px; font-size: 18px;margin-left: 530px;">(นางอรรยากานต์ วงษ์กวีวัฒนกูล)</div>
+			<div style="position:absolute; bottom:60px; font-size: 18px;margin-left: 773px;">( นายวิโชติ พันธุ์สกุล )</div>
 
 			';
 

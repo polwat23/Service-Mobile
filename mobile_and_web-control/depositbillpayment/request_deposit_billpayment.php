@@ -21,7 +21,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
 		$fee_amt = 0;
 		$dateOperC = date('c');
-		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		if(date('Hi') >= 2300){ 
+			$dateOper = date('Y-m-d', strtotime($dateOperC. ' +1 days'));
+			$dateOper = $dateOper.' 00:00:00';
+		}else{
+			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		}
 		if($rowCheckBill["transfer_status"] == '0'){
 			if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
 				$payload = array();
@@ -64,7 +69,7 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				if(!$isHaveOnlyDep){
 					$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
 					$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
-					'WFS',$conmysql,0,'006');
+					'WFS',$conmysql,0,true);
 				}
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
 													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no

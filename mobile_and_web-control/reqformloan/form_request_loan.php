@@ -316,7 +316,7 @@ $html .= '
 				<div class="flex" style="height: 22px;">
 					<div>
 						<div class="absolute">
-							<input class="checkbox" type="checkbox" style="margin-left:10px;"'.($เงินกู้ฉุกเฉิน??null).'>
+						<input class="checkbox" type="checkbox" style="margin-left:10px;" '.($เงินกู้ฉุกเฉิน??null).' >
 							<div class="absolute" style="margin-left:3px; margin-top:4px;">เงินกู้ฉุกเฉิน</div>
 						</div>
 					</div>
@@ -409,11 +409,11 @@ $html .= '
 				</div>
 			</div>
 			
-			<div style="width:40%;  border-bottom:0.5px solid;  solid; margin-left:60%; padding-bottom:2.5px; ">
-				<div class="center bold" style="padding:3px 5px 5px 5px ; width:90px; height:25px;  border:2px solid;  border-radius: 7px; margin-top:10px; margin-left:33%; ">จำนวนเงินขอกู้</div>
+			<div style="width:40%;  border-bottom:0.5px solid;  solid; margin-left:60%; padding-bottom:27px; ">
+				<div class="center bold" style="padding:3px 5px 5px 5px ; width:90px; height:30px;  border:2px solid;  border-radius: 7px; margin-top:10px; margin-left:33%; ">จำนวนขอกู้</div>
 				<div class="padding-content" style="margin-top:15px;">
 					<div class="absolute " style="margin-left:60px; width:185px;"><div  class="data nowrap center">'.($data["จำนวนเงินกู้"]??null).'</div></div>
-					จำนวนเงินกู้............................................................บาท
+					จำนวนขอกู้............................................................บาท
 				</div>
 				<div class="padding-content center" style="margin-top:20px;">
 					<div class="absolute" style="margin-left:30px; width:230px;"><div style="margin-top:-3px;"  class="data nowrap center">'.($data["จำนวนเงินคำอ่าน"]??null).'</div></div>
@@ -423,23 +423,10 @@ $html .= '
 					<div class="absolute" style="margin-left:90px; width:25px;"><div style="margin-top:-3px;"  class="data nowrap center">'.($data["งวดชำระ"]??null).'</div></div>
 					<div class="absolute" style="margin-left:175px; width:70px;"><div style="margin-top:-3px;"  class="data nowrap center">'.($data["งวดล่ะ"]??null).'</div></div>
 
-					ส่งเงินงวดชำระหนี้.........งวด งวดล่ะ.......................บาท
+					ส่งเงินงวดชำระหนี้.........งวด งวดละ.......................บาท
 				</div>
 				<div class="padding-content center">(พร้อมด้วยดอกเบี้ยตามอัตราที่สหกรณ์กำหนด)</div>
-				<div class="flex" style="height:30px;">
-					<div>
-						<div class="absolute" style="margin-left:30%">
-							<input class="checkbox" type="checkbox" '.($คงต้น??null).'>
-							<div class="absolute" style="margin-left:3px;">คงต้น</div>
-						</div>
-					</div>
-					<div>
-						<div class="absolute" style="right:30%">
-							<input class="checkbox" type="checkbox" '.($คงยอด??null).'>
-							<div class="absolute" style="margin-left:3px;">คงยอด</div>
-						</div>
-					</div>
-				</div>
+				
 			</div>
 		</div>
 		<div  style="border-bottom:solid 0.5px; padding-left:5px">
@@ -459,8 +446,6 @@ $html .= '
 				<div class="absolute" style="margin-left:37px; width:400px; "><div   class="data nowrap center ">'.($data["ชื่อ"]??null).'</div></div>
 				<div class="absolute" style="margin-left:510px; width:170px; "><div   class="data nowrap center ">'.($data["วันเกิด"]??null).'</div></div>
 				<div class="absolute" style="margin-left:699px; width:25px; "><div   class="data nowrap center ">'.($data["อายุ"]??null).'</div></div>
-
-
 				ข้าพเจ้า................................................................................................................................วัน/เดือน/ปีเกิด.....................................................อายุ........ปี
 			</div>
 			<div>
@@ -764,7 +749,10 @@ $html .= '<div class="wrapper-page " >
 			</div>
 			
 			<div class="border" style="margin-top:20px; padding-bottom:20px; ">
-				<div class="center bold" style="border-bottom:1px solid; padding-bottom:5px;">บันทึกการพิจารณาให้ความเห็นของผู้บังคับบัญชา</div>
+				<div class="center bold" >บันทึกการพิจารณาให้ความเห็นของผู้บังคับบัญชา</div>
+				<div style="border-bottom:1px solid;  padding-bottom:5px;">
+					<div class="center">( สำหรับผู้บริหารโรงเรียน หรือ ผู้รับบำนาญ ให้ลงนามรับรองตนเอง )</div>
+				</div>			
 				<div style="padding-top:5px;">
 					<div class="content">วันที่..........................................................</div>
 				</div>
@@ -779,42 +767,56 @@ $html .= '<div class="wrapper-page " >
 					<div class="content">........................................................................................................................................................................................................................................</div>
 					<div class="content">........................................................................................................................................................................................................................................</div>
 				</div>
-				<div class="flex" style="height:25px; margin-top:20px;">
-					<div class="content">ลายมือชื่อผู้บังคับบัญชา..................................................................................................</div>
-					<div class="absolute content" style="right:-10px">ตำแหน่ง..............................................................................</div>
+				<div class="flex" style="height:25px; margin-top:10px;">
+					<div class="content" style="margin-left:70px">ลายมือชื่อ..................................................................................................ตำแหน่ง..............................................................................</div>					
 				</div>
-				<div  style="margin-left:114px; margin-top:-5px;" >
+				<div  style="margin-left:114px; margin-top:-3px;" >
 					(..................................................................................................)
 				</div>
-				<div class="bold content" style="font-size:16pt; margin-top:10px;">
-					<u>หนายเหตุ</u> สำหรับผู้บริหารโรงเรียน หรือข้าราชการบำนาญ ให้ลงนามรับรองตนเอง
-				</div>
+			
 			</div>
 			<div class="border" style="margin-top:20px; line-height:18px;">
-				<div class="center bold">เอกสารประกอบคำขอกู้</div>
-				<div class="content detail">1. สลิปเงินเดือน เดือนปัจจุบัน ขนาดกระดาษ A4 โดยผู้บังคับบัญชา ลงนามรับรอง </div>
-				<div class="content detail">2. สําเนาหนาสมุดเงินฝากธนาคารกรุงไทย ชื่อบัญชีผู้กู้ </div>
+				<div class="center bold">เอกสารประกอบคำขอกู้</div>				
 				<div class="content detail">
-					สําเนาบัตรประจําตัวประชาชน หรือ บัตรข้าราชการ ของผู้กู้ และคู่สมรส (ถ้ามี) กรณีสถานะ หม้าย แนบสําเนาใบมรณบัตร / กรณีสถานะ หย่า แนบสําเนาใบหย่า 
+					1. สลิปเงินเดือน ข้าราชการประจำ ใช้เดือน มี.ค.63 และเดือนปัจจุบัน ขนาดกระดาษ A4 อย่างละ 1 ฉบับ โดยผู้บังคับบัญชา ลงนามรับรอง
 				</div>
 				<div class="content detail">
-					4. กรณีผู้กู้ กับคู่สมรส ไม่ใช่นามสกุลเดียวกัน แนบสําเนาทะเบียนสมรส 
+				                 ข้าราชการบำนาญ ใช้เดือน ธ.ค.62 และเดือนปัจจุบัน ขนาดกระดาษ A4 อย่างละ 1 ฉบับ โดยผู้กู้ ลงนามรับรอง
+				</div>	
+				<div class="content detail">
+				            2. สำเนาบัตรประจำตัวประชาชน หรือ บัตรข้าราชการ ของผู้กู้ และคู่สมรส (ถ้ามี)   กรณีผู้กู้ กับคู่สมรส ไม่ใช้นามสกุลเดียวกัน แนบสำเนาทะเบียนสมรส
+				</div>	
+				<div class="content detail">
+					  กรณี คู่สมรสถึงแก่กรรม แนบสำเนาใบมรณบัตร / กรณี หย่า แนบสำเนาใบหย่า อย่างละ 1 ฉบับ
+				</div>	
+				<div class="content detail">
+					3. สําเนาบัตรประจําตัวประชาชน หรือ บัตรข้าราชการ ของผู้ค้ำประกัน ทุกท่าน ท่านละ 1 ฉบับ
+				</div>	
+				<div class="content detail">
+					4. เอกสารเปลี่ยนชื่อ และนามสกุล (ถ้ามี) อย่างละ 1 ฉบับ
 				</div>
 				<div class="content detail">
-					5. สําเนาบัตรประจําตัวประชาชน หรือ บัตรข้าราชการ ของผู้ค้ําประกัน 
-				</div>
-				<div class="content detail">
-					6. เอกสารเปลี่ยนชื่อ และนามสกุล (ถ้ามี)
+					5. สําเนาหน้าสมุดเฝินฝากธนาคารกรุงไทย ชื่อบัญชีผู้กู้ 2 ฉบับ
 				</div>
 				<div class="content detail bold">
-					กรณีใช้อสังหาริมทรัพย์ หรือหลักทรัพย์ค้ําประกัน มีเอกสารเพิ่มเติม
+					**กรณีกู้สามัญเพื่อชำระหนี้สถาบันการเงินอื่น มีเอกสารเพิ่มเติม**
 				</div>
 				<div class="content detail">
-					1. สําเนาทะเบียนบ้าน ของผู้กู้ และคู่สมรส  
+					1. หลักฐานการเป็นหนี้กับสถาบันการเงินอื่น ฯ วันสิ้นเดือน นั้นๆ 
 				</div>
 				<div class="content detail">
-					2. สําเนาบัตรประจําตัวประชาชนเจ้าของหลักทรัพย์ และสําเนาทะเบียนบ้านเจ้าของหลักทรัพย์(ของคู่สมรส ถ้ามี) สําเนาทะเบียนสมรส (ถ้ามี) <br> กรณีสถานะ หม้าย แนบสําเนาใบมรณบัตร / กรณีสถานะ หย่า แนบสําเนาใบหย่า
+					2. สําเนาสัญญาเงินกู้จากสถาบันการเงินอื่น
 				</div>
+				<div class="content detail bold">
+					**กรณีใช้อสังหาริมทรัพย์ หรือหลักทรัพย์ค้ําประกัน มีเอกสารเพิ่มเติม
+				</div>
+				<div class="content detail">
+					1. สําเนาทะเบียนบ้าน ของผู้กู้ และคู่สมรส
+				</div>
+				<div class="content detail">
+					2. สำเนาบัตรประจำตัวประชาชนเจ้าของหลักทรัพย์ และสำเนาทะเบียนบ้านเจ้าของหลักทรัพย์ (ของคู่สมรส ถ้ามี) สำเนาทะเบียนสมรส (ถ้ามี)
+				</div>
+				<div class="content detail">  สกรณีสถานะ หม้าย แนบสำเนาใบมรณบัตร / กรณีสถานะ หย่า แนบสำเนาใบหย่า</div>
 				<div class="content detail">
 					3. สําเนาโฉนดที่ดิน 
 				</div>

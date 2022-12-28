@@ -488,24 +488,20 @@ class CalculateLoan {
 		}
 		$int_returnSrc = 0;
 		$int_returnFull = 0;
-		$interest = $this->calculateInterest($contract_no,$amt_transfer);
-		$interestFull = $interest;
-		$interestPeriod = $interest - $dataCont["INTEREST_ARREAR"];
+		$interest = $this->calculateIntAPI($contract_no,$amt_transfer);
+		
+		$interestPeriod = $interest["INT_PERIOD"];
 		if($interestPeriod < 0){
 			$interestPeriod = 0;
 		}
-		if($int_return >= $interest){
-			$int_return = $int_return - $interest;
-			$interest = 0;
-		}else{
-			$interest = $interest - $int_return;
-			$int_return = 0;
-		}
-		if($interest > 0){
-			if($amt_transfer < $interest){
-				$interest = $amt_transfer;
+		$prinPay = 0;
+		$int_returnSrc = $interest["INT_RETURN"];
+		$interestFull = $interest["INT_PAYMENT"];
+		if($interestFull > 0){
+			if($amt_transfer < $interestFull){
+				$interestFull = $amt_transfer;
 			}else{
-				$prinPay = $amt_transfer - $interest;
+				$prinPay = $amt_transfer - $interestFull;
 			}
 			if($prinPay < 0){
 				$prinPay = 0;
@@ -513,26 +509,14 @@ class CalculateLoan {
 		}else{
 			$prinPay = $amt_transfer;
 		}
-		if($dataCont["CHECK_KEEPING"] == '0'){
-			if($dataCont["SPACE_KEEPING"] != 0){
-				$int_returnSrc = $this->calculateIntReturn($contract_no,$prinPay,$interest);
-				$int_returnFull = $int_returnSrc;
-			}
-		}
+
 		$lastperiod = $dataCont["LAST_PERIODPAY"];
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$updateInterestAccum = $conoracle->prepare("UPDATE mbmembmaster SET ACCUM_INTEREST = :int_accum WHERE member_no = :member_no");
 		if($updateInterestAccum->execute([
-			':int_accum' => $interest_accum + $interest,
+			':int_accum' => $interest_accum + $interestFull,
 			':member_no' => $member_no
 		])){
-			$intArr = $interestFull - $amt_transfer - $int_returnFull;
-			if($intArr < 0){
-				$intArr = 0;
-				if($dataCont["INTEREST_ARREAR_SRC"] - $dataCont["INTEREST_ARREAR"] > 0){
-					$intArr = $dataCont["INTEREST_ARREAR_SRC"] - $dataCont["INTEREST_ARREAR"];
-				}
-			}
 			$executeLnSTM = [
 				':coop_id' => $config["COOP_ID"],
 				':loancontract_no' => $contract_no,
@@ -542,11 +526,11 @@ class CalculateLoan {
 				':lastperiod' => $lastperiod,
 				':prin_pay' => $prinPay,
 				':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] - $prinPay,
-				':int_pay' => $interest,
+				':int_pay' => $interest["INT_PAYMENT"],
 				':principal' => $dataCont["PRINCIPAL_BALANCE"],
 				':calint_from' => date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
 				':bfintarr' => $dataCont["INTEREST_ARREAR_SRC"],
-				':int_arr' => $intArr,
+				':int_arr' => $interestFull,
 				':int_return' => $int_returnSrc,
 				':moneytype_code' => 'TRN',
 				':ref_slipno' => $lnslip_no,
@@ -582,11 +566,11 @@ class CalculateLoan {
 					':prin_bal' => $dataCont["PRINCIPAL_BALANCE"] - $prinPay,
 					':loancontract_no' => $contract_no,
 					':lastperiod_pay' => $lastperiod,
-					':int_arr' => $intArr,
-					':int_accum' => $interest_accum + $interest,
+					':int_arr' => $interest["INT_ARREAR"],
+					':int_accum' => $interest_accum  + $interestFull,
 					':prinpay' => $prinPay,
 					':int_return' => $int_returnSrc,
-					':int_pay' => $interest,
+					':int_pay' => $interestFull,
 					':laststmno' => $dataCont["LAST_STM_NO"] + 1,
 					':operate_date' => $operate_date
 				];
@@ -666,9 +650,9 @@ class CalculateLoan {
 							':amount' => $amt_transfer,
 							':penalty_amt' => $penalty_amt,
 							':principal' => $prinPay,
-							':interest' => $interest,
+							':interest' => $interestFull,
 							':interest_return' => $int_returnSrc,
-							':interest_arrear' => $intArr,
+							':interest_arrear' => $interest["INT_ARREAR"],
 							':bfinterest_return' => $dataCont["INTEREST_RETURN"],
 							':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
 							':member_no' => $payload["member_no"],
@@ -691,9 +675,9 @@ class CalculateLoan {
 							':amount' => $amt_transfer,
 							':penalty_amt' => $penalty_amt,
 							':principal' => $prinPay,
-							':interest' => $interest,
+							':interest' => $interestFull,
 							':interest_return' => $int_returnSrc,
-							':interest_arrear' => $intArr,
+							':interest_arrear' => $interest["INT_ARREAR"],
 							':bfinterest_return' => $dataCont["INTEREST_RETURN"],
 							':bfinterest_arrear' => $dataCont["INTEREST_ARREAR"],
 							':member_no' => $payload["member_no"],
@@ -763,7 +747,7 @@ class CalculateLoan {
 
 	}
 	public function paySlip($conoracle,$amt_transfer,$config,$slipdoc_no,$operate_date,
-	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWTD,$conmysql,$penalty_amt=0){
+	$tofrom_accid,$slipwtd=null,$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWTD,$conmysql,$penalty_amt=0,$is_bank=false){
 		$interest_accum = $this->calculateIntAccum($member_no);
 		$getShareinfo = $conoracle->prepare("SELECT SHARESTK_AMT FROM SHSHAREMASTER WHERE member_no = :member_no");
 		$getShareinfo->execute([':member_no' => $member_no]);
@@ -780,8 +764,9 @@ class CalculateLoan {
 			':operate_date' => $operate_date,
 			':sharevalue' => $rowShare["SHARESTK_AMT"] * 10,
 			':intaccum_amt' => $interest_accum,
-			':moneytype_code' => 'TRN',
+			':moneytype_code' => $is_bank ? 'CBT' : 'TRN',
 			':tofrom_accid' => $tofrom_accid,
+			':ref_system' => $is_bank ? null : 'DEP',
 			':slipdep' => $slipwtd ?? null,
 			':slip_amt' => $amt_transfer,
 			':membgroup_code' => $rowMember["MEMBGROUP_CODE"]
@@ -793,7 +778,7 @@ class CalculateLoan {
 												VALUES(:coop_id,:payinslip_no,:coop_id,:member_no,:document_no,:sliptype_code,
 												TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
 												TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
-												:sharevalue,:sharevalue,:intaccum_amt,:moneytype_code,1,:tofrom_accid,'DEP',:slipdep,:slip_amt,:membgroup_code,
+												:sharevalue,:sharevalue,:intaccum_amt,:moneytype_code,1,:tofrom_accid,:ref_system,:slipdep,:slip_amt,:membgroup_code,
 												'MOBILE',TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss'))");
 		if($insertPayinSlip->execute($arrExecuteSlSlip)){
 			$arrayResult['RESULT'] = TRUE;
@@ -996,7 +981,7 @@ class CalculateLoan {
 		
 	}
 	public function paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,$sliptype_code,$document_no,$operate_date,$loantype_code,$loancontract_no,$amt_transfer,$payload,$deptaccount_no
-	,$moneytype_code,$bank_code,$vcc_id,$log){
+	,$moneytype_code,$bank_code,$vcc_id,$log,$fee_amt = 0){
 		$dataCont = $this->getContstantLoanContract($loancontract_no);
 		$interest = $this->calculateIntArrAPI($loancontract_no,$amt_transfer);
 		$interestFull = $interest["INT_ARREAR"];
@@ -1032,19 +1017,20 @@ class CalculateLoan {
 			':moneytype_code' => $moneytype_code,
 			':expense_bank' => $bank_code ?? null,
 			':expense_accid' => $deptaccount_no,
+			':bankfee_amt' => $fee_amt,
 			':tofrom_accid' => $vcc_id
 		];
 		$insertSLSlipPayout = $conoracle->prepare("INSERT INTO slslippayout(COOP_ID,PAYOUTSLIP_NO,MEMCOOP_ID,MEMBER_NO,SLIPTYPE_CODE,DOCUMENT_NO,SLIP_DATE,OPERATE_DATE,SHRLONTYPE_CODE,
 													LOANCONTRACT_NO,PAYOUT_AMT,PAYOUTNET_AMT,BFLOANAPPROVE_AMT,BFSHRCONT_BALAMT,BFWITHDRAW_AMT,BFINTEREST_ARREAR,
 													BFLASTCALINT_DATE,BFLASTRECEIVE_DATE,BFLASTPROC_DATE,BFPAYMENT_STATUS,BFCONTINT_TYPE,CALINT_FROM,CALINT_TO,INTEREST_PERIOD,
-													MONEYTYPE_CODE,EXPENSE_BANK,EXPENSE_BRANCH,EXPENSE_ACCID,
+													MONEYTYPE_CODE,EXPENSE_BANK,EXPENSE_BRANCH,EXPENSE_ACCID,BANKFEE_AMT,
 													TOFROM_ACCID,SLIP_STATUS,ENTRY_ID,ENTRY_DATE,ENTRY_BYCOOPID)
 													VALUES(:coop_id,:payoutslip_no,:coop_id,:member_no,:sliptype_code,:document_no,
-													TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss'),TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss'),
+													TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),TRUNC(TO_DATE(:operate_date,'yyyy/mm/dd  hh24:mi:ss')),
 													:shrlontype_code,:loancontract_no,:payout_amt,:payout_amt,:bfloanapprove_amt,:bfshrcont_balamt,:bfwithdraw_amt,:bfinterest_arrear,
 													TO_DATE(:bflastcalint_date,'yyyy/mm/dd  hh24:mi:ss'),TO_DATE(:bflastreceive_date,'yyyy/mm/dd  hh24:mi:ss'),TO_DATE(:bflastproc_date,'yyyy/mm/dd  hh24:mi:ss'),
 													'1','3',TO_DATE(:calint_from,'yyyy/mm/dd  hh24:mi:ss'),TO_DATE(:calint_to,'yyyy/mm/dd  hh24:mi:ss'),:interest_period,
-													:moneytype_code,:expense_bank,'ฮฮฮ',:expense_accid,:tofrom_accid,'1','MOBILE',SYSDATE,:coop_id)");
+													:moneytype_code,:expense_bank,'ฮฮฮ',:expense_accid,:bankfee_amt,:tofrom_accid,'1','MOBILE',SYSDATE,:coop_id)");
 		if($insertSLSlipPayout->execute($arrExecuteSlOutSlip)){
 			$arrayResult['RESULT'] = TRUE;
 			return $arrayResult;

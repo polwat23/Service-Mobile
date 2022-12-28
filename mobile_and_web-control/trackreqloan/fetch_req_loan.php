@@ -16,6 +16,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$getLoanType->execute([':loantype_code' => $rowReqLoan["loantype_code"]]);
 				$rowLoan = $getLoanType->fetch(PDO::FETCH_ASSOC);
 				$arrayReq = array();
+				$arrayReq["ALLOW_CANCEL"] = TRUE;
 				$arrayReq["LOANTYPE_DESC"] = $rowLoan["LOANTYPE_DESC"];
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];

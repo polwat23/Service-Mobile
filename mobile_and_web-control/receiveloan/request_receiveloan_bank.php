@@ -65,16 +65,23 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		$arrSlipnoPayout = $cal_dep->generateDocNo('ONLINETXLON',$lib);
 		$payoutslip_no = $arrSlipnoPayout["SLIP_NO"];
 		$lastdocument_noPayout = $arrSlipnoPayout["QUERY"]["LAST_DOCUMENTNO"] + 1;
-		if(isset($rowDataWithdraw["account_payfee"]) && $rowDataWithdraw["account_payfee"] != ""){
-			$from_account_no = $rowDataWithdraw["account_payfee"];
-			$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowDataWithdraw["account_payfee"]);
-		}else{
-			$fetchAccAtm = $conoracle->prepare("SELECT  DEPTACCOUNT_NO FROM dpdeptmaster WHERE member_no =:member_no AND depttype_code ='88'");
-			$fetchAccAtm->execute([':member_no' => $member_no]);
-			$rowAccAtm = $fetchAccAtm->fetch(PDO::FETCH_ASSOC);
-			$from_account_no = $rowAccAtm["DEPTACCOUNT_NO"];	
-			$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowAccAtm["DEPTACCOUNT_NO"]);			
+
+		$fetchAccAtm = $conoracle->prepare("SELECT DEPTACCOUNT_NO,PRNCBAL FROM dpdeptmaster WHERE member_no = :member_no 
+											AND depttype_code = '88' and deptclose_status = '0'");
+		$fetchAccAtm->execute([':member_no' => $member_no]);
+		$rowAccAtm = $fetchAccAtm->fetch(PDO::FETCH_ASSOC);
+		$from_account_no = $rowAccAtm["DEPTACCOUNT_NO"];	
+		$dataConst = $cal_dep->getConstantAcc($from_account_no);
+		$DataSeqAmt = $cal_dep->getSequestAmt($from_account_no);
+		$getlastseqFeeAcc = $cal_dep->getLastSeqNo($rowAccAtm["DEPTACCOUNT_NO"]);			
+		$sumAllTransfer = ($dataConst["PRNCBAL"] - $DataSeqAmt["SEQUEST_AMOUNT"]) - ($fee_amt);
+		if($sumAllTransfer < $dataConst["MINPRNCBAL"]){
+			$arrayResult['RESPONSE_CODE'] = "WS0100";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
 		}
+		
 		$constFromAccFee = $cal_dep->getConstantAcc($from_account_no);
 		$vccamtPenalty = $func->getConstant("accidfee_receive");
 		$vccamtPenaltyPromo = $func->getConstant("accidfee_promotion");
@@ -91,7 +98,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 		}
 		$conoracle->beginTransaction();
 		$slipPayout = $cal_loan->paySlipLonOut($conoracle,$config,$payoutslip_no,$member_no,'LWD',$ref_no,$dateOper,$dataCont["LOANTYPE_CODE"],
-		$contract_no,$dataComing["amt_transfer"],$payload,$deptaccount_no,'CBT',$rowDataWithdraw["bank_code"],$vccAccID,$log);
+		$contract_no,$dataComing["amt_transfer"],$payload,$deptaccount_no,'CBT',$rowDataWithdraw["bank_code"],$vccAccID,$log,$fee_amt);
 		if($slipPayout["RESULT"]){
 			$receiveLon = $cal_loan->receiveLoanOD($conoracle,$config,$contract_no,$dataCont,$ref_no,$dataComing["amt_transfer"],
 			$payoutslip_no,$ref_no,$deptaccount_no,0,$payload,$dataComing["app_version"],$dateOper,$log);
@@ -240,7 +247,7 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				}
 			}else{
 				$conoracle->rollback();
-				$arrayResult['RESPONSE_CODE'] = $slipPayout["RESPONSE_CODE"];
+				$arrayResult['RESPONSE_CODE'] = $receiveLon["RESPONSE_CODE"];
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
