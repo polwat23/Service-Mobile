@@ -281,29 +281,49 @@ function GenerateReport($dataReport,$header,$lib){
 		</div>
 		';
 	} else {
-	$html .= '
-		<img src="../../resource/important_doc/reg_cpct.jpg" style="position: absolute; width:100%; left: 0%; right: 0%; top: 0%; bottom: 0%; z-index: 1;">
-		<div style="margin-top:245px; z-index:100;">
-			<div class="bold" style="float: right; width: 28%;">' . ($header["doc_no"] ?? null) . '</div>
-			<div class="bold center" style="float: right; width: 52%;">' . ($header["full_name"] ?? null) . '</div>
-		</div>
-		<div style="margin-top:95px; ; z-index:100">
-			<div style="clear: both;"></div>
-			<div style="float: right; height: 20px;">
-				<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 2px;">' . ($lib->convertdate($dataReport["date_1"],'d M') ?? null) . '</div>
-				<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 340px;">' . (substr($lib->convertdate($dataReport["date_1"],'d M Y'), -4) ?? null) . '</div>
-			</div>
-			<div style="clear: both;"></div>
-			<div style="float: right; height: 20px;">
-				<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 2px;">' . ($lib->convertdate($dataReport["date_2"],'d M') ?? null) . '</div>
-				<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 340px;">' . (substr($lib->convertdate($dataReport["date_2"],'d M Y'), -4) ?? null) . '</div>
-			</div>
-			<div style="clear: both;"></div>
-			<div style="float: right; height: 20px;">
-				<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 2px;">' . ($dataReport["date_3"] ? $lib->convertdate($dataReport["date_3"],'d M') ?? null : null) . '</div>
-				<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 340px;">' . ($dataReport["date_3"] ? substr($lib->convertdate($dataReport["date_3"],'d M Y'), -4) ?? null : null) . '</div>
-			</div>
-		</div>';
+		if (date('Y-m-d', strtotime($dataReport["date_2"])) < date('Y-m-d', strtotime("01/08/2019"))) {
+			$html .= '
+				<img src="../../resource/important_doc/reg_cpct2562.jpg" style="position: absolute; width:100%; left: 0%; right: 0%; top: 0%; bottom: 0%; z-index: 1;">
+				<div style="margin-top:260px; z-index:100;">
+					<div class="bold center">' . ($header["full_name"] ?? null) . '</div>
+				</div>
+				<div style="margin-top:60px; z-index:100;">
+					<div class="bold center">' . ($header["doc_no"] ?? null) . '</div>
+					<div class="center" style="margin-top: 15px;">
+						<div class="bold" style="display:inline-block; margin-left: 50px;">' . ($lib->convertdate($dataReport["date_2"],'d M') ?? null) . '</div>
+						<div class="bold" style="display:inline-block; margin-left: 170px;">' . (substr($lib->convertdate($dataReport["date_2"],'d M Y'), -4) ?? null) . '</div>
+					</div>
+				</div>
+				<div style="margin-top:15px; z-index:100;">
+					<div class="bold center" style="font-size:12pt;">เริ่มมีสมาชิกภาพสมบูรณ์ด้วยการเสียชีวิตจากอุบัติเหตุ</div>
+					<div class="bold center" style="font-size:12pt;">ตั้งแต่วันที่ ' .($lib->convertdate($dataReport["date_1"],'d M Y') ?? null). ' เป็นต้นไป</div>
+				</div>
+				';
+		} else {
+			$html .= '
+				<img src="../../resource/important_doc/reg_cpct.jpg" style="position: absolute; width:100%; left: 0%; right: 0%; top: 0%; bottom: 0%; z-index: 1;">
+				<div style="margin-top:245px; z-index:100;">
+					<div class="bold" style="float: right; width: 28%;">' . ($header["doc_no"] ?? null) . '</div>
+					<div class="bold center" style="float: right; width: 52%;">' . ($header["full_name"] ?? null) . '</div>
+				</div>
+				<div style="margin-top:95px; ; z-index:100">
+					<div style="clear: both;"></div>
+					<div style="float: right; height: 20px;">
+						<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 2px;">' . ($lib->convertdate($dataReport["date_1"],'d M') ?? null) . '</div>
+						<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 340px;">' . (substr($lib->convertdate($dataReport["date_1"],'d M Y'), -4) ?? null) . '</div>
+					</div>
+					<div style="clear: both;"></div>
+					<div style="float: right; height: 20px;">
+						<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 2px;">' . ($lib->convertdate($dataReport["date_2"],'d M') ?? null) . '</div>
+						<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 340px;">' . (substr($lib->convertdate($dataReport["date_2"],'d M Y'), -4) ?? null) . '</div>
+					</div>
+					<div style="clear: both;"></div>
+					<div style="float: right; height: 20px;">
+						<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 2px;">' . ($dataReport["date_3"] ? $lib->convertdate($dataReport["date_3"],'d M') ?? null : null) . '</div>
+						<div class="bold" style="font-size:12pt; display:inline-block; margin-right: 340px;">' . ($dataReport["date_3"] ? substr($lib->convertdate($dataReport["date_3"],'d M Y'), -4) ?? null : null) . '</div>
+					</div>
+				</div>';
+		}
 	}
 
 	$html .= '
