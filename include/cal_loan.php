@@ -517,7 +517,7 @@ class CalculateLoan {
 			':sliptype_code' => 'PX',
 			':operate_date' => $operate_date,
 			':sharebf_value' => $rowShare["SHAREBEGIN_AMT"] * 50,
-			':sharevalue' => $rowShare["SHARESTK_AMT"] * 50,
+			':sharevalue' => ($rowShare["SHARESTK_AMT"] * 50) + $amt_transfer,
 			':intaccum_amt' => $interest_accum,
 			':moneytype_code' => 'TRN',
 			':tofrom_accid' => $tofrom_accid,
