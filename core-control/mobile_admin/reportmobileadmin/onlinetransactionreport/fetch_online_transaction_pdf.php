@@ -561,7 +561,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		}
 		foreach($arrayLoanExternalList as $value){
 			$inAmt = $value["INT_AMT"]==0?null:(" / ".number_format($value["INT_AMT"] ?? '0',2)." บาท");
-			$arrInsideList[] = "- ".$value["LOANTYPE_DESC"]." : ".($value["COUNT"] ?? 0)." รายการ ".number_format($value["PRN_AMT"] ?? '0',2).$intAmt;
+			$arrInsideList[] = "- ".$value["LOANTYPE_DESC"]." : ".($value["COUNT"] ?? 0)." รายการ ".number_format($value["PRN_AMT"] ?? '0',2)." / ".number_format($value["INT_AMT"] ?? '0',2)." บาท";
 		}
 		//ถอน
 		$arrInsideList[] = "รวมถอน : ".number_format($sum_withdraw_inside,2)." บาท";

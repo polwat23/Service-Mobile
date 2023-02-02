@@ -123,7 +123,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		}
 		$getDetailKPHeader = $conoracle->prepare("SELECT 
 																kpd.RECEIPT_NO,
-																kpd.OPERATE_DATE,
+																kpd.RECEIPT_DATE,
 																kpd.KEEPING_STATUS,
 																kpd.SHARESTK_VALUE,
 																kpd.INTEREST_ACCUM
@@ -140,7 +140,7 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["sharestk_value"] = number_format($rowKPHeader["SHARESTK_VALUE"] + $shareinPeriod,2);
 		$header["interest_accum"] = number_format($rowKPHeader["INTEREST_ACCUM"] + $intinPeriod,2);
 		$header["receipt_no"] = TRIM($rowKPHeader["RECEIPT_NO"]);
-		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
+		$header["operate_date"] = $lib->convertdate($rowKPHeader["RECEIPT_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
 			if ($forceNewSecurity == true) {
