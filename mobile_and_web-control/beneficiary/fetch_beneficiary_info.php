@@ -9,9 +9,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												MG.ADDRESS_MOO,MG.ADDRESS_SOI,MG.ADDRESS_VILLAGE,MG.ADDRESS_ROAD,MBT.TAMBOL_DESC AS TAMBOL_DESC,
 												MBD.DISTRICT_DESC AS DISTRICT_DESC,
 												mg.PROVINCE_CODE AS PROVINCE_CODE,
-												MBP.PROVINCE_DESC AS PROVINCE_DESC,mc.GAIN_CONCERN,mg.POSTCODE
+												MBP.PROVINCE_DESC AS PROVINCE_DESC,mc.GAIN_CONCERN,mg.POSTCODE , mg.GAIN_ADDRESS
 												FROM mbgainmaster mg LEFT JOIN mbucfprename mp ON mg.prename_code = mp.prename_code
-												LEFT JOIN mbucfgainconcern mc ON mg.relation_code = mc.concern_code
+												LEFT JOIN mbucfgainconcern mc ON LTRIM(RTRIM(mg.gain_relation)) =  LTRIM(RTRIM(mc.concern_code))
 												LEFT JOIN MBUCFTAMBOL MBT ON mg.TAMBOL_CODE = MBT.TAMBOL_CODE
 												LEFT JOIN MBUCFDISTRICT MBD ON mg.DISTRICT_CODE = MBD.DISTRICT_CODE
 												LEFT JOIN MBUCFPROVINCE MBP ON mg.PROVINCE_CODE = MBP.PROVINCE_CODE	
@@ -42,8 +42,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrOtherInfo[0]["LABEL"] = "เลขบัตรประจำตัวประชาชน";
 			$arrOtherInfo[0]["VALUE"] = $rowBenefit["CARD_PERSON"];
-			$arrOtherInfo[1]["LABEL"] = "วันเกิด";
-			$arrOtherInfo[1]["VALUE"] = $lib->convertdate($rowBenefit["BIRTH_DATE"],"D m Y");
+			$arrOtherInfo[1]["LABEL"] = "ที่อยู่";
+			$arrOtherInfo[1]["VALUE"] = $rowBenefit["GAIN_ADDRESS"];
 			$arrBenefit["ADDRESS"] = $address;
 			$arrBenefit["OTHER_INFO"] = $arrOtherInfo;
 			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];

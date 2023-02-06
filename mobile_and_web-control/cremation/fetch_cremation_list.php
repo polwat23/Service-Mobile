@@ -5,37 +5,35 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'CremationInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrayDataWcGrp = array();
-		$getDataWc = $conmssql->prepare("SELECT WCDEPTMASTER.DEPTACCOUNT_NO,WCDEPTMASTER.WFACCOUNT_NAME,WCUCFCREMATION.CS_NAME,
-									WCDEPTMASTER.WFTYPE_CODE,WCUCFCREMATION.AMT,WCUCFCREMATION.RATE
-									FROM WCDEPTMASTER LEFT JOIN WCUCFCREMATION 
-									ON WCDEPTMASTER.BRANCH_ID = WCUCFCREMATION.CS_BRANCH  
-									WHERE WCDEPTMASTER.DEPTCLOSE_STATUS = 0  AND WCDEPTMASTER.DEPTTYPE_CODE NOT IN('03')
-									AND TRIM(WCDEPTMASTER.MEMBER_NO) = :member_no");
+		$getDataWc = $conmssql->prepare("SELECT cp.COOP_NAME as CS_NAME,mt.MEMBER_NO,mt.DEPTACCOUNT_NO,mt.DEPTACCOUNT_NAME,mt.DEPTACCOUNT_SNAME,mt.WFTYPE_CODE,mt.CARD_PERSON
+										from wcdeptmaster mt 
+										left join wcreqchg_dept chg on mt.deptaccount_no = chg.deptaccount_no and mt.coop_id = chg.coop_id and mt.wc_id = chg.wc_id
+										left join wccontcoop cp on  mt.coop_id = cp.coop_id  and mt.coop_id = cp.coop_id and mt.wc_id = cp.wc_id
+										where mt.member_no = :member_no");
 		$getDataWc->execute([':member_no' => $member_no]);
 		while($rowDataWc = $getDataWc->fetch(PDO::FETCH_ASSOC)){
-			if(isset($rowDataWc["CS_NAME"]) && $rowDataWc["CS_NAME"] != ""){
-				$arrayDataWc = array();
-				$arrayDataWc["DEPTACCOUNT_NO"] = $lib->formataccount($rowDataWc["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));
-				$arrayDataWc["ACCOUNT_NAME"] = $rowDataWc["WFACCOUNT_NAME"];
-				$arrayDataWc["CREMATION_TYPE"] = $rowDataWc["CS_NAME"];
-				$arrayDataWc["CREMATION_CODE"] = $rowDataWc["WFTYPE_CODE"];
-				$arrayDataWc["AMOUNT_WC"] = number_format($rowDataWc["AMT"],2);
-				$getPersonAccountWC = $conmssql->prepare("SELECT WCCODEPOSIT.NAME,WCCODEPOSIT.SEQ_NO
-													FROM WCDEPTMASTER LEFT JOIN WCCODEPOSIT 
-													ON WCDEPTMASTER.DEPTACCOUNT_NO= WCCODEPOSIT.DEPTACCOUNT_NO 
-													WHERE WCDEPTMASTER.DEPTCLOSE_STATUS = 0 AND TRIM(WCDEPTMASTER.DEPTACCOUNT_NO) = :account_no
-													ORDER BY WCCODEPOSIT.SEQ_NO ASC");
-				$getPersonAccountWC->execute([':account_no' => TRIM($rowDataWc["DEPTACCOUNT_NO"])]);
-				while($rowPerson = $getPersonAccountWC->fetch(PDO::FETCH_ASSOC)){
-					if(isset($rowPerson["NAME"]) && $rowPerson["NAME"] != ""){
-						$arrPerson = array();
-						$arrPerson["NAME"] = $rowPerson["NAME"];
-						$arrPerson["SEQ_NO"] = $rowPerson["SEQ_NO"];
-						$arrayDataWc["PERSON"][] = $arrPerson;
-					}
+			$arrayDataWc = array();
+			$arrayDataWc["DEPTACCOUNT_NO"] = $rowDataWc["DEPTACCOUNT_NO"];
+			$arrayDataWc["ACCOUNT_NAME"] = $rowDataWc["DEPTACCOUNT_NAME"]." ".$rowDataWc["DEPTACCOUNT_SNAME"];
+			$arrayDataWc["CREMATION_TYPE"] = $rowDataWc["CS_NAME"];
+			$arrayDataWc["CREMATION_CODE"] = $rowDataWc["WFTYPE_CODE"];
+			$arrayDataWc["CARD_PERSON"] = $rowDataWc["CARD_PERSON"];
+			$getPersonAccountWC = $conmssql->prepare("SELECT co.SEQ_NO, co.transferee_name as NAME
+									   FROM wcdeptmaster mt 
+									   LEFT JOIN wccodeposit co on mt.deptaccount_no = co.deptaccount_no and mt.coop_id = co.coop_id and mt.wc_id = co.wc_id
+									   LEFT JOIN wccontcoop wc on mt.coop_id = wc.coop_id and mt.wc_id = wc.wc_id
+									   WHERE LTRIM(RTRIM(mt.DEPTACCOUNT_NO)) = :account_no
+									   ORDER BY mt.wc_id,co.seq_no");
+			$getPersonAccountWC->execute([':account_no' => TRIM($rowDataWc["DEPTACCOUNT_NO"])]);
+			while($rowPerson = $getPersonAccountWC->fetch(PDO::FETCH_ASSOC)){
+				if(isset($rowPerson["NAME"]) && $rowPerson["NAME"] != ""){
+					$arrPerson = array();
+					$arrPerson["NAME"] = $rowPerson["NAME"];
+					$arrPerson["SEQ_NO"] = $rowPerson["SEQ_NO"];
+					$arrayDataWc["PERSON"][] = $arrPerson;
 				}
-				$arrayDataWcGrp[] = $arrayDataWc;
 			}
+			$arrayDataWcGrp[] = $arrayDataWc;
 		}
 		$arrayResult['CREMATION'] = $arrayDataWcGrp;
 		$arrayResult['RESULT'] = TRUE;

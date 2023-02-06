@@ -3,6 +3,7 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance','calint_type','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'PaymentSimulateTable')){
+		
 		$request_date = $dataComing['request_date'];
 		$cal_start_pay_date = $func->getConstant('cal_start_pay_date');
 		$pay_date = date("Y-m-t", strtotime($request_date));
@@ -108,13 +109,26 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					$dayinYear = $rowConstant["DAYINYEAR"];
 				}
 				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+				$period_int = $lib->roundDecimal($period_int , 4);
 				if (($payment_sumbalance) < $pay_period) {
 					$prn_amount = $payment_sumbalance;
+					$prn_amount = $lib->roundDecimal($prn_amount , 4);
+					if($prn_amount % 10 > 0){
+						$prn_amount = $prn_amount + ( 10 - ($prn_amount % 10));
+					}
 				}else{
 					$prn_amount = $pay_period;
+					$prn_amount = $lib->roundDecimal($prn_amount , 4);
+					if($prn_amount % 10 > 0){
+						$prn_amount = $prn_amount + ( 10 - ($prn_amount % 10));
+					}
+					
 				}
 				$periodPayment = $prn_amount + $period_int;
+				$sumInt += $period_int;
+				$sumPayment += $periodPayment;
 				$payment_sumbalance = $payment_sumbalance - $prn_amount;
+
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
 				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;
@@ -141,11 +155,20 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 					$dayinYear = $rowConstant["DAYINYEAR"];
 				}
 				$period_int = $lib->roundDecimal($payment_sumbalance * $int_rate * $dayOfMonth / $dayinYear,$rowRoundType["ROUND_TYPE"]);
+				$period_int = $lib->roundDecimal($period_int , 4);
 				$prn_amount = $pay_period - $period_int;
+				$prn_amount = $lib->roundDecimal($prn_amount , 4);
+				if($prn_amount % 10 > 0){
+					$prn_amount = $prn_amount + ( 10 - ($prn_amount % 10));
+				}
 				
 				
 				if (($payment_sumbalance) < $pay_period) {
 				  $prn_amount = $payment_sumbalance;
+				  $prn_amount = $lib->roundDecimal($prn_amount , 4);
+					if($prn_amount % 10 > 0){
+						$prn_amount = $prn_amount + ( 10 - ($prn_amount % 10));
+					}
 				}
 				$periodPaymentRaw = $prn_amount + $period_int;
 				if($lib->checkCompleteArgument(['period_payment'],$dataComing)){
@@ -175,7 +198,8 @@ if($lib->checkCompleteArgument(['menu_component','int_rate','payment_sumbalance'
 				}
 				$payment_sumbalance = $payment_sumbalance - ($prn_amount);
 				$sumInt += $period_int;
-				$sumPayment += $periodPayment;
+				$sumPayment += $periodPaymentRaw;
+
 				$arrPaymentPerPeriod["MUST_PAY_DATE"] = $lib->convertdate($lastDate,'D m Y');
 				$arrPaymentPerPeriod["PRN_AMOUNT"] = number_format($prn_amount,2);
 				$arrPaymentPerPeriod["DAYS"] = $dayOfMonth;

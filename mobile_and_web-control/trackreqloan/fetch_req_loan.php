@@ -3,8 +3,33 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestTrack')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGrpReq = array();
 		if(isset($dataComing["req_status"]) && $dataComing["req_status"] != ""){
+			$fetchTrackLoan = $conmssql->prepare("SELECT ln.LOANREQUEST_DOCNO ,lt.LOANTYPE_DESC , ln.LOANREQUEST_STATUS , 
+												ln.LOANPERMISS_AMT , ln.LOANREQUEST_AMT , ln.PERIOD_PAYAMT ,ln.REMARK
+												from lnreqloan ln LEFT JOIN lnloantype lt ON ln.loantype_code = lt.loantype_code 
+												where ln.member_no = :member_no AND ln.loanrequest_status = :req_status ");
+			$fetchTrackLoan->execute([
+				':member_no' => $member_no,
+				':req_status' => $dataComing["req_status"]
+			]);
+			while($rowTrackLoan = $fetchTrackLoan->fetch(PDO::FETCH_ASSOC)){
+				$arrayReq = array();
+				$arrayReq["LOANTYPE_DESC"] = $rowTrackLoan["LOANTYPE_DESC"];
+				$arrayReq["REQLOAN_DOC"] = $rowTrackLoan["LOANREQUEST_DOCNO"];
+				$arrayReq["REQUEST_AMT"] = $rowTrackLoan["LOANREQUEST_AMT"];
+				$arrayReq["PERIOD"] = $rowTrackLoan["PERIOD_PAYAMT"];
+				$arrayReq["REQ_STATUS"] = $rowTrackLoan["LOANREQUEST_STATUS"];
+				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowTrackLoan["LOANREQUEST_STATUS"]][0][$lang_locale];
+				$arrayReq["DIFFOLD_CONTRACT"] = 0;
+				$arrayReq["LOANPERMIT_AMT"] = $rowTrackLoan["LOANPERMISS_AMT"];
+				$arrayReq["RECEIVE_NET"] = $rowTrackLoan["LOANPERMISS_AMT"];
+				$arrayReq["REMARK"] = $rowTrackLoan["REMARK"];
+				$arrGrpReq[] = $arrayReq;
+			}
+
+
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
 															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
 															FROM gcreqloan WHERE member_no = :member_no and req_status = :req_status ORDER BY update_date DESC");
@@ -21,7 +46,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["request_amt"];
-				//$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				$arrayReq["PERIOD"] = $rowReqLoan["period"];
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
@@ -37,6 +61,30 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrGrpReq[] = $arrayReq;
 			}
 		}else{
+			
+			$fetchTrackLoan = $conmssql->prepare("SELECT ln.LOANREQUEST_DOCNO ,lt.LOANTYPE_DESC , ln.LOANREQUEST_STATUS , 
+												ln.LOANPERMISS_AMT , ln.LOANREQUEST_AMT , ln.PERIOD_PAYAMT ,ln.REMARK
+												from lnreqloan ln LEFT JOIN lnloantype lt ON ln.loantype_code = lt.loantype_code 
+												where ln.member_no = :member_no");
+			$fetchTrackLoan->execute([
+				':member_no' => $member_no
+			]);
+			while($rowTrackLoan = $fetchTrackLoan->fetch(PDO::FETCH_ASSOC)){
+				$arrayReq = array();
+				$arrayReq["LOANTYPE_DESC"] = $rowTrackLoan["LOANTYPE_DESC"];
+				$arrayReq["REQLOAN_DOC"] = $rowTrackLoan["LOANREQUEST_DOCNO"];
+				$arrayReq["REQUEST_AMT"] = $rowTrackLoan["LOANREQUEST_AMT"];
+				$arrayReq["PERIOD"] = $rowTrackLoan["PERIOD_PAYAMT"];
+				$arrayReq["REQ_STATUS"] = $rowTrackLoan["LOANREQUEST_STATUS"];
+				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowTrackLoan["LOANREQUEST_STATUS"]][0][$lang_locale];
+				$arrayReq["DIFFOLD_CONTRACT"] = 0;
+				$arrayReq["LOANPERMIT_AMT"] = $rowTrackLoan["LOANPERMISS_AMT"];
+				$arrayReq["RECEIVE_NET"] = $rowTrackLoan["LOANPERMISS_AMT"];
+				$arrayReq["REMARK"] = $rowTrackLoan["REMARK"];
+				$arrGrpReq[] = $arrayReq;
+			}
+			
+			
 			$fetchReqLoan = $conmysql->prepare("SELECT reqloan_doc,loantype_code,request_amt,period_payment,period,req_status,loanpermit_amt,
 															diff_old_contract,receive_net,salary_img,citizen_img,remark,approve_date,contractdoc_url,deptaccount_no_bank
 															FROM gcreqloan WHERE member_no = :member_no ORDER BY update_date DESC");
@@ -50,7 +98,6 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayReq["REQLOAN_DOC"] = $rowReqLoan["reqloan_doc"];
 				$arrayReq["LOANTYPE_CODE"] = $rowReqLoan["loantype_code"];
 				$arrayReq["REQUEST_AMT"] = $rowReqLoan["request_amt"];
-				//$arrayReq["PERIOD_PAYMENT"] = $rowReqLoan["period_payment"];
 				$arrayReq["PERIOD"] = $rowReqLoan["period"];
 				$arrayReq["REQ_STATUS"] = $rowReqLoan["req_status"];
 				$arrayReq["REQ_STATUS_DESC"] = $configError["REQ_LOAN_STATUS"][0][$rowReqLoan["req_status"]][0][$lang_locale];
