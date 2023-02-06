@@ -136,27 +136,27 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 					':loantype_code' => $dataComing["loantype_code"]
 				]);
 				$rowPrefix = $fetchPrefix->fetch(PDO::FETCH_ASSOC);
-				$fetchData = $conmssql->prepare("SELECT mp.prename_desc,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,mb.salary_amount, 
-													mb.member_date,mb.work_date,mb.position_desc,mg.membgroup_desc,mt.membtype_desc,mb.membgroup_code,
-													mb.ADDRESS_NO as ADDR_NO,
-													mb.ADDRESS_MOO as ADDR_MOO,
-													mb.ADDRESS_SOI as ADDR_SOI,
-													mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
-													mb.ADDRESS_ROAD as ADDR_ROAD,
-													MBT.TAMBOL_DESC AS TAMBOL_DESC,
-													MBD.DISTRICT_DESC AS DISTRICT_DESC,
-													MB.PROVINCE_CODE AS PROVINCE_CODE,
-													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MB.POSTCODE AS ADDR_POSTCODE,(sh.sharestk_amt * 10) AS SHAREBEGIN_AMT,sh.sharestk_amt,(sh.periodshare_amt * 10) as periodshare_amt,
-													mb.email as email,mb.MEM_TEL as MEM_TELMOBILE, mariage_status
-													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
-													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
-													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
-													LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-													LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
-													LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
-													LEFT JOIN shsharemaster sh ON mb.member_no = sh.member_no
-													WHERE mb.member_no = :member_no");
+				$fetchData = $conmssql->prepare("SELECT MP.PRENAME_DESC,MB.MEMB_NAME,MB.MEMB_SURNAME,MB.BIRTH_DATE,MB.CARD_PERSON,MB.SALARY_AMOUNT,
+												MB.MEMBER_DATE,MB.WORK_DATE,MG.MEMBGROUP_DESC,MT.MEMBTYPE_DESC,MB.MEMBGROUP_CODE,
+												MB.ADDRESS_NO AS ADDR_NO,
+												MB.ADDRESS_MOO AS ADDR_MOO,
+												MB.ADDRESS_SOI AS ADDR_SOI,
+												MB.ADDRESS_VILLAGE AS ADDR_VILLAGE,
+												MB.ADDRESS_ROAD AS ADDR_ROAD,
+												MBT.TAMBOL_DESC AS TAMBOL_DESC,
+												MBD.DISTRICT_DESC AS DISTRICT_DESC,
+												MB.PROVINCE_CODE AS PROVINCE_CODE,
+												MBP.PROVINCE_DESC AS PROVINCE_DESC,
+												MB.POSTCODE AS ADDR_POSTCODE,(SH.SHARESTK_AMT * 10) AS SHAREBEGIN_AMT,SH.SHARESTK_AMT,(SH.PERIODSHARE_AMT * 10) AS PERIODSHARE_AMT,
+												MB.EMAIL AS EMAIL,MB.MEM_TEL AS MEM_TELMOBILE, MARIAGE_STATUS
+												FROM MBMEMBMASTER MB LEFT JOIN MBUCFPRENAME MP ON MB.PRENAME_CODE = MP.PRENAME_CODE
+												LEFT JOIN MBUCFMEMBGROUP MG ON MB.MEMBGROUP_CODE = MG.MEMBGROUP_CODE
+												LEFT JOIN MBUCFMEMBTYPE MT ON MB.MEMBTYPE_CODE = MT.MEMBTYPE_CODE
+												LEFT JOIN MBUCFTAMBOL MBT ON MB.TAMBOL_CODE = MBT.TAMBOL_CODE
+												LEFT JOIN MBUCFDISTRICT MBD ON MB.DISTRICT_CODE = MBD.DISTRICT_CODE
+												LEFT JOIN MBUCFPROVINCE MBP ON MB.PROVINCE_CODE = MBP.PROVINCE_CODE
+												LEFT JOIN SHSHAREMASTER SH ON MB.MEMBER_NO = SH.MEMBER_NO
+												WHERE MB.MEMBER_NO = :member_no");
 				$fetchData->execute([
 					':member_no' => $member_no
 				]);
@@ -481,7 +481,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							':id_userlogin' => $payload["id_userlogin"]
 						]);
 						$conmysql->commit();
-						$arrayResult['SHOW_SLIP'] = TRUE;
+						$arrayResult['REPORT_URL'] = $pathFile;
 						$arrayResult['APV_DOCNO'] = $reqloan_doc;
 						$arrayResult['RESULT'] = TRUE;
 						require_once('../../include/exit_footer.php');

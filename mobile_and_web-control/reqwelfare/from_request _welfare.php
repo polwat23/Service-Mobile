@@ -141,12 +141,12 @@ $html = '
 			}
 			body {
 			  padding: 0 ;
-			  font-size: 16pt;
+			  font-size: 14pt;
 			  line-height: 24px;
 			}
 			div{
 				line-height: 24px;
-				font-size: 16pt;
+				font-size: 14pt;
 			}
 			.nowrap{
 				white-space: nowrap;
@@ -185,7 +185,7 @@ $html = '
 				position:absolute;
 			  }
 			.data{
-				font-size:15pt;
+				font-size:13pt;
 				margin-top:-2px;
 			}
 			.border{
@@ -221,29 +221,29 @@ $html = '
 			}
 			</style>';
 //ขนาด
-$html .= '<div  style="margin:-10px 0px -30px 10px;" >';
+$html .= '<div  style="margin:-30px 20px -30px 20px;" >';
 //หน้า 1
 $html .= '<div class="wrapper-page">';
 //ส่วนหัว
 $html .= '
 	<div>
-		<div class="absolute" style="margin-left:90;"><div class="data nowrap center" style="width: 120px;">' . ($data["เลขประจำตัวผู้สม้คร"] ?? null) . '</div></div>
+		<div class="absolute" style="margin-left:90;"><div class="data nowrap" style="width: 120px;">' . ($data["เลขประจำตัวผู้สม้คร"] ?? null) . '</div></div>
 		เลขประจำตัวผู้สมัคร..............................
 	</div>
 	<div style=" text-align: center; margin-top:10px;"><img src="../../resource/logo/logo.jpg" alt="" width="100" height="0"></div>
-	<div class="center bold" style="margin-top:20px;">แบบแสดงความจำนงขอรับทุนส่งเสริมการศึกษาบุตรสมาชิก ประจำปี ' . ($data["year"] ?? (date("Y") + 543)) . '</div>
+	<div class="center bold" style="margin-top:10px;">แบบแสดงความจำนงขอรับทุนส่งเสริมการศึกษาบุตรสมาชิก ประจำปี ' . ($data["year"] ?? (date("Y") + 543)) . '</div>
 	<div class="right spac">
-		<div class="absolute" style="margin-left:270;"><div class="data nowrap center" style="width: 120px;">' . ($data["วันที่"] ?? null) . '</div></div>
-		<div class="absolute" style="margin-left:335;"><div class="data nowrap center" style="width: 150px;">' . ($data["เดือน"] ?? null) . '</div></div>
-		<div class="absolute" style="margin-left:455;"><div class="data nowrap center">' . ($data["year"] ?? null) . '</div></div>
-		วันที่..............เดือน......................................พ.ศ...................
+		<div class="absolute" style="margin-left:300;"><div class="data nowrap center" style="width: 120px;">' . ($data["วันที่"] ?? null) . '</div></div>
+		<div class="absolute" style="margin-left:355;"><div class="data nowrap center" style="width: 150px;">' . ($data["เดือน"] ?? null) . '</div></div>
+		<div class="absolute" style="margin-left:475;"><div class="data nowrap left">' . ($data["year"] ?? null) . '</div></div>
+			วันที่.........เดือน..............................พ.ศ...................
 	</div>
 	<div class="spac">เรียน&nbsp; &nbsp;ประธานกรรมการสหกรณ์ออมทรัพย์กรมการแพทย์ จำกัด </div>
 	<div class ="spac nowrap"  style="padding-left:75px; letter-spacing:0.7px; ">
-		ด้วยข้าพเจ้าประสงค์จะสมัครขอรับทุนส่งเสริมการศึกษาบุตรสมาชิก ประจำปี 2565 จึงขอแจ้ง
+		ด้วยข้าพเจ้าประสงค์จะสมัครขอรับทุนส่งเสริมการศึกษาบุตรสมาชิก ประจำปี 2565 จึงขอแจ้งรายละเอียด
 	</div>
 	<div>
-		รายละเอียดของข้าพเจ้า เพื่อประกอบการพิจารณา ดังต่อไปนี้
+		ของข้าพเจ้า เพื่อประกอบการพิจารณา ดังต่อไปนี้
 	</div>
 	<div class="flex" style=" height:30px;">
 		<div>1. ข้าพเจ้า</div>
@@ -255,15 +255,15 @@ $html .= '
 		<div style="margin-left:190px;">
 			<div class="absolute" style="margin-left:0;"><div class="data nowrap center" style="width: 225px;">' . ($data["memb_name"] ?? null) . '</div></div>
 			<div class="absolute" style="margin-left:210;"><div class="data nowrap center " style="width: 225px;">' . ($data["memb_surname"] ?? null) . '</div></div>
-			...........................................................นามสกุล.........................................................
+			.....................................................................นามสกุล..................................................................
 		</div>
 		
 	</div>
 	<div class="tab">
 		<div class="absolute" style="margin-left:55;"><div class="data nowrap center" style="width: 90px;">' . ($data["เลขที่สมาชิก"] ?? null) . '</div></div>
-		<div class="absolute" style="margin-left:170;"><div class="data nowrap center" style="width: 295px;">' . ($data["หน่วยงาน"] ?? null) . '</div></div>
+		<div class="absolute" style="margin-left:160;"><div class="data nowrap center" style="width: 295px;">' . ($data["หน่วยงาน"] ?? null) . '</div></div>
 		<div class="absolute" style="margin-left:410;"><div class="data nowrap center" style="">' . ($data["มือถือ"] ?? null) . '</div></div>
-		สมาชิกเลขที่........................หน่วยงาน.............................................................................มือถือ..............................
+		สมาชิกเลขที่............................หน่วยงาน........................................................................................มือถือ........................................
 	</div>
 	<div class="tab" >
 		มีความประสงค์ขอรับทุนส่งเสริมการศึกษาบุตรสมาชิก
@@ -279,15 +279,15 @@ $html .= '
 		<div class="' . $miss_r . '"  style="margin-left:160px;  width:50px; border-radius:10px;">นางสาว</div>
 		<div  class="nowrap"style="margin-left:211px;">
 		<div class="absolute" style="margin-left:0;"><div class="data nowrap center" style="width: 180px;">' . ($data["ชื่อผู้ขอทุน"] ?? null) . '</div></div>
-		<div class="absolute" style="margin-left:180;"><div class="data nowrap center" style="width: 170px;">' . ($data["assist_lastname"] ?? null) . '</div></div>
-		<div class="absolute" style="margin-left:328;"><div class="data nowrap center" style="width: 30px;">' . ($data["อายุผู้ขอทุน"] ?? null) . '</div></div>
-		................................................นามสกุล........................................... อายุ.........ปี
+		<div class="absolute" style="margin-left:170;"><div class="data nowrap center" style="width: 170px;">' . ($data["assist_lastname"] ?? null) . '</div></div>
+		<div class="absolute" style="margin-left:300;"><div class="data nowrap center" style="width: 30px;">' . ($data["อายุผู้ขอทุน"] ?? null) . '</div></div>
+			......................................................นามสกุล........................................... อายุ...........ปี
 		</div>
 	</div>
 	<div>
 			กำลังศึกษาอยู่ในระดับ
-			<div style="position:absolute; top:-2px; margin-left:11px;"> <input type="checkbox" style="margin-top:6px; margin-right:10px;"' . ($primary ?? null) . ' >ประถมศึกษา</div>
-			<div style="position:absolute; top:-2px; margin-left:211px;"> <input type="checkbox" style="margin-top:6px; margin-right:10px;" ' . ($vocational_certificate ?? null) . '>ประกาศศนียบัตรวิชาชีพ (ปวช.)</div>
+			<div style="position:absolute; top:-2px; margin-left:27px;"> <input type="checkbox" style="margin-top:6px; margin-right:10px;"' . ($primary ?? null) . ' >ประถมศึกษา</div>
+			<div style="position:absolute; top:-2px; margin-left:227px;"> <input type="checkbox" style="margin-top:6px; margin-right:10px;" ' . ($vocational_certificate ?? null) . '>ประกาศศนียบัตรวิชาชีพ (ปวช.)</div>
 	</div>
 	<div>
 		&nbsp;<div style="position:absolute; top:-2px; margin-left:145px;"> <input type="checkbox" style="margin-top:6px; margin-right:10px;" ' . ($junior_high_school ?? null) . ' >มัธยมศึกษาตอนต้น</div>
@@ -301,20 +301,20 @@ $html .= '
 		<div class="absolute" style="margin-left:65;"><div class="data nowrap center" style="width: 400px;">' . ($data["ชื่อสถานศึกษา"] ?? null) . '</div></div>
 		<div class="absolute" style="margin-left:410;"><div class="data nowrap center" style="width: 130px;">' . ($data["เกรดเฉลี่ย"] ?? null) . '</div></div>
 
-		ชื่อสถานศึกษา.......................................................................................................เกรดเฉลี่ย.................................
+		ชื่อสถานศึกษา..........................................................................................................................เกรดเฉลี่ย.................................
 	</div>
 	<div>
 		<div style="position:absolute; top:-2px; margin-left:470px;">  <input type="checkbox" style="margin-top:6px; margin-right:10px;" ' . $father_member . '>เป็นสมาชิก</div>
 		<div style="position:absolute; top:-2px; margin-left:580px;">  <input type="checkbox" style="margin-top:6px; margin-right:10px;" ' . $father_not_member . '>ไม่เป็นสมาชิก</div>
-		<div class="absolute" style="margin-left:45;"><div class="data nowrap center" style="width: 400px;">' . ($data["ชื่อบิดา"] ?? null) . '</div></div>
-	 	4. ชื่อบิดา........................................................................................................
+		<div class="absolute" style="margin-left:65;"><div class="data nowrap " style="width: 400px;">' . ($data["ชื่อบิดา"] ?? null) . '</div></div>
+	 	4. ชื่อบิดา...............................................................................................................
 		 
 	</div>
 	<div class="tab">
 		<div style="position:absolute; top:-2px; margin-left:455px;">  <input type="checkbox" style="margin-top:6px; margin-right:10px;" '.$mother_member.'>เป็นสมาชิก</div>
 		<div style="position:absolute; top:-2px; margin-left:565px;">  <input type="checkbox" style="margin-top:6px; margin-right:10px;" '.$mother_not_member.'>ไม่เป็นสมาชิก</div>
-		<div class="absolute" style="margin-left:45;"><div class="data nowrap center" style="width: 385px;">' . ($data["ชื่อมารดา"] ?? null) . '</div></div>
-	 		ชื่อมารดา....................................................................................................
+		<div class="absolute" style="margin-left:55;"><div class="data nowrap " style="width: 385px;">' . ($data["ชื่อมารดา"] ?? null) . '</div></div>
+	 		ชื่อมารดา...........................................................................................................
 	</div>
 	<div>
 		5. ได้แนบหลักฐาน ซึ่ง<u>รับรองสำเนาถูกต้อง</u>ประกอบแบบแสดงความจำนง ดังนี้
@@ -322,10 +322,10 @@ $html .= '
 	<div class="list">1) สำเนาทะเบียนบ้านของบุตรที่ขอรับทุน</div>
 	<div class="list">2) สำเนาผลการศึกษาของปีการศึกษา ' . ($data["year"] ?? (date("Y") + 543)) . ' หรือหนังสือรับรองผลการศึกษาปี ' . ($data["year"] ?? (date("Y") + 543)) . ' <u>ของบุตรที่ขอรับทุน</u></div>
 	<div class="list">3) สำเนาหน้าสมุดบัญชีธนาคารกรุงไทย จำกัด หรือ ธนาคารไทยพาณิชย์ ประเภทออมทรัพย์ <u>ของสมาชิก</u></div>
-	<div class="bold" style="padding-left:70px;">หากข้าพเจ้าแนบหลักฐานไม่ครบถ้วน หรือไม่ถูกต้องตามที่กำหนดให้ถือว่าข้าพเจ้าสละสิทธิ์ขอรับ</div>
-	<div class="bold">ทุนส่งเสริมการศึกษาบุตรสมาชิก ประจำปี ' . ($data["year"] ?? (date("Y") + 543)) . '</div>
+	<div class="bold" style="padding-left:70px;">หากข้าพเจ้าแนบหลักฐานไม่ครบถ้วน หรือไม่ถูกต้องตามที่กำหนดให้ถือว่าข้าพเจ้าสละสิทธิ์ขอรับุนส่งเสริม</div>
+	<div class="bold">ทการศึกษาบุตรสมาชิก ประจำปี ' . ($data["year"] ?? (date("Y") + 543)) . '</div>
 	<div style="padding-left:70px;">ข้าพเจ้าขอรับรองว่า ข้อความดังกล่าวข้างต้นเป็นความจริงทุกประการ</div>
-	<div class="right" style="margin-top:40px;">ลงชื่อ......................................................สมาชิกผู้ขอรับทุน</div>
+	<div class="right" style="margin-top:30px;">ลงชื่อ......................................................สมาชิกผู้ขอรับทุน</div>
 	<div style="margin-left:376px;">
 		<div class="absolute" style="margin-left:0;"><div class="data nowrap center" style="width: 215px;">' . ($data["fulname"] ?? null) . '</div></div>
 		(......................................................)
@@ -334,8 +334,8 @@ $html .= '
 			<b>หมายเหตุ : </b>
 			<div style="position:absolute;">
 				1. สมาชิก 1 คน สามารถขอรับทุนได้เพียง 1 ทุน
-				<div>2. กรณี สามี/ภรรยา เป็นสมาชิกทั้ง 2 คน แต่มีบุตรเพียง 1 คน ให้ส่งขอรับทุนได้ตามสิทธิ</div>
-				<div class="tab">แต่บุตรจะได้รับเพียง 1 ทุนเท่านั้น ถ้ามีบุตรมากกว่า 1 คน ให้ยื่นได้ตามคุณสมบัติข้อ 1.</div>
+				<div>2. กรณี สามี/ภรรยา เป็นสมาชิกทั้ง 2 คน แต่มีบุตรเพียง 1 คน ให้ส่งขอรับทุนได้ตามสิทธิ แต่บุตรจะได้รับเพียง 1 ทุน</div>
+				<div class="tab">เท่านั้น ถ้ามีบุตรมากกว่า 1 คน ให้ยื่นได้ตามคุณสมบัติข้อ 1.</div>
 			</div>
 	</div>
 	<div class="bold" style="padding-left:70px;"><u>ยื่นแบบแสดงความจำนงขอรับทุนได้ตั้งแต่วันที่ 18 เมมายน - 31 พฤษภาคม 2565</u></div>

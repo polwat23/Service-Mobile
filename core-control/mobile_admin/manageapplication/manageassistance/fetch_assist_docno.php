@@ -6,7 +6,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$arrayWelfare = array();
 		$fetchWelfare = $conmysql->prepare("SELECT assist_docno, assisttype_code, member_no, assist_name, assist_lastname, age, father_name, mother_name,
 											academy_name, education_level, assist_amt, assist_year, req_date, contractdoc_url, req_status
-											FROM assreqmasteronline WHERE req_status <> '1' ");
+											FROM assreqmasteronline WHERE req_status = '8' ");
 		$fetchWelfare->execute();
 		while($dataWelfare = $fetchWelfare->fetch(PDO::FETCH_ASSOC)){
 			$welfare = array();
@@ -16,13 +16,23 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 													WHERE MB.MEMBER_NO = :member_no ");
 			$getFullName->execute([':member_no' => $dataWelfare["member_no"]]);
 			$rowFullName = $getFullName->fetch(PDO::FETCH_ASSOC);
-			$welfare["ASSIST_DOCNO"] = $dataWelfare["member_no"];
+			$welfare["REQ_STATUS"] = $dataWelfare["req_status"];
+			$welfare["ASSIST_DOCNO"] = $dataWelfare["assist_docno"];
 			$welfare["ASSISTTYPE_DESC"] = 'ทุนส่งเสริมการศึกษา';
 			$welfare["MEMBER_NO"] = $dataWelfare["member_no"];
 			$welfare["FULLNAME"] = $rowFullName["PRENAME_DESC"] . $rowFullName["MEMB_NAME"].' ' .$rowFullName["MEMB_SURNAME"];
 			$welfare["ASSIST_NAME"] = $dataWelfare["assist_name"] .' '.$dataWelfare["assist_name"];
 			$welfare["CONTRACTDOC_URL"] = $dataWelfare["contractdoc_url"];
-			$welfare["REQ_DATE"] = $lib->convertdate($dataWelfare["req_date"],"D m Y");
+			$welfare["REQ_DATE"] = $dataWelfare["req_date"];
+			$welfare["REQ_DATE_FOMAT"] = $lib->convertdate($dataWelfare["req_date"],"D m Y");
+			$welfare["REQ_STATUS_DESC"] = $dataWelfare["req_status"] == '0';
+			if($dataWelfare["req_status"] == '8'){
+				$welfare["REQ_STATUS_DESC"] = "ส่งคำขอสวัสดิการ";
+			}else if($dataWelfare["req_status"] == '1'){
+				$welfare["REQ_STATUS_DESC"] = "อนุมัติ";
+			}else if($dataWelfare["req_status"] == '-9'){
+				$welfare["REQ_STATUS_DESC"] = "ไม่อนุมัติ";
+			}
 			$arrayWelfare[] = $welfare;
 		}
 		$arrayResult['DOCNO_DATA'] = $arrayWelfare;

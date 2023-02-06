@@ -8,6 +8,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			$oldBal = 0;
 			$maxsalary = 0;
 			$period_payment = 0;
+			$contsetmoney = 1000;
 			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
 				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
 			}else{
@@ -30,6 +31,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				}else{
 					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
 				}
+			
 				/*$getPayRound = $conmssql->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
 				$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
 				$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
@@ -39,29 +41,59 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				if($module < 100){
 					$period_payment = floor($period_payment + $module);
 				}*/
-				$period_payment = $dataComing["request_amt"] / $dataComing["period"];
-				$mod = $period_payment % 10;
-				if($mod > 0){
-					$period_payment = (int)($period_payment + (10 - ($period_payment % 10)));
-				}else{
-					$period_payment = (int)$period_payment;
-				}
-
-			}
-			//$lib->sendLineNotify(($dataComing["remain_salary"] - $period_payment));
 			
-			if(($dataComing["remain_salary"] - $period_payment) < 300){
-				$arrayResult['RESPONSE_MESSAGE'] = "ไม่สามารถขอกู้ได้เนื่องจากเงินเดือนคงเหลือไม่ถึงตามเกณฑ์";
-				$arrayResult['REVERT_VALUE'] = TRUE;
-				$arrayResult['RESULT'] = FALSE; 
-				require_once('../../include/exit_footer.php');
-			}
-			$arrayResult["RECEIVE_NET"] = $receive_net - $oldBal;
-			$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
-			$arrayResult["PERIOD"] = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
-			$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			$arrayResult['RESULT'] = TRUE;
-			require_once('../../include/exit_footer.php');
+				
+				if($dataComing["loantype_code"] == '11'){
+					$getOldContract = $conmssql->prepare("SELECT SUM(period_payment) as  period_payment FROM lncontmaster  
+														  WHERE member_no = :member_no and contract_status = 1  and loantype_code ='11'");
+					$getOldContract->execute([
+						':member_no' => $member_no
+					]);
+					$rowOldContract = $getOldContract->fetch(PDO::FETCH_ASSOC);
+					$permiss_balance =  $dataComing["remain_salary"] + $rowOldContract["period_payment"];
+					$permiss_balance = $permiss_balance - $contsetmoney;	
+			
+					
+					if(($permiss_balance  * 12) > $maxloan_amt){
+						$maxloan_amt = $maxloan_amt;
+					}else{
+						$maxloan_amt = $permiss_balance  * 12;
+					}
+					
+					$period_payment = $maxloan_amt / $dataComing["period"];
+					$mod = $period_payment % 10;
+					if($mod > 0){
+						$period_payment = (int)($period_payment + (10 - ($period_payment % 10)));
+					}else{
+						$period_payment = (int)$period_payment;
+					}
+					
+					$arrayResult["RECEIVE_NET"] = $maxloan_amt;
+					$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
+					$arrayResult["REQUEST_AMT"] = $maxloan_amt;
+					$arrayResult["LOAN_PERMIT_BALANCE"] = 0;
+					$arrayResult["PERIOD"] = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
+					$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
+				}else{
+					$period_payment = $dataComing["request_amt"] / $dataComing["period"];
+					$mod = $period_payment % 10;
+					if($mod > 0){
+						$period_payment = (int)($period_payment + (10 - ($period_payment % 10)));
+					}else{
+						$period_payment = (int)$period_payment;
+					}
+					
+					$arrayResult["RECEIVE_NET"] = $receive_net - $oldBal;
+					$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
+					$arrayResult["LOAN_PERMIT_BALANCE"] = $maxloan_amt - $dataComing["request_amt"];
+					$arrayResult["PERIOD"] = $max_period == 0 ? (string)$dataComing["period"] : (string)$max_period;
+					$arrayResult["PERIOD_PAYMENT"] = $period_payment;
+					$arrayResult['RESULT'] = TRUE;
+					require_once('../../include/exit_footer.php');
+				}	
+			}	
 		}else{
 			$maxloan_amt = 0;
 			$maxsalary  = 0;
@@ -92,8 +124,8 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 			]);
 			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
 			if(isset($rowMaxPeriod["MAX_PERIOD"])){
-				$getLoanObjective = $conmssql->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective WHERE loantype_code = :loantype");
-				$getLoanObjective->execute([':loantype' => $dataComing["loantype_code"]]);
+				$getLoanObjective = $conmssql->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective");
+				$getLoanObjective->execute();
 				$arrGrpObj = array();
 				while($rowLoanObj = $getLoanObjective->fetch(PDO::FETCH_ASSOC)){
 					$arrObj = array();
@@ -200,6 +232,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
 				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
 				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
+				$arrayResult['OBJECTIVE'] = $arrGrpObj;		
 				$arrayResult["REQ_REMAIN_SALARY"] = TRUE;
 				$arrayResult["IS_REMAIN_SALARY"] = TRUE;
 				$arrayResult["REQ_SALARY"] = TRUE;

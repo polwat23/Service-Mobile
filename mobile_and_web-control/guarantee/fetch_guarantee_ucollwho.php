@@ -39,10 +39,38 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
 		$structureReqLoan = array();
 		$structureReqLoan["coop_id"] = $config["COOP_ID"];
-		$structureReqLoan["member_no"] = $member_no;
-		$structureReqLoan["loantype_code"] = "สม";
-		$structureReqLoan["operate_date"] = date("c");
-		$structureReqLoan["loancolltype_code"] = "01";
+		$structureReqLoan["member_no"] = $member_no;		
+		$structureReqLoan["loantype_code"] = "22";
+		$structureReqLoan["operate_date"] = date('c');
+		$structureReqLoan["colltype_code"] = "01";		
+		/*$structureReqLoan["action_status"] = 0;
+		$structureReqLoan["approve_amt"] = 0;
+		$structureReqLoan["buyshr_amt"] = 0;
+		$structureReqLoan["contcredit_flag"] = 0;
+		$structureReqLoan["emerbalance_amt"] = 0;
+		$structureReqLoan["fee_amt"] = 0;
+		$structureReqLoan["feeinclude_status"] = 0;
+		$structureReqLoan["intpayment_clr"] = 0;
+		$structureReqLoan["intrate_amt"] = 0;
+		$structureReqLoan["item_amt"] = 0;
+		$structureReqLoan["lastperiod_payamt"] = 0;
+		$structureReqLoan["loancredit_amt"] = 0;
+		$structureReqLoan["loanpayment_type"] = 0;
+		$structureReqLoan["loanpermiss_amt"] = 0;
+		$structureReqLoan["loanrequest_amt"] = 0;
+		$structureReqLoan["maxloanrequest_amt"] = 0;
+		$structureReqLoan["maxperiod_payment"] = 0;
+		$structureReqLoan["maxreceive_amt"] = 0;
+		$structureReqLoan["nombalance_amt"] = 0;
+		$structureReqLoan["period_payamt"] = 0;
+		$structureReqLoan["period_payment"] = 0;
+		$structureReqLoan["post_status"] = 0;
+		$structureReqLoan["prinbal_clr"] = 0;
+		$structureReqLoan["principal_amt"] = 0;	
+		$structureReqLoan["roundpay_factor"] = 0;
+		$structureReqLoan["sharestk_value"] = 0;
+		$structureReqLoan["specbalace_amt"] = 0;
+		$structureReqLoan["withdrawable_amt"] = 0;*/
 		try {
 			$argumentWS = [
 				"as_wspass" => $config["WS_STRC_DB"],
@@ -50,7 +78,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			];
 			$resultWS = $clientWS->__call("of_getcollpermissmemno_IVR", array($argumentWS));
 			$responseSoap = $resultWS->atr_lnatm;
-			$arrayResult['LIMIT_GUARANTEE_LIST'] = $responseSoap->loanrequest_amt;
+			//$lib->sendLineNotify(json_encode($responseSoap->loanrequest_amt,JSON_UNESCAPED_UNICODE));
+			$arrayResult['LIMIT_GUARANTEE_LIST'] = number_format($responseSoap->loanrequest_amt,2);
 		}catch(SoapFault $e){
 			$filename = basename(__FILE__, '.php');
 			$logStruc = [
@@ -61,7 +90,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			];
 			$log->writeLog('errorusage',$logStruc);
 			//$message_error = "ไฟล์ ".$filename." ไม่สามารถคำนวณวงเงินค้ำประกันคงเหลือได้ "."\n"."Error => "."\n".json_encode($e)."\n"."DATA => ".json_encode($dataComing);
-			$lib->sendLineNotify(json_encode( $e, JSON_UNESCAPED_UNICODE ));
+			
 			$arrayResult['RESPONSE_CODE'] = 'WS0061';
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
