@@ -12,8 +12,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowBenefit = $getBeneficiary->fetch(PDO::FETCH_ASSOC)){
 			$arrBenefit = array();
 			$arrBenefit["FULL_NAME"] = $rowBenefit["GAIN_NAME"].' '.$rowBenefit["GAIN_SURNAME"];
-			$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
-			$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
+			//$arrBenefit["ADDRESS"] = preg_replace("/ {2,}/", " ", $rowBenefit["GAIN_ADDR"]);
+			//$arrBenefit["RELATION"] = $rowBenefit["GAIN_CONCERN"];
 			$arrBenefit["TYPE_PERCENT"] = 'text';
 			$arrBenefit["PERCENT_TEXT"] = $rowBenefit["REMARK"];	
 			$arrBenefit["PERCENT"] = filter_var($rowBenefit["REMARK"], FILTER_SANITIZE_NUMBER_INT);

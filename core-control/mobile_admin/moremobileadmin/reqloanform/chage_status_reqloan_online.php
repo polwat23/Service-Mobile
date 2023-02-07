@@ -48,6 +48,21 @@ if($lib->checkCompleteArgument(['unique_id','req_status','reqloan_doc'],$dataCom
 				echo json_encode($arrayResult);
 				exit();
 			}
+		}else if($dataComing["req_status"] == '9'){
+			$approveReqLoan = $conmysql->prepare("UPDATE gcreqloan SET req_status = '9',remark = :remark,username = :username WHERE reqloan_doc = :reqloan_doc");
+			if($approveReqLoan->execute([
+				':remark' => $dataComing["remark"] ?? null,
+				':username' => $payload["username"],
+				':reqloan_doc' => $dataComing["reqloan_doc"]
+			])){
+				$arrayResult['RESULT'] = TRUE;
+				echo json_encode($arrayResult);
+			}else{
+				$arrayResult['RESULT'] = FALSE;
+				$arrayResult['RESPONSE'] = "ไม่สามารถยกเลิกใบคำขอนี้ได้ กรุณาติดต่อผู้พัฒนา";
+				echo json_encode($arrayResult);
+				exit();
+			}
 		}
 		$getDataReqDoc = $conmysql->prepare("SELECT member_no FROM gcreqloan WHERE reqloan_doc = :reqloan_doc");
 		$getDataReqDoc->execute([':reqloan_doc' => $dataComing["reqloan_doc"]]);

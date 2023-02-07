@@ -465,13 +465,22 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code','request_amt','
 							$arrData["guarantor"][] = $contcollArr;
 						}
 					}
-					if(file_exists('form_request_loan.php')){
-						include('form_request_loan.php');
-						$arrayPDF = GeneratePDFContract($arrData,$lib);
-					}else{
-						$arrayPDF["RESULT"] = FALSE;
-					}
 					
+					if($dataComing["loantype_code"] == '29'){
+						if(file_exists('form_request_loan_29.php')){
+							include('form_request_loan_29.php');
+						$arrayPDF = GeneratePDFContract($arrData,$lib);
+						}else{
+							$arrayPDF["RESULT"] = FALSE;
+						}
+					}else{
+						if(file_exists('form_request_loan.php')){
+							include('form_request_loan.php');
+						$arrayPDF = GeneratePDFContract($arrData,$lib);
+						}else{
+							$arrayPDF["RESULT"] = FALSE;
+						}				
+					}
 					if($arrayPDF["RESULT"]){
 						$insertDocMaster = $conmysql->prepare("INSERT INTO doclistmaster(doc_no,docgrp_no,doc_filename,doc_type,doc_address,member_no)
 																VALUES(:doc_no,:docgrp_no,:doc_filename,'pdf',:doc_address,:member_no)");

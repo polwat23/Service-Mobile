@@ -12,7 +12,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$getMemberRetryDate = $conoracle->prepare("SELECT RETRY_DATE FROM mbmembmaster WHERE member_no = :member_no");
 		$getMemberRetryDate->execute([':member_no' => $member_no]);
 		$rowMemberRetryDate = $getMemberRetryDate->fetch(PDO::FETCH_ASSOC);
-		if(isset($rowMemberRetryDate["RETRY_DATE"]) && $rowMemberRetryDate["RETRY_DATE"] != ""){
+		/*if(isset($rowMemberRetryDate["RETRY_DATE"]) && $rowMemberRetryDate["RETRY_DATE"] != ""){
 			$dateRetry = new DateTime(date('d-m-Y',strtotime($rowMemberRetryDate["RETRY_DATE"])));
 			$dateNow = new DateTime(date('d-m-Y'));
 			$date_duration = $dateRetry->diff($dateNow);
@@ -21,7 +21,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 			}
-		}
+		}*/
 		$fetchAccAllowTrans = $conmysql->prepare("SELECT gat.deptaccount_no FROM gcuserallowacctransaction gat
 													LEFT JOIN gcconstantaccountdept gad ON gat.id_accountconstant = gad.id_accountconstant
 													WHERE gat.member_no = :member_no and gat.is_use = '1' and gad.allow_receive_loan = '1'");
@@ -57,7 +57,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$fetchLoanRepay = $conoracle->prepare("SELECT LN.LOANCONTRACT_NO,LT.LOANTYPE_CODE,LT.LOANTYPE_DESC,LN.PRINCIPAL_BALANCE,LN.WITHDRAWABLE_AMT, LN.LOANAPPROVE_AMT,ln.HOLD_FLAG
 													FROM lncontmaster ln LEFT JOIN lnloantype lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE
-													WHERE ln.loantype_code IN(".implode(',',$arrGrpLoan).") and ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
+													WHERE ln.loantype_code IN(".implode(',',$arrGrpLoan).") 
+													and ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8
+													and ln.startcont_date IS NOT NULL and ln.LAST_PERIODRCV > 0");
 			$fetchLoanRepay->execute([':member_no' => $member_no]);
 			while($rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC)){
 				$arrLoan = array();
