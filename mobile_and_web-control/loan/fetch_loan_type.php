@@ -15,7 +15,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											ln.LAST_PERIODPAY as LAST_PERIOD,
 											(SELECT max(operate_date) FROM lncontstatement WHERE loancontract_no = ln.loancontract_no) as LAST_OPERATE_DATE
 											FROM lncontmaster ln LEFT JOIN LNLOANTYPE lt ON ln.LOANTYPE_CODE = lt.LOANTYPE_CODE 
-											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
+											WHERE ln.member_no = :member_no and ln.contract_status > 0 and ln.contract_status <> 8
+											and ln.startcont_date IS NOT NULL and ln.LAST_PERIODRCV > 0");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
 			$arrGroupContract = array();

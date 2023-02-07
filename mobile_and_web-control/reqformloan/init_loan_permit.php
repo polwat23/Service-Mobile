@@ -155,7 +155,7 @@ if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 				
 
 				$iscountcoll = 0;
-				if($dataComing["loantype_code"] == '23' || $dataComing["loantype_code"] == '27' || $dataComing["loantype_code"] == '38' || $dataComing["loantype_code"] == '42' || $dataComing["loantype_code"] == '27'){
+				if($dataComing["loantype_code"] == '23' || $dataComing["loantype_code"] == '27' || $dataComing["loantype_code"] == '38' || $dataComing["loantype_code"] == '42' || $dataComing["loantype_code"] == '27' || $dataComing["loantype_code"] == '29'){
 					$fetchCollReqgrt = $conoracle->prepare("SELECT USEMAN_AMT FROM LNLOANTYPEREQGRT WHERE loantype_code = :loantype_code 
 															 AND  :request_amt between money_from AND  money_to");
 					$fetchCollReqgrt->execute([':loantype_code' => $dataComing["loantype_code"],

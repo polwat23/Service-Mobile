@@ -21,7 +21,12 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 		$rowCheckBill = $checkBillAvailable->fetch(PDO::FETCH_ASSOC);
 		$fee_amt = 0;
 		$dateOperC = date('c');
-		$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		if(date('Hi') >= 2300){ 
+			$dateOper = date('Y-m-d', strtotime($dateOperC. ' +1 days'));
+			$dateOper = $dateOper.' 00:00:00';
+		}else{
+			$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
+		}
 		if($rowCheckBill["transfer_status"] == '0'){
 			if(date('YmdHis',strtotime($rowCheckBill["expire_date"])) > date('YmdHis')){
 				$payload = array();
@@ -33,14 +38,21 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$getDetailTranDP = $conmysql->prepare("SELECT ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
 													WHERE qrgenerate = :tran_id and trans_code_qr = '01'");
 				$getDetailTranDP->execute([':tran_id' => $dataComing["tran_id"]]);
+				$getDetailTranLN = $conmysql->prepare("SELECT ref_account,qrtransferdt_amt FROM gcqrcodegendetail 
+													WHERE qrgenerate = :tran_id and trans_code_qr = '02'");
+				$getDetailTranLN->execute([':tran_id' => $dataComing["tran_id"]]);
 				$arrDpSlip = array();
+				$isHaveOnlyDep = true;
+				if($getDetailTranLN->rowCount() > 0){
+					$isHaveOnlyDep = false;
+				}
 				while($rowDetailDP = $getDetailTranDP->fetch(PDO::FETCH_ASSOC)){
 					$amt_transferLon -= $rowDetailDP["qrtransferdt_amt"];
 					$arrSlipDPnoDest = $cal_dep->generateDocNo('ONLINETX',$lib);
 					$arrDpSlip[$rowDetailDP["ref_account"]] = $arrSlipDPnoDest["SLIP_NO"];
 					$lastdocument_noDest = $arrSlipDPnoDest["QUERY"]["LAST_DOCUMENTNO"] + 1;
 					$updateDocuControl = $conoracle->prepare("UPDATE cmdocumentcontrol SET last_documentno = :lastdocument_no WHERE document_code = 'ONLINETX'");
-					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);
+					$updateDocuControl->execute([':lastdocument_no' => $lastdocument_noDest]);;
 				}
 				$arrSlipnoPayin = $cal_dep->generateDocNo('ONLINETXLON',$lib);
 				$arrSlipDocNoPayin = $cal_dep->generateDocNo('ONLINETXRECEIPT',$lib);
@@ -54,9 +66,11 @@ if($lib->checkCompleteArgument(['tran_id'],$dataComing)){
 				$updateDocuControlDocPayin->execute([':lastdocument_no' => $lastdocument_noDocPayin]);
 				$conoracle->beginTransaction();
 				$conmysql->beginTransaction();
-				$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
-				$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
-				'WFS',$conmysql,0,'006');
+				if(!$isHaveOnlyDep){
+					$paykeeping = $cal_loan->paySlip($conoracle,$amt_transferLon,$config,$payinslipdoc_no,$dateOper,
+					$vccAccID,null,$log,$lib,$payload,$dataComing["bank_ref"],$payinslip_no,$dataComing["member_no"],$ref_no,
+					'WFS',$conmysql,0,true);
+				}
 				$getDetailTran = $conmysql->prepare("SELECT trans_code_qr,ref_account,qrtransferdt_amt,
 													ROW_NUMBER() OVER (PARTITION BY trans_code_qr ORDER BY ref_account) as seq_no
 													FROM gcqrcodegendetail 

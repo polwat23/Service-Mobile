@@ -81,7 +81,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 				$srcvcid["ACCOUNT_ID"],$wtdResult["DEPTSLIP_NO"],$log,$lib,$payload,$from_account_no,$payinslip_no,$member_no,$ref_no,$itemtypeWithdraw,$conmysql);
 				if($payslip["RESULT"]){
 					$payslipdet = $cal_loan->paySlipLonDet($conoracle,$dataCont,$dataComing["amt_transfer"],$config,$dateOperC,$log,$payload,
-					$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest,
+					$from_account_no,$payinslip_no,'LON',$dataCont["LOANTYPE_CODE"],$dataComing["contract_no"],$prinPay,$interest["INT_PAYMENT"],
 					$intarrear,$int_returnSrc,$interestPeriod,'1');
 					if($payslipdet["RESULT"]){
 						$repayloan = $cal_loan->repayLoan($conoracle,$dataComing["contract_no"],$dataComing["amt_transfer"],$dataComing["penalty_amt"],
@@ -121,7 +121,7 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','contract_no','d
 							$dataMerge["DEPTACCOUNT"] = $lib->formataccount_hidden($from_account_no,$func->getConstant('hidden_dep'));
 							$dataMerge["CONTRACT_NO"] = $dataComing["contract_no"];
 							$dataMerge["AMOUNT"] = number_format($dataComing["amt_transfer"],2);
-							$dataMerge["INT_PAY"] = number_format($interest,2);
+							$dataMerge["INT_PAY"] = number_format($interest["INT_PAYMENT"],2);
 							$dataMerge["PRIN_PAY"] = number_format($prinPay,2);
 							$dataMerge["OPERATE_DATE"] = $lib->convertdate(date('Y-m-d H:i:s'),'D m Y',true);
 							$message_endpoint = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$dataMerge);

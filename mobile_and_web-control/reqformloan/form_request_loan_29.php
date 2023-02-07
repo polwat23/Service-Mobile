@@ -79,15 +79,7 @@ if($status == "โสด"){
 //กลุ่มเงินกุ้เงินกู้
 $loantype_code =  $data["loantype_code"]??null;
 $loangroup_code =  $data["loangroup_code"]??null;
-if($loangroup_code == "01"){
-	$เงินกู้เพื่อเหตุฉุกเฉิน = "checked";
-}else if($loangroup_code == "03"){
-	$เงินกู้พิเศษ = "checked";  //
-}else if($loangroup_code == "02" && $loantype_code !="42" && $loantype_code !="43"){
-	$เงินกู้สามัญเพื่อการอันจำเป็น = "checked";
-}else if($loangroup_code == "02" && $loantype_code =="42" || $loantype_code =="43"){
-	$เงินกู้สามัญเพื่อชำระหนี้สถาบันการเงินอื่น = "checked";
-}
+$เงินกู้สามัญกระแสรายวันเพื่อรักษาสภาพคล่องในการดํารงชีวิต = "checked";
 //ประเภทเงินกู้
 if($loantype_code =="10"){
 	$เงินกู้ฉุกเฉิน = "checked"; //
@@ -345,6 +337,16 @@ $html .= '
 						</div>
 					</div>
 				</div>
+				<div class="flex" style="height:22px;">
+					<div>
+						<div class="padding-content" >
+							<div class="absolute">
+								<input class="radio" type="radio" '.($เงินกู้สามัญกระแสรายวันเพื่อรักษาสภาพคล่องในการดํารงชีวิต??null).'>
+							</div>
+							<div style="margin-left:30px; margin-top:4px;">เงินกู้สามัญกระแสรายวันเพื่อรักษาสภาพคล่องในการดํารงชีวิต</div>
+						</div>
+					</div>
+				</div>	
 				<div class="flex" style="height: 22px;">
 					<div>
 						<div class="absolute">
@@ -393,20 +395,7 @@ $html .= '
 						</div>
 					</div>
 				</div>
-				<div class="flex" style="height: 22px;">
-					<div>
-						<div class="absolute">
-							<input class="checkbox" type="checkbox" style="margin-left:10px;" '.($เงินกู้เพื่อการเคหะสงเคราะห์??null).'>
-							<div class="absolute" style="margin-left:3px; margin-top:4px;">เงินกู้เพื่อการเคหะสงเคราะห์</div>
-						</div>
-					</div>
-					<div>
-						<div class="absolute" style="margin-left:170px;">
-							<input class="checkbox" type="checkbox" style="margin-left:10px;" '.($เงินกู้เพื่อการลงทุนประกอบวิชาชีพ??null).'>
-							<div class="absolute" style="margin-left:3px; margin-top:4px;">เงินกู้เพื่อการลงทุนประกอบวิชาชีพ</div>
-						</div>
-					</div>
-				</div>
+				
 			</div>
 			
 			<div style="width:40%;  border-bottom:0.5px solid;  solid; margin-left:60%; padding-bottom:27px; ">

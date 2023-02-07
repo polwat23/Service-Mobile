@@ -12,11 +12,17 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 				$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
 				$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 				$dataComing["amt_transfer"] = number_format($dataComing["amt_transfer"],2,'.','');
-				$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT ,LOANAPPROVE_AMT
+				$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT ,LOANAPPROVE_AMT,HOLD_FLAG
 														FROM lncontmaster
 														WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
 				$fetchLoanRepay->execute([':contract_no' => $contract_no]);
 				$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowLoan["LOANCONTRACT_NO"]) && $rowLoan["HOLD_FLAG"] != '0'){
+					$arrayResult["RESPONSE_CODE"] = 'HOLD_FLAG_OD';
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
 				if($dataComing["amt_transfer"] > ($rowLoan["LOANAPPROVE_AMT"] - $rowLoan["PRINCIPAL_BALANCE"])){
 					$arrayResult["RESPONSE_CODE"] = 'WS0093';
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -39,11 +45,17 @@ if($lib->checkCompleteArgument(['menu_component','contract_no','amt_transfer'],$
 			}else{
 				$contract_no = str_replace('/','',str_replace('.','',$dataComing["contract_no"]));
 				$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-				$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT, LOANAPPROVE_AMT
+				$fetchLoanRepay = $conoracle->prepare("SELECT LOANCONTRACT_NO,PRINCIPAL_BALANCE,WITHDRAWABLE_AMT, LOANAPPROVE_AMT,HOLD_FLAG
 														FROM lncontmaster
 														WHERE loancontract_no = :contract_no and contract_status > 0 and contract_status <> 8");
 				$fetchLoanRepay->execute([':contract_no' => $contract_no]);
 				$rowLoan = $fetchLoanRepay->fetch(PDO::FETCH_ASSOC);
+				if(isset($rowLoan["LOANCONTRACT_NO"]) && $rowLoan["HOLD_FLAG"] != '0'){
+					$arrayResult["RESPONSE_CODE"] = 'HOLD_FLAG_OD';
+					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					$arrayResult['RESULT'] = FALSE;
+					require_once('../../include/exit_footer.php');
+				}
 				if($dataComing["amt_transfer"] > ($rowLoan["LOANAPPROVE_AMT"] - $rowLoan["PRINCIPAL_BALANCE"])){
 					$arrayResult["RESPONSE_CODE"] = 'WS0093';
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

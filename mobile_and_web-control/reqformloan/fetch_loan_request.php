@@ -18,7 +18,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		while($rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC)){
 			$arrayDetailLoan = array();
 			$CheckIsReq = $conmysql->prepare("SELECT reqloan_doc,req_status
-														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9')");
+														FROM gcreqloan WHERE loantype_code = :loantype_code and member_no = :member_no and req_status NOT IN('-9','9','1')");
 			$CheckIsReq->execute([
 				':loantype_code' => $rowIntRate["LOANTYPE_CODE"],
 				':member_no' => $payload["member_no"]

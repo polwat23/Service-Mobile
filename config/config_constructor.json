@@ -6,7 +6,7 @@
 	"URL_PRIVACY" : "https://policy.thaicoop.co/privacy.html?coop=ryt",
 	"URL_LINEBOT": "https://line.me/R/ti/p/%40784paxpa",
 	"COOP_ID" : "006001",
-	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/",
+	"URL_API_COOPDIRECT" : "http://203.151.66.161/coopdirect-test/control/",
 	"APP_ID" : "com.ryt.mobile",
 	"URL_SERVICE" : "https://proxy.thaicoop.co/RYTCOOP-TEST/",
 	"URL_CONSTANT" : "https://api-node.thaicoop.co/constant-Test/",

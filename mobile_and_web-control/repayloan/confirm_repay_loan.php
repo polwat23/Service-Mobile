@@ -40,7 +40,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 						$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 					}
 
-					if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+					if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]){
 						$arrayResult['RESPONSE_CODE'] = "WS0098";
 						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 						$arrayResult['RESULT'] = FALSE;
@@ -181,7 +181,7 @@ if($lib->checkCompleteArgument(['menu_component','loancontract_no','amt_transfer
 				$arrayResult["PAYMENT_PRIN"] = $dataComing["amt_transfer"];
 			}
 
-			if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest){
+			if($dataComing["amt_transfer"] > ($rowLoan["PRINCIPAL_BALANCE"] - $rowLoan["RKEEP_PRINCIPAL"]) + $interest["INT_PAYMENT"]){
 				$arrayResult['RESPONSE_CODE'] = "WS0098";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;

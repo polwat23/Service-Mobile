@@ -22,15 +22,21 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	}
 	$conmysql->beginTransaction();
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$getTel = $conoracle->prepare("SELECT CURRADDR_PHONE as MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
+	$getTel = $conoracle->prepare("SELECT ADDR_MOBILEPHONE as MEM_TELMOBILE FROM MBMEMBMASTER WHERE member_no = :member_no");
 	$getTel->execute([':member_no' => $member_no]);
 	$rowTel = $getTel->fetch(PDO::FETCH_ASSOC);
-	$addr_phone = filter_var($rowTel["MEM_TELMOBILE"], FILTER_SANITIZE_NUMBER_INT)
-	$addr_phone =  preg_replace('/-/','',$addr_phone);
-	$addr_phone =  preg_replace('/\s+/', '', $addr_phone);
+	$addr_phone = filter_var($rowTel["MEM_TELMOBILE"], FILTER_SANITIZE_NUMBER_INT);
+	$addr_phone = preg_replace("/[\s-]/", '', $addr_phone);
 	
+	$comingTel = filter_var($dataComing["tel"], FILTER_SANITIZE_NUMBER_INT);
+	$comingTel = preg_replace("/[\s-]/", '', $comingTel);
 	
-	if($dataComing["tel"] != $addr_phone){
+	$logMss["member_no"] = $member_no;
+	$logMss["tel_db"] = $addr_phone;
+	$logMss["tel_dataComing"] = $comingTel;
+	file_put_contents('log.txt', json_encode($logMss,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+	
+	if($comingTel != $addr_phone){
 		$arrayResult['RESPONSE_CODE'] = "WS0095";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
@@ -45,7 +51,7 @@ if($lib->checkCompleteArgument(['member_no','tel'],$dataComing)){
 	$arrTarget["RANDOM_ALL"] = $reference;
 	$arrTarget["DATE_EXPIRE"] = $lib->convertdate($expire_date,'D m Y',true);
 	$arrMessage = $lib->mergeTemplate($templateMessage["SUBJECT"],$templateMessage["BODY"],$arrTarget);
-	$arrayComing["TEL"] = $dataComing["tel"];
+	$arrayComing["TEL"] = $comingTel;
 	$arrayComing["MEMBER_NO"] = $member_no;
 	$arrayTel[] = $arrayComing;
 	$bulkInsert = array();

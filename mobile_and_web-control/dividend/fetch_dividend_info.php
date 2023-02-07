@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
 		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT yr.DIV_YEAR AS DIV_YEAR,yr.DIVPERCENT_RATE,yr.AVGPERCENT_RATE FROM YRDIVMASTER yrm LEFT JOIN yrcfrate yr 
-												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no 
+												ON yrm.DIV_YEAR = yr.DIV_YEAR WHERE yrm.MEMBER_NO = :member_no and yr.WEBSHOW_FLAG = '1'
 												GROUP BY yr.DIV_YEAR,yr.DIVPERCENT_RATE,yr.AVGPERCENT_RATE ORDER BY yr.DIV_YEAR DESC) where rownum <= :limit_year");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
@@ -54,10 +54,13 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 						$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],$func->getConstant('dep_format'));
 					}
 				}
+				/*
 				$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"];
 				$arrayRecv["BANK"] = $rowMethpay["BANK"];
 				$arrayRecv["RECEIVE_AMT"] = number_format($rowMethpay["RECEIVE_AMT"],2);
 				$arrDividend["RECEIVE_ACCOUNT"][] = $arrayRecv;
+				*/
+				$arrDividend["RECEIVE_NET"]  = number_format($rowMethpay["RECEIVE_AMT"],2);
 			}
 
 			$getPaydiv = $conoracle->prepare("SELECT UCF.METHPAYTYPE_DESC AS TYPE_DESC, DIVD.MONEYTYPE_CODE AS MONEYTYPE_CODE , 

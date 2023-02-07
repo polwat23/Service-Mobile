@@ -91,7 +91,7 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 						require_once('../../include/exit_footer.php');
 					}
 				}else if($rowBankDisplay["bank_code"] == '006'){
-					if($rowBankDisplay["fee_deposit"] > 0){
+					/*if($rowBankDisplay["fee_deposit"] > 0){
 						$getBalanceAccFee = $conoracle->prepare("SELECT PRNCBAL FROM dpdeptmaster WHERE deptaccount_no = :deptaccount_no");
 						$getBalanceAccFee->execute([':deptaccount_no' => $rowBankDisplay["account_payfee"]]);
 						$rowBalFee = $getBalanceAccFee->fetch(PDO::FETCH_ASSOC);
@@ -105,7 +105,17 @@ if($lib->checkCompleteArgument(['menu_component','sigma_key'],$dataComing)){
 
 						$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
 						$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
+					}*/
+					if($dataComing["amt_transfer"] > 30000){
+						$arrayResult['FEE_AMT'] = ($dataComing["amt_transfer"] - 30000) * 0.001;
+						$arrayResult['FEE_AMT'] += $rowBankDisplay["fee_deposit"];
+					}else{
+						$arrayResult['FEE_AMT'] = $rowBankDisplay["fee_deposit"];
 					}
+					if($arrayResult['FEE_AMT'] > 1000){
+						$arrayResult['FEE_AMT'] = 1000;
+					}
+					$arrayResult['FEE_AMT_FORMAT'] = number_format($arrayResult["FEE_AMT"],2);
 					$arrayResult['ACCOUNT_NAME'] = $account_name_th;
 					$arrayResult['RESULT'] = TRUE;
 				}

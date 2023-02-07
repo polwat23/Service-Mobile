@@ -17,7 +17,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												from lncontmaster lnm LEFT JOIN lncontstatement lns ON 
 												lnm.loancontract_no = lns.loancontract_no and lnm.coop_id = lns.coop_id LEFT JOIN LNLOANTYPE lt ON lnm.LOANTYPE_CODE = lt.LOANTYPE_CODE 
 												WHERE lnm.member_no = :member_no and lnm.contract_status > 0 and lnm.contract_status <> 8
-												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
+												and lns.entry_date IS NOT NULL 
+												and lnm.startcont_date IS NOT NULL and lnm.LAST_PERIODRCV > 0 ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
@@ -43,7 +44,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$old_seq_no = isset($dataComing["old_seq_no"]) ? "and lsm.SEQ_NO < ".$dataComing["old_seq_no"] : "and lsm.SEQ_NO < 999999";
 		}
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
-											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
+											lsm.interest_payment as INT_PAYMENT,lsm.interest_period as INT_PERIOD,lsm.principal_balance as loan_balance
 											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
 											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
 											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
@@ -59,6 +60,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];
 			$arrSTM["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
+			if($rowStm["INT_PAYMENT"] == 0){
+				$rowStm["INT_PAYMENT"] = $rowStm["INT_PERIOD"];
+			}
 			$arrSTM["PRN_PAYMENT"] = number_format($rowStm["PRN_PAYMENT"],2);
 			$arrSTM["INT_PAYMENT"] = number_format($rowStm["INT_PAYMENT"],2);
 			$arrSTM["SUM_PAYMENT"] = number_format($rowStm["INT_PAYMENT"] + $rowStm["PRN_PAYMENT"],2);
