@@ -30,23 +30,23 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$memberInfo = $conoracle->prepare("select mp.prename_desc AS prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
 												mb.member_date,mps.position_desc,mt.membtype_desc,
-												mb.ADDR_NO as ADDR_NO,
-												mb.ADDR_MOO as ADDR_MOO,
-												mb.ADDR_SOI as ADDR_SOI, 
-												mb.ADDR_VILLAGE as ADDR_VILLAGE,
-												mb.ADDR_ROAD as ADDR_ROAD,
+												mb.ADDRESS_NO as ADDR_NO,
+												mb.ADDRESS_MOO as ADDR_MOO,
+												mb.ADDRESS_SOI as ADDR_SOI, 
+												mb.ADDRESS_VILLAGE as ADDR_VILLAGE,
+												mb.ADDRESS_ROAD as ADDR_ROAD,
 												MBT.TAMBOL_DESC AS TAMBOL_DESC,
 												MBD.DISTRICT_DESC AS DISTRICT_DESC,
 												MB.PROVINCE_CODE AS PROVINCE_CODE,
 												MBP.PROVINCE_DESC AS PROVINCE_DESC,
-												MB.ADDR_POSTCODE AS ADDR_POSTCODE,
+												MB.POSTCODE AS ADDR_POSTCODE,
 												mbg.membgroup_desc as MEMBGROUP_DESC
 												from mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 												LEFT JOIN mbucfposition mps ON mb.position_code = mps.position_code
 												LEFT JOIN mbucfmembgroup mbg ON mb.membgroup_code = mbg.membgroup_code
 												LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
 												LEFT JOIN MBUCFTAMBOL MBT ON mb.TAMBOL_CODE = MBT.TAMBOL_CODE
-												LEFT JOIN MBUCFDISTRICT MBD ON mb.amphur_code = MBD.DISTRICT_CODE
+												LEFT JOIN MBUCFDISTRICT MBD ON mb.DISTRICT_CODE = MBD.DISTRICT_CODE
 												LEFT JOIN MBUCFPROVINCE MBP ON mb.PROVINCE_CODE = MBP.PROVINCE_CODE
 												WHERE mb.member_no = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
