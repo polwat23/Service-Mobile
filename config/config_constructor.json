@@ -1,6 +1,8 @@
 {
 	"NAME_APP" : "MHS Saving Connect",
 	"COOP_KEY" : "mhs",
+	"URL_POLICY" : "https://coop-policy.gensoft.co.th/index_v1.html?coop=mhs",
+	"URL_PRIVACY" : "https://coop-policy.gensoft.co.th/privacy.html?coop=mhs",
 	"COOP_ID" : "003001",
 	"URL_API_COOPDIRECT" : "https://coopdirect.thaicoop.co/coopdirect-test/control/kbank",
 	"APP_ID" : "com.mhssaving.mobile",

@@ -1,6 +1,5 @@
 <?php
 require_once('../autoload.php');
-
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ManagementAccount')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];

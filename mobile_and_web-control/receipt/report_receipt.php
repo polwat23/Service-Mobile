@@ -137,7 +137,13 @@ if($lib->checkCompleteArgument(['menu_component','recv_period'],$dataComing)){
 		$header["operate_date"] = $lib->convertdate($rowKPHeader["OPERATE_DATE"],'D m Y');
 		$arrayPDF = GenerateReport($arrGroupDetail,$header,$lib);
 		if($arrayPDF["RESULT"]){
-			$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			if ($forceNewSecurity == true) {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
+				$arrayResult["REPORT_URL_TOKEN"] = $lib->generate_token_access_resource($arrayPDF["PATH"], $jwt_token, $config["SECRET_KEY_JWT"]);
+			} else {
+				$arrayResult['REPORT_URL'] = $config["URL_SERVICE"].$arrayPDF["PATH"];
+			}
+
 			$arrayResult['RESULT'] = TRUE;
 			require_once('../../include/exit_footer.php');
 		}else{
@@ -329,19 +335,19 @@ function GenerateReport($dataReport,$header,$lib){
 			<div style="width:200px;margin-left: 680px;display:flex;">
 			<img src="../../resource/utility_icon/signature/secretary.jpg" width="100" height="50" style="margin-top:10px;"/>
 			</div>
-			<div style="width:200px;margin-left: 830px;display:flex;">
+			<div style="width:200px;margin-left: 850px;display:flex;">
 			<img src="../../resource/utility_icon/signature/manager.jpg" width="100" height="40" style="margin-top:10px;"/>
 			</div>
 			</div>
 			<div style="font-size: 18px;margin-left: 520px;margin-top:-180px;">
-			<p style="margin-left: 0px;">นายสงวน ศรีสวัสดิ์</p>
+			<p style="margin-left: -20px;">นายสมพงษ์ ณะรงค์ชัย</p>
 			<p style="margin-left: 0px;margin-top:-20px">ประธานกรรมการ</p>
 			</div>
 			<div style="font-size: 18px;margin-left: 660px;margin-top:-90px;">
-			<p style="margin-left: 20px;">นายสมศักดิ์ เวียงคำ</p>
-			<p style="margin-left: 40px;margin-top:-20px">เลขานุการ</p></div>
+			<p style="margin-left: 20px;">นายเอกชัย เรือนคำ</p>
+			<p style="margin-left: 20px;margin-top:-20px">กรรมการ/เลขานุการ</p></div>
 			<div style="font-size: 18px;margin-left: 840px;margin-top:-100px;">
-			<p style="margin-left: 10px;">นายประสิทธิ์   ศรีชุ่ม</p>
+			<p style="margin-left: 10px;">นายบุญส่ง จิตสว่าง</p>
 			<p style="margin-left: 30px;margin-top:-20px">ผู้จัดการ</p>
 			</div>
 			';

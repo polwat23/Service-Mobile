@@ -1,37 +1,35 @@
 <?php
 require_once('../autoload.php');
 
-if($lib->checkCompleteArgument(['pin'],$dataComing)){
-	$checkPin = $conmysql->prepare("SELECT member_no,pin FROM gcmemberaccount WHERE member_no = :member_no");
-	$checkPin->execute([
-		':member_no' => $payload["member_no"]
-	]);
-	$rowaccount = $checkPin->fetch(PDO::FETCH_ASSOC);
-	if(password_verify($dataComing["pin"], $rowaccount['pin']) || (isset($dataComing["flag"]) && $dataComing["flag"] == "TOUCH_ID")){
-		$is_refreshToken_arr = $auth->refresh_accesstoken($dataComing["refresh_token"],$dataComing["unique_id"],$conmysql,
-		$lib->fetch_payloadJWT($access_token,$jwt_token,$config["SECRET_KEY_JWT"]),$jwt_token,$config["SECRET_KEY_JWT"]);
-		if(!$is_refreshToken_arr){
-			$arrayResult['RESPONSE_CODE'] = "WS0014";
+if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
+	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'BindAccountConsent')){
+		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
+		$fetchDataMember = $conoracle->prepare("SELECT TRIM(card_person) as CARD_PERSON FROM mbmembmaster WHERE member_no = :member_no");
+		$fetchDataMember->execute([
+			':member_no' => $member_no
+		]);
+		$rowDataMember = $fetchDataMember->fetch(PDO::FETCH_ASSOC);
+		if(isset($rowDataMember["CARD_PERSON"])){
+			$getFormat = $conmysql->prepare("SELECT bank_format_account FROM csbankdisplay WHERE bank_code = :bank_code");
+			$getFormat->execute([':bank_code' => $dataComing["bank_code"]]);
+			$rowFormat = $getFormat->fetch(PDO::FETCH_ASSOC);
+			$arrayResult['CITIZEN_ID_FORMAT'] = $lib->formatcitizen($rowDataMember["CARD_PERSON"]);
+			$arrayResult['CITIZEN_ID'] = $rowDataMember["CARD_PERSON"];
+			$arrayResult['FORMAT_BANK_ACCOUNT'] = $rowFormat["bank_format_account"];
+			$arrayResult['RESULT'] = TRUE;
+			require_once('../../include/exit_footer.php');
+		}else{
+			$arrayResult['RESPONSE_CODE'] = "WS0003";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			http_response_code(401);
 			require_once('../../include/exit_footer.php');
 			
 		}
-		$arrayResult['NEW_TOKEN'] = $is_refreshToken_arr["ACCESS_TOKEN"];
-		$arrayResult['RESULT'] = TRUE;		
-		if ($forceNewSecurity == true) {
-			$newArrayResult = array();
-			$newArrayResult['ENC_TOKEN'] = $lib->generate_jwt_token($arrayResult, $jwt_token, $config["SECRET_KEY_JWT"]);
-			$arrayResult = array();
-			$arrayResult = $newArrayResult;
-		}
-
-		require_once('../../include/exit_footer.php');
 	}else{
-		$arrayResult['RESPONSE_CODE'] = "WS0011";
+		$arrayResult['RESPONSE_CODE'] = "WS0006";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 		$arrayResult['RESULT'] = FALSE;
+		http_response_code(403);
 		require_once('../../include/exit_footer.php');
 		
 	}
