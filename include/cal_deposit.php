@@ -348,7 +348,7 @@ class CalculateDep {
 		$getSummary = $this->con->prepare("SELECT SUM(amount) as SUM_AMT FROM gctransaction WHERE member_no = :member_no and transfer_mode = '9' and trans_flag = '-1' and DATE(operate_date) = DATE(NOW())");
 		$getSummary->execute([':member_no' => $dataConst["MEMBER_NO"]]);
 		$rowSum = $getSummary->fetch(\PDO::FETCH_ASSOC);
-		if($rowSum["SUM_AMT"] > 100000) {
+		if($rowSum["SUM_AMT"] + $amt_transfer > 100000) {
 			$arrayResult['RESPONSE_CODE'] = "OVER_AMOUNT";
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
