@@ -53,6 +53,8 @@ class connection {
 		$json = file_get_contents(__DIR__.'/../config/config_connection.json');
 		$json_data = json_decode($json,true);
 		try{
+			
+			//putenv("NLS_LANG=AMERICAN_AMERICA.WE8MSWIN1252");
 			$dbuser = $json_data["DBORACLE_USERNAME"];
 			$dbpass = $json_data["DBORACLE_PASSWORD"];
 			$dbname = "(DESCRIPTION =
@@ -63,9 +65,14 @@ class connection {
 						  (".$json_data["DBORACLE_TYPESERVICE"]." = ".$json_data["DBORACLE_SERVICE"].")
 						)
 					  )";
-			$this->conoracle = new \PDO("oci:dbname=".$dbname.";charset=utf8", $dbuser, $dbpass);
+			//$this->conoracle = new \PDO("oci:dbname=".$dbname."", $dbuser, $dbpass);
+			$this->conoracle = new \PDO("oci:dbname=".$dbname.";", $dbuser, $dbpass );
+			//$this->conoracle = new \PDO("oci:dbname=".$dbname.";charset=WE8MSWIN1252", $dbuser, $dbpass);
+			//$this->conoracle = new \PDO("oci:dbname=".$dbname.";charset=WE8ISO8859P1", $dbuser, $dbpass);
+			//;charset=CL8MSWIN1251
 			$this->conoracle->query("ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YYYY HH24:MI:SS'");
 			$this->conoracle->query("ALTER SESSION SET NLS_DATE_LANGUAGE = 'AMERICAN'");
+			$this->conoracle->exec("ALTER SESSION SET NLS_LANG='AMERICAN_AMERICA.WE8MSWIN1252'");
 			return $this->conoracle;
 		}catch(\Throwable $e){
 			$arrayError = array();
@@ -77,5 +84,6 @@ class connection {
 			exit();
 		}
 	}
+	
 }
 ?>

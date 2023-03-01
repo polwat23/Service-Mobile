@@ -15,6 +15,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE TRIM(dp.member_no) = :member_no and dp.deptclose_status <> 1 ORDER BY dp.deptaccount_no ASC");
 		$getAccount->execute([':member_no' => $member_no]);
 		while($rowAccount = $getAccount->fetch(PDO::FETCH_ASSOC)){
+			convertArray($rowAccount,true);
 			$arrAccount = array();
 			$arrGroupAccount = array();
 			$account_no = $lib->formataccount($rowAccount["DEPTACCOUNT_NO"],$func->getConstant('dep_format'));

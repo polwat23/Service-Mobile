@@ -1,0 +1,22 @@
+Array
+(
+    [PRENAME_SHORT] => นาง
+    [MEMB_NAME] => กรองทอง
+    [MEMB_SURNAME] => ทาซะที
+    [BIRTH_DATE] => 04-03-1957 00:00:00
+    [CARD_PERSON] => 3510100069347
+    [MEMBER_DATE] => 01-08-1982 00:00:00
+    [POSITION_DESC] => ข้าราชการบำนาญ
+    [MEMBTYPE_DESC] => สมาชิกปกติ
+    [ADDR_NO] => 196
+    [ADDR_MOO] => 4
+    [ADDR_SOI] => 
+    [ADDR_VILLAGE] => บ้านป่าตาล
+    [ADDR_ROAD] => 
+    [TAMBOL_DESC] => บ้านธิ
+    [DISTRICT_DESC] => บ้านธิ
+    [PROVINCE_CODE] => 051
+    [PROVINCE_DESC] => ลำพูน
+    [ADDR_POSTCODE] => 51180
+    [MEMBGROUP_CODE] => 9700    
+)

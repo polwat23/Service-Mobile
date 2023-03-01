@@ -1,0 +1,1 @@
+"C:\Program Files\gettext-iconv\bin\iconv" -f tis-620 -t utf-8 C:\Mobile\service-lpntsc\mobile_and_web-control\home/data_004779.txt>C:\Mobile\service-lpntsc\mobile_and_web-control\home/data_004779_.txt

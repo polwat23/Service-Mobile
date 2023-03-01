@@ -1,0 +1,12 @@
+Array
+(
+    [channel] => mobile_app
+    [platform] => android
+    [device_name] => HUAWEI EML-L29
+    [app_version] => 0.2.0
+    [refresh_token] => 855517bc-5831-4fea-8e89-66d43d6fd6df
+    [unique_id] => 8e86cb2e4ec32093
+    [ip_address] => 101.109.238.255
+    [is_root] => 0
+    [menu_component] => MemberInfo
+)

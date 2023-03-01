@@ -85,6 +85,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no'],$dataComing)){
 			$arrMemo[] = $rowMemo;
 		}
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
+			convertArray($rowStm,true);
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
 			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];

@@ -1,0 +1,22 @@
+Array
+(
+    [PRENAME_SHORT] => ¹Ò§
+    [MEMB_NAME] => ½¹·Í§
+    [MEMB_SURNAME] => ¾ÃËÁÁÔ¹·Ãì
+    [BIRTH_DATE] => 06-JUN-50
+    [CARD_PERSON] => 3510100961622
+    [MEMBER_DATE] => 10-SEP-77
+    [POSITION_DESC] => ¢éÒÃÒª¡ÒÃºÓ¹Ò­
+    [MEMBTYPE_DESC] => ÊÁÒªÔ¡»¡µÔ
+    [ADDR_NO] => 19
+    [ADDR_MOO] => 8
+    [ADDR_SOI] => 
+    [ADDR_VILLAGE] => 
+    [ADDR_ROAD] => 
+    [TAMBOL_DESC] => ºéÒ¹á»é¹
+    [DISTRICT_DESC] => àÁ×Í§ÅÓ¾Ù¹
+    [PROVINCE_CODE] => 051
+    [PROVINCE_DESC] => ÅÓ¾Ù¹
+    [ADDR_POSTCODE] => 51000
+    [MEMBGROUP_CODE] => 9900    
+)

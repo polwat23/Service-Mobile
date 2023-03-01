@@ -29,6 +29,7 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			]);
 			$arraySTMGrp = array();
 			while($rowDataSTM = $fetchDataSTM->fetch(PDO::FETCH_ASSOC)){
+				convertArray($rowDataSTM,true);
 				$arraySTM = array();
 				$arraySTM["TYPE_TRAN"] = $rowDataSTM["TYPE_TRAN"];
 				$arraySTM["SIGN_FLAG"] = $rowDataSTM["SIGN_FLAG"];

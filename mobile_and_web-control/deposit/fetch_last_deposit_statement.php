@@ -28,6 +28,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and dpm.deptclose_status <> 1 ORDER BY dps.deptslip_date DESC,dps.deptslip_no DESC) where rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowAccountLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
+		convertArray($rowAccountLastSTM,true);
 		$account_no = preg_replace('/-/','',$rowAccountLastSTM["DEPTACCOUNT_NO"]);
 		$arrAccount = array();
 		$account_no_format = isset($account_no) && $account_no != "" ? $lib->formataccount($account_no,$func->getConstant('dep_format')) : null;
@@ -96,6 +97,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrMemo[] = $rowMemo;
 		}
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
+			convertArray($rowStm,true);
 			$arrSTM = array();
 			$arrSTM["TYPE_TRAN"] = $rowStm["TYPE_TRAN"];
 			$arrSTM["SIGN_FLAG"] = $rowStm["SIGN_FLAG"];

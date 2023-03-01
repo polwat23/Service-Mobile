@@ -36,6 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				':datenow' => $date_now
 			]);
 			while($rowStm = $getShareStatement->fetch(PDO::FETCH_ASSOC)){
+				convertArray($rowStm,true);
 				$arrayStm = array();
 				$arrayStm["OPERATE_DATE"] = $lib->convertdate($rowStm["OPERATE_DATE"],'D m Y');
 				$arrayStm["PERIOD_SHARE_AMOUNT"] = number_format($rowStm["PERIOD_SHARE_AMOUNT"],2);

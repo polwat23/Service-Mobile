@@ -14,6 +14,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE TRIM(ln.member_no) = :member_no and ln.contract_status > 0 and ln.contract_status <> 8");
 		$getContract->execute([':member_no' => $member_no]);
 		while($rowContract = $getContract->fetch(PDO::FETCH_ASSOC)){
+			convertArray($rowContract,true);
 			$arrGroupContract = array();
 			$contract_no = preg_replace('/\//','',$rowContract["LOANCONTRACT_NO"]);
 			$arrContract = array();

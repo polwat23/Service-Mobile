@@ -20,7 +20,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												and lns.entry_date IS NOT NULL ORDER BY lns.entry_date DESC) WHERE rownum <= 1");
 		$fetchLastStmAcc->execute([':member_no' => $member_no]);
 		$rowLoanLastSTM = $fetchLastStmAcc->fetch(PDO::FETCH_ASSOC);
+		convertArray($rowLoanLastSTM,true);
 		$contract_no = preg_replace('/\//','',$rowLoanLastSTM["LOANCONTRACT_NO"]);
+		$contract_no_ = mb_substr($contract_no,2,strlen($contract_no)-2,"UTF-8");
+		
 		$arrContract = array();
 		$arrContract["CONTRACT_NO"] = $contract_no;
 		$arrContract["LOAN_BALANCE"] = mb_substr($rowLoanLastSTM["LOANCONTRACT_NO"],4,1) >= '4' && mb_substr($rowLoanLastSTM["LOANCONTRACT_NO"],4,1) <= '9' ?
@@ -45,17 +48,30 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		}
 		$getStatement = $conoracle->prepare("SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
 											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
-											FROM lncontstatement lsm LEFT JOIN LNUCFLOANITEMTYPE lit
-											ON lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE 
-											WHERE lsm.loancontract_no = :contract_no and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
-											BETWEEN to_date(:datebefore,'YYYY-MM-DD') and to_date(:datenow,'YYYY-MM-DD') ".$old_seq_no." 
+											FROM lncontstatement lsm , LNUCFLOANITEMTYPE lit , lncontmaster l
+											WHERE l.loancontract_no like '%".$contract_no_."%' and l.member_no ='$member_no' and lsm.loancontract_no = l.loancontract_no  
+											and lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE  and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
+											BETWEEN to_date('".$date_before."','YYYY-MM-DD') and to_date('".$date_now."','YYYY-MM-DD') ".$old_seq_no." 
 											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");
+		/*									
+		file_put_contents( "c:\\WINDOWS\\TEMP\\in.log", "SELECT * FROM (SELECT lit.LOANITEMTYPE_DESC AS TYPE_DESC,lsm.operate_date,lsm.principal_payment as PRN_PAYMENT,lsm.SEQ_NO,
+											lsm.interest_payment as INT_PAYMENT,lsm.principal_balance as loan_balance
+											FROM lncontstatement lsm , LNUCFLOANITEMTYPE lit , lncontmaster l
+											WHERE l.loancontract_no like '%".$contract_no_."%' and l.member_no ='$member_no' and lsm.loancontract_no = l.loancontract_no  
+											and lsm.LOANITEMTYPE_CODE = lit.LOANITEMTYPE_CODE  and lsm.LOANITEMTYPE_CODE <> 'AVG' and lsm.operate_date
+											BETWEEN to_date('".$date_before."','YYYY-MM-DD') and to_date('".$date_now."','YYYY-MM-DD') ".$old_seq_no." 
+											ORDER BY lsm.SEQ_NO DESC) WHERE rownum <= ".$rownum." ");		
+		*/									
+		/*											
 		$getStatement->execute([
 			':contract_no' => $contract_no,
 			':datebefore' => $date_before,
 			':datenow' => $date_now
 		]);
+		*/
+		$getStatement->execute();
 		while($rowStm = $getStatement->fetch(PDO::FETCH_ASSOC)){
+			convertArray($rowStm,true);
 			$arrSTM = array();
 			$arrSTM["TYPE_DESC"] = $rowStm["TYPE_DESC"];
 			$arrSTM["SEQ_NO"] = $rowStm["SEQ_NO"];

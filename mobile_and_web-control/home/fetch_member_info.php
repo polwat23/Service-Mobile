@@ -3,11 +3,11 @@ require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'MemberInfo')){
-		
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$memberInfoMobile = $conmysql->prepare("SELECT phone_number,email,path_avatar,member_no FROM gcmemberaccount WHERE member_no = :member_no");
 		$memberInfoMobile->execute([':member_no' => $payload["member_no"]]);
 		if($memberInfoMobile->rowCount() > 0){
+			
 			$rowInfoMobile = $memberInfoMobile->fetch(PDO::FETCH_ASSOC);
 			$arrayResult["PHONE"] = $lib->formatphone($rowInfoMobile["phone_number"]);
 			$arrayResult["EMAIL"] = $rowInfoMobile["email"];
@@ -28,7 +28,24 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["AVATAR_PATH"] = null;
 				$arrayResult["AVATAR_PATH_WEBP"] = null;
 			}
-			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,
+			/*
+			$gclogintoken = $conoracle->prepare("delete from gclogintoken where member_no=:member_no ");
+			$gclogintoken->execute([':member_no' => $member_no]);
+			$gclogintoken = $conoracle->prepare("insert into gclogintoken(member_no,refresh_token,unique_id,update_date)values(:member_no ,:refresh_token,:unique_id,sysdate");
+			$gclogintoken->execute([
+				':member_no' => $member_no,
+				':refresh_token' => $dataComing["refresh_token"],
+				':unique_id' => $dataComing["unique_id"]
+				]);
+			$gclogintoken = $conoracle->prepare("commit");	
+			$gclogintoken->execute();	
+		    file_put_contents( "c:\\WINDOWS\\TEMP\\in.log", print_r($dataComing, true));
+		    */
+		
+			$memberInfo = $conoracle->prepare("SELECT mp.prename_short,
+													mb.memb_name as memb_name,
+													mb.memb_surname,
+													mb.birth_date,mb.card_person,
 													mb.member_date,mb.position_desc,mt.membtype_desc,
 													mb.MEMB_ADDR as ADDR_NO,
 													mb.ADDR_GROUP as ADDR_MOO,
@@ -49,6 +66,26 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													WHERE TRIM(mb.member_no) = :member_no");
 			$memberInfo->execute([':member_no' => $member_no]);
 			$rowMember = $memberInfo->fetch(PDO::FETCH_ASSOC);
+			
+			/*
+			$root="c:\\WINDOWS\\TEMP\\";
+			$now = DateTime::createFromFormat('U.u', microtime(true));
+			$ID=$now->format('Y-m-d-h-i-s-u');
+			$iconv_path="\"C:\\Program Files\\gettext-iconv\\bin\\iconv\"";
+			$filename=($root.$ID.".txt");
+			$filename_=($root.$ID."_.txt");
+			$filename_bat=$filename.".bat";
+			file_put_contents( $filename, print_r($rowMember, true));
+			file_put_contents( $filename_bat,($iconv_path." -f tis-620 -t utf-8 ".$filename.">".$filename_.""));
+			exec("c:\\WINDOWS\\system32\\cmd.exe /c \"".$filename_bat."\" ");
+			$rowMember=parseOraDataBufferToArray($filename_);//autoloadConnection.php
+			//unlink($filename);
+			//unlink($filename_);
+			//unlink($filename_bat);
+			*/
+			
+			convertArray($rowMember,true);
+			
 			$sqlGetMembGrp = $conoracle->prepare("SELECT (B.MEMBGROUP_DESC || ' / ' || A.MEMBGROUP_DESC ) AS MEMBGROUP_CODE_STR 
 												FROM MBUCFMEMBGROUP A LEFT JOIN MBUCFMEMBGROUP B ON A.MEMBGROUP_CONTROL = B.MEMBGROUP_CODE 
 												WHERE A.MEMBGROUP_CODE = :MEMBGRP");
@@ -69,6 +106,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 												WHERE TRIM(MB.MEMBER_NO) = :member_no");
 			$getRecvAcc->execute([':member_no' => $member_no]);
 			$rowRecvAcc = $getRecvAcc->fetch(PDO::FETCH_ASSOC);
+			
+			convertArray($rowRecvAcc,true);
+			
 			$address = (isset($rowMember["ADDR_NO"]) ? $rowMember["ADDR_NO"] : null);
 			if(isset($rowMember["PROVINCE_CODE"]) && $rowMember["PROVINCE_CODE"] == '10'){
 				$address .= (isset($rowMember["ADDR_MOO"]) ? ' ม.'.$rowMember["ADDR_MOO"] : null);
@@ -105,6 +145,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 											WHERE TRIM(MBA.MEMBER_NO) = :member_no");
 			$getAddress->execute([':member_no' => $member_no]);
 			$rowAddress = $getAddress->fetch(PDO::FETCH_ASSOC);
+			
+			convertArray($rowAddress,true);
+			
 			$addressCurr = (isset($rowAddress["ADDR_NO"]) ? $rowAddress["ADDR_NO"] : null);
 			if(isset($rowAddress["PROVINCE_CODE"]) && $rowAddress["PROVINCE_CODE"] == '10'){
 				$addressCurr .= (isset($rowAddress["ADDR_MOO"]) ? ' ม.'.$rowAddress["ADDR_MOO"] : null);
@@ -127,6 +170,8 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			}
 			$arrayResult["PRENAME"] = $rowMember["PRENAME_SHORT"];
 			$arrayResult["NAME"] = $rowMember["MEMB_NAME"];
+			//$arrayResult["NAME"]  = mb_detect_encoding($arrayResult["NAME"]);
+			//$arrayResult["NAME"] = mb_convert_encoding($arrayResult["NAME"], 'ISO-8859-1','utf-8'); 
 			$arrayResult["SURNAME"] = $rowMember["MEMB_SURNAME"];
 			$arrayResult["BIRTH_DATE"] = $lib->convertdate($rowMember["BIRTH_DATE"],"D m Y");
 			$arrayResult["BIRTH_DATE_COUNT"] =  $lib->count_duration($rowMember["BIRTH_DATE"],"ym");
