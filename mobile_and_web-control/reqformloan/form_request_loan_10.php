@@ -156,8 +156,9 @@ function GeneratePDFContract($data,$lib) {
 		  </div>
 
 		  <div class="nowrap" style="padding-left:50px; margin:0px; ">
-			ข้อ 2. ในเวลานี้ข้าพเจ้ามีหุ้นอยู่ในสหกรณ์ รวม............................หุ้น เป็นเงิน.................................................................บาท
+			ข้อ 2. ในเวลานี้ข้าพเจ้ามีหุ้นอยู่ในสหกรณ์ รวม............................หุ้น เป็นเงิน.................................................................บาท  <br> และข้าพเจ้าส่งเงินค่าหุ้นรายเดือนอยู่ในอัตราเดือนละ.........................................บาท
 		  </div>
+		
 		  <div style="padding-left:50px; margin:0px; ">
 			ข้อ 3. ข้าพเจ้ามีหนี้สินอยู่ต่อสหกรณ์ในฐานะผู้กู้ ดังต่อไปนี้
 		  </div>';
@@ -201,7 +202,7 @@ function GeneratePDFContract($data,$lib) {
 
 	$html .= '
 		<div style="padding-left  :50px; margin:0px; ">
-		ข้อ 4. ข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งเงินกู้คืนเป็นงวดรายเดือน ดังนี้
+		ข้อ 4. ถ้าข้าพเจ้าได้รับเงินกู้ ข้าพเจ้าขอส่งเงินกู้คืนเป็นงวดรายเดือน ดังนี้
 		</div>
 		<div class="nowrap" style="padding-left:98px;"> 
 		ชำระเงินต้น งวดล่ะ......................................บาท (.............................................................................................)
@@ -305,6 +306,9 @@ function GeneratePDFContract($data,$lib) {
 		</div>
 		<div class="text-center" style=" position:absolute; right:48px; top : 337px;  width:228px;font-weight:bold;">
 			'.$data["sharestk_amt"].'
+		</div>
+		<div class="text-center" style=" position:absolute; left:365px; top : 359px;  width:50px;font-weight:bold;">
+			'.$data["period_share_amount"].'
 		</div>
 		';
 
@@ -448,7 +452,7 @@ function GeneratePDFContract($data,$lib) {
 		จ่ายเงินถูกต้องแล้ว
 		</div>
 		<div style="padding-left:322px; margin-top:5px;">
-		................................................................ผู้รับเงิน
+		................................................................เจ้าหน้าที่การเงิน
 		</div>
 		<div style="font-weight:bold;position:absolute;top:203px;left:336px;">
 		'.number_format($data["request_amt"],2).'

@@ -71,7 +71,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				}
 				$arrDetail[] = $arrBalDetail;
 			}
-			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail);
+			$arrayPDF = GeneratePdfDoc($arrHeader,$arrDetail,$dataComing["ip_address"]);
 			if($arrayPDF["RESULT"]){
 				if ($forceNewSecurity == true) {
 					$arrayResult['REPORT_URL'] = $config["URL_SERVICE"]."/resource/get_resource?id=".hash("sha256", $arrayPDF["PATH"]);
@@ -114,7 +114,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	];
 	$log->writeLog('errorusage',$logStruc);
 	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
-	$lib->sendLineNotify($message_error);
+	$lib->sendLineNotify($message_error); 
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 	$arrayResult['RESULT'] = FALSE;
@@ -122,7 +122,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	require_once('../../include/exit_footer.php');
 	
 }
-function GeneratePdfDoc($arrHeader,$arrDetail) {
+function GeneratePdfDoc($arrHeader,$arrDetail,$ip_address) {
 	$html = '<style>
 		@font-face {
 		  font-family: TH Niramit AS;
@@ -207,7 +207,7 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 	$html.='<div style="margin-top:30px; margin-left:450px;  margin-right:20px;" class="text-center">ขอแสดงความนับถือ</div>
 	  <div>
 		<div style="margin-top:30px; margin-left:450px;  margin-right:20px;" class="text-center">
-		<div style="positon:absolute;   width:100%;  " class="text-center">ผจก</div>
+		<div style="positon:absolute;   width:100%;  " class="text-center">นายณัฎฐ์นันธ์  นิกรพันธุ์</div>
 		  <div style="margin-top:-24px;"> (..............................................................)</div>
 		</div>
 	  </div>
@@ -218,7 +218,7 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 	  </div>
 	  <div style="width:50%;">
 		  <div class="nowrap">
-			  <div style="position:absolute width:200px;" class="text-center">ผู้ตรวจ</div>
+			  <div style="position:absolute width:200px;" class="text-center">ผู้ช่วยศาสตราจารย์ ดร.อรรถพงศ์  พีระเชื้อ</div>
 			  <div style="margin-top:-25px;"> เรียน............................................................................................ผู้ตรวจบัญชี</div>
 		  </div>
 		  <div class="nowrap">
@@ -262,10 +262,15 @@ function GeneratePdfDoc($arrHeader,$arrDetail) {
 
 	$html.='<div style="margin-top:30px; margin-left:450px; margin-right:20px;  " class="text-center">('.($arrHeader["full_name"]??null).')</div>
 	<div style="margin-left:450px; margin-right:20px;  " class="text-center">เลขที่ทะเบียนที่ '.($arrHeader["member_no"]??null).'</div>';
-
 	$html .= '
 		</div>
 	';
+	
+	$html.='<div style="position:absolute ;bottom:0px" class="text-left">'.$ip_address.' '.date("H:i:s").'</div>';
+	$html .= '
+		</div>
+	';
+	
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
