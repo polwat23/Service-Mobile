@@ -47,7 +47,7 @@ class CalculateLoan {
 			}
 		}
 		$dataReq["data"] = [
-			"amount" => (float)($amount ?? $dataCont["PRINCIPAL_BALANCE"]),
+			"amount" => $amount > $dataCont["PRINCIPAL_BALANCE"] ? (float) $dataCont["PRINCIPAL_BALANCE"] : (float)($amount ?? $dataCont["PRINCIPAL_BALANCE"]),
 			"loanBalance" => (float)$dataCont["PRINCIPAL_BALANCE"],
 			"keepingAmount" => (float)$dataCont["SPACE_KEEPING"],
 			"prinKeepingAmount" => (float)$dataCont["RKEEP_PRINCIPAL"],
@@ -929,7 +929,7 @@ class CalculateLoan {
 		if($interestPeriod > 0){
 			$executeLnSTM = [
 				$config["COOP_ID"],$contract_no,$dataCont["LAST_STM_NO"] + 1,
-				'LRC',$slipdocno,$lastperiod,$prinPay,0,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
+				'LRC',$slipdocno,$lastperiod,$prinPay,$interestPeriod,$dataCont["PRINCIPAL_BALANCE"] + $prinPay,
 				$dataCont["PRINCIPAL_BALANCE"],date('Y-m-d H:i:s',strtotime($dataCont["LASTCALINT_DATE"])),
 				$dataCont["BFINTEREST_ARREAR"],$interestPeriod,$intArr,$int_returnSrc,'TRN',$config["COOP_ID"],
 				$lnslip_no,$dataCont["INTEREST_RETURN"]
