@@ -62,6 +62,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 		}
 		$arrResponse = json_decode($responseAPI);
 		if($arrResponse->RESULT){
+			$updateWithdrawData = $conoracle->prepare("UPDATE dpdeptmaster SET confirm_status = 9
+													WHERE deptaccount_no = :deptaccount_no");
+			$updateWithdrawData->execute([
+				':deptaccount_no' => $coop_account_no
+			]);
 			$transaction_no = $arrResponse->TRANSACTION_NO;
 			$etn_ref = $arrResponse->EXTERNAL_REF;
 			$constantDep = $cal_dep->getConstantAcc($coop_account_no);
@@ -83,11 +88,14 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["coop_id"] = "065001";
 			$arrayGroup["deptaccount_no"] = $coop_account_no;
 			$arrayGroup["depttype_code"] = $constantDep["DEPTTYPE_CODE"];
+			$arrayGroup["deptgroup_code"] = $constantDep["DEPTGROUP_CODE"];
 			$arrayGroup["entry_id"] = "MOBILE";
 			$arrayGroup["fee_amt"] = 0;
 			$arrayGroup["fee_operate_cd"] = '0';
 			$arrayGroup["feeinclude_status"] = '1';
 			$arrayGroup["item_amt"] = $amt_transfer;
+			$arrayGroup["laststmseq_no"] = $constantDep["LASTSTMSEQ_NO"];
+			$arrayGroup["membcat_code"] = $constantDep["MEMBCAT_CODE"];
 			$arrayGroup["member_no"] = $member_no;
 			$arrayGroup["moneytype_code"] = "CBT";
 			$arrayGroup["msg_output"] = null;
@@ -101,19 +109,20 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 			$arrayGroup["slipitemtype_code"] = $rowDataDeposit["itemtype_dep"];
 			$arrayGroup["stmtitemtype_code"] = $rowDataDeposit["itemtype_dep"];
 			$arrayGroup["system_cd"] = "02";
-			$arrayGroup["withdrawable_amt"] = null;
+			$arrayGroup["withdrawable_amt"] = 0;
 			try {
-				$arrayData = array();
-				$arrayData["serviceName"] = 'deposit';
-				$arrHeader[] = "requestId: ".$lib->randomText('all',10);
-				$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 				$argumentWS = [
 					"as_wspass" => $config["WS_PASS"],
 					"astr_dept_inf_serv" => $arrayGroup
 				];
-				$resultWS = $clientWS->__call("of_dept_inf_serv", array($argumentWS));
-				$responseSoap = $resultWS->of_dept_inf_servResult;
+				$resultWS = $clientWS->__call("of_dept_insert_serv_online", array($argumentWS));
+				$responseSoap = $resultWS->of_dept_insert_serv_onlineResult;
 				if($responseSoap->msg_status != '0000'){
+					$updateWithdrawData = $conoracle->prepare("UPDATE dpdeptmaster SET confirm_status = 8,last_error = 'repost Deposit ".$ref_no."'
+															WHERE deptaccount_no = :deptaccount_no");
+					$updateWithdrawData->execute([
+						':deptaccount_no' => $coop_account_no
+					]);
 					$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 																,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,
 																coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)
@@ -197,6 +206,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					$arrayResult['RESULT'] = TRUE;
 					require_once('../../include/exit_footer.php');
 				}else{
+					$updateWithdrawData = $conoracle->prepare("UPDATE dpdeptmaster SET withdrawable_amt = withdrawable_amt + ".$amt_transfer."
+															WHERE deptaccount_no = :deptaccount_no");
+					$updateWithdrawData->execute([
+						':deptaccount_no' => $coop_account_no
+					]);
 					$ref_slipno = $responseSoap->ref_slipno;
 					// -----------------------------------------------
 					$insertRemark = $conmysql->prepare("INSERT INTO gcmemodept(memo_text,deptaccount_no,ref_no)
@@ -279,6 +293,11 @@ if($lib->checkCompleteArgument(['menu_component','amt_transfer','sigma_key','coo
 					require_once('../../include/exit_footer.php');
 				}
 			}catch(SoapFault $e){
+				$updateWithdrawData = $conoracle->prepare("UPDATE dpdeptmaster SET confirm_status = -9
+														WHERE deptaccount_no = :deptaccount_no");
+				$updateWithdrawData->execute([
+					':deptaccount_no' => $coop_account_no
+				]);
 				$insertTransactionLog = $conmysql->prepare("INSERT INTO gctransaction(ref_no,transaction_type_code,from_account,destination,transfer_mode
 															,amount,fee_amt,amount_receive,trans_flag,operate_date,result_transaction,cancel_date,member_no,ref_no_1,
 															coop_slip_no,etn_refno,id_userlogin,ref_no_source,bank_code)

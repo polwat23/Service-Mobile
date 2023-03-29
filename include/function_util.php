@@ -45,6 +45,20 @@ class functions {
 				return FALSE;
 			}
 		}
+		public function checkAccStatusWeb($member_no) {
+			$checkStatus = $this->con->prepare("SELECT account_status FROM gcmemberaccountweb 
+												WHERE member_no = :member_no");
+			$checkStatus->execute([
+				':member_no' => $member_no
+			]);
+			$rowStatus = $checkStatus->fetch(\PDO::FETCH_ASSOC);
+			$arrayStatus = array();
+			if($rowStatus["account_status"] == '1' || $rowStatus["account_status"] == '-9'){
+				return TRUE;
+			}else{
+				return FALSE;
+			}
+		}
 		public function logout($id_token,$type_login) {
 			$logout = $this->con->prepare("UPDATE gcuserlogin SET is_login = :type_login,logout_date = NOW() WHERE id_token = :id_token");
 			if($logout->execute([

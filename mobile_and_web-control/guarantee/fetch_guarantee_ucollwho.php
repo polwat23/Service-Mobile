@@ -7,7 +7,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		
 		$arrayGroupLoan = array();
 		$getUcollwho = $conoracle->prepare("SELECT
-											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,
+											LCC.LOANCONTRACT_NO AS LOANCONTRACT_NO,LCM.principal_balance as LOAN_BALANCE,
 											LNTYPE.loantype_desc as TYPE_DESC,
 											PRE.PRENAME_DESC,MEMB.MEMB_NAME,MEMB.MEMB_SURNAME,
 											LCM.MEMBER_NO AS MEMBER_NO,
@@ -32,6 +32,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrayColl["AVATAR_PATH_WEBP"] = isset($arrayAvarTar["AVATAR_PATH_WEBP"]) ? $config["URL_SERVICE"].$arrayAvarTar["AVATAR_PATH_WEBP"] : null;
 			$arrayColl["APPROVE_AMT"] = number_format($rowUcollwho["LOANAPPROVE_AMT"],2);
 			$arrayColl["FULL_NAME"] = $rowUcollwho["PRENAME_DESC"].$rowUcollwho["MEMB_NAME"].' '.$rowUcollwho["MEMB_SURNAME"];
+			$arrayColl["LOAN_BALANCE"] = number_format($rowUcollwho["LOAN_BALANCE"]);
 			$arrayGroupLoan[] = $arrayColl;
 		}
 		$arrayResult['CONTRACT_COLL'] = $arrayGroupLoan;

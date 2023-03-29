@@ -5,8 +5,13 @@ if($lib->checkCompleteArgument(['menu_component','password'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'SettingChangePassword')){
 		$password = password_hash($dataComing["password"], PASSWORD_DEFAULT);
 		$conmysql->beginTransaction();
-		$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1'
+		if(isset($dataComing["channel"]) && $dataComing["channel"] == 'web'){
+			$changePassword = $conmysql->prepare("UPDATE gcmemberaccountweb SET password = :password,temppass = null,account_status = '1'
 												WHERE member_no = :member_no");
+		}else{
+			$changePassword = $conmysql->prepare("UPDATE gcmemberaccount SET password = :password,temppass = null,account_status = '1'
+												WHERE member_no = :member_no");
+		}
 		if($changePassword->execute([
 			':password' => $password,
 			':member_no' => $payload["member_no"]

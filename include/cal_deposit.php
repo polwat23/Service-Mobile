@@ -38,6 +38,7 @@ class CalculateDep {
 					$arrayResult["GET_BALANCE"] = TRUE;
 					$arrayResult["CAN_DEPOSIT"] = TRUE;
 					$arrayResult["CAN_WITHDRAW"] = TRUE;
+					$arrayResult["SEQUEST_AMOUNT"] = 0;
 				}else{
 					$arrayResult["GET_BALANCE"] = FALSE;
 					$arrayResult["SEQUEST_DESC"] = $resultWS->as_msglog;
@@ -98,11 +99,15 @@ class CalculateDep {
 	}
 	public function getWithdrawable($deptaccount_no){
 		$DataAcc = $this->getConstantAcc($deptaccount_no);
-		$withdraw_amt = $DataAcc["PRNCBAL"] - $DataAcc["MINPRNCBAL"];
-		if($withdraw_amt < 0){
-			$withdraw_amt = 0;
+		if(date("Ymd",strtotime($DataAcc["LASTCALWITH_DATE"])) >= date("Ymd",strtotime($DataAcc["LASTACCESS_DATE"]))){
+			return $DataAcc["WITHDRAWABLE_AMT"];
+		}else{
+			$withdraw_amt = $DataAcc["PRNCBAL"] - $DataAcc["MINPRNCBAL"];
+			if($withdraw_amt < 0){
+				$withdraw_amt = 0;
+			}
+			return $withdraw_amt;
 		}
-		return $withdraw_amt;
 	}
 	public function depositCheckDepositRights($deptaccount_no,$amt_transfer,$menu_component,$bank_code=null){
 		$dataConst = $this->getConstantAcc($deptaccount_no);
@@ -382,6 +387,12 @@ class CalculateDep {
 			$arrayResult['RESULT'] = FALSE;
 			return $arrayResult;
 		}*/
+		$arrayResult['IS_WARNING'] = FALSE;
+		if($dataConst["DEPTTYPE_CODE"] == '17' || $dataConst["DEPTTYPE_CODE"] == '73') {
+			if($dataConst["PRNCBAL"] - $amt_transfer < 5000000){
+				$arrayResult['IS_WARNING'] = TRUE;
+			}
+		}
 		if($menu_component == 'TransferSelfDepInsideCoop' || $menu_component == 'TransferDepInsideCoop'){
 			$menucheckrights = "and gca.allow_withdraw_inside = '1'";
 			$transfer_mode = "1";
@@ -667,8 +678,9 @@ class CalculateDep {
 	public function getConstantAcc($deptaccount_no){
 		$getConst = $this->conora->prepare("SELECT dpm.LASTSTMSEQ_NO,dpm.DEPTCLOSE_STATUS,dpt.DEPTGROUP_CODE,dpm.DEPTTYPE_CODE,dpm.DEPTACCOUNT_NAME,dpm.PRNCBAL,dpt.MINPRNCBAL,
 											dpt.MINWITD_AMT,dpt.MINDEPT_AMT,NVL(dpt.s_maxwitd_inmonth,0) as MAXWITHD_INMONTH,NVL(dpt.withcount_flag,0) as IS_CHECK_PENALTY,
-											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG
-											,NVL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK
+											dpm.membcat_code,
+											dpt.LIMITDEPT_FLAG,dpt.LIMITDEPT_AMT,dpt.MAXBALANCE,dpt.MAXBALANCE_FLAG,dpm.LASTCALWITH_DATE,dpm.LASTACCESS_DATE,dpm.CONFIRM_STATUS
+											,NVL(dpt.s_period_inmonth,1) as PER_PERIOD_INCOUNT,NVL(dpt.withcount_unit,1) as PERIOD_UNIT_CHECK,dpm.WITHDRAWABLE_AMT,dpm.WITHDRAWABLE_ONLINE
 											FROM dpdeptmaster dpm LEFT JOIN dpdepttype dpt ON dpm.DEPTTYPE_CODE  = dpt.DEPTTYPE_CODE and dpm.membcat_code = dpt.membcat_code
 											WHERE dpm.DEPTACCOUNT_NO = :deptaccount_no");
 		$getConst->execute([':deptaccount_no' => $deptaccount_no]);

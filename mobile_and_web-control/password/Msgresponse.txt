@@ -1,0 +1,2 @@
+{"RESULT":false,"MESSAGE_ERROR":"SMTP connect() failed. https:\/\/github.com\/PHPMailer\/PHPMailer\/wiki\/Troubleshooting"}
+{"RESULT":false,"MESSAGE_ERROR":"SMTP connect() failed. https:\/\/github.com\/PHPMailer\/PHPMailer\/wiki\/Troubleshooting"}

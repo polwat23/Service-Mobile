@@ -2,8 +2,13 @@
 require_once('../autoload.php');
 
 if($lib->checkCompleteArgument(['password'],$dataComing)){
-	$getOldPassword = $conmysql->prepare("SELECT password,temppass,account_status FROM gcmemberaccount 
+	if(isset($dataComing["channel"]) && $dataComing["channel"] == 'web'){
+		$getOldPassword = $conmysql->prepare("SELECT password,temppass,account_status FROM gcmemberaccountweb 
 											WHERE member_no = :member_no");
+	}else{
+		$getOldPassword = $conmysql->prepare("SELECT password,temppass,account_status FROM gcmemberaccount 
+											WHERE member_no = :member_no");
+	}
 	$getOldPassword->execute([':member_no' => $payload["member_no"]]);
 	if($getOldPassword->rowCount() > 0){
 		$rowAccount = $getOldPassword->fetch(PDO::FETCH_ASSOC);

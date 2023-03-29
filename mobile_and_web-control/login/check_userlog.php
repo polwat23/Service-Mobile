@@ -13,6 +13,8 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		if($rowResign["RESIGN_STATUS"] == '1'){
 			$updateStatus = $conmysql->prepare("UPDATE gcmemberaccount SET account_status = '-6' WHERE member_no = :member_no");
 			$updateStatus->execute([':member_no' => $payload["member_no"]]);
+			$updateStatusWeb = $conmysql->prepare("UPDATE gcmemberaccountweb SET account_status = '-6' WHERE member_no = :member_no");
+			$updateStatusWeb->execute([':member_no' => $payload["member_no"]]);
 			$arrayResult['RESPONSE_CODE'] = "WS0051";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
@@ -53,7 +55,11 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 			
 		}
 		
-		$checkAccountStatus = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+		if($dataComing["channel"] == "mobile_app"){
+			$checkAccountStatus = $conmysql->prepare("SELECT account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+		}else{
+			$checkAccountStatus = $conmysql->prepare("SELECT account_status FROM gcmemberaccountweb WHERE member_no = :member_no and account_status IN('1','-9')");
+		}
 		$checkAccountStatus->execute([':member_no' => $payload["member_no"]]);
 		$rowCheckAccountStatus = $checkAccountStatus->fetch(PDO::FETCH_ASSOC);
 		if ($rowCheckAccountStatus["account_status"] == '-9'){
@@ -75,7 +81,9 @@ if($lib->checkCompleteArgument(['pin'],$dataComing)){
 		require_once('../../include/exit_footer.php');
 		
 	}
-	$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+	if($dataComing["channel"] == "mobile_app"){
+		$checkPinNull = $conmysql->prepare("SELECT pin,account_status FROM gcmemberaccount WHERE member_no = :member_no and account_status IN('1','-9')");
+	}
 	$checkPinNull->execute([':member_no' => $payload["member_no"]]);
 	$rowPinNull = $checkPinNull->fetch(PDO::FETCH_ASSOC);
 	if(isset($rowPinNull["pin"])){

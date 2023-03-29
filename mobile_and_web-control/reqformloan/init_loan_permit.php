@@ -4,375 +4,169 @@ require_once('../autoload.php');
 if($lib->checkCompleteArgument(['menu_component','loantype_code'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'LoanRequestForm')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
-		if(isset($dataComing["request_amt"]) && $dataComing["request_amt"] != "" && isset($dataComing["period"]) && $dataComing["period"] != ""){
-			$oldBal = 0;
-			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
-				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
-			}else{
-				include(__DIR__.'/../credit/calculate_loan_etc.php');
-			}
-			if($maxloan_amt <= 0){
-				$arrayResult['RESPONSE_CODE'] = "WS0084";
-				$arrayResult['RESPONSE_MESSAGE'] = $cal_remark ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
+		/*$checkCreditLoan = $conoracle->prepare("SELECT contcredit_no FROM lncontcredit WHERE loangroup_code = :loangrp_code and member_no = :member_no and credit_status = 1");
+		$checkCreditLoan->execute([
+			':loangrp_code' => substr($dataComing["loantype_code"],0,2),
+			':member_no' => $member_no
+		]);
+		$rowCreditLoan = $checkCreditLoan->fetch(PDO::FETCH_ASSOC);
+		if(empty($rowCreditLoan["CONTCREDIT_NO"]) || $rowCreditLoan["CONTCREDIT_NO"] == ""){
+			$arrayResult['RESPONSE_CODE'] = "WS0073";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
+			
+		}*/
+		try {
+			$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_loan.svc?singleWsdl");
+			$structureReqLoan = array();
+			$structureReqLoan["coop_id"] = $config["COOP_ID"];
+			$structureReqLoan["member_no"] = $member_no;
+			$structureReqLoan["loantype_code"] = $dataComing["loantype_code"];
+			$structureReqLoan["operate_date"] = date("c");
+					
+			try {
+				$argumentWS = [
+					"as_wspass" => $config["WS_PASS"],
+					"atr_lnatm" => $structureReqLoan
+				];
+				file_put_contents('Msgresponse.txt', json_encode($argumentWS,JSON_UNESCAPED_UNICODE ) . PHP_EOL, FILE_APPEND);
+				$resultWS = $clientWS->__call("of_initloanrequest_mobile_atm", array($argumentWS));
+				$responseSoap = $resultWS->atr_lnatm;
 				
-			}
-			$fetchLoanIntRate = $conoracle->prepare("SELECT * FROM (SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
-														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-														WHERE lnt.loantype_code = :loantype_code ORDER BY lnd.effective_date DESC) WHERE rownum <= 1");
-			$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
-			$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-			$typeCalDate = $func->getConstant("process_keep_forward");
-			$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
-			$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
-			if($typeCalDate == "next"){
-				$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
-			}else{
-				$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
-			}
-			$period_payment = ($dataComing["request_amt"] / $dataComing["period"]);// + ((($dataComing["request_amt"] * $rowIntRate["INTEREST_RATE"]) * $dayOfMonth) / $dayinYear);
-			$receive_net = $dataComing["request_amt"] - $oldBal;
-			if($period_payment < 1000 && $dataComing["loantype_code"] == '2J'){
-				$temp_period = ($dataComing["request_amt"] / 1000);
-				$min_period = ceil($temp_period);
-				$arrayResult["PERIOD"] = $min_period;
-				$arrayResult["PERIOD_PAYMENT"] = 1000;
-			}else{
-				$period_payment = (int)$period_payment;
-				$arrayResult["PERIOD"] = $dataComing["period"];
-				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			}
-			if($dataComing["recv_acc"] == '0'){
-				$arrGrpBank = array();
-				$getBank = $conoracle->prepare("SELECT TRIM(BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
-											WHERE bank_code IN('006') and USE_FLAG = '1' ORDER BY SETSORT ASC");
-				$getBank->execute();
-				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
-					$arrBank = array();
-					$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
-					$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
-					$arrGrpBank[] = $arrBank;
-				}
-				$arrayResult['COOP_ACCOUNT'] = [];
-				$arrayResult["REQ_BOOKBANK"] = TRUE;
-				$arrayResult["REQ_BOOKCOOP"] = FALSE;
-				$arrayResult["REQ_BANK_ACCOUNT"] = TRUE;
-				$arrayResult["IS_UPLOAD_BOOKBANK"] = TRUE;
-				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
-				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
-				$arrayResult['BANK'] = $arrGrpBank;
-			}else if($dataComing["recv_acc"] == '1'){
-				$arrGrpCoopAcc = array();
-				$arrTypeAllow = array();
-				$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
-														FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct ON gat.id_accountconstant = gct.id_accountconstant
-														WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
-				$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
-				while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
-					$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
-				}
-				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-				$arrDataAPI["MemberID"] = substr($member_no,-6);
-				$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-				if(!$arrResponseAPI["RESULT"]){
+				if($responseSoap->msg_status == '000'){
+					$arrayResult['ACCOUNT_RECEIVE'] = $lib->formataccount($responseSoap->account_id,$func->getConstant('dep_format'));
+					$arrayResult['ACCOUNT_RECEIVE_HIDDEN'] = $lib->formataccount_hidden($arrayResult['ACCOUNT_RECEIVE'],$func->getConstant('hidden_dep'));
+					$arrayResult['CONTRACT_CLR'] = $responseSoap->contclr_no;
+					$arrayResult['DIFF_OLD_CONTRACT'] = $responseSoap->prinbal_clr + $responseSoap->intpayment_clr;
+					$arrayResult['LOANPERMIT_AMT'] = $responseSoap->loancredit_amt;
+					$arrayResult['REQUEST_AMT'] = $responseSoap->maxloanrequest_amt;
+					$arrayResult['SALARY_AMT'] = $responseSoap->approve_amt;
+					$arrayResult['PERIOD'] = $responseSoap->period_payamt;
+					$structureReqLoanPayment = array();
+					$structureReqLoanPayment["calperiod_intrate"] = $dataComing["int_rate"];
+					$structureReqLoanPayment["calperiod_maxinstallment"] = $responseSoap->period_payamt;
+					$structureReqLoanPayment["calperiod_prnamt"] = $arrayResult['REQUEST_AMT'];
+					$structureReqLoanPayment["loanpayment_type"] = 2;
+					$structureReqLoanPayment["loantype_code"] = $dataComing["loantype_code"];
+					$structureReqLoanPayment["period_installment"] = $responseSoap->period_payamt;
+					$structureReqLoanPayment["period_lastpayment"] = $responseSoap->period_payamt;
+					$structureReqLoanPayment["period_payment"] = 0;
+					$structureReqLoanPayment["progess_flag"] = 0;
+					$structureReqLoanPayment["roundpay_flag"] = '1';
+					$structureReqLoanPayment["salary_amount"] = $responseSoap->approve_amt;
+					try {
+						$argumentWS_Credit = [
+							"as_wspass" => $config["WS_PASS"],
+							"astr_lncalperiod" => $structureReqLoanPayment
+						];
+						$resultWS_Credit = $clientWS->__call("of_calperiodpay", array($argumentWS_Credit));
+						$responseSoap_Credit = $resultWS_Credit->astr_lncalperiod;
+						$getPayRound = $conoracle->prepare("SELECT PAYROUND_FACTOR FROM lnloantype WHERE loantype_code = :loantype_code");
+						$getPayRound->execute([':loantype_code' => $dataComing["loantype_code"]]);
+						$rowPayRound = $getPayRound->fetch(PDO::FETCH_ASSOC);
+						$pay_period = preg_replace('/,/', '', $responseSoap_Credit->period_payment);
+						if($pay_period > $responseSoap->maxperiod_payment){
+							if(($responseSoap->maxperiod_payment - $pay_period) > $rowPayRound["PAYROUND_FACTOR"]){
+								$arrayResult['RESPONSE_CODE'] = "WS0071";
+								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+								$arrayResult['RESULT'] = FALSE;
+								require_once('../../include/exit_footer.php');
+								
+							}
+						}
+						if($responseSoap->maxperiod_payment == 0){	
+							$arrayResult['RESPONSE_CODE'] = "WS0072";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+							
+						}
+						$arrayResult['ROUNDPAY'] = $responseSoap->roundpay_factor;
+						$arrayResult['MAXPERIOD_PAYMENT'] = $responseSoap->maxperiod_payment ?? 0;
+						$arrayResult['PERIOD_PAYMENT'] = $pay_period ?? 0;
+						$arrayResult['MAXRECEIVE_AMT'] = $responseSoap->maxreceive_amt;
+						$arrayResult['DISABLE_AMOUNT'] = FALSE;
+						$arrayResult['DISABLE_PERIOD'] = FALSE;
+						$arrayResult['RECEIVE_AMT'] = $arrayResult['REQUEST_AMT'] - $arrayResult['DIFF_OLD_CONTRACT'];
+						if($arrayResult['RECEIVE_AMT'] <= 0){
+							
+							$arrayResult['RESPONSE_CODE'] = "WS0086";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$responseSoap['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+							
+						}
+						$arrayResult['RESULT'] = TRUE;
+						require_once('../../include/exit_footer.php');
+					}catch(SoapFault $e){
+						$filename = basename(__FILE__, '.php');
+						$logStruc = [
+							":error_menu" => $filename,
+							":error_code" => "WS0062",
+							":error_desc" => "ไม่สามารถคำนวณชำระต่องวดได้ "."\n"."Error => ".($e->getMessage() ?? " Service ไม่ได้ Return Error มาให้"),
+							":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+						];
+						
+						$log->writeLog('errorusage',$logStruc);
+						$arrayResult['RESPONSE_CODE'] = "WS0062";
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+						$arrayResult['RESULT'] = FALSE;
+						require_once('../../include/exit_footer.php');
+						
+					}
+				}else{
 					$filename = basename(__FILE__, '.php');
 					$logStruc = [
 						":error_menu" => $filename,
-						":error_code" => "WS9999",
-						":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
+						":error_code" => "WS0058",
+						":error_desc" => "ไม่สามารถคำนวณชำระต่องวดได้ "."\n"."Error => ".$responseSoap->msg_output,
 						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 					];
-					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-					$lib->sendLineNotify($message_error);
-					$func->MaintenanceMenu($dataComing["menu_component"]);
-					$arrayResult['RESPONSE_CODE'] = "WS9999";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-				}
-				$arrResponseAPI = json_decode($arrResponseAPI);
-				$formatDept = $func->getConstant('dep_format');
-				$formatDeptHidden = $func->getConstant('hidden_dep');
-				if($arrResponseAPI->responseCode == "200"){
-					foreach($arrResponseAPI->accountDetail as $accData){
-						if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0" && $accData->accountType == '10'){
-							$arrCoopAcc = array();
-							$arrCoopAcc["ACCOUNT_NO"] = $accData->coopAccountNo;
-							$arrCoopAcc["ACCOUNT_NO_FORMAT"] =  $lib->formataccount($accData->coopAccountNo,$formatDept);
-							$arrGrpCoopAcc[] = $arrCoopAcc;
-						}
-					}
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS9001";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-					
-				}
-				
-				if($dataComing["loantype_code"] == '2J'){
-					$arrayResult['BANK'] = [];
-				}else {
-					$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
-					$arrayResult["REQ_SALARY"] = TRUE;
-					$arrayResult['BANK'] = $arrGrpBank;
-				}
-				$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
-				$arrayResult["REQ_BOOKBANK"] = FALSE;
-				$arrayResult["REQ_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
-				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
-				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
-				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
-				$arrayResult['BANK'] = [];
-			}
-			
-			//เช็คอัปโหลดเงินเดือน
-			if($dataComing["loantype_code"] == '2J'){
-				$arrayResult["REQ_BOOKCOOP"] = TRUE;
-				$arrayResult["IS_UPLOAD_BOOKCOOP"] = TRUE;	
-				if($dataComing["request_amt"] > 50000){
-					$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
-					$arrayResult["REQ_SALARY"] = TRUE;				
-					$arrayResult["NOTE_DESC"] = "การกู้เงินจำนวนเกินกว่า 50,000 บาท ให้แสกนใบรับเงินได้ 1 เดือนล่าสุด (ณ วันที่ยื่นกู้) และต้องมีลายเซ็นผู้กู้รับรอง และเมื่อหักชำระหนี้เงินกู้ทุกประเภทแล้ว จะต้องมียอดรับเงินสุทธิคงเหลือไม่ต่ำกว่า 5,000 บาท";
-					$arrayResult["NOTE_DESC_COLOR"] = "red";
-				}else{
-					$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-					$arrayResult["REQ_SALARY"] = FALSE;
-					$arrayResult["NOTE_DESC"] = null;
-					$arrayResult["NOTE_DESC_COLOR"] = null;
-				}
-			}else{
-				$arrayResult["REQ_BOOKCOOP"] = FALSE;
-				$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
-			}
-			//ยอดชำระต่องวดต่ำกว่า 1000 2J
-			$min_period = null;
-			if($period_payment < 1000 && $dataComing["loantype_code"] == '2J'){
-				$temp_period = ($dataComing["request_amt"] / 1000);
-				$min_period = ceil($temp_period);
-				$arrayResult["PERIOD"] = $min_period;
-				$arrayResult["PERIOD_PAYMENT"] = 1000;
-			}else{
-				$period_payment = (int)$period_payment;
-				$arrayResult["PERIOD"] = $dataComing["period"];
-				$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-			}
-			if($dataComing["request_amt"] >= 50000){
-				if($dataComing["remain_salary"] - $arrayResult["PERIOD_PAYMENT"] >= 5000){
-					$arrayResult["RECEIVE_NET"] = $receive_net;
-					$arrayResult['RESULT'] = TRUE;
-					require_once('../../include/exit_footer.php');
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS0120";
-					$arrayResult['RESPONSE_MESSAGE'] = $cal_remark ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-				}
-			}else{
-				$arrayResult["IS_REMAIN_SALARY"] = FALSE;
-				$arrayResult["RECEIVE_NET"] = $receive_net;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}
-		}else{
-			$maxloan_amt = 0;
-			$oldBal = 0;
-			$loanRequest = TRUE;
-			if(file_exists(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php')){
-				include(__DIR__.'/../credit/calculate_loan_'.$dataComing["loantype_code"].'.php');
-			}else{
-				include(__DIR__.'/../credit/calculate_loan_etc.php');
-			}
-			if($maxloan_amt <= 0){
-				$arrayResult['RESPONSE_CODE'] = "WS0084";
-				$arrayResult['RESPONSE_MESSAGE'] = $cal_remark ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-				$arrayResult['RESULT'] = FALSE;
-				require_once('../../include/exit_footer.php');
-				
-			}
-			$request_amt = $dataComing["request_amt"] ?? $maxloan_amt;
-			
-			//เงินกู้ 2J มีหักกลบ
-			if($dataComing["loantype_code"] == '2J' && $request_amt < $oldBal){
-				if($oldBal > $maxloan_amt){
-					$request_amt = $maxloan_amt;
-				}else{
-					$request_amt = $oldBal;
-				}
-			}
 
-			$getMaxPeriod = $conoracle->prepare("SELECT MAX_PERIOD 
-												FROM lnloantype lnt LEFT JOIN lnloantypeperiod lnd ON lnt.LOANTYPE_CODE = lnd.LOANTYPE_CODE
-												WHERE :request_amt >= lnd.MONEY_FROM and :request_amt <= lnd.MONEY_TO and lnd.LOANTYPE_CODE = :loantype_code");
-			$getMaxPeriod->execute([
-				':request_amt' => $maxloan_amt,
-				':loantype_code' => $dataComing["loantype_code"]
-			]);
-			$rowMaxPeriod = $getMaxPeriod->fetch(PDO::FETCH_ASSOC);
-			if(isset($rowMaxPeriod["MAX_PERIOD"])){
-				$getLoanObjective = $conoracle->prepare("SELECT LOANOBJECTIVE_CODE,LOANOBJECTIVE_DESC FROM lnucfloanobjective WHERE loantype_code = :loantype");
-				$getLoanObjective->execute([':loantype' => $dataComing["loantype_code"]]);
-				$arrGrpObj = array();
-				$arrGrpBank = array();
-				while($rowLoanObj = $getLoanObjective->fetch(PDO::FETCH_ASSOC)){
-					$arrObj = array();
-					$arrObj["LOANOBJECTIVE_CODE"] = $rowLoanObj["LOANOBJECTIVE_CODE"];
-					$arrObj["LOANOBJECTIVE_DESC"] = $rowLoanObj["LOANOBJECTIVE_DESC"];
-					$arrGrpObj[] = $arrObj;
-				}
-				$getBank = $conoracle->prepare("SELECT TRIM(BANK_DESC) as BANK_DESC,BANK_CODE FROM CMUCFBANK 
-											WHERE bank_code IN('006') and USE_FLAG = '1' ORDER BY SETSORT ASC");
-				$getBank->execute();
-				while($rowBank = $getBank->fetch(PDO::FETCH_ASSOC)){
-					$arrBank = array();
-					$arrBank["BANK_DESC"] = $rowBank["BANK_DESC"];
-					$arrBank["BANK_CODE"] = $rowBank["BANK_CODE"];
-					$arrGrpBank[] = $arrBank;
-				}
-				$arrGrpCoopAcc = array();
-				$arrTypeAllow = array();
-				$getTypeAllowShow = $conmysql->prepare("SELECT gat.deptaccount_no 
-														FROM gcuserallowacctransaction gat LEFT JOIN gcconstantaccountdept gct 
-														ON gat.id_accountconstant = gct.id_accountconstant
-														WHERE gct.allow_showdetail = '1' and gat.member_no = :member_no and gat.is_use = '1'");
-				$getTypeAllowShow->execute([':member_no' => $payload["member_no"]]);
-				while($rowTypeAllow = $getTypeAllowShow->fetch(PDO::FETCH_ASSOC)){
-					$arrTypeAllow[] = $rowTypeAllow["deptaccount_no"];
-				}
-				$arrHeaderAPI[] = 'Req-trans : '.date('YmdHis');
-				$arrDataAPI["MemberID"] = substr($member_no,-6);
-				$arrResponseAPI = $lib->posting_dataAPI($config["URL_SERVICE_EGAT"]."Account/InquiryAccount",$arrDataAPI,$arrHeaderAPI);
-				if(!$arrResponseAPI["RESULT"]){
-					$filename = basename(__FILE__, '.php');
-					$logStruc = [
-						":error_menu" => $filename,
-						":error_code" => "WS9999",
-						":error_desc" => "Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount",
-						":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
-					];
 					$log->writeLog('errorusage',$logStruc);
-					$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_SERVICE_EGAT"]."Account/InquiryAccount";
-					$lib->sendLineNotify($message_error);
-					$func->MaintenanceMenu($dataComing["menu_component"]);
-					$arrayResult['RESPONSE_CODE'] = "WS9999";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
-					$arrayResult['RESULT'] = FALSE;
-					require_once('../../include/exit_footer.php');
-				}
-				$arrResponseAPI = json_decode($arrResponseAPI);
-				$formatDept = $func->getConstant('dep_format');
-				$formatDeptHidden = $func->getConstant('hidden_dep');
-				if($arrResponseAPI->responseCode == "200"){
-					foreach($arrResponseAPI->accountDetail as $accData){
-						if (in_array($accData->coopAccountNo, $arrTypeAllow) && $accData->accountStatus == "0" && $accData->accountType == "10"){
-							$arrCoopAcc = array();
-							$arrCoopAcc["ACCOUNT_NO"] = $accData->coopAccountNo;
-							$arrCoopAcc["ACCOUNT_NO_FORMAT"] = $lib->formataccount($accData->coopAccountNo,$formatDept);
-							$arrGrpCoopAcc[] = $arrCoopAcc;
-						}
+					$arrayResult['RESPONSE_CODE'] = "WS0058";
+					if($responseSoap->msg_status == "013" || $responseSoap->msg_status == "099" || $responseSoap->msg_status == "011"){
+						$arrayResult['RESPONSE_MESSAGE'] = $responseSoap->msg_output ?? $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+					}else{
+						$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					}
-				}else{
-					$arrayResult['RESPONSE_CODE'] = "WS9001";
-					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 					$arrayResult['RESULT'] = FALSE;
 					require_once('../../include/exit_footer.php');
 					
 				}
-				$fetchLoanIntRate = $conoracle->prepare("SELECT * FROM (SELECT lnd.INTEREST_RATE FROM lnloantype lnt LEFT JOIN lncfloanintratedet lnd 
-														ON lnt.INTTABRATE_CODE = lnd.LOANINTRATE_CODE
-														WHERE lnt.loantype_code = :loantype_code ORDER BY lnd.effective_date DESC) WHERE rownum <= 1");
-				$fetchLoanIntRate->execute([':loantype_code' => $dataComing["loantype_code"]]);
-				$rowIntRate = $fetchLoanIntRate->fetch(PDO::FETCH_ASSOC);
-				$typeCalDate = $func->getConstant("process_keep_forward");
-				$pay_date = date("Y-m-t", strtotime('last day of '.$typeCalDate.' month',strtotime(date('Y-m-d'))));
-				$dayinYear = $lib->getnumberofYear(date('Y',strtotime($pay_date)));
-				if($typeCalDate == "next"){
-					$dayOfMonth = date('d',strtotime($pay_date)) + (date("t") - date("d"));
-				}else{
-					$dayOfMonth = date('d',strtotime($pay_date)) - date("d");
-				}
-				$period_payment = ($maxloan_amt / $rowMaxPeriod["MAX_PERIOD"]);
-				//$interest = ((($maxloan_amt * $rowIntRate["INTEREST_RATE"]) * $dayOfMonth) / $dayinYear);
-				//$period_payment += $interest;
-				//ยอดชำระต่องวดต่ำกว่า 1000 2J
-				$min_period = null;
-				if($period_payment < 1000 && $dataComing["loantype_code"] == '2J'){
-					$temp_period = ($maxloan_amt / 1000);
-					$min_period = ceil($temp_period);
-					$arrayResult["PERIOD"] = $min_period;
-					$arrayResult["PERIOD_PAYMENT"] = 1000;
-				}else{
-					$period_payment = (int)$period_payment - ($period_payment % 100);
-					$arrayResult["PERIOD_PAYMENT"] = $period_payment;
-				}
-				
-				$receive_net = $maxloan_amt - $oldBal;
-				
-				if($dataComing["loantype_code"] != '2J'){
-					$arrRecvBank["VALUE"] = "0";
-					$arrRecvBank["DESC"] = "โอนเข้าบัญชีธนาคาร";
-					$arrGrpReceive[] = $arrRecvBank;
-				}
-				$arrRecvCoop["VALUE"] = "1";
-				$arrRecvCoop["DESC"] = "โอนเข้าบัญชีสหกรณ์";
-				$arrGrpReceive[] = $arrRecvCoop;
-				if($dataComing["loantype_code"] == '2J'){
-					$arrayResult["DEFAULT_RECV_ACC"] = "1";
-				}else {
-					$arrayResult["DEFAULT_RECV_ACC"] = "0";
-				}
-				$arrayResult["RECEIVE_NET"] = $receive_net;
-				$arrayResult["REQUEST_AMT"] = $request_amt;
-				$arrayResult["LOAN_PERMIT_AMT"] = $maxloan_amt;
-				$arrayResult["MAX_PERIOD"] = $rowMaxPeriod["MAX_PERIOD"];
-				$arrayResult["TERMS_HTML"]["uri"] = "https://policy.gensoft.co.th/".((explode('-',$config["COOP_KEY"]))[0] ?? $config["COOP_KEY"])."/termanduse.html";
-				$arrayResult["SPEC_REMARK"] =  $configError["SPEC_REMARK"][0][$lang_locale];
-				$arrayResult["RECV_ACC"] = $arrGrpReceive;
-				$arrayResult["REQ_CITIZEN"] = TRUE;
-				$arrayResult["REQ_BANK_ACCOUNT"] = FALSE;
-				$arrayResult["REQ_BOOKBANK"] = FALSE;
-				$arrayResult["IS_UPLOAD_CITIZEN"] = TRUE;
-				$arrayResult["IS_UPLOAD_BOOKBANK"] = FALSE;
-				$arrayResult["IS_BANK_ACCOUNT"] = FALSE;
-				$arrayResult['OBJECTIVE'] = $arrGrpObj;
-				if($dataComing["loantype_code"] == '2J'){
-					$arrayResult["REQ_BOOKCOOP"] = TRUE;
-					$arrayResult["IS_UPLOAD_BOOKCOOP"] = TRUE;	
-					if($request_amt > 50000){
-						$arrayResult["IS_REMAIN_SALARY"] = TRUE;
-						$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
-						$arrayResult["REQ_SALARY"] = TRUE;		
-						$arrayResult["NOTE_DESC"] = "การกู้เงินจำนวนเกินกว่า 50,000 บาท ให้แสกนใบรับเงินได้ 1 เดือนล่าสุด (ณ วันที่ยื่นกู้) และต้องมีลายเซ็นผู้กู้รับรอง และเมื่อหักชำระหนี้เงินกู้ทุกประเภทแล้ว จะต้องมียอดรับเงินสุทธิคงเหลือไม่ต่ำกว่า 5,000 บาท";
-						$arrayResult["NOTE_DESC_COLOR"] = "red";
-					}else{
-						$arrayResult["IS_UPLOAD_SALARY"] = FALSE;
-						$arrayResult["REQ_SALARY"] = FALSE;
-						$arrayResult["NOTE_DESC"] = null;
-						$arrayResult["NOTE_DESC_COLOR"] = null;
-					}
-					$arrayResult['BANK'] = [];
-				}else {
-					$arrayResult["IS_UPLOAD_SALARY"] = TRUE;
-					$arrayResult["REQ_SALARY"] = TRUE;
-					$arrayResult["REQ_BOOKCOOP"] = FALSE;
-					$arrayResult["IS_UPLOAD_BOOKCOOP"] = FALSE;
-					$arrayResult['BANK'] = $arrGrpBank;
-				}
-				$arrayResult['COOP_ACCOUNT'] = $arrGrpCoopAcc;
-				$arrayResult['LOANREQ_AMT_STEP'] = 100;
-				$arrayResult["DIFFOLD_CONTRACT"] = $oldBal;
-				$arrayResult['RESULT'] = TRUE;
-				require_once('../../include/exit_footer.php');
-			}else{
-				$arrayResult['RESPONSE_CODE'] = "WS0088";
+			}catch(SoapFault $e){
+				$filename = basename(__FILE__, '.php');
+				$logStruc = [
+					":error_menu" => $filename,
+					":error_code" => "WS0058",
+					":error_desc" => "คำนวณสิทธิ์กู้ไม่ได้ "."\n"."Error => ".($e->getMessage() ?? " Service ไม่ได้ Return Error มาให้"),
+					":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+				];
+				$log->writeLog('errorusage',$logStruc);
+				$arrayResult['RESPONSE_CODE'] = "WS0058";
 				$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 				$arrayResult['RESULT'] = FALSE;
 				require_once('../../include/exit_footer.php');
 				
 			}
+		}catch(Throwable $e){
+			$filename = basename(__FILE__, '.php');
+			$logStruc = [
+				":error_menu" => $filename,
+				":error_code" => "WS0058",
+				":error_desc" => "คำนวณสิทธิ์กู้ไม่ได้เพราะต่อ Service เงินกู้ไม่ได้"."\n".$e->getMessage(),
+				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
+			];
+			$log->writeLog('errorusage',$logStruc);
+			$message_error = "ไฟล์ ".$filename." คำนวณสิทธิ์กู้ไม่ได้เพราะต่อ Service เงินกู้ไม่ได้ "."\n"."DATA => ".json_encode($dataComing)."\n"."Error => ".$e->getMessage();
+			$lib->sendLineNotify($message_error);
+			$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_SERVICE"]);
+			$func->MaintenanceMenu($dataComing["menu_component"]);
+			$arrayResult['RESPONSE_CODE'] = "WS0058";
+			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+			$arrayResult['RESULT'] = FALSE;
+			require_once('../../include/exit_footer.php');
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";

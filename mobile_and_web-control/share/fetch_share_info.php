@@ -1,6 +1,8 @@
 <?php
 require_once('../autoload.php');
 
+$conoracle = $con->connecttooldoracle();
+
 if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'ShareInfo')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -63,6 +65,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayStm["SLIP_DATE"] = $lib->convertdate($rowStm["SLIP_DATE"],'D m Y');
 				$arrayStm["MONEYTYPE_DESC"] = $rowStm["MONEYTYPE_DESC"];
 				$arrayStm["MONEYTYPE_CODE"] = $rowStm["MONEYTYPE_CODE"];
+				$arrayStm["PAYMENT_TYPE"] = $rowStm["MONEYTYPE_DESC"];
 				$arrGroupStm[] = $arrayStm;
 			}
 			

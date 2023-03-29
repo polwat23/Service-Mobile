@@ -5,7 +5,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'TransactionDeposit')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
 		$arrGroupAccBind = array();
-		$fetchBindAccount = $conmysql->prepare("SELECT gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
+		$fetchBindAccount = $conmysql->prepare("SELECT gba.id_bindaccount,gba.sigma_key,gba.deptaccount_no_coop,gba.deptaccount_no_bank,csb.bank_logo_path,
 												csb.bank_format_account,csb.bank_format_account_hide,gba.bank_code,csb.bank_short_name
 												FROM gcbindaccount gba LEFT JOIN csbankdisplay csb ON gba.bank_code = csb.bank_code
 												WHERE gba.member_no = :member_no and gba.bindaccount_status = '1'");
@@ -60,6 +60,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			if(sizeof($arrGroupAccBind["BIND"]) > 0 && sizeof($arrGroupAccBind["COOP"]) > 0){
 				$arrayResult['IS_DEFAULT_BIND_ACCOUNT'] = FALSE;
 				$arrayResult['IS_DEFAULT_COOP_ACCOUNT'] = FALSE;
+				$arrayResult['SCHEDULE']["ENABLED"] = FALSE;
 				$arrayResult['ACCOUNT'] = $arrGroupAccBind;
 				$arrayResult['RESULT'] = TRUE;
 				require_once('../../include/exit_footer.php');

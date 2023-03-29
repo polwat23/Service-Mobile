@@ -298,6 +298,7 @@
 	"ALLOW_TRANS_PAY_LOAN_FLAG_ON" : [{"th" : "สามารถโอนภายในและชำระหนี้ได้","en" : "Can transfer inside and pay loan"}],
 	"ALLOW_TRANS_ALL_FLAG_ON" : [{"th" : "สามารถทำธุรกรรมได้ทุกประเภท","en" : "Can transaction all menu"}],
 	"CAUTION_WITHDRAW" : [{"th" : "ท่านถอนเกินกว่าจำนวนครั้งที่สหกรณ์กำหนด การทำรายการครั้งนี้จะมีค่าปรับในการทำรายการ ท่านต้องการทำรายการต่อไป ?","en" : "Your withdrawal over limit that cooperative define, this transaction will have a penalty. Do you want to continue ?"}],
+	"CAUTION_WITHDRAW_OVER" : [{"th" : "ยอดเงินคงเหลือต่ำกว่าที่กำหนด ระบบจะหยุดคิดดอกเบี้ย ท่านต้องการทำรายการต่อไป ?","en" : "Balance is lower than that cooperative define that make interest will not calculate. Do you want to continue ?"}],
 	"BUTTON_TEXT" : [{
 		"CANCEL_TEXT" : [{"th" : "ยกเลิก","en" : "Cancel"}],
 		"CONFIRM_TEXT" : [{"th" : "ยืนยัน","en" : "Confirm"}]

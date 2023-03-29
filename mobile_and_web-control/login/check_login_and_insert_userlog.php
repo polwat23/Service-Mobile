@@ -20,8 +20,13 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
+	if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
+		$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccount 
 										WHERE member_no = :member_no");
+	}else{
+		$checkLogin = $conmysql->prepare("SELECT password,user_type,pin,account_status,temppass,temppass_is_md5 FROM gcmemberaccountweb
+										WHERE member_no = :member_no");
+	}
 	$checkLogin->execute([':member_no' => $member_no]);
 	if($checkLogin->rowCount() > 0){
 		if($arrPayload["PAYLOAD"]["channel"] == "mobile_app" && isset($dataComing["is_root"])){
@@ -172,7 +177,11 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 									$arrayResult['TEMP_PASSWORD'] = FALSE;
 								}
 							}
-							$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
+							if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
+								$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = 0  WHERE member_no = :member_no");
+							}else{
+								$updateWrongPassCount = $conmysql->prepare("UPDATE gcmemberaccountweb SET counter_wrongpass = 0  WHERE member_no = :member_no");
+							}
 							$updateWrongPassCount->execute([
 								':member_no' => $member_no
 							]);
@@ -275,13 +284,25 @@ if($lib->checkCompleteArgument(['member_no','api_token','password','unique_id'],
 				
 			}
 		}else{
-			$updateCounter = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
+			if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
+				$updateCounter = $conmysql->prepare("UPDATE gcmemberaccount SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
+			}else{
+				$updateCounter = $conmysql->prepare("UPDATE gcmemberaccountweb SET counter_wrongpass = counter_wrongpass + 1 WHERE member_no = :member_no");
+			}
 			$updateCounter->execute([':member_no' => $member_no]);
-			$getCounter = $conmysql->prepare("SELECT counter_wrongpass FROM gcmemberaccount WHERE member_no = :member_no");
+			if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
+				$getCounter = $conmysql->prepare("SELECT counter_wrongpass FROM gcmemberaccount WHERE member_no = :member_no");
+			}else{
+				$getCounter = $conmysql->prepare("SELECT counter_wrongpass FROM gcmemberaccountweb WHERE member_no = :member_no");
+			}
 			$getCounter->execute([':member_no' => $member_no]);
 			$rowCounter = $getCounter->fetch(PDO::FETCH_ASSOC);
 			if($rowCounter["counter_wrongpass"] >= 5){
-				$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				if($arrPayload["PAYLOAD"]["channel"] == "mobile_app"){
+					$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccount SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				}else{
+					$updateAccountStatus = $conmysql->prepare("UPDATE gcmemberaccountweb SET prev_acc_status = account_status,account_status = '-8',counter_wrongpass = 0 WHERE member_no = :member_no");
+				}
 				$updateAccountStatus->execute([':member_no' => $member_no]);
 				$struc = [
 					':member_no' =>  $member_no,

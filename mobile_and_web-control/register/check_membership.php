@@ -20,8 +20,13 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id','d
 		
 	}
 	$member_no = strtolower($lib->mb_str_pad($dataComing["member_no"]));
-	$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
-	$checkMember->execute([':member_no' => $member_no]);
+	if(isset($dataComing["channel"]) && $dataComing["channel"] == 'web'){
+		$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccountweb WHERE member_no = :member_no");
+		$checkMember->execute([':member_no' => $member_no]);
+	}else{
+		$checkMember = $conmysql->prepare("SELECT member_no FROM gcmemberaccount WHERE member_no = :member_no");
+		$checkMember->execute([':member_no' => $member_no]);
+	}
 	if($checkMember->rowCount() > 0){
 		$arrayResult['RESPONSE_CODE'] = "WS0020";
 		$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

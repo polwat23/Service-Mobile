@@ -36,7 +36,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 													MBT.TAMBOL_DESC AS TAMBOL_DESC,
 													MBD.DISTRICT_DESC AS DISTRICT_DESC,
 													MBP.PROVINCE_DESC AS PROVINCE_DESC,
-													MBD.POSTCODE AS ADDR_POSTCODE
+													MBD.POSTCODE AS ADDR_POSTCODE,mb.*
 													FROM mbmembmaster mb LEFT JOIN mbucfprename mp ON mb.prename_code = mp.prename_code
 													LEFT JOIN MBUCFMEMBGROUP mg ON mb.MEMBGROUP_CODE = mg.MEMBGROUP_CODE
 													LEFT JOIN MBUCFMEMBTYPE mt ON mb.MEMBTYPE_CODE = mt.MEMBTYPE_CODE
@@ -85,6 +85,15 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				$arrayResult["IGNORE_INFO"] = ["CARD_PERSON","MEMBERGROUP_DESC","BIRTH_DATE","POSITION_DESC"];
 				$arrayResult["RECEIVE_MONEY_FROM"] = $rowMember["MEMBGROUP_DESC"]." (".$rowMember["MEMBGROUP_CODE"].")";
 				$arrayResult["RESULT"] = TRUE;
+				
+				//เพิ่มข้อมูลอื่นๆ
+				$otherInfoGrp = array();
+				$otherInfoArr = array();
+				$otherInfoArr["LABEL"] = "บัญชีธนาคารกรุงศรี";
+				$otherInfoArr["VALUE"] = "-";
+				$otherInfoArr["ICON"] = "bookbank";
+				$otherInfoGrp[] = $otherInfoArr;
+				$arrayResult["GENERAL_INFO"] = $otherInfoGrp;
 				require_once('../../include/exit_footer.php');
 			}else{
 				$getInfoMembTemp = $conoracle->prepare("SELECT mp.prename_short,mb.memb_name,mb.memb_surname,mb.birth_date,mb.card_person,

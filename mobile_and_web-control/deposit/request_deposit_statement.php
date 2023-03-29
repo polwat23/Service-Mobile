@@ -1,8 +1,6 @@
 <?php
 require_once('../autoload.php');
-
 use Dompdf\Dompdf;
-
 if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$dataComing)){
 	if($func->check_permission($payload["user_type"],$dataComing["menu_component"],'DepositStatement')){
 		$member_no = $configAS[$payload["member_no"]] ?? $payload["member_no"];
@@ -63,15 +61,14 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 			$logStruc = [
 				":error_menu" => $filename,
 				":error_code" => "WS0019",
-				":error_desc" => "���������� ".$rowMail["email"]."\n"."Error => ".$arrMailStatus["MESSAGE_ERROR"],
+				":error_desc" => "ส่งเมลไม่ได้ ".$rowMail["email"]."\n"."Error => ".$arrMailStatus["MESSAGE_ERROR"],
 				":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 			];
 			$log->writeLog('errorusage',$logStruc);
 			$arrayResult['RESPONSE_CODE'] = "WS0019";
 			$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 			$arrayResult['RESULT'] = FALSE;
-			require_once('../../include/exit_footer.php');
-			
+			require_once('../../include/exit_footer.php');	
 		}
 	}else{
 		$arrayResult['RESPONSE_CODE'] = "WS0006";
@@ -86,11 +83,11 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 	$logStruc = [
 		":error_menu" => $filename,
 		":error_code" => "WS4004",
-		":error_desc" => "�� Argument �����ú "."\n".json_encode($dataComing),
+		":error_desc" => "ส่ง Argument มาไม่ครบ "."\n".json_encode($dataComing),
 		":error_device" => $dataComing["channel"].' - '.$dataComing["unique_id"].' on V.'.$dataComing["app_version"]
 	];
 	$log->writeLog('errorusage',$logStruc);
-	$message_error = "��� ".$filename." �� Argument �����ú���� "."\n".json_encode($dataComing);
+	$message_error = "ไฟล์ ".$filename." ส่ง Argument มาไม่ครบมาแค่ "."\n".json_encode($dataComing);
 	$lib->sendLineNotify($message_error);
 	$arrayResult['RESPONSE_CODE'] = "WS4004";
 	$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
@@ -101,8 +98,20 @@ if($lib->checkCompleteArgument(['menu_component','account_no','request_date'],$d
 }
 
 function generatePDFSTM($dompdf,$arrayData,$lib,$password){
-	$dompdf = new DOMPDF();
+	//$dompdf = new DOMPDF();
 	//style table
+	  $html = '
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Document</title>
+		</head>
+		<body>
+			<meta charset="UTF-8">
+	  ';
 	  $html = '<style>
 
 		 @font-face {
@@ -111,7 +120,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			}
 			@font-face {
 				font-family: TH Niramit AS;
-				src: url(../../resource/fonts/TH Niramit AS Bold.ttf);
+				src: url(../../resource/fonts/TH Niramit AS.ttf);
 				font-weight: bold;
 			}
 			* {
@@ -181,6 +190,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			font-size: 18px;
 		}
 		  </style>
+		  
 		';
 	//head table
 	$html .='
@@ -189,7 +199,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<div style="position:fixed;">
 			   <div style="padding:0px;"><img src="../../resource/logo/logo.jpg" style="width:50px "></div>
 			   <div style=" position: fixed;top:2px; left: 60px; font-size:18px; font-weight:bold;">
-					�ˡó������Ѿ����俿�ҽ��¼�Ե �ӡѴ
+					สหกรณ์ออมทรัพย์การไฟฟ้าฝ่ายผลิต จำกัด
 			   </div>
 			   <div style=" position: fixed;top:25px; left: 60px;font-size:14px">
 					Egat Savings and Credit Co-Operative, Limited
@@ -197,20 +207,20 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 			   </div>
 				<div class="frame-info-user">
 					<div style="display:flex;width: 100%;padding-top: 0px;">
-					<div class="label">�Ţ��Ҫԡ</div>
+					<div class="label">เลขสมาชิก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["MEMBER_NO"].'</div>
 					</div>
 					<div style="display:flex;width: 100%;padding-top: 0px;">
-					<div class="label">�Ţ�ѭ���Թ�ҡ</div>
+					<div class="label">เลขบัญชีเงินฝาก</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DEPTACCOUNT_NO"].'</div>
 					</div>
 					<div style="display:flex;width: 100%">
-					<div class="label">�����ҧ�ѹ���</div>
+					<div class="label">ระหว่างวันที่</div>
 					<div style="padding-left: 90px;font-weight: bold;font-size: 17px;">'.$arrayData["DATE_BETWEEN_FORMAT"].'</div>
 					</div>
 				</div>
 			   <div class="label-type">
-			   <p style="font-size: 25px;">��¡���Թ�ѭ���Թ�ҡ</p>
+			   <p style="font-size: 25px;">รายการเดินบัญชีเงินฝาก</p>
 			   </div>
 			</header>';
 	$html .='<main>';
@@ -218,12 +228,12 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	<table >
 	  <thead>
 		<tr>
-		  <th style="text-align:center;width:80px;">�ѹ ��͹ ��</th>
-		  <th>��¡��</th>
-		  <th>�ҡ</th>
-		  <th>�͹</th>
-		  <th>�ʹ�������</th>
-		  <th>�Ţ��ҧ�ԧ</th>
+		  <th style="text-align:center;width:80px;">วัน เดือน ปี</th>
+		  <th>รายการ</th>
+		  <th>ฝาก</th>
+		  <th>ถอน</th>
+		  <th>ยอดคงเหลือ</th>
+		  <th>เลขอ้างอิง</th>
 		</tr>
 	  </thead>
 
@@ -264,7 +274,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='
 	  <tr>
 		<td ></td>
-		<td ><b>��¡�ö͹ '.$count_withdraw.' ��¡��</b></td>
+		<td ><b>รายการถอน '.$count_withdraw.' รายการ</b></td>
 		<td ></td>
 		<td style="text-align:right"><b>'.number_format($sum_withdraw,2).'</b></td>
 		<td ></td>
@@ -272,7 +282,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	  </tr>
 	  <tr>
 		<td ></td>
-		<td ><b>��¡�ýҡ '.$count_deposit.' ��¡��</b></td>
+		<td ><b>รายการฝาก '.$count_deposit.' รายการ</b></td>
 		<td style="text-align:right"><b>'.number_format($sum_deposit,2).'</b></td>
 		<td ></td>
 		<td ></td>
@@ -280,7 +290,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	  </tr>
 	  <tr>
 		<td style="border-bottom:1px solid #000;" ></td>
-		<td style="border-bottom:1px solid #000;" ><b>�ʹ����ء��¡�� '.$count_sumall.' ��¡��</b></td>
+		<td style="border-bottom:1px solid #000;" ><b>ยอดรวมทุกรายการ '.$count_sumall.' รายการ</b></td>
 		<td style="border-bottom:1px solid #000;" ></td>
 		<td style="border-bottom:1px solid #000;" ></td>
 		<td style="border-bottom:1px solid #000; text-align:right;" ><b>'.number_format($sum_all,2).'</b></td>
@@ -291,6 +301,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$html .='</tbody></table>';
 	$html .= '</div>';
 	$html .='</main>';
+	$html .='</body>';
 	$dompdf = new Dompdf([
 		'fontDir' => realpath('../../resource/fonts'),
 		'chroot' => realpath('/'),
@@ -300,7 +311,7 @@ function generatePDFSTM($dompdf,$arrayData,$lib,$password){
 	$dompdf->load_html($html);
 	$dompdf->render();
 	$pathOutput = __DIR__."/../../resource/pdf/statement/".$arrayData['DEPTACCOUNT_NO']."_".$arrayData["DATE_BETWEEN"].".pdf";
-	$dompdf->getCanvas()->page_text(520,  25, "˹�� {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
+	$dompdf->getCanvas()->page_text(520,  25, "หน้า {PAGE_NUM} / {PAGE_COUNT}","", 12, array(0,0,0));
 	$dompdf->getCanvas()->get_cpdf()->setEncryption($password);
 	$output = $dompdf->output();
 	if(file_put_contents($pathOutput, $output)){

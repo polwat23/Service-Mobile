@@ -16,10 +16,6 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 			$arrRightDep = $cal_dep->depositCheckWithdrawRights($deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"],$rowDataWithdraw["bank_code"]);
 			if($arrRightDep["RESULT"]){
 				try {
-					$arrayData = array();
-					$arrayData["serviceName"] = 'verifywithdraw';
-					$arrHeader[] = "requestId: ".$lib->randomText('all',10);
-					$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 					try{
 						$argumentWS = [
@@ -33,6 +29,12 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 						$feeAmt = $resultWS->of_chk_withdrawcount_amtResult;
 						$constantDep = $cal_dep->getConstantAcc($deptaccount_no);
 						if($arrInitDep["SUM_REMAIN"] - $feeAmt < $constantDep["MINPRNCBAL"]){
+							$arrayResult['RESPONSE_CODE'] = "WS0100";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
+						if($constantDep["PRNCBAL"] - $dataComing["amt_transfer"] - $feeAmt < $constantDep["MINPRNCBAL"]){
 							$arrayResult['RESPONSE_CODE'] = "WS0100";
 							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 							$arrayResult['RESULT'] = FALSE;
@@ -213,6 +215,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 								$log->writeLog('withdrawtrans',$arrayStruc);
 								$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
 								$lib->sendLineNotify($message_error);
+								$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 								$func->MaintenanceMenu($dataComing["menu_component"]);
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
@@ -256,6 +259,17 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							$arrayResult['PENALTY_AMT'] = $feeAmt;
 							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($feeAmt,2);
 						}
+						$updateWithdrawData = $conoracle->prepare("UPDATE dpdeptmaster SET confirm_status = 8
+																WHERE deptaccount_no = :deptaccount_no");
+						$updateWithdrawData->execute([
+							':deptaccount_no' => $deptaccount_no
+						]);
+						if($arrRightDep["IS_WARNING"]) {
+							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW_OVER"][0][$lang_locale];
+							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+							$arrayResult['CAUTION'] = $arrayCaution;
+						}
 						$arrayResult['TRAN_TIME'] = $arrResponse->TRAN_TIME;
 						$arrayResult['TOKEN_ID'] = $arrResponse->TOKEN_ID;
 						$arrayResult['TRAN_UNIQ'] = $arrResponse->TRAN_UNIQ;
@@ -287,6 +301,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$log->writeLog('errorusage',$logStruc);
 					$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl";
 					$lib->sendLineNotify($message_error);
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_CODE'] = "WS9999";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];

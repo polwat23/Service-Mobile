@@ -12,10 +12,6 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 			$checkDeposit = $cal_dep->depositCheckDepositRights($to_deptaccount_no,$dataComing["amt_transfer"],$dataComing["menu_component"]);
 			if($checkDeposit["RESULT"]){
 				try {
-					$arrayData = array();
-					$arrayData["serviceName"] = 'verifytransfer';
-					$arrHeader[] = "requestId: ".$lib->randomText('all',10);
-					$dataResponse = $lib->posting_dataAPI('http://10.20.240.78:4000/callservice',$arrayData,$arrHeader);
 					$clientWS = new SoapClient($config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl");
 					try{
 						$argumentWS = [
@@ -31,6 +27,12 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 							$arrayResult['PENALTY_AMT'] = $feeAmt;
 							$arrayResult['PENALTY_AMT_FORMAT'] = $feeAmt;
 							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW"][0][$lang_locale];
+							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+							$arrayResult['CAUTION'] = $arrayCaution;
+						}
+						if($checkWithdraw["IS_WARNING"]) {
+							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW_OVER"][0][$lang_locale];
 							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
 							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
 							$arrayResult['CAUTION'] = $arrayCaution;
@@ -64,6 +66,7 @@ if($lib->checkCompleteArgument(['menu_component','deptaccount_no','amt_transfer'
 					$log->writeLog('errorusage',$logStruc);
 					$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl";
 					$lib->sendLineNotify($message_error);
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_CODE'] = "WS9999";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
