@@ -98,7 +98,9 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 					':ref_member_no' => TRIM($rowHeaderRecv["REF_MEMBNO"])
 				]);
 				$arrGroupDetail = array();
+				
 				while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
+					convertArray($rowDetail,true);
 					$arrDetail = array();
 					$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 					if($rowDetail["TYPE_GROUP"] == 'SHR'){
@@ -154,6 +156,7 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			]);
 			$arrGroupDetail = array();
 			while($rowDetail = $getPaymentDetail->fetch(PDO::FETCH_ASSOC)){
+				convertArray($rowDetail,true);
 				$arrDetail = array();
 				$arrDetail["TYPE_DESC"] = $rowDetail["TYPE_DESC"];
 				if($rowDetail["TYPE_GROUP"] == 'SHR'){

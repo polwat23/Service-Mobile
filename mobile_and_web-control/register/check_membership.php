@@ -36,6 +36,7 @@ if($lib->checkCompleteArgument(['member_no','id_card','api_token','unique_id'],$
 			':member_no' => $member_no
 		]);
 		$rowMember = $checkValid->fetch(PDO::FETCH_ASSOC);
+		convertArray($rowMember,true);
 		if(isset($rowMember["MEMB_NAME"])){
 			if($rowMember["RESIGN_STATUS"] == '1'){
 				$arrayResult['RESPONSE_CODE'] = "WS0051";

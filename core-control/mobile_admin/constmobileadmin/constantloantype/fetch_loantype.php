@@ -14,6 +14,7 @@ if($lib->checkCompleteArgument(['unique_id'],$dataComing)){
 		$fetchLoantype = $conoracle->prepare("SELECT LOANTYPE_CODE,LOANTYPE_DESC FROM LNLOANTYPE ORDER BY LOANTYPE_CODE ASC");
 		$fetchLoantype->execute();
 		while($rowLoantype = $fetchLoantype->fetch(PDO::FETCH_ASSOC)){
+			convertArray($rowLoantype,true);
 			$arrayLoantype = array();
 			if(array_search($rowLoantype["LOANTYPE_CODE"],array_column($arrayLoanCheckGrp,'LOANTYPE_CODE')) === False){
 				$arrayLoantype["IS_CREDITLOAN"] = "0";

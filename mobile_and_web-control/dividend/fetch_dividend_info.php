@@ -6,9 +6,10 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 		$member_no = $configAS[$payload["member_no"]] ?? TRIM($payload["member_no"]);
 		$arrDivmaster = array();
 		$limit_year = $func->getConstant('limit_dividend');
-		$getYeardividend = $conoracle->prepare("SELECT * FROM (SELECT cm.account_year AS DIV_YEAR FROM mbdivavgtrnpost mp LEFT JOIN cmaccountyear cm 
-														ON mp.DIVAVG_YEAR = cm.account_year WHERE TRIM(mp.MEMBER_NO) = :member_no and cm.SHOWDIVAVG_FLAG = '1' 
-														GROUP BY cm.account_year ORDER BY cm.account_year DESC) where rownum <= :limit_year");
+		$getYeardividend = $conoracle->prepare("SELECT account_year AS DIV_YEAR 
+												FROM CMCLOSESHLNCOYEAR 
+												WHERE TRIM(MEMBER_NO) = :member_no and account_year >= to_number((select max(account_year) from CMCLOSESHLNCOYEAR where TRIM(MEMBER_NO) = :member_no)) - :limit_year
+												order by div_year desc");
 		$getYeardividend->execute([
 			':member_no' => $member_no,
 			':limit_year' => $limit_year
@@ -17,22 +18,31 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			convertArray($rowYear,true);
 			$arrDividend = array();
 			$getDivMaster = $conoracle->prepare("SELECT 
-								SUM(DIVIDEND_PAYMENT) AS DIV_AMT,
-								SUM(AVERAGE_PAYMENT) AS  AVG_AMT,
-								SUM(DIVIDEND_PAYMENT+AVERAGE_PAYMENT) AS SUMDIV
-							FROM 
-								mbdivavgtrnpost 
-							WHERE 
-								TRIM(MEMBER_NO) = :member_no
-								AND DIVAVG_YEAR = :div_year GROUP BY DIVAVG_YEAR");
+														DEV_PAYMENT AS DIV_AMT,
+														AVG_PAYMENT AS  AVG_AMT,
+														TOTAL_PAYMENT AS SUMDIV
+													FROM 
+														CMCLOSESHLNCOYEARDET 
+													WHERE 
+														TRIM(MEMBER_NO) = :member_no
+														AND ACCOUNT_YEAR = :div_year ");
 			$getDivMaster->execute([
 				':member_no' => $member_no,
-				':div_year' => $rowYear["DIV_YEAR"]
+				':div_year' =>  $rowYear["DIV_YEAR"]
 			]);
 			$rowDiv = $getDivMaster->fetch(PDO::FETCH_ASSOC);
 			convertArray($rowDiv,true);
-			$getRateDiv = $conoracle->prepare("SELECT DIVIDEND_RATE,AVERAGE_RATE FROM mbdivavgrate WHERE divavg_year = :year");
-			$getRateDiv->execute([':year' => $rowYear["DIV_YEAR"]]);
+			$getRateDiv = $conoracle->prepare("SELECT
+													MD.DIV_RATE AS DIVIDEND_RATE,
+													MD.AVG_RATE AS AVERAGE_RATE
+												FROM 
+													CMCLOSESHLNCOYEAR MD LEFT JOIN CMCLOSESHLNCOYEARDET CD  ON CD.ACCOUNT_YEAR = MD.ACCOUNT_YEAR AND TRIM(CD.MEMBER_NO) = TRIM(MD.MEMBER_NO)
+												WHERE  TRIM(md.MEMBER_NO) = :member_no
+													AND MD.ACCOUNT_YEAR = :div_year");
+			$getRateDiv->execute([
+				':member_no' => $member_no,
+				':div_year' => $rowYear["DIV_YEAR"]
+			]);
 			$rowRateDiv = $getRateDiv->fetch(PDO::FETCH_ASSOC);
 			$arrDividend["YEAR"] = $rowYear["DIV_YEAR"];
 			$arrDividend["DIV_RATE"] = ($rowRateDiv["DIVIDEND_RATE"] * 100)." %";
@@ -41,24 +51,20 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 			$arrDividend["AVG_AMT"] = number_format($rowDiv["AVG_AMT"],2);
 			$arrDividend["SUM_AMT"] = number_format($rowDiv["SUMDIV"],2);
 			$getMethpay = $conoracle->prepare("SELECT
-												(CASE WHEN md.DIVAVG_CODE = 'CSH' THEN 'เงินสด'
-														WHEN md.DIVAVG_CODE = 'TRS' THEN 'โอนซื้อหุ้น'
-														WHEN md.DIVAVG_CODE = 'TRN' THEN 'โอนเข้าเงินฝาก'
-														WHEN md.DIVAVG_CODE = 'CBT' THEN 'โอนเข้าธนาคาร'
-												ELSE '' END) AS TYPE_DESC,
-												md.TRANSPAY_AMT AS RECEIVE_AMT ,						
-												md.DIVAVG_ACCID AS BANK_ACCOUNT,
-												cmb.BANK_DESC as BANK_NAME,
-												cmbb.BRANCH_NAME,
-												md.DIVAVG_CODE
+												MD.EXPENSE_CODE AS TYPE_DESC,
+												(SELECT CD.TOTAL_PAYMENT FROM CMCLOSESHLNCOYEARDET CD WHERE  CD.ACCOUNT_YEAR = MD.ACCOUNT_YEAR AND TRIM(CD.MEMBER_NO) = TRIM(MD.MEMBER_NO)) AS RECEIVE_AMT ,						
+												MD.EXPENSE_ACCID AS BANK_ACCOUNT,
+												CMB.BANK_DESC AS BANK_NAME,
+												CMBB.BRANCH_NAME,
+												MD.EXPENSE_CODE AS DIVAVG_CODE
 											FROM 
-												mbdivavgtrnpost md LEFT JOIN cmucfbank cmb ON md.divavg_bank = cmb.bank_code	
-												LEFT JOIN cmucfbankbranch cmbb ON md.divavg_branch = cmbb.branch_id and
-												md.divavg_bank = cmbb.bank_code
+												CMCLOSESHLNCOYEAR MD LEFT JOIN CMUCFBANK CMB ON MD.EXPENSE_BANK = CMB.BANK_CODE	
+												LEFT JOIN CMUCFBANKBRANCH CMBB ON MD.EXPENSE_BRANCH = CMBB.BRANCH_ID AND
+												MD.EXPENSE_BANK = CMBB.BANK_CODE
 											WHERE  
-												md.divavg_code IN ('CSH','TRS','TRN','CBT') AND 
-												TRIM(md.MEMBER_NO) = :member_no
-												AND md.DIVAVG_YEAR= :div_year");
+												MD.EXPENSE_CODE IN ('CSH','TRS','TRN','CBT') 
+												AND TRIM(md.MEMBER_NO) = :member_no
+												AND MD.ACCOUNT_YEAR = :div_year");
 			$getMethpay->execute([
 				':member_no' => $member_no,
 				':div_year' => $rowYear["DIV_YEAR"]
@@ -67,6 +73,17 @@ if($lib->checkCompleteArgument(['menu_component'],$dataComing)){
 				convertArray($rowMethpay,true);
 				$arrayRecv = array();
 				$arrayRecv["ACCOUNT_RECEIVE"] = $lib->formataccount($rowMethpay["BANK_ACCOUNT"],'xxx-xxxxxx-x');
+				if($rowMethpay["DIVAVG_CODE"] == "CBT"){
+					$rowMethpay["TYPE_DESC"] = "โอนเข้าธนาคาร";
+				}else if($rowMethpay["DIVAVG_CODE"] == "CSH"){
+					$rowMethpay["TYPE_DESC"] = "เงินสด";
+				}else if($rowMethpay["DIVAVG_CODE"] == "TRS"){
+					$rowMethpay["TYPE_DESC"] = "โอนซื้อหุ้น";
+				} else if($rowMethpay["DIVAVG_CODE"] == "TRN"){
+					$rowMethpay["TYPE_DESC"] = "โอนเข้าเงินฝาก";
+				} else{
+					$rowMethpay["TYPE_DESC"] = "";
+				} 
 				if($rowMethpay["DIVAVG_CODE"] == 'CBT'){
 					$arrayRecv["RECEIVE_DESC"] = $rowMethpay["TYPE_DESC"].' '.$rowMethpay["BANK_NAME"];
 				}else{
