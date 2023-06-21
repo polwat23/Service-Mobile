@@ -34,6 +34,12 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							$arrayResult['RESULT'] = FALSE;
 							require_once('../../include/exit_footer.php');
 						}
+						if($constantDep["PRNCBAL"] - $dataComing["amt_transfer"] - $feeAmt < $constantDep["MINPRNCBAL"]){
+							$arrayResult['RESPONSE_CODE'] = "WS0100";
+							$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
+							$arrayResult['RESULT'] = FALSE;
+							require_once('../../include/exit_footer.php');
+						}
 						$dateOperC = date('c');
 						$dateOper = date('Y-m-d H:i:s',strtotime($dateOperC));
 						$amt_transfer = $dataComing["amt_transfer"];
@@ -66,6 +72,16 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							$arrSendData["verify_token"] = $verify_token;
 							$arrSendData["app_id"] = $config["APP_ID"];
 							$responseAPI = $lib->posting_data($config["URL_API_COOPDIRECT"].$rowDataWithdraw["link_inquirywithd_coopdirect"],$arrSendData);
+							
+							//HARDCODE Start Fix  for Test by Polwat
+							$responseAPI["RESULT"]=TRUE;
+							$responseAPI["SOURCE_REFNO"]="SOURCE_REFNO";
+							$responseAPI["ETN_REFNO"]="ETN_REFNO";
+							$responseAPI["TRAN_TIME"]= $dateOper;
+							$responseAPI["TOKEN_ID"]=$verify_token;
+							$responseAPI["TRAN_UNIQ"]="0123456";
+							//HARDCODE End Fix  for Test by Polwat
+
 							if(!$responseAPI["RESULT"]){
 								$filename = basename(__FILE__, '.php');
 								$arrayResult['RESPONSE_CODE'] = "WS0027";
@@ -89,6 +105,14 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 								
 							}
 							$arrResponse = json_decode($responseAPI);
+
+							//HARDCODE Start Fix for Test by Polwat
+							$arrayResult['FEE_AMT'] = $fee_amt;
+							$arrayResult['FEE_AMT_FORMAT'] = number_format($fee_amt,2);
+							//HARDCODE End Fix  for Test by Polwat
+
+							/*
+							//HARDCODE Start Fix  for Test by Polwat
 							if($arrResponse->RESULT){
 								if($fee_amt > 0){
 									$arrayResult['FEE_AMT'] = $fee_amt;
@@ -115,6 +139,8 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 								require_once('../../include/exit_footer.php');
 								
 							}
+							//HARDCODE End Fix  for Test by Polwat
+							*/
 						}else if($rowDataWithdraw["bank_code"] == '025'){
 							$arrayResult['SOURCE_REFNO'] = $arrResponse->SOURCE_REFNO;
 							$arrayResult['ETN_REFNO'] = $arrResponse->ETN_REFNO;
@@ -209,6 +235,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 								$log->writeLog('withdrawtrans',$arrayStruc);
 								$message_error = "ไม่สามารถติดต่อ CoopDirect Server เพราะ ".$responseAPI["RESPONSE_MESSAGE"]."\n".json_encode($arrVerifyToken);
 								$lib->sendLineNotify($message_error);
+								$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 								$func->MaintenanceMenu($dataComing["menu_component"]);
 								$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
 								$arrayResult['RESULT'] = FALSE;
@@ -252,6 +279,17 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 							$arrayResult['PENALTY_AMT'] = $feeAmt;
 							$arrayResult['PENALTY_AMT_FORMAT'] = number_format($feeAmt,2);
 						}
+						$updateWithdrawData = $conoracle->prepare("UPDATE dpdeptmaster SET confirm_status = 8
+																WHERE deptaccount_no = :deptaccount_no");
+						$updateWithdrawData->execute([
+							':deptaccount_no' => $deptaccount_no
+						]);
+						if($arrRightDep["IS_WARNING"]) {
+							$arrayCaution['RESPONSE_MESSAGE'] = $configError["CAUTION_WITHDRAW_OVER"][0][$lang_locale];
+							$arrayCaution['CANCEL_TEXT'] = $configError["BUTTON_TEXT"][0]["CANCEL_TEXT"][0][$lang_locale];
+							$arrayCaution['CONFIRM_TEXT'] = $configError["BUTTON_TEXT"][0]["CONFIRM_TEXT"][0][$lang_locale];
+							$arrayResult['CAUTION'] = $arrayCaution;
+						}
 						$arrayResult['TRAN_TIME'] = $arrResponse->TRAN_TIME;
 						$arrayResult['TOKEN_ID'] = $arrResponse->TOKEN_ID;
 						$arrayResult['TRAN_UNIQ'] = $arrResponse->TRAN_UNIQ;
@@ -283,6 +321,7 @@ if($lib->checkCompleteArgument(['menu_component','bank_account_no','deptaccount_
 					$log->writeLog('errorusage',$logStruc);
 					$message_error = "ไฟล์ ".$filename." Cannot connect server Deposit API ".$config["URL_CORE_COOP"]."n_deposit.svc?singleWsdl";
 					$lib->sendLineNotify($message_error);
+					$lib->sendLineNotify($message_error,$config["LINE_NOTIFY_DEPOSIT"]);
 					$func->MaintenanceMenu($dataComing["menu_component"]);
 					$arrayResult['RESPONSE_CODE'] = "WS9999";
 					$arrayResult['RESPONSE_MESSAGE'] = $configError[$arrayResult['RESPONSE_CODE']][0][$lang_locale];
